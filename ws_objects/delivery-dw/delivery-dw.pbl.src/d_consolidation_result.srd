@@ -1,0 +1,81 @@
+﻿$PBExportHeader$d_consolidation_result.srd
+$PBExportComments$Consolidation Search Results
+release 7;
+datawindow(units=0 timer_interval=0 color=16777215 processing=1 HTMLDW=no print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.prompt=no print.buttons=no print.preview.buttons=no grid.lines=0 )
+header(height=140 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=68 color="536870912" )
+table(column=(type=char(16) updatewhereclause=yes name=co_no dbname="Consolidation_Master.CO_NO" )
+ column=(type=char(10) updatewhereclause=yes name=project_id dbname="Consolidation_Master.Project_ID" )
+ column=(type=char(30) updatewhereclause=yes name=consolidation_no dbname="Consolidation_Master.Consolidation_No" )
+ column=(type=char(10) updatewhereclause=yes name=from_wh_code dbname="Consolidation_Master.From_wh_Code" )
+ column=(type=char(10) updatewhereclause=yes name=to_wh_code dbname="Consolidation_Master.To_wh_Code" )
+ column=(type=char(1) updatewhereclause=yes name=ord_status dbname="Consolidation_Master.Ord_Status" )
+ column=(type=char(20) updatewhereclause=yes name=awb_bol_nbr dbname="Consolidation_Master.AWB_BOL_Nbr" )
+ column=(type=char(20) updatewhereclause=yes name=master_awb_bol_no dbname="Consolidation_Master.MAster_AWB_BOL_No" )
+ column=(type=char(1) updatewhereclause=yes name=ord_type dbname="Consolidation_Master.Ord_Type" )
+ column=(type=char(20) updatewhereclause=yes name=carrier dbname="Consolidation_Master.Carrier" )
+ column=(type=datetime updatewhereclause=yes name=ord_date dbname="Consolidation_Master.Ord_Date" )
+ column=(type=datetime updatewhereclause=yes name=ship_date dbname="Consolidation_Master.Ship_Date" )
+ column=(type=datetime updatewhereclause=yes name=sched_arrival_date dbname="Consolidation_Master.Sched_arrival_date" )
+ column=(type=datetime updatewhereclause=yes name=receive_date dbname="Consolidation_Master.Receive_Date" )
+ column=(type=datetime updatewhereclause=yes name=complete_date dbname="Consolidation_Master.Complete_date" )
+ column=(type=datetime updatewhereclause=yes name=customs_clearance_date dbname="Consolidation_Master.Customs_Clearance_date" )
+ column=(type=datetime updatewhereclause=yes name=port_arrival_date dbname="Consolidation_Master.Port_arrival_Date" )
+ column=(type=datetime updatewhereclause=yes name=crossdock_complete_date dbname="Consolidation_Master.crossdock_complete_Date" )
+ retrieve="  SELECT Distinct Consolidation_Master.CO_NO,   
+         Consolidation_Master.Project_ID,   
+         Consolidation_Master.Consolidation_No,   
+         Consolidation_Master.From_wh_Code,   
+         Consolidation_Master.To_wh_Code,   
+         Consolidation_Master.Ord_Status,   
+         Consolidation_Master.AWB_BOL_Nbr,   
+			Consolidation_Master.MAster_AWB_BOL_No,
+         Consolidation_Master.Ord_Type,    
+         Consolidation_Master.Carrier,   
+         Consolidation_Master.Ord_Date, 
+			Consolidation_MAster.Ship_Date, 
+			Consolidation_MAster.Sched_arrival_date, 
+			Consolidation_MAster.Receive_Date, 
+			Consolidation_MAster.Complete_date, 
+			Consolidation_Master.Customs_Clearance_date, 
+			Consolidation_MAster.Port_arrival_Date, 
+			Consolidation_MAster.crossdock_complete_Date     
+    FROM Consolidation_Master"  sort="co_no D " )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="0" color="0" x="9" y="8" height="52" width="489" format="[general]"  name=consolidation_no edit.limit=20 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="0" color="0" x="4695" y="8" height="52" width="315" format="[general]"  name=from_wh_code edit.limit=10 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="0" tabsequence=32766 border="0" color="0" x="5019" y="8" height="52" width="279" format="[general]"  name=to_wh_code visible="1~tIf( ord_type = 'C',0,1)" edit.limit=10 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="0" tabsequence=32766 border="0" color="0" x="3826" y="8" height="52" width="494" format="[general]"  name=ord_status dddw.name=dddw_consol_ord_status dddw.displaycolumn=c_code_desc dddw.datacolumn=ord_status dddw.percentwidth=0 dddw.lines=0 dddw.limit=0 dddw.allowedit=no dddw.useasborder=no dddw.case=any  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=9 alignment="0" tabsequence=32766 border="0" color="0" x="4329" y="8" height="52" width="357" format="[general]"  name=ord_type dddw.name=dddw_consol_ord_type dddw.displaycolumn=code_descript dddw.datacolumn=code_id dddw.percentwidth=0 dddw.lines=0 dddw.limit=0 dddw.allowedit=no dddw.useasborder=no dddw.case=any  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=10 alignment="0" tabsequence=32766 border="0" color="0" x="5307" y="8" height="52" width="297" format="[general]"  name=carrier edit.limit=20 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=11 alignment="2" tabsequence=32766 border="0" color="0" x="1312" y="8" height="52" width="256" format="[shortdate] "  name=ord_date edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=7 alignment="0" tabsequence=32766 border="0" color="0" x="507" y="8" height="52" width="338" format="[general]"  name=awb_bol_nbr edit.limit=20 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=12 alignment="2" tabsequence=32766 border="0" color="0" x="1577" y="8" height="52" width="288" format="[shortdate] "  name=ship_date edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=15 alignment="2" tabsequence=32766 border="0" color="0" x="3538" y="8" height="52" width="279" format="[shortdate]"  name=complete_date edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=8 alignment="0" tabsequence=32766 border="0" color="0" x="855" y="8" height="52" width="302" format="[general]"  name=master_awb_bol_no edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=detail alignment="2" expression="If(not isnull( crossdock_complete_date ),daysafter(  ord_date ,  crossdock_complete_date  ),daysafter(  ord_date , today() ))"border="0" color="0" x="1166" y="8" height="52" width="137" format="[GENERAL]"  name=c_days_in_transit  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=14 alignment="2" tabsequence=32766 border="0" color="0" x="2533" y="8" height="52" width="315" format="[shortdate] "  name=receive_date edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=13 alignment="2" tabsequence=32766 border="0" color="0" x="1874" y="8" height="52" width="325" format="[shortdate] "  name=sched_arrival_date edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=17 alignment="2" tabsequence=32766 border="0" color="0" x="2208" y="8" height="52" width="315" format="[shortdate] "  name=port_arrival_date edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=16 alignment="2" tabsequence=32766 border="0" color="0" x="2857" y="8" height="52" width="325" format="[shortdate] "  name=customs_clearance_date edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=18 alignment="2" tabsequence=0 border="0" color="0" x="3195" y="8" height="52" width="338"  name=crossdock_complete_date  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="CrossdockComplete" border="0" color="0" x="3191" y="8" height="120" width="343"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+text(band=header alignment="2" text="ConsolidationNbr" border="0" color="0" x="9" y="8" height="120" width="489"  name=consolidation_no_t  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+text(band=header alignment="2" text="HouseAWB Nbr" border="0" color="0" x="507" y="8" height="120" width="338"  name=awb_bol_nbr_t  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+text(band=header alignment="2" text="MasterAWB Nbr" border="0" color="0" x="855" y="8" height="120" width="302"  name=t_1  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+text(band=header alignment="2" text="Ship DT(Srce WH)" border="0" color="0" x="1577" y="8" height="120" width="288"  name=t_2  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+text(band=header alignment="2" text="OrdDate" border="0" color="0" x="1312" y="8" height="120" width="256"  name=ord_date_t  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+text(band=header alignment="2" text="DIT" border="0" color="0" x="1166" y="8" height="120" width="137"  name=t_6  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+text(band=header alignment="2" text="Receive DT(Dest WH)" border="0" color="0" x="2533" y="8" height="120" width="315"  name=t_4  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+text(band=header alignment="2" text="Sched Arriv(Dest WH)" border="0" color="0" x="1874" y="8" height="120" width="325"  name=t_3  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+text(band=header alignment="2" text="Port ArrivalDate" border="0" color="0" x="2208" y="8" height="120" width="315"  name=t_8  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+text(band=header alignment="2" text="CustomsCleared" border="0" color="0" x="2857" y="8" height="120" width="325"  name=t_7  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+text(band=header alignment="2" text="SourceWH" border="0" color="0" x="4695" y="8" height="120" width="315"  name=from_wh_code_t  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+text(band=header alignment="2" text="DestWH" border="0" color="0" x="5019" y="8" height="120" width="279"  name=to_wh_code_t  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+text(band=header alignment="2" text="Status" border="0" color="0" x="3826" y="8" height="120" width="494"  name=ord_status_t  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+text(band=header alignment="2" text="Type" border="0" color="0" x="4329" y="8" height="120" width="357"  name=ord_type_t  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+text(band=header alignment="2" text="Carrier" border="0" color="0" x="5307" y="8" height="120" width="297"  name=carrier_t  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+text(band=header alignment="2" text="CompleteDate" border="0" color="0" x="3538" y="8" height="120" width="279"  name=t_5  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" )

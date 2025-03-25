@@ -1,0 +1,21 @@
+﻿$PBExportHeader$d_nike_failed_delivery_ppl.srd
+release 6;
+datawindow(units=0 timer_interval=0 color=16777215 processing=1 print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.prompt=no print.buttons=no print.preview.buttons=no grid.lines=0 )
+header(height=80 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=92 color="536870912" )
+table(column=(type=char(15) updatewhereclause=yes name=delivery_no dbname="Delivery_Detail.delivery_No" )
+ column=(type=char(16) updatewhereclause=yes name=do_no dbname="Delivery_Detail.DO_No" )
+ retrieve="  SELECT delivery_detail.delivery_No,   
+         delivery_detail.DO_No   
+    FROM delivery_detail
+   WHERE delivery_detail.DO_No = :a_dono   
+ORDER BY delivery_detail.delivery_no ASC   
+
+" arguments=(("a_dono", string)) )
+column(band=detail id=1 alignment="0" tabsequence=0 border="0" color="0" x="9" y="0" height="76" width="471"  name=delivery_no  font.face="Arial" font.height="-12" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+text(band=header alignment="0" text="Delivery No"border="0" color="0" x="5" y="4" height="76" width="475"  font.face="Arial" font.height="-12" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+column(band=detail id=2 alignment="0" tabsequence=0 border="0" color="0" x="494" y="0" height="76" width="503"  name=do_no  font.face="Arial" font.height="-12" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+text(band=header alignment="0" text="Do No"border="0" color="0" x="489" y="4" height="76" width="507"  font.face="Arial" font.height="-12" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+htmltable(border="1" cellpadding="0" cellspacing="0" generatecss="no" nowrap="yes")

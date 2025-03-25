@@ -1,0 +1,16 @@
+HA$PBExportHeader$d_maintenance_project_display.srd
+$PBExportComments$- display project content
+release 6;
+datawindow(units=0 timer_interval=0 color=16777215 processing=1 print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.prompt=no print.buttons=no print.preview.buttons=no grid.lines=0 grid.columnmove=no selected.mouse=no )
+header(height=80 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=80 color="536870912" )
+table(column=(type=char(10) update=yes updatewhereclause=yes key=yes name=project_id dbname="Project.Project_ID" )
+ column=(type=char(40) update=yes updatewhereclause=yes name=project_desc dbname="Project.Project_Desc" )
+ retrieve="PBSELECT(TABLE(NAME=~"Project~") COLUMN(NAME=~"Project.Project_ID~")COLUMN(NAME=~"Project.Project_Desc~"))" update="Project" updatewhere=1 updatekeyinplace=no  sort="project_id A " )
+text(band=header alignment="2" text="Project Description"border="0" color="0" x="512" y="8" height="68" width="1760"  name=project_desc_t  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Project ID"border="0" color="0" x="9" y="8" height="68" width="494"  name=project_id_t  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="0" color="0" x="512" y="4" height="72" width="1760" format="[general]"  name=project_desc edit.limit=40 edit.case=upper edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400~tif(  getrow() = currentrow() , 700 , 400)"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="0" color="0" x="9" y="4" height="72" width="494" format="[general]"  name=project_id edit.limit=10 edit.case=upper edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400~tif(  getrow() = currentrow() , 700 , 400)"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" cellpadding="0" cellspacing="0" generatecss="no" nowrap="yes")

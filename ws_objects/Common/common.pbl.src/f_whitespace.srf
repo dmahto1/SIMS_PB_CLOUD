@@ -1,0 +1,121 @@
+﻿$PBExportHeader$f_whitespace.srf
+$PBExportComments$*
+global type f_whitespace from function_object
+end type
+
+forward prototypes
+global function datawindow f_whitespace (datawindow adwdw, long alstart, long alend)
+end prototypes
+
+global function datawindow f_whitespace (datawindow adwdw, long alstart, long alend);/* Author: Gail Morrison Date: 2/19/2015                                                                                                            */
+/* This function will check the user fields and named fields of the inbound info screen to remove whitespace            */
+/* If all columns in a row are coded as invisible then remove that row by moving all rows below up by 80 pixels       */
+/* This function assumes that the first row starts at Y position 4 and there are 80 between rows.							*/
+/* Also assumes that all labels are the same name as the corresponding field but with a _t affixed.						*/
+datastore lds_columns
+string ls_err
+
+string ls_dsdef = &
+   'release 11.5; datawindow() table(column=(type=char(20) name=a dbname="a" ) column=(type=char(20) name=b dbname="b" ) column=(type=char(20) name=c dbname="c" ))'
+lds_columns = create datastore
+lds_columns.Create(ls_dsdef,ls_err)
+
+Long ll_startrow, ll_endrow, ll_spacing, ll_pos, ll_rowpos, ll_newpos, li_Loop, ll_columns, ll_thisrow, ll_yCoord, ll_row
+String ls_ColName, ls_LabelName, ls_yCoord, ls_visible
+Integer li_positions[]
+Int liCol, li_Inv, li_Fld, li_Lst
+Any la_colno
+
+gl_ScreenHeightChange = 0		//Report screen height change for moving command buttons
+liCol = 0
+ll_spacing = 80
+//ll_startrow = Long(adwDW.describe("return_tracking_no_t.y")) + ll_spacing 	// First row to check
+//ll_endrow = Long(adwDW.describe("user_field22.y"))			 	// Last row to check  (Do not check remark and below)
+
+  la_colno = adwDW.object.datawindow.column.count
+  ll_columns = long(la_colno)
+  FOR li_Loop = 1 TO ll_columns
+  	ls_ColName = adwDW.Describe("#" + String( li_Loop ) + ".Name")
+	ll_thisrow =  Long(adwDW.Describe( ls_ColName + ".Y") )
+	ls_yCoord = adwDW.Describe( ls_ColName + ".Y" )
+	ls_visible =  adwDW.Describe( ls_ColName + ".visible" ) 
+	
+	IF ISNUMBER(ls_yCoord)  then		// Only display columns will be picked
+		If (alStart = 0  or Long(ls_yCoord) >= alStart) and (alEnd = 0 or Long(ls_yCoord) <= alEnd)  Then 
+			liCol ++
+			ll_row = lds_columns.InsertRow(0)
+			lds_columns.SetItem(ll_row, "a", ls_ColName)
+			lds_columns.SetItem(ll_row, "b", ls_yCoord )
+			lds_columns.SetItem(ll_row, "c", ls_visible)
+		End If
+    END IF
+ next
+
+lds_columns.SetSort("integer(#2) A, #1 A")
+lds_columns.Sort()
+
+//ll_endrow = Long(lds_columns.getitemstring(lds_columns.rowcount(),'b'))
+ll_endrow = alEnd
+
+// Check all fields within the range for invisible.  
+ll_pos = alStart
+li_Fld = 0
+li_Inv = 0
+li_Lst = 0
+FOR li_Loop = 1 to liCol
+	li_Fld++
+ 	If lds_columns.GetItemString(li_Loop, "c") = '0' Then
+		li_Inv++
+	End If
+	if ll_newpos < ll_endrow Then
+		ll_newpos = Long(lds_columns.GetItemString(li_Loop+1, "b"))
+	End If
+	if ll_newpos <> ll_pos then
+		If li_Fld = li_Inv Then
+			li_Lst++
+			li_positions[li_Lst] = ll_pos
+		End If
+		ll_pos = ll_newpos
+		li_Fld = 0
+		li_Inv = 0
+	End If
+Next
+
+// Remove the rows that have no fields - whitespace removal - li_Lst is above zero
+liCol = lds_columns.rowcount()
+If li_Lst > 0 Then
+	FOR li_Loop = 1 to li_Lst
+		ll_pos = li_positions[li_Loop]
+		FOR ll_rowpos = 1 to liCol
+			ll_thisrow = Long(lds_columns.GetItemString(ll_rowpos, "b"))
+			If ll_thisrow > ll_pos Then		//Move this column and it's label up by ll_spacing
+			 	ls_ColName = lds_columns.GetItemString(ll_rowpos, "a") + ".y=" + String(ll_thisrow - (ll_spacing * li_Loop))
+				ls_LabelName = lds_columns.GetItemString(ll_rowpos, "a") + "_t.y=" + String(ll_thisrow - (ll_spacing * li_Loop))
+				adwDW.modify( ls_ColName )
+				adwDW.modify( ls_LabelName )
+			End If
+		NEXT
+	NEXT
+End If
+
+// Pick up any stray fields to move up
+//Moving message objects to top with action buttons
+If li_Lst > 1 Then
+	if adwdw.dataobject = 'd_ro_master' then
+		// Red message
+		ls_yCoord = adwDW.Describe( "t_3.y" )
+		ls_LabelName = "t_3.y="
+		li_Inv = Long(ls_yCoord) - (li_lst * 80)
+		ls_LabelName = ls_LabelName + string(li_Inv)
+		adwdw.modify(ls_LabelName)	
+	end if
+end if  
+
+gl_ScreenHeightChange = 	 ((li_lst) * 80)	// for use in postopen event	
+li_Inv = adwdw.height - gl_ScreenHeightChange
+adwdw.height = li_Inv
+
+	
+return adwDW
+end function
+

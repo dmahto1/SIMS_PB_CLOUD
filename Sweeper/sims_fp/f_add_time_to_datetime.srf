@@ -1,0 +1,40 @@
+HA$PBExportHeader$f_add_time_to_datetime.srf
+global type f_add_time_to_datetime from function_object
+end type
+
+forward prototypes
+global function datetime f_add_time_to_datetime (datetime adtm_start, long al_minutes)
+end prototypes
+
+global function datetime f_add_time_to_datetime (datetime adtm_start, long al_minutes);//14-Dec-2017 :Madhu Add Minutes to DateTime.
+Date ldt_rsc_srt
+Time ltm_rsc_srt  
+long ll_hrs_duration, ll_days_duration
+
+ldt_rsc_srt = Date(adtm_start)  
+ltm_rsc_srt = Time(adtm_start)  
+ll_days_duration = Int(al_minutes/1440) //extract days   (24*60 =1440)
+
+if ll_days_duration > 0 then  
+	al_minutes = Mod(al_minutes,1440) //remove days from minutes value  
+end if  
+
+ll_hrs_duration = Int(al_minutes/60)
+if ll_hrs_duration > 0 then
+	al_minutes = Mod(al_minutes, 60)
+end if
+
+If (Minute(ltm_rsc_srt) + al_minutes) >= 60 then
+	ll_hrs_duration++
+	al_minutes = al_minutes - 60
+end if
+
+if Hour(ltm_rsc_srt) + ll_hrs_duration >= 24 then
+	ll_days_duration++
+	ll_hrs_duration = ll_hrs_duration - 24
+end if
+
+RETURN datetime(RelativeDate(ldt_rsc_srt, ll_days_duration), Time(abs(Hour(ltm_rsc_srt) + ll_hrs_duration), abs(Minute(ltm_rsc_srt) + al_minutes), 0))
+
+end function
+

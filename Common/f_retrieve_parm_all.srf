@@ -1,0 +1,32 @@
+$PBExportHeader$f_retrieve_parm_all.srf
+$PBExportComments$Initial create
+global type f_retrieve_parm_all from function_object
+end type
+
+forward prototypes
+global function any f_retrieve_parm_all (string as_project_id, string as_code_type, string as_code_id)
+end prototypes
+
+global function any f_retrieve_parm_all (string as_project_id, string as_code_type, string as_code_id);/*GailM 4/13/2020 - S44744/F19843 -  Google - Print 2nd copy of Pick List without qty (audit sheet)
+	Return a structure with four parameters - code_descript, user_field1, user_field2, user_field3 */
+	
+Str_parms       lstrParms
+String ls_return, ls_code_descript, ls_user_field1, ls_user_field2, ls_user_field3, ls_user_updateable_ind
+
+select code_descript, user_field1, user_field2, user_field3, User_Updateable_Ind
+into :ls_code_descript, :ls_user_field1, :ls_user_field2, :ls_user_field3, :ls_user_updateable_ind
+from lookup_table
+where project_id = :as_project_id
+and code_type = :as_code_type
+and code_id = :as_code_id using sqlca;
+
+lstrParms.string_arg[1] = ls_code_descript
+lstrParms.string_arg[2] = ls_user_field1
+lstrParms.string_arg[3] = ls_user_field2
+lstrParms.string_arg[4] = ls_user_field3
+lstrParms.string_arg[5] = ls_user_updateable_ind
+
+return lstrParms
+
+end function
+

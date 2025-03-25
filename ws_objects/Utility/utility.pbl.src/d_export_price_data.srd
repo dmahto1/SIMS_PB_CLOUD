@@ -1,0 +1,47 @@
+﻿$PBExportHeader$d_export_price_data.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=1 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no grid.lines=0 )
+header(height=140 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=92 color="536870912" )
+table(column=(type=char(1) updatewhereclause=yes name=c_export_ind dbname="c_export_ind" values="	Y/	N" )
+ column=(type=char(10) update=yes updatewhereclause=yes key=yes name=project_id dbname="Price_Master.Project_ID" )
+ column=(type=char(20) update=yes updatewhereclause=yes key=yes name=supp_code dbname="Price_Master.Supp_Code" )
+ column=(type=char(50) update=yes updatewhereclause=yes key=yes name=sku dbname="Price_Master.SKU" )
+ column=(type=char(3) update=yes updatewhereclause=yes key=yes name=price_class dbname="Price_Master.Price_Class" )
+ column=(type=decimal(4) update=yes updatewhereclause=yes name=price_1 dbname="Price_Master.Price_1" )
+ column=(type=decimal(4) update=yes updatewhereclause=yes name=price_2 dbname="Price_Master.Price_2" )
+ column=(type=char(10) update=yes updatewhereclause=yes name=currency_cd dbname="Price_Master.Currency_CD" )
+ retrieve="  SELECT '' as c_export_ind,
+			dbo.Price_Master.Project_ID,   
+         dbo.Price_Master.Supp_Code,   
+         dbo.Price_Master.SKU,   
+         dbo.Price_Master.Price_Class,   
+         dbo.Price_Master.Price_1,   
+         dbo.Price_Master.Price_2,   
+         dbo.Price_Master.Currency_CD  
+    FROM dbo.Price_Master  
+   WHERE dbo.Price_Master.Project_ID = :as_projectid    
+" update="dbo.Price_Master" updatewhere=0 updatekeyinplace=yes arguments=(("as_projectid", string)) )
+text(band=header alignment="2" text="Currency" border="6" color="33554432" x="2514" y="8" height="128" width="329" html.valueishtml="0"  name=currency_cd_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217739" )
+text(band=header alignment="2" text="UsedPrice" border="6" color="33554432" x="2176" y="8" height="128" width="329" html.valueishtml="0"  name=price_2_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217739" )
+text(band=header alignment="2" text="NewPrice" border="6" color="33554432" x="1838" y="8" height="128" width="329" html.valueishtml="0"  name=price_1_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217739" )
+text(band=header alignment="2" text="SupplierCode" border="6" color="33554432" x="521" y="8" height="128" width="530" html.valueishtml="0"  name=supp_code_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217739" )
+text(band=header alignment="2" text="SKU" border="6" color="33554432" x="1061" y="8" height="128" width="480" html.valueishtml="0"  name=sku_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217739" )
+text(band=header alignment="2" text="ORG" border="6" color="33554432" x="1550" y="8" height="128" width="279" html.valueishtml="0"  name=price_class_1_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217739" )
+text(band=header alignment="2" text="Project" border="6" color="33554432" x="210" y="8" height="128" width="302" html.valueishtml="0"  name=project_id_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217739" )
+text(band=header alignment="0" text="" border="6" color="0" x="9" y="8" height="128" width="192" html.valueishtml="0"  name=c_export_ind_1_t visible="1"  font.face="Arial" font.height="-12" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217739" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="0" color="33554432" x="521" y="8" height="76" width="530" format="[general]" html.valueishtml="0"  name=supp_code visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="1" tabsequence=32766 border="0" color="33554432" x="1838" y="8" height="76" width="329" format="[general]" html.valueishtml="0"  name=price_1 visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=7 alignment="1" tabsequence=32766 border="0" color="33554432" x="2176" y="8" height="76" width="329" format="[general]" html.valueishtml="0"  name=price_2 visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=8 alignment="0" tabsequence=32766 border="0" color="33554432" x="2514" y="8" height="76" width="329" format="[general]" html.valueishtml="0"  name=currency_cd visible="1" edit.limit=10 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="0" color="33554432" x="1061" y="8" height="76" width="480" format="[general]" html.valueishtml="0"  name=sku visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="0" tabsequence=32766 border="0" color="33554432" x="1550" y="8" height="76" width="279" format="[general]" html.valueishtml="0"  name=price_class_1 visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="0" color="33554432" x="210" y="8" height="76" width="302" format="[general]" html.valueishtml="0"  name=project_id visible="1" edit.limit=10 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=1 alignment="2" tabsequence=10 border="0" color="0" x="9" y="8" height="76" width="192" format="[general]" html.valueishtml="0"  name=c_export_ind_1 visible="1" checkbox.text="" checkbox.on="Y" checkbox.off="N" checkbox.scale=no checkbox.threed=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

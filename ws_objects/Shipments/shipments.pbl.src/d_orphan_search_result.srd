@@ -1,0 +1,86 @@
+﻿$PBExportHeader$d_orphan_search_result.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=1 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no grid.lines=0 )
+header(height=76 color="536870912" )
+summary(height=8 color="536870912" )
+footer(height=20 color="536870912" )
+detail(height=92 color="536870912" )
+table(column=(type=char(15) updatewhereclause=yes name=si1_customer dbname="SI1_Customer" )
+ column=(type=char(4) updatewhereclause=yes name=si1_carrier dbname="SI1_Carrier" )
+ column=(type=char(30) updatewhereclause=yes name=si1_shpperrefnbr dbname="SI1_Shpperrefnbr" )
+ column=(type=datetime updatewhereclause=yes name=si1_receiveddate dbname="SI1_ReceivedDate" )
+ column=(type=datetime updatewhereclause=yes name=si4_statusdate dbname="SI4_Statusdate" )
+ column=(type=char(22) updatewhereclause=yes name=si1_carrierrefnbr dbname="SI1_Carrierrefnbr" )
+ column=(type=char(60) updatewhereclause=yes name=origname dbname="OrigName" )
+ column=(type=char(30) updatewhereclause=yes name=origcity dbname="OrigCity" )
+ column=(type=char(2) updatewhereclause=yes name=origstate dbname="OrigState" )
+ column=(type=char(3) updatewhereclause=yes name=origcountry dbname="OrigCountry" )
+ column=(type=char(15) updatewhereclause=yes name=origzip dbname="OrigZip" )
+ column=(type=char(60) updatewhereclause=yes name=destname dbname="DestName" )
+ column=(type=char(30) updatewhereclause=yes name=destcity dbname="DestCity" )
+ column=(type=char(2) updatewhereclause=yes name=deststate dbname="DestState" )
+ column=(type=char(3) updatewhereclause=yes name=destcountry dbname="DestCountry" )
+ column=(type=char(15) updatewhereclause=yes name=destzip dbname="DestZip" )
+ column=(type=char(9) updatewhereclause=yes name=si1_groupcontrolnbr dbname="si1_GroupControlNbr" )
+ column=(type=char(9) updatewhereclause=yes name=si1_transactioncontrolnbr dbname="si1_TransactionControlNbr" )
+ retrieve="select SI1_Customer,
+SI1_Carrier,
+SI1_Shpperrefnbr,
+SI1_ReceivedDate,
+SI4_Statusdate,
+SI1_Carrierrefnbr,
+SH.SI2_Name OrigName, SH.SI2_City OrigCity, SH.SI2_State OrigState, SH.SI2_Country OrigCountry, SH.SI2_PostalCode OrigZip,
+CN.SI2_Name DestName, CN.SI2_City DestCity, CN.SI2_State DestState, CN.SI2_Country DestCountry, CN.SI2_PostalCode DestZip,
+si1_GroupControlNbr, si1_TransactionControlNbr 
+from status_import_1 si1,
+ Status_import_2 SH,
+ Status_import_2 CN,
+ status_import_4 si4
+where si1_GroupControlNbr = sh.si2_GroupControlNbr and si1_TransactionControlNbr = sh.si2_TransactionControlNbr and SH.SI2_Entityqualifier ='SH'
+ and si1_GroupControlNbr = cn.si2_GroupControlNbr and si1_TransactionControlNbr = cn.si2_TransactionControlNbr and CN.SI2_Entityqualifier ='CN'
+ and si1_GroupControlNbr = si4_GroupControlNbr and si1_TransactionControlNbr = si4_TransactionControlNbr
+ and si1.sirs_id <> 25 and si4.sirs_id <> 25
+ and si1.sirs_id <> 1 and si4.sirs_id <> 1
+ 
+" )
+text(band=header alignment="0" text="Customer" border="0" color="0" x="9" y="4" height="80" width="471" html.valueishtml="0"  name=si1_customer_t visible="1"  font.face="Arial" font.height="-12" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="Carrier" border="0" color="0" x="489" y="4" height="80" width="242" html.valueishtml="0"  name=si1_carrier_t visible="1"  font.face="Arial" font.height="-12" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="Shipper Ref NBR" border="0" color="0" x="1385" y="4" height="80" width="681" html.valueishtml="0"  name=si1_shpperrefnbr_t visible="1"  font.face="Arial" font.height="-12" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="Received Date" border="0" color="0" x="2075" y="4" height="80" width="558" html.valueishtml="0"  name=si1_receiveddate_t visible="1"  font.face="Arial" font.height="-12" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="Status Date" border="0" color="0" x="2642" y="4" height="80" width="599" html.valueishtml="0"  name=si4_statusdate_t visible="1"  font.face="Arial" font.height="-12" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="Carrier Ref NBR" border="0" color="0" x="741" y="4" height="80" width="635" html.valueishtml="0"  name=si1_carrierrefnbr_t visible="1"  font.face="Arial" font.height="-12" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="Origin" border="0" color="0" x="3250" y="0" height="80" width="1129" html.valueishtml="0"  name=origname_t visible="1"  font.face="Arial" font.height="-12" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="Orig City" border="0" color="0" x="4389" y="4" height="80" width="731" html.valueishtml="0"  name=origcity_t visible="1"  font.face="Arial" font.height="-12" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="Orig ST" border="0" color="0" x="5129" y="0" height="80" width="256" html.valueishtml="0"  name=origstate_t visible="1"  font.face="Arial" font.height="-12" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="Orig Cntry" border="0" color="0" x="5806" y="4" height="80" width="215" html.valueishtml="0"  name=origcountry_t visible="1"  font.face="Arial" font.height="-12" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="Destination" border="0" color="0" x="6030" y="4" height="80" width="1029" html.valueishtml="0"  name=destname_t visible="1"  font.face="Arial" font.height="-12" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="Dest City" border="0" color="0" x="7067" y="4" height="80" width="617" html.valueishtml="0"  name=destcity_t visible="1"  font.face="Arial" font.height="-12" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="Dest ST" border="0" color="0" x="7694" y="4" height="80" width="288" html.valueishtml="0"  name=deststate_t visible="1"  font.face="Arial" font.height="-12" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="Dest Cntry" border="0" color="0" x="8471" y="4" height="80" width="366" html.valueishtml="0"  name=destcountry_t visible="1"  font.face="Arial" font.height="-12" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="Group Cntrl NBR" border="0" color="0" x="8846" y="0" height="80" width="59" html.valueishtml="0"  name=si1_groupcontrolnbr_t visible="1"  font.face="Arial" font.height="-12" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="Trans Cntrl NBR" border="0" color="0" x="8914" y="0" height="80" width="55" html.valueishtml="0"  name=si1_transactioncontrolnbr_t visible="1"  font.face="Arial" font.height="-12" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="OrigZip" border="0" color="0" x="5394" y="4" height="80" width="402" html.valueishtml="0"  name=origzip_t visible="1"  font.face="Arial" font.height="-12" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="DestZip" border="0" color="0" x="7991" y="4" height="80" width="471" html.valueishtml="0"  name=destzip_t visible="1"  font.face="Arial" font.height="-12" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="0" color="0" x="9" y="0" height="76" width="471" format="[general]" html.valueishtml="0"  name=si1_customer visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-12" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="0" color="0" x="489" y="0" height="76" width="242" format="[general]" html.valueishtml="0"  name=si1_carrier visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-12" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="0" color="0" x="1385" y="0" height="76" width="681" format="[general]" html.valueishtml="0"  name=si1_shpperrefnbr visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-12" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="0" color="0" x="2075" y="0" height="76" width="558" format="[shortdate] [time]" html.valueishtml="0"  name=si1_receiveddate visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-12" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=5 alignment="0" tabsequence=32766 border="0" color="0" x="2642" y="0" height="76" width="599" format="[shortdate] [time]" html.valueishtml="0"  name=si4_statusdate visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-12" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=6 alignment="0" tabsequence=32766 border="0" color="0" x="741" y="0" height="76" width="635" format="[general]" html.valueishtml="0"  name=si1_carrierrefnbr visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-12" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=7 alignment="0" tabsequence=32766 border="0" color="0" x="3250" y="0" height="76" width="1129" format="[general]" html.valueishtml="0"  name=origname visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-12" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=8 alignment="0" tabsequence=32766 border="0" color="0" x="4389" y="0" height="76" width="731" format="[general]" html.valueishtml="0"  name=origcity visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-12" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=9 alignment="0" tabsequence=32766 border="0" color="0" x="5129" y="0" height="76" width="256" format="[general]" html.valueishtml="0"  name=origstate visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-12" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=10 alignment="0" tabsequence=32766 border="0" color="0" x="5806" y="0" height="76" width="215" format="[general]" html.valueishtml="0"  name=origcountry visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-12" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=12 alignment="0" tabsequence=32766 border="0" color="0" x="6030" y="0" height="76" width="1029" format="[general]" html.valueishtml="0"  name=destname visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-12" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=13 alignment="0" tabsequence=32766 border="0" color="0" x="7067" y="0" height="76" width="617" format="[general]" html.valueishtml="0"  name=destcity visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-12" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=14 alignment="0" tabsequence=32766 border="0" color="0" x="7694" y="0" height="76" width="288" format="[general]" html.valueishtml="0"  name=deststate visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-12" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=15 alignment="0" tabsequence=32766 border="0" color="0" x="8471" y="0" height="76" width="366" format="[general]" html.valueishtml="0"  name=destcountry visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-12" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=17 alignment="0" tabsequence=32766 border="0" color="0" x="8846" y="0" height="76" width="59" format="[general]" html.valueishtml="0"  name=si1_groupcontrolnbr visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-12" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=18 alignment="0" tabsequence=32766 border="0" color="0" x="8914" y="0" height="76" width="55" format="[general]" html.valueishtml="0"  name=si1_transactioncontrolnbr visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-12" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=11 alignment="0" tabsequence=32766 border="0" color="0" x="5394" y="0" height="76" width="402" format="[general]" html.valueishtml="0"  name=origzip visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-12" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=16 alignment="0" tabsequence=32766 border="0" color="0" x="7991" y="0" height="76" width="471" format="[general]" html.valueishtml="0"  name=destzip visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-12" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

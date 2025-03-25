@@ -1,0 +1,163 @@
+﻿$PBExportHeader$d_receive_summary.srd
+release 7;
+datawindow(units=0 timer_interval=0 color=12632256 processing=0 HTMLDW=no print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.prompt=no print.buttons=no print.preview.buttons=no )
+header(height=188 color="536870912" )
+summary(height=68 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=192 color="536870912" )
+table(column=(type=char(16) updatewhereclause=yes name=ro_no dbname="Receive_Master.RO_No" )
+ column=(type=datetime updatewhereclause=yes name=complete_date dbname="Receive_Master.Complete_Date" )
+ column=(type=datetime updatewhereclause=yes name=ord_date dbname="Receive_Master.Ord_Date" )
+ column=(type=char(1) updatewhereclause=yes name=inventory_type dbname="Receive_Master.Inventory_Type" )
+ column=(type=char(50) updatewhereclause=yes name=sku dbname="Receive_Detail.SKU" )
+ column=(type=decimal(0) updatewhereclause=yes name=alloc_qty dbname="Receive_Detail.Alloc_Qty" )
+ column=(type=decimal(0) updatewhereclause=yes name=damage_qty dbname="Receive_Detail.Damage_Qty" )
+ column=(type=char(4) updatewhereclause=yes name=uom dbname="Receive_Detail.UOM" )
+ column=(type=char(4) updatewhereclause=yes name=uom_1 dbname="Item_Master.UOM_1" )
+ column=(type=decimal(0) updatewhereclause=yes name=length_1 dbname="Item_Master.Length_1" )
+ column=(type=decimal(0) updatewhereclause=yes name=width_1 dbname="Item_Master.Width_1" )
+ column=(type=decimal(0) updatewhereclause=yes name=height_1 dbname="Item_Master.Height_1" )
+ column=(type=decimal(3) updatewhereclause=yes name=weight_1 dbname="Item_Master.Weight_1" )
+ column=(type=char(4) updatewhereclause=yes name=uom_2 dbname="Item_Master.UOM_2" )
+ column=(type=decimal(0) updatewhereclause=yes name=length_2 dbname="Item_Master.Length_2" )
+ column=(type=decimal(0) updatewhereclause=yes name=width_2 dbname="Item_Master.Width_2" )
+ column=(type=decimal(0) updatewhereclause=yes name=height_2 dbname="Item_Master.Height_2" )
+ column=(type=decimal(3) updatewhereclause=yes name=weight_2 dbname="Item_Master.Weight_2" )
+ column=(type=decimal(0) updatewhereclause=yes name=qty_2 dbname="Item_Master.Qty_2" )
+ column=(type=char(4) updatewhereclause=yes name=uom_3 dbname="Item_Master.UOM_3" )
+ column=(type=decimal(0) updatewhereclause=yes name=length_3 dbname="Item_Master.Length_3" )
+ column=(type=decimal(0) updatewhereclause=yes name=width_3 dbname="Item_Master.Width_3" )
+ column=(type=decimal(0) updatewhereclause=yes name=height_3 dbname="Item_Master.Height_3" )
+ column=(type=decimal(3) updatewhereclause=yes name=weight_3 dbname="Item_Master.Weight_3" )
+ column=(type=decimal(0) updatewhereclause=yes name=qty_3 dbname="Item_Master.Qty_3" )
+ column=(type=char(4) updatewhereclause=yes name=uom_4 dbname="Item_Master.UOM_4" )
+ column=(type=decimal(0) updatewhereclause=yes name=length_4 dbname="Item_Master.Length_4" )
+ column=(type=decimal(0) updatewhereclause=yes name=width_4 dbname="Item_Master.Width_4" )
+ column=(type=decimal(0) updatewhereclause=yes name=height_4 dbname="Item_Master.Height_4" )
+ column=(type=decimal(3) updatewhereclause=yes name=weight_4 dbname="Item_Master.Weight_4" )
+ column=(type=decimal(0) updatewhereclause=yes name=qty_4 dbname="Item_Master.Qty_4" )
+ retrieve="  SELECT Receive_Master.RO_No,   
+         Receive_Master.Complete_Date,   
+         Receive_Master.Ord_Date,   
+         Receive_Master.Inventory_Type,   
+         Receive_Detail.SKU,   
+         Receive_Detail.Alloc_Qty,   
+         Receive_Detail.Damage_Qty,   
+         Receive_Detail.UOM,   
+         Item_Master.UOM_1,   
+         Item_Master.Length_1,   
+         Item_Master.Width_1,   
+         Item_Master.Height_1,    
+         Item_Master.Weight_1,   
+         Item_Master.UOM_2,   
+         Item_Master.Length_2,   
+         Item_Master.Width_2,   
+         Item_Master.Height_2,   
+         Item_Master.Weight_2,   
+         Item_Master.Qty_2,   
+         Item_Master.UOM_3,   
+         Item_Master.Length_3,   
+         Item_Master.Width_3,   
+         Item_Master.Height_3,   
+         Item_Master.Weight_3,   
+         Item_Master.Qty_3,   
+         Item_Master.UOM_4,   
+         Item_Master.Length_4,   
+         Item_Master.Width_4,   
+         Item_Master.Height_4,   
+         Item_Master.Weight_4,   
+         Item_Master.Qty_4  
+    FROM Item_Master,   
+         Receive_Detail,   
+         Receive_Master  
+   WHERE ( Item_Master.SKU = Receive_Detail.SKU ) and  
+         ( Receive_Master.RO_No = Receive_Detail.RO_No ) and
+			( Receive_Master.Ord_Status = 'C' ) and
+			( Receive_Master.Project_id = :pid ) and  
+         ( ( Receive_Master.Complete_Date >= :start ) AND  
+         ( Receive_Master.Complete_Date <= :end ) )    " arguments=(("pid", string),("start", date),("end", date)) )
+group(level=1 header.height=0 trailer.height=0 by=("ro_no" ) header.color="536870912" trailer.color="536870912" )
+group(level=2 header.height=64 trailer.height=64 by=("ro_no" ) header.color="536870912" trailer.color="536870912" )
+text(band=header alignment="2" text="Uom 1" border="2" color="0" x="5" y="64" height="56" width="192"  name=item_master_uom_1_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Length 1" border="2" color="0" x="201" y="64" height="56" width="256"  name=item_master_length_1_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Width 1" border="2" color="0" x="462" y="64" height="56" width="229"  name=item_master_width_1_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="CBM1" border="2" color="0" x="946" y="64" height="56" width="178"  name=t_1  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Height 1" border="2" color="0" x="695" y="64" height="56" width="247"  name=item_master_height_1_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Weight 1" border="2" color="0" x="1129" y="64" height="56" width="265"  name=item_master_weight_1_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Uom 2" border="2" color="0" x="1559" y="64" height="56" width="192"  name=item_master_uom_2_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Lenght 2" border="2" color="0" x="1755" y="64" height="56" width="256"  name=item_master_lenght_2_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Width 2" border="2" color="0" x="2016" y="64" height="56" width="229"  name=item_master_width_2_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Height 2" border="2" color="0" x="2249" y="64" height="56" width="247"  name=item_master_height_2_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="CBM2" border="2" color="0" x="2501" y="64" height="56" width="178"  name=t_2  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Weight 2" border="2" color="0" x="2683" y="64" height="56" width="265"  name=item_master_weight_2_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Qty 2" border="2" color="0" x="2953" y="64" height="56" width="155"  name=item_master_qty_2_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Uom 3" border="2" color="0" x="5" y="124" height="56" width="192"  name=item_master_uom_3_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Length 3" border="2" color="0" x="201" y="124" height="56" width="256"  name=item_master_length_3_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Width 3" border="2" color="0" x="462" y="124" height="56" width="229"  name=item_master_width_3_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Height 3" border="2" color="0" x="695" y="124" height="56" width="247"  name=item_master_height_3_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="CBM3" border="2" color="0" x="946" y="124" height="56" width="178"  name=t_3  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Weight 3" border="2" color="0" x="1129" y="124" height="56" width="265"  name=item_master_weight_3_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Qty 3" border="2" color="0" x="1399" y="124" height="56" width="155"  name=item_master_qty_3_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Uom 4" border="2" color="0" x="1559" y="124" height="56" width="192"  name=item_master_uom_4_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Length 4" border="2" color="0" x="1755" y="124" height="56" width="256"  name=item_master_length_4_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Width 4" border="2" color="0" x="2016" y="124" height="56" width="229"  name=item_master_width_4_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Height 4" border="2" color="0" x="2249" y="124" height="56" width="247"  name=item_master_height_4_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="CBM4" border="2" color="0" x="2501" y="124" height="56" width="178"  name=t_4  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Weight 4" border="2" color="0" x="2683" y="124" height="56" width="265"  name=item_master_weight_4_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Qty 4" border="2" color="0" x="2953" y="124" height="56" width="155"  name=item_master_qty_4_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="Weight" border="2" color="0" x="2953" y="4" height="56" width="155"  name=t_5  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Rcv. No" border="2" color="0" x="5" y="4" height="56" width="233"  name=receive_master_ro_no_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Inventory Type" border="2" color="0" x="1088" y="4" height="56" width="443"  name=receive_master_inventory_type_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Sku" border="2" color="0" x="1536" y="4" height="56" width="110"  name=receive_detail_sku_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Alloc Qty" border="2" color="0" x="1650" y="4" height="56" width="261"  name=receive_detail_alloc_qty_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Damage Qty" border="2" color="0" x="1915" y="4" height="56" width="366"  name=receive_detail_damage_qty_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Uom" border="2" color="0" x="2286" y="4" height="56" width="137"  name=receive_detail_uom_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="Quantity" border="2" color="0" x="2427" y="4" height="56" width="251"  name=t_6  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="CBM" border="2" color="0" x="2683" y="4" height="56" width="265"  name=t_7  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Request Date" border="2" color="0" x="681" y="4" height="56" width="402"  name=receive_master_request_date_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Complete Date" border="2" color="0" x="242" y="4" height="56" width="434"  name=receive_master_complete_date_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.2 id=1 alignment="0" tabsequence=32766 border="2" color="0" x="14" y="4" height="56" width="782" format="[general]"  name=ro_no edit.limit=16 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="0" tabsequence=10 border="2" color="0" x="1088" y="4" height="56" width="443" format="[general]"  name=inventory_type dddw.name=dddw_inventory_type dddw.displaycolumn=inv_type_desc dddw.datacolumn=inv_type dddw.percentwidth=300 dddw.lines=0 dddw.limit=0 dddw.allowedit=no dddw.useasborder=no dddw.case=any  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+column(band=detail id=5 alignment="0" tabsequence=32766 border="2" color="0" x="1536" y="4" height="56" width="110" format="[general]"  name=sku edit.limit=20 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="1" tabsequence=32766 border="2" color="0" x="1650" y="4" height="56" width="261" format="#######.#####"  name=alloc_qty editmask.mask="#######.#####" editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=7 alignment="1" tabsequence=32766 border="2" color="0" x="1915" y="4" height="56" width="366" format="#######.#####"  name=damage_qty editmask.mask="#######.#####" editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=8 alignment="0" tabsequence=32766 border="2" color="0" x="2286" y="4" height="56" width="137" format="[general]"  name=uom edit.limit=4 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=9 alignment="0" tabsequence=32766 border="2" color="0" x="5" y="64" height="56" width="192" format="[general]"  name=uom_1 edit.limit=4 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=10 alignment="1" tabsequence=32766 border="2" color="0" x="201" y="64" height="56" width="256" format="[general]"  name=length_1 edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=11 alignment="1" tabsequence=32766 border="2" color="0" x="462" y="64" height="56" width="229" format="[general]"  name=width_1 edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=detail alignment="0" expression=" length_1  *  width_1  *  height_1 "border="2" color="0" x="946" y="64" height="56" width="178" format="[general]"  name=cbm1  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=12 alignment="1" tabsequence=32766 border="2" color="0" x="695" y="64" height="56" width="247" format="[general]"  name=height_1 edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=13 alignment="1" tabsequence=32766 border="2" color="0" x="1129" y="64" height="56" width="265" format="[general]"  name=weight_1 edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=14 alignment="0" tabsequence=32766 border="2" color="0" x="1559" y="64" height="56" width="192" format="[general]"  name=uom_2 edit.limit=4 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=16 alignment="1" tabsequence=32766 border="2" color="0" x="2016" y="64" height="56" width="229" format="[general]"  name=width_2 edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=17 alignment="1" tabsequence=32766 border="2" color="0" x="2249" y="64" height="56" width="247" format="[general]"  name=height_2 edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=detail alignment="0" expression="length_2  *  width_2  *  height_2 "border="2" color="0" x="2501" y="64" height="56" width="178" format="[general]"  name=cbm2  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=18 alignment="1" tabsequence=32766 border="2" color="0" x="2683" y="64" height="56" width="265" format="[general]"  name=weight_2 edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=20 alignment="0" tabsequence=32766 border="2" color="0" x="5" y="124" height="56" width="192" format="[general]"  name=uom_3 edit.limit=4 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=21 alignment="1" tabsequence=32766 border="2" color="0" x="201" y="124" height="56" width="256" format="[general]"  name=length_3 edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=22 alignment="1" tabsequence=32766 border="2" color="0" x="462" y="124" height="56" width="229" format="[general]"  name=width_3 edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=23 alignment="1" tabsequence=32766 border="2" color="0" x="695" y="124" height="56" width="247" format="[general]"  name=height_3 edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=detail alignment="0" expression=" length_3  *  width_3  *  height_3 "border="2" color="0" x="946" y="124" height="56" width="178" format="[general]"  name=cbm3  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=24 alignment="1" tabsequence=32766 border="2" color="0" x="1129" y="124" height="56" width="265" format="[general]"  name=weight_3 edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=25 alignment="1" tabsequence=32766 border="2" color="0" x="1399" y="124" height="56" width="155" format="#######.#####"  name=qty_3 editmask.mask="#######.#####" editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=26 alignment="0" tabsequence=32766 border="2" color="0" x="1559" y="124" height="56" width="192" format="[general]"  name=uom_4 edit.limit=4 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=27 alignment="1" tabsequence=32766 border="2" color="0" x="1755" y="124" height="56" width="256" format="[general]"  name=length_4 edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=28 alignment="1" tabsequence=32766 border="2" color="0" x="2016" y="124" height="56" width="229" format="[general]"  name=width_4 edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=29 alignment="1" tabsequence=32766 border="2" color="0" x="2249" y="124" height="56" width="247" format="[general]"  name=height_4 edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=detail alignment="0" expression=" length_4  *  width_4  *  height_4 "border="2" color="0" x="2501" y="124" height="56" width="178" format="[general]"  name=cbm4  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=detail alignment="0" expression=" alloc_qty  +  damage_qty "border="2" color="0" x="2427" y="4" height="56" width="251" format="#######.#####"  name=quantity  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=detail alignment="0" expression="if(  uom = uom_1 ,   cbm1   ,  if(  uom = uom_2 ,  cbm2 , if(  uom = uom_3 , cbm3 ,  cbm4  ) )  )"border="2" color="0" x="2683" y="4" height="56" width="265" format="[general]"  name=cbm  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=19 alignment="1" tabsequence=32766 border="2" color="0" x="2953" y="64" height="56" width="155" format="#######.#####"  name=qty_2 editmask.mask="#######.#####" editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=detail alignment="0" expression="if(  uom = uom_1 ,    weight_1    ,  if(  uom = uom_2 ,   weight_2  , if(  uom = uom_3 ,  weight_3  ,   weight_4   ) )  )"border="2" color="0" x="2953" y="4" height="56" width="155" format="[general]"  name=weight  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=31 alignment="1" tabsequence=32766 border="2" color="0" x="2953" y="124" height="56" width="155" format="#######.#####"  name=qty_4 editmask.mask="#######.#####" editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=30 alignment="1" tabsequence=32766 border="2" color="0" x="2683" y="124" height="56" width="265" format="[general]"  name=weight_4 edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="2" color="0" x="681" y="4" height="56" width="402" format="dd/mm/yyyy hh:mm"  name=ord_date edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="2" color="0" x="242" y="4" height="56" width="434" format="dd/mm/yyyy hh:mm"  name=complete_date edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=trailer.2 alignment="0" expression="sum(if(  uom = uom_1 ,    weight_1    ,  if(  uom = uom_2 ,   weight_2  , if(  uom = uom_3 ,  weight_3  ,   weight_4   ) )  ) for group 2)"border="2" color="0" x="2953" y="4" height="56" width="155" format="[general]"  name=groupweight  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=trailer.2 alignment="0" expression="sum(if(  uom = uom_1 ,   cbm1   ,  if(  uom = uom_2 ,  cbm2 , if(  uom = uom_3 , cbm3 ,  cbm4  ) )  ) for group 2)"border="2" color="0" x="2683" y="4" height="56" width="265" format="[general]"  name=groupcbm  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=trailer.2 alignment="0" expression="sum( alloc_qty  +  damage_qty  for group 2)"border="2" color="0" x="2432" y="4" height="56" width="251" format="#######.#####"  name=groupqty  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=summary alignment="0" expression="sum( alloc_qty  +  damage_qty  for all)"border="2" color="0" x="2427" y="4" height="56" width="251" format="#######.#####"  name=sumqty  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=summary alignment="0" expression="sum(if(  uom = uom_1 ,   cbm1   ,  if(  uom = uom_2 ,  cbm2 , if(  uom = uom_3 , cbm3 ,  cbm4  ) )  ) for all)"border="2" color="0" x="2683" y="4" height="56" width="265" format="[general]"  name=sumcbm  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=summary alignment="0" expression="sum(if(  uom = uom_1 ,    weight_1    ,  if(  uom = uom_2 ,   weight_2  , if(  uom = uom_3 ,  weight_3  ,   weight_4   ) )  ) for all)"border="2" color="0" x="2953" y="4" height="56" width="155" format="[general]"  name=sumweight  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" )

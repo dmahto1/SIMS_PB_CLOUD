@@ -1,0 +1,23 @@
+HA$PBExportHeader$d_customer_type.srd
+$PBExportComments$-
+release 6;
+datawindow(units=0 timer_interval=0 color=16777215 processing=1 print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.prompt=no print.buttons=no print.preview.buttons=no grid.lines=0 )
+header(height=92 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=92 color="536870912" )
+table(column=(type=char(20) update=yes updatewhereclause=yes key=yes name=code_id dbname="Lookup_Table.Code_ID" )
+ column=(type=char(40) update=yes updatewhereclause=yes name=code_descript dbname="Lookup_Table.Code_Descript" )
+ column=(type=char(10) update=yes updatewhereclause=yes key=yes name=project_id dbname="Lookup_Table.Project_ID" )
+ column=(type=char(5) update=yes updatewhereclause=yes key=yes name=code_type dbname="Lookup_Table.Code_Type" )
+ retrieve="  SELECT Lookup_Table.Code_ID,   
+         Lookup_Table.Code_Descript,   
+         Lookup_Table.Project_ID,   
+         Lookup_Table.Code_Type  
+    FROM Lookup_Table   
+	Where Code_type = 'CTYPE'" update="Lookup_Table" updatewhere=1 updatekeyinplace=no )
+text(band=header alignment="2" text="Code Id"border="0" color="0" x="9" y="8" height="80" width="576"  name=code_id_t  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Code Descript"border="0" color="0" x="594" y="8" height="80" width="672"  name=code_descript_t  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=1 alignment="0" tabsequence=10 border="0" color="0" x="9" y="8" height="76" width="576" format="[general]"  name=code_id edit.limit=20 edit.case=upper edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="0" tabsequence=20 border="0" color="0" x="599" y="8" height="76" width="667" format="[general]"  name=code_descript edit.limit=40 edit.case=upper edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" cellpadding="0" cellspacing="0" generatecss="no" nowrap="yes")

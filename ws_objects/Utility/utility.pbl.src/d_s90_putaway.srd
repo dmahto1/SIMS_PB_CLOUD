@@ -1,0 +1,94 @@
+﻿$PBExportHeader$d_s90_putaway.srd
+$PBExportComments$Putaway information for Orde Close Transactions (S80)
+release 9;
+datawindow(units=0 timer_interval=0 color=16777215 processing=1 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no grid.lines=0 )
+header(height=144 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=92 color="536870912" )
+table(column=(type=char(16) updatewhereclause=yes name=ro_no dbname="Receive_Master.RO_NO" )
+ column=(type=char(10) updatewhereclause=yes name=wh_code dbname="Receive_Master.WH_Code" )
+ column=(type=char(30) updatewhereclause=yes name=supp_invoice_no dbname="Receive_Master.Supp_Invoice_No" )
+ column=(type=char(50) updatewhereclause=yes name=sku dbname="Receive_Putaway.SKU" )
+ column=(type=char(20) updatewhereclause=yes name=supp_code dbname="Receive_Putaway.Supp_Code" )
+ column=(type=decimal(0) updatewhereclause=yes name=owner_id dbname="Receive_Putaway.Owner_ID" )
+ column=(type=char(3) updatewhereclause=yes name=country_of_origin dbname="Receive_Putaway.Country_of_Origin" )
+ column=(type=char(10) updatewhereclause=yes name=l_code dbname="Receive_Putaway.L_Code" )
+ column=(type=char(1) updatewhereclause=yes name=inventory_type dbname="Receive_Putaway.Inventory_Type" )
+ column=(type=char(50) updatewhereclause=yes name=serial_no dbname="Receive_Putaway.Serial_No" )
+ column=(type=char(50) updatewhereclause=yes name=lot_no dbname="Receive_Putaway.Lot_No" )
+ column=(type=char(50) updatewhereclause=yes name=po_no dbname="Receive_Putaway.PO_No" )
+ column=(type=char(50) updatewhereclause=yes name=po_no2 dbname="Receive_Putaway.PO_No2" )
+ column=(type=decimal(5) updatewhereclause=yes name=quantity dbname="Receive_Putaway.Quantity" )
+ column=(type=decimal(0) updatewhereclause=yes name=line_item_no dbname="Receive_Putaway.Line_Item_No" )
+ retrieve="  SELECT dbo.Receive_Master.RO_NO,   
+			dbo.Receive_Master.WH_Code, 
+         dbo.Receive_Master.Supp_Invoice_No,   
+         dbo.Receive_Putaway.SKU,   
+         dbo.Receive_Putaway.Supp_Code,   
+         dbo.Receive_Putaway.Owner_ID,   
+         dbo.Receive_Putaway.Country_of_Origin,   
+         dbo.Receive_Putaway.L_Code,   
+         dbo.Receive_Putaway.Inventory_Type,   
+         dbo.Receive_Putaway.Serial_No,    
+         dbo.Receive_Putaway.Lot_No,   
+         dbo.Receive_Putaway.PO_No,   
+         dbo.Receive_Putaway.PO_No2,   
+         dbo.Receive_Putaway.Quantity,   
+         dbo.Receive_Putaway.Line_Item_No  
+    FROM dbo.Receive_Master,   
+         dbo.Receive_Putaway  
+   WHERE ( dbo.Receive_Putaway.RO_No = dbo.Receive_Master.RO_No )    AND
+			Project_id = :asProject and
+			dbo.Receive_Master.ro_no = :asRoNo
+			
+" arguments=(("asProject", string),("asRoNo", string)) )
+text(band=header alignment="2" text="Receive Master
+Wh Code" border="0" color="0" x="9" y="8" height="128" width="407" html.valueishtml="0"  name=receive_master_wh_code_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Receive Master
+Supp Invoice No" border="0" color="0" x="425" y="8" height="128" width="850" html.valueishtml="0"  name=receive_master_supp_invoice_no_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Receive Putaway
+Sku" border="0" color="0" x="1285" y="8" height="128" width="1399" html.valueishtml="0"  name=receive_putaway_sku_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Receive Putaway
+Supp Code" border="0" color="0" x="2693" y="8" height="128" width="576" html.valueishtml="0"  name=receive_putaway_supp_code_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Receive Putaway
+Owner Id" border="0" color="0" x="3278" y="8" height="128" width="453" html.valueishtml="0"  name=receive_putaway_owner_id_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Receive Putaway
+Country Of Origin" border="0" color="0" x="3739" y="8" height="128" width="457" html.valueishtml="0"  name=receive_putaway_country_of_origin_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Receive Putaway
+L Code" border="0" color="0" x="4206" y="8" height="128" width="453" html.valueishtml="0"  name=receive_putaway_l_code_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Receive Putaway
+Inventory Type" border="0" color="0" x="4667" y="8" height="128" width="453" html.valueishtml="0"  name=receive_putaway_inventory_type_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Receive Putaway
+Serial No" border="0" color="0" x="5129" y="8" height="128" width="576" html.valueishtml="0"  name=receive_putaway_serial_no_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Receive Putaway
+Lot No" border="0" color="0" x="5714" y="8" height="128" width="576" html.valueishtml="0"  name=receive_putaway_lot_no_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Receive Putaway
+Po No" border="0" color="0" x="6299" y="8" height="128" width="713" html.valueishtml="0"  name=receive_putaway_po_no_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Receive Putaway
+Po No2" border="0" color="0" x="7022" y="8" height="128" width="713" html.valueishtml="0"  name=receive_putaway_po_no2_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Receive Putaway
+Quantity" border="0" color="0" x="7744" y="8" height="128" width="453" html.valueishtml="0"  name=receive_putaway_quantity_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Receive Putaway
+Line Item No" border="0" color="0" x="8206" y="8" height="128" width="453" html.valueishtml="0"  name=receive_putaway_line_item_no_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="Receive Master Ro No" border="0" color="0" x="8667" y="4" height="64" width="425" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="0" color="0" x="9" y="8" height="76" width="407" format="[general]" html.valueishtml="0"  name=wh_code visible="1" edit.limit=10 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="0" color="0" x="425" y="8" height="76" width="850" format="[general]" html.valueishtml="0"  name=supp_invoice_no visible="1" edit.limit=30 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="0" color="0" x="1285" y="8" height="76" width="1399" format="[general]" html.valueishtml="0"  name=sku visible="1" edit.limit=50 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="0" tabsequence=32766 border="0" color="0" x="2693" y="8" height="76" width="576" format="[general]" html.valueishtml="0"  name=supp_code visible="1" edit.limit=20 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="1" tabsequence=32766 border="0" color="0" x="3278" y="8" height="76" width="453" format="[general]" html.valueishtml="0"  name=owner_id visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=7 alignment="0" tabsequence=32766 border="0" color="0" x="3739" y="8" height="76" width="457" format="[general]" html.valueishtml="0"  name=country_of_origin visible="1" edit.limit=3 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=8 alignment="0" tabsequence=32766 border="0" color="0" x="4206" y="8" height="76" width="453" format="[general]" html.valueishtml="0"  name=l_code visible="1" edit.limit=10 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=9 alignment="0" tabsequence=32766 border="0" color="0" x="4667" y="8" height="76" width="453" format="[general]" html.valueishtml="0"  name=inventory_type visible="1" edit.limit=1 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=10 alignment="0" tabsequence=32766 border="0" color="0" x="5129" y="8" height="76" width="576" format="[general]" html.valueishtml="0"  name=serial_no visible="1" edit.limit=20 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=11 alignment="0" tabsequence=32766 border="0" color="0" x="5714" y="8" height="76" width="576" format="[general]" html.valueishtml="0"  name=lot_no visible="1" edit.limit=20 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=12 alignment="0" tabsequence=32766 border="0" color="0" x="6299" y="8" height="76" width="713" format="[general]" html.valueishtml="0"  name=po_no visible="1" edit.limit=25 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=13 alignment="0" tabsequence=32766 border="0" color="0" x="7022" y="8" height="76" width="713" format="[general]" html.valueishtml="0"  name=po_no2 visible="1" edit.limit=25 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=14 alignment="1" tabsequence=32766 border="0" color="0" x="7744" y="8" height="76" width="453" format="[general]" html.valueishtml="0"  name=quantity visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=15 alignment="1" tabsequence=32766 border="0" color="0" x="8206" y="8" height="76" width="453" format="[general]" html.valueishtml="0"  name=line_item_no visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="0" color="0" x="8667" y="0" height="64" width="425" format="[general]" html.valueishtml="0"  name=ro_no visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

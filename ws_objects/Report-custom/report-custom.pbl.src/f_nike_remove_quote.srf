@@ -1,0 +1,27 @@
+﻿$PBExportHeader$f_nike_remove_quote.srf
+global type f_nike_remove_quote from function_object
+end type
+
+forward prototypes
+global function STRING f_nike_remove_quote (string a_line)
+end prototypes
+
+global function STRING f_nike_remove_quote (string a_line);// Function to remove double quote and sigle quote from a string
+
+Long i, ll_cnt
+String ls_new
+
+ls_new = ""
+ll_cnt = Len(a_line)
+For i = 1 to ll_cnt
+	If Mid(a_line,i,1) = "'" or Mid(a_line,i,1) = '"' Then
+		ls_new += " "
+	Else
+		ls_new += Mid(a_line,i,1)
+	End If
+Next
+	
+Return Trim(ls_new)
+
+end function
+

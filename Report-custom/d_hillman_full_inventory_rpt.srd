@@ -1,0 +1,83 @@
+HA$PBExportHeader$d_hillman_full_inventory_rpt.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="Full Inventory" print.orientation = 1 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=276 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=164 color="536870912" )
+detail(height=68 color="536870912" )
+table(column=(type=char(10) updatewhereclause=yes name=project_id dbname="Project_Id" )
+ column=(type=char(50) updatewhereclause=yes name=sku dbname="SKU" )
+ column=(type=char(70) updatewhereclause=yes name=description dbname="Description" )
+ column=(type=char(10) updatewhereclause=yes name=location dbname="Location" )
+ column=(type=char(20) updatewhereclause=yes name=supp_code dbname="Supp_Code" )
+ column=(type=decimal(5) updatewhereclause=yes name=available_qty dbname="Available_Qty" )
+ column=(type=decimal(5) updatewhereclause=yes name=allocated_qty dbname="Allocated_Qty" )
+ column=(type=decimal(5) updatewhereclause=yes name=sit_qty dbname="Sit_Qty" )
+ retrieve="  SELECT 	dbo.Item_Master.Project_Id,
+				dbo.Item_Master.SKU, 
+        dbo.Item_Master.Description,   
+    	cs.L_Code as Location,
+dbo.Item_Master.Supp_Code,
+  ( select isnull( sum( dbo.content_summary.avail_qty  ), 0)
+    from dbo.content_summary  
+   where (dbo.content_summary.project_id = dbo.Item_Master.project_id ) and
+			(dbo.content_summary.supp_code = dbo.Item_Master.supp_code ) and
+ 		(Upper( dbo.content_summary.inventory_type ) <> 'H' ) and
+		( dbo.content_summary.sku = dbo.Item_Master.sku) and
+		  dbo.content_summary.l_code = cs.l_code ) as ~"Available_Qty~",
+  ( select isnull(sum( dbo.content_summary.alloc_qty  ), 0)
+    from dbo.content_summary  
+   where (dbo.content_summary.project_id = dbo.Item_Master.project_id ) and
+			(dbo.content_summary.supp_code = dbo.Item_Master.supp_code ) and
+ 		(Upper( dbo.content_summary.inventory_type ) <> 'H' ) and
+		( dbo.content_summary.sku = dbo.Item_Master.sku) and
+		  dbo.content_summary.l_code = cs.l_code  ) as ~"Allocated_Qty~",
+  ( select isnull(sum( dbo.content_summary.sit_qty  ), 0)
+    from dbo.content_summary  
+   where (dbo.content_summary.project_id = dbo.Item_Master.project_id ) and
+			(dbo.content_summary.supp_code = dbo.Item_Master.supp_code ) and
+ 		(Upper( dbo.content_summary.inventory_type ) <> 'H' ) and
+		( dbo.content_summary.sku = dbo.Item_Master.sku)and
+		  dbo.content_summary.l_code = cs.l_code   ) as ~"Sit_Qty~"
+    FROM dbo.Item_Master left outer join content_summary cs ON (Item_Master.SKU = cs.sku AND Item_Master.supp_code = cs.supp_code AND Item_Master.project_id = cs.project_id )
+ORDER BY dbo.Item_Master.SKU, cs.l_code 
+" )
+text(band=header alignment="2" text="Full Inventory Report" border="0" color="33554432" x="18" y="0" height="92" width="4507" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-14" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=header alignment="0" expression="String( datetime( today(), now() ) , ~"dddd mmmm dd, yyyy hh:mm am/pm~")"border="0" color="33554432" x="14" y="12" height="64" width="1019" format="[General]" html.valueishtml="0"  name=date_1 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="1" text="Project:" border="0" color="33554432" x="23" y="132" height="56" width="224" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header id=1 alignment="0" tabsequence=32766 border="0" color="33554432" x="265" y="136" height="56" width="631" format="[general]" html.valueishtml="0"  name=project_id  tag="1:Project ID" visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="Sku" border="4" color="33554432" x="9" y="212" height="56" width="786" html.valueishtml="0"  name=sku_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="Description" border="4" color="33554432" x="809" y="212" height="56" width="1669" html.valueishtml="0"  name=t_5 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="Supplier" border="4" color="33554432" x="2496" y="212" height="56" width="462" html.valueishtml="0"  name=t_3 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Location" border="4" color="33554432" x="2976" y="212" height="56" width="462" html.valueishtml="0"  name=l_code_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="1" text="Available
+Qty" border="4" color="33554432" x="3456" y="156" height="112" width="352" html.valueishtml="0"  name=available_qty_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="1" text="Allocated
+Qty" border="4" color="33554432" x="3826" y="156" height="112" width="352" html.valueishtml="0"  name=allocated_qty_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="1" text="Sit
+Qty" border="4" color="33554432" x="4197" y="156" height="112" width="352" html.valueishtml="0"  name=sit_qty_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=header alignment="1" expression="'Page ' + page() + ' of ' + pageCount()"border="0" color="33554432" x="3502" y="12" height="64" width="1047" format="[general]" html.valueishtml="0"  name=page_1 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+line(band=detail x1="0" y1="208" x2="3438" y2="208"  name=l_1 visible="1" pen.style="0" pen.width="5" pen.color="0"  background.mode="2" background.color="16777215" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="0" color="33554432" x="9" y="4" height="56" width="786" format="[general]" html.valueishtml="0"  name=sku  tag="2:SKU" visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="0" color="33554432" x="809" y="4" height="56" width="1669" format="[general]" html.valueishtml="0"  name=description  tag="3:Description" visible="1" edit.limit=70 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="0" tabsequence=32766 border="0" color="33554432" x="2496" y="4" height="56" width="462" format="[general]" html.valueishtml="0"  name=supp_code  tag="4:Supplier" visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="0" color="33554432" x="2976" y="4" height="56" width="462" format="[general]" html.valueishtml="0"  name=location visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=8 alignment="1" tabsequence=32766 border="0" color="33554432" x="4197" y="4" height="56" width="352" format="###,###,##0" html.valueishtml="0"  name=sit_qty  tag="8:Sit Quantity" visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=7 alignment="1" tabsequence=32766 border="0" color="33554432" x="3826" y="4" height="56" width="352" format="###,###,##0" html.valueishtml="0"  name=allocated_qty  tag="7:Allocated Quantity" visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="1" tabsequence=32766 border="0" color="33554432" x="3456" y="4" height="56" width="352" format="###,###,##0" html.valueishtml="0"  name=available_qty  tag="6:Available Quantity" visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=footer alignment="1" text="Sku Count:" border="0" color="33554432" x="18" y="4" height="56" width="274" html.valueishtml="0"  name=t_4 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=footer alignment="0" expression="rowcount()"border="0" color="33554432" x="306" y="4" height="56" width="366" format="###,###,##0" html.valueishtml="0"  name=compute_1 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=footer alignment="1" expression="sum(sit_qty for all)"border="0" color="33554432" x="3877" y="0" height="56" width="672" format="###,###,###,###,##0" html.valueishtml="0"  name=compute_4 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=footer alignment="1" expression="sum(allocated_qty for all)"border="0" color="33554432" x="3506" y="84" height="56" width="672" format="###,###,###,###,##0" html.valueishtml="0"  name=compute_3 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=footer alignment="1" expression="sum(available_qty for all)"border="0" color="33554432" x="3136" y="0" height="56" width="672" format="###,###,###,###,##0" html.valueishtml="0"  name=compute_2 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+line(band=footer x1="3131" y1="60" x2="3803" y2="60"  name=l_4 visible="1" pen.style="0" pen.width="5" pen.color="0"  background.mode="2" background.color="16777215" )
+line(band=footer x1="3131" y1="68" x2="3803" y2="68"  name=l_5 visible="1" pen.style="0" pen.width="5" pen.color="0"  background.mode="2" background.color="16777215" )
+line(band=footer x1="3506" y1="148" x2="4178" y2="148"  name=l_3 visible="1" pen.style="0" pen.width="5" pen.color="0"  background.mode="2" background.color="16777215" )
+line(band=footer x1="3506" y1="156" x2="4178" y2="156"  name=l_7 visible="1" pen.style="0" pen.width="5" pen.color="0"  background.mode="2" background.color="16777215" )
+line(band=footer x1="3872" y1="72" x2="4544" y2="72"  name=l_2 visible="1" pen.style="0" pen.width="5" pen.color="0"  background.mode="2" background.color="16777215" )
+line(band=footer x1="3872" y1="64" x2="4544" y2="64"  name=l_6 visible="1" pen.style="0" pen.width="5" pen.color="0"  background.mode="2" background.color="16777215" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

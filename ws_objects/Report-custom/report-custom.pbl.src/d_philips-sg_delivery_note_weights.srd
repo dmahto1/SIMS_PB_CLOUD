@@ -1,0 +1,19 @@
+﻿$PBExportHeader$d_philips-sg_delivery_note_weights.srd
+$PBExportComments$Philips Singapore Delivery Note - Weight and Volume Override
+release 9;
+datawindow(units=0 timer_interval=0 color=67108864 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=124 color="536870912" )
+table(column=(type=decimal(5) updatewhereclause=yes name=total_weight dbname="total_weight" )
+ column=(type=decimal(5) updatewhereclause=yes name=total_volume dbname="total_volume" )
+ )
+text(band=detail alignment="1" text="Gross Weight:" border="0" color="33554432" x="0" y="32" height="64" width="402" html.valueishtml="0"  name=total_weight_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=detail alignment="1" text="Total Volume:" border="0" color="33554432" x="1001" y="32" height="64" width="407" html.valueishtml="0"  name=total_volume_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=1 alignment="1" tabsequence=10 border="5" color="33554432" x="439" y="32" height="64" width="521" format="[general]" html.valueishtml="0"  name=total_weight visible="1" editmask.mask="###,###.00000" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=2 alignment="1" tabsequence=20 border="5" color="33554432" x="1445" y="32" height="64" width="521" format="[general]" html.valueishtml="0"  name=total_volume visible="1" editmask.mask="###,###.00000" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

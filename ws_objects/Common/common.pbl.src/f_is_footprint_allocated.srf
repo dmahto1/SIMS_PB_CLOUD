@@ -1,0 +1,182 @@
+﻿$PBExportHeader$f_is_footprint_allocated.srf
+$PBExportComments$Is Footprint GPN Pallet allocated
+global type f_is_footprint_allocated from function_object
+end type
+
+forward prototypes
+global function str_parms f_is_footprint_allocated (string aspallet, string ascontainer, datawindow adwpick, string aswhcode, string assku)
+end prototypes
+
+global function str_parms f_is_footprint_allocated (string aspallet, string ascontainer, datawindow adwpick, string aswhcode, string assku);String lsFind, lsContainer, lsSharedContainer, lsThisContainer, lsOrderNbr, lsOrderType, lsThisOrderType, lsThisDoTo
+String lsColumnNames, lsOrdType, lsOtherOrderType
+Long llAvailQty, llNbrAlloc, llOtherQty, llAllocQty, llFound, llNbrReq, llEmptyContainers
+Long llTfrInQty, llTfrOutQty, llAllocContainers, llNbrTfrOut
+Int liCSRows, liCSRow, liRowPos, liPickRow, liPickRows, liPos
+
+//GailM 3/25/2019 Set an indicator for footprint GPNs where pallet and/or containers are not assigned (Now DUMMY. Will change to NA soon)
+//String lsFootPrintBlankInd = 'NA'
+
+str_parms lstr_parms
+
+u_ds_ancestor ldsCS
+
+ldsCS = Create u_ds_ancestor
+ldsCS.dataobject = 'd_content_summary_pallet'
+ldsCS.SetTransObject(SQLCA)
+
+lsOrderNbr = ""
+lsOrderType = ""
+lsOrdType = "T"
+lsThisOrderType = ""		//Transfer
+llAvailQty = 0
+llEmptyContainers = 0
+llAllocContainers = 0
+lsSharedContainer = ''
+lsThisContainer = ''
+
+//liCSRows = ldsCS.Retrieve(gs_project,asWhCode, asSku, asPallet, asContainer, gsFootprintBlankInd)
+liCSRows = ldsCS.Retrieve(gs_project,asWhCode, asSku, asPallet)
+//GailM 1/16/2020 DE14186 - 1/27/2020 DE14365
+If asPallet = gsFootprintBlankInd and asContainer = gsFootprintBlankInd Then
+	lstr_parms.Integer_Arg[1] = 0	//Cannot check for allocation against NA
+Else
+	If asPallet = gsFootprintBlankInd and asContainer <> gsFootprintBlankInd Then
+		ldsCS.SetFilter("container_id = '" + asContainer + "' ")
+		ldsCS.Filter()
+		liCSRows = ldsCS.RowCount()
+	End if
+	
+	lstr_parms.Integer_Arg[1] = liCSRows
+	If liCSRows > 0 Then
+		//Loop through, removing unallocated rows
+		For liCSRow = liCSRows to 1 step -1
+			llAvailQty += ldsCS.GetItemNumber( liCSRow, 'avail_qty' )
+			llAllocQty = ldsCS.GetItemNumber( liCSRow, 'alloc_qty' )
+			llTfrOutQty = ldsCS.GetItemNumber( liCSRow, 'tfr_out') 
+			llTfrInQty = ldsCS.GetItemNumber( liCSRow, 'tfr_in')
+			If llTfrInQty > 0 and llTfrOutQty = 0 Then	//SOC transfer in will not be used
+				ldsCS.deleterow( liCSRow)
+			ElseIf llAllocQty > 0 and llTfrOutQty > 0 Then		//Container has outbound allocated and transfer out qty (shared allocated)
+				lsSharedContainer = ldsCS.GetItemString( liCSRow, 'container_id' )
+				llAllocContainers ++
+			ElseIf llTfrInQty > 0 and llTfrOutQty > 0 Then		//Stock Transfer allocated without owner change
+				llAllocContainers ++
+			Elseif llAllocQty + llTfrOutQty = 0 Then 				//No allocation on this container.  Pull out of contention
+				llEmptyContainers ++
+				ldsCS.deleterow( liCSRow)
+			ElseIf llTfrInQty > 0 Then									//Do not use TfrIn rows.  Pull out of contention
+				ldsCS.deleterow( liCSRow)
+			Else
+				llAllocContainers ++									//Container is allocated
+			End If
+		Next
+	End If
+	
+	// Check CS for extra allocated stock
+	lsContainer = ''
+	liCSRows = ldsCS.Rowcount()
+	liPickRows = adwpick.Rowcount()
+	If liPickRows > 0 Then		//Is this an outbound order or transfer?
+		lsColumnNames = adwPick.describe("datawindow.objects ")
+		If Pos( lsColumnNames, "s_location" ) = 0 Then 
+			lsThisOrderType = "S"		//Outbound Order
+		Else
+			If Pos( lsColumnNames, "user_line_item_no") = 0 Then
+				lsThisOrderType = "I"		//Stock Transfer
+			Else
+				lsThisOrderType = "O"	//Stock Owner Change
+			End If
+		End If
+	End If
+	
+	//Check remaining content summary rows for allocations
+	For liCSRow = 1 to liCSRows
+		lsThisContainer = ldsCS.GetItemString( liCSRow, "container_id" )
+		if lsSharedContainer <> '' Then		//We have a shared container
+			if lsSharedContainer = lsThisContainer Then
+				llAllocQty = ldsCS.GetItemNumber( liCSRow, "alloc_qty" )		//Total OutB allocated
+				llOtherQty = ldsCS.GetItemNumber( liCSRow, "tfr_out" )		//Transfer allocated
+			Else
+				llAllocQty = ldsCS.GetItemNumber( liCSRow, "alloc_qty" ) + ldsCS.GetItemNumber( liCSRow, "tfr_out" )  //Not shared.  Not this container
+			End If
+		Else
+			llAllocQty = ldsCS.GetItemNumber( liCSRow, "alloc_qty" ) + ldsCS.GetItemNumber( liCSRow, "tfr_out" )  		//Not shared. Get total allocated
+		End if
+		
+		lsFind = "container_id = '" + lsThisContainer + "' "
+		llFound = adwpick.Find( lsFind, 1, liPickRows )
+		If llFound > 0 Then
+			llNbrReq = adwpick.GetItemNumber(llFound, 'quantity')
+			If lsThisOrderType = 'S' Then
+				lsThisDoTo = adwpick.GetItemString(llFound, 'do_no')
+			Else
+				lsThisDoTo = adwpick.GetItemString(llFound, 'to_no')
+			End If			
+			
+			If llAllocQty > llNbrReq Then		//Extra allocated to another outbound order
+				lsContainer = lsThisContainer
+				lsOrdType = lsThisOrderType
+			ElseIf llAllocQty = llNbrReq and llOtherQty > 0 Then  //Extra allocated to transfer order
+				lsContainer = lsThisContainer
+			ElseIf llAllocQty + llOtherQty > llNbrReq Then
+				lsContainer = lsThisContainer
+			End If
+		Else
+			lsContainer = lsThisContainer
+		End If
+		llAllocQty = 0
+		llOtherQty = 0
+	Next
+	
+	// If lsContainer is not blank, this pallet is allocated to another order.  Find the order nbr
+	If lsContainer <> '' and lsContainer <> gsFootprintBlankInd and lsContainer <> '-' Then
+		
+		select rtrim(dm.invoice_no) into :lsOrderNbr
+		from delivery_master dm with (nolock), delivery_picking dp with (nolock)
+		where dm.project_id = :gs_project and dp.do_no = dm.do_no
+		and dm.ord_status not in ('C','D','V','H') 
+		and dp.po_no2 = :asPallet
+		and dp.container_id = :lsContainer
+		and dm.do_no <> :lsThisDoTo
+		using sqlca;
+		
+		If lsOrderNbr > "" Then
+			lsOrderType = 'S'
+		End If
+	End If
+	
+	If lsContainer <> '' and lsOrderNbr = "" and lsContainer <> gsFootprintBlankInd and lsContainer <> '-' Then			//Must be SOC or ST
+		select rtrim(tm.user_field3), rtrim(tm.ord_type) into :lsOrderNbr, :lsOrderType
+		from transfer_master tm with (nolock), transfer_detail td with (nolock)
+		where tm.project_id = :gs_project and td.to_no = tm.to_no and tm.ord_status not in ('C','V')
+		and td.po_no2 = :asPallet and td.container_id = :lsContainer and tm.ord_type = 'O'
+		and tm.to_no <> :lsThisDoTo
+		using sqlca;
+		
+		if lsOrderNbr = "" Then		//Must check for ST by to_no
+			select rtrim(tm.to_no), rtrim(tm.ord_type) into :lsOrderNbr, :lsOrderType
+			from transfer_master tm with (nolock), transfer_detail td with (nolock)
+			where tm.project_id = :gs_project and td.to_no = tm.to_no and tm.ord_status not in ('C','V')
+			and td.po_no2 = :asPallet and td.container_id = :lsContainer and tm.ord_type = 'I'		
+			and tm.to_no <> :lsThisDoTo
+			using sqlca;
+			
+		End If
+	End If
+End If
+
+//If lsOrderNbr <> "" Then lsOrderNbr = lsOrderType + lsOrderNbr
+lstr_parms.String_Arg[1] = lsOrderNbr
+lstr_parms.String_Arg[2] = lsOrderType
+lstr_parms.String_Arg[3] = lsSharedContainer	
+lstr_parms.String_Arg[4] = lsThisOrderType
+lstr_parms.Long_Arg[1] = llAvailQty
+lstr_parms.Long_Arg[2] = llEmptyContainers
+lstr_parms.Long_Arg[3] = llAllocContainers
+lstr_parms.Long_Arg[4] = llAllocContainers
+			
+Destroy ldsCS
+
+return lstr_parms
+end function
+

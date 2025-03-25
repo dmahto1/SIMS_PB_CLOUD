@@ -1,0 +1,18 @@
+HA$PBExportHeader$str_parms.srs
+$PBExportComments$*Structure Parms
+global type str_parms from structure
+	string		string_arg[]
+	long		long_arg[]
+	integer		integer_arg[]
+	boolean		boolean_arg[]
+	datawindow		datawindow_arg[]
+	window		window_arg[]
+	boolean		cancelled
+	decimal { 5 }		decimal_arg[]
+	datetime		datetime_arg[]
+	date		date_arg[]
+	datastore		datastore_arg[]
+	string		string_arg_2[]
+	string		string_arg_3[]
+end type
+

@@ -1,0 +1,118 @@
+HA$PBExportHeader$d_invoice.srd
+$PBExportComments$Main datawindow object for invoice information
+release 9;
+datawindow(units=0 timer_interval=60000 color=16777215 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 60 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=1592 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=172 color="536870912"  height.autosize=yes)
+table(column=(type=char(16) updatewhereclause=yes name=delivery_master_do_no dbname="do_no" )
+ column=(type=char(40) updatewhereclause=yes name=project_client_name dbname="client_name" )
+ column=(type=char(40) updatewhereclause=yes name=project_address_1 dbname="address_1" )
+ column=(type=char(40) updatewhereclause=yes name=project_address_2 dbname="address_2" )
+ column=(type=char(40) updatewhereclause=yes name=project_address_3 dbname="address_3" )
+ column=(type=char(40) updatewhereclause=yes name=project_address_4 dbname="address_4" )
+ column=(type=char(30) updatewhereclause=yes name=project_city dbname="city" )
+ column=(type=char(35) updatewhereclause=yes name=project_state dbname="state" )
+ column=(type=char(30) updatewhereclause=yes name=project_country dbname="country" )
+ column=(type=char(15) updatewhereclause=yes name=project_zip dbname="zip" )
+ column=(type=char(40) updatewhereclause=yes name=delivery_master_ship_ref dbname="ship_ref" )
+ column=(type=char(20) updatewhereclause=yes name=vat_id dbname="vat_id" )
+ column=(type=char(40) updatewhereclause=yes name=delivery_master_cust_name dbname="cust_name" )
+ column=(type=char(40) updatewhereclause=yes name=delivery_master_contact_person dbname="contact_person" )
+ column=(type=char(60) updatewhereclause=yes name=delivery_master_address_1 dbname="address_1" )
+ column=(type=char(60) updatewhereclause=yes name=delivery_master_address_2 dbname="address_2" )
+ column=(type=char(60) updatewhereclause=yes name=delivery_master_address_3 dbname="address_3" )
+ column=(type=char(60) updatewhereclause=yes name=delivery_master_address_4 dbname="address_4" )
+ column=(type=char(30) updatewhereclause=yes name=delivery_master_city dbname="city" )
+ column=(type=char(35) updatewhereclause=yes name=delivery_master_state dbname="state" )
+ column=(type=char(30) updatewhereclause=yes name=delivery_master_country dbname="country" )
+ column=(type=char(15) updatewhereclause=yes name=delivery_master_zip dbname="zip" )
+ column=(type=char(20) updatewhereclause=yes name=delivery_master_tel dbname="tel" )
+ column=(type=char(50) updatewhereclause=yes name=delivery_master_invoice_no dbname="invoice_no" )
+ retrieve=" select 	distinct  dm.do_no,
+			p.client_name, 
+			p.address_1, 
+			p.address_2, 
+			p.address_3, 
+			p.address_4, 
+			p.city, 
+			p.state, 
+			p.country, 
+			p.zip,  
+			dm.ship_ref,
+			vat_id = (select vat_id
+				from customer
+					where 	customer.project_id = dm.project_id and
+								customer.cust_code  = dm.cust_code),
+
+	
+	
+			dm.cust_name, 
+			dm.contact_person,
+			dm.address_1,
+			dm.address_2,
+			dm.address_3, 
+			dm.address_4,
+			dm.city,
+			dm.state,
+			dm.country,
+			dm.zip,
+			dm.tel,
+			dm.invoice_no
+
+from 		delivery_master dm, 
+			project p
+
+where 	dm.project_id = :as_project and
+			dm.wh_code    = :as_warehouse and
+			dm.invoice_no = :as_invoice_no  and
+			dm.project_id = p.project_id
+	   " arguments=(("as_project", string),("as_warehouse", string),("as_invoice_no", string)) )
+bitmap(band=header filename="F:\Resources\emery_logo.bmp" x="59" y="8" height="304" width="809" border="0"  name=po_emeryworld visible="1" )
+column(band=header id=2 alignment="0" tabsequence=32766 border="0" color="0" x="910" y="64" height="60" width="1125" format="[general]" html.valueishtml="0"  name=project_client_name visible="1" edit.limit=40 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header id=3 alignment="0" tabsequence=32766 border="0" color="0" x="910" y="128" height="60" width="1125" format="[general]" html.valueishtml="0"  name=project_address_1 visible="1" edit.limit=40 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header id=4 alignment="0" tabsequence=32766 border="0" color="0" x="910" y="192" height="60" width="1125" format="[general]" html.valueishtml="0"  name=project_address_2 visible="1" edit.limit=40 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header id=5 alignment="0" tabsequence=32766 border="0" color="0" x="910" y="256" height="60" width="1125" format="[general]" html.valueishtml="0"  name=project_address_3 visible="1" edit.limit=40 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header id=6 alignment="0" tabsequence=32766 border="0" color="0" x="910" y="320" height="60" width="1125" format="[general]" html.valueishtml="0"  name=project_address_4 visible="1" edit.limit=40 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header id=7 alignment="0" tabsequence=32766 border="0" color="0" x="910" y="384" height="60" width="850" format="[general]" html.valueishtml="0"  name=project_city visible="1" edit.limit=30 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header id=8 alignment="0" tabsequence=32766 border="0" color="0" x="1797" y="384" height="60" width="544" format="[general]" html.valueishtml="0"  name=project_state visible="1" edit.limit=35 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header id=10 alignment="0" tabsequence=32766 border="0" color="0" x="910" y="448" height="60" width="439" format="[general]" html.valueishtml="0"  name=project_zip visible="1" edit.limit=15 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header id=9 alignment="0" tabsequence=32766 border="0" color="0" x="1381" y="448" height="60" width="850" format="[general]" html.valueishtml="0"  name=project_country visible="1" edit.limit=30 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="GE Order Ref:" border="0" color="0" x="69" y="704" height="56" width="334" html.valueishtml="0"  name=delivery_master_ship_ref_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header id=11 alignment="0" tabsequence=32766 border="0" color="0" x="425" y="704" height="60" width="896" format="[general]" html.valueishtml="0"  name=delivery_master_ship_ref visible="1" edit.limit=40 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="Vat Number:" border="0" color="0" x="69" y="768" height="56" width="334" html.valueishtml="0"  name=vat_id_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header id=12 alignment="0" tabsequence=32766 border="0" color="0" x="425" y="768" height="60" width="576" format="[general]" html.valueishtml="0"  name=vat_id visible="1" edit.limit=20 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+line(band=header x1="69" y1="1368" x2="69" y2="1472"  name=l_1 visible="1" pen.style="0" pen.width="9" pen.color="0"  background.mode="1" background.color="553648127" )
+line(band=header x1="69" y1="1372" x2="3301" y2="1372"  name=l_2 visible="1" pen.style="0" pen.width="9" pen.color="0"  background.mode="1" background.color="553648127" )
+line(band=header x1="64" y1="1468" x2="3301" y2="1468"  name=l_3 visible="1" pen.style="0" pen.width="9" pen.color="0"  background.mode="1" background.color="553648127" )
+text(band=header alignment="0" text="PRO FORMA INVOICE #" border="0" color="0" x="882" y="1396" height="56" width="690" html.valueishtml="0"  name=delivery_master_do_no_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header id=24 alignment="0" tabsequence=32766 border="0" color="0" x="1641" y="1396" height="60" width="658" format="[general]" html.valueishtml="0"  name=delivery_master_invoice_no visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+line(band=header x1="3310" y1="1472" x2="3305" y2="1368"  name=l_4 visible="1" pen.style="0" pen.width="9" pen.color="0"  background.mode="1" background.color="553648127" )
+text(band=header alignment="0" text="Part Number:" border="0" color="0" x="123" y="1512" height="56" width="389" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="Product Description:" border="0" color="0" x="937" y="1512" height="56" width="599" html.valueishtml="0"  name=t_3 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+line(band=header x1="96" y1="1580" x2="3301" y2="1576"  name=l_5 visible="1" pen.style="0" pen.width="9" pen.color="0"  background.mode="1" background.color="553648127" )
+text(band=header alignment="0" text="Quantity:" border="0" color="0" x="2121" y="1512" height="56" width="265" html.valueishtml="0"  name=t_4 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="Price Each:" border="0" color="0" x="2519" y="1512" height="56" width="334" html.valueishtml="0"  name=t_5 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="Line Value:" border="0" color="0" x="2990" y="1512" height="56" width="283" html.valueishtml="0"  name=t_6 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+report(band=detail dataobject="d_invoice_detail" x="73" y="4" height="148" width="2830" border="0"  height.autosize=yes criteria="" nest_arguments=(("as_project"),("delivery_master_do_no")) trail_footer = yes  name=dw_1 visible="1"  slideup=directlyabove )
+column(band=header id=20 alignment="0" tabsequence=32766 border="0" color="0" x="2222" y="1024" height="60" width="443" format="[general]" html.valueishtml="0"  name=delivery_master_state visible="1" edit.limit=35 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header id=21 alignment="0" tabsequence=32766 border="0" color="0" x="2679" y="1024" height="60" width="471" format="[general]" html.valueishtml="0"  name=delivery_master_country visible="1" edit.limit=30 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=header alignment="0" expression="today()"border="0" color="0" x="1591" y="1268" height="60" width="576" format="mm/dd/yyyy hh:mm" html.valueishtml="0"  name=cf_date visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header id=13 alignment="0" tabsequence=32766 border="0" color="0" x="1591" y="640" height="60" width="1394" format="[general]" html.valueishtml="0"  name=delivery_master_cust_name visible="1" edit.limit=40 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header id=14 alignment="0" tabsequence=32766 border="0" color="0" x="1591" y="704" height="60" width="1394" format="[general]" html.valueishtml="0"  name=delivery_master_contact_person visible="1" edit.limit=40 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header id=19 alignment="0" tabsequence=32766 border="0" color="0" x="1591" y="1024" height="60" width="617" format="[general]" html.valueishtml="0"  name=delivery_master_city visible="1" edit.limit=30 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header id=22 alignment="0" tabsequence=32766 border="0" color="0" x="1591" y="1088" height="60" width="439" format="[general]" html.valueishtml="0"  name=delivery_master_zip visible="1" edit.limit=15 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header id=23 alignment="0" tabsequence=32766 border="0" color="0" x="1591" y="1204" height="60" width="576" format="[general]" html.valueishtml="0"  name=delivery_master_tel visible="1" edit.limit=20 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header id=16 alignment="0" tabsequence=32766 border="0" color="0" x="1591" y="832" height="60" width="1696" format="[general]" html.valueishtml="0"  name=delivery_master_address_2 visible="1" edit.limit=40 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header id=17 alignment="0" tabsequence=32766 border="0" color="0" x="1591" y="896" height="60" width="1696" format="[general]" html.valueishtml="0"  name=delivery_master_address_3 visible="1" edit.limit=40 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header id=18 alignment="0" tabsequence=32766 border="0" color="0" x="1591" y="960" height="60" width="1696" format="[general]" html.valueishtml="0"  name=delivery_master_address_4 visible="1" edit.limit=40 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header id=15 alignment="0" tabsequence=32766 border="0" color="0" x="1591" y="768" height="60" width="1696" format="[general]" html.valueishtml="0"  name=delivery_master_address_1 visible="1" edit.limit=40 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="Ship To:" border="0" color="0" x="1339" y="640" height="56" width="224" html.valueishtml="0"  name=delivery_master_cust_name_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="Attn:" border="0" color="0" x="1339" y="704" height="56" width="128" html.valueishtml="0"  name=delivery_master_contact_person_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="Phone:" border="0" color="0" x="1339" y="1204" height="56" width="206" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

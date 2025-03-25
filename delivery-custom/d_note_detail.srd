@@ -1,0 +1,19 @@
+HA$PBExportHeader$d_note_detail.srd
+release 7;
+datawindow(units=0 timer_interval=0 color=16777215 processing=0 HTMLDW=no print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.prompt=no print.buttons=no print.preview.buttons=no )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=48 color="536870912"  height.autosize=yes)
+table(column=(type=char(255) updatewhereclause=yes name=note_text dbname="Delivery_Notes.note_text" )
+ column=(type=decimal(0) updatewhereclause=yes name=note_seq_no dbname="Delivery_Notes.note_seq_no" )
+ retrieve="SELECT  delivery_notes.note_text ,
+           delivery_notes.note_seq_no     
+        FROM delivery_notes      
+        WHERE ( delivery_notes.note_type = :note_type ) and 
+         ( delivery_notes.do_no = :do_no ) and 
+         ( delivery_notes.project_id = :project_id ) and
+          ( delivery_notes.line_item_no = :line_item_no )  
+        ORDER BY delivery_notes.note_seq_no          ASC  " arguments=(("project_id", string),("do_no", string),("line_item_no", number),("note_type", string)) )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="0" color="0" x="14" y="0" height="76" width="3515" format="[general]"  name=note_text height.autosize=yes edit.limit=255 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" )

@@ -1,0 +1,84 @@
+HA$PBExportHeader$d_cc_report_by_sku.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=400 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=128 color="536870912" )
+table(column=(type=char(50) updatewhereclause=yes name=fsku dbname="fsku" )
+ column=(type=char(50) updatewhereclause=yes name=tsku dbname="tsku" )
+ column=(type=char(70) updatewhereclause=yes name=item_master_description dbname="Item_Master.Description" )
+ column=(type=char(20) updatewhereclause=yes name=item_master_supp_code dbname="Item_Master.Supp_Code" )
+ column=(type=decimal(0) updatewhereclause=yes name=item_master_owner_id dbname="Item_Master.Owner_ID" )
+ column=(type=char(1) updatewhereclause=yes name=cc_group_code dbname="Item_Master.cc_group_code" )
+ column=(type=char(4) updatewhereclause=yes name=item_master_cc_class_code dbname="Item_Master.cc_class_code" )
+ column=(type=datetime updatewhereclause=yes name=item_master_last_cycle_cnt_date dbname="Last_Cycle_Cnt_Date" )
+ column=(type=long updatewhereclause=yes name=list_past_due dbname="list_past_due" values="List Past Due	1/List Past Due	0" )
+ column=(type=decimal(0) updatewhereclause=yes name=item_master_cc_freq dbname="Item_Master.CC_Freq" )
+ column=(type=decimal(5) updatewhereclause=yes name=item_master_cc_trigger_qty dbname="Item_Master.CC_Trigger_Qty" )
+ column=(type=long updatewhereclause=yes name=cc_group_class_code_count_frequency dbname="cc_group_class_code.count_frequency" )
+ column=(type=char(16) updatewhereclause=yes name=item_master_last_cc_no dbname="Item_Master.last_cc_no" )
+ column=(type=char(10) updatewhereclause=yes name=item_master_project_id dbname="Item_Master.project_id" )
+ column=(type=long updatewhereclause=yes name=diff dbname="diff" )
+ column=(type=char(23) updatewhereclause=yes name=ownername dbname="OwnerName" )
+ retrieve="  SELECT dbo.Item_Master.SKU as 'fsku',
+		dbo.Item_Master.SKU as 'tsku',   
+         dbo.Item_Master.Description,   
+         dbo.Item_Master.Supp_Code,   
+         dbo.Item_Master.Owner_ID,   
+         dbo.Item_Master.cc_group_code,   
+         dbo.Item_Master.cc_class_code,   
+         isNUll( dbo.Item_Master.Last_Cycle_Cnt_Date, '') as ~"Last_Cycle_Cnt_Date~",
+         0 as 'list_past_due',   
+         dbo.Item_Master.CC_Freq,   
+         dbo.Item_Master.CC_Trigger_Qty,   
+         dbo.cc_group_class_code.count_frequency,   
+         dbo.Item_Master.last_cc_no  ,
+	    dbo.Item_Master.project_id,
+		( cc_group_class_code.count_frequency - DATEDIFF(day, Item_Master.Last_Cycle_Cnt_Date,getDate())  ) as diff,
+		( rtrim(dbo.Owner.Owner_Cd) + '('+dbo.Owner.Owner_Type )+')' as 'OwnerName'
+    FROM dbo.cc_group_class_code RIGHT OUTER JOIN dbo.Item_Master ON dbo.cc_group_class_code.project_id = dbo.Item_Master.Project_ID AND dbo.cc_group_class_code.group_code = dbo.Item_Master.cc_group_code AND dbo.cc_group_class_code.class_code = dbo.Item_Master.cc_class_code,   
+         dbo.Owner  
+   WHERE ( dbo.Owner.Owner_ID = dbo.Item_Master.Owner_ID ) and  
+         ( dbo.Owner.Project_ID = dbo.Item_Master.Project_ID )    
+"  sort="fsku A item_master_supp_code A item_master_owner_id A " )
+text(band=header alignment="2" text="Cycle Count By SKU Report" border="0" color="33554432" x="14" y="0" height="92" width="3497" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-14" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="1" text="Project:" border="0" color="33554432" x="23" y="132" height="56" width="224" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header id=9 alignment="1" tabsequence=32766 border="0" color="33554432" x="23" y="208" height="56" width="393" format="[general]" html.valueishtml="0"  name=list_past_due visible="1" checkbox.text="List Past Due" checkbox.on="1" checkbox.off="0" checkbox.lefttext=yes checkbox.scale=no checkbox.threed=yes  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header id=14 alignment="0" tabsequence=32766 border="0" color="33554432" x="265" y="132" height="64" width="672" format="[general]" html.valueishtml="0"  name=item_master_project_id visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=header alignment="0" expression="String( datetime( today(), now() ) , ~"dddd mmmm dd, yyyy hh:mm am/pm~")"border="0" color="33554432" x="14" y="12" height="64" width="1019" format="[General]" html.valueishtml="0"  name=date_1 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=header alignment="1" expression="'Page ' + page() + ' of ' + pageCount()"border="0" color="33554432" x="2446" y="12" height="64" width="1047" format="[general]" html.valueishtml="0"  name=page_1 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="SKU/Desciption" border="4" color="33554432" x="9" y="336" height="56" width="878" html.valueishtml="0"  name=t_3 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Supplier" border="4" color="33554432" x="905" y="336" height="56" width="210" html.valueishtml="0"  name=t_5 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="Owner" border="4" color="33554432" x="1134" y="336" height="56" width="370" html.valueishtml="0"  name=t_6 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Last Count
+Order" border="4" color="33554432" x="3136" y="280" height="112" width="338" html.valueishtml="0"  name=t_10 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="( overdue )" border="4" color="255" x="2843" y="336" height="56" width="274" html.valueishtml="0"  name=t_12 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Days Until
+Next Count" border="0" color="33554432" x="2843" y="228" height="112" width="274" html.valueishtml="0"  name=t_4 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Last Count
+Date" border="4" color="33554432" x="2487" y="280" height="112" width="338" html.valueishtml="0"  name=t_9 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Count
+Frequency" border="4" color="33554432" x="2208" y="280" height="112" width="265" html.valueishtml="0"  name=t_11 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="CC
+Class" border="4" color="33554432" x="2039" y="280" height="112" width="151" html.valueishtml="0"  name=t_8 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="CC Group" border="4" color="33554432" x="1522" y="336" height="56" width="498" html.valueishtml="0"  name=t_7 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="0" color="33554432" x="128" y="232" height="64" width="507" format="[general]" html.valueishtml="0"  name=tsku visible="0" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=11 alignment="0" tabsequence=32766 border="0" color="33554432" x="654" y="236" height="64" width="983" format="[general]" html.valueishtml="0"  name=item_master_cc_trigger_qty visible="0" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="0" color="33554432" x="32" y="64" height="52" width="1710" format="[general]" html.valueishtml="0"  name=item_master_description visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+line(band=detail x1="0" y1="124" x2="3474" y2="124"  name=l_1 visible="1" pen.style="0" pen.width="5" pen.color="0"  background.mode="2" background.color="16777215" )
+column(band=detail id=5 alignment="1" tabsequence=32766 border="0" color="33554432" x="1650" y="228" height="52" width="169" format="[general]" html.valueishtml="0"  name=item_master_owner_id visible="0" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="0" color="33554432" x="9" y="4" height="52" width="878" format="[general]" html.valueishtml="0"  name=fsku  tag="1:sku" visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="0" color="33554432" x="905" y="4" height="52" width="210" format="[general]" html.valueishtml="0"  name=item_master_supp_code  tag="2:Supplier" visible="1" edit.limit=20 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=16 alignment="0" tabsequence=32766 border="0" color="33554432" x="1134" y="0" height="56" width="370" format="[general]" html.valueishtml="0"  name=ownername  tag="3:Owner" visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=13 alignment="0" tabsequence=32766 border="0" color="33554432" x="3136" y="4" height="52" width="338" format="[general]" html.valueishtml="0"  name=item_master_last_cc_no  tag="9:Last CC Order" visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=15 alignment="2" tabsequence=32766 border="0" color="33554432" x="2843" y="0" height="56" width="274" format="0###;[red](0###)" html.valueishtml="0"  name=diff  tag="8:Days Until Next Count" visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=8 alignment="2" tabsequence=32766 border="0" color="33554432" x="2487" y="4" height="52" width="338" format="mm/dd/yyyy" html.valueishtml="0"  name=item_master_last_cycle_cnt_date  tag="7:Last Cycle Count Date" visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=12 alignment="2" tabsequence=32766 border="0" color="33554432" x="2208" y="4" height="52" width="265" format="[general]" html.valueishtml="0"  name=cc_group_class_code_count_frequency  tag="6:CC Count Frequency" visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=7 alignment="2" tabsequence=32766 border="0" color="33554432" x="2039" y="4" height="52" width="151" format="[general]" html.valueishtml="0"  name=item_master_cc_class_code  tag="5:CC Class" visible="1" edit.limit=4 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="0" tabsequence=32766 border="0" color="33554432" x="1522" y="4" height="52" width="498" format="[general]" html.valueishtml="0"  name=cc_group_code  tag="4:CC Group" visible="1" dddw.name=d_dddw_cc_group_by_project dddw.displaycolumn=group_description dddw.datacolumn=group_id dddw.percentwidth=0 dddw.lines=0 dddw.limit=0 dddw.allowedit=no dddw.useasborder=no dddw.case=any dddw.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

@@ -1,0 +1,67 @@
+﻿$PBExportHeader$d_pandora_serial_no_soc.srd
+$PBExportComments$Datawindow used for pandora inventory report
+release 11;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes print.preview.outline=yes hidegrayline=no showbackcoloronxp=no )
+header(height=140 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=84 color="536870912" )
+table(column=(type=char(20) updatewhereclause=yes name=order_no dbname="Order_No" )
+ column=(type=char(10) updatewhereclause=yes name=wh_code dbname="WH_Code" )
+ column=(type=datetime updatewhereclause=yes name=complete_date dbname="Complete_Date" )
+ column=(type=decimal(0) updatewhereclause=yes name=from_owner_id dbname="From_Owner_Id" )
+ column=(type=decimal(0) updatewhereclause=yes name=to_owner_id dbname="To_Owner_Id" )
+ column=(type=char(20) updatewhereclause=yes name=to_owner_cd dbname="To_Owner_Cd" )
+ column=(type=char(50) updatewhereclause=yes name=sku dbname="SKU" )
+ column=(type=char(50) updatewhereclause=yes name=serial_no dbname="Serial_No" )
+ column=(type=char(50) updatewhereclause=yes name=po_no dbname="Po_No" )
+ retrieve="
+  SELECT Transfer_Master.User_Field3 as Order_No,
+         Transfer_Master.S_Warehouse as WH_Code,
+         Transfer_Master.Complete_Date as Complete_Date,
+         Transfer_Detail.Owner_Id as From_Owner_Id,
+         Transfer_Detail.New_Owner_Id as To_Owner_Id,
+         Owner.Owner_Cd as To_Owner_Cd,
+         Alternate_Serial_Capture.SKU_Parent as SKU,
+         Alternate_Serial_Capture.Serial_no_Parent as Serial_No,
+         Transfer_Detail.Po_No as Po_No
+    FROM Transfer_Master With (NoLock),
+         Transfer_Detail With (NoLock),
+         Alternate_Serial_Capture With (NoLock),
+         Owner With (NoLock)
+   WHERE ( Transfer_Detail.TO_No = Transfer_Master.TO_No ) and
+         ( Owner.Owner_ID = Transfer_Detail.New_Owner_Id ) and
+         ( Alternate_Serial_Capture.TO_NO = Transfer_Detail.TO_No ) and
+         ( Transfer_Detail.SKU = Alternate_Serial_Capture.SKU_Parent ) and
+         ( Transfer_Detail.Owner_Id <> Transfer_Detail.New_Owner_Id ) and
+         ( Alternate_Serial_Capture.SKU_Parent = Alternate_Serial_Capture.SKU_Child ) and
+         ( Transfer_Master.Project_ID = 'SOC' )
+Order By Serial_No, Complete_Date;" )
+text(band=header alignment="0" text="Warehouse" border="0" color="33554432" x="5" y="68" height="64" width="443" html.valueishtml="0"  name=warehouse_code_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="Order Number" border="0" color="33554432" x="457" y="68" height="64" width="553" html.valueishtml="0"  name=invoice_number_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="Complete Date" border="0" color="33554432" x="1019" y="68" height="64" width="603" html.valueishtml="0"  name=complete_date_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="Ship From" border="0" color="33554432" x="1632" y="68" height="64" width="576" html.valueishtml="0"  name=ship_from_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="Ship To" border="0" color="33554432" x="2217" y="68" height="64" width="576" html.valueishtml="0"  name=ship_to_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="0" color="33554432" x="5" y="4" height="76" width="434" format="[general]" html.valueishtml="0"  name=wh_code visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="0" color="33554432" x="453" y="4" height="76" width="553" format="[general]" html.valueishtml="0"  name=order_no visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="0" color="33554432" x="1019" y="4" height="76" width="603" format="[shortdate] [time]" html.valueishtml="0"  name=complete_date visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="0" color="33554432" x="1623" y="4" height="76" width="425" format="[general]" html.valueishtml="0"  name=from_owner_id visible="1~tif(( from_owner_id = 0) , 0, 1)" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="0" tabsequence=32766 border="0" color="33554432" x="2213" y="4" height="76" width="425" format="[general]" html.valueishtml="0"  name=to_owner_id visible="1~tif(( to_owner_id = 0) , 0, 1)" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="0" tabsequence=32766 border="0" color="33554432" x="2642" y="4" height="76" width="544" format="[general]" html.valueishtml="0"  name=to_owner_cd visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="Sku" border="0" color="33554432" x="3808" y="68" height="64" width="759" html.valueishtml="0"  name=sku_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="Serial Number" border="0" color="33554432" x="4571" y="68" height="64" width="718" html.valueishtml="0"  name=serial_number_parent_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=7 alignment="0" tabsequence=32766 border="0" color="33554432" x="3808" y="4" height="76" width="759" format="[general]" html.valueishtml="0"  name=sku visible="1" edit.limit=50 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=8 alignment="0" tabsequence=32766 border="0" color="33554432" x="4576" y="4" height="76" width="1353" format="[general]" html.valueishtml="0"  name=serial_no visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=9 alignment="0" tabsequence=0 border="0" color="33554432" x="3191" y="4" height="64" width="613" html.valueishtml="0"  name=po_no visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="Project" border="0" color="33554432" x="3182" y="68" height="64" width="626" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" pagingmethod=0 generatedddwframes="1" )
+xhtmlgen() cssgen(sessionspecific="0" )
+xmlgen(inline="0" )
+xsltgen()
+jsgen()
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )
+export.xhtml()
+ 

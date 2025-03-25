@@ -1,0 +1,82 @@
+﻿$PBExportHeader$d_3com_customs_declaration.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=1276 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=4 color="536870912" )
+detail(height=88 color="536870912" )
+table(column=(type=char(20) updatewhereclause=yes name=delivery_master_invoice_no dbname="Invoice_No" )
+ column=(type=char(100) updatewhereclause=yes name=delivery_master_country dbname="Country" )
+ column=(type=char(20) updatewhereclause=yes name=delivery_master_user_field6 dbname="User_Field6" )
+ column=(type=decimal(0) updatewhereclause=yes name=delivery_master_ctn_cnt dbname="Ctn_Cnt" )
+ column=(type=decimal(5) updatewhereclause=yes name=delivery_master_weight dbname="Weight" )
+ column=(type=char(50) updatewhereclause=yes name=delivery_picking_lot_no dbname="Lot_No" )
+ column=(type=decimal(0) updatewhereclause=yes name=delivery_picking_line_item_no dbname="Line_Item_No" )
+ column=(type=char(15) updatewhereclause=yes name=item_master_hs_code dbname="HS_Code" )
+ column=(type=char(20) updatewhereclause=yes name=delivery_detail_user_field1 dbname="User_Field1" )
+ column=(type=char(50) updatewhereclause=yes name=sku dbname="SKU" )
+ column=(type=decimal(5) updatewhereclause=yes name=compute_0011 dbname="compute_0011" )
+ retrieve="  SELECT DM.Invoice_No,
+         DM.Country,
+         DM.User_Field6,
+         DM.Ctn_Cnt,
+         DM.Weight,
+         DP.Lot_No,
+         DP.Line_Item_No,
+         IM.HS_Code,
+         DD.User_Field1,
+         DD.SKU,
+         sum(DP.quantity)
+    FROM Delivery_Master DM,
+         Delivery_Detail DD,
+         Delivery_Picking DP,
+         Item_Master IM
+   WHERE ( DD.DO_No = DM.DO_No ) and  
+         ( DM.Project_ID = IM.Project_ID ) and  
+         ( DD.SKU = IM.SKU ) and  
+         ( IM.Supp_Code = DD.Supp_code ) and  
+         ( DD.DO_No = DP.DO_No ) and  
+         ( DD.Line_Item_No = DP.Line_Item_No ) and  
+         ( ( DM.DO_No = :do_no ) AND  
+         ( DP.Component_Ind <> 'Y' ) )
+			and (DP.SKU = Left(DP.SKU_parent, abs(CharIndex('-',DP.SKU_parent) + CharIndex('-', SubString(RTrim(DP.SKU_parent), CharIndex('-', DP.SKU_parent) + 1, 50))-1))
+				 or dp.sku = dp.sku_parent)
+/*
+--and DP.SKU = left(DP.SKU_parent, CHARINDEX('-', DP.SKU_parent)-1)
+-- Only print the 'Main' SKU of the assembly (not the power cord)
+-- SKU will be the same as ParentSKU, without portion to the right of the LAST '-'
+--     So here we find the position of a '-' and the position of a '-' to the right of 1st '-'
+--     and add them together to get position of the last '-' (assuming no more than 2 '-'s)
+*/
+group by invoice_no, country, dm.user_field6, dm.ctn_cnt, weight, lot_no, dp.line_item_no, hs_code, dd.user_field1, dd.sku
+ORDER BY DP.Line_Item_No ASC,   
+         DP.Lot_No ASC,   
+         DD.User_Field1 ASC   
+
+" arguments=(("do_no", string)) )
+column(band=header id=1 alignment="0" tabsequence=32766 border="0" color="33554432" x="905" y="188" height="76" width="576" format="[general]" html.valueishtml="0"  name=delivery_master_invoice_no visible="1" edit.limit=20 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header id=3 alignment="0" tabsequence=32766 border="0" color="33554432" x="905" y="368" height="76" width="2080" format="[general]" html.valueishtml="0"  name=delivery_master_user_field6 visible="1" edit.limit=20 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header id=2 alignment="0" tabsequence=32766 border="0" color="33554432" x="905" y="548" height="76" width="850" format="[general]" html.valueishtml="0"  name=delivery_master_country visible="1" edit.limit=30 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header id=4 alignment="0" tabsequence=32766 border="0" color="33554432" x="905" y="728" height="76" width="654" format="[general]" html.valueishtml="0"  name=delivery_master_ctn_cnt visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header id=5 alignment="0" tabsequence=32766 border="0" color="33554432" x="905" y="908" height="76" width="814" format="[general]" html.valueishtml="0"  name=delivery_master_weight visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="Ship-to Country:" border="0" color="33554432" x="379" y="548" height="64" width="466" html.valueishtml="0"  name=delivery_master_country_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="Order No:" border="0" color="33554432" x="379" y="188" height="64" width="439" html.valueishtml="0"  name=delivery_master_invoice_no_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="Delivery Note:" border="0" color="33554432" x="379" y="368" height="64" width="439" html.valueishtml="0"  name=delivery_master_user_field6_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="Total Packages:" border="0" color="33554432" x="379" y="728" height="64" width="462" html.valueishtml="0"  name=delivery_master_ctn_cnt_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="Total Weight:" border="0" color="33554432" x="379" y="908" height="64" width="439" html.valueishtml="0"  name=delivery_master_weight_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="3COM CUSTOMS DECLARATION" border="0" color="33554432" x="1289" y="32" height="80" width="1152" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-12" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="Line #" border="0" color="33554432" x="165" y="1200" height="64" width="325" html.valueishtml="0"  name=delivery_picking_line_item_no_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" font.underline="1" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="SKU" border="0" color="33554432" x="526" y="1200" height="64" width="421" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" font.underline="1" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="QUANTITY" border="0" color="33554432" x="1518" y="1200" height="64" width="357" html.valueishtml="0"  name=t_3 visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" font.underline="1" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="HTS #" border="0" color="33554432" x="2098" y="1200" height="64" width="576" html.valueishtml="0"  name=delivery_detail_user_field1_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" font.underline="1" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="Import Permit (LOT#)" border="0" color="33554432" x="2775" y="1200" height="64" width="626" html.valueishtml="0"  name=delivery_picking_lot_no_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" font.underline="1" background.mode="1" background.color="536870912" )
+column(band=detail id=7 alignment="0" tabsequence=32766 border="0" color="33554432" x="165" y="4" height="76" width="302" format="[general]" html.valueishtml="0"  name=delivery_picking_line_item_no visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=10 alignment="0" tabsequence=32766 border="0" color="33554432" x="526" y="4" height="76" width="992" format="[general]" html.valueishtml="0"  name=sku visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=detail alignment="0" expression="if( isnull(delivery_detail_user_field1),  item_master_hs_code , delivery_detail_user_field1 )"border="0" color="33554432" x="2098" y="4" height="76" width="594" format="[GENERAL]" html.valueishtml="0"  name=compute_1 visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="0" tabsequence=32766 border="0" color="33554432" x="2775" y="4" height="76" width="722" format="[general]" html.valueishtml="0"  name=delivery_picking_lot_no visible="1" edit.limit=20 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=11 alignment="0" tabsequence=32766 border="0" color="33554432" x="3497" y="0" height="64" width="2350" format="[general]" html.valueishtml="0"  name=compute_0011 visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

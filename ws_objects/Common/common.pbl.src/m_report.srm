@@ -1,0 +1,94 @@
+﻿$PBExportHeader$m_report.srm
+forward
+global type m_report from m_main
+end type
+end forward
+
+global type m_report from m_main
+end type
+global m_report m_report
+
+on m_report.create
+m_report=this
+call super::create
+end on
+
+on m_report.destroy
+call super::destroy
+end on
+
+on m_saveas.create
+call super::create
+this.ToolBarItemName="SaveAs!"
+this.ToolBarItemText="Save As"
+this.Visible=true
+this.Enabled=true
+this.ToolBarItemOrder=6
+this.ToolBarItemVisible=true
+end on
+
+on m_retrieve.create
+call super::create
+this.ToolBarItemName="Custom007!"
+this.Enabled=true
+this.ToolBarItemOrder=7
+end on
+
+on m_sort.create
+call super::create
+this.Enabled=true
+end on
+
+on m_clear.create
+call super::create
+this.ToolBarItemName="Clear!"
+this.Enabled=true
+this.ToolBarItemOrder=11
+end on
+
+on m_close.create
+call super::create
+this.ToolBarItemName="Exit!"
+this.Enabled=true
+end on
+
+on m_printpreview.create
+call super::create
+this.ToolBarItemName="EditDataTabular!"
+this.ToolBarItemText="Print Preview"
+this.Visible=true
+this.Enabled=true
+this.ToolBarItemOrder=9
+end on
+
+on m_print.create
+call super::create
+this.ToolBarItemName="Print!"
+this.ToolBarItemOrder=10
+end on
+
+on m_delivery_order.create
+call super::create
+this.ToolBarItemOrder=1
+end on
+
+on m_stock_transfer.create
+call super::create
+this.ToolBarItemOrder=2
+end on
+
+on m_stock_adjustment.create
+call super::create
+this.ToolBarItemOrder=3
+end on
+
+on m_stockinquiry.create
+call super::create
+this.ToolBarItemOrder=4
+end on
+
+on m_cyclecount.create
+call super::create
+this.ToolBarItemOrder=5
+end on
+

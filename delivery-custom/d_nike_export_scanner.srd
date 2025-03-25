@@ -1,0 +1,53 @@
+HA$PBExportHeader$d_nike_export_scanner.srd
+$PBExportComments$Export Nike DO to scanner
+release 11;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=1 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes print.preview.outline=yes hidegrayline=no showbackcoloronxp=no grid.lines=0 )
+header(height=144 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=92 color="536870912" )
+table(column=(type=char(20) updatewhereclause=yes name=delivery_detail_do_no dbname="Delivery_Master.delivery_detail_do_no" )
+ column=(type=char(50) updatewhereclause=yes name=delivery_detail_sku dbname="Delivery_Detail.delivery_detail_sku" )
+ column=(type=decimal(0) updatewhereclause=yes name=item_master_upc dbname="Item_Master.item_master_upc" )
+ column=(type=decimal(5) updatewhereclause=yes name=alloc_qty dbname="Alloc_Qty" )
+ column=(type=long updatewhereclause=yes name=pick_qty dbname="Pick_Qty" )
+ retrieve="  SELECT dbo.Delivery_Master.Invoice_No as delivery_detail_do_no,   
+         dbo.Delivery_Detail.SKU as delivery_detail_sku,   
+         dbo.Item_Master.Part_UPC_Code  as item_master_upc, 
+		 sum(Delivery_Detail.Alloc_Qty) as Alloc_Qty,
+         Pick_Qty = 0 
+    FROM dbo.Delivery_Detail,   
+         dbo.Delivery_Master,   
+         dbo.Item_Master  
+   WHERE ( dbo.Delivery_Master.DO_No = dbo.Delivery_Detail.DO_No ) and  
+         ( dbo.Delivery_Master.Project_ID = dbo.Item_Master.Project_ID ) and  
+         ( dbo.Delivery_Detail.SKU = dbo.Item_Master.SKU ) and  
+         ( dbo.Delivery_Detail.Supp_code = dbo.Item_Master.Supp_Code )    AND
+		Delivery_Master.do_no = :asDONO
+Group By Invoice_No,
+			Delivery_Detail.SKU,
+			Part_UPC_Code" arguments=(("ASdono", string)) )
+text(band=header alignment="2" text="Delivery Master
+Delivery Detail Do No" border="0" color="33554432" x="14" y="8" height="128" width="576" html.valueishtml="0"  name=delivery_master_delivery_detail_do_no_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Delivery Detail
+Delivery Detail Sku" border="0" color="33554432" x="603" y="8" height="128" width="1399" html.valueishtml="0"  name=delivery_detail_delivery_detail_sku_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Item Master
+Item Master Upc" border="0" color="33554432" x="2016" y="8" height="128" width="439" html.valueishtml="0"  name=item_master_item_master_upc_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Alloc Qty" border="0" color="33554432" x="2469" y="8" height="64" width="329" html.valueishtml="0"  name=alloc_qty_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Pick Qty" border="0" color="33554432" x="2811" y="8" height="64" width="329" html.valueishtml="0"  name=pick_qty_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="0" color="33554432" x="14" y="8" height="76" width="576" format="[general]" html.valueishtml="0"  name=delivery_detail_do_no visible="1" edit.limit=20 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="0" color="33554432" x="603" y="8" height="76" width="1399" format="[general]" html.valueishtml="0"  name=delivery_detail_sku visible="1" edit.limit=50 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="1" tabsequence=32766 border="0" color="33554432" x="2016" y="8" height="76" width="439" format="[general]" html.valueishtml="0"  name=item_master_upc visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="1" tabsequence=32766 border="0" color="33554432" x="2469" y="8" height="76" width="329" format="[general]" html.valueishtml="0"  name=alloc_qty visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="1" tabsequence=32766 border="0" color="33554432" x="2811" y="8" height="76" width="329" format="[general]" html.valueishtml="0"  name=pick_qty visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" pagingmethod=0 generatedddwframes="1" )
+xhtmlgen() cssgen(sessionspecific="0" )
+xmlgen(inline="0" )
+xsltgen()
+jsgen()
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )
+export.xhtml()
+ 

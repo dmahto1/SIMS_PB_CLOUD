@@ -1,0 +1,138 @@
+HA$PBExportHeader$d_viaware_conversion_inv_diebold.srd
+$PBExportComments$Inventory to be exported to Vaiware for Diebold
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=1 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no grid.lines=0 )
+header(height=80 color="536870912" )
+summary(height=76 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=68 color="536870912" )
+table(column=(type=char(10) updatewhereclause=yes name=warehouse dbname="warehouse" )
+ column=(type=char(50) updatewhereclause=yes name=sku dbname="SKU" )
+ column=(type=char(10) updatewhereclause=yes name=l_code dbname="L_Code" )
+ column=(type=char(4) updatewhereclause=yes name=inventory_type dbname="Inventory_Type" )
+ column=(type=char(50) updatewhereclause=yes name=lot_no dbname="Lot_No" )
+ column=(type=char(50) updatewhereclause=yes name=po_no dbname="PO_No" )
+ column=(type=char(50) updatewhereclause=yes name=po_no2 dbname="PO_No2" )
+ column=(type=decimal(0) updatewhereclause=yes name=owner_id dbname="Owner_ID" )
+ column=(type=decimal(5) updatewhereclause=yes name=qty dbname="qty" )
+ column=(type=char(30) updatewhereclause=yes name=supp_invoice_no dbname="Supp_Invoice_No" )
+ column=(type=datetime updatewhereclause=yes name=complete_date dbname="Complete_Date" )
+ column=(type=char(16) updatewhereclause=yes name=ro_no dbname="Ro_No" )
+ column=(type=char(50) updatewhereclause=yes name=poline dbname="POLINE" )
+ retrieve="  SELECT  dbo.Warehouse.User_Field1 as ~"warehouse~", 
+			dbo.Content.SKU,   
+         dbo.Content.L_Code, 
+			Case When Content.Inventory_Type = 'N' Then ~"~" When Content.Inventory_Type = ~"D~" Then ~"DMGE~" When Content.Inventory_type = ~"Q~" or Content.Inventory_Type = ~"H~" Then ~"HOLD~" Else Content.Inventory_Type  End as Inventory_Type,  
+	      dbo.Content.Lot_No,   
+         dbo.Content.PO_No,   
+         dbo.Content.PO_No2,   
+			dbo.Content.Owner_ID, 
+  			Sum(dbo.Content.Avail_Qty) as ~"qty~", 
+			Receive_MAster.Supp_Invoice_No, 
+			Receive_MASter.Complete_Date, 
+			Receive_Master.Ro_No,
+			(Select Max (user_Field6) from Receive_Detail where REceive_Detail.ro_no =  Content.ro_no and  Receive_Detail.SKU = Content.SKU) as ~"POLINE~"
+			
+    FROM dbo.Content, Warehouse, Receive_Master, Item_Master
+	Where Content.project_id = :asProject and
+			Content.Wh_Code = Warehouse.wh_code and 
+			Content.ro_no = Receive_Master.ro_no and 
+			Content.Project_id = Item_master.Project_id and
+			Content.SKU = Item_Master.SKU and
+			Content.supp_code = Item_Master.Supp_Code and
+			Content.ro_no in (select ro_no from receive_Detail where ro_no like 'diebold%' and (user_field1 is null or user_field1 = '') ) and
+			avail_qty > 0 and
+			(Item_Master.grp is null or Item_Master.grp <> 'AIR') and
+			Content.l_code Not in ('SLOB', 'AIR') and
+			Content.Inventory_Type <> 'S'
+
+Group By Warehouse.User_Field1, 
+			dbo.Content.SKU,   
+         dbo.Content.Supp_Code,   
+         dbo.Content.L_Code,   
+         dbo.Content.Inventory_Type,   
+         dbo.Content.Lot_No,   
+         dbo.Content.PO_No,   
+         dbo.Content.PO_No2, 
+			dbo.Content.Owner_ID, 
+			Receive_MAster.Supp_Invoice_No, 
+			Receive_MASter.Complete_Date, 
+			Receive_Master.Ro_No, 
+			Content.Ro_no  
+
+Union
+
+ SELECT  dbo.Warehouse.User_Field1 as ~"warehouse~", 
+			dbo.Content.SKU,   
+         dbo.Content.L_Code,   
+         Case When Content.Inventory_Type = 'N' Then ~"~" When Content.Inventory_Type = ~"D~" Then ~"DMGE~" When Content.Inventory_type = ~"Q~" or Content.Inventory_Type = ~"H~" Then ~"HOLD~" Else Content.Inventory_Type  End as Inventory_Type,  
+	      dbo.Content.Lot_No,   
+         dbo.Content.PO_No,   
+         dbo.Content.PO_No2,   
+			dbo.Content.Owner_ID, 
+  			Sum(dbo.Content.Avail_Qty) as ~"qty~", 
+			Workorder_MAster.Workorder_Number, 
+			Workorder_MAster.Complete_Date, 
+			Workorder_MAster.Wo_No, 
+			(Select Max (user_Field2) from Workorder_Detail where Workorder_Detail.wo_no =  Content.ro_no and  Workorder_Detail.SKU = Content.SKU) as ~"POLINE~"  
+			
+    FROM dbo.Content, Warehouse, Workorder_MAster, Item_Master
+	Where Content.project_id = :asProject and
+			Content.Wh_Code = Warehouse.wh_code and 
+			Content.ro_no = Workorder_MAster.wo_no and
+			Content.Project_id = Item_master.Project_id and
+			Content.SKU = Item_Master.SKU and
+			Content.supp_code = Item_Master.Supp_Code and
+			avail_qty > 0  and
+			(Item_Master.grp is null or Item_Master.grp <> 'AIR') and
+			Content.l_code Not in ('SLOB', 'AIR') and
+			Content.Inventory_Type <> 'S'
+
+Group By Warehouse.User_Field1, 
+			dbo.Content.SKU,   
+         dbo.Content.Supp_Code,   
+         dbo.Content.L_Code,   
+         dbo.Content.Inventory_Type,   
+         dbo.Content.Lot_No,   
+         dbo.Content.PO_No,   
+         dbo.Content.PO_No2, 
+			dbo.Content.Owner_ID, 
+			Workorder_MAster.Workorder_Number, 
+			Workorder_MAster.Complete_Date, 
+			Workorder_MAster.Wo_No, 
+			Content.Ro_no    " filter="owner_id = alowner or (owner_id <> alOwner and Lot_no <> '-' and lot_no <> 'NA' and lot_no <> 'N/A' and po_no <> '-' and po_no <> 'NA' and po_no <> 'N/A')"arguments=(("asProject", string),("alOwner", number))  sort="warehouse A complete_date A supp_invoice_no A sku A l_code A inventory_type A " )
+text(band=header alignment="2" text="Row" border="6" color="0" x="9" y="8" height="64" width="178" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Sku" border="6" color="33554432" x="2002" y="8" height="64" width="471" html.valueishtml="0"  name=sku_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Location" border="6" color="33554432" x="2482" y="8" height="64" width="297" html.valueishtml="0"  name=l_code_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Hold Code" border="6" color="33554432" x="2789" y="8" height="64" width="347" html.valueishtml="0"  name=inventory_type_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Sales Order" border="6" color="33554432" x="3145" y="8" height="64" width="393" html.valueishtml="0"  name=lot_no_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="SO Line" border="6" color="33554432" x="3547" y="8" height="64" width="261" html.valueishtml="0"  name=po_no_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Qty" border="6" color="0" x="4507" y="8" height="64" width="457" html.valueishtml="0"  name=qty_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Receipt Date" border="6" color="33554432" x="1641" y="8" height="64" width="352" html.valueishtml="0"  name=complete_date_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Warehouse" border="6" color="0" x="197" y="8" height="64" width="338" html.valueishtml="0"  name=warehouse_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Container" border="6" color="33554432" x="3817" y="8" height="64" width="352" html.valueishtml="0"  name=po_no2_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Company" border="6" color="33554432" x="4178" y="8" height="64" width="320" html.valueishtml="0"  name=t_3 visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="PO/PO Line" border="6" color="0" x="544" y="8" height="64" width="393" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="PO Line" border="6" color="0" x="1307" y="8" height="64" width="325" html.valueishtml="0"  name=t_4 visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="PO" border="6" color="33554432" x="946" y="8" height="64" width="352" html.valueishtml="0"  name=supp_invoice_no_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+compute(band=detail alignment="0" expression="getrow()"border="0" color="33554432" x="9" y="4" height="56" width="178" format="[GENERAL]" html.valueishtml="0"  name=compute_2 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="0" color="33554432" x="2002" y="4" height="56" width="471" format="[general]" html.valueishtml="0"  name=sku visible="1" edit.limit=50 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="0" color="33554432" x="2482" y="4" height="56" width="297" format="[general]" html.valueishtml="0"  name=l_code visible="1" edit.limit=10 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="0" color="33554432" x="2789" y="4" height="56" width="347" format="[general]" html.valueishtml="0"  name=inventory_type visible="1" edit.limit=1 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="0" tabsequence=32766 border="0" color="33554432" x="3145" y="4" height="56" width="393" format="[general]" html.valueishtml="0"  name=lot_no visible="1" edit.limit=50 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="0" tabsequence=32766 border="0" color="33554432" x="3547" y="4" height="56" width="261" format="[general]" html.valueishtml="0"  name=po_no visible="1" edit.limit=50 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=9 alignment="1" tabsequence=32766 border="0" color="33554432" x="4507" y="4" height="56" width="457" format="#######.0" html.valueishtml="0"  name=qty visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=11 alignment="2" tabsequence=32766 border="0" color="33554432" x="1641" y="4" height="56" width="352" format="[shortdate]" html.valueishtml="0"  name=complete_date visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="0" color="33554432" x="197" y="4" height="56" width="338" format="[general]" html.valueishtml="0"  name=warehouse visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=detail alignment="0" expression=" supp_invoice_no + If(c_poline > ~"~",~"-~" + c_poline,~"~")"border="0" color="33554432" x="544" y="4" height="56" width="393" format="[GENERAL]" html.valueishtml="0"  name=po_poline visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=7 alignment="0" tabsequence=32766 border="0" color="33554432" x="3817" y="4" height="56" width="352" format="[general]" html.valueishtml="0"  name=po_no2 visible="1" edit.limit=50 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=detail alignment="2" expression="If (owner_id =  alOwner ,~"132~",~"100~")"border="0" color="33554432" x="4178" y="4" height="56" width="320" format="[GENERAL]" html.valueishtml="0"  name=c_company visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=detail alignment="0" expression="If( poline = ~"~" or isnull(poline),If(c_company = ~"100~",~"99~",~"~"),poline)"border="0" color="33554432" x="1307" y="4" height="56" width="325" format="[GENERAL]" html.valueishtml="0"  name=c_poline visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=10 alignment="0" tabsequence=32766 border="0" color="33554432" x="946" y="4" height="56" width="352" format="[general]" html.valueishtml="0"  name=supp_invoice_no visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=summary alignment="1" expression="~"TOTAL:    ~" + sum(qty for all)"border="0" color="33554432" x="4507" y="8" height="56" width="457" format="[General]" html.valueishtml="0"  name=compute_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+
+sparse(names="warehouse	complete_date	sku	l_code	inventory_type	lot_no	po_no	po_no2")htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

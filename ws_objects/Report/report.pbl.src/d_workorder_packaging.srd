@@ -1,0 +1,98 @@
+﻿$PBExportHeader$d_workorder_packaging.srd
+$PBExportComments$Workorder Packaging report
+release 11;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes print.preview.outline=yes hidegrayline=no showbackcoloronxp=no )
+header(height=384 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=72 color="536870912" )
+table(column=(type=char(20) updatewhereclause=yes name=workorder_master_workorder_number dbname="WorkOrder_Master.WorkOrder_Number" dbalias=".WorkOrder_Number" )
+ column=(type=datetime updatewhereclause=yes name=ord_date dbname="WorkOrder_Master.ord_Date" dbalias=".ord_Date" )
+ column=(type=char(1) updatewhereclause=yes name=workorder_master_ord_status dbname="WorkOrder_Master.ord_status" dbalias=".ord_status" )
+ column=(type=char(50) updatewhereclause=yes name=workorder_detail_sku dbname="WorkOrder_Detail.SKU" dbalias=".SKU" )
+ column=(type=char(50) updatewhereclause=yes name=item_component_sku_child dbname="Item_Component.SKU_Child" dbalias=".SKU_Child" )
+ column=(type=char(20) updatewhereclause=yes name=item_component_supp_code_child dbname="Item_Component.Supp_Code_Child" dbalias=".Supp_Code_Child" )
+ column=(type=decimal(5) updatewhereclause=yes name=reserved_qty dbname="reserved_qty" )
+ column=(type=decimal(10) updatewhereclause=yes name=extended_req_qty dbname="extended_req_qty" )
+ column=(type=decimal(5) updatewhereclause=yes name=avail_qty dbname="avail_qty" )
+ column=(type=decimal(2) updatewhereclause=yes name=remaining_req_qty dbname="remaining_req_qty" )
+ retrieve="  SELECT dbo.WorkOrder_Master.WorkOrder_Number,   
+			Workorder_master.ord_Date, 
+			Workorder_master.ord_status, 
+         dbo.WorkOrder_Detail.SKU,   
+         dbo.Item_Component.SKU_Child,   
+			 dbo.Item_Component.Supp_Code_Child, 
+         Sum(dbo.Content.Avail_Qty) as reserved_qty,   
+         dbo.WorkOrder_Detail.Req_qty * dbo.Item_Component.Child_Qty as extended_req_qty,
+			(Select Sum(avail_qty) from content where workorder_master.Project_id = content.Project_id and
+				workorder_master.wh_code = Content.wh_code and item_Component.sku_child = Content.Sku and
+				item_Component.supp_Code_Child = Content.Supp_Code and Content.Lot_No = '-') as avail_qty, 
+			0000000000.00 as remaining_req_qty 
+    FROM dbo.workorder_master
+   INNER JOIN dbo.Workorder_Detail
+      ON dbo.WorkOrder_Master.WO_NO = dbo.WorkOrder_Detail.WO_NO
+   INNER JOIN dbo.item_Component
+      ON dbo.WorkOrder_Master.Project_ID = dbo.Item_Component.Project_ID  
+     AND dbo.WorkOrder_Detail.SKU = dbo.Item_Component.SKU_Parent 
+     AND dbo.WorkOrder_Detail.Supp_code = dbo.Item_Component.Supp_Code_Parent
+    LEFT OUTER JOIN dbo.Content
+      ON item_Component.Project_ID = Content.Project_ID 
+	 AND item_Component.sku_child = Content.Sku  
+	 AND item_Component.supp_Code_Child = Content.Supp_Code
+	 AND Workorder_MASter.wo_no = Content.Lot_No
+   WHERE item_component.component_Type = 'P' 
+	 AND Workorder_master.ord_type = 'P' 
+Group By  dbo.WorkOrder_Master.WorkOrder_Number,   
+			Workorder_master.Ord_Date, 
+			Workorder_master.ord_status, 
+			workorder_Master.wo_no, 
+			workorder_master.Project_id, 
+			workorder_master.wh_Code, 
+         dbo.WorkOrder_Detail.SKU,   
+         dbo.Item_Component.SKU_Child, 
+			Item_component.supp_Code_Child, 
+			dbo.WorkOrder_Detail.Req_qty,
+			dbo.Item_Component.Child_Qty"  sort="workorder_master_workorder_number A workorder_detail_sku A item_component_sku_child A item_component_supp_code_child D " )
+group(level=1 header.height=0 trailer.height=12 by=("workorder_master_workorder_number" ) header.color="536870912" trailer.color="536870912" )
+text(band=header alignment="2" text="Workorder" border="0" color="33554432" x="0" y="244" height="64" width="320" html.valueishtml="0"  name=workorder_master_workorder_number_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Workorder Packaging Report" border="0" color="33554432" x="5" y="8" height="120" width="3447" html.valueishtml="0"  name=t_8 visible="1"  font.face="Arial" font.height="-18" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=header alignment="0" expression="Today()"border="0" color="33554432" x="14" y="12" height="68" width="699" format="[SHORTDATE] [TIME]" html.valueishtml="0"  name=compute_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=header alignment="1" expression="'Page ' + page() + ' of ' + PageCount()"border="0" color="33554432" x="3040" y="12" height="68" width="402" format="[GENERAL]" html.valueishtml="0"  name=compute_2 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Available" border="0" color="33554432" x="3113" y="244" height="64" width="306" html.valueishtml="0"  name=t_4 visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Qty" border="0" color="33554432" x="3113" y="292" height="64" width="306" html.valueishtml="0"  name=t_5 visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Additional" border="0" color="33554432" x="2720" y="244" height="64" width="306" html.valueishtml="0"  name=t_6 visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Req Qty" border="0" color="33554432" x="2720" y="292" height="64" width="306" html.valueishtml="0"  name=t_7 visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Reserved" border="0" color="33554432" x="2359" y="244" height="64" width="306" html.valueishtml="0"  name=content_reserved_qty_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Qty" border="0" color="33554432" x="2359" y="292" height="64" width="306" html.valueishtml="0"  name=t_3 visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Extended" border="0" color="33554432" x="1993" y="244" height="64" width="352" html.valueishtml="0"  name=required_qty_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Req Qty" border="0" color="33554432" x="1993" y="292" height="64" width="352" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Number" border="0" color="33554432" x="0" y="292" height="64" width="320" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Date" border="0" color="33554432" x="343" y="292" height="64" width="187" html.valueishtml="0"  name=t_9 visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+line(band=header x1="5" y1="372" x2="3424" y2="372"  name=l_1 visible="1" pen.style="0" pen.width="9" pen.color="0"  background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Status" border="0" color="33554432" x="699" y="292" height="64" width="178" html.valueishtml="0"  name=t_10 visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="SKU" border="0" color="33554432" x="951" y="292" height="64" width="256" html.valueishtml="0"  name=workorder_detail_sku_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="Package" border="0" color="33554432" x="1335" y="292" height="64" width="357" html.valueishtml="0"  name=item_component_sku_child_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="Supplier" border="0" color="33554432" x="1691" y="292" height="64" width="247" html.valueishtml="0"  name=t_11 visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="0" color="33554432" x="18" y="8" height="60" width="306" format="[general]" html.valueishtml="0"  name=workorder_master_workorder_number visible="1" edit.limit=20 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=9 alignment="1" tabsequence=32766 border="0" color="33554432" x="3049" y="8" height="60" width="334" format="########.##" html.valueishtml="0"  name=avail_qty visible="1" edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=10 alignment="1" tabsequence=32766 border="0" color="33554432" x="2688" y="8" height="60" width="334" format="#########0.##" html.valueishtml="0"  name=remaining_req_qty visible="1" edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=7 alignment="1" tabsequence=32766 border="0" color="33554432" x="2327" y="8" height="60" width="334" format="#####.##" html.valueishtml="0"  name=reserved_qty visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=8 alignment="1" tabsequence=32766 border="0" color="33554432" x="1961" y="8" height="60" width="334" format="#######.##" html.valueishtml="0"  name=extended_req_qty visible="1" edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="0" color="33554432" x="357" y="8" height="60" width="293" format="[shortdate]" html.valueishtml="0"  name=ord_date visible="1" edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="0" color="33554432" x="677" y="8" height="60" width="215" format="[general]" html.valueishtml="0"  name=workorder_master_ord_status visible="1" dddw.name=dddw_workorder_status dddw.displaycolumn=workorder_status_desc dddw.datacolumn=workorder_status_cd dddw.percentwidth=0 dddw.lines=0 dddw.limit=0 dddw.allowedit=no dddw.useasborder=no dddw.case=any  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="0" color="33554432" x="919" y="8" height="60" width="398" format="[general]" html.valueishtml="0"  name=workorder_detail_sku visible="1" edit.limit=50 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="0" tabsequence=32766 border="0" color="33554432" x="1335" y="8" height="60" width="347" format="[general]" html.valueishtml="0"  name=item_component_sku_child visible="1" edit.limit=50 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="0" tabsequence=32766 border="0" color="33554432" x="1705" y="8" height="60" width="219" format="[general]" html.valueishtml="0"  name=item_component_supp_code_child visible="1" edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+line(band=trailer.1 x1="5" y1="4" x2="3424" y2="4"  name=l_2 visible="1" pen.style="0" pen.width="5" pen.color="0"  background.mode="2" background.color="16777215" )
+
+sparse(names="workorder_master_workorder_number	ord_date	workorder_master_ord_status	workorder_detail_sku")htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" pagingmethod=0 generatedddwframes="1" )
+xhtmlgen() cssgen(sessionspecific="0" )
+xmlgen(inline="0" )
+xsltgen()
+jsgen()
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )
+export.xhtml()
+ 

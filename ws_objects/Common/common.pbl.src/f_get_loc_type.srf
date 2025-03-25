@@ -1,0 +1,20 @@
+﻿$PBExportHeader$f_get_loc_type.srf
+$PBExportComments$Initial create
+global type f_get_loc_type from function_object
+end type
+
+forward prototypes
+global function string f_get_loc_type (string aswhcode, string aslocation)
+end prototypes
+
+global function string f_get_loc_type (string aswhcode, string aslocation);//GailM 5/15/2020 DE45954 - Return location type code given warehouse and location codes
+String lsLocType
+
+Select l_type Into :lsLocType
+From	Location 
+Where wh_code = :aswhcode and l_code = :aslocation
+Using SQLCA;
+
+return lsLocType
+end function
+

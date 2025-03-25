@@ -1,0 +1,26 @@
+﻿$PBExportHeader$d_gems_oracle_recon_rpt_inv.srd
+$PBExportComments$GE Medical (GEMS) oracle to SIMS reconciliation rpt inventory information
+release 7;
+datawindow(units=0 timer_interval=0 color=16777215 processing=1 HTMLDW=no print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.prompt=no print.buttons=no print.preview.buttons=no grid.lines=0 )
+header(height=80 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=92 color="536870912" )
+table(column=(type=char(10) updatewhereclause=yes name=l_code dbname="Content.L_Code" )
+ column=(type=char(1) updatewhereclause=yes name=inventory_type dbname="Content.Inventory_Type" )
+ column=(type=decimal(0) updatewhereclause=yes name=total_avail_qty dbname="total_avail_qty" )
+ retrieve="  SELECT Content.L_Code,   
+         Content.Inventory_Type,   
+        Sum(Content.Avail_Qty) as total_avail_qty
+    FROM Content   
+Where Project_id = :asProject and Sku = :asSku
+Group By l_code, Inventory_Type
+" arguments=(("asProject", string),("asSKU", string)) )
+text(band=header alignment="0" text="Total Avail Qty" border="0" color="0" x="9" y="4" height="76" width="471"  name=t_1  font.face="Arial" font.height="-12" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="L Code" border="0" color="0" x="489" y="4" height="76" width="261"  name=t_2  font.face="Arial" font.height="-12" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="Inventory Type" border="0" color="0" x="759" y="4" height="76" width="489"  name=t_3  font.face="Arial" font.height="-12" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="0" color="0" x="9" y="4" height="64" width="471" format="#######.#####"  name=total_avail_qty editmask.mask="#######.#####" editmask.focusrectangle=no  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="0" color="0" x="489" y="0" height="64" width="261" format="[general]"  name=l_code edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="0" color="0" x="759" y="0" height="64" width="489" format="[general]"  name=inventory_type edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" )

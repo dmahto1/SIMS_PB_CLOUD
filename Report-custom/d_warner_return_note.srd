@@ -1,0 +1,80 @@
+HA$PBExportHeader$d_warner_return_note.srd
+$PBExportComments$Warner Return Note
+release 11;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 0 print.margin.right = 0 print.margin.top = 0 print.margin.bottom = 0 print.paper.source = 8 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=yes print.overrideprintjob=no print.collate=yes print.preview.outline=yes hidegrayline=no showbackcoloronxp=no )
+header(height=1208 color="536870912" )
+summary(height=176 color="536870912" )
+footer(height=624 color="536870912" )
+detail(height=72 color="536870912" )
+table(column=(type=char(30) updatewhereclause=yes name=receive_master_supp_invoice_no dbname="Receive_Master.Supp_Invoice_No" )
+ column=(type=char(255) updatewhereclause=yes name=receive_master_user_field12 dbname="Receive_Master.User_Field12" )
+ column=(type=char(20) updatewhereclause=yes name=customer_cust_code dbname="Customer.Cust_Code" )
+ column=(type=char(40) updatewhereclause=yes name=customer_cust_name dbname="Customer.Cust_Name" )
+ column=(type=char(60) updatewhereclause=yes name=customer_address_1 dbname="Customer.Address_1" )
+ column=(type=char(20) updatewhereclause=yes name=customer_cust_code dbname="Customer.Cust_Code" )
+ column=(type=char(40) updatewhereclause=yes name=customer_contact_person dbname="Customer.Contact_Person" )
+ column=(type=char(20) updatewhereclause=yes name=customer_tel dbname="Customer.Tel" )
+ column=(type=char(50) updatewhereclause=yes name=receive_detail_sku dbname="Receive_Detail.SKU" )
+ column=(type=decimal(5) updatewhereclause=yes name=receive_detail_req_qty dbname="req_Qty" )
+ column=(type=char(50) updatewhereclause=yes name=receive_detail_user_field2 dbname="Receive_Detail.User_Field2" )
+ column=(type=decimal(4) updatewhereclause=yes name=receive_detail_cost dbname="Receive_Detail.Cost" )
+ column=(type=char(75) updatewhereclause=yes name=item_master_native_description dbname="Item_Master.Native_Description" )
+ column=(type=decimal(0) updatewhereclause=yes name=item_master_part_upc_code dbname="Item_Master.Part_UPC_Code" )
+ column=(type=decimal(0) updatewhereclause=yes name=receive_detail_line_item_no dbname="Receive_Detail.Line_Item_No" )
+ retrieve="  SELECT dbo.Receive_Master.Supp_Invoice_No,   
+          dbo.Receive_Master.User_Field12, 
+		dbo.Customer.Cust_Code, 
+         dbo.Customer.Cust_Name,   
+         dbo.Customer.Address_1,   
+         dbo.Customer.Cust_Code,   
+         dbo.Customer.Contact_Person,   
+         dbo.Customer.Tel,   
+         dbo.Receive_Detail.SKU,   
+         dbo.Receive_Detail.Req_Qty * - 1 as req_Qty,   
+         dbo.Receive_Detail.User_Field2,   
+		dbo.REceive_Detail.Cost ,  
+         dbo.Item_Master.Native_Description,   
+         dbo.Item_Master.Part_UPC_Code,   
+         dbo.Receive_Detail.Line_Item_No  
+    FROM dbo.Receive_Master LEFT OUTER JOIN dbo.Customer ON dbo.Receive_Master.Project_ID = dbo.Customer.Project_ID AND dbo.Receive_Master.User_Field10 = dbo.Customer.Cust_Code,   
+         dbo.Receive_Detail,   
+         dbo.Item_Master  
+   WHERE ( dbo.Receive_Master.RO_No = dbo.Receive_Detail.RO_No ) and  
+         ( dbo.Receive_Master.Project_ID = dbo.Item_Master.Project_ID ) and  
+         ( dbo.Receive_Detail.SKU = dbo.Item_Master.SKU ) and  
+         ( dbo.Receive_Detail.Supp_Code = dbo.Item_Master.Supp_Code )    and
+			Receive_Master.ro_no = :asRONO and
+		Receive_Detail.Req_Qty > 0 
+" arguments=(("asRONO", string))  sort="receive_detail_line_item_no A " )
+text(band=header alignment="2" text="Return Order" border="0" color="0" x="9" y="388" height="76" width="3205" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-12" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="$$HEX4$$0090278d056e5553$$ENDHEX$$" border="0" color="0" x="1445" y="308" height="84" width="334" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial Unicode MS" font.height="-12" font.weight="400"  font.family="2" font.pitch="2" font.charset="134" background.mode="2" background.color="16777215" )
+compute(band=header alignment="0" expression="If (Not isnull( customer_cust_code ), customer_cust_code + ' ','') + If(not isnull( customer_cust_name ),  customer_cust_name ,'')"border="0" color="33554432" x="823" y="536" height="76" width="1125" format="[GENERAL]" html.valueishtml="0"  name=compute_6 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header id=5 alignment="0" tabsequence=32766 border="0" color="33554432" x="823" y="636" height="76" width="1568" format="[general]" html.valueishtml="0"  name=customer_address_1 visible="1" edit.limit=120 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header id=8 alignment="0" tabsequence=32766 border="0" color="33554432" x="823" y="740" height="76" width="576" format="[general]" html.valueishtml="0"  name=customer_tel visible="1" edit.limit=20 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header id=7 alignment="0" tabsequence=32766 border="0" color="33554432" x="823" y="844" height="76" width="1125" format="[general]" html.valueishtml="0"  name=customer_contact_person visible="1" edit.limit=40 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header id=1 alignment="0" tabsequence=32766 border="0" color="33554432" x="2830" y="632" height="76" width="713" format="[general]" html.valueishtml="0"  name=receive_master_supp_invoice_no visible="1" edit.limit=30 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=header alignment="0" expression="String(today(),'MM/DD/YY')"border="0" color="33554432" x="2830" y="732" height="76" width="718" format="[GENERAL]" html.valueishtml="0"  name=compute_1 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header id=2 alignment="0" tabsequence=32766 border="0" color="33554432" x="2830" y="840" height="76" width="713" format="[general]" html.valueishtml="0"  name=receive_master_user_field12 visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=detail alignment="0" expression="GetRow()"border="0" color="0" x="14" y="8" height="52" width="114" format="[GENERAL]" html.valueishtml="0"  name=compute_5 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=detail alignment="1" expression=" receive_detail_req_qty *  receive_detail_cost  "border="0" color="33554432" x="2917" y="8" height="52" width="283" format="#######.00" html.valueishtml="0"  name=compute_2 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=12 alignment="1" tabsequence=32766 border="0" color="33554432" x="2437" y="8" height="52" width="329" format="[general]" html.valueishtml="0"  name=receive_detail_cost visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=9 alignment="0" tabsequence=32766 border="0" color="33554432" x="146" y="8" height="52" width="411" format="[general]" html.valueishtml="0"  name=receive_detail_sku visible="1" edit.limit=50 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=14 alignment="0" tabsequence=32766 border="0" color="33554432" x="581" y="8" height="52" width="384" format="[general]" html.valueishtml="0"  name=item_master_part_upc_code visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=10 alignment="1" tabsequence=32766 border="0" color="33554432" x="2249" y="8" height="52" width="160" format="#########" html.valueishtml="0"  name=receive_detail_req_qty visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=11 alignment="0" tabsequence=32766 border="0" color="33554432" x="1943" y="4" height="56" width="293" format="[general]" html.valueishtml="0"  name=receive_detail_user_field2 visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=13 alignment="0" tabsequence=32766 border="0" color="33554432" x="983" y="8" height="52" width="937" format="[general]" html.valueishtml="0"  name=item_master_native_description visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=header alignment="0" expression="pagecount()"border="0" color="0" x="2807" y="60" height="76" width="114" format="[GENERAL]" html.valueishtml="0"  name=compute_7 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="0" expression="page()"border="0" color="0" x="3081" y="60" height="76" width="114" format="[GENERAL]" html.valueishtml="0"  name=compute_8 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=footer alignment="1" expression="sum(receive_detail_req_qty for all)"border="0" color="33554432" x="2080" y="40" height="60" width="329" format="#########" html.valueishtml="0"  name=compute_3 visible="1~tIf (page() = pagecount(),1,0)"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=footer alignment="1" expression="sum( receive_detail_req_qty *  receive_detail_cost   for all)"border="0" color="33554432" x="2679" y="48" height="52" width="521" format="#######.00" html.valueishtml="0"  name=compute_4 visible="1~tIf (page() = pagecount(),1,0)"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" pagingmethod=0 generatedddwframes="1" )
+xhtmlgen() cssgen(sessionspecific="0" )
+xmlgen(inline="0" )
+xsltgen()
+jsgen()
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )
+export.xhtml()
+ 

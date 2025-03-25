@@ -1,0 +1,33 @@
+HA$PBExportHeader$d_item_master_rpt_reorder.srd
+$PBExportComments$Reorder Info sub report for Item Master Report
+release 7;
+datawindow(units=0 timer_interval=0 color=16777215 processing=0 HTMLDW=no print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.prompt=no print.buttons=no print.preview.buttons=no )
+header(height=92 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=56 color="536870912" )
+table(column=(type=char(10) updatewhereclause=yes name=wh_code dbname="Reorder_Point.WH_Code" )
+ column=(type=decimal(0) updatewhereclause=yes name=max_supply_onhand dbname="Reorder_Point.MAX_Supply_Onhand" )
+ column=(type=decimal(0) updatewhereclause=yes name=min_rop dbname="Reorder_Point.MIN_ROP" )
+ column=(type=decimal(0) updatewhereclause=yes name=reorder_qty dbname="Reorder_Point.Reorder_Qty" )
+ retrieve="  SELECT Reorder_Point.WH_Code,   
+         Reorder_Point.MAX_Supply_Onhand,   
+         Reorder_Point.MIN_ROP,   
+         Reorder_Point.Reorder_Qty  
+    FROM Reorder_Point   
+	Where project_id = :asProject and sku = :asSKU and supp_code = :asSupplier
+" arguments=(("asProject", string),("asSKU", string),("asSupplier", string)) )
+text(band=header alignment="0" text="Reorder:" border="0" color="0" x="14" y="8" height="56" width="288"  name=t_4  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="Max" border="0" color="0" x="978" y="8" height="56" width="155"  name=max_supply_onhand_t  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="On hand" border="0" color="0" x="923" y="40" height="56" width="242"  name=t_3  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" font.underline="1" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="Warehouse" border="0" color="0" x="512" y="40" height="56" width="357"  name=wh_code_t  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" font.underline="1" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="Reorder" border="0" color="0" x="1426" y="8" height="56" width="279"  name=reorder_qty_t  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="Qty" border="0" color="0" x="1490" y="40" height="56" width="123"  name=t_2  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" font.underline="1" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="1" tabsequence=32766 border="0" color="0" x="873" y="4" height="56" width="233" format="#######.#####"  name=max_supply_onhand editmask.mask="#######.#####" editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="1" tabsequence=32766 border="0" color="0" x="1134" y="4" height="56" width="233" format="#######.#####"  name=min_rop editmask.mask="#######.#####" editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="0" color="0" x="512" y="4" height="56" width="338" format="[general]"  name=wh_code edit.limit=10 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="1" tabsequence=32766 border="0" color="0" x="1385" y="4" height="56" width="238" format="#######.#####"  name=reorder_qty editmask.mask="#######.#####" editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="Min" border="0" color="0" x="1280" y="8" height="56" width="165"  name=t_1  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="Rop" border="0" color="0" x="1271" y="40" height="56" width="160"  name=min_rop_t  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" font.underline="1" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" )

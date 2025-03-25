@@ -1,0 +1,25 @@
+HA$PBExportHeader$d_maintenance_storage_type.srd
+$PBExportComments$Storage Type Maintenance
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=1 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no grid.lines=0 )
+header(height=80 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=84 color="536870912" )
+table(column=(type=char(10) update=yes updatewhereclause=yes key=yes name=project_id dbname="Storage_Type.Project_ID" )
+ column=(type=char(25) update=yes updatewhereclause=yes key=yes name=storage_type_cd dbname="Storage_Type.Storage_Type_Cd" )
+ column=(type=char(50) update=yes updatewhereclause=yes name=storage_type_desc dbname="Storage_Type.Storage_Type_Desc" )
+ retrieve="  SELECT dbo.Storage_Type.Project_ID,   
+         dbo.Storage_Type.Storage_Type_Cd,   
+         dbo.Storage_Type.Storage_Type_Desc  
+    FROM dbo.Storage_Type   
+	Where project_id = :asProject" update="dbo.Storage_Type" updatewhere=1 updatekeyinplace=no arguments=(("asProject", string))  sort="storage_type_cd A " )
+text(band=header alignment="2" text="Storage Type Cd" border="6" color="33554432" x="9" y="8" height="60" width="754" html.valueishtml="0"  name=storage_type_cd_t visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Storage Type Desc" border="6" color="33554432" x="773" y="8" height="60" width="1733" html.valueishtml="0"  name=storage_type_desc_t visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+column(band=detail id=2 alignment="0" tabsequence=20 border="0" color="33554432" x="9" y="8" height="64" width="754" format="[general]" html.valueishtml="0"  name=storage_type_cd visible="1" edit.limit=25 edit.case=upper edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="0" tabsequence=30 border="0" color="33554432" x="773" y="8" height="64" width="1733" format="[general]" html.valueishtml="0"  name=storage_type_desc visible="1" edit.limit=50 edit.case=upper edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

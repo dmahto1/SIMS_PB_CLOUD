@@ -1,0 +1,76 @@
+﻿$PBExportHeader$d_fast_moving_rpt.srd
+$PBExportComments$fast moving Report
+release 9;
+datawindow(units=0 timer_interval=0 color=16777215 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=356 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=72 color="536870912" )
+table(column=(type=char(50) updatewhereclause=yes name=delivery_detail_sku dbname="SKU" )
+ column=(type=decimal(5) updatewhereclause=yes name=qty_ordered dbname="compute_0002" )
+ column=(type=decimal(5) updatewhereclause=yes name=qty_shipped dbname="compute_0003" )
+ column=(type=long updatewhereclause=yes name=no_of_orders dbname="No_of_Orders" )
+ column=(type=char(70) updatewhereclause=yes name=item_master_description dbname="Description" )
+ column=(type=char(20) updatewhereclause=yes name=item_master_supp_code dbname="supp_code" )
+ column=(type=char(10) updatewhereclause=yes name=delivery_detail_grp dbname="grp" )
+ retrieve="  SELECT Delivery_Detail.SKU,   
+         sum(Delivery_Detail.Req_Qty),   
+         sum(Delivery_Detail.Alloc_Qty), 
+			count(Delivery_Master.DO_NO) As 'No_of_Orders',  
+         Item_Master.Description,
+			item_master.supp_code, 
+			grp 
+    FROM Delivery_Detail,   
+         Delivery_Master,   
+         Item_Master   
+   WHERE Delivery_master.project_id = :project and
+			( Delivery_Detail.DO_No = Delivery_Master.DO_No ) and  
+         ( Item_Master.SKU = Delivery_Detail.SKU )    and
+         ( Item_Master.supp_code = Delivery_Detail.supp_code )    and 
+			ord_date >= :From_date and
+			ord_date <= :To_date and
+			wh_code = :warehouse and
+			grp =  COALESCE(:group, grp) and
+			Delivery_Detail.supp_code =  COALESCE(:supp_code, Delivery_Detail.supp_code)
+
+
+Group By Delivery_Detail.SKU,
+			Item_Master.Description,
+			item_master.supp_code,
+			grp
+" arguments=(("project", string),("warehouse", string),("group", string),("from_date", datetime),("to_date", datetime),("supp_code", string))  sort="qty_ordered D " )
+text(band=header alignment="0" text="Date:" border="0" color="0" x="23" y="72" height="56" width="146" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=header alignment="0" expression="string(today(),'mm/dd/yyyy hh:mm')"border="0" color="0" x="279" y="72" height="56" width="402" format="[general]" html.valueishtml="0"  name=compute_1 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="FAST MOVING ITEMS REPORT" border="0" color="0" x="1280" y="12" height="64" width="901" html.valueishtml="0"  name=t_3 visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="SIMS306" border="0" color="0" x="279" y="12" height="56" width="265" html.valueishtml="0"  name=t_4 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="Report ID:" border="0" color="0" x="23" y="12" height="56" width="242" html.valueishtml="0"  name=t_5 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="0" expression="string( from_date ,'mm/dd/yyyy hh:mm') + ' To: ' + String( to_date ,'mm/dd/yyyy hh:mm')"border="0" color="0" x="279" y="168" height="64" width="1339" format="[general]" html.valueishtml="0"  name=compute_2 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+line(band=header x1="9" y1="348" x2="3397" y2="348"  name=l_1 visible="1" pen.style="0" pen.width="5" pen.color="0"  background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="Page:" border="0" color="0" x="2885" y="12" height="56" width="137" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=header alignment="1" expression="page() + ' of ' + pageCount()"border="0" color="0" x="3035" y="12" height="56" width="302" format="[general]" html.valueishtml="0"  name=compute_3 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+text(band=header alignment="0" text="From:" border="0" color="0" x="23" y="168" height="64" width="146" html.valueishtml="0"  name=t_6 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="LINE
+NBR" border="0" color="0" x="23" y="228" height="112" width="151" html.valueishtml="0"  name=t_7 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="SKU" border="0" color="0" x="192" y="284" height="56" width="741" html.valueishtml="0"  name=delivery_detail_sku_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="SUPPLIER CODE" border="0" color="0" x="951" y="284" height="56" width="389" html.valueishtml="0"  name=t_10 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="GROUP" border="0" color="0" x="1353" y="284" height="56" width="174" html.valueishtml="0"  name=t_11 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="DESCRIPTION" border="0" color="0" x="1627" y="284" height="56" width="325" html.valueishtml="0"  name=item_master_description_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="1" text="Qty
+ORDERED" border="0" color="0" x="2414" y="228" height="112" width="366" html.valueishtml="0"  name=t_8 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="1" text="Qty
+SHIPPED" border="0" color="0" x="2802" y="228" height="112" width="361" html.valueishtml="0"  name=compute_0003_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="1" text="No. of
+Orders" border="0" color="0" x="3182" y="228" height="112" width="219" html.valueishtml="0"  name=t_9 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=detail alignment="2" expression="Getrow()"border="0" color="0" x="23" y="4" height="60" width="151" format="[general]" html.valueishtml="0"  name=c_rownum visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="0" color="0" x="192" y="4" height="60" width="741" format="[general]" html.valueishtml="0"  name=delivery_detail_sku visible="1" edit.limit=20 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="0" tabsequence=32766 border="0" color="0" x="951" y="4" height="60" width="389" format="[general]" html.valueishtml="0"  name=item_master_supp_code visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=detail alignment="0" expression=" delivery_detail_grp "border="0" color="0" x="1353" y="4" height="60" width="256" format="[GENERAL]" html.valueishtml="0"  name=compute_4 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="0" tabsequence=32766 border="0" color="0" x="1627" y="4" height="60" width="786" format="[general]" html.valueishtml="0"  name=item_master_description visible="1" edit.limit=50 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="1" tabsequence=32766 border="0" color="0" x="2427" y="4" height="60" width="361" format="#######.#####" html.valueishtml="0"  name=qty_ordered visible="1" editmask.mask="#######.#####" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="1" tabsequence=32766 border="0" color="0" x="2802" y="4" height="60" width="361" format="#######.#####" html.valueishtml="0"  name=qty_shipped visible="1" editmask.mask="#######.#####" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="1" tabsequence=32766 border="0" color="0" x="3182" y="4" height="60" width="219" format="#######.#####" html.valueishtml="0"  name=no_of_orders visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

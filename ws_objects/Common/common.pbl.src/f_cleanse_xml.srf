@@ -1,0 +1,81 @@
+﻿$PBExportHeader$f_cleanse_xml.srf
+$PBExportComments$Remove any special characters from XML Document
+global type f_cleanse_xml from function_object
+end type
+
+forward prototypes
+global function string f_cleanse_xml (string asxml)
+end prototypes
+
+global function string f_cleanse_xml (string asxml);
+String	lsXML, lsChar
+Long	llLen, llPOs, llCount, llArrayPOs
+String	lsConvert[], lsFrom, lsTo
+
+//From/to values seperated by |
+lsConvert[1] =  "À|&&#192;" /*Agrave*/
+lsConvert[2] =  "Ä|&&#196;" /*Auml*/
+lsConvert[3] =  "Á|&&#193;" /*Aacute*/
+lsConvert[4] = "È|&&#200;" /*Egrave*/
+lsConvert[5] = "É|&&#201;" /*Eacute*/
+lsConvert[6] = "Ê|&&#202;" /*Ecirc*/
+lsConvert[7] = "Ò|&&#210;" /*Ograve*/
+lsConvert[8] = "Ó|&&#211;" /*Oacute*/
+lsConvert[9] = "Ö|&&#214;" /*Ouml*/
+lsConvert[10] = "Ô|&&#212;" /*Ocirc*/
+lsConvert[11] = "à|&&#224;" /*agrave*/
+lsConvert[12] = "á|&&#225;" /*aacute*/
+lsConvert[13] = "â|&&#226;" /*acirc*/
+lsConvert[14] = "ä|&&#228;" /*auml*/
+lsConvert[15] = "è|&&#232;" /*egrave*/
+lsConvert[16] = "é|&&#233;" /*eacute*/
+lsConvert[17] = "ê|&&#234;" /*ecirc*/
+
+
+SetPointer(Hourglass!)
+
+lsXML = asXML
+
+//we need to fix any "&" characters (i.e. K&N)
+llPos = Pos(lsXml,"&",1)
+Do While llPos > 0
+	
+	lsXml = Replace(lsXML,llPos,1,"&amp;")
+	llPos +=3
+	If llPos > Len(lsXml) Then
+		llPOs = 0
+	Else
+		llPos = Pos(lsXml,"&",llPos)
+	End If
+	
+Loop
+
+
+For llArrayPos = 1 to Upperbound(lsConvert)
+
+	lsFrom = Left(lsConvert[llArrayPOs], (Pos(lsConvert[llArrayPOs],'|') - 1))
+	lsTo = Mid(lsConvert[llArrayPos],(Pos(lsConvert[llArrayPOs],'|') + 2),999)
+	
+	w_main.SetMicroHelp("cleansing " + lsFrom)
+
+	llPOs = Pos(lsXML,lsFrom,1)
+	Do While llPos > 0
+		lsXML = Replace(lsXML,llPos,1,lsTo)
+		llPos ++
+		If llPos > Len(lsXML) Then
+			llPos = 0
+		Else
+			llPOs = Pos(lsXML,lsFrom,llPOs)
+		End If
+	Loop
+	
+Next
+
+
+
+w_main.SetMicroHelp("Ready")
+SetPointer(Arrow!)
+
+REturn lsXML
+end function
+

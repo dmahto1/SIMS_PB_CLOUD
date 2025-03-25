@@ -1,0 +1,94 @@
+﻿$PBExportHeader$f_import_do.srf
+$PBExportComments$*
+global type f_import_do from function_object
+end type
+
+forward prototypes
+global subroutine f_import_do (ref window aw_window, ref datawindow adw_master, ref datawindow adw_detail)
+end prototypes
+
+global subroutine f_import_do (ref window aw_window, ref datawindow adw_master, ref datawindow adw_detail);
+String ls_order, ls_file, ls_do
+OLEObject xl, xs
+String ls_filename
+Long ll_row, ll_new
+String ls_id, ls_sku, ls_sku2
+long  ll_cnt
+decimal ld_qty //GAP 11-02 convert to decimal
+Any la_value
+
+// Open Excel file
+
+aw_window.SetMicroHelp("Opening Excel ...")
+SetPointer(HourGlass!)
+ls_order = adw_master.GetItemString(1, "cust_order_no")
+if isnull(ls_order) then ls_order = ''
+ls_do = adw_master.GetItemString(1, "do_no")
+ls_filename = ProfileString(gs_inifile,"ewms","OrderPath","") + "O" + ls_order + ".xls"
+If not fileexists(ls_filename) Then
+	MessageBox(aw_window.Title, "File " + ls_filename + " not found!")
+	Return
+End If
+
+xl = CREATE OLEObject
+xs = CREATE OLEObject
+xl.ConnectToNewObject("Excel.Application")
+xl.Workbooks.Open(ls_filename,0,True)
+xs = xl.application.workbooks(1).worksheets(1)
+
+// Read order details from Excel file
+
+ls_id = 'H'
+ll_row = 0
+Do while ls_id <> "" and ls_id <> "T" 
+	ll_row += 1
+	aw_window.SetMicroHelp("Reading row " + String(ll_row))
+	ls_id = xs.cells(ll_row,1).Value 
+	If ls_id = 'L' Then
+		la_value = xs.cells(ll_row,3).Value
+		If ClassName(la_value) = 'string' Then 
+			ls_sku = la_value
+		Else
+			ls_sku = String(la_value)
+		End If
+		ls_sku2 = ls_sku
+		ll_cnt = 0
+		Do while ll_cnt = 0 and Len(ls_sku2) <= 20
+		Select Count(*) into :ll_cnt
+			From item_master 
+			Where project_id = :gs_project and sku = :ls_sku2 ;			 
+			If ll_cnt < 1 Then
+				ll_cnt = 0
+				ls_sku2 = '0' + ls_sku2
+			End If
+		Loop
+		If ll_cnt > 0 Then ls_sku = ls_sku2
+		
+		la_value = xs.cells(ll_row,9).Value
+		If ClassName(la_value) = 'string' Then 
+			ld_qty = long(la_value)
+		Else
+			ld_qty = la_value
+		End If
+		ll_new = adw_detail.Find("sku = '" + ls_sku + "'", 1, adw_detail.RowCount())
+		If ll_new > 0 Then
+			adw_detail.SetItem(ll_new, "req_qty", &
+				adw_detail.GetItemNumber(ll_new, "req_qty") + ld_qty)
+		Else
+			ll_new = adw_detail.InsertRow(0)
+			adw_detail.SetItem(ll_new, "do_no", ls_do)
+			adw_detail.SetItem(ll_new, "sku", ls_sku)
+			adw_detail.SetItem(ll_new, "original_sku", ls_sku)
+			adw_detail.SetItem(ll_new, "req_qty", ld_qty)
+		End If
+	End If
+Loop
+xl.Workbooks.Close
+xl.DisconnectObject()
+
+adw_detail.Sort()
+aw_window.SetMicroHelp("Import complete!")
+
+Return
+end subroutine
+

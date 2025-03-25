@@ -1,0 +1,65 @@
+HA$PBExportHeader$f_cleanse_printer.srf
+$PBExportComments$Convert any special characters in printer file
+global type f_cleanse_printer from function_object
+end type
+
+forward prototypes
+global function string f_cleanse_printer (string astext)
+end prototypes
+
+global function string f_cleanse_printer (string astext);
+String	lsText, lsChar
+Long	llLen, llPOs, llCount, llArrayPOs
+String	lsConvert[], lsFrom, lsTo
+
+//From/to values seperated by |
+
+//To Add - Use character map in LabelVision to add field to a label. Print to a file and see what is printed
+
+lsConvert[1] = "$$HEX1$$c000$$ENDHEX$$|$$HEX1$$b700$$ENDHEX$$"
+lsConvert[2] = "$$HEX1$$c100$$ENDHEX$$|$$HEX1$$b500$$ENDHEX$$"
+lsConvert[3] = "$$HEX1$$c200$$ENDHEX$$|$$HEX1$$b600$$ENDHEX$$"
+lsConvert[4] = "$$HEX1$$c300$$ENDHEX$$|$$HEX1$$c700$$ENDHEX$$"
+lsConvert[5] = "$$HEX1$$c400$$ENDHEX$$|$$HEX1$$7d01$$ENDHEX$$"
+lsConvert[6] = "$$HEX1$$c900$$ENDHEX$$|$$HEX1$$9000$$ENDHEX$$"
+lsConvert[7] = "$$HEX1$$d200$$ENDHEX$$|$$HEX1$$e300$$ENDHEX$$"
+lsConvert[8] = "$$HEX1$$d300$$ENDHEX$$|$$HEX1$$e000$$ENDHEX$$"
+lsConvert[9] = "$$HEX1$$d400$$ENDHEX$$|$$HEX1$$e200$$ENDHEX$$"
+lsConvert[10] = "$$HEX1$$d500$$ENDHEX$$|$$HEX1$$e500$$ENDHEX$$"
+lsConvert[11] = "$$HEX1$$d600$$ENDHEX$$|$$HEX1$$2221$$ENDHEX$$"
+lsConvert[12] = "$$HEX1$$ce00$$ENDHEX$$|$$HEX1$$d700$$ENDHEX$$"
+lsConvert[13] = "$$HEX1$$cc00$$ENDHEX$$|$$HEX1$$de00$$ENDHEX$$"
+
+// These convert to other characters that are converted as well. They need to be converted last
+lsConvert[14] = "$$HEX1$$c800$$ENDHEX$$|$$HEX1$$d400$$ENDHEX$$"
+lsConvert[15] = "$$HEX1$$ca00$$ENDHEX$$|$$HEX1$$d200$$ENDHEX$$"
+lsConvert[16] = "$$HEX1$$cb00$$ENDHEX$$|$$HEX1$$d300$$ENDHEX$$"
+lsConvert[17] = "$$HEX1$$cd00$$ENDHEX$$|$$HEX1$$d600$$ENDHEX$$"
+
+SetPointer(Hourglass!)
+
+lsText = asText
+
+For llArrayPos = 1 to Upperbound(lsConvert)
+
+	lsFrom = Left(lsConvert[llArrayPOs], (Pos(lsConvert[llArrayPOs],'|') - 1))
+	lsTo = Mid(lsConvert[llArrayPos],(Pos(lsConvert[llArrayPOs],'|') + 1),999)
+	
+	llPOs = Pos(lsText,lsFrom,1)
+	Do While llPos > 0
+		lsText = Replace(lsText,llPos,1,lsTo)
+		llPos ++
+		If llPos > Len(lsText) Then
+			llPos = 0
+		Else
+			llPOs = Pos(lsText,lsFrom,llPOs)
+		End If
+	Loop
+	
+Next
+
+SetPointer(Arrow!)
+
+REturn lsText
+end function
+

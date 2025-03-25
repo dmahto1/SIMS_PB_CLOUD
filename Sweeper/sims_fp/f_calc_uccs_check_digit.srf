@@ -1,0 +1,51 @@
+HA$PBExportHeader$f_calc_uccs_check_digit.srf
+$PBExportComments$Calculate UCCS Check Digit
+global type f_calc_uccs_check_digit from function_object
+end type
+
+forward prototypes
+global function integer f_calc_uccs_check_digit (string asin)
+end prototypes
+
+global function integer f_calc_uccs_check_digit (string asin);Integer	liCheck, liPos, liOddSum, liEvenSum, liSum, liLen, liRemainder
+String	lsCode
+
+lsCode = asIn
+liLen = Len(lsCode)
+
+//Must be 17 digits!
+If liLen <> 17 Then return -1
+
+//Sum The Odd Digits
+liPos = 1 /* first odd digit */
+Do While liPos <= liLen
+	
+	liOddSum += Long(Mid(lsCode,liPos,1))
+	liPos +=2 /*next odd number*/
+	
+Loop
+
+liOddSum = liOddSum * 3 /* multiply odd sum by 3 */
+
+//Sum the Even Digits
+liPos = 2 /* first Even digit */
+Do While liPos <= liLen
+	
+	liEvenSum += Long(Mid(lsCode,liPos,1))
+	liPos +=2 /*next odd number*/
+	
+Loop
+
+liSum = liOddsum + liEvenSum /* add the odd and even sums together*/
+
+//Divide Sum by 10 to get remainder
+liRemainder = Mod(liSum, 10)
+
+//Check digit is number which add remainder to 10
+liCheck = 10 - liRemainder
+
+If liCheck = 10 then liCheck = 0
+
+Return liCheck
+end function
+

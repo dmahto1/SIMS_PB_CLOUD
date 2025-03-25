@@ -1,0 +1,70 @@
+HA$PBExportHeader$d_shipment_detail.srd
+$PBExportComments$Shipment Detail (Order) information
+release 11;
+datawindow(units=0 timer_interval=0 color=16777215 processing=1 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes print.preview.outline=yes hidegrayline=no showbackcoloronxp=no grid.lines=0 )
+header(height=140 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=64 color="536870912" )
+table(column=(type=char(1) updatewhereclause=yes name=c_select_ind dbname="c_select_Ind" initial="N" values="	Y/	N" )
+ column=(type=char(16) update=yes updatewhereclause=yes key=yes name=ship_no dbname="Ship_No" )
+ column=(type=char(8) update=yes updatewhereclause=yes key=yes name=ship_line_no dbname="Ship_Line_No" )
+ column=(type=char(50) update=yes updatewhereclause=yes name=sku dbname="SKU" )
+ column=(type=decimal(5) update=yes updatewhereclause=yes name=quantity dbname="Quantity" )
+ column=(type=decimal(4) update=yes updatewhereclause=yes name=price dbname="Price" )
+ column=(type=char(10) update=yes updatewhereclause=yes name=container_id dbname="Container_ID" )
+ column=(type=char(25) update=yes updatewhereclause=yes name=last_user dbname="Last_User" )
+ column=(type=datetime update=yes updatewhereclause=yes name=last_update dbname="Last_Update" )
+ column=(type=char(10) update=yes updatewhereclause=yes name=create_user dbname="Create_User" )
+ column=(type=datetime update=yes updatewhereclause=yes name=create_user_date dbname="Create_User_Date" )
+ column=(type=decimal(0) update=yes updatewhereclause=yes name=line_item_nbr dbname="Line_Item_Nbr" )
+ column=(type=char(50) update=yes updatewhereclause=yes name=invoice_no dbname="Invoice_No" )
+ column=(type=char(16) update=yes updatewhereclause=yes name=rodo_no dbname="RODO_No" )
+ column=(type=decimal(0) update=yes updatewhereclause=yes name=line_item_no dbname="Line_Item_No" )
+ column=(type=char(1) updatewhereclause=yes name=c_delete_ind dbname="c_delete_Ind" initial="N" )
+ retrieve="  SELECT	'N' as c_select_Ind, 
+			Shipment_Line_Item.Ship_No,   
+         Shipment_Line_Item.Ship_Line_No,   
+         Shipment_Line_Item.SKU,   
+         Shipment_Line_Item.Quantity,   
+         Shipment_Line_Item.Price,   
+         Shipment_Line_Item.Container_ID,   
+         Shipment_Line_Item.Last_User,   
+         Shipment_Line_Item.Last_Update,   
+         Shipment_Line_Item.Create_User,   
+         Shipment_Line_Item.Create_User_Date,   
+         Shipment_Line_Item.Line_Item_Nbr,   
+         Shipment_Line_Item.Invoice_No,   
+         Shipment_Line_Item.RODO_No,   
+         Shipment_Line_Item.Line_Item_No, 
+			'N' as c_delete_Ind
+    FROM Shipment_Line_Item
+	Where Shipment_Line_Item.Ship_no = :asShipNo" update="Shipment_Line_Item" updatewhere=0 updatekeyinplace=yes arguments=(("asShipNo", string))  sort="line_item_nbr A invoice_no A line_item_no A " )
+group(level=1 header.height=0 trailer.height=8 by=("invoice_no" ) header.color="536870912" trailer.color="12639424" )
+text(band=header alignment="2" text="Sku" border="6" color="0" x="1358" y="8" height="120" width="526" html.valueishtml="0"  name=sku_t visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="79741120" )
+text(band=header alignment="2" text="Quantity" border="6" color="0" x="1893" y="8" height="120" width="306" html.valueishtml="0"  name=quantity_t visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="79741120" )
+text(band=header alignment="2" text="Price/Cost" border="6" color="0" x="2208" y="8" height="120" width="311" html.valueishtml="0"  name=price_t visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="79741120" )
+text(band=header alignment="2" text="ShipLine #" border="6" color="0" x="91" y="8" height="120" width="370" html.valueishtml="0"  name=ship_line_num_t visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="79741120" )
+text(band=header alignment="2" text="OrderNbr" border="6" color="0" x="471" y="8" height="120" width="521" html.valueishtml="0"  name=order_nbr_t visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="79741120" )
+text(band=header alignment="2" text="OrderLine #" border="6" color="0" x="1001" y="8" height="120" width="347" html.valueishtml="0"  name=order_line_num_t visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="79741120" )
+text(band=header alignment="0" text="" border="6" color="0" x="9" y="8" height="120" width="73" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="79741120" )
+text(band=header alignment="2" text="ContainerID" border="6" color="0" x="2528" y="8" height="120" width="421" html.valueishtml="0"  name=container_id_t visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="79741120" )
+column(band=detail id=1 alignment="0" tabsequence=10 border="0" color="0" x="9" y="8" height="56" width="73" format="[general]" html.valueishtml="0"  name=c_select_ind visible="1~tIf(getrow() = 1 or rodo_no[0] <> rodo_no[-1],1,0)" checkbox.text="" checkbox.on="Y" checkbox.off="N" checkbox.scale=no checkbox.threed=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+column(band=detail id=12 alignment="0" tabsequence=32766 border="0" color="0" x="91" y="8" height="56" width="370" format="[general]" html.valueishtml="0"  name=line_item_nbr visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="0" color="0" x="1358" y="8" height="56" width="526" format="[general]" html.valueishtml="0"  name=sku visible="1" edit.limit=50 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="1" tabsequence=32766 border="0" color="0" x="1893" y="8" height="56" width="306" format="########.#####" html.valueishtml="0"  name=quantity visible="1" editmask.mask="########.#####" editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=13 alignment="0" tabsequence=32766 border="0" color="0" x="471" y="8" height="56" width="521" format="[general]" html.valueishtml="0"  name=invoice_no visible="1" edit.limit=20 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=15 alignment="0" tabsequence=32766 border="0" color="0" x="1001" y="8" height="56" width="347" format="[general]" html.valueishtml="0"  name=line_item_no visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="1" tabsequence=20 border="5" color="0" x="2208" y="8" height="56" width="311" format="[general]" html.valueishtml="0"  name=price visible="1" editmask.mask="###,###.00" editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=7 alignment="0" tabsequence=30 border="5" color="0" x="2528" y="8" height="56" width="421" format="[general]" html.valueishtml="0"  name=container_id visible="1" edit.limit=10 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+
+sparse(names="invoice_no")htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" pagingmethod=0 generatedddwframes="1" )
+xhtmlgen() cssgen(sessionspecific="0" )
+xmlgen(inline="0" )
+xsltgen()
+jsgen()
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )
+export.xhtml()

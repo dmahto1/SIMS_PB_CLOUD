@@ -1,0 +1,1721 @@
+HA$PBExportHeader$m_simple_record.srm
+forward
+global type m_simple_record from m_main
+end type
+type m_edit from menu within m_simple_record
+end type
+type m_addnew from menu within m_edit
+end type
+type m_deleterecord from menu within m_edit
+end type
+type m_unlock from menu within m_edit
+end type
+type m_edit from menu within m_simple_record
+m_addnew m_addnew
+m_deleterecord m_deleterecord
+m_unlock m_unlock
+end type
+global type m_simple_record from m_main
+m_edit m_edit
+end type
+end forward
+
+global type m_simple_record from m_main
+m_edit m_edit
+end type
+global m_simple_record m_simple_record
+
+on m_simple_record.create
+m_simple_record=this
+call super::create
+this.m_edit=create m_edit
+this.Item[UpperBound(this.Item)+1]=this.m_edit
+end on
+
+on m_simple_record.destroy
+call super::destroy
+destroy(this.m_edit)
+end on
+
+type m_file from m_main`m_file within m_simple_record
+end type
+
+on m_file.create
+call super::create
+end on
+
+on m_file.destroy
+call super::destroy
+end on
+
+type m_save from m_main`m_save within m_file
+end type
+
+on m_save.create
+call super::create
+this.enabled = true
+this.toolbaritemname = "custom008!"
+this.toolbaritemorder = 1
+end on
+
+on m_save.destroy
+call super::destroy
+end on
+
+type m_saveas from m_main`m_saveas within m_file
+end type
+
+on m_saveas.create
+call super::create
+end on
+
+on m_saveas.destroy
+call super::destroy
+end on
+
+type m_06 from m_main`m_06 within m_file
+end type
+
+on m_06.create
+call super::create
+end on
+
+on m_06.destroy
+call super::destroy
+end on
+
+type m_retrieve from m_main`m_retrieve within m_file
+end type
+
+on m_retrieve.create
+call super::create
+this.enabled = true
+this.toolbaritemname = "custom007!"
+this.toolbaritemorder = 2
+end on
+
+on m_retrieve.destroy
+call super::destroy
+end on
+
+type m_refresh from m_main`m_refresh within m_file
+end type
+
+on m_refresh.create
+call super::create
+end on
+
+on m_refresh.destroy
+call super::destroy
+end on
+
+type m_sort from m_main`m_sort within m_file
+end type
+
+on m_sort.create
+call super::create
+end on
+
+on m_sort.destroy
+call super::destroy
+end on
+
+type m_clear from m_main`m_clear within m_file
+end type
+
+on m_clear.create
+call super::create
+end on
+
+on m_clear.destroy
+call super::destroy
+end on
+
+type m_find from m_main`m_find within m_file
+end type
+
+on m_find.create
+call super::create
+end on
+
+on m_find.destroy
+call super::destroy
+end on
+
+type m_07 from m_main`m_07 within m_file
+end type
+
+on m_07.create
+call super::create
+end on
+
+on m_07.destroy
+call super::destroy
+end on
+
+type m_close from m_main`m_close within m_file
+end type
+
+on m_close.create
+call super::create
+this.enabled = true
+this.toolbaritemname = "exit!"
+end on
+
+on m_close.destroy
+call super::destroy
+end on
+
+type m_30 from m_main`m_30 within m_file
+end type
+
+on m_30.create
+call super::create
+end on
+
+on m_30.destroy
+call super::destroy
+end on
+
+type m_printpreview from m_main`m_printpreview within m_file
+end type
+
+on m_printpreview.create
+call super::create
+end on
+
+on m_printpreview.destroy
+call super::destroy
+end on
+
+type m_print from m_main`m_print within m_file
+end type
+
+on m_print.create
+call super::create
+this.toolbaritemname = "print!"
+this.toolbaritemorder = 3
+this.toolbaritemspace = 1
+end on
+
+on m_print.destroy
+call super::destroy
+end on
+
+type m_printsetup from m_main`m_printsetup within m_file
+end type
+
+on m_printsetup.create
+call super::create
+end on
+
+on m_printsetup.destroy
+call super::destroy
+end on
+
+type m_01 from m_main`m_01 within m_file
+end type
+
+on m_01.create
+call super::create
+end on
+
+on m_01.destroy
+call super::destroy
+end on
+
+type m_changepassword from m_main`m_changepassword within m_file
+end type
+
+on m_changepassword.create
+call super::create
+end on
+
+on m_changepassword.destroy
+call super::destroy
+end on
+
+type m_changetemplate from m_main`m_changetemplate within m_file
+end type
+
+on m_changetemplate.create
+call super::create
+end on
+
+on m_changetemplate.destroy
+call super::destroy
+end on
+
+type m_logonoff from m_main`m_logonoff within m_file
+end type
+
+on m_logonoff.create
+call super::create
+end on
+
+on m_logonoff.destroy
+call super::destroy
+end on
+
+type m_02 from m_main`m_02 within m_file
+end type
+
+on m_02.create
+call super::create
+end on
+
+on m_02.destroy
+call super::destroy
+end on
+
+type m_exit from m_main`m_exit within m_file
+end type
+
+on m_exit.create
+call super::create
+end on
+
+on m_exit.destroy
+call super::destroy
+end on
+
+type m_inbound from m_main`m_inbound within m_simple_record
+end type
+
+on m_inbound.create
+call super::create
+end on
+
+on m_inbound.destroy
+call super::destroy
+end on
+
+type m_receive_order from m_main`m_receive_order within m_inbound
+end type
+
+on m_receive_order.create
+call super::create
+end on
+
+on m_receive_order.destroy
+call super::destroy
+end on
+
+type m_assignscanner from m_main`m_assignscanner within m_inbound
+end type
+
+on m_assignscanner.create
+call super::create
+end on
+
+on m_assignscanner.destroy
+call super::destroy
+end on
+
+type m_11 from m_main`m_11 within m_inbound
+end type
+
+on m_11.create
+call super::create
+end on
+
+on m_11.destroy
+call super::destroy
+end on
+
+type m_4loadgmimsasns from m_main`m_4loadgmimsasns within m_inbound
+end type
+
+on m_4loadgmimsasns.create
+call super::create
+end on
+
+on m_4loadgmimsasns.destroy
+call super::destroy
+end on
+
+type m_shipmentsinbound from m_main`m_shipmentsinbound within m_inbound
+end type
+
+on m_shipmentsinbound.create
+call super::create
+end on
+
+on m_shipmentsinbound.destroy
+call super::destroy
+end on
+
+type m_outbound from m_main`m_outbound within m_simple_record
+end type
+
+on m_outbound.create
+call super::create
+end on
+
+on m_outbound.destroy
+call super::destroy
+end on
+
+type m_delivery_order from m_main`m_delivery_order within m_outbound
+end type
+
+on m_delivery_order.create
+call super::create
+end on
+
+on m_delivery_order.destroy
+call super::destroy
+end on
+
+type m_batchpicking from m_main`m_batchpicking within m_outbound
+end type
+
+on m_batchpicking.create
+call super::create
+end on
+
+on m_batchpicking.destroy
+call super::destroy
+end on
+
+type m_3assignscanner from m_main`m_3assignscanner within m_outbound
+end type
+
+on m_3assignscanner.create
+call super::create
+end on
+
+on m_3assignscanner.destroy
+call super::destroy
+end on
+
+type m_12 from m_main`m_12 within m_outbound
+end type
+
+on m_12.create
+call super::create
+end on
+
+on m_12.destroy
+call super::destroy
+end on
+
+type m_shipmentsoutbound from m_main`m_shipmentsoutbound within m_outbound
+end type
+
+on m_shipmentsoutbound.create
+call super::create
+end on
+
+on m_shipmentsoutbound.destroy
+call super::destroy
+end on
+
+type m_6etamaintenance from m_main`m_6etamaintenance within m_outbound
+end type
+
+on m_6etamaintenance.create
+call super::create
+end on
+
+on m_6etamaintenance.destroy
+call super::destroy
+end on
+
+type m_siklinecapture from m_main`m_siklinecapture within m_outbound
+end type
+
+on m_siklinecapture.create
+call super::create
+end on
+
+on m_siklinecapture.destroy
+call super::destroy
+end on
+
+type m_outbounddashboard from m_main`m_outbounddashboard within m_outbound
+end type
+
+on m_outbounddashboard.create
+call super::create
+end on
+
+on m_outbounddashboard.destroy
+call super::destroy
+end on
+
+type m_inventorymgmt from m_main`m_inventorymgmt within m_simple_record
+end type
+
+on m_inventorymgmt.create
+call super::create
+end on
+
+on m_inventorymgmt.destroy
+call super::destroy
+end on
+
+type m_stock_transfer from m_main`m_stock_transfer within m_inventorymgmt
+end type
+
+on m_stock_transfer.create
+call super::create
+end on
+
+on m_stock_transfer.destroy
+call super::destroy
+end on
+
+type m_stock_adjustment from m_main`m_stock_adjustment within m_inventorymgmt
+end type
+
+on m_stock_adjustment.create
+call super::create
+end on
+
+on m_stock_adjustment.destroy
+call super::destroy
+end on
+
+type m_stockinquiry from m_main`m_stockinquiry within m_inventorymgmt
+end type
+
+on m_stockinquiry.create
+call super::create
+end on
+
+on m_stockinquiry.destroy
+call super::destroy
+end on
+
+type m_cyclecount from m_main`m_cyclecount within m_inventorymgmt
+end type
+
+on m_cyclecount.create
+call super::create
+end on
+
+on m_cyclecount.destroy
+call super::destroy
+end on
+
+type m_5 from m_main`m_5 within m_inventorymgmt
+end type
+
+on m_5.create
+call super::create
+end on
+
+on m_5.destroy
+call super::destroy
+end on
+
+type m_boh from m_main`m_boh within m_inventorymgmt
+end type
+
+on m_boh.create
+call super::create
+end on
+
+on m_boh.destroy
+call super::destroy
+end on
+
+type m_or from m_main`m_or within m_inventorymgmt
+end type
+
+on m_or.create
+call super::create
+end on
+
+on m_or.destroy
+call super::destroy
+end on
+
+type m_8stockownerchange from m_main`m_8stockownerchange within m_inventorymgmt
+end type
+
+on m_8stockownerchange.create
+call super::create
+end on
+
+on m_8stockownerchange.destroy
+call super::destroy
+end on
+
+type m_parentserialnumberchange from m_main`m_parentserialnumberchange within m_inventorymgmt
+end type
+
+on m_parentserialnumberchange.create
+call super::create
+end on
+
+on m_parentserialnumberchange.destroy
+call super::destroy
+end on
+
+type m_10dataentryofcyclecountbysku from m_main`m_10dataentryofcyclecountbysku within m_inventorymgmt
+end type
+
+on m_10dataentryofcyclecountbysku.create
+call super::create
+end on
+
+on m_10dataentryofcyclecountbysku.destroy
+call super::destroy
+end on
+
+type m_11dataentryofcyclecountbylocation from m_main`m_11dataentryofcyclecountbylocation within m_inventorymgmt
+end type
+
+on m_11dataentryofcyclecountbylocation.create
+call super::create
+end on
+
+on m_11dataentryofcyclecountbylocation.destroy
+call super::destroy
+end on
+
+type m_maintenance from m_main`m_maintenance within m_simple_record
+end type
+
+on m_maintenance.create
+call super::create
+end on
+
+on m_maintenance.destroy
+call super::destroy
+end on
+
+type m_product from m_main`m_product within m_maintenance
+end type
+
+on m_product.create
+call super::create
+end on
+
+on m_product.destroy
+call super::destroy
+end on
+
+type m_projectmaster from m_main`m_projectmaster within m_maintenance
+end type
+
+on m_projectmaster.create
+call super::create
+end on
+
+on m_projectmaster.destroy
+call super::destroy
+end on
+
+type m_warehousemaster from m_main`m_warehousemaster within m_maintenance
+end type
+
+on m_warehousemaster.create
+call super::create
+end on
+
+on m_warehousemaster.destroy
+call super::destroy
+end on
+
+type m_suppliermaster from m_main`m_suppliermaster within m_maintenance
+end type
+
+on m_suppliermaster.create
+call super::create
+end on
+
+on m_suppliermaster.destroy
+call super::destroy
+end on
+
+type m_customermaster from m_main`m_customermaster within m_maintenance
+end type
+
+on m_customermaster.create
+call super::create
+end on
+
+on m_customermaster.destroy
+call super::destroy
+end on
+
+type m_6carriermaster from m_main`m_6carriermaster within m_maintenance
+end type
+
+on m_6carriermaster.create
+call super::create
+end on
+
+on m_6carriermaster.destroy
+call super::destroy
+end on
+
+type m_6taxtable from m_main`m_6taxtable within m_maintenance
+end type
+
+on m_6taxtable.create
+call super::create
+end on
+
+on m_6taxtable.destroy
+call super::destroy
+end on
+
+type m_0 from m_main`m_0 within m_maintenance
+end type
+
+on m_0.create
+call super::create
+end on
+
+on m_0.destroy
+call super::destroy
+end on
+
+type m_6codetables from m_main`m_6codetables within m_maintenance
+end type
+
+on m_6codetables.create
+call super::create
+end on
+
+on m_6codetables.destroy
+call super::destroy
+end on
+
+type m_1inventorytype from m_main`m_1inventorytype within m_6codetables
+end type
+
+on m_1inventorytype.create
+call super::create
+end on
+
+on m_1inventorytype.destroy
+call super::destroy
+end on
+
+type m_2warehousetype from m_main`m_2warehousetype within m_6codetables
+end type
+
+on m_2warehousetype.create
+call super::create
+end on
+
+on m_2warehousetype.destroy
+call super::destroy
+end on
+
+type m_3locationtype from m_main`m_3locationtype within m_6codetables
+end type
+
+on m_3locationtype.create
+call super::create
+end on
+
+on m_3locationtype.destroy
+call super::destroy
+end on
+
+type m_4deliveryordertype from m_main`m_4deliveryordertype within m_6codetables
+end type
+
+on m_4deliveryordertype.create
+call super::create
+end on
+
+on m_4deliveryordertype.destroy
+call super::destroy
+end on
+
+type m_5receiveordertype from m_main`m_5receiveordertype within m_6codetables
+end type
+
+on m_5receiveordertype.create
+call super::create
+end on
+
+on m_5receiveordertype.destroy
+call super::destroy
+end on
+
+type m_6transferordertype from m_main`m_6transferordertype within m_6codetables
+end type
+
+on m_6transferordertype.create
+call super::create
+end on
+
+on m_6transferordertype.destroy
+call super::destroy
+end on
+
+type m_7itemgroup from m_main`m_7itemgroup within m_6codetables
+end type
+
+on m_7itemgroup.create
+call super::create
+end on
+
+on m_7itemgroup.destroy
+call super::destroy
+end on
+
+type m_8customer_type from m_main`m_8customer_type within m_6codetables
+end type
+
+on m_8customer_type.create
+call super::create
+end on
+
+on m_8customer_type.destroy
+call super::destroy
+end on
+
+type m_9transportationmodes from m_main`m_9transportationmodes within m_6codetables
+end type
+
+on m_9transportationmodes.create
+call super::create
+end on
+
+on m_9transportationmodes.destroy
+call super::destroy
+end on
+
+type m_2 from m_main`m_2 within m_6codetables
+end type
+
+on m_2.create
+call super::create
+end on
+
+on m_2.destroy
+call super::destroy
+end on
+
+type m_4 from m_main`m_4 within m_6codetables
+end type
+
+on m_4.create
+call super::create
+end on
+
+on m_4.destroy
+call super::destroy
+end on
+
+type m_6 from m_main`m_6 within m_6codetables
+end type
+
+on m_6.create
+call super::create
+end on
+
+on m_6.destroy
+call super::destroy
+end on
+
+type m_13cootranslate from m_main`m_13cootranslate within m_6codetables
+end type
+
+on m_13cootranslate.create
+call super::create
+end on
+
+on m_13cootranslate.destroy
+call super::destroy
+end on
+
+type m_14itemserial from m_main`m_14itemserial within m_6codetables
+end type
+
+on m_14itemserial.create
+call super::create
+end on
+
+on m_14itemserial.destroy
+call super::destroy
+end on
+
+type m_15 from m_main`m_15 within m_6codetables
+end type
+
+on m_15.create
+call super::create
+end on
+
+on m_15.destroy
+call super::destroy
+end on
+
+type m_16cartontype from m_main`m_16cartontype within m_6codetables
+end type
+
+on m_16cartontype.create
+call super::create
+end on
+
+on m_16cartontype.destroy
+call super::destroy
+end on
+
+type m_3 from m_main`m_3 within m_6codetables
+end type
+
+on m_3.create
+call super::create
+end on
+
+on m_3.destroy
+call super::destroy
+end on
+
+type m_18ccgroupmaint from m_main`m_18ccgroupmaint within m_6codetables
+end type
+
+on m_18ccgroupmaint.create
+call super::create
+end on
+
+on m_18ccgroupmaint.destroy
+call super::destroy
+end on
+
+type m_19ccclassmaint from m_main`m_19ccclassmaint within m_6codetables
+end type
+
+on m_19ccclassmaint.create
+call super::create
+end on
+
+on m_19ccclassmaint.destroy
+call super::destroy
+end on
+
+type m_7 from m_main`m_7 within m_6codetables
+end type
+
+on m_7.create
+call super::create
+end on
+
+on m_7.destroy
+call super::destroy
+end on
+
+type m_8 from m_main`m_8 within m_6codetables
+end type
+
+on m_8.create
+call super::create
+end on
+
+on m_8.destroy
+call super::destroy
+end on
+
+type m_9 from m_main`m_9 within m_6codetables
+end type
+
+on m_9.create
+call super::create
+end on
+
+on m_9.destroy
+call super::destroy
+end on
+
+type m_23countryforceserialmatch from m_main`m_23countryforceserialmatch within m_6codetables
+end type
+
+on m_23countryforceserialmatch.create
+call super::create
+end on
+
+on m_23countryforceserialmatch.destroy
+call super::destroy
+end on
+
+type m_24deliverystaterouting from m_main`m_24deliverystaterouting within m_6codetables
+end type
+
+on m_24deliverystaterouting.create
+call super::create
+end on
+
+on m_24deliverystaterouting.destroy
+call super::destroy
+end on
+
+type m_25hscodeprofile from m_main`m_25hscodeprofile within m_6codetables
+end type
+
+on m_25hscodeprofile.create
+call super::create
+end on
+
+on m_25hscodeprofile.destroy
+call super::destroy
+end on
+
+type m_26uom from m_main`m_26uom within m_6codetables
+end type
+
+on m_26uom.create
+call super::create
+end on
+
+on m_26uom.destroy
+call super::destroy
+end on
+
+type m_27serialprefix from m_main`m_27serialprefix within m_6codetables
+end type
+
+on m_27serialprefix.create
+call super::create
+end on
+
+on m_27serialprefix.destroy
+call super::destroy
+end on
+
+type m_28strykerwarehouse from m_main`m_28strykerwarehouse within m_6codetables
+end type
+
+on m_28strykerwarehouse.create
+call super::create
+end on
+
+on m_28strykerwarehouse.destroy
+call super::destroy
+end on
+
+type m_29strykermrpsku from m_main`m_29strykermrpsku within m_6codetables
+end type
+
+on m_29strykermrpsku.create
+call super::create
+end on
+
+on m_29strykermrpsku.destroy
+call super::destroy
+end on
+
+type m_30customcartonbolconfig from m_main`m_30customcartonbolconfig within m_6codetables
+end type
+
+on m_30customcartonbolconfig.create
+call super::create
+end on
+
+on m_30customcartonbolconfig.destroy
+call super::destroy
+end on
+
+type m_05 from m_main`m_05 within m_maintenance
+end type
+
+on m_05.create
+call super::create
+end on
+
+on m_05.destroy
+call super::destroy
+end on
+
+type m_user from m_main`m_user within m_maintenance
+end type
+
+on m_user.create
+call super::create
+end on
+
+on m_user.destroy
+call super::destroy
+end on
+
+type m_reports from m_main`m_reports within m_simple_record
+end type
+
+on m_reports.create
+call super::create
+end on
+
+on m_reports.destroy
+call super::destroy
+end on
+
+type m_utilities from m_main`m_utilities within m_simple_record
+end type
+
+on m_utilities.create
+call super::create
+end on
+
+on m_utilities.destroy
+call super::destroy
+end on
+
+type m_1shippinglabel from m_main`m_1shippinglabel within m_utilities
+end type
+
+on m_1shippinglabel.create
+call super::create
+end on
+
+on m_1shippinglabel.destroy
+call super::destroy
+end on
+
+type m_2partlabel from m_main`m_2partlabel within m_utilities
+end type
+
+on m_2partlabel.create
+call super::create
+end on
+
+on m_2partlabel.destroy
+call super::destroy
+end on
+
+type m_2eupartlabel from m_main`m_2eupartlabel within m_utilities
+end type
+
+on m_2eupartlabel.create
+call super::create
+end on
+
+on m_2eupartlabel.destroy
+call super::destroy
+end on
+
+type m_2import from m_main`m_2import within m_utilities
+end type
+
+on m_2import.create
+call super::create
+end on
+
+on m_2import.destroy
+call super::destroy
+end on
+
+type m_1 from m_main`m_1 within m_utilities
+end type
+
+on m_1.create
+call super::create
+end on
+
+on m_1.destroy
+call super::destroy
+end on
+
+type m_3mesurementconversion from m_main`m_3mesurementconversion within m_utilities
+end type
+
+on m_3mesurementconversion.create
+call super::create
+end on
+
+on m_3mesurementconversion.destroy
+call super::destroy
+end on
+
+type m_6serialnumberlabels from m_main`m_6serialnumberlabels within m_utilities
+end type
+
+on m_6serialnumberlabels.create
+call super::create
+end on
+
+on m_6serialnumberlabels.destroy
+call super::destroy
+end on
+
+type m_7receivinglabels from m_main`m_7receivinglabels within m_utilities
+end type
+
+on m_7receivinglabels.create
+call super::create
+end on
+
+on m_7receivinglabels.destroy
+call super::destroy
+end on
+
+type m_10 from m_main`m_10 within m_utilities
+end type
+
+on m_10.create
+call super::create
+end on
+
+on m_10.destroy
+call super::destroy
+end on
+
+type m_addresslabels from m_main`m_addresslabels within m_utilities
+end type
+
+on m_addresslabels.create
+call super::create
+end on
+
+on m_addresslabels.destroy
+call super::destroy
+end on
+
+type m_10palletlabel from m_main`m_10palletlabel within m_utilities
+end type
+
+on m_10palletlabel.create
+call super::create
+end on
+
+on m_10palletlabel.destroy
+call super::destroy
+end on
+
+type m_11traxeod from m_main`m_11traxeod within m_utilities
+end type
+
+on m_11traxeod.create
+call super::create
+end on
+
+on m_11traxeod.destroy
+call super::destroy
+end on
+
+type m_container_label from m_main`m_container_label within m_utilities
+end type
+
+on m_container_label.create
+call super::create
+end on
+
+on m_container_label.destroy
+call super::destroy
+end on
+
+type m_13 from m_main`m_13 within m_utilities
+end type
+
+on m_13.create
+call super::create
+end on
+
+on m_13.destroy
+call super::destroy
+end on
+
+type m_14 from m_main`m_14 within m_utilities
+end type
+
+on m_14.create
+call super::create
+end on
+
+on m_14.destroy
+call super::destroy
+end on
+
+type m_15cartonserialsearch from m_main`m_15cartonserialsearch within m_utilities
+end type
+
+on m_15cartonserialsearch.create
+call super::create
+end on
+
+on m_15cartonserialsearch.destroy
+call super::destroy
+end on
+
+type m_16diskerase from m_main`m_16diskerase within m_utilities
+end type
+
+on m_16diskerase.create
+call super::create
+end on
+
+on m_16diskerase.destroy
+call super::destroy
+end on
+
+type m_importcomcast from m_main`m_importcomcast within m_utilities
+end type
+
+on m_importcomcast.create
+call super::create
+end on
+
+on m_importcomcast.destroy
+call super::destroy
+end on
+
+type m_resendtransactions from m_main`m_resendtransactions within m_utilities
+end type
+
+on m_resendtransactions.create
+call super::create
+end on
+
+on m_resendtransactions.destroy
+call super::destroy
+end on
+
+type m_19updateputaway from m_main`m_19updateputaway within m_utilities
+end type
+
+on m_19updateputaway.create
+call super::create
+end on
+
+on m_19updateputaway.destroy
+call super::destroy
+end on
+
+type m_20kittinglabel from m_main`m_20kittinglabel within m_utilities
+end type
+
+on m_20kittinglabel.create
+call super::create
+end on
+
+on m_20kittinglabel.destroy
+call super::destroy
+end on
+
+type m_21cancanshippinglabel from m_main`m_21cancanshippinglabel within m_utilities
+end type
+
+on m_21cancanshippinglabel.create
+call super::create
+end on
+
+on m_21cancanshippinglabel.destroy
+call super::destroy
+end on
+
+type m_22huaweipartlabels from m_main`m_22huaweipartlabels within m_utilities
+end type
+
+on m_22huaweipartlabels.create
+call super::create
+end on
+
+on m_22huaweipartlabels.destroy
+call super::destroy
+end on
+
+type m_23simslog from m_main`m_23simslog within m_utilities
+end type
+
+on m_23simslog.create
+call super::create
+end on
+
+on m_23simslog.destroy
+call super::destroy
+end on
+
+type m_24comcastmultiplemacids from m_main`m_24comcastmultiplemacids within m_utilities
+end type
+
+on m_24comcastmultiplemacids.create
+call super::create
+end on
+
+on m_24comcastmultiplemacids.destroy
+call super::destroy
+end on
+
+type m_25strykermrplabel from m_main`m_25strykermrplabel within m_utilities
+end type
+
+on m_25strykermrplabel.create
+call super::create
+end on
+
+on m_25strykermrplabel.destroy
+call super::destroy
+end on
+
+type m_26comcastithitdtool from m_main`m_26comcastithitdtool within m_utilities
+end type
+
+on m_26comcastithitdtool.create
+call super::create
+end on
+
+on m_26comcastithitdtool.destroy
+call super::destroy
+end on
+
+type m_27palletdoinfo from m_main`m_27palletdoinfo within m_utilities
+end type
+
+on m_27palletdoinfo.create
+call super::create
+end on
+
+on m_27palletdoinfo.destroy
+call super::destroy
+end on
+
+type m_28cartonlabel from m_main`m_28cartonlabel within m_utilities
+end type
+
+on m_28cartonlabel.create
+call super::create
+end on
+
+on m_28cartonlabel.destroy
+call super::destroy
+end on
+
+type m_29geibuffalosupplylabel from m_main`m_29geibuffalosupplylabel within m_utilities
+end type
+
+on m_29geibuffalosupplylabel.create
+call super::create
+end on
+
+on m_29geibuffalosupplylabel.destroy
+call super::destroy
+end on
+
+type m_30sscclabel from m_main`m_30sscclabel within m_utilities
+end type
+
+on m_30sscclabel.create
+call super::create
+end on
+
+on m_30sscclabel.destroy
+call super::destroy
+end on
+
+type m_31sscclabelreprint from m_main`m_31sscclabelreprint within m_utilities
+end type
+
+on m_31sscclabelreprint.create
+call super::create
+end on
+
+on m_31sscclabelreprint.destroy
+call super::destroy
+end on
+
+type m_32ucc128 from m_main`m_32ucc128 within m_utilities
+end type
+
+on m_32ucc128.create
+call super::create
+end on
+
+on m_32ucc128.destroy
+call super::destroy
+end on
+
+type m_33grainger from m_main`m_33grainger within m_utilities
+end type
+
+on m_33grainger.create
+call super::create
+end on
+
+on m_33grainger.destroy
+call super::destroy
+end on
+
+type m_window from m_main`m_window within m_simple_record
+end type
+
+on m_window.create
+call super::create
+end on
+
+on m_window.destroy
+call super::destroy
+end on
+
+type m_tilevertical from m_main`m_tilevertical within m_window
+end type
+
+on m_tilevertical.create
+call super::create
+end on
+
+on m_tilevertical.destroy
+call super::destroy
+end on
+
+type m_tilehorizontal from m_main`m_tilehorizontal within m_window
+end type
+
+on m_tilehorizontal.create
+call super::create
+end on
+
+on m_tilehorizontal.destroy
+call super::destroy
+end on
+
+type m_cascade from m_main`m_cascade within m_window
+end type
+
+on m_cascade.create
+call super::create
+end on
+
+on m_cascade.destroy
+call super::destroy
+end on
+
+type m_layer from m_main`m_layer within m_window
+end type
+
+on m_layer.create
+call super::create
+end on
+
+on m_layer.destroy
+call super::destroy
+end on
+
+type m_03 from m_main`m_03 within m_window
+end type
+
+on m_03.create
+call super::create
+end on
+
+on m_03.destroy
+call super::destroy
+end on
+
+type m_arrange_icons from m_main`m_arrange_icons within m_window
+end type
+
+on m_arrange_icons.create
+call super::create
+end on
+
+on m_arrange_icons.destroy
+call super::destroy
+end on
+
+type m_help from m_main`m_help within m_simple_record
+end type
+
+on m_help.create
+call super::create
+end on
+
+on m_help.destroy
+call super::destroy
+end on
+
+type m_contents from m_main`m_contents within m_help
+end type
+
+on m_contents.create
+call super::create
+end on
+
+on m_contents.destroy
+call super::destroy
+end on
+
+type m_colorcodes from m_main`m_colorcodes within m_help
+end type
+
+on m_colorcodes.create
+call super::create
+end on
+
+on m_colorcodes.destroy
+call super::destroy
+end on
+
+type m_index from m_main`m_index within m_help
+end type
+
+on m_index.create
+call super::create
+end on
+
+on m_index.destroy
+call super::destroy
+end on
+
+type m_aboutsims from m_main`m_aboutsims within m_help
+end type
+
+on m_aboutsims.create
+call super::create
+end on
+
+on m_aboutsims.destroy
+call super::destroy
+end on
+
+type m_simsmanualonline from m_main`m_simsmanualonline within m_help
+end type
+
+on m_simsmanualonline.create
+call super::create
+end on
+
+on m_simsmanualonline.destroy
+call super::destroy
+end on
+
+type m_edit from menu within m_simple_record
+m_addnew m_addnew
+m_deleterecord m_deleterecord
+m_unlock m_unlock
+end type
+
+on m_edit.create
+call super::create
+this.text = "&Edit"
+this.menutextcolor = 134217735
+this.menubackcolor = 134217732
+this.menuhighlightcolor = 134217741
+this.textsize = 8
+this.weight = 400
+this.facename = "Tahoma"
+this.titlebackcolor = 134217730
+this.bitmapbackcolor = 12632256
+this.menubitmaps = true
+this.titlegradient = true
+this.toolbartextcolor = 134217746
+this.toolbarbackcolor = 67108864
+this.toolbarhighlightcolor = 134217741
+this.toolbargradient = true
+this.bitmapgradient = true
+this.m_addnew=create m_addnew
+this.m_deleterecord=create m_deleterecord
+this.m_unlock=create m_unlock
+this.Item[UpperBound(this.Item)+1]=this.m_addnew
+this.Item[UpperBound(this.Item)+1]=this.m_deleterecord
+this.Item[UpperBound(this.Item)+1]=this.m_unlock
+end on
+
+on m_edit.destroy
+call super::destroy
+destroy(this.m_addnew)
+destroy(this.m_deleterecord)
+destroy(this.m_unlock)
+end on
+
+type m_addnew from menu within m_edit
+end type
+
+event clicked;ParentWindow.TriggerEvent("ue_new")
+end event
+
+on m_addnew.create
+call super::create
+this.text = "&Add New Record~tF5"
+this.shortcut = 116
+this.toolbaritemname = "selectscript!"
+this.toolbaritemtext = "Add New Record"
+this.toolbaritemorder = 11
+this.toolbaritemspace = 1
+this.menutextcolor = 134217735
+this.menubackcolor = 134217732
+this.menuhighlightcolor = 134217741
+this.textsize = 8
+this.weight = 400
+this.facename = "Tahoma"
+this.titlebackcolor = 134217730
+this.bitmapbackcolor = 12632256
+this.menubitmaps = true
+this.titlegradient = true
+this.toolbartextcolor = 134217746
+this.toolbarbackcolor = 67108864
+this.toolbarhighlightcolor = 134217741
+this.toolbargradient = true
+this.bitmapgradient = true
+end on
+
+on m_addnew.destroy
+call super::destroy
+end on
+
+type m_deleterecord from menu within m_edit
+end type
+
+event clicked;ParentWindow.TriggerEvent("ue_delete")
+end event
+
+on m_deleterecord.create
+call super::create
+this.text = "&Delete Record~tF6"
+this.shortcut = 117
+this.toolbaritemname = "custom009!"
+this.toolbaritemtext = "Delete Record "
+this.toolbaritemorder = 12
+this.menutextcolor = 134217735
+this.menubackcolor = 134217732
+this.menuhighlightcolor = 134217741
+this.textsize = 8
+this.weight = 400
+this.facename = "Tahoma"
+this.titlebackcolor = 134217730
+this.bitmapbackcolor = 12632256
+this.menubitmaps = true
+this.titlegradient = true
+this.toolbartextcolor = 134217746
+this.toolbarbackcolor = 67108864
+this.toolbarhighlightcolor = 134217741
+this.toolbargradient = true
+this.bitmapgradient = true
+end on
+
+on m_deleterecord.destroy
+call super::destroy
+end on
+
+type m_unlock from menu within m_edit
+end type
+
+event clicked;
+ParentWindow.TriggerEvent("ue_unlock")
+
+end event
+
+on m_unlock.create
+call super::create
+this.text = "&Unlock [F10]~tF10"
+this.shortcut = 121
+this.toolbaritemname = "Warning!"
+this.menutextcolor = 134217735
+this.menubackcolor = 134217732
+this.menuhighlightcolor = 134217741
+this.textsize = 8
+this.weight = 400
+this.facename = "Tahoma"
+this.titlebackcolor = 134217730
+this.bitmapbackcolor = 12632256
+this.menubitmaps = true
+this.titlegradient = true
+this.toolbartextcolor = 134217746
+this.toolbarbackcolor = 67108864
+this.toolbarhighlightcolor = 134217741
+this.toolbargradient = true
+this.bitmapgradient = true
+end on
+
+on m_unlock.destroy
+call super::destroy
+end on
+

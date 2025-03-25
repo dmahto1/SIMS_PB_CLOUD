@@ -1,0 +1,56 @@
+﻿$PBExportHeader$f_check_required.srf
+global type f_check_required from function_object
+end type
+
+forward prototypes
+global function integer f_check_required (ref string as_title, ref datawindow adw_control)
+end prototypes
+
+global function integer f_check_required (ref string as_title, ref datawindow adw_control);Integer li_colnbr = 1
+Long ll_row = 1
+String ls_colname, ls_textname,ls_collabelname,ls_coltype
+
+// Find the first empty row and column, if any
+
+IF adw_control.FindRequired(Primary!, ll_row, li_colnbr, ls_colname, False) < 1 THEN
+	RETURN -1
+END IF
+
+// Was any row found?
+
+ls_coltype = adw_control.Describe(ls_colname+".Edit.Style")
+
+
+IF ll_row <> 0 THEN
+
+// Get the text of that column's label.
+
+	ls_textname = ls_colname + "_t.Text"
+	ls_collabelname = adw_control.Describe(ls_textname)
+
+	If Right(ls_collabelname,1) = ":" Then
+		ls_colname = Left(ls_colname, Len(ls_colname) - 1)
+	End If
+
+//SARUN2014Apr08 : There were '!' mark in messagebox if checkbox emty, capture text for checkbox too
+	If 	ls_coltype = 'checkbox' then ls_collabelname = adw_control.Describe(ls_colname + ".checkbox.text"		)
+
+// Tell the user which row and column to fill in
+
+	if len(ls_collabelname) <=3 then
+		MessageBox(as_title, "Please enter a value for '" + ls_colname + "'", StopSign! )
+	else
+		MessageBox(as_title, "Please enter a value for '" + ls_collabelname + "'", StopSign! )
+	end if
+	adw_control.SetColumn(li_colnbr)
+	adw_control.ScrollToRow(ll_row)
+	adw_control.SetFocus()
+	RETURN -1
+
+END IF
+
+// Return success code if all required rows and columns have data
+
+RETURN 1
+end function
+

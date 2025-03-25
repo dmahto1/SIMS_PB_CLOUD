@@ -1,0 +1,77 @@
+HA$PBExportHeader$d_batch_picking_prt_summary_babycare.srd
+$PBExportComments$Batch Picking List- Print (Summary version)
+release 11;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes print.preview.outline=yes hidegrayline=no showbackcoloronxp=no )
+header(height=372 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=68 color="536870912" )
+table(column=(type=char(50) updatewhereclause=yes name=sku dbname="SKU" )
+ column=(type=char(10) updatewhereclause=yes name=l_code dbname="L_CODE" )
+ column=(type=decimal(5) updatewhereclause=yes name=quantity dbname="Quantity" )
+ column=(type=char(75) updatewhereclause=yes name=description dbname="Description" )
+ column=(type=char(50) updatewhereclause=yes name=lot_no dbname="Lot_no" )
+ column=(type=char(10) updatewhereclause=yes name=forward_pick_loc dbname="forward_pick_loc" )
+ retrieve=" SELECT dbo.Delivery_Picking.SKU,   
+		dbo.Delivery_Picking.L_Code		L_CODE, 
+         Sum(dbo.Delivery_Picking.Quantity) as Quantity, 
+		Item_master.Native_Description		Description,
+		Delivery_Picking.Lot_no,
+		Location.l_code		'forward_pick_loc'
+    FROM dbo.Delivery_Master
+    INNER JOIN dbo.Delivery_Picking
+       ON Delivery_MAster.Do_no = Delivery_Picking.do_no
+      AND Delivery_Picking.batch_pick_id = :batchID
+   	INNER JOIN Item_Master   
+	   ON Item_Master.Project_ID = Delivery_MAster.Project_ID 
+	  and Item_MAster.SKU = Delivery_Picking.SKU 
+	  and Item_Master.Supp_Code = Delivery_Picking.supp_Code
+	LEFT OUTER JOIN Location
+	  ON Delivery_Master.wh_code = Location.wh_code
+	 AND Delivery_Picking.SKU = Location.SKU_Reserved
+  Where 	Delivery_Master.Project_id = :asProject
+Group by Delivery_Master.Project_id
+,Delivery_Picking.Sku
+,dbo.Delivery_Picking.L_Code
+,Item_master.Native_Description
+,Delivery_Picking.Lot_no     
+,Location.l_code" arguments=(("asProject", string),("batchID", number))  sort="l_code A sku A " )
+group(level=1 header.height=0 trailer.height=16 by=("l_code" ) header.color="536870912" trailer.color="536870912" )
+text(band=header alignment="2" text="BATCH PICKING LIST (Summary)" border="0" color="0" x="0" y="12" height="80" width="3282" html.valueishtml="0"  name=t_21 visible="1"  font.face="Arial" font.height="-12" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="Project:" border="0" color="0" x="0" y="16" height="56" width="279" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+text(band=header alignment="0" text="Batch ID:" border="0" color="0" x="0" y="64" height="56" width="279" html.valueishtml="0"  name=t_17 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+text(band=header alignment="0" text="Pick Start:" border="0" color="0" x="0" y="112" height="56" width="315" html.valueishtml="0"  name=t_3 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+text(band=header alignment="0" text="" border="0" color="0" x="293" y="112" height="56" width="608" html.valueishtml="0"  name=pick_start_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+compute(band=header alignment="0" expression=" batchID "border="0" color="0" x="293" y="64" height="56" width="183" format="[GENERAL]" html.valueishtml="0"  name=compute_3 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+compute(band=header alignment="0" expression=" Upper(asProject )"border="0" color="33554432" x="293" y="16" height="56" width="503" format="[GENERAL]" html.valueishtml="0"  name=compute_2 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="" border="0" color="0" x="411" y="160" height="56" width="608" html.valueishtml="0"  name=cust_order_no_t visible="1~tif( upper(asProject) = 'COTY',1,0)"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+text(band=header alignment="0" text="Cust Order No:" border="0" color="0" x="0" y="160" height="56" width="407" html.valueishtml="0"  name=t_4 visible="1~tif( upper(asProject) = 'COTY',1,0)"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+text(band=header alignment="0" text="Location" border="0" color="33554432" x="32" y="284" height="64" width="283" html.valueishtml="0"  name=l_code_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=header alignment="0" expression="'Page: ' + page() + ' of ' + Pagecount()"border="0" color="0" x="2766" y="20" height="56" width="517" format="[GENERAL]" html.valueishtml="0"  name=compute_6 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="0" expression="String(Today(), ~"mm/dd/yyyy hh:mm~")"border="0" color="0" x="2766" y="64" height="56" width="517" format="[general]" html.valueishtml="0"  name=compute_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+line(band=header x1="14" y1="348" x2="3305" y2="352"  name=l_1 visible="1" pen.style="0" pen.width="9" pen.color="0"  background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="SKU" border="0" color="33554432" x="389" y="284" height="64" width="242" html.valueishtml="0"  name=sku_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="Description" border="0" color="33554432" x="1499" y="284" height="64" width="498" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="1" text="Qty" border="0" color="33554432" x="2670" y="284" height="64" width="215" html.valueishtml="0"  name=quantity_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="1" text="Lot No" border="0" color="33554432" x="2981" y="284" height="64" width="215" html.valueishtml="0"  name=t_5 visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="Forward
+Pick Loc" border="0" color="33554432" x="1202" y="220" height="128" width="251" html.valueishtml="0"  name=t_6 visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="0" color="33554432" x="14" y="4" height="60" width="297" format="[general]" html.valueishtml="0"  name=l_code visible="1" edit.limit=10 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="0" color="33554432" x="325" y="4" height="60" width="859" format="[general]" html.valueishtml="0"  name=sku visible="1" edit.limit=50 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="0" color="33554432" x="1472" y="4" height="60" width="1138" format="[general]" html.valueishtml="0"  name=description visible="1" edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="1" tabsequence=32766 border="0" color="33554432" x="2624" y="4" height="60" width="270" format="#########" html.valueishtml="0"  name=quantity visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="0" tabsequence=32766 border="0" color="33554432" x="2921" y="4" height="60" width="393" format="[general]" html.valueishtml="0"  name=lot_no visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="0" tabsequence=32766 border="0" color="33554432" x="1202" y="4" height="60" width="251" format="[general]" html.valueishtml="0"  name=forward_pick_loc_1 visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+line(band=trailer.1 x1="14" y1="4" x2="3314" y2="8"  name=l_2 visible="1" pen.style="2" pen.width="5" pen.color="0"  background.mode="2" background.color="16777215" )
+
+sparse(names="l_code")htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" pagingmethod=0 generatedddwframes="1" )
+xhtmlgen() cssgen(sessionspecific="0" )
+xmlgen(inline="0" )
+xsltgen()
+jsgen()
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )
+export.xhtml()
+ 

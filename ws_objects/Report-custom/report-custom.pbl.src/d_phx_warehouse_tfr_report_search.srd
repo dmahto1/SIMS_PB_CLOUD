@@ -1,0 +1,21 @@
+﻿$PBExportHeader$d_phx_warehouse_tfr_report_search.srd
+$PBExportComments$Phx Brands Warehouse Transfer Report search
+release 9;
+datawindow(units=0 timer_interval=0 color=79741120 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=20 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=72 color="536870912" )
+table(column=(type=datetime updatewhereclause=no name=order_from_date dbname="order_from_date" )
+ column=(type=datetime updatewhereclause=no name=order_to_date dbname="order_to_date" )
+ )
+text(band=detail alignment="0" text="Order Date" border="0" color="0" x="23" y="0" height="56" width="297" html.valueishtml="0"  name=t_5 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=detail alignment="1" text="From:" border="0" color="0" x="393" y="0" height="56" width="146" html.valueishtml="0"  name=t_6 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=1 alignment="2" tabsequence=50 border="5" color="0" x="558" y="0" height="56" width="535" format="mm/dd/yyyy hh:mm" html.valueishtml="0"  name=order_from_date visible="1" editmask.spin=yes editmask.mask="mm/dd/yyyy hh:mm" editmask.imemode=0 editmask.spinrange="~~" editmask.spinincr=1  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+text(band=detail alignment="0" text="To:" border="0" color="0" x="1152" y="0" height="56" width="78" html.valueishtml="0"  name=t_10 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="2" tabsequence=60 border="5" color="0" x="1248" y="0" height="56" width="535" format="mm/dd/yyyy hh:mm" html.valueishtml="0"  name=order_to_date visible="1" editmask.spin=yes editmask.mask="mm/dd/yyyy hh:mm" editmask.imemode=0 editmask.spinrange="~~" editmask.spinincr=1  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

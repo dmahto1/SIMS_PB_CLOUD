@@ -1,0 +1,152 @@
+HA$PBExportHeader$d_asn_report.srd
+$PBExportComments$ASN Report
+release 7;
+datawindow(units=0 timer_interval=0 color=16777215 processing=0 HTMLDW=no print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.prompt=no print.buttons=no print.preview.buttons=no )
+header(height=192 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=60 color="536870912" )
+table(column=(type=char(16) updatewhereclause=yes name=asn_header_asn_no dbname="ASN_Header.ASN_No" )
+ column=(type=char(10) updatewhereclause=yes name=asn_header_project_id dbname="ASN_Header.Project_ID" )
+ column=(type=char(35) updatewhereclause=yes name=asn_header_shipment_id dbname="ASN_Header.Shipment_ID" )
+ column=(type=datetime updatewhereclause=yes name=asn_header_shipment_date dbname="ASN_Header.Shipment_Date" )
+ column=(type=datetime updatewhereclause=yes name=asn_header_estimated_arrival_date dbname="ASN_Header.Estimated_Arrival_Date" )
+ column=(type=datetime updatewhereclause=yes name=asn_header_actual_arrival_date dbname="ASN_Header.Actual_Arrival_Date" )
+ column=(type=char(35) updatewhereclause=yes name=asn_header_carrier dbname="ASN_Header.Carrier" )
+ column=(type=char(35) updatewhereclause=yes name=asn_header_awb_bol_nbr dbname="ASN_Header.AWB_BOL_Nbr" )
+ column=(type=decimal(0) updatewhereclause=yes name=asn_header_ctn_cnt dbname="ASN_Header.Ctn_Cnt" )
+ column=(type=char(40) updatewhereclause=yes name=asn_header_ship_from_name dbname="ASN_Header.Ship_From_Name" )
+ column=(type=char(40) updatewhereclause=yes name=asn_header_ship_from_address1 dbname="ASN_Header.Ship_From_Address1" )
+ column=(type=char(40) updatewhereclause=yes name=asn_header_ship_from_address2 dbname="ASN_Header.Ship_From_Address2" )
+ column=(type=char(40) updatewhereclause=yes name=asn_header_ship_from_city dbname="ASN_Header.Ship_From_City" )
+ column=(type=char(40) updatewhereclause=yes name=asn_header_ship_from_state dbname="ASN_Header.Ship_From_State" )
+ column=(type=char(15) updatewhereclause=yes name=asn_header_ship_from_zip dbname="ASN_Header.Ship_From_Zip" )
+ column=(type=char(30) updatewhereclause=yes name=asn_header_ship_from_country dbname="ASN_Header.Ship_From_Country" )
+ column=(type=char(40) updatewhereclause=yes name=asn_header_ship_to_name dbname="ASN_Header.Ship_To_Name" )
+ column=(type=char(40) updatewhereclause=yes name=asn_header_ship_to_address1 dbname="ASN_Header.Ship_To_Address1" )
+ column=(type=char(40) updatewhereclause=yes name=asn_header_ship_to_address2 dbname="ASN_Header.Ship_To_Address2" )
+ column=(type=char(40) updatewhereclause=yes name=asn_header_ship_to_city dbname="ASN_Header.Ship_To_City" )
+ column=(type=char(40) updatewhereclause=yes name=asn_header_ship_to_state dbname="ASN_Header.Ship_To_State" )
+ column=(type=char(15) updatewhereclause=yes name=asn_header_ship_to_zip dbname="ASN_Header.Ship_To_Zip" )
+ column=(type=char(30) updatewhereclause=yes name=asn_header_ship_to_country dbname="ASN_Header.Ship_To_Country" )
+ column=(type=char(35) updatewhereclause=yes name=asn_package_container_id dbname="ASN_Package.Container_ID" )
+ column=(type=decimal(2) updatewhereclause=yes name=asn_package_weight dbname="ASN_Package.Weight" )
+ column=(type=char(3) updatewhereclause=yes name=asn_package_weight_uom dbname="ASN_Package.Weight_UOM" )
+ column=(type=decimal(2) updatewhereclause=yes name=asn_package_height dbname="ASN_Package.Height" )
+ column=(type=decimal(2) updatewhereclause=yes name=asn_package_width dbname="ASN_Package.Width" )
+ column=(type=decimal(2) updatewhereclause=yes name=asn_package_length dbname="ASN_Package.Length" )
+ column=(type=char(3) updatewhereclause=yes name=asn_package_dimension_uom dbname="ASN_Package.Dimension_UOM" )
+ column=(type=char(35) updatewhereclause=yes name=asn_item_order_no dbname="ASN_Item.Order_No" )
+ column=(type=decimal(0) updatewhereclause=yes name=asn_item_line_item_no dbname="ASN_Item.Line_Item_No" )
+ column=(type=char(50) updatewhereclause=yes name=asn_item_sku dbname="ASN_Item.SKU" )
+ column=(type=char(50) updatewhereclause=yes name=asn_item_description dbname="ASN_Item.Description" )
+ column=(type=decimal(0) updatewhereclause=yes name=asn_item_ship_qty dbname="ASN_Item.Ship_Qty" )
+ column=(type=decimal(0) updatewhereclause=yes name=asn_item_rcv_qty dbname="ASN_Item.Rcv_Qty" )
+ column=(type=char(3) updatewhereclause=yes name=asn_item_uom dbname="ASN_Item.UOM" )
+ column=(type=char(3) updatewhereclause=yes name=asn_item_country_of_origin dbname="ASN_Item.Country_of_Origin" )
+ retrieve="  SELECT dbo.ASN_Header.ASN_No,   
+         dbo.ASN_Header.Project_ID,   
+         dbo.ASN_Header.Shipment_ID,   
+         dbo.ASN_Header.Shipment_Date,   
+         dbo.ASN_Header.Estimated_Arrival_Date,   
+         dbo.ASN_Header.Actual_Arrival_Date,   
+         dbo.ASN_Header.Carrier,   
+         dbo.ASN_Header.AWB_BOL_Nbr,   
+         dbo.ASN_Header.Ctn_Cnt,   
+         dbo.ASN_Header.Ship_From_Name,   
+         dbo.ASN_Header.Ship_From_Address1,   
+         dbo.ASN_Header.Ship_From_Address2,    
+         dbo.ASN_Header.Ship_From_City,   
+         dbo.ASN_Header.Ship_From_State,   
+         dbo.ASN_Header.Ship_From_Zip,   
+         dbo.ASN_Header.Ship_From_Country,   
+         dbo.ASN_Header.Ship_To_Name,   
+         dbo.ASN_Header.Ship_To_Address1,   
+         dbo.ASN_Header.Ship_To_Address2,   
+         dbo.ASN_Header.Ship_To_City,   
+         dbo.ASN_Header.Ship_To_State,   
+         dbo.ASN_Header.Ship_To_Zip,   
+         dbo.ASN_Header.Ship_To_Country,   
+         dbo.ASN_Package.Container_ID,   
+         dbo.ASN_Package.Weight,   
+         dbo.ASN_Package.Weight_UOM,   
+         dbo.ASN_Package.Height,   
+         dbo.ASN_Package.Width,   
+         dbo.ASN_Package.Length,   
+         dbo.ASN_Package.Dimension_UOM,   
+         dbo.ASN_Item.Order_No,   
+         dbo.ASN_Item.Line_Item_No,   
+         dbo.ASN_Item.SKU,   
+         dbo.ASN_Item.Description,   
+         dbo.ASN_Item.Ship_Qty,   
+         dbo.ASN_Item.Rcv_Qty,   
+         dbo.ASN_Item.UOM,   
+         dbo.ASN_Item.Country_of_Origin  
+    FROM dbo.ASN_Header,   
+         dbo.ASN_Item,   
+         dbo.ASN_Package  
+   WHERE ( dbo.ASN_Header.ASN_No = dbo.ASN_Package.ASN_No ) and  
+         ( dbo.ASN_Item.ASN_No = dbo.ASN_Package.ASN_No )    
+" retrieve.asneeded=yes  sort="asn_header_asn_no A asn_header_shipment_id A asn_item_order_no A asn_item_line_item_no A " )
+group(level=1 header.height=480 trailer.height=0 by=("asn_header_shipment_id" , "asn_header_awb_bol_nbr" ) newpage=yes header.color="536870912" trailer.color="536870912" )
+group(level=2 header.height=200 trailer.height=128 by=("asn_header_shipment_id" , "asn_header_awb_bol_nbr" , "asn_package_container_id" ) header.color="536870912" trailer.color="536870912" )
+text(band=header alignment="2" text="ASN Report" border="0" color="0" x="14" y="16" height="108" width="3355"  name=t_1  font.face="Arial" font.height="-14" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=header alignment="1" expression="'Page ' + page() + ' of ' + pageCount()"border="0" color="0" x="2821" y="20" height="56" width="544" format="[GENERAL]"  name=compute_6  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="1" text="Date:" border="0" color="0" x="78" y="60" height="56" width="155"  name=t_7  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=header alignment="0" expression="today()"border="0" color="0" x="242" y="60" height="56" width="393" format="[SHORTDATE] hh:mm"  name=compute_5  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="1" text="Project:" border="0" color="0" x="18" y="12" height="56" width="215"  name=t_10  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header id=2 alignment="0" tabsequence=32766 border="0" color="0" x="242" y="12" height="56" width="393" format="[general]"  name=asn_header_project_id edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header.1 alignment="1" text="Ship From:" border="0" color="0" x="32" y="200" height="56" width="320"  name=asn_header_ship_from_name_t  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.1 id=10 alignment="0" tabsequence=32766 border="0" color="0" x="361" y="200" height="56" width="1234" format="[general]"  name=asn_header_ship_from_name  slideup=directlyabove height.autosize=yes edit.limit=40 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.1 id=11 alignment="0" tabsequence=32766 border="0" color="0" x="361" y="248" height="56" width="1234" format="[general]"  name=asn_header_ship_from_address1  slideup=directlyabove height.autosize=yes edit.limit=40 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.1 id=12 alignment="0" tabsequence=32766 border="0" color="0" x="361" y="296" height="56" width="1234" format="[general]"  name=asn_header_ship_from_address2  slideup=directlyabove height.autosize=yes edit.limit=40 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=header.1 alignment="0" expression="If(not isnull( asn_header_ship_from_city ), asn_header_ship_from_city + ' ','') + If(not isnull( asn_header_ship_from_state ), asn_header_ship_from_state + ' ','') + If(not isnull( asn_header_ship_from_zip ), asn_header_ship_from_zip ,'')"border="0" color="0" x="361" y="344" height="56" width="1234" format="[GENERAL]"  name=compute_2  slideup=directlyabove  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.1 id=16 alignment="0" tabsequence=32766 border="0" color="0" x="361" y="392" height="56" width="1234" format="[general]"  name=asn_header_ship_from_country  slideup=directlyabove height.autosize=yes edit.limit=30 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header.1 alignment="1" text="Shipment Id:" border="0" color="0" x="18" y="16" height="56" width="334"  name=asn_header_shipment_id_t  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header.1 alignment="1" text="Carrier:" border="0" color="0" x="18" y="64" height="56" width="334"  name=asn_header_carrier_t  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header.1 alignment="1" text="AWB Nbr:" border="0" color="0" x="18" y="112" height="56" width="334"  name=asn_header_awb_bol_nbr_t  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header.1 alignment="1" text="Shipment Date:" border="0" color="0" x="1486" y="16" height="56" width="608"  name=asn_header_shipment_date_t  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.1 id=4 alignment="0" tabsequence=32766 border="0" color="0" x="2107" y="16" height="56" width="603" format="[shortdate] "  name=asn_header_shipment_date edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header.1 alignment="1" text="Estimated Arrival Date:" border="0" color="0" x="1486" y="64" height="56" width="608"  name=asn_header_estimated_arrival_date_t  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.1 id=5 alignment="0" tabsequence=32766 border="0" color="0" x="2107" y="64" height="56" width="603" format="[shortdate]"  name=asn_header_estimated_arrival_date edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header.1 alignment="1" text="Actual Arrival Date:" border="0" color="0" x="1486" y="112" height="56" width="608"  name=asn_header_actual_arrival_date_t  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.1 id=6 alignment="0" tabsequence=32766 border="0" color="0" x="2107" y="112" height="56" width="603" format="[shortdate]"  name=asn_header_actual_arrival_date edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header.1 alignment="1" text="Ship To:" border="0" color="0" x="1819" y="200" height="56" width="265"  name=asn_header_ship_to_name_t  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.1 id=17 alignment="0" tabsequence=32766 border="0" color="0" x="2107" y="200" height="56" width="1234" format="[general]"  name=asn_header_ship_to_name edit.limit=40 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.1 id=18 alignment="0" tabsequence=32766 border="0" color="0" x="2107" y="248" height="56" width="1234" format="[general]"  name=asn_header_ship_to_address1  slideup=directlyabove edit.limit=40 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.1 id=19 alignment="0" tabsequence=32766 border="0" color="0" x="2107" y="296" height="56" width="1234" format="[general]"  name=asn_header_ship_to_address2  slideup=directlyabove edit.limit=40 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=header.1 alignment="0" expression="If(not isnull( asn_header_ship_to_city ), asn_header_ship_to_city + ' ','') + If(not isnull( asn_header_ship_to_state ), asn_header_ship_to_state + ' ','') + If(not isnull( asn_header_ship_to_zip ), asn_header_ship_to_zip ,'')"border="0" color="0" x="2107" y="344" height="56" width="1234" format="[GENERAL]"  name=compute_1  slideup=directlyabove  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.1 id=23 alignment="0" tabsequence=32766 border="0" color="0" x="2107" y="392" height="56" width="1234" format="[general]"  name=asn_header_ship_to_country  slideup=directlyabove edit.limit=30 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.1 id=8 alignment="0" tabsequence=32766 border="0" color="0" x="366" y="112" height="56" width="1042" format="[general]"  name=asn_header_awb_bol_nbr edit.limit=35 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.1 id=7 alignment="0" tabsequence=32766 border="0" color="0" x="366" y="64" height="56" width="1042" format="[general]"  name=asn_header_carrier edit.limit=35 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.1 id=3 alignment="0" tabsequence=32766 border="0" color="0" x="366" y="16" height="56" width="1042" format="[general]"  name=asn_header_shipment_id edit.limit=35 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header.2 alignment="0" text="Order " border="0" color="0" x="151" y="100" height="56" width="247"  name=asn_item_order_no_t  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header.2 alignment="0" text="Nbr" border="0" color="0" x="174" y="136" height="56" width="247"  name=t_6  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" font.underline="1" background.mode="1" background.color="536870912" )
+text(band=header.2 alignment="1" text="Weight:" border="0" color="0" x="2775" y="12" height="56" width="242"  name=asn_package_weight_t  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=header.2 alignment="0" expression="If( asn_package_weight > 0,asn_package_weight_uom + If( asn_package_weight_uom > ' ','(' +  asn_package_width + ')','') ,'')"border="0" color="0" x="3031" y="12" height="56" width="334" format="[GENERAL]"  name=compute_4  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header.2 alignment="1" text="Dim (L x W x H):" border="0" color="0" x="1527" y="12" height="56" width="379"  name=t_2  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=header.2 alignment="0" expression="If( asn_package_length > 0, asn_package_length ,0) + ' x ' + If( asn_package_width > 0, asn_package_width ,0) + ' x ' + If( asn_package_height > 0, asn_package_height ,0) + If( asn_package_dimension_uom > ' ', ' (' +  asn_package_dimension_uom + ')','')"border="0" color="0" x="1920" y="12" height="56" width="832" format="[GENERAL]"  name=compute_3  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header.2 alignment="0" text="" border="2" color="0" x="87" y="4" height="72" width="3296"  name=t_8  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header.2 alignment="1" text="Container Id:" border="0" color="0" x="114" y="12" height="56" width="334"  name=asn_package_container_id_t  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.2 id=24 alignment="0" tabsequence=32766 border="0" color="0" x="462" y="12" height="56" width="1015" format="[general]"  name=asn_package_container_id edit.limit=10 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header.2 alignment="2" text="Line" border="0" color="0" x="649" y="100" height="56" width="192"  name=asn_item_line_item_no_t  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header.2 alignment="2" text="Item" border="0" color="0" x="649" y="136" height="56" width="192"  name=t_5  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" font.underline="1" background.mode="1" background.color="536870912" )
+text(band=header.2 alignment="2" text="Sku" border="0" color="0" x="869" y="136" height="56" width="165"  name=asn_item_sku_t  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" font.underline="1" background.mode="1" background.color="536870912" )
+text(band=header.2 alignment="2" text="Description" border="0" color="0" x="1673" y="136" height="56" width="347"  name=asn_item_description_t  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" font.underline="1" background.mode="1" background.color="536870912" )
+text(band=header.2 alignment="2" text="COO" border="0" color="0" x="2514" y="136" height="56" width="160"  name=asn_item_country_of_origin_t  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" font.underline="1" background.mode="1" background.color="536870912" )
+column(band=detail id=31 alignment="0" tabsequence=32766 border="0" color="0" x="151" y="4" height="52" width="521" format="[general]"  name=asn_item_order_no edit.limit=35 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=32 alignment="0" tabsequence=32766 border="0" color="0" x="667" y="4" height="52" width="192" format="[general]"  name=asn_item_line_item_no edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=33 alignment="0" tabsequence=32766 border="0" color="0" x="878" y="4" height="52" width="823" format="[general]"  name=asn_item_sku edit.limit=50 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=34 alignment="0" tabsequence=32766 border="0" color="0" x="1687" y="4" height="52" width="832" format="[general]"  name=asn_item_description edit.limit=50 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=38 alignment="0" tabsequence=32766 border="0" color="0" x="2533" y="4" height="52" width="123" format="[general]"  name=asn_item_country_of_origin edit.limit=3 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=35 alignment="1" tabsequence=32766 border="0" color="0" x="2670" y="4" height="52" width="311" format="#######.#####"  name=asn_item_ship_qty editmask.mask="#######.#####" editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=36 alignment="1" tabsequence=32766 border="0" color="0" x="2994" y="4" height="52" width="311" format="#######.#####"  name=asn_item_rcv_qty editmask.mask="#######.#####" editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=trailer.2 alignment="1" text="Total:" border="0" color="0" x="2464" y="20" height="52" width="174"  name=t_9  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=trailer.2 alignment="1" expression="sum(asn_item_ship_qty for group 2)"border="0" color="0" x="2656" y="20" height="52" width="325" format="#######.#####"  name=compute_7  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=trailer.2 alignment="1" expression="sum(asn_item_rcv_qty for group 2)"border="0" color="0" x="2994" y="20" height="52" width="311" format="#######.#####"  name=compute_8  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header.2 alignment="2" text="Ship" border="0" color="0" x="2811" y="104" height="56" width="183"  name=asn_item_ship_qty_t  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header.2 alignment="2" text="Qty" border="0" color="0" x="2811" y="136" height="56" width="183"  name=t_3  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" font.underline="1" background.mode="1" background.color="536870912" )
+text(band=header.2 alignment="2" text="Rcv" border="0" color="0" x="3173" y="104" height="56" width="151"  name=asn_item_rcv_qty_t  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header.2 alignment="2" text="Qty" border="0" color="0" x="3173" y="136" height="56" width="151"  name=t_4  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" font.underline="1" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" )

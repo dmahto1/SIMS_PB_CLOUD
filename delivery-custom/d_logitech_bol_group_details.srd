@@ -1,0 +1,74 @@
+HA$PBExportHeader$d_logitech_bol_group_details.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=16777215 processing=1 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no grid.lines=0 )
+header(height=128 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=100 color="536870912" )
+table(column=(type=char(50) updatewhereclause=yes name=item_master_sku dbname="Item_Master.sku" )
+ column=(type=decimal(5) updatewhereclause=yes name=item_quantity dbname="item_quantity" )
+ column=(type=char(50) updatewhereclause=yes name=delivery_picking_lot_no dbname="Delivery_Picking.lot_no" )
+ column=(type=char(3) updatewhereclause=yes name=delivery_picking_country_of_origin dbname="Delivery_Picking.Country_Of_Origin" )
+ column=(type=long updatewhereclause=yes name=sku_carton_count dbname="SKU_Carton_Count" )
+ column=(type=decimal(2) updatewhereclause=yes name=gross_weight dbname="Gross_Weight" )
+ column=(type=decimal(5) updatewhereclause=yes name=item_master_weight_1 dbname="Delivery_Picking.weight_1" )
+ column=(type=decimal(5) updatewhereclause=yes name=item_master_qty_3 dbname="Delivery_Picking.qty_3" )
+ column=(type=decimal(0) updatewhereclause=yes name=delivery_detail_line_item_no dbname="Delivery_Picking.Line_Item_No" )
+ retrieve="  SELECT DISTINCT dbo.Item_Master.SKU as sku,   
+			sum(dbo.Delivery_Picking.Quantity) as item_quantity,
+			Delivery_Picking.lot_no,
+			Delivery_Picking.Country_Of_Origin,
+ 		   0 As SKU_Carton_Count,
+			0000000000.00 as Gross_Weight, 
+			Item_Master.weight_1,
+			Item_Master.qty_3 as qty_3,
+			Delivery_Detail.Line_Item_No
+    FROM	dbo.Delivery_Picking, 
+         dbo.Item_Master, 
+			dbo.Delivery_Detail
+
+   WHERE ( dbo.Delivery_DEtail.Supp_Code = dbo.Item_Master.Supp_Code ) and  
+         ( dbo.Delivery_Detail.SKU = dbo.Item_Master.SKU ) and  
+			 ( dbo.Item_Master.Project_ID = :a_project_ID )  and
+
+                 
+			( dbo.Delivery_Picking.do_No = dbo.Delivery_Detail.do_No ) and  
+			( dbo.Delivery_Picking.Line_Item_No = dbo.Delivery_Detail.Line_Item_No ) and 
+			( dbo.Delivery_Picking.SKU = dbo.Delivery_Detail.SKU ) and 
+	
+
+ 			( dbo.Delivery_Detail.DO_No = :a_DO_NO ) AND
+			( dbo.Delivery_Detail.Alloc_Qty > 0)
+
+GROUP BY dbo.Item_Master.SKU, 
+			Delivery_Picking.lot_no,
+			Delivery_Picking.Country_Of_Origin,
+			Item_Master.weight_1,
+			Item_Master.qty_3,
+			Delivery_Detail.Line_Item_No,
+			Delivery_Picking.SKU,
+			Delivery_Picking.Supp_Code" arguments=(("a_DO_NO", string),("a_project_ID", string)) )
+text(band=header alignment="0" text="Item Master Sku" border="0" color="0" x="9" y="4" height="76" width="590" html.valueishtml="0"  name=item_master_sku_t visible="1"  font.face="Arial" font.height="-12" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="Sku Carton Count" border="0" color="0" x="608" y="4" height="76" width="603" html.valueishtml="0"  name=sku_carton_count_t visible="1"  font.face="Arial" font.height="-12" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="Item Quantity" border="0" color="0" x="1481" y="4" height="76" width="475" html.valueishtml="0"  name=item_quantity_t visible="1"  font.face="Arial" font.height="-12" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="Delivery Picking Lot No" border="0" color="0" x="1966" y="4" height="76" width="631" html.valueishtml="0"  name=delivery_picking_lot_no_t visible="1"  font.face="Arial" font.height="-12" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="Delivery Picking Country Of Origin" border="0" color="0" x="2606" y="4" height="76" width="320" html.valueishtml="0"  name=delivery_picking_country_of_origin_t visible="1"  font.face="Arial" font.height="-12" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="Item Master Qty 3" border="0" color="0" x="2935" y="4" height="76" width="617" html.valueishtml="0"  name=item_master_qty_3_t visible="1"  font.face="Arial" font.height="-12" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="Delivery Detail Line Item No" border="0" color="0" x="3561" y="4" height="76" width="928" html.valueishtml="0"  name=delivery_detail_line_item_no_t visible="1"  font.face="Arial" font.height="-12" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="Item Master Weight 1" border="0" color="0" x="4498" y="4" height="76" width="736" html.valueishtml="0"  name=item_master_weight_1_t visible="1"  font.face="Arial" font.height="-12" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="Gross Weight" border="0" color="0" x="5243" y="4" height="76" width="535" html.valueishtml="0"  name=gross_weight_t visible="1"  font.face="Arial" font.height="-12" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="0" color="0" x="9" y="0" height="76" width="590" format="[general]" html.valueishtml="0"  name=item_master_sku visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-12" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=5 alignment="0" tabsequence=32766 border="0" color="0" x="608" y="0" height="76" width="603" format="[general]" html.valueishtml="0"  name=sku_carton_count visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-12" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=detail alignment="0" expression=" int(    item_quantity  /  item_master_qty_3  ) + if (mod(    item_quantity  ,  item_master_qty_3 ) > 0, 1, 0) "border="0" color="0" x="1221" y="4" height="76" width="251" format="[GENERAL]" html.valueishtml="0"  name=case_count visible="1"  font.face="Arial" font.height="-12" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="0" color="0" x="1481" y="0" height="76" width="475" format="[general]" html.valueishtml="0"  name=item_quantity visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-12" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="0" color="0" x="1966" y="0" height="76" width="631" format="[general]" html.valueishtml="0"  name=delivery_picking_lot_no visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-12" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="0" color="0" x="2606" y="0" height="76" width="320" format="[general]" html.valueishtml="0"  name=delivery_picking_country_of_origin visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-12" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=8 alignment="0" tabsequence=32766 border="0" color="0" x="2935" y="0" height="76" width="617" format="[general]" html.valueishtml="0"  name=item_master_qty_3 visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-12" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=9 alignment="0" tabsequence=32766 border="0" color="0" x="3561" y="0" height="76" width="928" format="[general]" html.valueishtml="0"  name=delivery_detail_line_item_no visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-12" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=7 alignment="0" tabsequence=32766 border="0" color="0" x="4498" y="0" height="76" width="736" format="[general]" html.valueishtml="0"  name=item_master_weight_1 visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-12" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=6 alignment="0" tabsequence=32766 border="0" color="0" x="5243" y="0" height="76" width="535" format="[general]" html.valueishtml="0"  name=gross_weight visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-12" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

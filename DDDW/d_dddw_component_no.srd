@@ -1,0 +1,40 @@
+HA$PBExportHeader$d_dddw_component_no.srd
+release 11;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes print.preview.outline=yes hidegrayline=no showbackcoloronxp=no )
+header(height=0 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=76 color="536870912" )
+table(column=(type=decimal(0) updatewhereclause=yes name=component_no dbname="Component_no" )
+ column=(type=char(50) updatewhereclause=yes name=sku_parent dbname="SKU_Parent" )
+ column=(type=char(50) updatewhereclause=yes name=serial_no dbname="Serial_no" )
+ column=(type=char(104) updatewhereclause=yes name=skuserial dbname="SkuSerial" )
+ retrieve="
+SELECT  rpParent.Component_no, ic.SKU_Parent, SniParent.Serial_no,
+						(rtrim(ic.SKU_Parent) + ' -- ' + rtrim(SniParent.Serial_no)) as SkuSerial
+			from Item_component ic
+			join serial_number_inventory SniParent on SniParent.SKU = ic.SKU_parent
+			join Receive_Putaway rpParent on rpParent.Component_no = SniParent.Component_no
+			join owner o on o.owner_id = rpParent.owner_id  /*  linking child owner to parent recieve putaway record */
+			and SniParent.Owner_id = rpParent.Owner_id    /* linking parent owner to receive putaway parent owner */
+			and SniParent.Component_ind = rpParent.Component_ind  /* linking parent to receive putaway parent */
+			and SniParent.Project_id = 'PANDORA'
+			and rpParent.SKU = ic.SKU_Parent   /* linking parent to receive putaway parent */
+			and SniParent.Component_ind = 'Y'
+			and o.Owner_cd = :ls_owner_cd  /* using the child owner_cd because by rule it is the same as its parent's. */
+			and ic.SKU_Child = :ls_sku;
+
+
+" arguments=(("ls_owner_cd", string),("ls_sku", string)) )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="0" color="0" x="9" y="0" height="76" width="1106" format="[general]" html.valueishtml="0"  name=skuserial visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Tahoma" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" pagingmethod=0 generatedddwframes="1" )
+xhtmlgen() cssgen(sessionspecific="0" )
+xmlgen(inline="0" )
+xsltgen()
+jsgen()
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0  template=(comment="" encoding="UTF-16LE" name="d_ddw_owner" xml="<?xml version=~"1.0~" encoding=~"UTF-16LE~" standalone=~"no~"?><d_dddw_owner><d_dddw_owner_row __pbband=~"detail~"><owner_id>owner_id</owner_id><owner_cd/></d_dddw_owner_row></d_dddw_owner>"))
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )
+export.xhtml()
+ 

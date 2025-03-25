@@ -1,0 +1,45 @@
+HA$PBExportHeader$f_compare_dates.srf
+global type f_compare_dates from function_object
+end type
+
+forward prototypes
+global function string f_compare_dates (datetime ad_startdatetime, datetime ad_enddatetime)
+end prototypes
+
+global function string f_compare_dates (datetime ad_startdatetime, datetime ad_enddatetime);//Designed By: TimA
+//04/30/14
+//Returns a string representing the Hour, Min, Sec between 2 dates.
+
+//Note:  This is not setup to return Mili seconds or 1000th sec.  Could be added by someone.
+
+time lt_Time1, lt_Time2 , lt_DiffTime
+integer li_Hours, li_Mins 
+long ll_Secs 
+string ls_Time 
+
+lt_Time1 = Time(ad_StartDateTime )
+lt_Time2 = Time(ad_EndDateTime )
+ll_Secs = SecondsAfter( lt_Time1, lt_Time2 ) ;
+
+// Compute Hours
+IF ll_Secs >= 3600 THEN
+li_Hours = Int( ll_Secs / 3600 ) ;
+ll_Secs = Mod( ll_Secs, 3600 ) ; // Remainder secs
+END IF ;
+
+// Compute Minutes
+IF ll_Secs >= 60 THEN
+li_Mins = Int( ll_Secs / 60 ) ;
+ll_Secs = Mod( ll_Secs, 60 ) ; 
+else
+ll_Secs = Mod( ll_Secs, 60 ) ; 
+END IF ;
+
+lt_DiffTime = Time ( li_Hours, li_Mins ,ll_Secs ) 
+ls_Time = String ( lt_DiffTime )
+
+//Retruns a formated 00:00:00 HH:MM:SS
+Return ls_Time
+
+end function
+

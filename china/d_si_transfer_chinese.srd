@@ -1,0 +1,108 @@
+HA$PBExportHeader$d_si_transfer_chinese.srd
+$PBExportComments$*+ Stock Inquiry - Transfer tab
+release 11;
+datawindow(units=0 timer_interval=60000 color=16777215 processing=1 HTMLDW=no print.printername="" print.documentname="" print.orientation = 1 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes print.preview.outline=yes hidegrayline=no showbackcoloronxp=no grid.lines=0 )
+header(height=300 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=72 color="553648127" height.autosize=yes )
+table(column=(type=char(16) updatewhereclause=yes name=transfer_detail_content_to_no dbname="TO_No" )
+ column=(type=char(50) updatewhereclause=yes name=transfer_detail_content_sku dbname="SKU" )
+ column=(type=char(50) updatewhereclause=yes name=transfer_detail_content_serial_no dbname="Serial_No" )
+ column=(type=char(50) updatewhereclause=yes name=lot_no dbname="Lot_No" )
+ column=(type=char(10) updatewhereclause=yes name=transfer_detail_content_s_location dbname="S_Location" )
+ column=(type=char(10) updatewhereclause=yes name=transfer_detail_content_d_location dbname="D_Location" )
+ column=(type=char(1) updatewhereclause=yes name=inventory_type dbname="Inventory_Type" )
+ column=(type=char(16) updatewhereclause=yes name=transfer_detail_content_ro_no dbname="RO_No" )
+ column=(type=decimal(5) updatewhereclause=yes name=transfer_detail_content_quantity dbname="Quantity" )
+ column=(type=char(10) updatewhereclause=yes name=transfer_master_s_warehouse dbname="S_Warehouse" )
+ column=(type=char(10) updatewhereclause=yes name=transfer_master_d_warehouse dbname="D_Warehouse" )
+ column=(type=datetime updatewhereclause=yes name=transfer_master_complete_date dbname="Complete_Date" )
+ column=(type=char(50) updatewhereclause=yes name=po_no dbname="PO_No" )
+ column=(type=char(20) updatewhereclause=yes name=transfer_detail_content_supp_code dbname="Supp_Code" )
+ column=(type=decimal(0) updatewhereclause=yes name=owner_id dbname="Owner_ID" )
+ column=(type=char(50) updatewhereclause=yes name=po_no2 dbname="PO_No2" )
+ column=(type=char(20) updatewhereclause=yes name=owner_owner_cd dbname="Owner_Cd" )
+ column=(type=char(1) updatewhereclause=yes name=owner_owner_type dbname="Owner_Type" )
+ column=(type=char(25) updatewhereclause=yes name=container_id dbname="container_ID" )
+ column=(type=datetime updatewhereclause=yes name=expiration_date dbname="Expiration_Date" )
+ retrieve="  SELECT Transfer_Detail_Content.TO_No,   
+         Transfer_Detail_Content.SKU,   
+         Transfer_Detail_Content.Serial_No,   
+         Transfer_Detail_Content.Lot_No,   
+         Transfer_Detail_Content.S_Location,   
+         Transfer_Detail_Content.D_Location,   
+         Transfer_Detail_Content.Inventory_Type,   
+         Transfer_Detail_Content.RO_No,   
+         Transfer_Detail_Content.Quantity,   
+         Transfer_Master.S_Warehouse,   
+         Transfer_Master.D_Warehouse,    
+         Transfer_Master.Complete_Date,   
+         Transfer_Detail_Content.PO_No,   
+         Transfer_Detail_Content.Supp_Code,   
+         Transfer_Detail_Content.Owner_ID,   
+         Transfer_Detail_Content.PO_No2,   
+         Owner.Owner_Cd,   
+         Owner.Owner_Type,   
+         Transfer_Detail_Content.container_ID,   
+         Transfer_Detail_Content.Expiration_Date  
+    FROM Transfer_Detail_Content,   
+         Transfer_Master,   
+         Owner  
+   WHERE ( Transfer_Detail_Content.TO_No = Transfer_Master.TO_No ) and  
+         ( Transfer_Detail_Content.Owner_ID = Owner.Owner_ID )    
+"  sort="transfer_detail_content_to_no A transfer_detail_content_sku A " )
+text(band=header alignment="2" text="$$HEX6$$fb79935e5553167f0d00f753$$ENDHEX$$" border="6" color="0" x="9" y="180" height="112" width="361" html.valueishtml="0"  name=transfer_detail_content_to_no_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="78567654" )
+text(band=header alignment="2" text="$$HEX5$$278dc154167f0d00f753$$ENDHEX$$" border="6" color="0" x="379" y="180" height="112" width="411" html.valueishtml="0"  name=transfer_detail_content_sku_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="78567654" )
+text(band=header alignment="2" text="
+$$HEX3$$9b4f945e4655$$ENDHEX$$" border="6" color="0" x="800" y="180" height="112" width="270" html.valueishtml="0"  name=transfer_detail_content_supp_code_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="78567654" )
+text(band=header alignment="2" text="
+$$HEX3$$e5620967ba4e$$ENDHEX$$" border="6" color="0" x="1079" y="180" height="112" width="434" html.valueishtml="0"  name=cf_name_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="78567654" )
+text(band=header alignment="2" text="$$HEX3$$8f5e0d00f753$$ENDHEX$$" border="6" color="0" x="1522" y="180" height="112" width="251" html.valueishtml="0"  name=transfer_detail_content_serial_no_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="78567654" )
+text(band=header alignment="2" text="$$HEX3$$79620d00f753$$ENDHEX$$" border="6" color="0" x="1783" y="180" height="112" width="270" html.valueishtml="0"  name=lot_no_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="78567654" )
+text(band=header alignment="2" text="$$HEX6$$c7912d8d5553167f0d00f753$$ENDHEX$$" border="6" color="0" x="2062" y="180" height="112" width="306" html.valueishtml="0"  name=po_no_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="78567654" )
+text(band=header alignment="2" text="$$HEX6$$c7912d8d5553167f0d00f753$$ENDHEX$$2" border="6" color="0" x="2377" y="180" height="112" width="233" html.valueishtml="0"  name=po_no2_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="78567654" )
+text(band=header alignment="2" text="$$HEX4$$906e0d00d34e935e$$ENDHEX$$" border="6" color="0" x="3259" y="180" height="112" width="347" html.valueishtml="0"  name=transfer_master_s_warehouse_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="78567654" )
+text(band=header alignment="2" text="$$HEX4$$906e0d00935e4d4f$$ENDHEX$$" border="6" color="0" x="3616" y="180" height="112" width="238" html.valueishtml="0"  name=transfer_detail_content_s_location_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="78567654" )
+text(band=header alignment="2" text="$$HEX5$$ee7684760d00d34e935e$$ENDHEX$$" border="6" color="0" x="3863" y="180" height="112" width="325" html.valueishtml="0"  name=transfer_master_d_warehouse_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="78567654" )
+text(band=header alignment="2" text="$$HEX5$$ee7684760d00935e4d4f$$ENDHEX$$" border="6" color="0" x="4197" y="180" height="112" width="251" html.valueishtml="0"  name=transfer_detail_content_d_location_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="78567654" )
+text(band=header alignment="2" text="$$HEX5$$fb79a8520d007065cf91$$ENDHEX$$" border="6" color="0" x="4457" y="180" height="112" width="562" html.valueishtml="0"  name=transfer_detail_content_quantity_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="78567654" )
+text(band=header alignment="2" text="$$HEX5$$935e585b0d007b7c8b57$$ENDHEX$$" border="6" color="0" x="5029" y="180" height="112" width="210" html.valueishtml="0"  name=transfer_detail_content_inventory_type_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="78567654" )
+text(band=header alignment="2" text="$$HEX5$$fb79a8520d00f665f495$$ENDHEX$$" border="6" color="0" x="5248" y="180" height="112" width="370" html.valueishtml="0"  name=transfer_master_complete_date_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="78567654" )
+text(band=header alignment="2" text="$$HEX5$$278ddc67167f0d00f753$$ENDHEX$$" border="6" color="0" x="2619" y="180" height="112" width="293" html.valueishtml="0"  name=obj_12044398 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="79741120" )
+text(band=header alignment="2" text="$$HEX5$$096748650d00e5651f67$$ENDHEX$$" border="6" color="0" x="2921" y="180" height="112" width="329" html.valueishtml="0"  name=obj_12049336 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="79741120" )
+column(band=detail id=2 alignment="3" tabsequence=32766 border="0" color="0" x="379" y="4" height="56" width="411" format="[general]" html.valueishtml="0"  name=transfer_detail_content_sku visible="1" edit.limit=50 edit.case=upper edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="0" color="0" x="9" y="4" height="56" width="361" format="[general]" html.valueishtml="0"  name=transfer_detail_content_to_no visible="1" edit.limit=16 edit.case=upper edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=14 alignment="0" tabsequence=32766 border="0" color="0" x="800" y="4" height="56" width="270" format="[general]" html.valueishtml="0"  name=transfer_detail_content_supp_code visible="1" edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=detail alignment="0" expression=" owner_owner_cd  + '(' + owner_owner_type  + ')'"border="0" color="0" x="1079" y="4" height="56" width="434" format="[general]" html.valueishtml="0"  name=cf_owner_name visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="0" color="0" x="1522" y="4" height="56" width="251" format="[general]" html.valueishtml="0"  name=transfer_detail_content_serial_no visible="1" edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="0" color="0" x="1783" y="4" height="56" width="270" format="[general]" html.valueishtml="0"  name=lot_no visible="1" edit.limit=20 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=13 alignment="0" tabsequence=32766 border="0" color="0" x="2062" y="4" height="56" width="306" format="[general]" html.valueishtml="0"  name=po_no visible="1" edit.limit=25 edit.case=upper edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=10 alignment="0" tabsequence=32766 border="0" color="0" x="3259" y="4" height="56" width="347" format="[general]" html.valueishtml="0"  name=transfer_master_s_warehouse visible="1" edit.limit=10 edit.case=upper edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="0" tabsequence=32766 border="0" color="0" x="3616" y="4" height="56" width="238" format="[general]" html.valueishtml="0"  name=transfer_detail_content_s_location visible="1" edit.limit=10 edit.case=upper edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=11 alignment="0" tabsequence=32766 border="0" color="0" x="3863" y="4" height="56" width="325" format="[general]" html.valueishtml="0"  name=transfer_master_d_warehouse visible="1" edit.limit=10 edit.case=upper edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="0" tabsequence=32766 border="0" color="0" x="4197" y="4" height="56" width="251" format="[general]" html.valueishtml="0"  name=transfer_detail_content_d_location visible="1" edit.limit=10 edit.case=upper edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=9 alignment="1" tabsequence=32766 border="0" color="0" x="4457" y="4" height="56" width="562" format="#######.#####" html.valueishtml="0"  name=transfer_detail_content_quantity visible="1" editmask.mask="#######.#####" editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=7 alignment="0" tabsequence=32766 border="0" color="0" x="5029" y="4" height="56" width="210" format="[general]" html.valueishtml="0"  name=inventory_type visible="1" dddw.name=dddw_inventory_type_by_project dddw.displaycolumn=inv_type_desc dddw.datacolumn=inv_type dddw.percentwidth=100 dddw.lines=0 dddw.limit=0 dddw.allowedit=no dddw.useasborder=no dddw.case=any  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=12 alignment="0" tabsequence=32766 border="0" color="0" x="5248" y="4" height="56" width="370" format="mm/dd/yyyy hh:mm" html.valueishtml="0"  name=transfer_master_complete_date visible="1" edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=16 alignment="0" tabsequence=32766 border="0" color="0" x="2377" y="4" height="56" width="233" format="[general]" html.valueishtml="0"  name=po_no2 visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.autovscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=19 alignment="0" tabsequence=32766 border="0" color="0" x="2619" y="4" height="56" width="293" format="[general]" html.valueishtml="0"  name=container_id visible="1" edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=20 alignment="0" tabsequence=32766 border="0" color="0" x="2921" y="4" height="56" width="329" format="[shortdate] [time]" html.valueishtml="0"  name=expiration_date visible="1" edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=foreground alignment="0" text="$$HEX4$$935e585be567e28b$$ENDHEX$$($$HEX4$$935e585bfb79a852$$ENDHEX$$)" border="0" color="0" x="1989" y="8" height="64" width="814" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=foreground alignment="0" text="SIMS310" border="0" color="0" x="347" y="8" height="56" width="343" html.valueishtml="0"  name=t_3 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=foreground alignment="0" expression="today()"border="0" color="0" x="347" y="68" height="56" width="553" format="mm/dd/yyyy hh:mm" html.valueishtml="0"  name=compute_1 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=foreground alignment="0" text="$$HEX4$$a5626888167ff753$$ENDHEX$$:" border="0" color="0" x="5" y="8" height="56" width="329" html.valueishtml="0"  name=t_4 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=foreground alignment="0" text="$$HEX4$$a5626888e5651f67$$ENDHEX$$:" border="0" color="0" x="5" y="68" height="56" width="334" html.valueishtml="0"  name=t_5 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=foreground alignment="1" expression="'$$HEX5$$75980178200071512000$$ENDHEX$$'+ pagecount() + ' $$HEX4$$759820002c7b2000$$ENDHEX$$' + page() + ' $$HEX1$$7598$$ENDHEX$$'"border="0" color="0" x="2917" y="16" height="56" width="928" format="[general]" html.valueishtml="0"  name=compute_2 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+
+sparse(names="transfer_detail_content_to_no	transfer_detail_content_sku")htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" pagingmethod=0 generatedddwframes="1" )
+xhtmlgen() cssgen(sessionspecific="0" )
+xmlgen(inline="0" )
+xsltgen()
+jsgen()
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )
+export.xhtml()
+ 

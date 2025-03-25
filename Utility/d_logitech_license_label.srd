@@ -1,0 +1,78 @@
+HA$PBExportHeader$d_logitech_license_label.srd
+$PBExportComments$Pulse Receiving Labels
+release 9;
+datawindow(units=0 timer_interval=0 color=16777215 processing=1 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no grid.lines=0 )
+header(height=76 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=72 color="536870912" )
+table(column=(type=char(30) updatewhereclause=yes name=supp_invoice_no dbname="Supp_Invoice_No" )
+ column=(type=char(50) updatewhereclause=yes name=sku dbname="SKU" )
+ column=(type=decimal(5) updatewhereclause=yes name=quantity dbname="Quantity" )
+ column=(type=datetime updatewhereclause=yes name=expiration_date dbname="Expiration_Date" )
+ column=(type=char(25) updatewhereclause=yes name=container_id dbname="Container_ID" )
+ column=(type=char(20) updatewhereclause=yes name=lot_no dbname="Lot_NO" )
+ column=(type=char(10) updatewhereclause=yes name=l_code dbname="L_code" )
+ column=(type=char(4) updatewhereclause=yes name=uom dbname="UOM" )
+ column=(type=char(70) updatewhereclause=yes name=description dbname="Description" )
+ column=(type=char(1) updatewhereclause=yes name=c_print_ind dbname="c_Print_Ind" values="	Y/	N" )
+ column=(type=decimal(0) updatewhereclause=yes name=part_upc_code dbname="Part_Upc_Code" )
+ column=(type=char(20) updatewhereclause=yes name=user_field6 dbname="User_Field6" )
+ column=(type=char(20) updatewhereclause=yes name=user_field7 dbname="User_Field7" )
+ column=(type=char(20) updatewhereclause=yes name=supp_code dbname="Supp_Code" )
+ column=(type=char(16) updatewhereclause=yes name=ro_no dbname="RO_No" )
+ column=(type=char(1) updatewhereclause=yes name=inventory_type dbname="Inventory_Type" )
+ retrieve="  SELECT Receive_Master.Supp_Invoice_No,  
+			Receive_Putaway.SKU,   
+         Receive_Putaway.Quantity,   
+         Receive_Putaway.Expiration_Date,   
+         Receive_Putaway.Container_ID,   
+         Receive_Putaway.Lot_NO,  
+			Receive_Putaway.L_code,
+         Receive_Detail.UOM, 
+			Item_Master.Description, 
+			~"Y~" as c_Print_Ind,
+			Item_Master.Part_Upc_Code,
+			Item_Master.User_Field6,
+			Item_Master.User_Field7,
+         Item_Master.Supp_Code,
+			Receive_Master.RO_No,
+			Receive_Putaway.Inventory_Type
+    FROM Item_Master,   
+         Receive_Master,   
+         Receive_Putaway,   
+         Receive_Detail  
+   WHERE ( Item_Master.Project_ID = Receive_Master.Project_ID ) and  
+         ( Receive_Putaway.RO_No = Receive_Master.RO_No ) and  
+			(Receive_Detail.SKU = Receive_Putaway.SKU) and
+			(Receive_Detail.Supp_code = Receive_Putaway.Supp_code) and 
+			(Receive_Detail.Line_Item_No = Receive_Putaway.Line_Item_No) and 
+         ( Receive_Putaway.SKU = Item_Master.SKU ) and  
+         ( Receive_Putaway.Supp_Code = Item_Master.Supp_Code ) and  
+         ( Receive_Detail.RO_No = Receive_Master.RO_No )
+"  sort="sku A quantity A container_id A " )
+text(band=header alignment="2" text="PO Nbr" border="6" color="0" x="114" y="4" height="64" width="366" html.valueishtml="0"  name=receive_master_supp_invoice_no_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="79741120" )
+text(band=header alignment="2" text="Prt" border="6" color="0" x="9" y="4" height="64" width="96" html.valueishtml="0"  name=t_6 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="80269524" )
+text(band=header alignment="2" text="Tag #" border="6" color="0" x="489" y="4" height="64" width="329" html.valueishtml="0"  name=receive_putaway_container_id_t visible="0"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="79741120" )
+text(band=header alignment="2" text="SKU" border="6" color="0" x="1417" y="4" height="64" width="480" html.valueishtml="0"  name=receive_putaway_sku_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="79741120" )
+text(band=header alignment="2" text="QTY" border="6" color="0" x="2391" y="4" height="64" width="293" html.valueishtml="0"  name=receive_putaway_quantity_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="79741120" )
+text(band=header alignment="2" text="UOM" border="6" color="0" x="2693" y="4" height="64" width="183" html.valueishtml="0"  name=receive_detail_uom_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="79741120" )
+text(band=header alignment="2" text="Exp Date" border="6" color="0" x="2885" y="4" height="64" width="325" html.valueishtml="0"  name=t_3 visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="79741120" )
+text(band=header alignment="2" text="Lot #" border="6" color="0" x="827" y="4" height="64" width="274" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="79741120" )
+text(band=header alignment="2" text="Location" border="6" color="0" x="1111" y="4" height="64" width="297" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="79741120" )
+text(band=header alignment="2" text="Description" border="6" color="0" x="1906" y="4" height="64" width="475" html.valueishtml="0"  name=t_4 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="79741120" )
+column(band=detail id=10 alignment="0" tabsequence=10 border="0" color="0" x="9" y="8" height="56" width="96" format="[general]" html.valueishtml="0"  name=c_print_ind visible="1" checkbox.text="" checkbox.on="Y" checkbox.off="N" checkbox.scale=no checkbox.threed=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="0" color="0" x="114" y="8" height="56" width="366" format="[general]" html.valueishtml="0"  name=supp_invoice_no visible="1" edit.limit=30 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="0" tabsequence=32766 border="0" color="0" x="489" y="8" height="56" width="329" format="[general]" html.valueishtml="0"  name=container_id visible="0" edit.limit=25 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="0" color="0" x="1417" y="8" height="56" width="480" format="[general]" html.valueishtml="0"  name=sku visible="1" edit.limit=50 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=8 alignment="0" tabsequence=32766 border="0" color="0" x="2693" y="8" height="56" width="183" format="[general]" html.valueishtml="0"  name=uom visible="1" edit.limit=4 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=detail alignment="2" expression="If(String( expiration_date ,'mm/dd/yyyy') <> '12/31/2999',String(expiration_date,'mmm. dd,  yy'),'N/A')"border="0" color="0" x="2885" y="8" height="56" width="325" format="[GENERAL]" html.valueishtml="0"  name=c_exp_date visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="0" tabsequence=32766 border="0" color="0" x="827" y="8" height="56" width="274" format="[general]" html.valueishtml="0"  name=lot_no visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="1" tabsequence=20 border="5" color="0" x="2391" y="8" height="56" width="293" format="#######.#####" html.valueishtml="0"  name=quantity visible="1" editmask.mask="#######.#####" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=7 alignment="0" tabsequence=32766 border="0" color="0" x="1111" y="8" height="56" width="297" format="[general]" html.valueishtml="0"  name=l_code visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=9 alignment="0" tabsequence=32766 border="0" color="0" x="1906" y="8" height="56" width="475" format="[general]" html.valueishtml="0"  name=description visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

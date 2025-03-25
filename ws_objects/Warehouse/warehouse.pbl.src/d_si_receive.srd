@@ -1,0 +1,116 @@
+﻿$PBExportHeader$d_si_receive.srd
+$PBExportComments$*+ Stock Inquiry - Receive Tab
+release 11;
+datawindow(units=0 timer_interval=60000 color=16777215 processing=1 HTMLDW=no print.printername="" print.documentname="" print.orientation = 1 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes print.preview.outline=yes hidegrayline=no showbackcoloronxp=no grid.lines=0 )
+header(height=284 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=68 color="553648127" height.autosize=yes )
+table(column=(type=char(16) updatewhereclause=yes name=receive_putaway_ro_no dbname="RO_No" )
+ column=(type=char(10) updatewhereclause=yes name=receive_putaway_l_code dbname="L_Code" )
+ column=(type=char(50) updatewhereclause=yes name=receive_putaway_serial_no dbname="Serial_No" )
+ column=(type=char(50) updatewhereclause=yes name=lot_no dbname="Lot_No" )
+ column=(type=char(1) updatewhereclause=yes name=receive_putaway_inventory_type dbname="Inventory_Type" )
+ column=(type=decimal(5) updatewhereclause=yes name=receive_putaway_quantity dbname="Quantity" )
+ column=(type=char(10) updatewhereclause=yes name=receive_master_wh_code dbname="WH_Code" )
+ column=(type=datetime updatewhereclause=yes name=receive_master_arrival_date dbname="Arrival_Date" )
+ column=(type=char(1) updatewhereclause=yes name=receive_master_ord_status dbname="Ord_Status" values="New	N/Complete	C/Process	P/Void	V/" )
+ column=(type=char(30) updatewhereclause=yes name=receive_master_supp_invoice_no dbname="Supp_Invoice_No" )
+ column=(type=char(50) updatewhereclause=yes name=receive_putaway_sku dbname="SKU" )
+ column=(type=datetime updatewhereclause=yes name=receive_master_ord_date dbname="Ord_Date" )
+ column=(type=char(50) updatewhereclause=yes name=po_no dbname="PO_No" )
+ column=(type=char(20) updatewhereclause=yes name=receive_putaway_supp_code dbname="Supp_Code" )
+ column=(type=decimal(0) updatewhereclause=yes name=owner_id dbname="Owner_ID" )
+ column=(type=char(50) updatewhereclause=yes name=po_no2 dbname="PO_No2" )
+ column=(type=char(25) updatewhereclause=yes name=container_id dbname="Container_ID" )
+ column=(type=datetime updatewhereclause=yes name=expiration_date dbname="Expiration_date" )
+ column=(type=char(20) updatewhereclause=yes name=owner_owner_cd dbname="Owner_Cd" )
+ column=(type=char(1) updatewhereclause=yes name=owner_owner_type dbname="Owner_Type" )
+ column=(type=char(3) updatewhereclause=yes name=country_of_origin dbname="Country_of_Origin" )
+ retrieve="  SELECT Receive_Putaway.RO_No,   
+         Receive_Putaway.L_Code,   
+         Receive_Putaway.Serial_No,   
+         Receive_Putaway.Lot_No,   
+         Receive_Putaway.Inventory_Type,   
+         Receive_Putaway.Quantity,   
+         Receive_Master.WH_Code,   
+         Receive_Master.Arrival_Date,   
+         Receive_Master.Ord_Status,   
+         Receive_Master.Supp_Invoice_No,   
+         Receive_Putaway.SKU,   
+         Receive_Master.Ord_Date,   
+         Receive_Putaway.PO_No,   
+         Receive_Putaway.Supp_Code,   
+         Receive_Putaway.Owner_ID,    
+         Receive_Putaway.PO_No2,   
+         Receive_Putaway.Container_ID,   
+         Receive_Putaway.Expiration_date,   
+         Owner.Owner_Cd,   
+         Owner.Owner_Type,
+			Receive_Putaway.Country_of_Origin  
+    FROM Receive_Putaway,   
+         Receive_Master,   
+         Owner  
+   WHERE ( Receive_Master.RO_No = Receive_Putaway.RO_No ) and  
+         ( Owner.Owner_ID = Receive_Putaway.Owner_ID )    and
+ 		( Receive_Putaway.Inventory_Type <> '8' ) and
+			Receive_Putaway.sku = Receive_Putaway.sku_Parent 
+"  sort="receive_master_arrival_date A receive_master_supp_invoice_no A receive_putaway_sku A " )
+text(band=header alignment="0" text="WAREHOUSE" border="6" color="0" x="9" y="168" height="112" width="311" html.valueishtml="0"  name=receive_master_wh_code_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="78567654" )
+text(band=header alignment="2" text="SKU" border="6" color="0" x="613" y="168" height="112" width="526" html.valueishtml="0"  name=receive_putaway_sku_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="78567654" )
+text(band=header alignment="2" text="SERIALNBR" border="6" color="0" x="2208" y="168" height="112" width="270" html.valueishtml="0"  name=receive_putaway_serial_no_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="78567654" )
+text(band=header alignment="2" text="LOTNBR" border="6" color="0" x="2487" y="168" height="112" width="279" html.valueishtml="0"  name=lot_no_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="78567654" )
+text(band=header alignment="2" text="PONBR" border="6" color="0" x="2775" y="168" height="112" width="265" html.valueishtml="0"  name=po_no_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="78567654" )
+text(band=header alignment="2" text="PONBR2" border="6" color="0" x="3049" y="168" height="112" width="219" html.valueishtml="0"  name=po_no2_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="78567654" )
+text(band=header alignment="2" text="INVTYPE" border="6" color="0" x="3918" y="168" height="112" width="206" html.valueishtml="0"  name=receive_putaway_inventory_type_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="78567654" )
+text(band=header alignment="2" text="ORDERSTATUS" border="6" color="0" x="4133" y="168" height="112" width="242" html.valueishtml="0"  name=receive_master_ord_status_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="78567654" )
+text(band=header alignment="2" text="RCVDQTY" border="6" color="0" x="4384" y="168" height="112" width="457" html.valueishtml="0"  name=receive_putaway_quantity_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="78567654" )
+text(band=header alignment="2" text="SCHED ARRIVAL
+DATE" border="6" color="0" x="4850" y="168" height="112" width="375" html.valueishtml="0"  name=receive_master_arrival_date_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="78567654" )
+text(band=header alignment="2" text="LOCATION" border="6" color="0" x="1920" y="168" height="112" width="279" html.valueishtml="0"  name=receive_putaway_l_code_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="78567654" )
+text(band=header alignment="0" text="ORDER NBR" border="6" color="0" x="329" y="168" height="112" width="274" html.valueishtml="0"  name=receive_master_supp_invoice_no_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="78567654" )
+text(band=header alignment="2" text="
+ SUPPLIER" border="6" color="0" x="1147" y="168" height="112" width="320" html.valueishtml="0"  name=receive_putaway_supp_code_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="78567654" )
+text(band=header alignment="2" text="
+OWNER" border="6" color="0" x="1477" y="168" height="112" width="434" html.valueishtml="0"  name=cf_name_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="78567654" )
+text(band=header alignment="2" text="CONTAINER ID" border="6" color="0" x="3278" y="168" height="112" width="279" html.valueishtml="0"  name=container_id_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="79741120" )
+text(band=header alignment="2" text="EXPIRATION DATE" border="6" color="0" x="3566" y="168" height="112" width="343" html.valueishtml="0"  name=expiration_date_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="79741120" )
+text(band=header alignment="2" text="ORDERDATE" border="6" color="0" x="5234" y="168" height="112" width="398" html.valueishtml="0"  name=receive_master_ord_date_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="78567654" )
+text(band=header alignment="2" text="COUNTRY OF ORIGIN" border="6" color="0" x="5641" y="168" height="112" width="352" html.valueishtml="0"  name=country_of_origin_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+column(band=detail id=7 alignment="0" tabsequence=32766 border="0" color="0" x="9" y="4" height="60" width="311" format="[general]" html.valueishtml="0"  name=receive_master_wh_code visible="1" edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=10 alignment="0" tabsequence=32766 border="0" color="0" x="329" y="4" height="60" width="274" format="[general]" html.valueishtml="0"  name=receive_master_supp_invoice_no visible="1" edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="0" color="0" x="1920" y="4" height="60" width="279" format="[general]" html.valueishtml="0"  name=receive_putaway_l_code visible="1" edit.limit=10 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="0" color="0" x="2208" y="4" height="60" width="270" format="[general]" html.valueishtml="0"  name=receive_putaway_serial_no visible="1" edit.limit=20 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="0" color="0" x="2487" y="4" height="60" width="279" format="[general]" html.valueishtml="0"  name=lot_no visible="1" edit.limit=20 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=13 alignment="0" tabsequence=32766 border="0" color="0" x="2775" y="4" height="60" width="265" format="[general]" html.valueishtml="0"  name=po_no visible="1" edit.limit=25 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=16 alignment="0" tabsequence=32766 border="0" color="0" x="3049" y="4" height="60" width="219" format="[general]" html.valueishtml="0"  name=po_no2 visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="0" tabsequence=32766 border="0" color="0" x="3918" y="4" height="60" width="206" format="[general]" html.valueishtml="0"  name=receive_putaway_inventory_type visible="1" dddw.name=dddw_inventory_type_by_project dddw.displaycolumn=inv_type_desc dddw.datacolumn=inv_type dddw.percentwidth=100 dddw.lines=0 dddw.limit=0 dddw.allowedit=no dddw.useasborder=no dddw.case=any  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=9 alignment="0" tabsequence=32766 border="0" color="0" x="4133" y="4" height="60" width="242" format="[general]" html.valueishtml="0"  name=receive_master_ord_status visible="1" ddlb.limit=0 ddlb.allowedit=no ddlb.case=any  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="1" tabsequence=32766 border="0" color="0" x="4384" y="4" height="60" width="457" format="#######.#####" html.valueishtml="0"  name=receive_putaway_quantity visible="1" editmask.mask="########.#####" editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=11 alignment="3" tabsequence=32766 border="0" color="0" x="613" y="4" height="60" width="526" format="[general]" html.valueishtml="0"  name=receive_putaway_sku visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=14 alignment="0" tabsequence=32766 border="0" color="0" x="1147" y="4" height="56" width="320" format="[general]" html.valueishtml="0"  name=receive_putaway_supp_code visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.autovscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=detail alignment="0" expression=" owner_owner_cd  + '(' + owner_owner_type  + ')'"border="0" color="0" x="1477" y="4" height="56" width="434" format="[general]" html.valueishtml="0"  name=cf_owner_name visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=17 alignment="0" tabsequence=32766 border="0" color="0" x="3278" y="4" height="56" width="279" format="[general]" html.valueishtml="0"  name=container_id visible="1" edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=18 alignment="0" tabsequence=32766 border="0" color="0" x="3566" y="4" height="56" width="343" format="[shortdate] [time]" html.valueishtml="0"  name=expiration_date visible="1" edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=8 alignment="0" tabsequence=32766 border="0" color="0" x="4850" y="4" height="60" width="375" format="mm/dd/yyyy hh:mm" html.valueishtml="0"  name=receive_master_arrival_date visible="1" editmask.mask="mm/dd/yyyy hh:mm" editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=12 alignment="0" tabsequence=32766 border="0" color="0" x="5234" y="4" height="60" width="398" format="mm/dd/yyyy hh:mm" html.valueishtml="0"  name=receive_master_ord_date visible="1" editmask.mask="mm/dd/yyyy hh:mm" editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=21 alignment="2" tabsequence=32766 border="0" color="0" x="5641" y="4" height="60" width="352" format="[general]" html.valueishtml="0"  name=country_of_origin visible="1" edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=foreground alignment="0" text="STOCK INQUIRY INBOUND" border="0" color="0" x="1888" y="16" height="64" width="855" html.valueishtml="0"  name=stock_inquiry_inbound_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=foreground alignment="0" text="Report ID:" border="0" color="0" x="14" y="12" height="56" width="256" html.valueishtml="0"  name=report_id_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=foreground alignment="0" text="Date:" border="0" color="0" x="14" y="76" height="56" width="142" html.valueishtml="0"  name=date_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=foreground alignment="0" text="SIMS104" border="0" color="0" x="288" y="12" height="56" width="206" html.valueishtml="0"  name=t_5 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=foreground alignment="0" expression="today()"border="0" color="0" x="288" y="76" height="56" width="457" format="mm/dd/yyyy hh:mm" html.valueishtml="0"  name=compute_1 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=foreground alignment="0" text="Page:" border="0" color="0" x="3771" y="20" height="56" width="137" html.valueishtml="0"  name=page_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=foreground alignment="0" expression="page() + ' of ' + pagecount()"border="0" color="0" x="3931" y="20" height="60" width="745" format="[general]" html.valueishtml="0"  name=page_display_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+
+sparse(names="receive_master_wh_code	receive_master_supp_invoice_no	receive_putaway_sku	receive_putaway_l_code	receive_putaway_serial_no	receive_putaway_inventory_type")htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" pagingmethod=0 generatedddwframes="1" )
+xhtmlgen() cssgen(sessionspecific="0" )
+xmlgen(inline="0" )
+xsltgen()
+jsgen()
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )
+export.xhtml()
+ 

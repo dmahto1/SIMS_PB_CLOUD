@@ -1,0 +1,97 @@
+HA$PBExportHeader$d_bobcat_inbound_customs_rpt.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 1 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=1112 color="536870912" )
+summary(height=120 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=200 color="536870912" )
+table(column=(type=char(20) updatewhereclause=yes name=awb_bol_no dbname="Receive_Master.AWB_BOL_No" )
+ column=(type=char(30) updatewhereclause=yes name=supp_invoice_no dbname="Receive_Master.Supp_Invoice_No" )
+ column=(type=char(50) updatewhereclause=yes name=sku dbname="Receive_Detail.SKU" )
+ column=(type=char(20) updatewhereclause=yes name=receive_detail_supp_code dbname="Receive_Detail.Supp_Code" )
+ column=(type=char(70) updatewhereclause=yes name=description dbname="Item_Master.Description" )
+ column=(type=char(70) updatewhereclause=yes name=chinese_name dbname="Item_Master.chinese_name" )
+ column=(type=char(20) updatewhereclause=yes name=chinese_hs_code dbname="Item_Master.chinese_hs_code" )
+ column=(type=decimal(4) updatewhereclause=yes name=std_cost dbname="Item_Master.Std_Cost" )
+ column=(type=char(10) updatewhereclause=yes name=cc_type dbname="Item_Master.CC_type" )
+ column=(type=decimal(5) updatewhereclause=yes name=item_master_weight dbname="Item_Master.weight" )
+ column=(type=decimal(5) updatewhereclause=yes name=quantity dbname="quantity" )
+ retrieve="  SELECT dbo.Receive_Master.AWB_BOL_No,   
+         dbo.Receive_Master.Supp_Invoice_No,   
+         dbo.Receive_Detail.SKU,   
+         dbo.Receive_Detail.Supp_Code,   
+         dbo.Item_Master.Description,   
+         dbo.Item_Master.User_Field14 as chinese_name,   
+         dbo.Item_Master.User_Field6 as chinese_hs_code,   
+         dbo.Item_Master.Std_Cost,   
+         dbo.Item_Master.User_Field5 as CC_type,   
+         dbo.Item_Master.Weight_1 as weight,  
+         sum(dbo.Receive_Detail.Req_Qty) as quantity   
+    FROM dbo.Receive_Master,   
+         dbo.Receive_Detail,   
+         dbo.Item_Master  
+   WHERE ( dbo.Receive_Detail.RO_No = dbo.Receive_Master.RO_No ) and  
+         ( dbo.Receive_Detail.Supp_Code = dbo.Item_Master.Supp_Code ) and  
+         ( dbo.Receive_Detail.SKU = dbo.Item_Master.SKU ) and  
+         ( ( dbo.Receive_Master.Project_ID = :asproject ) AND  
+         ( dbo.Receive_Master.AWB_BOL_No = :asawbbol ) )    
+	Group By dbo.Receive_Master.AWB_BOL_No,   
+         dbo.Receive_Master.Supp_Invoice_No,   
+         dbo.Receive_Detail.SKU,   
+         dbo.Receive_Detail.Supp_Code,   
+         dbo.Item_Master.Description,    
+         dbo.Item_Master.User_Field14,   
+         dbo.Item_Master.User_Field6,   
+         dbo.Item_Master.Std_Cost,   
+         dbo.Item_Master.User_Field5,   
+         dbo.Item_Master.Weight_1" arguments=(("asproject", string),("asawbbol", string)) )
+text(band=header alignment="3" text="250 EAST BEATON DRIVE WEST  FARGO,  ND  58708" border="0" color="33554432" x="251" y="248" height="80" width="2400" html.valueishtml="0"  name=t_3 visible="1"  font.face="Arial" font.height="-12" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=header alignment="0" expression="'Page ' + page() + ' of ' + pageCount()"border="0" color="33554432" x="3611" y="692" height="72" width="686" format="[general]" html.valueishtml="0"  name=page_1 visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="3" text="BOBCAT COMPANY" border="0" color="33554432" x="1801" y="96" height="92" width="873" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-14" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Packing List and Invoice" border="0" color="33554432" x="1801" y="376" height="80" width="869" html.valueishtml="0"  name=t_7 visible="1"  font.face="Arial" font.height="-12" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Bill To:" border="0" color="33554432" x="256" y="604" height="76" width="183" html.valueishtml="0"  name=t_4 visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Country of Origin:" border="0" color="33554432" x="256" y="696" height="76" width="462" html.valueishtml="0"  name=t_5 visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Shipment:" border="0" color="33554432" x="256" y="788" height="76" width="270" html.valueishtml="0"  name=t_6 visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header id=1 alignment="0" tabsequence=32766 border="0" color="33554432" x="576" y="512" height="76" width="576" format="[general]" html.valueishtml="0"  name=awb_bol_no visible="1" edit.limit=20 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="AWB/BOL:" border="0" color="33554432" x="256" y="512" height="76" width="315" html.valueishtml="0"  name=receive_master_awb_bol_no_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="3" text="Date:" border="0" color="33554432" x="2331" y="512" height="76" width="142" html.valueishtml="0"  name=t_8 visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="Container No:" border="0" color="33554432" x="2331" y="604" height="76" width="361" html.valueishtml="0"  name=t_9 visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Terms of Payment:" border="0" color="33554432" x="2331" y="696" height="76" width="503" html.valueishtml="0"  name=t_10 visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Currency Type:" border="0" color="33554432" x="2331" y="788" height="76" width="402" html.valueishtml="0"  name=t_11 visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="1" text="Customs
+Cert.
+Type" border="0" color="33554432" x="4265" y="904" height="192" width="320" html.valueishtml="0"  name=item_master_user_field5_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="1" text="Qty" border="0" color="33554432" x="3072" y="1032" height="64" width="320" html.valueishtml="0"  name=quantity_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="1" text="Weight
+(Kg)" border="0" color="33554432" x="3397" y="968" height="128" width="238" html.valueishtml="0"  name=item_master_weight_1_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="1" text="Unit
+Cost" border="0" color="33554432" x="3639" y="968" height="128" width="265" html.valueishtml="0"  name=item_master_std_cost_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="1" text="Extended
+Cost" border="0" color="33554432" x="3909" y="968" height="128" width="352" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+line(band=header x1="0" y1="1108" x2="4576" y2="1108"  name=l_1 visible="1" pen.style="0" pen.width="5" pen.color="0"  background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="PO #" border="0" color="33554432" x="233" y="1032" height="64" width="567" html.valueishtml="0"  name=receive_master_supp_invoice_no_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="Chinese Name/
+    Chinese H.S. Code" border="0" color="33554432" x="1984" y="972" height="128" width="1083" html.valueishtml="0"  name=item_master_user_field4_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="SKU/
+    Description" border="0" color="33554432" x="805" y="972" height="128" width="1175" html.valueishtml="0"  name=item_master_description_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=11 alignment="1" tabsequence=32766 border="0" color="33554432" x="3072" y="20" height="76" width="320" format="########" html.valueishtml="0"  name=quantity visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=8 alignment="1" tabsequence=32766 border="0" color="33554432" x="3639" y="20" height="76" width="265" format="#######.00" html.valueishtml="0"  name=std_cost visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=detail alignment="1" expression="quantity  *  std_cost"border="0" color="33554432" x="3909" y="20" height="76" width="352" format="#######.00" html.valueishtml="0"  name=extended_cost visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=detail alignment="0" expression="getrow()"border="0" color="33554432" x="9" y="20" height="76" width="215" format="[GENERAL]" html.valueishtml="0"  name=compute_1 visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="0" color="33554432" x="238" y="20" height="76" width="567" format="[general]" html.valueishtml="0"  name=supp_invoice_no visible="1" edit.limit=30 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="0" color="33554432" x="805" y="20" height="76" width="1175" format="[general]" html.valueishtml="0"  name=sku visible="1" edit.limit=50 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="0" tabsequence=32766 border="0" color="33554432" x="896" y="100" height="76" width="1175" format="[general]" html.valueishtml="0"  name=description visible="1" edit.limit=70 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="0" tabsequence=32766 border="0" color="33554432" x="1984" y="20" height="76" width="1083" format="[general]" html.valueishtml="0"  name=chinese_name visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=7 alignment="0" tabsequence=32766 border="0" color="33554432" x="2075" y="100" height="76" width="992" format="[general]" html.valueishtml="0"  name=chinese_hs_code visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=9 alignment="1" tabsequence=32766 border="0" color="33554432" x="4265" y="20" height="76" width="270" format="[general]" html.valueishtml="0"  name=cc_type visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=detail alignment="1" expression="quantity *  item_master_weight "border="0" color="33554432" x="3397" y="20" height="76" width="238" format="[General]" html.valueishtml="0"  name=weight visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=summary alignment="2" text="Grand Total" border="0" color="33554432" x="2674" y="20" height="76" width="343" html.valueishtml="0"  name=t_12 visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+line(band=summary x1="0" y1="4" x2="4576" y2="4"  name=l_2 visible="1" pen.style="0" pen.width="5" pen.color="0"  background.mode="2" background.color="16777215" )
+compute(band=summary alignment="1" expression="sum(quantity for all)"border="0" color="33554432" x="3072" y="20" height="76" width="320" format="########" html.valueishtml="0"  name=compute_4 visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=summary alignment="1" expression="sum( quantity *  item_master_weight for all)"border="0" color="33554432" x="3397" y="20" height="76" width="238" format="[General]" html.valueishtml="0"  name=compute_5 visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=summary alignment="1" expression="sum( extended_cost  for all)"border="0" color="33554432" x="3854" y="20" height="76" width="407" format="########.00" html.valueishtml="0"  name=compute_6 visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

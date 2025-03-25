@@ -1,0 +1,33 @@
+﻿$PBExportHeader$f_get_gsin_number.srf
+$PBExportComments$S29552 F13773 I1745 PhilipsCLS get GSIN number
+global type f_get_gsin_number from function_object
+end type
+
+forward prototypes
+global function string f_get_gsin_number (string asproject, string assupplier)
+end prototypes
+
+global function string f_get_gsin_number (string asproject, string assupplier);//GailM 2/25/2019 S29552 F13773 I1745 Philips BlueHeart  - SIMS - Product Picked - Client Changes
+String lsGSIN, lsPrefix, lsSupplier
+Decimal 	ld_NxtSeq
+Int liCheck
+//Dinesh - 11/23/2020- S51444- Philips-DA
+If asProject = "PHILIPSCLS" or asProject = "PHILIPS-DA" Then
+	select gs1_gsin_company_cd into :lsPrefix from supplier where project_id = :asProject and supp_code = :asSupplier using sqlca;
+End If
+
+If IsNull(lsPrefix) or lsPrefix = '' Then 
+	return "-1"
+End If
+
+sqlca.sp_next_avail_seq_no(asProject, asSupplier, "GSIN" , ld_NxtSeq)			//get the next available GSIN seq no
+lsGSIN = lsPrefix + String(Long(ld_NxtSeq),"0000000") 
+
+liCheck = f_calc_gsin_check_Digit( lsGSIN )
+
+lsGSIN = lsGSIN + string(liCheck)
+ 
+return lsGSIN
+
+end function
+

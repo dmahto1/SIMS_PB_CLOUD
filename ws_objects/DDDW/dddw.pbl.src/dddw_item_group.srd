@@ -1,0 +1,16 @@
+﻿$PBExportHeader$dddw_item_group.srd
+release 6;
+datawindow(units=0 timer_interval=0 color=16777215 processing=1 print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.prompt=no print.buttons=no print.preview.buttons=no grid.lines=0 )
+header(height=80 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=80 color="536870912" )
+table(column=(type=char(10) update=yes updatewhereclause=yes key=yes name=grp dbname="Item_Group.GRP" )
+ column=(type=char(30) update=yes updatewhereclause=yes name=grp_desc dbname="Item_Group.GRP_Desc" )
+ column=(type=char(10) updatewhereclause=yes key=yes name=project_id dbname="Item_Group.Project_ID" )
+ retrieve="PBSELECT( VERSION(400) TABLE(NAME=~"Item_Group~" ) COLUMN(NAME=~"Item_Group.GRP~") COLUMN(NAME=~"Item_Group.GRP_Desc~") COLUMN(NAME=~"Item_Group.Project_ID~")) ORDER(NAME=~"Item_Group.GRP~" ASC=yes ) " update="Item_Group" updatewhere=1 updatekeyinplace=no )
+text(band=header alignment="2" text="Group "border="0" color="0" x="9" y="8" height="68" width="489"  name=grp_t  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Description"border="0" color="0" x="507" y="8" height="68" width="1467"  name=grp_desc_t  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=1 alignment="0" tabsequence=10 border="0" color="0" x="9" y="4" height="72" width="489" format="[general]"  name=grp edit.limit=10 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="0" tabsequence=20 border="0" color="0" x="507" y="4" height="72" width="1467" format="[general]"  name=grp_desc edit.limit=30 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" cellpadding="0" cellspacing="0" generatecss="no" nowrap="yes")

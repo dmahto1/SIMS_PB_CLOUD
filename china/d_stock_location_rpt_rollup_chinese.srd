@@ -1,0 +1,72 @@
+HA$PBExportHeader$d_stock_location_rpt_rollup_chinese.srd
+release 11;
+datawindow(units=0 timer_interval=0 color=16777215 processing=1 HTMLDW=no print.printername="" print.documentname="" print.orientation = 1 print.margin.left = 90 print.margin.right = 90 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes print.preview.outline=yes hidegrayline=no showbackcoloronxp=no grid.lines=2 grid.columnmove=no selected.mouse=no )
+header(height=360 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=72 color="536870912" )
+table(column=(type=char(10) updatewhereclause=yes name=l_code dbname="L_Code" )
+ column=(type=char(50) updatewhereclause=yes name=sku dbname="SKU" )
+ column=(type=decimal(5) updatewhereclause=yes identity=yes name=avail_qty dbname="Avail_qty" )
+ column=(type=decimal(5) updatewhereclause=yes identity=yes name=alloc_qty dbname="Alloc_qty" )
+ column=(type=decimal(5) updatewhereclause=yes identity=yes name=sit_qty dbname="SIT_Qty" )
+ column=(type=decimal(5) updatewhereclause=yes identity=yes name=tfr_in dbname="TFR_In" )
+ column=(type=decimal(5) updatewhereclause=yes identity=yes name=tfr_out dbname="TFR_Out" )
+ column=(type=decimal(5) updatewhereclause=yes identity=yes name=wip_qty dbname="WIP_Qty" )
+ retrieve="  SELECT L_Code,   
+         SKU,   
+         sum(Avail_Qty) Avail_qty,
+         sum(Alloc_Qty) Alloc_qty,
+         sum(SIT_Qty) SIT_Qty,
+         sum(Tfr_In) TFR_In,
+         sum(Tfr_Out) TFR_Out,
+		sum(wip_qty) WIP_Qty
+    FROM Content_Summary 
+   WHERE Project_ID = :a_project  AND  
+         WH_Code = :a_whcode AND
+         L_Code between :a_start and :a_end
+
+group by l_code, SKU
+ORDER BY L_Code, SKU
+" filter="l_code > ~" ~"  AND ( avail_qty > 0  OR  alloc_qty > 0 OR  sit_qty > 0 or wip_qty > 0)"arguments=(("a_project", string),("a_whcode", string),("a_start", string),("a_end", string)) )
+text(band=header alignment="2" text="$$HEX2$$935e4d4f$$ENDHEX$$" border="2" color="0" x="9" y="300" height="56" width="526" html.valueishtml="0"  name=l_code_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="$$HEX4$$278dc154167ff753$$ENDHEX$$" border="2" color="0" x="544" y="300" height="56" width="1051" html.valueishtml="0"  name=sku_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="$$HEX4$$096748657065cf91$$ENDHEX$$" border="2" color="0" x="1614" y="300" height="56" width="352" html.valueishtml="0"  name=t_4 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+text(band=header alignment="2" text="$$HEX4$$06524d917065cf91$$ENDHEX$$" border="2" color="0" x="1975" y="300" height="56" width="398" html.valueishtml="0"  name=t_7 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+text(band=header alignment="2" text="$$HEX7$$28571490935e585b0d007065cf91$$ENDHEX$$" border="2" color="0" x="2382" y="244" height="112" width="265" html.valueishtml="0"  name=t_8 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+text(band=header alignment="2" text="$$HEX5$$6c8f65510d007065cf91$$ENDHEX$$" border="2" color="0" x="2656" y="244" height="112" width="347" html.valueishtml="0"  name=t_5 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+text(band=header alignment="2" text="$$HEX5$$6c8ffa510d007065cf91$$ENDHEX$$" border="2" color="0" x="3013" y="244" height="112" width="347" html.valueishtml="0"  name=t_6 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+text(band=header alignment="2" text="$$HEX6$$28573652c1540d007065cf91$$ENDHEX$$" border="2" color="0" x="3369" y="244" height="112" width="375" html.valueishtml="0"  name=wip_qty_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="1" text="~t'$$HEX5$$75980178200071512000$$ENDHEX$$' + pageCount() + '$$HEX4$$759820002c7b2000$$ENDHEX$$' +  page() + '$$HEX1$$7598$$ENDHEX$$'" border="0" color="0" x="2656" y="12" height="52" width="347" html.valueishtml="0"  name=t_1 visible="1"  font.face="Tahoma" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="0" color="0" x="9" y="0" height="64" width="526" format="[general]" html.valueishtml="0"  name=l_code visible="1" edit.limit=10 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="0" color="0" x="544" y="4" height="64" width="1051" format="[general]" html.valueishtml="0"  name=sku visible="1" edit.limit=20 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="1" tabsequence=32766 border="0" color="0" x="2656" y="4" height="64" width="347" format="#######.#####" html.valueishtml="0"  name=tfr_in visible="1" editmask.mask="#######.#####" editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+column(band=detail id=5 alignment="1" tabsequence=32766 border="0" color="0" x="2382" y="4" height="64" width="265" format="#######.#####" html.valueishtml="0"  name=sit_qty visible="1" editmask.mask="#######.#####" editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+column(band=detail id=4 alignment="1" tabsequence=32766 border="0" color="0" x="1975" y="4" height="64" width="398" format="#######.#####" html.valueishtml="0"  name=alloc_qty visible="1" editmask.mask="#######.#####" editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+column(band=detail id=3 alignment="1" tabsequence=32766 border="0" color="0" x="1614" y="4" height="64" width="352" format="#######.#####" html.valueishtml="0"  name=avail_qty visible="1" editmask.mask="#######.#####" editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+column(band=detail id=7 alignment="1" tabsequence=32766 border="0" color="0" x="3013" y="4" height="64" width="347" format="#######.#####" html.valueishtml="0"  name=tfr_out visible="1" editmask.mask="#######.#####" editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+column(band=detail id=8 alignment="1" tabsequence=32766 border="0" color="0" x="3369" y="4" height="64" width="375" format="#######.#####" html.valueishtml="0"  name=wip_qty visible="1" editmask.mask="#######.#####" editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=foreground alignment="0" text="$$HEX4$$778dcb59935e4d4f$$ENDHEX$$:" border="0" color="0" x="1147" y="168" height="56" width="265" html.valueishtml="0"  name=t_16 visible="1"  slideup=allabove  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+compute(band=foreground alignment="0" expression=" a_start "border="0" color="0" x="1435" y="168" height="56" width="699" format="[general]" html.valueishtml="0"  name=compute_5 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+text(band=foreground alignment="0" text="$$HEX4$$7998ee760d54f079$$ENDHEX$$:" border="0" color="0" x="14" y="168" height="56" width="279" html.valueishtml="0"  name=t_17 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+text(band=foreground alignment="0" text="$$HEX4$$d37e5f67935e4d4f$$ENDHEX$$:" border="0" color="0" x="2208" y="168" height="56" width="261" html.valueishtml="0"  name=t_19 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+compute(band=foreground alignment="0" expression=" a_end "border="0" color="0" x="2427" y="168" height="56" width="649" format="[general]" html.valueishtml="0"  name=compute_6 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+text(band=foreground alignment="0" text="$$HEX2$$d34e935e$$ENDHEX$$:" border="0" color="0" x="1248" y="88" height="56" width="155" html.valueishtml="0"  name=t_18 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+compute(band=foreground alignment="0" expression=" a_whcode "border="0" color="0" x="1435" y="88" height="56" width="357" format="[general]" html.valueishtml="0"  name=compute_4 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+text(band=foreground alignment="0" text="$$HEX4$$a5626888e5651f67$$ENDHEX$$:" border="0" color="0" x="14" y="88" height="56" width="279" html.valueishtml="0"  name=t_14 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+text(band=foreground alignment="0" text="$$HEX6$$935e585b935e4d4fa5626888$$ENDHEX$$" border="0" color="0" x="1618" y="12" height="64" width="846" html.valueishtml="0"  name=t_13 visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=foreground alignment="0" text="$$HEX4$$a5626888167ff753$$ENDHEX$$:" border="0" color="0" x="14" y="12" height="56" width="279" html.valueishtml="0"  name=t_11 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+compute(band=foreground alignment="0" expression=" a_project "border="0" color="0" x="306" y="168" height="56" width="635" format="[general]" html.valueishtml="0"  name=compute_3 visible="1"  slideup=allabove  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+compute(band=foreground alignment="0" expression="String(Today(), 'mm/dd/yyyy hh:mm')"border="0" color="0" x="311" y="88" height="56" width="631" format="[general]" html.valueishtml="0"  name=compute_1 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+text(band=foreground alignment="0" text="SIMS302b" border="0" color="0" x="311" y="12" height="56" width="631" html.valueishtml="0"  name=t_12 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" pagingmethod=0 generatedddwframes="1" )
+xhtmlgen() cssgen(sessionspecific="0" )
+xmlgen(inline="0" )
+xsltgen()
+jsgen()
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )
+export.xhtml()
+ 

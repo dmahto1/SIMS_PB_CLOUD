@@ -1,0 +1,14 @@
+HA$PBExportHeader$dddw_shipment_order_status.srd
+$PBExportComments$Shipment Order Statuses Dropdown DW
+release 7;
+datawindow(units=0 timer_interval=0 color=16777215 processing=0 HTMLDW=no print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.prompt=no print.buttons=no print.preview.buttons=no )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=68 color="536870912" )
+table(column=(type=char(10) updatewhereclause=yes name=ord_status dbname="ord_status" )
+ column=(type=char(25) updatewhereclause=yes name=description dbname="description" )
+ )
+data("N", "New", "I", "In-Transit", "D", "Delivered", ) 
+compute(band=detail alignment="0" expression=" ord_status + ' - ' +  description "border="0" color="0" x="9" y="8" height="56" width="576" format="[GENERAL]"  name=compute_1  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" )

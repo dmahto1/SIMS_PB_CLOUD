@@ -1,0 +1,38 @@
+HA$PBExportHeader$f_isparticipatingsupplier.srf
+global type f_isparticipatingsupplier from function_object
+end type
+
+forward prototypes
+global function boolean f_isparticipatingsupplier (string asprojectid, string assupplier)
+end prototypes
+
+global function boolean f_isparticipatingsupplier (string asprojectid, string assupplier);// boolean =  f_isParticipatiingSupplier( string asProjectId, string asSupplier  )
+// do a look up of the supplier table and see if the participating serical scan flag, ( user_field4 )
+
+// this only applies to 3com
+if gs_project <> '3COM_NASH' Then return true
+
+string theflag
+string findthis
+long	findrow
+long	lrows
+
+theflag = 'N'
+
+datastore lds
+
+lds = g.getSupplierDs()
+lrows = lds.rowcount()
+
+findthis = "supp_code = '" + asSupplier + "'"
+findrow = lds.find( findthis, 1, lrows )
+if findrow > 0 then
+	theflag = lds.object.user_field4[ findrow]
+	if left( trim( upper( theflag ) ), 1) = 'Y' then return true
+	return false
+end if
+return false
+
+
+end function
+

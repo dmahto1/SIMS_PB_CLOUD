@@ -1,0 +1,148 @@
+﻿$PBExportHeader$d_stock_inquiry_content_only_chinese.srd
+$PBExportComments$*+ Stock Inquiry screen - Content Only
+release 11;
+datawindow(units=0 timer_interval=60000 color=16777215 processing=1 HTMLDW=no print.printername="" print.documentname="" print.orientation = 1 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes print.preview.outline=yes hidegrayline=no showbackcoloronxp=no row.resize=1 grid.lines=0 )
+header(height=272 color="536870912" )
+summary(height=112 color="536870912" )
+footer(height=20 color="536870912" )
+detail(height=92 color="553648127" height.autosize=yes )
+table(column=(type=char(10) updatewhereclause=yes name=wh_code dbname="WH_Code" )
+ column=(type=char(10) updatewhereclause=yes name=l_code dbname="L_Code" )
+ column=(type=char(1) updatewhereclause=yes name=inventory_type dbname="Inventory_Type" )
+ column=(type=char(50) updatewhereclause=yes name=serial_no dbname="Serial_No" )
+ column=(type=char(50) updatewhereclause=yes name=lot_no dbname="Lot_No" )
+ column=(type=char(50) updatewhereclause=yes name=po_no dbname="PO_No" )
+ column=(type=char(20) updatewhereclause=yes name=ro_no dbname="RO_No" )
+ column=(type=char(50) updatewhereclause=yes name=sku dbname="SKU" )
+ column=(type=decimal(5) updatewhereclause=yes name=avail_qty dbname="Avail_Qty" )
+ column=(type=char(30) updatewhereclause=yes name=supp_invoice_no dbname="Supp_Invoice_No" )
+ column=(type=datetime updatewhereclause=yes name=complete_date dbname="Complete_Date" )
+ column=(type=char(50) updatewhereclause=yes name=po_no2 dbname="PO_No2" )
+ column=(type=char(25) updatewhereclause=yes name=container_id dbname="Container_ID" )
+ column=(type=datetime updatewhereclause=yes name=expiration_date dbname="Expiration_Date" )
+ column=(type=decimal(0) updatewhereclause=yes name=owner_id dbname="owner_id" )
+ column=(type=char(3) updatewhereclause=yes name=country_of_origin dbname="Country_of_origin" )
+ column=(type=char(20) updatewhereclause=yes name=supp_code dbname="supp_code" )
+ column=(type=decimal(0) updatewhereclause=yes name=component_no dbname="Component_no" )
+ column=(type=char(20) updatewhereclause=yes name=owner_owner_cd dbname="Owner_Cd" )
+ column=(type=char(1) updatewhereclause=yes name=owner_owner_type dbname="Owner_Type" )
+ column=(type=long updatewhereclause=yes identity=yes name=daysonhand dbname="DaysOnHand" )
+ column=(type=char(70) updatewhereclause=yes name=description dbname="Description" )
+ column=(type=char(75) updatewhereclause=yes name=native_description dbname="Native_description" )
+ column=(type=char(10) updatewhereclause=yes name=grp dbname="Grp" )
+ retrieve="  SELECT Content.WH_Code , 
+         Content.L_Code , 
+         Content.Inventory_Type , 
+         Content.Serial_No ,   
+       	Content.Lot_No ,   
+        	Content.PO_No ,   
+        	Content.RO_No ,  
+         Content.SKU ,   
+        	Content.Avail_Qty , 
+         Receive_Master.Supp_Invoice_No ,
+         Receive_Master.Complete_Date , 
+         Content.PO_No2 ,   
+         Content.Container_ID ,   
+         Content.Expiration_Date ,    
+       	Content.owner_id ,
+		Content.Country_of_origin, 
+         Content.supp_code, 
+		Content.Component_no, 
+		Owner.Owner_Cd,   
+         Owner.Owner_Type,
+		DateDiff(dd, complete_date, GetDate()) DaysOnHand,
+		Item_Master.Description,
+		Item_Master.Native_description,
+		Item_Master.Grp
+        FROM dbo.Content LEFT OUTER JOIN dbo.Receive_Master ON dbo.Content.Project_ID = dbo.Receive_Master.Project_ID AND dbo.Content.RO_No = dbo.Receive_Master.RO_No,  
+          		Item_Master,
+               Owner     with (nolock) 
+        WHERE (item_master.project_id = Content.project_id ) and
+					( Content.SKU = Item_Master.SKU ) and 
+					( Content.supp_code = Item_Master.supp_code ) and 
+         		(item_master.project_id = Content.project_id ) and
+               ( Content.owner_id = owner.owner_id) and 
+					Avail_qty > 0 "  sort="wh_code A sku A l_code A " )
+group(level=1 header.height=0 trailer.height=72 by=("wh_code" ) header.color="536870912" trailer.color="536870912" )
+group(level=2 header.height=0 trailer.height=68 by=("sku" ) header.color="536870912" trailer.color="536870912" )
+text(band=header alignment="2" text="
+拥有人" border="6" color="0" x="1723" y="148" height="112" width="434" html.valueishtml="0"  name=cf_name_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="78567654" )
+text(band=header alignment="2" text="COO" border="6" color="0" x="2167" y="148" height="112" width="151" html.valueishtml="0"  name=country_of_origin_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="78567654" )
+text(band=header alignment="2" text="
+库位" border="6" color="0" x="2327" y="148" height="112" width="251" html.valueishtml="0"  name=l_code_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="78567654" )
+text(band=header alignment="2" text="有效
+数量" border="6" color="0" x="3575" y="148" height="112" width="425" html.valueishtml="0"  name=t_5 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="78567654" )
+text(band=header alignment="2" text="序
+号" border="6" color="0" x="4009" y="148" height="112" width="270" html.valueishtml="0"  name=serial_no_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="78567654" )
+text(band=header alignment="2" text="批
+号" border="6" color="0" x="4288" y="148" height="112" width="786" html.valueishtml="0"  name=lot_no_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="78567654" )
+text(band=header alignment="2" text="采购单编
+号" border="6" color="0" x="5083" y="148" height="112" width="215" html.valueishtml="0"  name=po_no_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="78567654" )
+text(band=header alignment="2" text="采购单
+编2" border="6" color="0" x="5307" y="148" height="112" width="251" html.valueishtml="0"  name=po_no2_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="78567654" )
+text(band=header alignment="2" text="货柜编号" border="6" color="0" x="5568" y="148" height="112" width="265" html.valueishtml="0"  name=container_id_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="80269524" )
+text(band=header alignment="2" text="
+供应商" border="6" color="0" x="1403" y="148" height="112" width="311" html.valueishtml="0"  name=supp_code_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="78567654" )
+text(band=header alignment="2" text="货品编号" border="6" color="0" x="873" y="148" height="112" width="521" html.valueishtml="0"  name=sku_t visible="1"  slideup=allabove  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="78567654" )
+text(band=header alignment="2" text="订单编号" border="6" color="0" x="366" y="148" height="112" width="498" html.valueishtml="0"  name=supp_invoice_no_t visible="1"  slideup=allabove  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="78567654" )
+text(band=header alignment="2" text="仓库" border="6" color="0" x="9" y="148" height="112" width="347" html.valueishtml="0"  name=wh_code_t visible="1"  slideup=allabove  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="78567654" )
+text(band=header alignment="2" text="在库天数" border="6" color="0" x="3282" y="148" height="112" width="283" html.valueishtml="0"  name=daysonhand_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="0" text="Complete Date" border="0" color="0" x="2935" y="4" height="76" width="338" html.valueishtml="0"  name=complete_date_t visible="1"  font.face="Arial" font.height="-12" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="库存
+类型" border="6" color="0" x="2587" y="148" height="112" width="338" html.valueishtml="0"  name=inventory_type_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="78567654" )
+text(band=header alignment="2" text="接收日期" border="6" color="0" x="2935" y="148" height="112" width="338" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="78567654" )
+text(band=header alignment="2" text="过期日期" border="6" color="0" x="5842" y="148" height="112" width="334" html.valueishtml="0"  name=expiration_date_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="
+货物描述" border="6" color="0" x="6185" y="148" height="112" width="987" html.valueishtml="0"  name=description_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="
+本地货品描述" border="6" color="0" x="7182" y="148" height="112" width="1134" html.valueishtml="0"  name=native_description_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="
+产品类别" border="6" color="0" x="8325" y="148" height="112" width="224" html.valueishtml="0"  name=grp_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header.1 alignment="2" text="
+Warehouse
+
+" border="6" color="0" x="9" y="0" height="224" width="347" html.valueishtml="0"  name=t_10 visible="1"  resizeable=1  moveable=1  slideleft=yes  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="80269524" )
+compute(band=detail alignment="0" expression=" owner_owner_cd  + '(' + owner_owner_type  + ')'"border="0" color="0" x="1723" y="4" height="56" width="434" format="[general]" html.valueishtml="0"  name=cf_owner_name visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="0" color="0" x="9" y="4" height="56" width="347" format="[general]" html.valueishtml="0"  name=wh_code visible="1" edit.limit=10 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=10 alignment="0" tabsequence=32766 border="0" color="0" x="366" y="4" height="56" width="498" format="[general]" html.valueishtml="0"  name=supp_invoice_no visible="1" edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=8 alignment="3" tabsequence=32766 border="0" color="0" x="873" y="4" height="56" width="521" format="[general]" html.valueishtml="0"  name=sku visible="1" height.autosize=yes edit.limit=50 edit.case=any edit.autoselect=yes edit.autovscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+column(band=detail id=17 alignment="0" tabsequence=32766 border="0" color="0" x="1403" y="4" height="56" width="311" format="[general]" html.valueishtml="0"  name=supp_code visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autovscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="0" color="0" x="2327" y="4" height="56" width="251" format="[general]" html.valueishtml="0"  name=l_code visible="1" edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=6 alignment="0" tabsequence=32766 border="0" color="0" x="5083" y="4" height="56" width="215" format="[general]" html.valueishtml="0"  name=po_no visible="1" edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=12 alignment="0" tabsequence=32766 border="0" color="0" x="5307" y="4" height="56" width="251" format="[general]" html.valueishtml="0"  name=po_no2 visible="1" edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=16 alignment="0" tabsequence=32766 border="0" color="0" x="2167" y="4" height="56" width="151" format="[general]" html.valueishtml="0"  name=country_of_origin visible="1" edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=9 alignment="1" tabsequence=32766 border="0" color="0" x="3575" y="4" height="56" width="425" format="#######.#####" html.valueishtml="0"  name=avail_qty visible="1" editmask.mask="#######.#####" editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=13 alignment="2" tabsequence=32766 border="0" color="0" x="5568" y="4" height="56" width="265" format="[general]" html.valueishtml="0"  name=container_id visible="1" edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=14 alignment="2" tabsequence=32766 border="0" color="0" x="5842" y="4" height="56" width="334" format="[shortdate]" html.valueishtml="0"  name=expiration_date visible="1" edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=21 alignment="2" tabsequence=32766 border="0" color="0" x="3282" y="4" height="56" width="283" format="[general]" html.valueishtml="0"  name=daysonhand visible="1" edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="0" color="0" x="4009" y="4" height="56" width="270" format="[general]" html.valueishtml="0"  name=serial_no visible="1" edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=5 alignment="0" tabsequence=32766 border="0" color="0" x="4288" y="4" height="56" width="786" format="[general]" html.valueishtml="0"  name=lot_no visible="1" edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="0" color="0" x="2587" y="4" height="56" width="338" format="[general]" html.valueishtml="0"  name=inventory_type visible="1" dddw.name=dddw_inventory_type_by_project dddw.displaycolumn=inv_type_desc dddw.datacolumn=inv_type dddw.percentwidth=100 dddw.lines=0 dddw.limit=0 dddw.allowedit=no dddw.useasborder=no dddw.case=any  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=11 alignment="2" tabsequence=32766 border="0" color="0" x="2935" y="4" height="56" width="338" format="[shortdate]" html.valueishtml="0"  name=complete_date visible="1" edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=22 alignment="0" tabsequence=32766 border="0" color="0" x="6190" y="0" height="56" width="983" format="[general]" html.valueishtml="0"  name=description visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=23 alignment="0" tabsequence=32766 border="0" color="0" x="7186" y="0" height="56" width="1129" format="[general]" html.valueishtml="0"  name=native_description visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=24 alignment="0" tabsequence=32766 border="0" color="0" x="8329" y="0" height="56" width="219" format="[general]" html.valueishtml="0"  name=grp visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=trailer.2 alignment="2" text="货品编号总计:" border="0" color="0" x="366" y="4" height="56" width="498" html.valueishtml="0"  name=t_11 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=trailer.2 alignment="1" expression="sum(avail_qty for group 2)"border="0" color="0" x="3575" y="4" height="56" width="425" format="#######.#####" html.valueishtml="0"  name=c_sku_tot_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=trailer.1 alignment="2" text="仓库总计:" border="0" color="0" x="366" y="4" height="56" width="498" html.valueishtml="0"  name=t_12 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=trailer.1 alignment="1" expression="sum(avail_qty for group 1)"border="0" color="0" x="3575" y="4" height="56" width="425" format="#######.#####" html.valueishtml="0"  name=compute_6 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=summary alignment="2" text="总计:" border="0" color="0" x="366" y="44" height="56" width="498" html.valueishtml="0"  name=t_13 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=summary alignment="1" expression="sum(avail_qty for all)"border="0" color="0" x="3575" y="48" height="56" width="425" format="#######.#####" html.valueishtml="0"  name=compute_7 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=foreground alignment="0" text="报表日期:" border="0" color="0" x="14" y="68" height="56" width="274" html.valueishtml="0"  name=t_14 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=foreground alignment="0" expression="today()"border="0" color="0" x="306" y="68" height="56" width="553" format="mm/dd/yyyy hh:mm" html.valueishtml="0"  name=compute_10 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=foreground alignment="0" text="报表编号:" border="0" color="0" x="18" y="8" height="56" width="270" html.valueishtml="0"  name=t_15 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=foreground alignment="0" text="SIMS311" border="0" color="0" x="306" y="8" height="56" width="475" html.valueishtml="0"  name=t_16 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=foreground alignment="0" text="库存查询(当前库存)" border="0" color="0" x="2322" y="8" height="64" width="1518" html.valueishtml="0"  name=t_18 visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=foreground alignment="1" expression="'页码 共 '+ pagecount() + ' 页 第 ' + page() + ' 页'"border="0" color="0" x="4009" y="8" height="56" width="1061" format="[GENERAL]" html.valueishtml="0"  name=compute_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+
+sparse(names="wh_code")htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" pagingmethod=0 generatedddwframes="1" )
+xhtmlgen() cssgen(sessionspecific="0" )
+xmlgen(inline="0" )
+xsltgen()
+jsgen()
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )
+export.xhtml()
+ 

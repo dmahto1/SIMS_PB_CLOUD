@@ -1,0 +1,172 @@
+HA$PBExportHeader$d_do_bom_report.srd
+$PBExportComments$Delivery Order BOM Report
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 2 print.margin.left = 25 print.margin.right = 25 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=104 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=280 color="536870912" )
+detail(height=100 color="536870912"  height.autosize=yes)
+table(column=(type=char(10) updatewhereclause=yes name=project_id dbname="Delivery_Master.Project_ID" )
+ column=(type=datetime updatewhereclause=yes name=delivery_master_ord_date dbname="Delivery_Master.Ord_Date" )
+ column=(type=char(10) updatewhereclause=yes name=delivery_master_wh_code dbname="Delivery_Master.WH_Code" )
+ column=(type=char(20) updatewhereclause=yes name=delivery_master_cust_order_no dbname="Delivery_Master.Cust_Order_No" )
+ column=(type=char(20) updatewhereclause=yes name=delivery_master_cust_code dbname="Delivery_Master.Cust_Code" )
+ column=(type=char(40) updatewhereclause=yes name=delivery_master_cust_name dbname="Delivery_Master.Cust_Name" )
+ column=(type=char(50) updatewhereclause=yes name=delivery_master_invoice_no dbname="Delivery_Master.Invoice_No" )
+ column=(type=char(40) updatewhereclause=yes name=delivery_master_ship_ref dbname="Delivery_Master.Ship_Ref" )
+ column=(type=char(20) updatewhereclause=yes name=delivery_master_carrier dbname="Delivery_Master.Carrier" )
+ column=(type=decimal(0) updatewhereclause=yes name=delivery_master_priority dbname="Delivery_Master.Priority" )
+ column=(type=char(20) updatewhereclause=yes name=delivery_master_user_field6 dbname="Delivery_Master.User_Field6" )
+ column=(type=char(50) updatewhereclause=yes name=delivery_picking_sku dbname="Delivery_Picking.SKU" )
+ column=(type=char(20) updatewhereclause=yes name=delivery_picking_supp_code dbname="Delivery_Picking.Supp_Code" )
+ column=(type=decimal(0) updatewhereclause=yes name=delivery_picking_line_item_no dbname="Delivery_Picking.Line_Item_No" )
+ column=(type=char(70) updatewhereclause=yes name=item_master_description dbname="Item_Master.Description" )
+ column=(type=char(30) updatewhereclause=yes name=delivery_detail_user_field4 dbname="Delivery_Detail.User_field4" )
+ column=(type=char(30) updatewhereclause=yes name=delivery_detail_user_field5 dbname="Delivery_Detail.User_field5" )
+ column=(type=decimal(5) updatewhereclause=yes name=picked_quantity dbname="Picked_Quantity" )
+ column=(type=char(1) updatewhereclause=yes name=c_component dbname="c_component" )
+ retrieve="  SELECT dbo.Delivery_Master.Project_ID,   
+			dbo.Delivery_Master.Ord_Date, 
+         dbo.Delivery_Master.WH_Code,   
+         dbo.Delivery_Master.Cust_Order_No,   
+         dbo.Delivery_Master.Cust_Code,   
+         dbo.Delivery_Master.Cust_Name,   
+         dbo.Delivery_Master.Invoice_No,   
+         dbo.Delivery_Master.Ship_Ref,   
+         dbo.Delivery_Master.Carrier,  
+			dbo.Delivery_Master.Priority,  
+			dbo.Delivery_Master.User_Field6, 
+	      dbo.Delivery_Picking.SKU,   
+         dbo.Delivery_Picking.Supp_Code,    
+         dbo.Delivery_Picking.Line_Item_No,  
+			dbo.Item_master.Description, 
+			dbo.Delivery_Detail.User_field4,  
+			dbo.Delivery_Detail.User_field5,  
+        Sum( dbo.Delivery_Picking.Quantity) as Picked_Quantity, 
+			'Y' as c_component  
+    FROM dbo.Delivery_Master,   
+         dbo.Delivery_Picking, 
+			dbo.Item_Master, 
+			dbo.Delivery_Detail 
+   WHERE ( dbo.Delivery_Picking.DO_No = dbo.Delivery_Master.DO_No )    and
+			dbo.Delivery_Master.DO_No = :asdono And
+			Delivery_Picking.l_code = 'N/A' and
+			item_master.Project_id = Delivery_master.Project_id and
+			item_master.SKU = Delivery_Picking.SKU and
+			item_master.Supp_code = Delivery_Picking.Supp_Code and
+			Delivery_MAster.do_no = Delivery_Detail.do_no and
+			Delivery_detail.Line_Item_NO = Delivery_Picking.Line_Item_No 
+
+	Group By dbo.Delivery_Master.Project_ID,
+			dbo.Delivery_Master.Ord_Date,   
+         dbo.Delivery_Master.WH_Code,   
+         dbo.Delivery_Master.Cust_Order_No,   
+         dbo.Delivery_Master.Cust_Code,   
+         dbo.Delivery_Master.Cust_Name,   
+         dbo.Delivery_Master.Invoice_No,   
+         dbo.Delivery_Master.Ship_Ref,   
+         dbo.Delivery_Master.Carrier,   
+			dbo.Delivery_Master.Priority, 
+			dbo.Delivery_Master.User_Field6,
+         dbo.Delivery_Picking.SKU,   
+         dbo.Delivery_Picking.Supp_Code,   
+         dbo.Delivery_Picking.Line_Item_No,  
+			dbo.Item_master.Description, 
+			dbo.Delivery_Detail.User_field4, 
+			dbo.Delivery_Detail.User_field5  
+
+Union
+
+SELECT dbo.Delivery_Master.Project_ID,   
+			dbo.Delivery_Master.Ord_Date, 
+         dbo.Delivery_Master.WH_Code,   
+         dbo.Delivery_Master.Cust_Order_No,   
+         dbo.Delivery_Master.Cust_Code,   
+         dbo.Delivery_Master.Cust_Name,   
+         dbo.Delivery_Master.Invoice_No,   
+         dbo.Delivery_Master.Ship_Ref,   
+         dbo.Delivery_Master.Carrier,  
+			dbo.Delivery_Master.Priority,  
+			dbo.Delivery_Master.User_Field6, 
+	      dbo.Delivery_Picking.SKU,   
+         dbo.Delivery_Picking.Supp_Code,    
+         dbo.Delivery_Picking.Line_Item_No,  
+			dbo.Item_master.Description, 
+			dbo.Delivery_Detail.User_field4,  
+			dbo.Delivery_Detail.User_field5,  
+        Sum( dbo.Delivery_Picking.Quantity) as Picked_Quantity, 
+			'N' as c_component  
+    FROM dbo.Delivery_Master,   
+         dbo.Delivery_Picking, 
+			dbo.Item_Master, 
+			dbo.Delivery_Detail 
+   WHERE ( dbo.Delivery_Picking.DO_No = dbo.Delivery_Master.DO_No )    and
+			dbo.Delivery_Master.DO_No = :asdono And
+			Delivery_Picking.l_code <> 'N/A' and
+			item_master.Project_id = Delivery_master.Project_id and
+			item_master.SKU = Delivery_Picking.SKU and
+			item_master.Supp_code = Delivery_Picking.Supp_Code and
+			Delivery_MAster.do_no = Delivery_Detail.do_no and
+			Delivery_detail.Line_Item_NO = Delivery_Picking.Line_Item_No and
+			Delivery_Picking.Component_Ind = 'N'
+
+	Group By dbo.Delivery_Master.Project_ID,
+			dbo.Delivery_Master.Ord_Date,   
+         dbo.Delivery_Master.WH_Code,   
+         dbo.Delivery_Master.Cust_Order_No,   
+         dbo.Delivery_Master.Cust_Code,   
+         dbo.Delivery_Master.Cust_Name,   
+         dbo.Delivery_Master.Invoice_No,   
+         dbo.Delivery_Master.Ship_Ref,   
+         dbo.Delivery_Master.Carrier,   
+			dbo.Delivery_Master.Priority, 
+			dbo.Delivery_Master.User_Field6,
+         dbo.Delivery_Picking.SKU,   
+         dbo.Delivery_Picking.Supp_Code,   
+         dbo.Delivery_Picking.Line_Item_No,  
+			dbo.Item_master.Description, 
+			dbo.Delivery_Detail.User_field4, 
+			dbo.Delivery_Detail.User_field5  " arguments=(("asDONO", string))  sort="c_component D   c_customer_sales_order A      delivery_picking_line_item_no A      delivery_picking_sku A " )
+group(level=1 header.height=432 trailer.height=0 by=("c_customer_sales_order" , "c_component" ) newpage=yes resetpagecount=yes header.color="536870912" trailer.color="536870912" )
+group(level=2 header.height=0 trailer.height=20 by=("delivery_picking_line_item_no" ) header.color="536870912" trailer.color="536870912" )
+text(band=header alignment="2" text="PICK LIST - BILL OF MATERIALS REPORT" border="0" color="33554432" x="0" y="8" height="92" width="3291" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-14" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Date:" border="0" color="33554432" x="5" y="16" height="56" width="155" html.valueishtml="0"  name=t_3 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=header alignment="0" expression="String(Today(), ~"mm/dd/yyyy hh:mm~")"border="0" color="33554432" x="169" y="16" height="56" width="581" format="[GENERAL]" html.valueishtml="0"  name=compute_2 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=header alignment="1" expression="'Page ' + Page() + ' of ' + PageCount()"border="0" color="33554432" x="2606" y="16" height="56" width="667" format="[GENERAL]" html.valueishtml="0"  name=compute_3 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header.1 alignment="1" text="Order Nbr:" border="0" color="33554432" x="14" y="12" height="56" width="302" html.valueishtml="0"  name=delivery_master_invoice_no_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header.1 alignment="1" text="Cust Order:" border="0" color="33554432" x="14" y="52" height="56" width="302" html.valueishtml="0"  name=delivery_master_cust_order_no_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header.1 alignment="1" text="Ship Ref:" border="0" color="33554432" x="14" y="92" height="56" width="302" html.valueishtml="0"  name=delivery_master_ship_ref_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header.1 alignment="1" text="Customer:" border="0" color="33554432" x="14" y="132" height="56" width="302" html.valueishtml="0"  name=delivery_master_cust_code_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header.1 alignment="1" text="Order Date:" border="0" color="33554432" x="2240" y="12" height="56" width="416" html.valueishtml="0"  name=delivery_master_ord_date_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.1 id=2 alignment="0" tabsequence=32766 border="0" color="33554432" x="2674" y="12" height="56" width="603" format="[shortdate] [time]" html.valueishtml="0"  name=delivery_master_ord_date visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header.1 alignment="1" text="Warehouse:" border="0" color="33554432" x="2240" y="52" height="56" width="416" html.valueishtml="0"  name=delivery_master_wh_code_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.1 id=3 alignment="0" tabsequence=32766 border="0" color="33554432" x="2674" y="52" height="56" width="603" format="[general]" html.valueishtml="0"  name=delivery_master_wh_code visible="1" edit.limit=10 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.1 id=9 alignment="0" tabsequence=32766 border="0" color="33554432" x="2674" y="92" height="56" width="603" format="[general]" html.valueishtml="0"  name=delivery_master_carrier visible="1" edit.limit=20 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=header.1 alignment="0" expression=" delivery_master_cust_code + ' - ' +  delivery_master_cust_name "border="0" color="33554432" x="329" y="132" height="56" width="1262" format="[GENERAL]" html.valueishtml="0"  name=compute_1 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.1 id=10 alignment="0" tabsequence=32766 border="0" color="33554432" x="2674" y="132" height="56" width="603" format="[general]" html.valueishtml="0"  name=delivery_master_priority visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header.1 alignment="1" text="Carrier:" border="0" color="33554432" x="2240" y="92" height="56" width="416" html.valueishtml="0"  name=delivery_master_carrier_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header.1 alignment="1" text="Priority:" border="0" color="33554432" x="2240" y="132" height="56" width="416" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header.1 alignment="1" text="Delivery Note:" border="0" color="33554432" x="2240" y="172" height="56" width="416" html.valueishtml="0"  name=t_5 visible="1~tIf(project_id = '3COM_NASH',1,0)"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.1 id=11 alignment="0" tabsequence=32766 border="0" color="33554432" x="2674" y="172" height="56" width="603" format="[general]" html.valueishtml="0"  name=delivery_master_user_field6 visible="1~tIf(project_id = '3COM_NASH',1,0)" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.1 id=8 alignment="0" tabsequence=32766 border="0" color="33554432" x="329" y="92" height="56" width="576" format="[general]" html.valueishtml="0"  name=delivery_master_ship_ref visible="1" edit.limit=40 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=header.1 alignment="0" expression="If(project_id = '3COM_NASH',If( delivery_detail_user_field5 > '', delivery_detail_user_field5,  delivery_master_cust_order_no ), delivery_master_cust_order_no )"border="0" color="33554432" x="329" y="52" height="56" width="576" format="[GENERAL]" html.valueishtml="0"  name=c_customer_po visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=header.1 alignment="0" expression="If( project_id = '3COM_NASH',If (delivery_detail_user_field4 > '',  delivery_detail_user_field4 , delivery_master_invoice_no ), delivery_master_invoice_no )"border="0" color="33554432" x="329" y="12" height="56" width="576" format="[GENERAL]" html.valueishtml="0"  name=c_customer_sales_order visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header.1 alignment="2" text="The following non-kitted parts are also being picked for this order:" border="0" color="33554432" x="18" y="240" height="80" width="3269" html.valueishtml="0"  name=t_7 visible="1~tif( c_component = 'N',1,0)"  font.face="Arial" font.height="-12" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header.1 alignment="0" text="LINE" border="0" color="33554432" x="142" y="360" height="64" width="416" html.valueishtml="0"  name=delivery_picking_line_item_no_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header.1 alignment="0" text="QTY" border="0" color="33554432" x="2752" y="360" height="64" width="416" html.valueishtml="0"  name=delivery_picking_quantity_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header.1 alignment="0" text="DESCRIPTION" border="0" color="33554432" x="1559" y="360" height="64" width="640" html.valueishtml="0"  name=t_4 visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header.1 alignment="0" text="SKU" border="0" color="33554432" x="480" y="360" height="64" width="416" html.valueishtml="0"  name=delivery_picking_sku_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header.1 alignment="0" text="GROUP" border="0" color="33554432" x="1088" y="360" height="64" width="306" html.valueishtml="0"  name=t_6 visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+line(band=header.1 x1="137" y1="424" x2="3191" y2="428"  name=l_1 visible="1" pen.style="0" pen.width="9" pen.color="0"  background.mode="2" background.color="16777215" )
+column(band=detail id=14 alignment="0" tabsequence=32766 border="0" color="33554432" x="151" y="4" height="76" width="247" format="[general]" html.valueishtml="0"  name=delivery_picking_line_item_no visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=12 alignment="0" tabsequence=32766 border="0" color="33554432" x="466" y="4" height="76" width="887" format="[general]" html.valueishtml="0"  name=delivery_picking_sku visible="1" edit.limit=50 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=18 alignment="1" tabsequence=32766 border="0" color="33554432" x="2583" y="4" height="76" width="315" format="#####.##" html.valueishtml="0"  name=picked_quantity visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=15 alignment="0" tabsequence=32766 border="0" color="33554432" x="1536" y="4" height="76" width="1024" format="[general]" html.valueishtml="0"  name=item_master_description visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+report(band=detail dataobject="d_do_bom_report_detail" x="494" y="68" height="20" width="2661" border="0"  height.autosize=yes criteria="" nest_arguments=((" project_id "),(" asDONO "),(" delivery_picking_line_item_no "),(" delivery_picking_sku "),(" picked_quantity ")) trail_footer = yes  name=dw_1 visible="1~tif( c_component = 'Y',1,0)"  slideup=directlyabove )
+text(band=footer alignment="0" text="ASSEMBLED BY: ________________________" border="0" color="0" x="5" y="120" height="56" width="1253" html.valueishtml="0"  name=t_31 visible="1~tif( c_component = 'Y',1,0)"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=footer alignment="0" text="DATE/TIME: ________________________" border="0" color="0" x="5" y="208" height="56" width="1243" html.valueishtml="0"  name=t_32 visible="1~tif( c_component = 'Y',1,0)"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

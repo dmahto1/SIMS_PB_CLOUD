@@ -1,0 +1,22 @@
+﻿$PBExportHeader$d_projects.srd
+$PBExportComments$Data window used for displaying all projects
+release 6;
+datawindow(units=0 timer_interval=0 color=16777215 processing=0 print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.prompt=no print.buttons=no print.preview.buttons=no )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=60 color="536870912" )
+table(column=(type=char(10) updatewhereclause=yes name=project_id dbname="Project_Warehouse.project_id" )
+ column=(type=char(40) updatewhereclause=yes name=project_desc dbname="project_desc" )
+ retrieve="select 	distinct project_id,
+			project_desc = (select project_desc
+			  	from project
+					where project.wh_code = project_warehouse.wh_code and
+					      project.project_id = project_warehouse.project_id) 
+
+from 		project_warehouse
+
+where 	project_warehouse.wh_code = :as_warehouse" arguments=(("as_warehouse", string)) )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="0" color="0" x="1376" y="16" height="56" width="64" format="[general]"  name=project_desc visible="1~t0" edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=detail alignment="1" text="Project:"border="0" color="0" x="78" y="4" height="56" width="224"  name=project_project_id_t visible="1~tif (getrow() = 1,1,0)"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="0" color="0" x="343" y="4" height="56" width="983" format="[general]"  name=project_id edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+htmltable(border="1" cellpadding="0" cellspacing="0" generatecss="no" nowrap="yes")

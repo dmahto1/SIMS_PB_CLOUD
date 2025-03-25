@@ -1,0 +1,86 @@
+﻿$PBExportHeader$d_nike_recon_summary.srd
+release 6;
+datawindow(units=2 timer_interval=0 color=16777215 processing=0 print.documentname="Cycle Count Report" print.orientation = 2 print.margin.left = 1000 print.margin.right = 600 print.margin.top = 800 print.margin.bottom = 800 print.paper.source = 0 print.paper.size = 9 print.prompt=no print.buttons=no print.preview.buttons=no )
+header(height=1158 color="536870912" )
+summary(height=841 color="536870912" )
+footer(height=8 color="536870912" )
+detail(height=200 color="536870912" )
+table(column=(type=char(5) updatewhereclause=yes name=wh_code dbname="CC_master.WH_Code" )
+ column=(type=char(16) updatewhereclause=yes name=sku dbname="CC_Inventory.SKU" )
+ column=(type=char(1) updatewhereclause=yes name=inventory_type dbname="CC_Inventory.Inventory_Type" )
+ column=(type=decimal(0) updatewhereclause=yes name=systemqty dbname="Systemqty" )
+ column=(type=decimal(0) updatewhereclause=yes name=callocqty dbname="allocqty" )
+ column=(type=decimal(0) updatewhereclause=yes name=ccountqty dbname="Countqty" )
+ retrieve="  SELECT CC_master.WH_Code,   
+         CC_Inventory.SKU,   
+         CC_Inventory.Inventory_Type,   
+         sum(CC_Inventory.Avail_Qty) as Systemqty,   
+         sum(CC_Inventory.Alloc_Qty) as allocqty,   
+         sum(Isnull(CC_Result.Quantity,0)) as Countqty   
+    FROM CC_Inventory,   
+         CC_master,   
+         CC_Result   
+   WHERE ( CC_Inventory.CC_No = CC_master.CC_No ) and  
+         ( CC_master.CC_No *= CC_Result.CC_No ) and  
+         ( CC_Inventory.L_Code *= CC_Result.L_Code ) and  
+         ( CC_Inventory.SKU *= CC_Result.SKU ) and  
+         ( CC_Inventory.Inventory_Type *= CC_Result.Inventory_Type ) and  
+			( CC_Inventory.receipt_date *= CC_Result.receipt_date ) and
+         ( ( CC_master.CC_No = :a_cc_no ) ) 
+			Group by  CC_master.WH_Code,CC_Inventory.SKU,CC_Inventory.Inventory_Type
+
+		UNION
+       SELECT  
+         cc_master.wh_code,    
+         cc_result.sku,
+         cc_result.Inventory_Type,         
+         sum(0) as systemqty,   
+         sum(0) as allocqty,   
+         sum(cc_result.quantity) as Countqty
+    FROM cc_result,   
+         cc_master
+       WHERE ( cc_master.cc_no = cc_result.cc_no ) and  
+             ( cc_master.cc_no = :a_cc_no ) and
+         NOT EXISTS (SELECT * 
+                       FROM CC_Inventory 
+                      WHERE cc_no = cc_result.cc_no and
+                            l_code = cc_result.l_code and
+                            sku = cc_result.sku and 
+                            inventory_type = cc_result.inventory_type)  
+					Group by  CC_master.WH_Code,CC_Result.SKU,CC_Result.Inventory_Type
+" arguments=(("a_cc_no", string))  sort="sku A inventory_type A " )
+text(band=header alignment="2" text="Cycle Count Report"border="0" color="0" x="0" y="166" height="341" width="6341"  font.face="Arial" font.height="-20" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=header alignment="1" expression="'Page ' + page() + ' of ' + pageCount()"border="0" color="0" x="4808" y="0" height="158" width="1533" format="[general]"  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+text(band=header alignment="1" text="Order No.: "border="0" color="0" x="175" y="575" height="166" width="733"  name=cc_master_cc_no_t  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="1" text="Order Date: "border="0" color="0" x="2666" y="575" height="166" width="808"  name=cc_master_ord_date_t  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="1" text="Warehouse: "border="0" color="0" x="41" y="750" height="166" width="866"  name=wh_code_t  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header id=1 alignment="0" tabsequence=32766 border="0" color="0" x="916" y="750" height="166" width="958" format="[general]"  name=wh_code edit.limit=5 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="1" text="No. of SKU: "border="0" color="0" x="2675" y="750" height="166" width="816"  name=cc_master_loc_start_t  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+line(band=header x1="0" y1="1141" x2="6366" y2="1141" pen.style="0" pen.width="8" pen.color="0"  background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="Inventory Type"border="0" color="0" x="2250" y="975" height="158" width="866"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="1" text="Count Qty"border="0" color="0" x="5000" y="975" height="158" width="633"  name=cc_result_quantity_t  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="1" text="Difference"border="0" color="0" x="5641" y="975" height="158" width="691"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="1" text="Avail Qty"border="0" color="0" x="3125" y="975" height="158" width="633"  name=cc_inventory_avail_qty_t  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="1" text="Alloc Qty"border="0" color="0" x="3766" y="975" height="158" width="625"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=header alignment="0" expression="'Printed on: ' + String(today(), 'mm/dd/yyyy hh:mm')"border="0" color="0" x="0" y="0" height="158" width="1975" format="[general]"  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="SKU"border="0" color="0" x="0" y="975" height="158" width="1333"  name=cc_inventory_sku_t  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+line(band=detail x1="0" y1="192" x2="6366" y2="192" pen.style="2" pen.width="8" pen.color="0"  background.mode="1" background.color="553648127" )
+column(band=detail id=4 alignment="1" tabsequence=32766 border="0" color="0" x="3125" y="8" height="158" width="633" format="[general]"  name=systemqty edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="1" tabsequence=32766 border="0" color="0" x="5000" y="8" height="158" width="633" format="[general]"  name=ccountqty edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=detail alignment="1" expression="ccountqty - (systemqty + callocqty)"border="0" color="0" x="5641" y="8" height="158" width="691" format="[general]"  name=stock_diff  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="0" color="0" x="2250" y="8" height="158" width="866" format="[general]"  name=inventory_type dddw.name=dddw_inventory_type dddw.displaycolumn=code_descript dddw.datacolumn=code_id dddw.percentwidth=100 dddw.lines=0 dddw.limit=0 dddw.allowedit=no dddw.useasborder=no dddw.case=any  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="0" color="0" x="0" y="8" height="158" width="1333" format="@@@@@@-@@@-@@@@@"  name=sku edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="0" tabsequence=32766 border="0" color="0" x="3791" y="17" height="158" width="658" format="[general]"  name=callocqty edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=summary alignment="1" text="Lines with Gain:"border="0" color="0" x="641" y="50" height="158" width="1083"  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=summary alignment="1" expression="99999"border="0" color="0" x="1758" y="50" height="166" width="608" format="[general]"  name=line_gain  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=summary alignment="1" text="Lines with Loss:"border="0" color="0" x="625" y="250" height="158" width="1100"  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=summary alignment="1" expression="99999"border="0" color="0" x="1758" y="250" height="166" width="608" format="[general]"  name=line_loss  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=summary alignment="1" expression="line_gain + line_loss"border="0" color="0" x="1758" y="450" height="166" width="608" format="[general]"  name=line_diff  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=summary alignment="1" expression="99999"border="0" color="0" x="1758" y="642" height="166" width="608" format="[general]"  name=total_line  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=summary alignment="1" text="Total lines with Difference:"border="0" color="0" x="125" y="450" height="150" width="1600"  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=summary alignment="1" text="Total system quantity:"border="0" color="0" x="3208" y="450" height="150" width="1500"  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=summary alignment="1" text="Total no. of lines:"border="0" color="0" x="558" y="642" height="158" width="1166"  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=summary alignment="1" text="Total count quantity:"border="0" color="0" x="3341" y="642" height="158" width="1366"  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=summary alignment="1" expression="99999"border="0" color="0" x="4750" y="450" height="166" width="833" format="[general]"  name=total_system  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=summary alignment="1" expression="99999"border="0" color="0" x="4750" y="642" height="166" width="833" format="[general]"  name=total_count  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" cellpadding="0" cellspacing="0" generatecss="no" nowrap="yes")

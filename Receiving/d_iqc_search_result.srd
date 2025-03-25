@@ -1,0 +1,80 @@
+HA$PBExportHeader$d_iqc_search_result.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=1 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no grid.lines=0 )
+header(height=140 color="536870912" )
+summary(height=8 color="536870912" )
+footer(height=20 color="536870912" )
+detail(height=84 color="536870912" )
+table(column=(type=char(16) update=yes updatewhereclause=yes name=ro_no dbname="receive_iqc.RO_No" )
+ column=(type=decimal(0) updatewhereclause=yes name=line_item_no dbname="receive_iqc.Line_Item_No" )
+ column=(type=char(50) updatewhereclause=yes name=sku dbname="Receive_Detail.SKU" )
+ column=(type=datetime update=yes updatewhereclause=yes name=iqc_date dbname="receive_iqc.IQC_Date" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=inspection_level dbname="receive_iqc.Inspection_Level" )
+ column=(type=decimal(5) update=yes updatewhereclause=yes name=sample_size dbname="receive_iqc.Sample_Size" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=iqc_pass_fail dbname="receive_iqc.IQC_Pass_Fail" )
+ column=(type=decimal(5) update=yes updatewhereclause=yes name=qty_accepted dbname="receive_iqc.Qty_Accepted" )
+ column=(type=decimal(5) update=yes updatewhereclause=yes name=qty_rejected dbname="receive_iqc.Qty_Rejected" )
+ column=(type=char(20) update=yes updatewhereclause=yes name=failure_category dbname="receive_iqc.Failure_Category" )
+ column=(type=char(30) update=yes updatewhereclause=yes name=cause dbname="receive_iqc.Cause" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=requires_rework dbname="receive_iqc.Requires_Rework" )
+ column=(type=decimal(5) update=yes updatewhereclause=yes name=qty_reworked dbname="receive_iqc.Qty_Reworked" )
+ column=(type=char(255) update=yes updatewhereclause=yes name=comments dbname="receive_iqc.Comments" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=original_inv_type dbname="receive_iqc.Original_Inv_Type" )
+ retrieve="  SELECT dbo.receive_iqc.RO_No,
+			dbo.receive_iqc.Line_Item_No,
+         dbo.Receive_Detail.SKU,   
+         dbo.receive_iqc.IQC_Date,   
+         dbo.receive_iqc.Inspection_Level,   
+         dbo.receive_iqc.Sample_Size,   
+         dbo.receive_iqc.IQC_Pass_Fail,   
+         dbo.receive_iqc.Qty_Accepted,   
+         dbo.receive_iqc.Qty_Rejected,   
+         dbo.receive_iqc.Failure_Category,   
+         dbo.receive_iqc.Cause,   
+         dbo.receive_iqc.Requires_Rework,   
+         dbo.receive_iqc.Qty_Reworked,   
+         dbo.receive_iqc.Comments,   
+         dbo.receive_iqc.Original_Inv_Type  
+    FROM dbo.receive_iqc,   
+         dbo.Receive_Detail,   
+         dbo.Receive_Master  
+   WHERE ( dbo.receive_iqc.RO_No = dbo.Receive_Detail.RO_No and 
+			  dbo.receive_iqc.line_item_no = dbo.Receive_Detail.line_item_no ) and  
+         ( dbo.Receive_Master.RO_No = dbo.Receive_Detail.RO_No ) and  
+         ( dbo.Receive_Master.RO_No = dbo.receive_iqc.RO_No )    
+" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="0" color="33554432" x="9" y="8" height="60" width="631" format="[general]" html.valueishtml="0"  name=ro_no visible="1" edit.limit=16 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=14 alignment="0" tabsequence=32766 border="0" color="33554432" x="5728" y="8" height="60" width="544" format="[general]" html.valueishtml="0"  name=comments visible="1" edit.limit=255 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=15 alignment="0" tabsequence=32766 border="0" color="33554432" x="6281" y="8" height="60" width="311" format="[general]" html.valueishtml="0"  name=original_inv_type visible="1" edit.limit=1 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="0" color="33554432" x="891" y="8" height="60" width="1083" format="[general]" html.valueishtml="0"  name=sku visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="0" color="33554432" x="1984" y="8" height="60" width="411" format="[shortdate] [time]" html.valueishtml="0"  name=iqc_date visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="0" tabsequence=32766 border="0" color="33554432" x="2405" y="8" height="60" width="311" format="[general]" html.valueishtml="0"  name=inspection_level visible="1" edit.limit=1 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="1" tabsequence=32766 border="0" color="33554432" x="2725" y="8" height="60" width="279" format="[general]" html.valueishtml="0"  name=sample_size visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=7 alignment="0" tabsequence=32766 border="0" color="33554432" x="3013" y="8" height="60" width="302" format="[general]" html.valueishtml="0"  name=iqc_pass_fail visible="1" edit.limit=1 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=8 alignment="1" tabsequence=32766 border="0" color="33554432" x="3323" y="8" height="60" width="320" format="[general]" html.valueishtml="0"  name=qty_accepted visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=9 alignment="1" tabsequence=32766 border="0" color="33554432" x="3653" y="8" height="60" width="261" format="[general]" html.valueishtml="0"  name=qty_rejected visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=10 alignment="0" tabsequence=32766 border="0" color="33554432" x="3922" y="8" height="60" width="311" format="[general]" html.valueishtml="0"  name=failure_category visible="1" edit.limit=20 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=11 alignment="0" tabsequence=32766 border="0" color="33554432" x="4242" y="8" height="60" width="850" format="[general]" html.valueishtml="0"  name=cause visible="1" edit.limit=30 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=12 alignment="0" tabsequence=32766 border="0" color="33554432" x="5102" y="8" height="60" width="302" format="[general]" html.valueishtml="0"  name=requires_rework visible="1" edit.limit=1 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=13 alignment="1" tabsequence=32766 border="0" color="33554432" x="5413" y="8" height="60" width="306" format="[general]" html.valueishtml="0"  name=qty_reworked visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="0" color="0" x="649" y="8" height="60" width="233" format="[general]" html.valueishtml="0"  name=line_item_no visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Ro No" border="0" color="33554432" x="9" y="8" height="128" width="631" html.valueishtml="0"  name=ro_no_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="IqcDate" border="0" color="33554432" x="1984" y="8" height="128" width="411" html.valueishtml="0"  name=iqc_date_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="Sku" border="0" color="33554432" x="891" y="8" height="128" width="1083" html.valueishtml="0"  name=receive_detail_sku_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="Line No" border="0" color="0" x="649" y="8" height="128" width="233" html.valueishtml="0"  name=receive_iqc_line_item_no_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="InspectionLevel" border="0" color="33554432" x="2405" y="8" height="128" width="311" html.valueishtml="0"  name=inspection_level_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="SampleSize" border="0" color="33554432" x="2725" y="8" height="128" width="279" html.valueishtml="0"  name=sample_size_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="IqcPass Fail" border="0" color="33554432" x="3013" y="8" height="128" width="302" html.valueishtml="0"  name=iqc_pass_fail_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="QtyAccepted" border="0" color="33554432" x="3323" y="8" height="128" width="320" html.valueishtml="0"  name=qty_accepted_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="QtyRejected" border="0" color="33554432" x="3653" y="8" height="128" width="261" html.valueishtml="0"  name=qty_rejected_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="FailureCategory" border="0" color="33554432" x="3922" y="8" height="128" width="311" html.valueishtml="0"  name=failure_category_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Cause" border="0" color="33554432" x="4242" y="8" height="128" width="850" html.valueishtml="0"  name=cause_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="RequiresRework" border="0" color="33554432" x="5102" y="8" height="128" width="302" html.valueishtml="0"  name=requires_rework_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="QtyReworked" border="0" color="33554432" x="5413" y="8" height="128" width="306" html.valueishtml="0"  name=qty_reworked_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Comments" border="0" color="33554432" x="5728" y="8" height="128" width="544" html.valueishtml="0"  name=comments_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="OriginalInv Type" border="0" color="33554432" x="6281" y="8" height="128" width="311" html.valueishtml="0"  name=original_inv_type_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

@@ -1,0 +1,29 @@
+HA$PBExportHeader$f_pack_copypaste.srf
+$PBExportComments$S35966 F16957 I2457 Kendo
+global type f_pack_copypaste from function_object
+end type
+
+forward prototypes
+global function integer f_pack_copypaste (integer airowind[], ref datawindow awpack)
+end prototypes
+
+global function integer f_pack_copypaste (integer airowind[], ref datawindow awpack);Int liRet, liCnt, i
+Integer liRowInd[]
+Long llRowCount, llRow
+String lsRowInd[]
+String lsCartonNo
+
+liRowInd = aiRowInd
+liRet = Upperbound(liRowInd)
+llRowCount = awPack.RowCount()
+lsCartonNo = awPack.GetItemString( 1, 'carton_no' )
+
+For i = 1 to liRet
+	llRow = liRowInd[i]
+	awPack.SetItem( llRow, 'carton_no', lsCartonNo )
+Next
+
+return liRet
+
+end function
+

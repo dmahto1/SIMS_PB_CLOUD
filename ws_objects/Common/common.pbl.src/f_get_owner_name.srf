@@ -1,0 +1,29 @@
+﻿$PBExportHeader$f_get_owner_name.srf
+global type f_get_owner_name from function_object
+end type
+
+forward prototypes
+global function string f_get_owner_name (long as_owner_id)
+end prototypes
+
+global function string f_get_owner_name (long as_owner_id);String	lstype,	&
+			lsCode,	&
+			lsOwnerCode
+
+Select owner_type, owner_cd
+Into	:lstype, :lsCode
+From	Owner 
+Where Owner_id = :as_owner_id
+Using SQLCA;
+
+If lsCode > '' Then
+	Return lsCode + '(' + lsType + ')'
+Else
+	Return ''
+End If
+
+
+
+
+end function
+

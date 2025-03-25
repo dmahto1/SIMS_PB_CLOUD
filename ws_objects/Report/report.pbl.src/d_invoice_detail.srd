@@ -1,0 +1,40 @@
+﻿$PBExportHeader$d_invoice_detail.srd
+$PBExportComments$Data window used for invoice detail information
+release 7;
+datawindow(units=0 timer_interval=0 color=16777215 processing=0 HTMLDW=no print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.prompt=no print.buttons=no print.preview.buttons=no )
+summary(height=120 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=104 color="536870912" )
+table(column=(type=char(16) updatewhereclause=yes name=do_no dbname="Delivery_Detail.do_no" )
+ column=(type=char(70) updatewhereclause=yes name=item_desc dbname="item_desc" )
+ column=(type=char(50) updatewhereclause=yes name=sku dbname="Delivery_Detail.sku" )
+ column=(type=decimal(0) updatewhereclause=yes name=alloc_qty dbname="Delivery_Detail.alloc_qty" )
+ column=(type=decimal(4) updatewhereclause=yes name=price dbname="Delivery_Detail.price" )
+ column=(type=decimal(4) updatewhereclause=yes name=line_value dbname="line_value" )
+ retrieve="  select 	dd.do_no,
+				item_desc = (select description
+					from item_master
+						where item_master.project_id = :as_project and
+								item_master.sku = dd.sku and
+                        item_master.supp_code = dd.supp_code),
+				dd.sku,
+				dd.alloc_qty,
+				dd.price,
+				line_value = (dd.alloc_qty * dd.price)
+
+from 			delivery_detail dd
+
+where			dd.do_no = :as_do_no" arguments=(("as_project", string),("as_do_no", string)) )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="0" color="0" x="32" y="8" height="76" width="805" format="[general]"  name=sku edit.limit=50 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="0" color="0" x="850" y="8" height="76" width="1106" format="[general]"  name=item_desc edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="1" tabsequence=32766 border="0" color="0" x="1970" y="8" height="76" width="352" format="#######.#####"  name=alloc_qty editmask.mask="#######.#####" editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+line(band=summary x1="41" y1="8" x2="3195" y2="8"  name=l_1 pen.style="0" pen.width="9" pen.color="0"  background.mode="1" background.color="553648127" )
+text(band=summary alignment="0" text="Grand Total:" border="0" color="0" x="32" y="32" height="56" width="361"  name=t_3  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+text(band=detail alignment="1" text="US$" border="0" color="0" x="2350" y="8" height="76" width="123"  name=t_1  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="1" tabsequence=32766 border="0" color="0" x="2496" y="8" height="76" width="256" format="#,###,##0.00"  name=price edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=detail alignment="0" text="US$" border="0" color="0" x="2789" y="8" height="76" width="123"  name=t_2  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="1" tabsequence=32766 border="0" color="0" x="2935" y="8" height="76" width="256" format="###,###,###.00"  name=line_value edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=summary alignment="0" text="US$" border="0" color="0" x="2789" y="32" height="56" width="123"  name=t_4  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+compute(band=summary alignment="1" expression="sum(line_value for all)"border="0" color="0" x="2930" y="32" height="64" width="256" format="###,###,###.00"  name=compute_1  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" )

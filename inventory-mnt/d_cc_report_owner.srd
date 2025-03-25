@@ -1,0 +1,114 @@
+HA$PBExportHeader$d_cc_report_owner.srd
+$PBExportComments$*
+release 11;
+datawindow(units=0 timer_interval=0 color=16777215 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 1 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes print.preview.outline=yes hidegrayline=no showbackcoloronxp=no )
+header(height=368 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=64 color="536870912" )
+table(column=(type=char(16) update=yes updatewhereclause=yes name=cc_no dbname="CC_No" )
+ column=(type=char(50) update=yes updatewhereclause=yes name=sku dbname="SKU" )
+ column=(type=char(20) updatewhereclause=yes name=supp_code dbname="SUPP_CODE" )
+ column=(type=char(10) update=yes updatewhereclause=yes name=l_code dbname="L_Code" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=inventory_type dbname="Inventory_Type" )
+ column=(type=char(50) update=yes updatewhereclause=yes name=serial_no dbname="Serial_No" )
+ column=(type=char(50) update=yes updatewhereclause=yes name=lot_no dbname="Lot_No" values="New	N/Complete	C/Process	P/Void	C/" )
+ column=(type=decimal(5) updatewhereclause=yes name=quantity dbname="Quantity" )
+ column=(type=decimal(5) updatewhereclause=yes identity=yes name=result_1 dbname="Result_1" )
+ column=(type=decimal(5) updatewhereclause=yes name=result_2 dbname="Result_2" )
+ column=(type=decimal(5) updatewhereclause=yes name=result_3 dbname="Result_3" )
+ column=(type=char(1) updatewhereclause=yes name=ord_status dbname="Ord_Type" values="By SKU	S/By Location	L/" )
+ column=(type=datetime updatewhereclause=yes name=ord_date dbname="Ord_Date" values="Processed	P/Complete	C/New	N/1st Count	1/2nd Count	2/3rd Count 	3/" )
+ column=(type=char(1) updatewhereclause=yes name=ord_status dbname="Ord_Status" values="New	N/Complete	C/Process	P/1st Count	1/2nd Count	2/3rd Count	3/" )
+ column=(type=datetime updatewhereclause=yes name=complete_date dbname="Complete_Date" )
+ column=(type=char(20) updatewhereclause=yes name=range_start dbname="Range_start" )
+ column=(type=char(20) updatewhereclause=yes name=range_end dbname="Range_End" )
+ column=(type=char(10) updatewhereclause=yes name=project_id dbname="Project_ID" )
+ column=(type=char(10) updatewhereclause=yes name=wh_code dbname="WH_Code" )
+ column=(type=char(1) updatewhereclause=yes name=owner_owner_type dbname="owner_type" )
+ column=(type=char(20) updatewhereclause=yes name=owner_owner_cd dbname="owner_cd" )
+ retrieve="  SELECT CC_Inventory.CC_No,   
+         CC_Inventory.SKU,  
+         CC_Inventory.SUPP_CODE,  
+         CC_Inventory.L_Code,   
+         CC_Inventory.Inventory_Type,   
+         CC_Inventory.Serial_No,    
+         CC_Inventory.Lot_No, 
+         CC_Inventory.Quantity,
+         IsNull(CC_Result_1.Quantity,0) as Result_1, 
+         CC_Result_2.Quantity as Result_2,   
+         CC_Result_3.Quantity as Result_3, 
+         CC_Master.Ord_Type, 
+         CC_Master.Ord_Date, 
+			CC_Master.Ord_Status,
+         CC_Master.Complete_Date, 
+         CC_Master.Range_start,
+         CC_Master.Range_End,
+         CC_Master.Project_ID,
+         CC_Master.WH_Code,
+         owner.owner_type,
+         owner.owner_cd
+FROM CC_Inventory LEFT JOIN CC_MAster ON CC_Inventory.CC_No = CC_MAster.CC_No
+	LEFT JOIN Owner ON CC_Inventory.owner_id = owner.owner_id
+	LEFT JOIN CC_Result_1 ON CC_Inventory.CC_No = CC_Result_1.CC_No
+		AND CC_Inventory.line_item_no = CC_Result_1.line_item_no
+	LEFT JOIN CC_Result_2 ON CC_Inventory.CC_No = CC_Result_2.CC_No
+		AND CC_Inventory.line_item_no = CC_Result_2.line_item_no
+	LEFT JOIN CC_Result_3 ON CC_Inventory.CC_No = CC_Result_3.CC_No
+		AND CC_Inventory.line_item_no = CC_Result_3.line_item_no
+WHERE CC_Inventory.CC_No = :a_order" arguments=(("a_order", string))  sort="l_code A sku A serial_no A lot_no A inventory_type A " )
+column(band=header id=12 alignment="0" tabsequence=32766 border="0" color="0" x="475" y="220" height="60" width="411" format="" html.valueishtml="0"  name=ord_type visible="1" ddlb.limit=0 ddlb.allowedit=no ddlb.case=any  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="1" text="Order Date: " border="0" color="0" x="1755" y="156" height="60" width="462" html.valueishtml="0"  name=ord_date_t visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1090519039" )
+text(band=header alignment="1" text="Warehouse: " border="0" color="0" x="882" y="156" height="60" width="462" html.valueishtml="0"  name=wh_code_t visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1090519039" )
+column(band=header id=19 alignment="0" tabsequence=32766 border="0" color="0" x="1349" y="156" height="60" width="402" format="[general]" html.valueishtml="0"  name=wh_code visible="1" edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="1" text="Complete Date: " border="0" color="0" x="2743" y="156" height="60" width="462" html.valueishtml="0"  name=complete_date_t visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1090519039" )
+column(band=header id=13 alignment="0" tabsequence=32766 border="0" color="0" x="2222" y="156" height="60" width="517" format="mm/dd/yyyy hh:mm" html.valueishtml="0"  name=ord_date visible="1" edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header id=15 alignment="0" tabsequence=32766 border="0" color="0" x="3209" y="156" height="60" width="517" format="mm/dd/yyyy hh:mm" html.valueishtml="0"  name=complete_date visible="1" edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="1" text="Order Type: " border="0" color="0" x="9" y="220" height="60" width="462" html.valueishtml="0"  name=ord_type_t visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1090519039" )
+text(band=header alignment="2" text="REPORT for CYCLE COUNT" border="0" color="0" x="1815" y="8" height="72" width="978" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-11" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="" border="0" color="0" x="2798" y="8" height="72" width="197" html.valueishtml="0"  name=ccno_t visible="1"  font.face="Arial" font.height="-11" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="1" text="Range: " border="0" color="0" x="1755" y="220" height="60" width="462" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1090519039" )
+compute(band=header alignment="0" expression="range_start  + ' to ' + range_end"border="0" color="0" x="2222" y="220" height="60" width="850" format="[general]" html.valueishtml="0"  name=compute_1 visible="1"  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1090519039" )
+text(band=header alignment="1" text="Order Status: " border="0" color="0" x="882" y="220" height="60" width="462" html.valueishtml="0"  name=t_6 visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1090519039" )
+column(band=header id=14 alignment="0" tabsequence=32766 border="0" color="0" x="1349" y="220" height="60" width="402" format="[general]" html.valueishtml="0"  name=ord_status visible="1" ddlb.limit=0 ddlb.allowedit=no ddlb.case=any  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="3RD CNT" border="2" color="0" x="3909" y="304" height="60" width="283" html.valueishtml="0"  name=result_3_t visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1090519039" )
+text(band=header alignment="2" text="DIFFERENCE" border="2" color="0" x="4206" y="304" height="60" width="338" html.valueishtml="0"  name=t_5 visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1090519039" )
+text(band=header alignment="2" text="2ND CNT" border="2" color="0" x="3598" y="304" height="60" width="270" html.valueishtml="0"  name=result_2_t visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1090519039" )
+text(band=header alignment="2" text="1ST CNT" border="2" color="0" x="3282" y="304" height="60" width="256" html.valueishtml="0"  name=result_1_t visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1090519039" )
+text(band=header alignment="2" text="SYSTEM" border="2" color="0" x="2679" y="304" height="60" width="530" html.valueishtml="0"  name=quantity_t visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1090519039" )
+text(band=header alignment="2" text="SKU" border="2" color="0" x="599" y="304" height="60" width="672" html.valueishtml="0"  name=sku_t visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1090519039" )
+text(band=header alignment="2" text="BATCH NBR" border="2" color="0" x="1975" y="304" height="60" width="407" html.valueishtml="0"  name=lot_no_t visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1090519039" )
+text(band=header alignment="2" text="SUPPLIER" border="2" color="0" x="1271" y="304" height="60" width="434" html.valueishtml="0"  name=t_3 visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="LOCATION" border="2" color="0" x="146" y="304" height="60" width="443" html.valueishtml="0"  name=l_code_t visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1090519039" )
+text(band=header alignment="2" text="ITEM" border="2" color="0" x="0" y="304" height="60" width="133" html.valueishtml="0"  name=t_7 visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1090519039" )
+text(band=header alignment="2" text="INV TYPE" border="2" color="0" x="2395" y="304" height="60" width="265" html.valueishtml="0"  name=inventory_type_t visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1090519039" )
+column(band=header id=18 alignment="0" tabsequence=32766 border="0" color="0" x="475" y="156" height="60" width="402" format="[general]" html.valueishtml="0"  name=project_id visible="1" edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header id=1 alignment="0" tabsequence=32766 border="0" color="0" x="475" y="92" height="60" width="585" format="[general]" html.valueishtml="0"  name=cc_no visible="1" edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="1" text="Project ID: " border="0" color="0" x="9" y="156" height="60" width="462" html.valueishtml="0"  name=project_id_t visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1090519039" )
+text(band=header alignment="1" text="Order Nbr: " border="0" color="0" x="9" y="92" height="60" width="462" html.valueishtml="0"  name=t_8 visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1090519039" )
+text(band=header alignment="2" text="OWNER" border="2" color="0" x="1719" y="304" height="60" width="242" html.valueishtml="0"  name=t_4 visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=detail alignment="1" expression="If(IsNull(result_3), if(isnull(result_2), result_1 - quantity, result_2 - quantity), result_3 - quantity)"border="0" color="0" x="4219" y="0" height="60" width="315" format="[general]" html.valueishtml="0"  name=difference visible="1"  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=11 alignment="1" tabsequence=32766 border="0" color="0" x="3890" y="0" height="60" width="315" format="[general]" html.valueishtml="0"  name=result_3 visible="1" edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=detail alignment="0" expression="getrow()"border="0" color="0" x="9" y="0" height="60" width="119" format="[GENERAL]" html.valueishtml="0"  name=compute_5 visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=10 alignment="1" tabsequence=32766 border="0" color="0" x="3552" y="0" height="60" width="315" format="[general]" html.valueishtml="0"  name=result_2 visible="1" edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=9 alignment="1" tabsequence=32766 border="0" color="0" x="3223" y="0" height="60" width="315" format="[general]" html.valueishtml="0"  name=result_1 visible="1" edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=8 alignment="1" tabsequence=32766 border="0" color="0" x="2674" y="0" height="60" width="535" format="#######.#####" html.valueishtml="0"  name=quantity visible="1" editmask.mask="#######.#####" editmask.focusrectangle=no  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="0" color="0" x="599" y="0" height="60" width="672" format="[general]" html.valueishtml="0"  name=sku visible="1" edit.limit=50 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=7 alignment="0" tabsequence=32766 border="0" color="0" x="1975" y="0" height="60" width="398" format="[general]" html.valueishtml="0"  name=lot_no visible="1" edit.limit=20 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="0" color="0" x="1266" y="0" height="60" width="434" format="[general]" html.valueishtml="0"  name=supp_code visible="1" edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="0" color="0" x="146" y="0" height="60" width="443" format="[general]" html.valueishtml="0"  name=l_code visible="1" edit.limit=10 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="0" tabsequence=32766 border="0" color="0" x="2395" y="0" height="60" width="261" format="[general]" html.valueishtml="0"  name=inventory_type visible="1" dddw.name=dddw_inventory_type_by_project dddw.displaycolumn=inv_type_desc dddw.datacolumn=inv_type dddw.percentwidth=100 dddw.lines=0 dddw.limit=0 dddw.allowedit=no dddw.useasborder=no dddw.case=any  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=detail alignment="0" expression=" owner_owner_cd  + '(' + owner_owner_type  + ')'"border="0" color="0" x="1714" y="0" height="60" width="818" format="[general]" html.valueishtml="0"  name=compute_2 visible="1"  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=foreground alignment="0" expression="'Printed on: ' + String(Today(), 'mm/dd/yyyy hh:mm')"border="0" color="0" x="9" y="8" height="68" width="983" format="[general]" html.valueishtml="0"  name=compute_3 visible="1"  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+compute(band=foreground alignment="1" expression="'Page ' + page() + ' of ' + pageCount()"border="0" color="0" x="3506" y="8" height="60" width="882" format="[general]" html.valueishtml="0"  name=compute_4 visible="1"  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" pagingmethod=0 generatedddwframes="1" )
+xhtmlgen() cssgen(sessionspecific="0" )
+xmlgen(inline="0" )
+xsltgen()
+jsgen()
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )
+export.xhtml()
+ 

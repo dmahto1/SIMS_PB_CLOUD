@@ -1,0 +1,37 @@
+HA$PBExportHeader$f_linksys_create_ucc.srf
+global type f_linksys_create_ucc from function_object
+end type
+
+forward prototypes
+global function string f_linksys_create_ucc (boolean arg_carton, string arg_unique_ucc)
+end prototypes
+
+global function string f_linksys_create_ucc (boolean arg_carton, string arg_unique_ucc);
+//Function needs work. Just a temp to get out.
+
+string ls_ucc
+
+string ls_carton_pallet
+string lsUccCarton
+
+if arg_carton then
+	ls_carton_pallet = "0"
+else
+	ls_carton_pallet = "1"	
+end if
+
+
+string ls_check_digit, ls_rtn_digit, lsUccCarton_View
+
+ls_check_digit = ls_carton_pallet + "1745883" + arg_unique_ucc
+
+ls_rtn_digit = string(f_calc_uccs_check_Digit(ls_check_digit))
+
+lsUccCarton = "00" + ls_check_digit + ls_rtn_digit
+
+//right(string(today(),"YYYY"),1) + string(today(),"MM") + string(today(),"DD") + string(li_inc_number, "0000") 
+
+return lsUccCarton
+
+end function
+

@@ -1,0 +1,13 @@
+﻿$PBExportHeader$dddw_shipment_status_code.srd
+$PBExportComments$Shipment Status Codes DD
+release 7;
+datawindow(units=0 timer_interval=0 color=16777215 processing=0 HTMLDW=no print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.prompt=no print.buttons=no print.preview.buttons=no )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=64 color="536870912" )
+table(column=(type=char(50) update=yes updatewhereclause=yes name=description dbname="Shipment_Status_Code.Description" )
+ column=(type=char(10) update=yes updatewhereclause=yes key=yes name=status_code dbname="Shipment_Status_Code.Status_Code" )
+ retrieve="PBSELECT( VERSION(400) TABLE(NAME=~"dbo.Shipment_Status_Code~" ) COLUMN(NAME=~"dbo.Shipment_Status_Code.Description~") COLUMN(NAME=~"dbo.Shipment_Status_Code.Status_Code~")) " update="dbo.Shipment_Status_Code" updatewhere=1 updatekeyinplace=no  sort="status_code A " )
+compute(band=detail alignment="0" expression=" status_code + ' - ' +  description "border="0" color="0" x="5" y="0" height="56" width="1189" format="[GENERAL]"  name=compute_1  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" )

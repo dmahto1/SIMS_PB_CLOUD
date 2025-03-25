@@ -1,0 +1,362 @@
+﻿$PBExportHeader$d_do_master3.srd
+$PBExportComments$+ This data widnow is shared with d_do_master
+release 11.5;
+datawindow(units=0 timer_interval=0 color=79741120 brushmode=0 transparency=0 gradient.angle=0 gradient.color=8421504 gradient.focus=0 gradient.repetition.count=0 gradient.repetition.length=100 gradient.repetition.mode=0 gradient.scale=100 gradient.spread=100 gradient.transparency=0 picture.blur=0 picture.clip.bottom=0 picture.clip.left=0 picture.clip.right=0 picture.clip.top=0 picture.mode=0 picture.scale.x=100 picture.scale.y=100 picture.transparency=0 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes print.background=no print.preview.background=no print.preview.outline=yes hidegrayline=no showbackcoloronxp=no picture.file="" )
+header(height=0 color="536870912" transparency="0" gradient.color="8421504" gradient.transparency="0" gradient.angle="0" brushmode="0" gradient.repetition.mode="0" gradient.repetition.count="0" gradient.repetition.length="100" gradient.focus="0" gradient.scale="100" gradient.spread="100" )
+summary(height=0 color="536870912" transparency="0" gradient.color="8421504" gradient.transparency="0" gradient.angle="0" brushmode="0" gradient.repetition.mode="0" gradient.repetition.count="0" gradient.repetition.length="100" gradient.focus="0" gradient.scale="100" gradient.spread="100" )
+footer(height=4 color="536870912" transparency="0" gradient.color="8421504" gradient.transparency="0" gradient.angle="0" brushmode="0" gradient.repetition.mode="0" gradient.repetition.count="0" gradient.repetition.length="100" gradient.focus="0" gradient.scale="100" gradient.spread="100" )
+detail(height=2836 color="536870912" transparency="0" gradient.color="8421504" gradient.transparency="0" gradient.angle="0" brushmode="0" gradient.repetition.mode="0" gradient.repetition.count="0" gradient.repetition.length="100" gradient.focus="0" gradient.scale="100" gradient.spread="100" )
+table(column=(type=char(16) updatewhereclause=yes key=yes name=do_no dbname="DO_No" )
+ column=(type=char(10) updatewhereclause=yes name=project_id dbname="Project_ID" )
+ column=(type=char(1) updatewhereclause=yes name=ord_type dbname="Ord_Type" )
+ column=(type=decimal(0) updatewhereclause=yes name=priority dbname="Priority" initial="1" )
+ column=(type=datetime updatewhereclause=yes name=ord_date dbname="Ord_Date" )
+ column=(type=datetime updatewhereclause=yes name=complete_date dbname="Complete_Date" )
+ column=(type=datetime updatewhereclause=yes name=pick_start dbname="Pick_Start" )
+ column=(type=datetime updatewhereclause=yes name=pick_complete dbname="Pick_Complete" )
+ column=(type=datetime updatewhereclause=yes name=schedule_date dbname="Schedule_Date" )
+ column=(type=datetime updatewhereclause=yes name=request_date dbname="Request_Date" )
+ column=(type=datetime updatewhereclause=yes name=delivery_date dbname="Delivery_Date" )
+ column=(type=datetime updatewhereclause=yes name=receive_date dbname="Receive_Date" )
+ column=(type=char(1) updatewhereclause=yes name=ord_status dbname="Ord_Status" values="New	N/Process	P/Picking	I/Packing	A/Delivered	D/Completed	C/" )
+ column=(type=char(10) updatewhereclause=yes name=wh_code dbname="WH_Code" )
+ column=(type=char(1) updatewhereclause=yes name=inventory_type dbname="Inventory_Type" )
+ column=(type=char(20) updatewhereclause=yes name=cust_order_no dbname="Cust_Order_No" )
+ column=(type=decimal(0) updatewhereclause=yes name=back_order_no dbname="Back_Order_No" )
+ column=(type=char(20) updatewhereclause=yes name=cust_code dbname="Cust_Code" )
+ column=(type=char(50) updatewhereclause=yes name=cust_name dbname="Cust_Name" )
+ column=(type=char(10) updatewhereclause=yes name=address_code dbname="Address_Code" )
+ column=(type=char(60) updatewhereclause=yes name=address_1 dbname="Address_1" )
+ column=(type=char(60) updatewhereclause=yes name=address_2 dbname="Address_2" )
+ column=(type=char(60) updatewhereclause=yes name=address_3 dbname="Address_3" )
+ column=(type=char(60) updatewhereclause=yes name=address_4 dbname="Address_4" )
+ column=(type=char(50) updatewhereclause=yes name=city dbname="City" )
+ column=(type=char(50) updatewhereclause=yes name=country dbname="Country" )
+ column=(type=char(50) updatewhereclause=yes name=contact_person dbname="Contact_Person" )
+ column=(type=char(20) updatewhereclause=yes name=tel dbname="Tel" )
+ column=(type=char(20) updatewhereclause=yes name=fax dbname="Fax" )
+ column=(type=char(250) updatewhereclause=yes name=remark dbname="Remark" )
+ column=(type=char(60) updatewhereclause=yes name=ship_via dbname="Ship_VIA" )
+ column=(type=char(40) updatewhereclause=yes name=ship_ref dbname="Ship_Ref" )
+ column=(type=char(20) updatewhereclause=yes name=invoice_no dbname="Invoice_No" )
+ column=(type=char(20) updatewhereclause=yes name=carrier dbname="Carrier" )
+ column=(type=char(20) updatewhereclause=yes name=freight_terms dbname="Freight_Terms" )
+ column=(type=datetime updatewhereclause=yes name=freight_etd dbname="Freight_ETD" )
+ column=(type=datetime updatewhereclause=yes name=freight_eta dbname="Freight_ETA" )
+ column=(type=datetime updatewhereclause=yes name=freight_atd dbname="Freight_ATD" )
+ column=(type=datetime updatewhereclause=yes name=freight_ata dbname="Freight_ATA" )
+ column=(type=decimal(3) updatewhereclause=yes name=freight_cost dbname="Freight_Cost" validation="Number(GetText()) >= 0 and Number(GetText()) <= 9999999999.999" validationmsg="~"Please enter a value between 0 and 9999999999.999~"" )
+ column=(type=decimal(0) updatewhereclause=yes name=ctn_cnt dbname="Ctn_Cnt" validation="Number(GetText()) >= 0 and Number(GetText()) <= 9999999" validationmsg="~"Please enter a value between 0 and 9999999~"" )
+ column=(type=decimal(5) updatewhereclause=yes name=weight dbname="Weight" validation="Number(GetText()) >= 0 and Number(GetText()) <= 9999999999.999" validationmsg="~"Please enter a value between 0 and 9999999999.999~"" )
+ column=(type=char(255) updatewhereclause=yes name=user_field1 dbname="User_Field1" )
+ column=(type=char(255) update=yes updatewhereclause=yes name=user_field2 dbname="User_Field2" )
+ column=(type=char(255) update=yes updatewhereclause=yes name=user_field3 dbname="User_Field3" )
+ column=(type=char(255) update=yes updatewhereclause=yes name=user_field4 dbname="User_Field4" )
+ column=(type=char(255) update=yes updatewhereclause=yes name=user_field5 dbname="User_Field5" )
+ column=(type=char(255) update=yes updatewhereclause=yes name=user_field6 dbname="User_Field6" )
+ column=(type=char(255) update=yes updatewhereclause=yes name=user_field7 dbname="User_Field7" )
+ column=(type=char(255) update=yes updatewhereclause=yes name=user_field8 dbname="User_Field8" )
+ column=(type=char(255) update=yes updatewhereclause=yes name=user_field9 dbname="User_Field9" )
+ column=(type=char(255) update=yes updatewhereclause=yes name=user_field10 dbname="User_Field10" )
+ column=(type=char(255) update=yes updatewhereclause=yes name=user_field11 dbname="User_Field11" )
+ column=(type=char(255) update=yes updatewhereclause=yes name=user_field12 dbname="User_Field12" )
+ column=(type=char(255) update=yes updatewhereclause=yes name=user_field13 dbname="User_Field13" )
+ column=(type=char(255) update=yes updatewhereclause=yes name=user_field14 dbname="User_Field14" )
+ column=(type=char(255) update=yes updatewhereclause=yes name=user_field15 dbname="User_Field15" )
+ column=(type=char(255) update=yes updatewhereclause=yes name=user_field16 dbname="User_Field16" )
+ column=(type=char(255) update=yes updatewhereclause=yes name=user_field17 dbname="User_Field17" )
+ column=(type=char(255) update=yes updatewhereclause=yes name=user_field18 dbname="User_Field18" )
+ column=(type=char(255) update=yes updatewhereclause=yes name=user_field19 dbname="User_Field19" )
+ column=(type=char(255) update=yes updatewhereclause=yes name=user_field20 dbname="User_Field20" )
+ column=(type=char(255) update=yes updatewhereclause=yes name=user_field21 dbname="User_Field21" )
+ column=(type=char(255) update=yes updatewhereclause=yes name=user_field22 dbname="User_Field22" )
+ column=(type=char(25) updatewhereclause=yes name=last_user dbname="Last_User" )
+ column=(type=datetime updatewhereclause=yes name=last_update dbname="Last_Update" )
+ column=(type=char(50) updatewhereclause=yes name=state dbname="State" )
+ column=(type=char(50) updatewhereclause=yes name=zip dbname="Zip" )
+ column=(type=char(40) updatewhereclause=yes name=district dbname="District" )
+ column=(type=char(30) updatewhereclause=yes name=awb_bol_no dbname="AWB_BOL_No" )
+ column=(type=char(50) updatewhereclause=yes name=vics_bol_no dbname="Vics_BOL_No" )
+ column=(type=char(30) updatewhereclause=yes name=agent_info dbname="Agent_Info" )
+ column=(type=char(20) updatewhereclause=yes name=customs_doc dbname="Customs_Doc" )
+ column=(type=char(10) updatewhereclause=yes name=transport_mode dbname="Transport_Mode" )
+ column=(type=decimal(1) updatewhereclause=yes name=shipping_carton_volume dbname="Shipping_Carton_Volume" )
+ column=(type=char(1) updatewhereclause=yes name=gemini_ind dbname="Gemini_Ind" initial="Y" values="	Y/	N" )
+ column=(type=char(28) updatewhereclause=yes name=description dbname="Description" )
+ column=(type=char(1) updatewhereclause=yes name=type_of_product dbname="Type_of_Product" )
+ column=(type=char(1) updatewhereclause=yes name=type_of_service dbname="Type_of_Service" )
+ column=(type=char(1) updatewhereclause=yes name=type_of_payment dbname="Type_Of_Payment" )
+ column=(type=decimal(2) updatewhereclause=yes name=declared_value dbname="Declared_Value" )
+ column=(type=char(1) updatewhereclause=yes name=delivery_confirm_ind dbname="Delivery_Confirm_Ind" )
+ column=(type=char(1) updatewhereclause=yes name=confirmation_ind dbname="Confirmation_Ind" )
+ column=(type=char(255) updatewhereclause=yes name=shipping_instructions dbname="shipping_instructions" )
+ column=(type=char(255) updatewhereclause=yes name=om_note_code_text dbname="Om_Note_code_text" )
+ column=(type=char(255) updatewhereclause=yes name=packlist_notes dbname="Packlist_Notes" )
+ column=(type=datetime updatewhereclause=yes name=edm_generate_datetime dbname="EDM_Generate_dateTime" )
+ column=(type=decimal(0) updatewhereclause=yes name=edi_batch_seq_no dbname="EDI_Batch_Seq_no" )
+ column=(type=char(20) updatewhereclause=yes name=gemini_order_no dbname="Gemini_order_no" )
+ column=(type=char(1) updatewhereclause=yes name=vor_shipment_ind dbname="vor_shipment_ind" )
+ column=(type=decimal(0) updatewhereclause=yes name=batch_pick_id dbname="Batch_Pick_ID" )
+ column=(type=char(25) updatewhereclause=yes name=scanner_id dbname="Scanner_ID" initial="NONE" )
+ column=(type=char(10) updatewhereclause=yes name=scanner_status dbname="Scanner_Status" initial="READY" values="READY	READY/INUSE	INUSE/PICKED	PICKED/CANCELED	CANCELED/" )
+ column=(type=char(10) updatewhereclause=yes name=line_of_business dbname="Line_of_Business" )
+ column=(type=char(30) updatewhereclause=yes name=consolidation_no dbname="Consolidation_No" )
+ column=(type=datetime updatewhereclause=yes name=carrier_notified_date dbname="Carrier_Notified_date" )
+ column=(type=char(20) updatewhereclause=yes name=trader_id dbname="Trader_ID" )
+ column=(type=char(20) updatewhereclause=yes name=contract_owner_id dbname="Contract_OWner_ID" )
+ column=(type=char(20) updatewhereclause=yes name=factory_id dbname="Factory_ID" )
+ column=(type=char(25) updatewhereclause=yes name=create_user dbname="Create_USer" )
+ column=(type=char(20) updatewhereclause=yes name=carrier_tracking_no dbname="carrier_tracking_no" )
+ column=(type=char(20) updatewhereclause=yes name=vat_id dbname="vat_id" )
+ column=(type=char(1) updatewhereclause=yes name=crossdock_ind dbname="crossdock_ind" )
+ column=(type=char(50) updatewhereclause=yes name=trax_acct_no dbname="TRAX_ACCT_NO" )
+ column=(type=char(50) updatewhereclause=yes name=return_tracking_no dbname="Return_tracking_no" )
+ column=(type=char(1) updatewhereclause=yes name=otm_status dbname="OTM_Status" )
+ column=(type=char(20) updatewhereclause=yes name=trax_duty_terms dbname="Trax_Duty_Terms" )
+ column=(type=char(50) updatewhereclause=yes name=trax_duty_acct_no dbname="Trax_Duty_Acct_No" )
+ column=(type=datetime updatewhereclause=yes name=otm_call_date dbname="OTM_Call_Date" )
+ column=(type=char(5) updatewhereclause=yes name=trax_pack_location dbname="Trax_Pack_Location" )
+ column=(type=char(25) updatewhereclause=yes name=pack_list_last_user dbname="Pack_List_Last_User" )
+ column=(type=datetime updatewhereclause=yes name=pack_list_last_update dbname="Pack_List_Last_Update" )
+ column=(type=char(25) updatewhereclause=yes name=confirmation_user dbname="Confirmation_User" )
+ column=(type=char(25) updatewhereclause=yes name=embargoed_override_user dbname="Embargoed_Override_User" )
+ column=(type=datetime updatewhereclause=yes name=embargoed_override_date dbname="Embargoed_Override_Date" )
+ column=(type=char(50) updatewhereclause=yes name=embargoed_override_license dbname="Embargoed_Override_License" )
+ column=(type=char(1) updatewhereclause=yes name=otm_sent_ind dbname="OTM_Sent_Ind" )
+ column=(type=char(30) updatewhereclause=yes name=carrier_pro_no dbname="Carrier_Pro_No" )
+ column=(type=datetime updatewhereclause=yes name=pack_complete_date dbname="Pack_Complete_Date" )
+ column=(type=datetime updatewhereclause=yes name=authorized_to_ship_date dbname="authorized_to_Ship_Date" )
+ column=(type=char(1) updatewhereclause=yes name=customer_order_status dbname="Customer_order_Status" )
+ column=(type=char(1) updatewhereclause=yes name=ignore_shelflife_ind dbname="Ignore_Shelflife_ind" initial="N" )
+ column=(type=decimal(0) updatewhereclause=yes name=ship_cnt dbname="Ship_Cnt" initial="1" )
+ column=(type=char(1) updatewhereclause=yes name=mobile_enabled_ind dbname="Mobile_Enabled_Ind" )
+ column=(type=char(25) updatewhereclause=yes name=mobile_user_assigned dbname="Mobile_User_Assigned" )
+ column=(type=char(1) updatewhereclause=yes name=mobile_status_ind dbname="Mobile_Status_Ind" )
+ column=(type=char(10) updatewhereclause=yes name=mobile_pack_location dbname="Mobile_Pack_Location" )
+ column=(type=datetime updatewhereclause=yes name=mobile_released_time dbname="Mobile_Released_Time" )
+ column=(type=datetime updatewhereclause=yes name=mobile_pick_start_time dbname="Mobile_Pick_Start_Time" )
+ column=(type=datetime updatewhereclause=yes name=mobile_pick_complete_time dbname="Mobile_Pick_Complete_Time" )
+ column=(type=char(1) updatewhereclause=yes name=mobile_scan_all_units_req_ind dbname="Mobile_Scan_All_Units_Req_Ind" )
+ column=(type=char(50) updatewhereclause=yes name=email_address dbname="Email_Address" )
+ column=(type=char(20) updatewhereclause=yes name=account_nbr dbname="Account_Nbr" )
+ column=(type=char(20) updatewhereclause=yes name=asn_number dbname="ASN_Number" )
+ column=(type=char(20) updatewhereclause=yes name=client_cust_po_nbr dbname="Client_Cust_PO_Nbr" )
+ column=(type=char(20) updatewhereclause=yes name=client_cust_so_nbr dbname="Client_Cust_SO_Nbr" )
+ column=(type=char(20) updatewhereclause=yes name=container_nbr dbname="Container_Nbr" )
+ column=(type=char(10) updatewhereclause=yes name=dock_code dbname="Dock_Code" )
+ column=(type=char(255) updatewhereclause=yes name=document_codes dbname="Document_Codes" )
+ column=(type=decimal(0) updatewhereclause=yes name=equipment_nbr dbname="Equipment_Nbr" )
+ column=(type=char(3) updatewhereclause=yes name=fob dbname="FOB" )
+ column=(type=char(20) updatewhereclause=yes name=fob_bill_duty_acct dbname="FOB_Bill_Duty_Acct" )
+ column=(type=char(20) updatewhereclause=yes name=fob_bill_duty_party dbname="FOB_Bill_Duty_Party" )
+ column=(type=char(20) updatewhereclause=yes name=fob_bill_freight_party dbname="FOB_Bill_Freight_Party" )
+ column=(type=char(20) updatewhereclause=yes name=fob_bill_freight_to_acct dbname="FOB_Bill_Freight_To_Acct" )
+ column=(type=char(10) updatewhereclause=yes name=from_wh_loc dbname="From_Wh_Loc" )
+ column=(type=char(10) updatewhereclause=yes name=routing_nbr dbname="Routing_Nbr" )
+ column=(type=char(10) updatewhereclause=yes name=seal_nbr dbname="Seal_Nbr" )
+ column=(type=char(20) updatewhereclause=yes name=shipping_route dbname="Shipping_Route" )
+ column=(type=char(20) updatewhereclause=yes name=sli_nbr dbname="SLI_Nbr" )
+ retrieve="SELECT Delivery_Master.DO_No ,
+		Delivery_Master.Project_ID ,
+		Delivery_Master.Ord_Type ,
+		Delivery_Master.Priority ,
+		Delivery_Master.Ord_Date ,
+		Delivery_Master.Complete_Date , 
+		Delivery_Master.Pick_Start ,
+		Delivery_Master.Pick_Complete , 
+		Delivery_Master.Schedule_Date , 
+		Delivery_Master.Request_Date ,  
+		Delivery_Master.Delivery_Date , 
+		Delivery_Master.Receive_Date , 
+		Delivery_Master.Ord_Status , 
+		Delivery_Master.WH_Code ,  
+		Delivery_Master.Inventory_Type , 
+		Delivery_Master.Cust_Order_No ,   
+		Delivery_Master.Back_Order_No ,
+		Delivery_Master.Cust_Code ,
+		Delivery_Master.Cust_Name , 
+		Delivery_Master.Address_Code ,  
+		Delivery_Master.Address_1 , 
+		Delivery_Master.Address_2 , 
+		Delivery_Master.Address_3 , 
+		Delivery_Master.Address_4 , 
+		Delivery_Master.City ,  
+		Delivery_Master.Country ,  
+		Delivery_Master.Contact_Person , 
+		Delivery_Master.Tel ,
+		Delivery_Master.Fax ,  
+		Delivery_Master.Remark ,  
+		Delivery_Master.Ship_VIA , 
+		Delivery_Master.Ship_Ref ,  
+		Delivery_Master.Invoice_No , 
+		Delivery_Master.Carrier ,   
+		Delivery_Master.Freight_Terms ,  
+		Delivery_Master.Freight_ETD ,  
+		Delivery_Master.Freight_ETA ,  
+		Delivery_Master.Freight_ATD ,  
+		Delivery_Master.Freight_ATA ,  
+		Delivery_Master.Freight_Cost , 
+		Delivery_Master.Ctn_Cnt ,  
+		Delivery_Master.Weight ,
+		Delivery_Master.User_Field1 ,  
+		Delivery_Master.User_Field2 , 
+		Delivery_Master.User_Field3 , 
+		Delivery_Master.User_Field4 ,  
+		Delivery_Master.User_Field5 ,  
+		Delivery_Master.User_Field6 ,  
+		Delivery_Master.User_Field7 , 
+		Delivery_Master.User_Field8 , 
+		Delivery_Master.User_Field9 , 
+		Delivery_Master.User_Field10 , 
+		Delivery_Master.User_Field11 , 
+		Delivery_Master.User_Field12 , 
+		Delivery_Master.User_Field13 , 
+		Delivery_Master.User_Field14 , 
+		Delivery_Master.User_Field15 , 
+		Delivery_Master.User_Field16 , 
+		Delivery_Master.User_Field17 , 
+		Delivery_Master.User_Field18 , 
+		Delivery_Master.User_Field19 , 
+		Delivery_Master.User_Field20 , 
+		Delivery_Master.User_Field21 , 
+		Delivery_Master.User_Field22 , 
+		Delivery_Master.Last_User ,
+		Delivery_Master.Last_Update ,
+		Delivery_Master.State , 
+		Delivery_Master.Zip , 
+		Delivery_Master.District, 
+		Delivery_Master.AWB_BOL_No ,  Delivery_Master.Vics_BOL_No ,
+		Delivery_Master.Agent_Info ,
+		Delivery_Master.Customs_Doc ,
+		Delivery_Master.Transport_Mode ,
+		Delivery_Master.Shipping_Carton_Volume ,
+		Delivery_Master.Gemini_Ind, 
+		Delivery_Master.Description,
+		Delivery_Master.Type_of_Product,
+		Delivery_Master.Type_of_Service,
+		Delivery_Master.Type_Of_Payment,
+		Delivery_Master.Declared_Value,
+		Delivery_Master.Delivery_Confirm_Ind,
+		Delivery_Master.Confirmation_Ind, 
+		Delivery_Master.shipping_instructions, 
+		Delivery_Master.Om_Note_code_text, 
+		Delivery_Master.Packlist_Notes, 
+		Delivery_Master.EDM_Generate_dateTime, 
+		Delivery_Master.EDI_Batch_Seq_no, 
+		Delivery_Master.Gemini_order_no, 
+		Delivery_Master.vor_shipment_ind,	
+		Delivery_MASter.Batch_Pick_ID, 
+		Delivery_MASter.Scanner_ID, 
+		Delivery_MASter.Scanner_Status,
+		Delivery_MASter.Line_of_Business, 
+		Delivery_MASter.Consolidation_No, 
+		Delivery_Master.Carrier_Notified_date, 
+		Delivery_MAster.Trader_ID,
+		Delivery_MAster.Contract_OWner_ID, 
+		Delivery_MAster.Factory_ID,
+		Delivery_MAster.Create_USer  ,
+		Delivery_MAster.carrier_tracking_no ,
+		Delivery_MAster.vat_id, 
+		delivery_master.crossdock_ind,
+		Delivery_MAster.TRAX_ACCT_NO, 
+		Delivery_MAster.Return_tracking_no, 
+		Delivery_MAster.OTM_Status,
+		Delivery_MAster.Trax_Duty_Terms,
+		Delivery_MAster.Trax_Duty_Acct_No,
+		Delivery_MAster.OTM_Call_Date,
+		Delivery_MAster.Trax_Pack_Location,
+		Delivery_Master.Pack_List_Last_User,
+		Delivery_Master.Pack_List_Last_Update,
+		Delivery_Master.Confirmation_User,
+		Delivery_Master.Embargoed_Override_User,
+		Delivery_Master.Embargoed_Override_Date, 
+		Delivery_Master.Embargoed_Override_License,
+		Delivery_Master.OTM_Sent_Ind,
+		Delivery_Master.Carrier_Pro_No,
+		Delivery_MASter.Pack_Complete_Date, 
+		Delivery_MAster.authorized_to_Ship_Date, 
+		Delivery_MAster.Customer_order_Status,
+	     Delivery_MAster.Ignore_Shelflife_ind,
+		Delivery_Master.Ship_Cnt, 
+		Delivery_MAster.Mobile_Enabled_Ind, 
+		Delivery_MAster.Mobile_User_Assigned, 
+		Delivery_MAster.Mobile_Status_Ind,
+		Delivery_MAster.Mobile_Pack_Location, 
+		Delivery_MAster.Mobile_Released_Time, 
+		Delivery_MAster.Mobile_Pick_Start_Time,
+		Delivery_MAster.Mobile_Pick_Complete_Time, 
+		Delivery_MAster.Mobile_Scan_All_Units_Req_Ind,
+		Delivery_Master.Email_Address, 
+		Delivery_Master.Account_Nbr, 
+		Delivery_Master.ASN_Number,
+		Delivery_Master.Client_Cust_PO_Nbr,
+		Delivery_Master.Client_Cust_SO_Nbr,
+		Delivery_Master.Container_Nbr,
+		Delivery_Master.Dock_Code,
+		Delivery_Master.Document_Codes,
+		Delivery_Master.Equipment_Nbr,
+		Delivery_Master.FOB,
+		Delivery_Master.FOB_Bill_Duty_Acct,
+		Delivery_Master.FOB_Bill_Duty_Party,
+		Delivery_Master.FOB_Bill_Freight_Party,
+		Delivery_Master.FOB_Bill_Freight_To_Acct,
+		Delivery_Master.From_Wh_Loc,
+		Delivery_Master.Routing_Nbr,
+		Delivery_Master.Seal_Nbr,
+		Delivery_Master.Shipping_Route,
+		Delivery_Master.SLI_Nbr  
+FROM Delivery_Master      
+WHERE ( Delivery_Master.DO_No = :a_order )   " update="Delivery_Master" updatewhere=0 updatekeyinplace=no arguments=(("a_order", string)) )
+text(band=detail alignment="1" text="User Field 2:" border="0" color="0" x="0" y="4" height="60" width="539" html.valueishtml="0"  name=user_field2_t visible="1"  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+text(band=detail alignment="1" text="User Field6:" border="0" color="0" x="0" y="164" height="60" width="539" html.valueishtml="0"  name=user_field6_t visible="1"  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+text(band=detail alignment="1" text="User Field8:" border="0" color="0" x="0" y="244" height="60" width="539" html.valueishtml="0"  name=user_field8_t visible="1"  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+text(band=detail alignment="1" text="User Field 10:" border="0" color="0" x="0" y="324" height="60" width="539" html.valueishtml="0"  name=user_field10_t visible="1"  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+text(band=detail alignment="1" text="User Field 12:" border="0" color="0" x="0" y="404" height="60" width="539" html.valueishtml="0"  name=user_field12_t visible="1"  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+text(band=detail alignment="1" text="User Field 14:" border="0" color="0" x="0" y="484" height="60" width="539" html.valueishtml="0"  name=user_field14_t visible="1"  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+text(band=detail alignment="1" text="User FIeld 16:" border="0" color="0" x="0" y="564" height="60" width="539" html.valueishtml="0"  name=user_field16_t visible="1"  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+text(band=detail alignment="1" text="User Field 18:" border="0" color="0" x="0" y="644" height="60" width="539" html.valueishtml="0"  name=user_field18_t visible="1"  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+text(band=detail alignment="1" text="User Field 20:" border="0" color="0" x="0" y="724" height="60" width="539" html.valueishtml="0"  name=user_field20_t visible="1"  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+text(band=detail alignment="1" text="User Field3:" border="0" color="0" x="2030" y="4" height="60" width="535" html.valueishtml="0"  name=user_field3_t visible="1"  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+column(band=detail id=45 alignment="0" tabsequence=20 border="5" color="0" x="2583" y="4" height="60" width="1239" format="[general]" html.valueishtml="0"  name=user_field3 visible="1" edit.limit=0 edit.case=upper edit.focusrectangle=no edit.autoselect=yes edit.nilisnull=yes edit.autohscroll=yes  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1090519039" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+column(band=detail id=49 alignment="0" tabsequence=60 border="5" color="0" x="2583" y="164" height="60" width="1239" format="[general]" html.valueishtml="0"  name=user_field7 visible="1" edit.limit=0 edit.case=upper edit.focusrectangle=no edit.autoselect=yes edit.nilisnull=yes edit.autohscroll=yes  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1090519039" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+column(band=detail id=51 alignment="0" tabsequence=80 border="5" color="0" x="2583" y="244" height="60" width="1239" format="[general]" html.valueishtml="0"  name=user_field9 visible="1" edit.limit=0 edit.case=upper edit.autoselect=yes  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1090519039" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+column(band=detail id=53 alignment="0" tabsequence=100 border="5" color="0" x="2583" y="324" height="60" width="1239" format="[general]" html.valueishtml="0"  name=user_field11 visible="1" edit.limit=0 edit.case=upper edit.autoselect=yes  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1090519039" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+column(band=detail id=55 alignment="0" tabsequence=120 border="5" color="0" x="2583" y="404" height="60" width="1239" format="[general]" html.valueishtml="0"  name=user_field13 visible="1" edit.limit=0 edit.case=upper edit.autoselect=yes  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+column(band=detail id=57 alignment="0" tabsequence=140 border="5" color="0" x="2583" y="484" height="60" width="1239" format="[general]" html.valueishtml="0"  name=user_field15 visible="1" edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+column(band=detail id=59 alignment="0" tabsequence=160 border="5" color="0" x="2583" y="564" height="60" width="1239" format="[general]" html.valueishtml="0"  name=user_field17 visible="1" edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+column(band=detail id=61 alignment="0" tabsequence=180 border="5" color="0" x="2583" y="644" height="60" width="1239" format="[general]" html.valueishtml="0"  name=user_field19 visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1090519039" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+column(band=detail id=63 alignment="0" tabsequence=200 border="5" color="0" x="2583" y="724" height="60" width="1239" format="[general]" html.valueishtml="0"  name=user_field21 visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1090519039" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+text(band=detail alignment="1" text="User Field7:" border="0" color="0" x="2030" y="164" height="60" width="535" html.valueishtml="0"  name=user_field7_t visible="1"  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+text(band=detail alignment="1" text="User Field 9:" border="0" color="0" x="2030" y="244" height="60" width="535" html.valueishtml="0"  name=user_field9_t visible="1"  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+text(band=detail alignment="1" text="User Field 11:" border="0" color="0" x="2030" y="324" height="60" width="535" html.valueishtml="0"  name=user_field11_t visible="1"  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+text(band=detail alignment="1" text="User Field 13:" border="0" color="0" x="2030" y="404" height="60" width="535" html.valueishtml="0"  name=user_field13_t visible="1"  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+text(band=detail alignment="1" text="User Field 15:" border="0" color="0" x="2030" y="484" height="60" width="535" html.valueishtml="0"  name=user_field15_t visible="1"  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+text(band=detail alignment="1" text="User Field 17:" border="0" color="0" x="2030" y="564" height="60" width="535" html.valueishtml="0"  name=user_field17_t visible="1"  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+text(band=detail alignment="1" text="User Field 19:" border="0" color="0" x="2030" y="644" height="60" width="535" html.valueishtml="0"  name=user_field19_t visible="1"  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+text(band=detail alignment="1" text="User Field 21:" border="0" color="0" x="2030" y="724" height="60" width="535" html.valueishtml="0"  name=user_field21_t visible="1"  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+column(band=detail id=44 alignment="0" tabsequence=10 border="5" color="0" x="549" y="4" height="60" width="1458" format="[general]" html.valueishtml="0"  name=user_field2 visible="1" edit.limit=0 edit.case=upper edit.focusrectangle=no edit.autoselect=yes edit.nilisnull=yes edit.autohscroll=yes  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+column(band=detail id=48 alignment="0" tabsequence=50 border="5" color="0" x="549" y="164" height="60" width="1458" format="[general]" html.valueishtml="0"  name=user_field6 visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.nilisnull=yes edit.autohscroll=yes  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1090519039" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+column(band=detail id=50 alignment="0" tabsequence=70 border="5" color="0" x="549" y="244" height="60" width="1458" format="[general]" html.valueishtml="0"  name=user_field8 visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.nilisnull=yes edit.autohscroll=yes  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1090519039" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+column(band=detail id=52 alignment="0" tabsequence=90 border="5" color="0" x="549" y="324" height="60" width="1458" format="[general]" html.valueishtml="0"  name=user_field10 visible="1" edit.limit=0 edit.case=upper edit.autoselect=yes  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1090519039" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+column(band=detail id=54 alignment="0" tabsequence=110 border="5" color="0" x="549" y="404" height="60" width="1458" format="[general]" html.valueishtml="0"  name=user_field12 visible="1" edit.limit=0 edit.case=upper edit.autoselect=yes  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+column(band=detail id=56 alignment="0" tabsequence=130 border="5" color="0" x="549" y="484" height="60" width="1458" format="[general]" html.valueishtml="0"  name=user_field14 visible="1" edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+column(band=detail id=58 alignment="0" tabsequence=150 border="5" color="0" x="549" y="564" height="60" width="1458" format="[general]" html.valueishtml="0"  name=user_field16 visible="1" edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+column(band=detail id=60 alignment="0" tabsequence=170 border="5" color="0" x="549" y="644" height="60" width="1458" format="[general]" html.valueishtml="0"  name=user_field18 visible="1" edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1090519039" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+column(band=detail id=62 alignment="0" tabsequence=190 border="5" color="0" x="549" y="724" height="60" width="1458" format="[general]" html.valueishtml="0"  name=user_field20 visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1090519039" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+text(band=detail alignment="1" text="User Field4:" border="0" color="0" x="0" y="84" height="60" width="539" html.valueishtml="0"  name=user_field4_t visible="1"  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+column(band=detail id=46 alignment="0" tabsequence=30 border="5" color="0" x="549" y="84" height="60" width="1458" format="[general]" html.valueishtml="0"  name=user_field4 visible="1" edit.limit=0 edit.case=upper edit.focusrectangle=no edit.autoselect=yes edit.nilisnull=yes edit.autohscroll=yes  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1090519039" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+text(band=detail alignment="1" text="User Field5:" border="0" color="0" x="2030" y="84" height="60" width="535" html.valueishtml="0"  name=user_field5_t visible="1"  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+column(band=detail id=47 alignment="0" tabsequence=40 border="5" color="0" x="2583" y="84" height="60" width="1239" format="[general]" html.valueishtml="0"  name=user_field5 visible="1" edit.limit=0 edit.case=upper edit.focusrectangle=no edit.autoselect=yes edit.nilisnull=yes edit.autohscroll=yes  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1090519039" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+text(band=detail alignment="1" text="User Field 22:" border="0" color="0" x="0" y="804" height="60" width="535" html.valueishtml="0"  name=user_field22_t visible="1"  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+column(band=detail id=64 alignment="0" tabsequence=210 border="5" color="0" x="553" y="804" height="60" width="1458" format="[general]" html.valueishtml="0"  name=user_field22 visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1090519039" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" pagingmethod=0 generatedddwframes="1" )
+xhtmlgen() cssgen(sessionspecific="0" )
+xmlgen(inline="0" )
+xsltgen()
+jsgen()
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )
+export.xhtml()
+ 

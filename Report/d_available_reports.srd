@@ -1,0 +1,34 @@
+HA$PBExportHeader$d_available_reports.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=64 color="536870912" )
+table(column=(type=char(10) update=yes updatewhereclause=yes key=yes name=report_id dbname="Project_Reports_Detail.Report_ID" )
+ column=(type=char(50) update=yes updatewhereclause=yes name=report_name dbname="Project_Reports_Detail.Report_Name" )
+ column=(type=char(40) update=yes updatewhereclause=yes name=description dbname="Project_Reports_Detail.Description" )
+ column=(type=char(50) update=yes updatewhereclause=yes name=report_window dbname="Project_Reports_Detail.Report_Window" )
+ column=(type=char(20) update=yes updatewhereclause=yes name=report_access dbname="Project_Reports_Detail.Report_Access" )
+ column=(type=char(250) update=yes updatewhereclause=yes name=url dbname="Project_Reports_Detail.URL" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=default_report dbname="Project_Reports_Detail.default_report" )
+ retrieve="  SELECT dbo.Project_Reports_Detail.Report_ID,   
+         dbo.Project_Reports_Detail.Report_Name,   
+         dbo.Project_Reports_Detail.Description,   
+         dbo.Project_Reports_Detail.Report_Window,   
+         dbo.Project_Reports_Detail.Report_Access,   
+         dbo.Project_Reports_Detail.URL,
+	    dbo.Project_Reports_Detail.default_report  
+    FROM dbo.Project_Reports_Detail  
+   WHERE dbo.Project_Reports_Detail.Report_ID not in (  SELECT dbo.Project_Reports.Report_ID  
+                                                          FROM dbo.Project_Reports  
+                                                         WHERE dbo.Project_Reports.Project_ID = :projectid  )  
+ORDER BY dbo.Project_Reports_Detail.Report_ID ASC   
+" update="dbo.Project_Reports_Detail" updatewhere=0 updatekeyinplace=no arguments=(("projectid", string)) )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="0" color="33554432" x="1449" y="4" height="56" width="334" format="[general]" html.valueishtml="0"  name=report_id visible="1" edit.limit=10 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="0" color="33554432" x="14" y="4" height="56" width="1399" format="[general]" html.valueishtml="0"  name=report_name visible="1" edit.limit=50 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=7 alignment="0" tabsequence=0 border="0" color="33554432" x="2290" y="0" height="56" width="23" html.valueishtml="0"  name=default_report visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

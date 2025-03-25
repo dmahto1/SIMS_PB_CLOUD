@@ -1,0 +1,19 @@
+HA$PBExportHeader$dddw_customer_type.srd
+$PBExportComments$Customer Type Dropdown
+release 7;
+datawindow(units=0 timer_interval=0 color=16777215 processing=0 HTMLDW=no print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.prompt=no print.buttons=no print.preview.buttons=no )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=80 color="536870912" )
+table(column=(type=char(20) updatewhereclause=yes name=code_id dbname="Lookup_Table.Code_ID" )
+ column=(type=char(40) updatewhereclause=yes name=code_descript dbname="Lookup_Table.Code_Descript" )
+ column=(type=char(10) updatewhereclause=yes name=project_id dbname="Lookup_Table.Project_id" )
+ retrieve="  SELECT  Lookup_Table.Code_ID ,
+           Lookup_Table.Code_Descript,
+           Lookup_Table.Project_id     
+        FROM Lookup_Table      
+        WHERE ( Lookup_Table.Code_Type = 'CTYPE' )  
+        ORDER BY Lookup_Table.Code_ID          ASC  " )
+compute(band=detail alignment="0" expression="code_id + ' - ' + code_descript"border="0" color="0" x="9" y="4" height="64" width="1275" format="[GENERAL]"  name=c_id_desc  slideleft=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" )

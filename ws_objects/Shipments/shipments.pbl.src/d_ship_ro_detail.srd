@@ -1,0 +1,32 @@
+﻿$PBExportHeader$d_ship_ro_detail.srd
+$PBExportComments$Receive Detail rows for building Shipment Line
+release 7;
+datawindow(units=0 timer_interval=0 color=16777215 processing=1 HTMLDW=no print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.prompt=no print.buttons=no print.preview.buttons=no grid.lines=0 )
+header(height=80 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=68 color="536870912" )
+table(column=(type=char(50) updatewhereclause=yes name=sku dbname="Receive_Detail.SKU" )
+ column=(type=char(20) updatewhereclause=yes name=supp_code dbname="Receive_Detail.Supp_Code" )
+ column=(type=decimal(5) updatewhereclause=yes name=req_qty dbname="Receive_Detail.Req_Qty" )
+ column=(type=decimal(4) updatewhereclause=yes name=cost dbname="Receive_Detail.Cost" )
+ column=(type=decimal(0) updatewhereclause=yes name=line_item_no dbname="Receive_Detail.Line_Item_No" )
+ retrieve="  SELECT dbo.Receive_Detail.SKU,   
+         dbo.Receive_Detail.Supp_Code,   
+         dbo.Receive_Detail.Req_Qty,   
+         dbo.Receive_Detail.Cost,   
+         dbo.Receive_Detail.Line_Item_No
+    FROM dbo.Receive_Detail   
+	Where ro_no = :asRONO" arguments=(("asRONO", string)) )
+text(band=header alignment="2" text="Sku" border="0" color="0" x="9" y="8" height="64" width="480"  name=sku_t  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Supp Code" border="0" color="0" x="498" y="8" height="64" width="334"  name=supp_code_t  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Req Qty" border="0" color="0" x="841" y="8" height="64" width="329"  name=req_qty_t  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Line Item No" border="0" color="0" x="1184" y="8" height="64" width="334"  name=line_item_no_t  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="Cost" border="0" color="0" x="1527" y="4" height="64" width="288"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="0" color="0" x="9" y="8" height="56" width="480" format="[general]"  name=sku edit.limit=50 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="0" color="0" x="498" y="8" height="56" width="334" format="[general]"  name=supp_code edit.limit=20 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="1" tabsequence=32766 border="0" color="0" x="841" y="8" height="56" width="329" format="[general]"  name=req_qty edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="1" tabsequence=32766 border="0" color="0" x="1184" y="8" height="56" width="334" format="[general]"  name=line_item_no edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="0" tabsequence=0 border="0" color="0" x="1531" y="8" height="56" width="283"  name=cost  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" )

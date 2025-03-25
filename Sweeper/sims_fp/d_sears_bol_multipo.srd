@@ -1,0 +1,22 @@
+HA$PBExportHeader$d_sears_bol_multipo.srd
+release 7;
+datawindow(units=0 timer_interval=0 color=16777215 processing=0 HTMLDW=no print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.prompt=no print.buttons=no print.preview.buttons=no )
+header(height=136 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=84 color="536870912" )
+table(column=(type=char(16) updatewhereclause=yes name=receive_xref_po_no dbname="Receive_Xref.PO_NO" )
+ retrieve="  SELECT Receive_XRef.PO_NO
+    FROM Receive_XRef,
+			Delivery_Picking_Detail			
+   WHERE ( Receive_XRef.SKU > '0' ) and
+			( Delivery_Picking_Detail.DO_NO = :an_do_no) and
+			( Delivery_Picking_Detail.RO_NO = Receive_XRef.RO_NO)
+ORDER BY Receive_XRef.RO_No ASC,   
+         Receive_XRef.SKU ASC   
+" arguments=(("an_do_no", string)) )
+text(band=header alignment="2" text="Receive Xref
+Po No" border="0" color="0" x="5" y="4" height="128" width="466"  name=receive_xref_po_no_t  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="0" color="0" x="5" y="4" height="76" width="466" format="[general]"  name=receive_xref_po_no edit.limit=16 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" )

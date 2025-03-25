@@ -1,0 +1,16 @@
+HA$PBExportHeader$f_get_daynumber.srf
+$PBExportComments$Return Day Number
+global type f_get_daynumber from function_object
+end type
+
+forward prototypes
+global function integer f_get_daynumber (date adtdate)
+end prototypes
+
+global function integer f_get_daynumber (date adtdate);Integer liRet
+
+liRet = DayNumber( adtDate )
+
+Return liRet
+end function
+

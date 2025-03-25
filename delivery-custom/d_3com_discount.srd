@@ -1,0 +1,35 @@
+HA$PBExportHeader$d_3com_discount.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=3940 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=28 color="536870912" )
+table(column=(type=char(10) updatewhereclause=yes name=discount dbname="discount" )
+ )
+bitmap(band=header filename="3com.jpg" x="87" y="36" height="316" width="626" border="0"  name=p_1 visible="1" )
+text(band=header alignment="0" text="10 % Discount" border="0" color="0" x="315" y="536" height="456" width="2985" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-72" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="Benefits:" border="0" color="0" x="1486" y="1784" height="172" width="645" html.valueishtml="0"  name=t_3 visible="1"  font.face="Arial" font.height="-28" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="If you purchase 3Com
+Express Service cover" border="0" color="0" x="238" y="1112" height="592" width="3141" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-48" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+ellipse(band=header x="919" y="2824" height="36" width="41"  name=oval_3 visible="1" brush.hatch="6" brush.color="0" pen.style="0" pen.width="5" pen.color="16777215"  background.mode="2" background.color="0" )
+text(band=header alignment="2" text="Technical telephone support" border="0" color="0" x="1024" y="2776" height="132" width="1563" html.valueishtml="0"  name=t_6 visible="1"  font.face="Arial" font.height="-20" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+ellipse(band=header x="146" y="2448" height="36" width="41"  name=oval_2 visible="1" brush.hatch="6" brush.color="0" pen.style="0" pen.width="5" pen.color="16777215"  background.mode="2" background.color="0" )
+text(band=header alignment="2" text="Advanced Hardware Replacement within 4 Hours, Next
+Business Day or Next Business Day Ship ... Guaranteed" border="0" color="0" x="247" y="2408" height="264" width="3122" html.valueishtml="0"  name=t_5 visible="1"  font.face="Arial" font.height="-20" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="3Com will pay all the costs of shipping your replacement unit
+AND picking up the broken unit" border="0" color="0" x="133" y="2040" height="264" width="3346" html.valueishtml="0"  name=t_4 visible="1"  font.face="Arial" font.height="-20" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+ellipse(band=header x="23" y="2080" height="36" width="41"  name=oval_1 visible="1" brush.hatch="6" brush.color="0" pen.style="0" pen.width="5" pen.color="16777215"  background.mode="2" background.color="0" )
+ellipse(band=header x="1189" y="3072" height="36" width="41"  name=oval_4 visible="1" brush.hatch="6" brush.color="0" pen.style="0" pen.width="5" pen.color="16777215"  background.mode="2" background.color="0" )
+text(band=header alignment="2" text="Software upgrades" border="0" color="0" x="1289" y="3028" height="132" width="1038" html.valueishtml="0"  name=t_7 visible="1"  font.face="Arial" font.height="-20" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="For a free no-obligation quote simply email
+Service_Sales@3Com.com quoting reference: WAR10 and
+we shall contact you." border="0" color="0" x="174" y="3348" height="396" width="3269" html.valueishtml="0"  name=t_8 visible="1"  font.face="Arial" font.height="-20" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+ellipse(band=header x="261" y="3812" height="36" width="41"  name=oval_5 visible="1" brush.hatch="6" brush.color="0" pen.style="0" pen.width="5" pen.color="16777215"  background.mode="2" background.color="0" )
+text(band=header alignment="2" text="Only applicable to Warranty customers in Europe, Middle East && Africa who do not already have an existing service
+contract Office expires 31/12/2009  Obsolete products are covered at our discretion" border="0" color="0" x="325" y="3804" height="112" width="2967" html.valueishtml="0"  name=t_9 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

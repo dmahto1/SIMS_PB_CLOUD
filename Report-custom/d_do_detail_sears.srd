@@ -1,0 +1,100 @@
+HA$PBExportHeader$d_do_detail_sears.srd
+$PBExportComments$*Delivery Order Detail
+release 7;
+datawindow(units=0 timer_interval=0 color=16777215 processing=1 HTMLDW=no print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.prompt=no print.buttons=no print.preview.buttons=no grid.lines=0 )
+header(height=132 color="536870912" )
+summary(height=188 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=72 color="536870912" )
+table(column=(type=char(50) update=yes updatewhereclause=yes key=yes name=sku dbname="Delivery_Detail.SKU" )
+ column=(type=decimal(0) update=yes updatewhereclause=yes key=yes name=line_item_no dbname="Delivery_Detail.Line_Item_no" )
+ column=(type=decimal(5) update=yes updatewhereclause=yes name=req_qty dbname="Delivery_Detail.Req_Qty" validation="Number(GetText()) >=1 and Number(GetText()) <= 9999999" validationmsg="~"Please enter a value between1 and 9999999~"" )
+ column=(type=decimal(4) update=yes updatewhereclause=yes name=price dbname="Delivery_Detail.Price" initial="0" validation="Number(GetText()) >= 0 and Number(GetText()) <= 999999999999.9999" validationmsg="~"Please enter a value between 0 and 999999999999.9999~"" )
+ column=(type=char(4) update=yes updatewhereclause=yes name=uom dbname="Delivery_Detail.UOM" )
+ column=(type=decimal(4) update=yes updatewhereclause=yes name=cost dbname="Delivery_Detail.Cost" initial="0" )
+ column=(type=char(20) update=yes updatewhereclause=yes name=user_field1 dbname="Delivery_Detail.User_Field1" )
+ column=(type=char(20) update=yes updatewhereclause=yes name=user_field2 dbname="Delivery_Detail.User_Field2" )
+ column=(type=char(16) update=yes updatewhereclause=yes key=yes name=do_no dbname="Delivery_Detail.DO_No" )
+ column=(type=char(50) update=yes updatewhereclause=yes key=yes name=alternate_sku dbname="Delivery_Detail.Alternate_SKU" )
+ column=(type=decimal(5) update=yes updatewhereclause=yes name=alloc_qty dbname="Delivery_Detail.Alloc_Qty" initial="0" )
+ column=(type=decimal(4) update=yes updatewhereclause=yes name=tax dbname="Delivery_Detail.Tax" initial="0" validation="Number(GetText()) >= 0 and Number(GetText()) <= 999999" validationmsg="~"Please enter a value between 0 and 999999~"" )
+ column=(type=char(20) update=yes updatewhereclause=yes key=yes name=supp_code dbname="Delivery_Detail.Supp_code" )
+ column=(type=decimal(0) update=yes updatewhereclause=yes key=yes name=owner_id dbname="Delivery_Detail.Owner_ID" )
+ column=(type=char(20) update=yes updatewhereclause=yes name=contract_no dbname="Delivery_Detail.COntract_No" )
+ column=(type=char(20) update=yes updatewhereclause=yes name=commodity_code dbname="Delivery_Detail.Commodity_Code" )
+ column=(type=char(1) updatewhereclause=yes name=owner_owner_type dbname="Owner.Owner_Type" )
+ column=(type=char(20) updatewhereclause=yes name=owner_owner_cd dbname="Owner.Owner_Cd" )
+ column=(type=char(50) updatewhereclause=yes name=cf_owner_name dbname="cf_owner_name" )
+ column=(type=char(30) update=yes updatewhereclause=yes name=user_field3 dbname="Delivery_Detail.User_Field3" )
+ column=(type=char(30) update=yes updatewhereclause=yes name=user_field4 dbname="Delivery_Detail.User_Field4" )
+ column=(type=char(1) updatewhereclause=yes name=ccc_change_ind dbname="ccc_change_Ind" )
+ retrieve="SELECT  Delivery_Detail.SKU ,
+			Delivery_Detail.Line_Item_no, 
+         Delivery_Detail.Req_Qty ,
+         Delivery_Detail.Price ,
+         Delivery_Detail.UOM ,
+         Delivery_Detail.Cost ,
+         Delivery_Detail.User_Field1 ,
+         Delivery_Detail.User_Field2 ,
+         Delivery_Detail.DO_No ,
+         Delivery_Detail.Alternate_SKU ,
+         Delivery_Detail.Alloc_Qty , 
+         Delivery_Detail.Tax , 
+         Delivery_Detail.Supp_code ,  
+         Delivery_Detail.Owner_ID ,
+			Delivery_Detail.COntract_No, 
+			Delivery_Detail.Commodity_Code, 
+			Owner.Owner_Type ,
+         Owner.Owner_Cd ,
+         '                                                  ' as cf_owner_name, 
+			Delivery_Detail.User_Field3, 
+			Delivery_Detail.User_Field4, 
+			' ' as ccc_change_Ind    
+        FROM Delivery_Detail ,
+           Owner     
+        WHERE ( Delivery_Detail.Owner_ID = Owner.Owner_ID ) and          ( Delivery_Detail.DO_No = :a_order )   " update="Delivery_Detail" updatewhere=0 updatekeyinplace=yes arguments=(("a_order", string))  sort="line_item_no A sku A alternate_sku A " )
+text(band=header alignment="2" text="ITEM" border="6" color="0" x="9" y="8" height="120" width="151"  name=t_1  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="78567654" )
+text(band=header alignment="2" text="SKU" border="6" color="0" x="357" y="8" height="120" width="517"  name=sku_t  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="78567654"  height.autosize=yes)
+text(band=header alignment="2" text="LineItem #" border="6" color="0" x="169" y="8" height="120" width="178"  name=line_item_no_t  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="78567654" )
+text(band=header alignment="2" text="ALTERNATESKU" border="6" color="0" x="887" y="8" height="120" width="361"  name=alternate_sku_t  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="78567654" )
+text(band=header alignment="2" text="OWNER" border="6" color="0" x="1257" y="8" height="120" width="261"  name=cf_name_t  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="78567654" )
+text(band=header alignment="2" text="REQQTY" border="6" color="0" x="1527" y="8" height="120" width="453"  name=req_qty_t  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="78567654" )
+text(band=header alignment="2" text="ALLOCQTY" border="6" color="0" x="1989" y="8" height="120" width="485"  name=alloc_qty_t  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="78567654" )
+text(band=header alignment="2" text="UOM" border="6" color="0" x="2482" y="8" height="120" width="151"  name=uom_t  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="78567654" )
+text(band=header alignment="2" text="PRICE" border="6" color="0" x="2642" y="8" height="120" width="210"  name=price_t  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="78567654" )
+text(band=header alignment="2" text="COST" border="6" color="0" x="2862" y="8" height="120" width="210"  name=cost_t  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="78567654" )
+text(band=header alignment="2" text="TAX" border="6" color="0" x="3081" y="8" height="120" width="201"  name=tax_t  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="78567654" )
+text(band=header alignment="2" text="TOTALPRICE" border="6" color="0" x="3291" y="8" height="120" width="315"  name=total_price_t  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="78567654" )
+text(band=header alignment="2" text="TOTALCOST" border="6" color="0" x="3616" y="8" height="120" width="270"  name=total_cost_t  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="78567654" )
+text(band=header alignment="2" text="UserField1" border="6" color="0" x="3895" y="8" height="120" width="306"  name=user_field1_t  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="78567654" )
+text(band=header alignment="2" text="USERFIELD2" border="6" color="0" x="4210" y="8" height="120" width="325"  name=user_field2_t  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="79741120" )
+text(band=header alignment="2" text="CCCContract No" border="6" color="0" x="5243" y="8" height="120" width="443"  name=contract_no_t  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="80269524" )
+text(band=header alignment="2" text="CCCCommodity Code" border="6" color="0" x="5696" y="8" height="120" width="453"  name=t_2  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="80269524" )
+text(band=header alignment="2" text="UserField3" border="6" color="0" x="4544" y="8" height="120" width="357"  name=user_field3_t  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="79741120" )
+text(band=header alignment="2" text="UserField4" border="6" color="0" x="4910" y="8" height="120" width="325"  name=user_field4_t  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="79741120" )
+column(band=detail id=1 alignment="0" tabsequence=20 border="0" color="0" x="357" y="4" height="64" width="517" format="[general]"  name=sku edit.limit=50 edit.case=upper edit.focusrectangle=no edit.autoselect=yes edit.required=yes edit.autohscroll=yes  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=10 alignment="0" tabsequence=40 border="0" color="0~tif(  sku =  alternate_sku  ,  10789024,  0)" x="887" y="4" height="64" width="361" format="[general]"  name=alternate_sku edit.limit=50 edit.case=upper edit.focusrectangle=no edit.autoselect=yes edit.required=yes edit.autohscroll=yes  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=19 alignment="0" tabsequence=32766 border="0" color="0" x="1257" y="4" height="64" width="261" format="[general]"  name=cf_owner_name edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=3 alignment="1" tabsequence=50 border="0" color="0" x="1527" y="4" height="64" width="453" format="#######.#####"  name=req_qty editmask.mask="#######.#####" editmask.focusrectangle=no  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=11 alignment="1" tabsequence=32766 border="0" color="0" x="1989" y="4" height="64" width="485" format="#######.#####"  name=alloc_qty editmask.mask="#######.#####" editmask.focusrectangle=no  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" )
+column(band=detail id=5 alignment="2" tabsequence=60 border="0" color="0" x="2482" y="4" height="64" width="151" format="[general]"  name=uom edit.limit=4 edit.case=upper edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=4 alignment="1" tabsequence=70 border="0" color="0" x="2642" y="4" height="64" width="210" format="0.000"  name=price edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=6 alignment="1" tabsequence=32766 border="0" color="0" x="2862" y="4" height="64" width="210" format="0.000"  name=cost edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" )
+column(band=detail id=12 alignment="1" tabsequence=80 border="0" color="0" x="3081" y="4" height="64" width="201" format="0.00%"  name=tax edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=detail alignment="1" expression="alloc_qty * price * (1 + tax)"border="0" color="0" x="3291" y="4" height="64" width="315" format="0.000"  name=total_price  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" )
+compute(band=detail alignment="1" expression="alloc_qty * cost"border="0" color="0" x="3616" y="4" height="64" width="270" format="0.000"  name=total_cost  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" )
+column(band=detail id=7 alignment="0" tabsequence=90 border="0" color="0" x="3895" y="4" height="64" width="306" format="[general]"  name=user_field1 edit.limit=20 edit.case=upper edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=detail alignment="2" expression="getrow()"border="0" color="0" x="9" y="4" height="64" width="151" format="[general]"  name=compute_1  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" )
+column(band=detail id=2 alignment="2" tabsequence=10 border="0" color="0" x="169" y="4" height="64" width="178" format="[general]"  name=line_item_no edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=8 alignment="0" tabsequence=100 border="0" color="0" x="4210" y="4" height="64" width="325" format="[general]"  name=user_field2 edit.limit=20 edit.case=upper edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=15 alignment="0" tabsequence=130 border="0" color="0" x="5243" y="4" height="64" width="443" format="[general]"  name=contract_no edit.limit=0 edit.case=upper edit.focusrectangle=no edit.autoselect=yes edit.nilisnull=yes edit.autohscroll=yes  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=16 alignment="0" tabsequence=140 border="0" color="0" x="5696" y="4" height="64" width="453" format="[general]"  name=commodity_code edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=20 alignment="0" tabsequence=110 border="0" color="0" x="4544" y="4" height="64" width="357" format="[general]"  name=user_field3 edit.limit=0 edit.case=upper edit.autoselect=yes edit.nilisnull=yes edit.autohscroll=yes  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=21 alignment="0" tabsequence=120 border="0" color="0" x="4910" y="4" height="64" width="325" format="[general]"  name=user_field4 edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=summary alignment="1" expression="sum(req_qty for all)"border="2" color="0" x="1527" y="96" height="64" width="453" format="#######.#####"  name=compute_2  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=summary alignment="1" expression="sum(alloc_qty for all)"border="2" color="0" x="1989" y="96" height="64" width="485" format="#######.#####"  name=compute_3  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=summary alignment="1" expression="sum(alloc_qty * price * (1 + tax) for all)"border="2" color="0" x="3291" y="96" height="64" width="315" format="0.000"  name=compute_4  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=summary alignment="1" expression="sum(alloc_qty * cost for all)"border="2" color="0" x="3616" y="96" height="64" width="270" format="0.000"  name=compute_5  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=summary alignment="0" expression="sum(number( user_field1 ) for all)"border="0" color="0" x="9" y="64" height="76" width="151" format="[GENERAL]"  name=compute_7 visible="1~t0"  font.face="Arial" font.height="-12" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" )

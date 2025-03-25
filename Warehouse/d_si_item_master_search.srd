@@ -1,0 +1,62 @@
+HA$PBExportHeader$d_si_item_master_search.srd
+$PBExportComments$- stcok inquire search
+release 9;
+datawindow(units=0 timer_interval=0 color=16777215 processing=1 HTMLDW=no print.printername="" print.documentname="" print.orientation = 1 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no grid.lines=0 selected.mouse=no )
+header(height=72 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=68 color="553648127"  height.autosize=yes)
+table(column=(type=char(10) update=yes updatewhereclause=yes name=project_id dbname="Item_Master.Project_ID" )
+ column=(type=char(50) update=yes updatewhereclause=yes name=sku dbname="Item_Master.SKU" )
+ column=(type=char(4) updatewhereclause=yes name=uom_1 dbname="Item_Master.UOM_1" )
+ column=(type=char(10) updatewhereclause=yes name=user_field1 dbname="Item_Master.User_Field1" )
+ column=(type=char(10) updatewhereclause=yes name=user_field2 dbname="Item_Master.User_Field2" )
+ column=(type=char(10) updatewhereclause=yes name=user_field3 dbname="Item_Master.User_Field3" )
+ column=(type=char(10) updatewhereclause=yes name=user_field5 dbname="Item_Master.User_Field5" )
+ column=(type=char(10) updatewhereclause=yes name=grp dbname="Item_Master.GRP" )
+ column=(type=char(50) updatewhereclause=yes name=alternate_sku dbname="Item_Master.Alternate_SKU" )
+ column=(type=char(20) updatewhereclause=yes name=supp_code dbname="Item_Master.Supp_Code" )
+ column=(type=decimal(0) updatewhereclause=yes name=owner_id dbname="Item_Master.Owner_ID" )
+ column=(type=char(20) updatewhereclause=yes name=owner_owner_cd dbname="Owner.Owner_Cd" )
+ column=(type=char(1) updatewhereclause=yes name=owner_owner_type dbname="Owner.Owner_Type" )
+ column=(type=char(1) updatewhereclause=yes name=cf_owner_ind dbname="cf_owner_ind" )
+ retrieve="  SELECT DISTINCT Item_Master.Project_ID,   
+         Item_Master.SKU,
+         Item_Master.UOM_1,   
+         Item_Master.User_Field1,   
+         Item_Master.User_Field2,   
+         Item_Master.User_Field3,   
+         Item_Master.User_Field5,   
+         Item_Master.GRP,    
+         Item_Master.Alternate_SKU,   
+         Item_Master.Supp_Code,   
+         Item_Master.Owner_ID,    
+         Owner.Owner_Cd,   
+         Owner.Owner_Type,   
+         ' ' as cf_owner_ind  
+    FROM Item_Master,   
+         Owner  
+   WHERE ( Item_Master.Owner_ID = Owner.Owner_ID ) and  
+         ( Item_Master.Project_ID = Owner.Project_ID )    
+" )
+text(band=header alignment="2" text="SKU" border="6" color="0" x="9" y="8" height="56" width="727" html.valueishtml="0"  name=sku_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="78567654" )
+text(band=header alignment="0" text="GROUP" border="6" color="0" x="2331" y="8" height="56" width="178" html.valueishtml="0"  name=grp_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="78567654" )
+text(band=header alignment="0" text="UNPACKED WEIGHT" border="6" color="0" x="2519" y="8" height="56" width="475" html.valueishtml="0"  name=user_field2_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="78567654" )
+text(band=header alignment="0" text="AMOUNT FOR LOC" border="6" color="0" x="3003" y="8" height="56" width="457" html.valueishtml="0"  name=user_field3_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="78567654" )
+text(band=header alignment="2" text="OWNER" border="6" color="0" x="1888" y="8" height="56" width="434" html.valueishtml="0"  name=cf_name_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="78567654" )
+text(band=header alignment="2" text="ALTERNATE SKU" border="6" color="0" x="745" y="8" height="56" width="750" html.valueishtml="0"  name=alternate_sku_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="78567654" )
+text(band=header alignment="2" text="SUPPLIER" border="6" color="0" x="1504" y="8" height="56" width="375" html.valueishtml="0"  name=suppl_code_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="78567654" )
+text(band=header alignment="0" text="USER FIELD 5" border="6" color="0" x="3470" y="8" height="56" width="306" html.valueishtml="0"  name=user_field5_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="78567654" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="0" color="0" x="9" y="4" height="56" width="727" format="[general]" html.valueishtml="0"  name=sku visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=8 alignment="0" tabsequence=32766 border="0" color="0" x="2331" y="4" height="56" width="178" format="[general]" html.valueishtml="0"  name=grp visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=5 alignment="0" tabsequence=32766 border="0" color="0" x="2519" y="4" height="56" width="475" format="[general]" html.valueishtml="0"  name=user_field2 visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=6 alignment="0" tabsequence=32766 border="0" color="0" x="3003" y="4" height="56" width="457" format="[general]" html.valueishtml="0"  name=user_field3 visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=7 alignment="0" tabsequence=32766 border="0" color="0" x="3470" y="4" height="56" width="306" format="[general]" html.valueishtml="0"  name=user_field5 visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=detail alignment="0" expression="owner_owner_cd  + '(' + owner_owner_type  + ')'"border="0" color="0" x="1888" y="4" height="56" width="434" format="[general]" html.valueishtml="0"  name=cf_owner_name visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=9 alignment="0" tabsequence=32766 border="0" color="0" x="745" y="4" height="56" width="750" format="[general]" html.valueishtml="0"  name=alternate_sku visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=10 alignment="0" tabsequence=32766 border="0" color="0" x="1504" y="4" height="56" width="375" format="[general]" html.valueishtml="0"  name=supp_code visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

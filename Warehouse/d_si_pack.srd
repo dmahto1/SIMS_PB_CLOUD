@@ -1,0 +1,63 @@
+HA$PBExportHeader$d_si_pack.srd
+$PBExportComments$* Stock Inquiry - Packing list
+release 11;
+datawindow(units=0 timer_interval=60000 color=16777215 processing=1 HTMLDW=no print.printername="" print.documentname="" print.orientation = 2 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes print.preview.outline=yes hidegrayline=no showbackcoloronxp=no grid.lines=0 )
+header(height=264 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=76 color="553648127" height.autosize=yes )
+table(column=(type=char(50) updatewhereclause=yes name=delivery_master_invoice_no dbname="Invoice_No" )
+ column=(type=char(10) updatewhereclause=yes name=delivery_master_wh_code dbname="WH_Code" )
+ column=(type=char(25) updatewhereclause=yes name=delivery_packing_carton_no dbname="Carton_No" )
+ column=(type=char(50) updatewhereclause=yes name=delivery_packing_sku dbname="SKU" )
+ column=(type=decimal(5) updatewhereclause=yes name=delivery_packing_quantity dbname="Quantity" )
+ column=(type=decimal(5) updatewhereclause=yes name=delivery_packing_weight_net dbname="Weight_Net" )
+ column=(type=decimal(5) updatewhereclause=yes name=delivery_packing_weight_gross dbname="Weight_Gross" )
+ column=(type=char(20) updatewhereclause=yes name=delivery_packing_supp_code dbname="Supp_Code" )
+ retrieve="SELECT  Delivery_Master.Invoice_No ,
+           Delivery_Master.WH_Code ,
+           Delivery_Packing.Carton_No ,
+           Delivery_Packing.SKU ,
+           Delivery_Packing.Quantity ,
+           Delivery_Packing.Weight_Net ,
+           Delivery_Packing.Weight_Gross , 
+           Delivery_Packing.Supp_Code     
+        FROM Delivery_Master ,
+           Delivery_Packing     
+        WHERE ( Delivery_Packing.DO_No = Delivery_Master.DO_No )   "  sort="delivery_master_invoice_no A delivery_packing_carton_no A delivery_packing_sku A " )
+text(band=header alignment="0" text="WAREHOUSE" border="6" color="0" x="9" y="144" height="112" width="375" html.valueishtml="0"  name=delivery_master_wh_code_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="78567654" )
+text(band=header alignment="2" text="ORDERNBR" border="6" color="0" x="393" y="144" height="112" width="393" html.valueishtml="0"  name=delivery_master_invoice_no_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="78567654" )
+text(band=header alignment="2" text="CARTONNBR" border="6" color="0" x="795" y="144" height="112" width="293" html.valueishtml="0"  name=delivery_packing_carton_no_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="78567654" )
+text(band=header alignment="2" text="SKU" border="6" color="0" x="1097" y="144" height="112" width="882" html.valueishtml="0"  name=delivery_packing_sku_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="78567654" )
+text(band=header alignment="2" text="
+SUPPLIER" border="6" color="0" x="1989" y="144" height="112" width="448" html.valueishtml="0"  name=delivery_packing_supp_code_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="78567654" )
+text(band=header alignment="2" text="
+QTY" border="6" color="0" x="2446" y="144" height="112" width="398" html.valueishtml="0"  name=delivery_packing_quantity_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="78567654" )
+text(band=header alignment="2" text="NETWEIGHT" border="6" color="0" x="2853" y="144" height="112" width="251" html.valueishtml="0"  name=delivery_packing_weight_net_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="78567654" )
+text(band=header alignment="2" text="GROSSWEIGHT" border="6" color="0" x="3113" y="144" height="112" width="379" html.valueishtml="0"  name=delivery_packing_weight_gross_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="78567654" )
+column(band=detail id=3 alignment="1" tabsequence=32766 border="0" color="0" x="795" y="4" height="64" width="293" format="[general]" html.valueishtml="0"  name=delivery_packing_carton_no visible="1" edit.limit=0 edit.case=upper edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="3" tabsequence=32766 border="0" color="0" x="1097" y="4" height="64" width="882" format="[general]" html.valueishtml="0"  name=delivery_packing_sku visible="1" edit.limit=0 edit.case=upper edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=8 alignment="0" tabsequence=32766 border="0" color="0" x="1989" y="4" height="64" width="448" format="[general]" html.valueishtml="0"  name=delivery_packing_supp_code visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="1" tabsequence=32766 border="0" color="0" x="2446" y="4" height="64" width="398" format="#######.#####" html.valueishtml="0"  name=delivery_packing_quantity visible="1" editmask.mask="#######.#####" editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="1" tabsequence=32766 border="0" color="0" x="2853" y="4" height="64" width="251" format="######.#####" html.valueishtml="0"  name=delivery_packing_weight_net visible="1" editmask.mask="######.#####" editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=7 alignment="1" tabsequence=32766 border="0" color="0" x="3113" y="4" height="64" width="379" format="##,##0.00" html.valueishtml="0"  name=delivery_packing_weight_gross visible="1" editmask.mask="######.#####" editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="0" color="0" x="393" y="4" height="64" width="393" format="[general]" html.valueishtml="0"  name=delivery_master_invoice_no visible="1" edit.limit=20 edit.case=upper edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="0" color="0" x="9" y="4" height="64" width="375" format="[general]" html.valueishtml="0"  name=delivery_master_wh_code visible="1" edit.limit=0 edit.case=upper edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=foreground alignment="0" text="Report ID:" border="0" color="0" x="41" y="4" height="56" width="247" html.valueishtml="0"  name=report_id_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=foreground alignment="0" text="SIMS205" border="0" color="0" x="302" y="4" height="56" width="215" html.valueishtml="0"  name=t_4 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=foreground alignment="0" text="STOCK INQUIRY PACKING" border="0" color="0" x="1353" y="4" height="64" width="823" html.valueishtml="0"  name=stock_inquiry_packing_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=foreground alignment="0" text="Date:" border="0" color="0" x="41" y="64" height="56" width="123" html.valueishtml="0"  name=date_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=foreground alignment="0" expression="TODAY()"border="0" color="0" x="302" y="64" height="56" width="539" format="mm/dd/yyyy hh:mm" html.valueishtml="0"  name=cf_today visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=foreground alignment="0" text="Page:" border="0" color="0" x="2766" y="4" height="56" width="137" html.valueishtml="0"  name=page_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=foreground alignment="0" expression="page() + ' of ' + pagecount()"border="0" color="0" x="2912" y="4" height="56" width="562" format="[general]" html.valueishtml="0"  name=page_display_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+
+sparse(names="delivery_master_wh_code	delivery_master_invoice_no")htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" pagingmethod=0 generatedddwframes="1" )
+xhtmlgen() cssgen(sessionspecific="0" )
+xmlgen(inline="0" )
+xsltgen()
+jsgen()
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )
+export.xhtml()

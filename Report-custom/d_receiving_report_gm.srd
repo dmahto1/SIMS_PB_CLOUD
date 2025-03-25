@@ -1,0 +1,134 @@
+HA$PBExportHeader$d_receiving_report_gm.srd
+$PBExportComments$GM Detroit version of Receiving Report
+release 11;
+datawindow(units=0 timer_interval=0 color=16777215 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 1 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes print.preview.outline=yes hidegrayline=no showbackcoloronxp=no )
+header(height=184 color="536870912" )
+summary(height=72 color="536870912" )
+footer(height=28 color="536870912" )
+detail(height=68 color="553648127" height.autosize=yes )
+table(column=(type=char(10) updatewhereclause=yes name=receive_master_project_id dbname="project_id" )
+ column=(type=char(10) updatewhereclause=yes name=receive_master_wh_code dbname="WH_Code" )
+ column=(type=char(40) updatewhereclause=yes name=receive_master_supp_name dbname="supp_name" )
+ column=(type=char(20) updatewhereclause=yes name=receive_master_supp_code dbname="Supp_Code" )
+ column=(type=char(30) updatewhereclause=yes name=receive_master_supp_invoice_no dbname="Supp_Invoice_No" )
+ column=(type=datetime updatewhereclause=yes name=receive_master_arrival_date dbname="Arrival_Date" )
+ column=(type=datetime updatewhereclause=yes name=receive_master_request_date dbname="Request_Date" )
+ column=(type=decimal(0) updatewhereclause=yes name=receive_detail_line_item_no dbname="Line_Item_No" )
+ column=(type=char(1) updatewhereclause=yes name=ord_type dbname="Ord_Type" )
+ column=(type=char(50) updatewhereclause=yes name=receive_detail_sku dbname="SKU" )
+ column=(type=char(50) updatewhereclause=yes name=receive_detail_alternate_sku dbname="alternate_sku" )
+ column=(type=decimal(5) updatewhereclause=yes name=req_qty dbname="Req_Qty" )
+ column=(type=char(40) updatewhereclause=yes name=receive_master_ship_ref dbname="Ship_Ref" )
+ column=(type=decimal(5) updatewhereclause=yes name=receive_detail_damage_qty dbname="Damage_Qty" )
+ column=(type=datetime updatewhereclause=yes name=receive_master_complete_date dbname="Complete_Date" )
+ column=(type=datetime updatewhereclause=yes name=receive_master_ord_date dbname="ord_date" )
+ column=(type=char(1) updatewhereclause=yes name=receive_master_ord_status dbname="ord_status" )
+ column=(type=char(23) updatewhereclause=yes name=cf_owner_name dbname="cf_owner_Name" )
+ column=(type=char(16) updatewhereclause=yes name=receive_master_ro_no dbname="Ro_NO" )
+ column=(type=decimal(5) updatewhereclause=yes name=quantity dbname="Quantity" )
+ column=(type=char(10) updatewhereclause=yes name=l_code dbname="l_Code" )
+ column=(type=char(10) updatewhereclause=yes name=carrier dbname="Carrier" )
+ column=(type=char(10) updatewhereclause=yes name=user_field3 dbname="User_Field3" )
+ retrieve="  SELECT  receive_master.project_id,
+			Receive_Master.WH_Code , 
+			supp_name = (select supp_name
+				from supplier
+					where supplier.project_id = receive_master.project_id and
+							supplier.supp_code = receive_master.supp_code),
+	   
+			Receive_Master.Supp_Code ,
+       	Receive_Master.Supp_Invoice_No ,           
+			Receive_Master.Arrival_Date ,           
+			Receive_Master.Request_Date ,       
+			Receive_Detail.Line_Item_No,
+			Receive_MASter.Ord_Type,     
+			Receive_Detail.SKU ,    
+			Receive_Detail.alternate_sku,
+			Receive_Detail.Req_Qty ,           
+			Receive_Master.Ship_Ref ,           
+			Receive_Detail.Damage_Qty ,           
+			Receive_Master.Complete_Date,
+			receive_master.ord_date ,
+			receive_master.ord_status, 
+			RTRIM(Owner_Cd) + '(' + Owner_Type + ')' as cf_owner_Name, 
+			Receive_MASter.Ro_NO, 
+			Receive_Putaway.Quantity, 
+			Receive_Putaway.l_Code,
+			Receive_Master.Carrier,
+			Receive_Master.User_Field3
+	 
+	
+FROM 		Receive_Master
+INNER JOIN Receive_Detail
+  ON Receive_Master.RO_No = Receive_Detail.RO_No
+INNER JOIN Owner    
+  ON Owner.Owner_ID = REceive_Detail.Owner_ID
+LEFT OUTER JOIN Receive_Putaway
+  ON Receive_Master.ro_no = receive_Putaway.Ro_no 
+ AND receive_detail.Line_item_no = Receive_Putaway.Line_Item_No
+ AND receive_Detail.sku = Receive_putaway.sku
+WHERE 1 = 1"  sort="receive_master_wh_code A receive_master_arrival_date A receive_master_ro_no A receive_master_supp_invoice_no A receive_detail_line_item_no A receive_detail_sku A " )
+group(level=1 header.height=364 trailer.height=68 by=("receive_master_ro_no" ) header.color="536870912" trailer.color="536870912" )
+text(band=header alignment="2" text="RECEIVING REPORT" border="0" color="0" x="9" y="12" height="136" width="4357" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-14" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="Report ID:" border="0" color="0" x="23" y="12" height="56" width="242" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+line(band=header x1="23" y1="156" x2="4384" y2="160"  name=l_1 visible="1" pen.style="0" pen.width="9" pen.color="0"  background.mode="1" background.color="553648127" )
+compute(band=header alignment="1" expression="'Page: ' + page() + ' of ' + pageCount()"border="0" color="0" x="3739" y="12" height="56" width="576" format="" html.valueishtml="0"  name=compute_2 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+text(band=header alignment="0" text="SIMS100" border="0" color="0" x="279" y="12" height="56" width="265" html.valueishtml="0"  name=t_3 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="Date:" border="0" color="0" x="23" y="60" height="56" width="187" html.valueishtml="0"  name=t_4 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=header alignment="0" expression="string(today(),'mm/dd/yyyy hh:mm')"border="0" color="0" x="279" y="60" height="56" width="402" format="[general]" html.valueishtml="0"  name=compute_1 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header.1 alignment="0" text="LINE" border="0" color="0" x="41" y="300" height="56" width="174" html.valueishtml="0"  name=t_25 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header.1 alignment="2" text="RCVD" border="0" color="0" x="2729" y="252" height="56" width="302" html.valueishtml="0"  name=t_11 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header.1 alignment="2" text="SHIPPED" border="0" color="0" x="2318" y="252" height="56" width="302" html.valueishtml="0"  name=t_9 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header.1 alignment="2" text="QTY" border="0" color="0" x="2318" y="300" height="56" width="302" html.valueishtml="0"  name=t_10 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header.1 alignment="0" text="OWNER" border="0" color="0" x="1783" y="300" height="56" width="283" html.valueishtml="0"  name=t_26 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header.1 alignment="0" text="SKU" border="0" color="0" x="558" y="300" height="56" width="128" html.valueishtml="0"  name=t_6 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header.1 alignment="0" text="SKU" border="0" color="0" x="1349" y="300" height="56" width="128" html.valueishtml="0"  name=t_8 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header.1 alignment="0" text="ALTERNATE" border="0" color="0" x="1285" y="252" height="56" width="293" html.valueishtml="0"  name=t_7 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header.1 alignment="0" text="TYPE" border="0" color="0" x="251" y="300" height="56" width="128" html.valueishtml="0"  name=t_28 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header.1 alignment="0" text="ORDER" border="0" color="0" x="238" y="252" height="56" width="174" html.valueishtml="0"  name=t_27 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header.1 alignment="2" text="QTY" border="0" color="0" x="2729" y="300" height="56" width="302" html.valueishtml="0"  name=t_12 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header.1 alignment="0" text="Location" border="0" color="0" x="3090" y="300" height="56" width="334" html.valueishtml="0"  name=t_13 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header.1 alignment="1" text="Warehouse:" border="0" color="0" x="27" y="8" height="64" width="320" html.valueishtml="0"  name=t_18 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.1 id=2 alignment="0" tabsequence=32766 border="0" color="0" x="370" y="8" height="64" width="571" format="[general]" html.valueishtml="0"  name=receive_master_wh_code visible="1" edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header.1 alignment="1" text="Supplier ID:" border="0" color="0" x="37" y="56" height="64" width="311" html.valueishtml="0"  name=t_20 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.1 id=4 alignment="0" tabsequence=32766 border="0" color="0" x="370" y="56" height="64" width="576" format="[general]" html.valueishtml="0"  name=receive_master_supp_code visible="1" edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header.1 alignment="1" text="Order Date:" border="0" color="0" x="9" y="108" height="64" width="338" html.valueishtml="0"  name=t_21 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.1 id=16 alignment="0" tabsequence=32766 border="0" color="0" x="370" y="108" height="56" width="576" format="mm/dd/yyyy hh:mm" html.valueishtml="0"  name=receive_master_ord_date visible="1" edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header.1 alignment="1" text="Order Nbr:" border="0" color="0" x="1166" y="8" height="64" width="306" html.valueishtml="0"  name=receive_master_supp_invoice_no_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.1 id=5 alignment="0" tabsequence=32766 border="0" color="0" x="1495" y="8" height="64" width="421" format="[general]" html.valueishtml="0"  name=receive_master_supp_invoice_no visible="1" edit.limit=30 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header.1 alignment="1" text="Supplier Name:" border="0" color="0" x="1015" y="56" height="64" width="457" html.valueishtml="0"  name=t_22 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.1 id=3 alignment="0" tabsequence=32766 border="0" color="0" x="1495" y="56" height="64" width="1138" format="[general]" html.valueishtml="0"  name=receive_master_supp_name visible="1" edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header.1 alignment="1" text="Sched Arrival Date:" border="0" color="0" x="974" y="108" height="56" width="498" html.valueishtml="0"  name=t_23 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.1 id=6 alignment="0" tabsequence=32766 border="0" color="0" x="1495" y="108" height="56" width="576" format="mm/dd/yyyy hh:mm" html.valueishtml="0"  name=receive_master_arrival_date visible="1" edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header.1 alignment="1" text="Rcvd Slip Nbr:" border="0" color="0" x="2661" y="8" height="64" width="425" html.valueishtml="0"  name=t_19 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.1 id=13 alignment="0" tabsequence=32766 border="0" color="0" x="3109" y="8" height="64" width="343" format="[general]" html.valueishtml="0"  name=receive_master_ship_ref visible="1" edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header.1 alignment="1" text="Order Status:" border="0" color="0" x="2697" y="56" height="64" width="389" html.valueishtml="0"  name=t_24 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=header.1 alignment="0" expression="case(    receive_master_ord_status  when ~"C~" then ~"Completed~" when ~"D~" then ~"Completed~"  when ~"P~" then ~"Process~" when ~"V~" then ~"Void~"  when ~"A~" then ~"Packing~" when ~"I~" then ~"Picking~" when ~"N~" then ~"NEW~" else ~"receive_master_ord_status~")"border="0" color="0" x="3109" y="56" height="64" width="503" format="[general]" html.valueishtml="0"  name=cf_order_status visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header.1 alignment="1" text="Complete Date:" border="0" color="0" x="2633" y="108" height="64" width="453" html.valueishtml="0"  name=receive_master_arrival_date_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.1 id=15 alignment="0" tabsequence=32766 border="0" color="0" x="3109" y="108" height="56" width="576" format="mm/dd/yyyy hh:mm" html.valueishtml="0"  name=receive_master_complete_date visible="1" edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header.1 alignment="1" text="Carrier:" border="0" color="0" x="3771" y="32" height="56" width="219" html.valueishtml="0"  name=t_29 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header.1 alignment="1" text="Nbr Carton:" border="0" color="0" x="3707" y="88" height="56" width="283" html.valueishtml="0"  name=t_30 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.1 id=22 alignment="0" tabsequence=32766 border="0" color="0" x="4014" y="32" height="56" width="320" format="[general]" html.valueishtml="0"  name=carrier visible="1" edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.1 id=23 alignment="0" tabsequence=32766 border="0" color="0" x="4014" y="88" height="56" width="320" format="[general]" html.valueishtml="0"  name=user_field3 visible="1" edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=11 alignment="0" tabsequence=32766 border="0" color="0" x="1275" y="4" height="56" width="480" format="[general]" html.valueishtml="0"  name=receive_detail_alternate_sku visible="1" edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=10 alignment="0" tabsequence=32766 border="0" color="0" x="553" y="4" height="56" width="704" format="[general]" html.valueishtml="0"  name=receive_detail_sku visible="1" edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=8 alignment="0" tabsequence=32766 border="0" color="0" x="41" y="4" height="56" width="178" format="[general]" html.valueishtml="0"  name=receive_detail_line_item_no visible="1" edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=9 alignment="0" tabsequence=32766 border="0" color="0" x="238" y="4" height="56" width="297" format="[general]" html.valueishtml="0"  name=ord_type visible="1" dddw.name=dddw_receive_order_type dddw.displaycolumn=ord_type_desc dddw.datacolumn=ord_type dddw.percentwidth=0 dddw.lines=0 dddw.limit=0 dddw.allowedit=no dddw.useasborder=no dddw.case=any  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=18 alignment="1" tabsequence=32766 border="0" color="0" x="1774" y="4" height="56" width="375" format="[general]" html.valueishtml="0"  name=cf_owner_name visible="1" edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=21 alignment="0" tabsequence=32766 border="0" color="0" x="3095" y="4" height="56" width="389" format="[general]" html.valueishtml="0"  name=l_code visible="1" edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=12 alignment="1" tabsequence=32766 border="0" color="0" x="2213" y="4" height="56" width="357" format="###,###,##0" html.valueishtml="0"  name=req_qty visible="1" edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=20 alignment="1" tabsequence=32766 border="0" color="0" x="2688" y="4" height="56" width="293" format="#######.#####" html.valueishtml="0"  name=quantity visible="1" edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+line(band=trailer.1 x1="27" y1="56" x2="4375" y2="60"  name=l_3 visible="1" pen.style="0" pen.width="9" pen.color="0"  background.mode="1" background.color="553648127" )
+text(band=footer alignment="0" text="TOTAL WGT:" border="0" color="0" x="3282" y="108" height="56" width="311" html.valueishtml="0"  name=t_5 visible="1~tIf( Left(upper(  delivery_master_project_id  ),9) = 'SEARS-FIX',1,0)"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+
+sparse(names="receive_detail_line_item_no	ord_type	receive_detail_sku	receive_detail_alternate_sku	cf_owner_name	req_qty")htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" pagingmethod=0 generatedddwframes="1" )
+xhtmlgen() cssgen(sessionspecific="0" )
+xmlgen(inline="0" )
+xsltgen()
+jsgen()
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )
+export.xhtml()
+ 

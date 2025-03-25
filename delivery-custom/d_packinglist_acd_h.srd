@@ -1,0 +1,126 @@
+HA$PBExportHeader$d_packinglist_acd_h.srd
+$PBExportComments$+ GM ACD Packing List
+release 9;
+datawindow(units=0 timer_interval=0 color=16777215 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 1 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 1 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=996 color="536870912" )
+summary(height=4 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=20 color="536870912" )
+table(column=(type=char(40) updatewhereclause=yes name=warehouse_address_1 dbname="address_1" )
+ column=(type=char(82) updatewhereclause=yes name=warehouse_address dbname="warehouse_address" )
+ column=(type=char(20) updatewhereclause=yes name=delivery_master_cust_code dbname="cust_code" )
+ column=(type=char(71) updatewhereclause=yes name=shpmtno dbname="shpmtno" )
+ column=(type=char(16) updatewhereclause=yes name=delivery_master_do_no dbname="do_no" )
+ column=(type=char(50) updatewhereclause=yes name=delivery_master_invoice_no dbname="Invoice_No" )
+ column=(type=char(15) updatewhereclause=yes name=delivery_master_ship_via dbname="ship_via" )
+ column=(type=char(100) updatewhereclause=yes name=delivery_master_cust_name dbname="cust_name" )
+ column=(type=char(120) updatewhereclause=yes name=delivery_master_address_1 dbname="address_1" )
+ column=(type=char(120) updatewhereclause=yes name=delivery_master_address_2 dbname="address_2" )
+ column=(type=char(120) updatewhereclause=yes name=delivery_master_address_3 dbname="address_3" )
+ column=(type=char(100) updatewhereclause=yes name=delivery_master_city dbname="city" )
+ column=(type=char(100) updatewhereclause=yes name=delivery_master_state dbname="state" )
+ column=(type=char(100) updatewhereclause=yes name=delivery_master_zip dbname="zip" )
+ column=(type=char(20) updatewhereclause=yes name=delivery_master_user_field6 dbname="user_field6" )
+ column=(type=char(20) updatewhereclause=yes name=delivery_master_carrier dbname="carrier" )
+ column=(type=char(100) updatewhereclause=yes name=delivery_alt_address_name dbname="name" )
+ column=(type=char(120) updatewhereclause=yes name=delivery_alt_address_address_1 dbname="address_1" )
+ column=(type=char(120) updatewhereclause=yes name=delivery_alt_address_address_2 dbname="address_2" )
+ column=(type=char(120) updatewhereclause=yes name=delivery_alt_address_address_3 dbname="address_3" )
+ column=(type=char(100) updatewhereclause=yes name=delivery_alt_address_city dbname="city" )
+ column=(type=char(100) updatewhereclause=yes name=delivery_alt_address_state dbname="state" )
+ column=(type=char(100) updatewhereclause=yes name=delivery_alt_address_zip dbname="zip" )
+ retrieve="SELECT   warehouse.address_1,   
+         warehouse.city+','+warehouse.state+' '+warehouse.zip as warehouse_address,   
+         delivery_master.cust_code,   
+         warehouse.user_field1+'-'+delivery_master.user_field8 as shpmtno,  
+         delivery_master.do_no, 
+			Delivery_MAster.Invoice_No, 
+         delivery_master.ship_via,   
+         delivery_master.cust_name,   
+         delivery_master.address_1,   
+         delivery_master.address_2,   
+         delivery_master.address_3,   
+         delivery_master.city,   
+         delivery_master.state,   
+         delivery_master.zip,   
+         delivery_master.user_field6,   
+         delivery_master.carrier,    
+         delivery_alt_address.name,    
+         delivery_alt_address.address_1,   
+         delivery_alt_address.address_2,   
+         delivery_alt_address.address_3,   
+         delivery_alt_address.city,   
+         delivery_alt_address.state,   
+         delivery_alt_address.zip 
+    FROM delivery_master,   
+         warehouse,   
+         delivery_alt_address
+   WHERE ( delivery_master.wh_code = warehouse.wh_code ) and  
+         ( delivery_alt_address.do_no = delivery_master.do_no ) and 
+         ( delivery_master.project_id = 'GM_MI_DAT'  ) AND  
+         ( delivery_alt_address.address_type = 'NS' ) AND
+         ( delivery_master.do_no = :dono )
+        " arguments=(("dono", string)) )
+rectangle(band=header x="128" y="416" height="352" width="1472"  name=r_2 visible="1" brush.hatch="6" brush.color="16777215" pen.style="0" pen.width="5" pen.color="33554432"  background.mode="2" background.color="15793151" )
+rectangle(band=header x="1632" y="416" height="352" width="1472"  name=r_3 visible="1" brush.hatch="6" brush.color="16777215" pen.style="0" pen.width="5" pen.color="33554432"  background.mode="2" background.color="15793151" )
+rectangle(band=header x="3685" y="108" height="96" width="832"  name=r_1 visible="1" brush.hatch="6" brush.color="16777215" pen.style="0" pen.width="5" pen.color="33554432"  background.mode="2" background.color="15793151" )
+text(band=header alignment="0" text="SHIP-TO" border="0" color="0" x="133" y="356" height="56" width="242" html.valueishtml="0"  name=t_6 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="NORMAL SHIP-TO" border="0" color="0" x="1637" y="360" height="56" width="425" html.valueishtml="0"  name=t_7 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="ROUTE:" border="0" color="0" x="3671" y="560" height="56" width="219" html.valueishtml="0"  name=t_9 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+line(band=header x1="64" y1="940" x2="4585" y2="940"  name=l_1 visible="1" pen.style="0" pen.width="5" pen.color="33554432"  background.mode="2" background.color="33554432" )
+line(band=header x1="64" y1="956" x2="4585" y2="956"  name=l_2 visible="1" pen.style="0" pen.width="5" pen.color="33554432"  background.mode="2" background.color="33554432" )
+column(band=header id=14 alignment="0" tabsequence=32766 border="0" color="0" x="782" y="700" height="52" width="347" format="[general]" html.valueishtml="0"  name=delivery_master_zip visible="1"  resizeable=1 height.autosize=yes edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header id=13 alignment="0" tabsequence=32766 border="0" color="0" x="782" y="644" height="52" width="617" format="[general]" html.valueishtml="0"  name=delivery_master_state visible="1"  resizeable=1 height.autosize=yes edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header id=12 alignment="0" tabsequence=32766 border="0" color="0" x="146" y="644" height="52" width="507" format="[general]" html.valueishtml="0"  name=delivery_master_city visible="1"  resizeable=1 height.autosize=yes edit.limit=30 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header id=11 alignment="0" tabsequence=32766 border="0" color="0" x="146" y="588" height="52" width="1280" format="[general]" html.valueishtml="0"  name=delivery_master_address_3 visible="1"  resizeable=1  slideup=directlyabove height.autosize=yes edit.limit=40 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header id=10 alignment="0" tabsequence=32766 border="0" color="0" x="146" y="532" height="52" width="1125" format="[general]" html.valueishtml="0"  name=delivery_master_address_2 visible="1"  resizeable=1  slideup=directlyabove height.autosize=yes edit.limit=40 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header id=9 alignment="0" tabsequence=32766 border="0" color="0" x="151" y="476" height="52" width="1125" format="[general]" html.valueishtml="0"  name=delivery_master_address_1 visible="1"  resizeable=1  slideup=directlyabove height.autosize=yes edit.limit=40 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header id=8 alignment="0" tabsequence=32766 border="0" color="0" x="151" y="420" height="52" width="878" format="[general]" html.valueishtml="0"  name=delivery_master_cust_name visible="1" edit.limit=40 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header id=17 alignment="0" tabsequence=32766 border="0" color="0" x="1650" y="424" height="52" width="1413" format="[general]" html.valueishtml="0"  name=delivery_alt_address_name visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=header id=18 alignment="0" tabsequence=32766 border="0" color="0" x="1646" y="480" height="52" width="1079" format="[general]" html.valueishtml="0"  name=delivery_alt_address_address_1 visible="1"  resizeable=1  slideup=directlyabove height.autosize=yes edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=header id=19 alignment="0" tabsequence=32766 border="0" color="0" x="1650" y="536" height="52" width="1079" format="[general]" html.valueishtml="0"  name=delivery_alt_address_address_2 visible="1"  resizeable=1  slideup=allabove height.autosize=yes edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=header id=20 alignment="0" tabsequence=32766 border="0" color="0" x="1650" y="592" height="52" width="1079" format="[general]" html.valueishtml="0"  name=delivery_alt_address_address_3 visible="1"  resizeable=1  slideup=directlyabove height.autosize=yes edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=header id=21 alignment="0" tabsequence=32766 border="0" color="0" x="1650" y="648" height="52" width="745" format="[general]" html.valueishtml="0"  name=delivery_alt_address_city visible="1"  resizeable=1 height.autosize=yes edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=header id=22 alignment="0" tabsequence=32766 border="0" color="0" x="2418" y="648" height="52" width="645" format="[general]" html.valueishtml="0"  name=delivery_alt_address_state visible="1"  resizeable=1 height.autosize=yes edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header id=23 alignment="0" tabsequence=32766 border="0" color="0" x="2418" y="704" height="52" width="599" format="[general]" html.valueishtml="0"  name=delivery_alt_address_zip visible="1"  resizeable=1 height.autosize=yes edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="ACD PART NBR" border="0" color="0" x="347" y="820" height="56" width="361" html.valueishtml="0"  name=t_11 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="GM PART NBR" border="0" color="0" x="791" y="820" height="56" width="338" html.valueishtml="0"  name=t_12 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="COMMENTS" border="0" color="0" x="4233" y="820" height="56" width="288" html.valueishtml="0"  name=t_22 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="CUSTOMER BIN
+/PART NBR" border="0" color="0" x="1755" y="820" height="112" width="398" html.valueishtml="0"  name=t_15 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="HAZ" border="0" color="0" x="2935" y="820" height="56" width="101" html.valueishtml="0"  name=t_18 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="FREIGHT
+PC NBR" border="0" color="0" x="3131" y="820" height="112" width="247" html.valueishtml="0"  name=t_19 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="MASTER
+ FRT PC" border="0" color="0" x="3392" y="820" height="112" width="293" html.valueishtml="0"  name=t_20 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="TRAILER
+NBR" border="0" color="0" x="3730" y="820" height="112" width="274" html.valueishtml="0"  name=t_21 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="SHPD
+QTY" border="0" color="0" x="1495" y="820" height="112" width="174" html.valueishtml="0"  name=t_14 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="WTN
+QTY" border="0" color="0" x="1234" y="820" height="112" width="151" html.valueishtml="0"  name=t_13 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="ORD
+ITEM" border="0" color="0" x="133" y="820" height="112" width="137" html.valueishtml="0"  name=t_10 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="CARRIER:" border="0" color="0" x="3653" y="456" height="56" width="279" html.valueishtml="0"  name=t_8 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header id=16 alignment="0" tabsequence=32766 border="0" color="0" x="3941" y="456" height="56" width="462" format="[general]" html.valueishtml="0"  name=delivery_master_carrier visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="PROD
+LN" border="0" color="0" x="2181" y="820" height="112" width="169" html.valueishtml="0"  name=t_16 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="DESCPTN" border="0" color="0" x="2373" y="820" height="56" width="311" html.valueishtml="0"  name=t_17 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="DATE:" border="0" color="0" x="3127" y="128" height="56" width="174" html.valueishtml="0"  name=t_3 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="ORDER EXT NBR:" border="0" color="0" x="2167" y="128" height="56" width="498" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="CUST CD:" border="0" color="0" x="1499" y="128" height="56" width="279" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header id=3 alignment="0" tabsequence=32766 border="0" color="0" x="1742" y="128" height="56" width="398" format="[general]" html.valueishtml="0"  name=delivery_master_cust_code visible="1"  resizeable=1  slideup=directlyabove height.autosize=yes edit.limit=20 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header id=6 alignment="0" tabsequence=32766 border="0" color="0" x="2624" y="128" height="56" width="462" format="[general]" html.valueishtml="0"  name=delivery_master_invoice_no visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="SHIP VIA:" border="0" color="0" x="2331" y="208" height="56" width="279" html.valueishtml="0"  name=t_5 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header id=7 alignment="0" tabsequence=32766 border="0" color="0" x="2624" y="208" height="56" width="1033" format="[general]" html.valueishtml="0"  name=delivery_master_ship_via visible="1" edit.limit=15 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=header alignment="0" expression="today()"border="0" color="0" x="3314" y="128" height="56" width="334" format="MM-DD YYYY" html.valueishtml="0"  name=compute_1 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="SHPMT NO:" border="0" color="0" x="3698" y="128" height="56" width="334" html.valueishtml="0"  name=t_4 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header id=4 alignment="0" tabsequence=32766 border="0" color="0" x="3986" y="128" height="56" width="503" format="[general]" html.valueishtml="0"  name=shpmtno visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+bitmap(band=header filename="acd.bmp" x="14" y="16" height="128" width="421" border="0"  name=p_1 visible="1" )
+column(band=header id=1 alignment="0" tabsequence=32766 border="0" color="0" x="23" y="128" height="56" width="1207" format="[general]" html.valueishtml="0"  name=warehouse_address_1 visible="1" edit.limit=40 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header id=2 alignment="0" tabsequence=32766 border="0" color="0" x="18" y="172" height="56" width="1207" format="[general]" html.valueishtml="0"  name=warehouse_address visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

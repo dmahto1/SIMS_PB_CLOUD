@@ -1,0 +1,113 @@
+HA$PBExportHeader$d_pulse_export_tpl.srd
+$PBExportComments$Export Pulse Transportation Packing List
+release 11;
+datawindow(units=0 timer_interval=0 color=16777215 processing=1 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes print.preview.outline=yes hidegrayline=no showbackcoloronxp=no grid.lines=0 )
+header(height=124 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=68 color="536870912" )
+table(column=(type=char(1) updatewhereclause=yes name=c_export_ind dbname="c_Export_IND" values="	Y/	N" )
+ column=(type=char(50) updatewhereclause=yes name=invoice_no dbname="Invoice_No" )
+ column=(type=char(20) updatewhereclause=yes name=cust_code dbname="Cust_Code" )
+ column=(type=char(255) updatewhereclause=yes name=remark dbname="Remark" )
+ column=(type=char(50) updatewhereclause=yes name=sku dbname="SKU" )
+ column=(type=char(3) updatewhereclause=yes name=country_of_origin dbname="Country_of_Origin" )
+ column=(type=char(50) updatewhereclause=yes name=lot_no dbname="Lot_No" )
+ column=(type=char(20) updatewhereclause=yes name=delivery_picking_user_field1 dbname="User_field1" )
+ column=(type=datetime updatewhereclause=yes name=expiration_date dbname="Expiration_Date" )
+ column=(type=char(4) updatewhereclause=yes name=uom dbname="UOM" )
+ column=(type=decimal(5) updatewhereclause=yes identity=yes name=c_total_qty dbname="c_total_qty" )
+ column=(type=long updatewhereclause=yes identity=yes name=c_carton_count dbname="c_Carton_Count" )
+ column=(type=char(25) updatewhereclause=yes name=c_from_carton dbname="c_From_Carton" )
+ column=(type=char(25) updatewhereclause=yes name=c_to_carton dbname="c_to_Carton" )
+ column=(type=decimal(5) updatewhereclause=yes identity=yes name=c_weight dbname="c_weight" )
+ column=(type=char(20) updatewhereclause=yes name=delivery_detail_user_field2 dbname="User_Field2" )
+ column=(type=char(50) updatewhereclause=yes name=cc3 dbname="cc3" )
+ retrieve="  SELECT ' ' as c_Export_IND, 
+			Delivery_Master.Invoice_No, 
+			Delivery_Master.Cust_Code,   
+			Delivery_MAster.Remark, 
+         Delivery_Picking_Detail.SKU,   
+         Delivery_Picking_Detail.Country_of_Origin,   
+         Delivery_Picking_Detail.Lot_No,   
+			Delivery_Picking_Detail.User_field1, 
+			Delivery_Picking_Detail.Expiration_Date, 
+         Delivery_Detail.UOM, 
+			Sum( Delivery_Picking_Detail.Quantity) as c_total_qty,    
+			Count(Delivery_Picking_Detail.Container_ID) as c_Carton_Count, 
+			Min(Delivery_Picking_Detail.Container_ID) as c_From_Carton, 
+			Max(Delivery_Picking_Detail.Container_ID) as c_to_Carton, 
+			Sum(Delivery_Picking_Detail.cntnr_weight) as c_weight, 
+			Delivery_Detail.User_Field2,
+			(select top 1 user_field4 from receive_detail where receive_detail.ro_no = Delivery_Picking_Detail.ro_no and receive_detail.sku = Delivery_Picking_Detail.sku  and receive_detail.Supp_Code = Delivery_Picking_Detail.Supp_Code  ) as cc3
+    FROM Delivery_Master,   
+         Delivery_Detail,
+		Delivery_Picking_Detail
+   WHERE ( Delivery_Detail.DO_No = Delivery_Master.DO_No ) and  
+         ( Delivery_Detail.DO_No = Delivery_Picking_Detail.DO_No ) and  
+         ( Delivery_Detail.SKU = Delivery_Picking_Detail.SKU ) and  
+         ( Delivery_Detail.Line_Item_No = Delivery_Picking_Detail.Line_Item_No )   and
+			Project_id = 'PULSE' and 
+			Ord_status Not in ('N', 'V') and 
+			Ord_Date >= :adtFromDate and
+			Ord_Date <= :adtToDate 
+
+Group By	Delivery_Master.Do_No, 
+			Delivery_Master.Invoice_No, 
+			Delivery_Master.Cust_Code,   
+			Delivery_MAster.Remark, 
+         Delivery_Picking_Detail.SKU,   
+         Delivery_Picking_Detail.Country_of_Origin,   
+         Delivery_Picking_Detail.Lot_No,   
+			Delivery_Picking_Detail.User_field1,
+			Delivery_Picking_Detail.Expiration_Date, 
+         Delivery_Detail.UOM, 
+			Delivery_Detail.User_Field2,
+		Delivery_Picking_Detail.ro_no,
+	Delivery_Picking_Detail.sku ,
+	Delivery_Picking_Detail.supp_code" arguments=(("adtFromDate", datetime),("adtToDate", datetime))  sort="invoice_no A sku A " )
+group(level=1 header.height=0 trailer.height=4 by=("invoice_no" ) header.color="536870912" trailer.color="12639424" )
+text(band=header alignment="0" text="" border="6" color="0" x="9" y="4" height="112" width="78" html.valueishtml="0"  name=t_7 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="80269524" )
+text(band=header alignment="2" text="SIMSOrder Nbr" border="6" color="0" x="96" y="4" height="112" width="297" html.valueishtml="0"  name=obj_23421478 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="80269524" )
+text(band=header alignment="2" text="Cust" border="6" color="0" x="402" y="4" height="112" width="293" html.valueishtml="0"  name=delivery_master_cust_code_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="80269524" )
+text(band=header alignment="2" text="SKU" border="6" color="0" x="704" y="4" height="112" width="539" html.valueishtml="0"  name=delivery_picking_sku_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="80269524" )
+text(band=header alignment="2" text="COO" border="6" color="0" x="3575" y="4" height="112" width="169" html.valueishtml="0"  name=delivery_picking_country_of_origin_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="80269524" )
+text(band=header alignment="2" text="IMI ID #" border="6" color="0" x="1253" y="4" height="112" width="320" html.valueishtml="0"  name=delivery_picking_lot_no_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="80269524" )
+text(band=header alignment="2" text="Remark" border="6" color="0" x="3753" y="4" height="112" width="846" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="80269524" )
+text(band=header alignment="2" text="Quantity" border="6" color="0" x="1582" y="4" height="112" width="329" html.valueishtml="0"  name=t_3 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="80269524" )
+text(band=header alignment="2" text="# ofCartons" border="6" color="0" x="2345" y="4" height="112" width="256" html.valueishtml="0"  name=t_4 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="80269524" )
+text(band=header alignment="2" text="Carton #From" border="6" color="0" x="2610" y="4" height="112" width="302" html.valueishtml="0"  name=t_5 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="80269524" )
+text(band=header alignment="2" text="Carton #To" border="6" color="0" x="2921" y="4" height="112" width="302" html.valueishtml="0"  name=t_6 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="80269524" )
+text(band=header alignment="2" text="UOM" border="6" color="0" x="1920" y="4" height="112" width="165" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="80269524" )
+text(band=header alignment="2" text="Pallet#" border="6" color="0" x="2094" y="4" height="112" width="242" html.valueishtml="0"  name=t_8 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="80269524" )
+text(band=header alignment="2" text="ExpirationDate" border="6" color="0" x="4608" y="4" height="112" width="311" html.valueishtml="0"  name=t_9 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="80269524" )
+text(band=header alignment="2" text="GrossWeight" border="6" color="0" x="3232" y="4" height="112" width="334" html.valueishtml="0"  name=t_10 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="80269524" )
+text(band=header alignment="2" text="RPONumber/Line" border="6" color="0" x="4928" y="4" height="112" width="494" html.valueishtml="0"  name=t_11 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="79741120" )
+text(band=header alignment="2" text="CC3" border="6" color="0" x="5431" y="4" height="112" width="599" html.valueishtml="0"  name=cc3_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+column(band=detail id=1 alignment="0" tabsequence=10 border="0" color="0" x="9" y="4" height="56" width="78" format="[general]" html.valueishtml="0"  name=c_export_ind visible="1" checkbox.text="" checkbox.on="Y" checkbox.off="N" checkbox.scale=no checkbox.threed=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="80269524" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="0" color="0" x="96" y="4" height="56" width="297" format="[general]" html.valueishtml="0"  name=invoice_no visible="1" edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="0" color="0" x="402" y="4" height="56" width="293" format="[general]" html.valueishtml="0"  name=cust_code visible="1" edit.limit=20 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="0" tabsequence=32766 border="0" color="0" x="704" y="4" height="56" width="539" format="[general]" html.valueishtml="0"  name=sku visible="1" edit.limit=50 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="0" tabsequence=32766 border="0" color="0" x="3575" y="4" height="56" width="169" format="[general]" html.valueishtml="0"  name=country_of_origin visible="1" edit.limit=3 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=7 alignment="0" tabsequence=32766 border="0" color="0" x="1253" y="4" height="56" width="320" format="[general]" html.valueishtml="0"  name=lot_no visible="1" edit.limit=20 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="0" color="0" x="3753" y="4" height="56" width="846" format="[general]" html.valueishtml="0"  name=remark visible="1" edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=11 alignment="1" tabsequence=32766 border="0" color="0" x="1582" y="4" height="56" width="329" format="[general]" html.valueishtml="0"  name=c_total_qty visible="1" editmask.mask="#######.#####" editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=12 alignment="1" tabsequence=32766 border="0" color="0" x="2345" y="4" height="56" width="256" format="[general]" html.valueishtml="0"  name=c_carton_count visible="1" edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=13 alignment="0" tabsequence=32766 border="0" color="0" x="2610" y="4" height="56" width="302" format="[general]" html.valueishtml="0"  name=c_from_carton visible="1" edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=10 alignment="0" tabsequence=32766 border="0" color="0" x="1920" y="4" height="56" width="165" format="[general]" html.valueishtml="0"  name=uom visible="1" edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=8 alignment="0" tabsequence=32766 border="0" color="0" x="2094" y="4" height="56" width="242" format="[general]" html.valueishtml="0"  name=delivery_picking_user_field1 visible="1" edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=14 alignment="0" tabsequence=32766 border="0" color="0" x="2921" y="4" height="56" width="302" format="[general]" html.valueishtml="0"  name=c_to_carton visible="1" edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=15 alignment="1" tabsequence=32766 border="0" color="0" x="3232" y="4" height="56" width="334" format="[general]" html.valueishtml="0"  name=c_weight visible="1" edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=9 alignment="0" tabsequence=32766 border="0" color="0" x="4608" y="4" height="56" width="311" format="[shortdate] [time]" html.valueishtml="0"  name=expiration_date visible="1" editmask.mask="[date]" editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=16 alignment="0" tabsequence=32766 border="0" color="0" x="4928" y="4" height="56" width="494" format="[general]" html.valueishtml="0"  name=delivery_detail_user_field2 visible="1" edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+column(band=detail id=17 alignment="0" tabsequence=20 border="0" color="0" x="5435" y="4" height="56" width="594" format="[general]" html.valueishtml="0"  name=cc3 visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" pagingmethod=0 generatedddwframes="1" )
+xhtmlgen() cssgen(sessionspecific="0" )
+xmlgen(inline="0" )
+xsltgen()
+jsgen()
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )
+export.xhtml()

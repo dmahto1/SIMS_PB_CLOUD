@@ -1,0 +1,56 @@
+﻿$PBExportHeader$d_valeo_address_label.srd
+$PBExportComments$Valeo Address Label
+release 7;
+datawindow(units=2 timer_interval=0 color=16777215 processing=2 HTMLDW=no print.documentname="" print.orientation = 0 print.margin.left = 156 print.margin.right = 156 print.margin.top = 500 print.margin.bottom = 501 print.paper.source = 0 print.paper.size = 0 print.prompt=no print.buttons=no print.preview.buttons=no label.name="Laser Address/Ship 3.33 x 4.00 5164" label.width=4000 label.height=3333 label.rows=3 label.rows.spacing=0 label.columns=2 label.columns.spacing=188 label.topdown=no label.sheet=yes label.shape=roundrectangle label.ellipse_height=158 label.ellipse_width=158 )
+detail(height=3343 color="536870912" )
+table(column=(type=char(40) updatewhereclause=yes name=cust_name dbname="Customer.Cust_Name" )
+ column=(type=char(40) updatewhereclause=yes name=address_1 dbname="Customer.Address_1" )
+ column=(type=char(40) updatewhereclause=yes name=address_2 dbname="Customer.Address_2" )
+ column=(type=char(40) updatewhereclause=yes name=address_3 dbname="Customer.Address_3" )
+ column=(type=char(40) updatewhereclause=yes name=address_4 dbname="Customer.Address_4" )
+ column=(type=char(30) updatewhereclause=yes name=city dbname="Customer.City" )
+ column=(type=char(35) updatewhereclause=yes name=state dbname="Customer.State" )
+ column=(type=char(15) updatewhereclause=yes name=zip dbname="Customer.Zip" )
+ column=(type=char(40) updatewhereclause=yes name=warehouse_wh_name dbname="Warehouse.WH_Name" )
+ column=(type=char(40) updatewhereclause=yes name=warehouse_address_1 dbname="Warehouse.Address_1" )
+ column=(type=char(40) updatewhereclause=yes name=warehouse_address_2 dbname="Warehouse.Address_2" )
+ column=(type=char(40) updatewhereclause=yes name=warehouse_address_3 dbname="Warehouse.Address_3" )
+ column=(type=char(40) updatewhereclause=yes name=warehouse_address_4 dbname="Warehouse.Address_4" )
+ column=(type=char(30) updatewhereclause=yes name=warehouse_city dbname="Warehouse.City" )
+ column=(type=char(35) updatewhereclause=yes name=warehouse_state dbname="Warehouse.State" )
+ column=(type=char(15) updatewhereclause=yes name=warehouse_zip dbname="Warehouse.Zip" )
+ retrieve="  SELECT Customer.Cust_Name,   
+         Customer.Address_1,   
+         Customer.Address_2,   
+         Customer.Address_3,   
+         Customer.Address_4,   
+         Customer.City,   
+         Customer.State,   
+         Customer.Zip,   
+         Warehouse.WH_Name,   
+         Warehouse.Address_1,   
+         Warehouse.Address_2,   
+         Warehouse.Address_3,   
+         Warehouse.Address_4,   
+         Warehouse.City,   
+         Warehouse.State,   
+         Warehouse.Zip  
+    FROM Customer,   
+         Warehouse   
+	Where Customer.Project_id = :asProject and wh_code = :asWarehouse and cust_code = :asCustomer" arguments=(("asProject", string),("aswarehouse", string),("ascustomer", string)) )
+text(band=detail alignment="0" text="FROM:" border="0" color="0" x="62" y="208" height="166" width="500"  name=t_1  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=detail alignment="0" text="TO:" border="0" color="0" x="62" y="1552" height="166" width="229"  name=t_2  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=9 alignment="0" tabsequence=32766 border="0" color="0" x="593" y="208" height="20" width="3354" format="[general]"  name=warehouse_wh_name  resizeable=1 height.autosize=yes edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=10 alignment="0" tabsequence=32766 border="0" color="0" x="593" y="250" height="20" width="3354" format="[general]"  name=warehouse_address_1  resizeable=1  slideup=allabove height.autosize=yes edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=11 alignment="0" tabsequence=32766 border="0" color="0" x="593" y="291" height="20" width="3354" format="[general]"  name=warehouse_address_2  resizeable=1  slideup=allabove height.autosize=yes edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=12 alignment="0" tabsequence=32766 border="0" color="0" x="593" y="333" height="20" width="3354" format="[general]"  name=warehouse_address_3  resizeable=1  slideup=allabove height.autosize=yes edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=13 alignment="0" tabsequence=32766 border="0" color="0" x="593" y="375" height="20" width="3354" format="[general]"  name=warehouse_address_4  resizeable=1  slideup=allabove height.autosize=yes edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=detail alignment="0" expression="If(not isnull( warehouse_city ), warehouse_city + ', ','') + If(not isnull( warehouse_state ), warehouse_state + ' ','') + If(not isnull( warehouse_zip ), warehouse_zip ,'')"border="0" color="0" x="593" y="416" height="20" width="3354" format="[GENERAL]"  name=compute_1  resizeable=1  slideup=allabove  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912"  height.autosize=yes)
+column(band=detail id=1 alignment="0" tabsequence=32766 border="0" color="0" x="593" y="1552" height="20" width="3354" format="[general]"  name=cust_name  resizeable=1 height.autosize=yes edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="0" color="0" x="593" y="1593" height="20" width="3354" format="[general]"  name=address_1  resizeable=1  slideup=allabove height.autosize=yes edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="0" color="0" x="593" y="1635" height="20" width="3354" format="[general]"  name=address_2  resizeable=1  slideup=allabove height.autosize=yes edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="0" color="0" x="593" y="1677" height="20" width="3354" format="[general]"  name=address_3  resizeable=1  slideup=allabove height.autosize=yes edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="0" tabsequence=32766 border="0" color="0" x="593" y="1718" height="20" width="3354" format="[general]"  name=address_4  resizeable=1  slideup=allabove height.autosize=yes edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=detail alignment="0" expression="If(not isnull( city ), city + ', ','') + If(not isnull( state ), state + ' ','') + If(not isnull( zip ), zip ,'')"border="0" color="0" x="593" y="1760" height="20" width="3354" format="[GENERAL]"  name=compute_2  resizeable=1  slideup=allabove  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912"  height.autosize=yes)
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" )

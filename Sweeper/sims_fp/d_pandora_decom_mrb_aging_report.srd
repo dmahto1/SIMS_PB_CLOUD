@@ -1,0 +1,114 @@
+HA$PBExportHeader$d_pandora_decom_mrb_aging_report.srd
+release 11;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=1 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes print.preview.outline=yes hidegrayline=no showbackcoloronxp=no grid.lines=0 )
+header(height=144 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=92 color="536870912" )
+table(column=(type=char(10) updatewhereclause=yes name=wh_code dbname="WH_Code" )
+ column=(type=char(50) updatewhereclause=yes name=sku dbname="SKU" )
+ column=(type=char(50) updatewhereclause=yes name=manufacturer_part_number dbname="Manufacturer_Part_Number" )
+ column=(type=char(30) updatewhereclause=yes name=inventory_type dbname="Inventory_Type" )
+ column=(type=char(20) updatewhereclause=yes name=inventory_owner_code dbname="Inventory_Owner_Code" )
+ column=(type=char(70) updatewhereclause=yes name=part_description dbname="Part_Description" )
+ column=(type=decimal(5) updatewhereclause=yes identity=yes name=qty dbname="Qty" )
+ column=(type=decimal(4) updatewhereclause=yes identity=yes name=google_cost dbname="Google_Cost" )
+ column=(type=decimal(6) updatewhereclause=yes identity=yes name=extended_price dbname="Extended_Price" )
+ column=(type=long updatewhereclause=yes identity=yes name=daysonhand dbname="DaysOnHand" )
+ column=(type=char(10) updatewhereclause=yes name=cust_code dbname="Cust_Code" )
+ column=(type=char(60) updatewhereclause=yes name=cust_name dbname="Cust_Name" )
+ column=(type=char(50) updatewhereclause=yes name=commodity dbname="Commodity" )
+ retrieve="
+ SELECT Content_Summary.WH_Code , 
+         Content_Summary.SKU ,
+			Item_Master.alternate_sku as 'Manufacturer_Part_Number',
+			Inventory_Type.Inv_Type_Desc As 'Inventory_Type',
+			Owner.Owner_Cd AS 'Inventory_Owner_Code',
+			Item_Master.Description As 'Part_Description',
+
+        	sum(IsNull(Content_Summary.Avail_Qty, 0)) As 'Qty' ,
+
+				IsNull((SELECT Price_1  FROM Customer Cus, Price_Master WHERE Cus.Cust_Code = Owner.Owner_Cd AND Price_Master.Sku = Content_Summary.SKU AND Price_Master.Supp_Code = Content_Summary.Supp_Code  AND Price_Master.Price_Class = Cus.User_Field3 AND Price_Master.Project_ID = Receive_Master.Project_ID  ), IsNull((SELECT Max(Price_1)  FROM Customer Cus, Price_Master WHERE Cus.Cust_Code = Owner.Owner_Cd AND Price_Master.Sku = Content_Summary.SKU AND Price_Master.Supp_Code = Content_Summary.Supp_Code  AND Price_Master.Project_ID = Receive_Master.Project_ID AND (Price_Master.Price_Class = 'ZGA' OR Price_Master.Price_Class = 'ZNL' )), (SELECT Max(Price_1)  FROM Customer Cus, Price_Master WHERE Cus.Cust_Code = Owner.Owner_Cd AND Price_Master.Sku = Content_Summary.SKU AND Price_Master.Supp_Code = Content_Summary.Supp_Code  AND Price_Master.Project_ID = Receive_Master.Project_ID AND (Left(Price_Master.Price_Class,1) = 'Z'))))  As 'Google_Cost',  
+			(IsNull((SELECT Price_1  FROM Customer Cus, Price_Master WHERE Cus.Cust_Code = Owner.Owner_Cd AND Price_Master.Sku = Content_Summary.SKU AND Price_Master.Supp_Code = Content_Summary.Supp_Code  AND Price_Master.Price_Class = Cus.User_Field3 AND Price_Master.Project_ID = Receive_Master.Project_ID  ), IsNull((SELECT Max(Price_1)  FROM Customer Cus, Price_Master WHERE Cus.Cust_Code = Owner.Owner_Cd AND Price_Master.Sku = Content_Summary.SKU AND Price_Master.Supp_Code = Content_Summary.Supp_Code  AND Price_Master.Project_ID = Receive_Master.Project_ID AND (Price_Master.Price_Class = 'ZGA' OR Price_Master.Price_Class = 'ZNL' )), (SELECT Max(Price_1)  FROM Customer Cus, Price_Master WHERE Cus.Cust_Code = Owner.Owner_Cd AND Price_Master.Sku = Content_Summary.SKU AND Price_Master.Supp_Code = Content_Summary.Supp_Code  AND Price_Master.Project_ID = Receive_Master.Project_ID AND (Left(Price_Master.Price_Class,1) = 'Z'))))) * 	sum(IsNull(Content_Summary.Avail_Qty,0))  As 'Extended_Price',
+   			DateDiff(dd, complete_date, GetDate()) DaysOnHand,
+	Receive_Master.User_Field3 As Cust_Code,
+	Customer.Cust_Name As Cust_Name,
+	Item_Master.User_Field5 As 'Commodity'
+
+FROM Customer (nolock) RIGHT JOIN Receive_Master  (nolock) ON Customer.Project_ID = Receive_Master.Project_ID
+				AND Customer.Cust_Code = Receive_Master.User_Field3
+			INNER JOIN Content_Summary  (nolock) ON Content_Summary.Project_ID = Receive_Master.Project_ID
+				AND Content_Summary.RO_No = Receive_Master.RO_No
+			INNER JOIN Item_Master  (nolock) ON item_master.project_id = Content_Summary.project_id
+				AND Content_Summary.SKU = Item_Master.SKU
+				AND Content_Summary.supp_code = Item_Master.supp_code
+			INNER JOIN Supplier  (nolock) ON Item_Master.Project_ID = Supplier.Project_ID
+				AND Item_Master.Supp_Code = Supplier.Supp_Code
+				AND item_master.project_id = Content_Summary.project_id
+			INNER JOIN Owner (nolock) ON Content_Summary.owner_id = owner.owner_id
+			INNER JOIN Inventory_Type  (nolock) ON Content_Summary.Inventory_Type = Inventory_Type.Inv_Type
+				AND Content_Summary.Project_ID = Inventory_Type.Project_ID
+        
+WHERE Content_Summary.Project_ID = 'PANDORA'
+     AND Content_Summary.Avail_qty > 0 
+     AND Right(RTrim(Owner.Owner_Cd),2) = 'PM'
+
+Group by Item_Master.Project_ID,   
+         Content_Summary.SKU,   
+         Item_Master.Alternate_SKU,
+         Content_Summary.Supp_Code,   
+         Item_Master.Description,   
+         Supplier.Supp_Name,
+         Item_Master.Weight_1,    
+         Content_Summary.WH_Code,
+			Owner.Owner_CD,	
+			Complete_Date,
+	Receive_Master.User_Field3,
+	Customer.Cust_Name,
+	Owner.Owner_cd,
+Inventory_Type.Inv_Type_Desc,
+Item_Master.User_Field5,
+Content_Summary.Avail_Qty,
+Content_Summary.Sku,
+Content_Summary.Supp_Code,
+Receive_Master.Project_iD 
+
+ ;
+" )
+text(band=header alignment="2" text="Wh Code" border="0" color="33554432" x="9" y="8" height="64" width="302" html.valueishtml="0"  name=wh_code_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Sku" border="0" color="33554432" x="320" y="8" height="64" width="1399" html.valueishtml="0"  name=sku_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Inventory Owner Code" border="0" color="33554432" x="3141" y="8" height="64" width="576" html.valueishtml="0"  name=inventory_owner_code_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Part Description" border="0" color="33554432" x="3730" y="8" height="64" width="1947" html.valueishtml="0"  name=part_description_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Manufacturer Part Number" border="0" color="33554432" x="1728" y="8" height="64" width="1399" html.valueishtml="0"  name=manufacturer_part_number_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Qty" border="0" color="33554432" x="5687" y="8" height="64" width="329" html.valueishtml="0"  name=qty_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Google Cost" border="0" color="33554432" x="6025" y="8" height="64" width="329" html.valueishtml="0"  name=google_cost_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Extended Price" border="0" color="33554432" x="6363" y="8" height="64" width="407" html.valueishtml="0"  name=extended_price_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Daysonhand" border="0" color="33554432" x="6779" y="8" height="64" width="329" html.valueishtml="0"  name=daysonhand_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Cust Code" border="0" color="33554432" x="7118" y="8" height="64" width="302" html.valueishtml="0"  name=cust_code_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Cust Name" border="0" color="33554432" x="7429" y="8" height="64" width="1125" html.valueishtml="0"  name=cust_name_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Commodity" border="0" color="33554432" x="8567" y="8" height="64" width="302" html.valueishtml="0"  name=commodity_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="Inventory Type" border="0" color="0" x="8878" y="4" height="76" width="805" html.valueishtml="0"  name=inventory_type_t visible="1"  font.face="Tahoma" font.height="-12" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="0" color="33554432" x="9" y="8" height="76" width="302" format="[general]" html.valueishtml="0"  name=wh_code visible="1" edit.limit=10 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="0" color="33554432" x="320" y="8" height="76" width="1399" format="[general]" html.valueishtml="0"  name=sku visible="1" edit.limit=50 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="0" tabsequence=32766 border="0" color="33554432" x="3141" y="8" height="76" width="576" format="[general]" html.valueishtml="0"  name=inventory_owner_code visible="1" edit.limit=20 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="0" tabsequence=32766 border="0" color="33554432" x="3730" y="8" height="76" width="1947" format="[general]" html.valueishtml="0"  name=part_description visible="1" edit.limit=70 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="0" color="33554432" x="1728" y="8" height="76" width="1399" format="[general]" html.valueishtml="0"  name=manufacturer_part_number visible="1" edit.limit=50 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=7 alignment="1" tabsequence=32766 border="0" color="33554432" x="5687" y="8" height="76" width="329" format="[general]" html.valueishtml="0"  name=qty visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=8 alignment="0" tabsequence=32766 border="0" color="33554432" x="6025" y="8" height="76" width="329" format="[general]" html.valueishtml="0"  name=google_cost visible="1" edit.limit=1 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=9 alignment="0" tabsequence=32766 border="0" color="33554432" x="6363" y="8" height="76" width="407" format="[general]" html.valueishtml="0"  name=extended_price visible="1" edit.limit=1 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=10 alignment="1" tabsequence=32766 border="0" color="33554432" x="6779" y="8" height="76" width="329" format="[general]" html.valueishtml="0"  name=daysonhand visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=11 alignment="0" tabsequence=32766 border="0" color="33554432" x="7118" y="8" height="76" width="302" format="[general]" html.valueishtml="0"  name=cust_code visible="1" edit.limit=10 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=12 alignment="0" tabsequence=32766 border="0" color="33554432" x="7429" y="8" height="76" width="1125" format="[general]" html.valueishtml="0"  name=cust_name visible="1" edit.limit=40 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=13 alignment="0" tabsequence=32766 border="0" color="33554432" x="8567" y="8" height="76" width="302" format="[general]" html.valueishtml="0"  name=commodity visible="1" edit.limit=10 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="0" color="33554432" x="8882" y="0" height="64" width="800" format="[general]" html.valueishtml="0"  name=inventory_type visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" pagingmethod=0 generatedddwframes="1" )
+xhtmlgen() cssgen(sessionspecific="0" )
+xmlgen(inline="0" )
+xsltgen()
+jsgen()
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )
+export.xhtml()
+ 

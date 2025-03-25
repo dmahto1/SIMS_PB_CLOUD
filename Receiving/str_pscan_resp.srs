@@ -1,0 +1,7 @@
+HA$PBExportHeader$str_pscan_resp.srs
+$PBExportComments$Used by w_physio_scan_or_generate to return information to the caller
+global type str_pscan_resp from structure
+	string		action		descriptor "comment" = "string matching the text on the control option chosen"
+	boolean		bOK		descriptor "comment" = "true for OK button termination, false for cancel"
+end type
+

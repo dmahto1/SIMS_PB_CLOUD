@@ -1,0 +1,154 @@
+﻿$PBExportHeader$f_getlocalworldtime.srf
+global type f_getlocalworldtime from function_object
+end type
+
+forward prototypes
+global function datetime f_getworldtime (integer gmtoffset)
+global function datetime f_getlocalworldtime (string _whcode)
+end prototypes
+
+global function datetime f_getworldtime (integer gmtoffset);// datetime = f_getLocalWorldTime( integer GMTOFFSET  )
+
+// We need to figure out what the local users time is based on GMT ( Greenwich Mean Time)
+
+datetime 	_userDateTime
+datetime	_systemTime
+date			_today
+integer		_pstOffset = -8
+time			_now
+
+_today = today()
+_now = time( today() )
+
+
+return _userDateTime
+
+end function
+
+global function datetime f_getlocalworldtime (string _whcode);// datetime = f_getLocalWorldTime( whcode  )
+
+// We need to figure out what the local users time is based on GMT ( Greenwich Mean Time)
+
+// 09/14 - PCONKL - Added Timezone field. If populated, Offset will include DST offset if applicable. No need to calculate DST time
+
+datetime 		_userDateTime
+datetime		_systemTime
+int 				_dst
+decimal{2}		_gmtOffset
+int					_todayMonth
+int					_todayDay
+int					_dstStartMonth
+int					_dstStartDay
+int					_dstEndMonth
+int					_dstEndDay
+string 			test
+int 				lpos
+int 				minutes
+
+datastore lds_getlocaltime
+
+lds_getlocaltime= create datastore
+lds_getlocaltime.dataobject = "d_getlocaltime"
+lds_getlocaltime.SetTransObject(SQLCA)
+
+
+if IsNull( _whcode ) or len( _whcode ) = 0 then
+	_whcode = gs_default_wh
+end if
+
+select Max(current_timestamp) into :_systemTime
+from sysobjects;
+
+g.setCurrentWarehouse( _whCode )
+g.setWarehousedata(  )
+
+_gmtOffset = g.getGMTOffset()
+
+_dst = 0
+
+//09/14 - PCONKL - Only add DST offset if TImezone is blank. If timezone is populated, the OFfset includes DST if applicable
+
+if g.getDSTFlag() = 'Y' and (isnull(g.isWarehouseTimezone) or g.iswarehouseTimezone = '') then
+	
+	_dstStartMonth = Month( date( g.getDSTStarts() ) )
+	_dstStartDay = Day( date( g.getDSTStarts() ) )
+	_dstEndMonth = Month( date( g.getDSTEnds() ) )
+	_dstEndDay = Day( date( g.getDSTEnds() ) )
+	_todayMonth = Month( date( _systemTime ) )
+	_todayDay = Day( date( _systemTime ) )
+
+	// 04/08 - PCONKL - Fixed DST Calculation
+	if _todayMonth > _dstStartMonth and _todayMonth < _dstEndMonth then
+		
+		_dst = 1
+		
+	ElseIf _todayMonth = _dstStartMonth Then
+		
+		if _todayday >= _dstStartDay Then
+			
+			_dst = 1
+			
+		End If
+		
+	ElseIf _todayMonth = _dstEndMonth then
+		
+		If  _todayday <= _dstEndDay then
+			
+			_dst = 1
+			
+		End If
+		
+	End If
+		
+		
+//	if _todayMonth >= _dstStartMonth and _todayMonth <= _dstEndMonth then
+//		if _todayday >= _dstStartDay and _todayday <= _dstEndDay then
+//			_dst = 1
+//		end if
+//	end if
+	
+end if
+
+_gmtOffset += _dst
+
+minutes = 0
+test = string( _gmtOffset )
+lpos = pos(  test,"." )
+if lpos > 0 then	test = right( test, (len(test) -lpos))
+minutes = integer( test )
+choose case minutes
+	case 25
+		minutes = 15
+	case 50
+		minutes = 30
+	case 75
+		minutes = 45
+end choose
+
+//MEA - 04/12 - Had to add this because the dateAdd was returning a db error. Not sure why. I tried everything but when I put it inside a datastore, it worked ok.
+//Otherwise, 0/0/1900 was being returned.
+	
+lds_getlocaltime.Retrieve(_gmtoffset, _systemTime )
+
+if lds_getlocaltime.RowCount() > 0 then
+	_userDateTime = lds_getlocaltime.GetItemDateTime(1, "localdatetime")
+end if
+			
+//select Max(dateAdd( hour, :_gmtoffset, :_systemTime )) into :_userDateTime
+//from sysobjects;
+
+if minutes > 0 then
+	select Max(dateAdd( minute, :minutes, :_userDateTime )) into :_userDateTime
+	from sysobjects;
+end if
+
+//TimA 02/15/13 added a default just in case something failed on the code above.
+//This possibly solve an issue when the comple date is null even on order that are confirmed.
+If Isnull(_userDateTime) then
+	_userDateTime = datetime(Today(), Now())
+End if
+
+return _userDateTime
+
+end function
+

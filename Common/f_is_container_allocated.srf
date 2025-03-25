@@ -1,0 +1,22 @@
+HA$PBExportHeader$f_is_container_allocated.srf
+$PBExportComments$DE14071 Disallow footprint merge container if From container is allocated
+global type f_is_container_allocated from function_object
+end type
+
+forward prototypes
+global function integer f_is_container_allocated (string ascontainer)
+end prototypes
+
+global function integer f_is_container_allocated (string ascontainer);integer liRtn, liQtyAllocated
+
+select alloc_qty into :liQtyAllocated from content_summary with (nolock) where project_id = 'PANDORA' and container_id = :asContainer using sqlca;
+
+If liQtyAllocated > 0 Then
+	liRtn = 1
+Else
+	liRtn = 0
+End If
+
+Return liRtn
+end function
+

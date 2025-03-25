@@ -1,0 +1,40 @@
+HA$PBExportHeader$d_sku_serial_select.srd
+release 11;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=1 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes print.preview.outline=yes hidegrayline=no showbackcoloronxp=no grid.lines=0 )
+header(height=144 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=92 color="536870912" )
+table(column=(type=decimal(0) updatewhereclause=yes name=component_no dbname="Component_no" )
+ column=(type=char(50) updatewhereclause=yes name=sku_parent dbname="SKU_Parent" )
+ column=(type=char(50) updatewhereclause=yes name=serial_no dbname="Serial_no" )
+ column=(type=char(104) updatewhereclause=yes name=skuserial dbname="SkuSerial" )
+ retrieve="  SELECT  SniParent.Component_no, ic.SKU_Parent, SniParent.Serial_no,
+						(rtrim(ic.SKU_Parent) + ' -- ' + rtrim(SniParent.Serial_no)) as SkuSerial
+			from Item_component ic
+			join serial_number_inventory SniParent on SniParent.SKU = ic.SKU_parent
+			join owner o on o.owner_id = SniParent.owner_id  /*  linking child owner to parent serial Inventory record */
+			and SniParent.Project_id = :ls_project
+			and SniParent.Component_ind = 'Y'
+			and o.Owner_cd = :ls_owner_cd  /* using the child owner_cd because by rule it is the same as its parent's. */
+			and ic.SKU_Child = :ls_sku;
+" arguments=(("ls_owner_cd", string),("ls_sku", string),("ls_project", string)) )
+text(band=header alignment="2" text="Sku Parent" border="0" color="33554432" x="14" y="8" height="64" width="1257" html.valueishtml="0"  name=sku_parent_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Serial No" border="0" color="33554432" x="1285" y="8" height="64" width="1248" html.valueishtml="0"  name=serial_no_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Skuserial" border="0" color="33554432" x="2981" y="8" height="64" width="2880" html.valueishtml="0"  name=skuserial_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Assembly No" border="0" color="33554432" x="2542" y="4" height="64" width="430" html.valueishtml="0"  name=component_no_1_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="0" color="33554432" x="14" y="8" height="76" width="1257" format="[general]" html.valueishtml="0"  name=sku_parent visible="1" edit.limit=50 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="0" color="33554432" x="2981" y="8" height="76" width="2880" format="[general]" html.valueishtml="0"  name=skuserial visible="1" edit.limit=104 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="0" color="33554432" x="1285" y="8" height="76" width="1248" format="[general]" html.valueishtml="0"  name=serial_no visible="1" edit.limit=50 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="0" color="33554432" x="2546" y="8" height="76" width="425" format="[general]" html.valueishtml="0"  name=component_no_1 visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" pagingmethod=0 generatedddwframes="1" )
+xhtmlgen() cssgen(sessionspecific="0" )
+xmlgen(inline="0" )
+xsltgen()
+jsgen()
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0  template=(comment="" encoding="UTF-16LE" name="d_sku_serial_select" xml="<?xml version=~"1.0~" encoding=~"UTF-16LE~" standalone=~"no~"?><d_sku_serial_select><d_sku_serial_select_row __pbband=~"detail~"><component_no/><sku_parent>sku_parent</sku_parent><serial_no>serial_no</serial_no><skuserial>skuserial</skuserial></d_sku_serial_select_row></d_sku_serial_select>"))
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )
+export.xhtml()
+ 

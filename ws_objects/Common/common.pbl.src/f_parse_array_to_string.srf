@@ -1,0 +1,34 @@
+﻿$PBExportHeader$f_parse_array_to_string.srf
+$PBExportComments$Accept a string array and return a SQL IN string
+global type f_parse_array_to_string from function_object
+end type
+
+forward prototypes
+global function string f_parse_array_to_string (any asstrarray)
+end prototypes
+
+global function string f_parse_array_to_string (any asstrarray);//Accept a string array and return a string formated for SQL IN statement
+String lsRtn
+String lsStrArray[]
+Long llRow, llSize, llLen
+
+lsRtn = ""
+lsStrArray = asStrArray
+llSize = UpperBound(lsStrArray[])
+
+If llSize = 0 Then
+	Return lsRtn
+End If
+
+For llRow = 1 to llSize
+	lsRtn += "'" + lsStrArray[llRow] + "',"
+Next
+llLen = Len(lsRtn)
+
+lsRtn = Left(lsRtn, llLen - 1)
+lsRtn = "(" + lsRtn + ")"
+
+Return lsRtn
+
+end function
+

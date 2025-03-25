@@ -1,0 +1,198 @@
+HA$PBExportHeader$d_ro_master_mobile.srd
+$PBExportComments$Receive order Mobile info - SHARED WITH D_RO_MASTER
+release 11.5;
+datawindow(units=0 timer_interval=0 color=67108864 brushmode=0 transparency=0 gradient.angle=0 gradient.color=8421504 gradient.focus=0 gradient.repetition.count=0 gradient.repetition.length=100 gradient.repetition.mode=0 gradient.scale=100 gradient.spread=100 gradient.transparency=0 picture.blur=0 picture.clip.bottom=0 picture.clip.left=0 picture.clip.right=0 picture.clip.top=0 picture.mode=0 picture.scale.x=100 picture.scale.y=100 picture.transparency=0 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes print.background=no print.preview.background=no print.preview.outline=yes hidegrayline=no showbackcoloronxp=no picture.file="" )
+header(height=0 color="536870912" transparency="0" gradient.color="8421504" gradient.transparency="0" gradient.angle="0" brushmode="0" gradient.repetition.mode="0" gradient.repetition.count="0" gradient.repetition.length="100" gradient.focus="0" gradient.scale="100" gradient.spread="100" )
+summary(height=0 color="536870912" transparency="0" gradient.color="8421504" gradient.transparency="0" gradient.angle="0" brushmode="0" gradient.repetition.mode="0" gradient.repetition.count="0" gradient.repetition.length="100" gradient.focus="0" gradient.scale="100" gradient.spread="100" )
+footer(height=0 color="536870912" transparency="0" gradient.color="8421504" gradient.transparency="0" gradient.angle="0" brushmode="0" gradient.repetition.mode="0" gradient.repetition.count="0" gradient.repetition.length="100" gradient.focus="0" gradient.scale="100" gradient.spread="100" )
+detail(height=172 color="536870912" transparency="0" gradient.color="8421504" gradient.transparency="0" gradient.angle="0" brushmode="0" gradient.repetition.mode="0" gradient.repetition.count="0" gradient.repetition.length="100" gradient.focus="0" gradient.scale="100" gradient.spread="100" )
+table(column=(type=char(16) updatewhereclause=yes name=ro_no dbname="RO_No" )
+ column=(type=char(10) updatewhereclause=yes name=receive_master_project_id dbname="Project_ID" )
+ column=(type=datetime updatewhereclause=yes name=receive_master_ord_date dbname="Ord_Date" )
+ column=(type=datetime updatewhereclause=yes name=receive_master_complete_date dbname="Complete_Date" )
+ column=(type=datetime updatewhereclause=yes name=receive_master_request_date dbname="Request_Date" )
+ column=(type=datetime updatewhereclause=yes name=receive_master_arrival_date dbname="Arrival_Date" )
+ column=(type=char(1) updatewhereclause=yes name=receive_master_ord_status dbname="Ord_Status" )
+ column=(type=char(1) updatewhereclause=yes name=receive_master_ord_type dbname="Ord_Type" )
+ column=(type=char(1) updatewhereclause=yes name=receive_master_inventory_type dbname="Inventory_Type" )
+ column=(type=char(10) updatewhereclause=yes name=receive_master_wh_code dbname="WH_Code" )
+ column=(type=char(20) updatewhereclause=yes name=receive_master_supp_code dbname="Supp_Code" )
+ column=(type=char(100) updatewhereclause=yes name=receive_master_supp_order_no dbname="Supp_Order_No" )
+ column=(type=decimal(0) updatewhereclause=yes name=receive_master_back_order_no dbname="Back_Order_No" )
+ column=(type=char(50) updatewhereclause=yes name=receive_master_supp_invoice_no dbname="Supp_Invoice_No" )
+ column=(type=char(15) updatewhereclause=yes name=receive_master_ship_via dbname="Ship_VIA" )
+ column=(type=char(40) updatewhereclause=yes name=receive_master_ship_ref dbname="Ship_Ref" )
+ column=(type=decimal(0) updatewhereclause=yes name=receive_master_ctn_cnt dbname="Ctn_Cnt" )
+ column=(type=decimal(5) updatewhereclause=yes name=receive_master_weight dbname="Weight" )
+ column=(type=char(250) updatewhereclause=yes name=receive_master_remark dbname="Remark" )
+ column=(type=char(25) updatewhereclause=yes name=receive_master_last_user dbname="Last_User" )
+ column=(type=datetime updatewhereclause=yes name=receive_master_last_update dbname="Last_Update" )
+ column=(type=char(255) updatewhereclause=yes name=receive_master_user_field1 dbname="User_Field1" )
+ column=(type=char(255) updatewhereclause=yes name=receive_master_user_field2 dbname="User_Field2" )
+ column=(type=char(255) updatewhereclause=yes name=receive_master_user_field3 dbname="User_Field3" )
+ column=(type=char(255) updatewhereclause=yes name=receive_master_user_field4 dbname="User_Field4" )
+ column=(type=char(255) updatewhereclause=yes name=receive_master_user_field5 dbname="User_Field5" )
+ column=(type=char(255) updatewhereclause=yes name=receive_master_user_field6 dbname="User_Field6" )
+ column=(type=char(255) updatewhereclause=yes name=receive_master_user_field7 dbname="User_Field7" )
+ column=(type=char(255) updatewhereclause=yes name=receive_master_user_field8 dbname="User_Field8" )
+ column=(type=char(255) updatewhereclause=yes name=receive_master_user_field9 dbname="User_Field9" )
+ column=(type=char(255) updatewhereclause=yes name=receive_master_user_field10 dbname="User_Field10" )
+ column=(type=char(255) updatewhereclause=yes name=receive_master_user_field11 dbname="User_Field11" )
+ column=(type=char(255) updatewhereclause=yes name=receive_master_user_field12 dbname="User_Field12" )
+ column=(type=char(255) updatewhereclause=yes name=receive_master_user_field13 dbname="User_Field13" )
+ column=(type=char(255) updatewhereclause=yes name=receive_master_user_field14 dbname="User_Field14" )
+ column=(type=char(255) updatewhereclause=yes name=receive_master_user_field15 dbname="User_Field15" )
+ column=(type=char(255) updatewhereclause=yes name=receive_master_user_field16 dbname="User_Field16" )
+ column=(type=char(255) updatewhereclause=yes name=receive_master_user_field17 dbname="User_Field17" )
+ column=(type=char(40) updatewhereclause=yes name=supplier_supp_name dbname="Supp_Name" )
+ column=(type=char(10) updatewhereclause=yes name=receive_master_carrier dbname="Carrier" )
+ column=(type=char(30) updatewhereclause=yes name=receive_master_agent_info dbname="Agent_Info" )
+ column=(type=char(10) updatewhereclause=yes name=receive_master_transport_mode dbname="Transport_Mode" )
+ column=(type=char(20) updatewhereclause=yes name=receive_master_customs_doc dbname="Customs_Doc" )
+ column=(type=decimal(1) updatewhereclause=yes name=receive_master_shipping_carton_volume dbname="Shipping_Carton_Volume" )
+ column=(type=decimal(0) updatewhereclause=yes name=receive_master_edi_batch_seq_no dbname="EDI_Batch_Seq_No" )
+ column=(type=char(10) updatewhereclause=yes name=receive_master_line_of_business dbname="Line_of_Business" )
+ column=(type=char(25) updatewhereclause=yes name=receive_master_scanner_id dbname="Scanner_ID" )
+ column=(type=char(10) updatewhereclause=yes name=receive_master_scanner_status dbname="Scanner_Status" )
+ column=(type=char(35) updatewhereclause=yes name=receive_master_gls_tr_id dbname="gls_tr_id" )
+ column=(type=char(20) updatewhereclause=yes name=receive_master_consolidation_no dbname="Consolidation_No" )
+ column=(type=char(20) updatewhereclause=yes name=receive_master_awb_bol_no dbname="AWB_Bol_no" )
+ column=(type=char(16) updatewhereclause=yes name=receive_master_do_no dbname="DO_NO" )
+ column=(type=char(1) updatewhereclause=yes name=receive_order_type_multiple_supplier_ind dbname="multiple_supplier_Ind" )
+ column=(type=datetime updatewhereclause=yes name=receive_master_putaway_start_time dbname="Putaway_Start_Time" )
+ column=(type=char(25) updatewhereclause=yes name=receive_master_create_user dbname="Create_User" )
+ column=(type=char(1) updatewhereclause=yes name=receive_master_crossdock_ind dbname="crossdock_ind" )
+ column=(type=char(1) updatewhereclause=yes name=receive_master_otm_sent_ind dbname="OTM_Sent_Ind" )
+ column=(type=char(255) updatewhereclause=yes name=receive_master_client_cust_po_nbr dbname="Client_Cust_PO_Nbr" )
+ column=(type=char(255) updatewhereclause=yes name=receive_master_client_invoice_nbr dbname="Client_Invoice_Nbr" )
+ column=(type=char(255) updatewhereclause=yes name=receive_master_container_nbr dbname="Container_Nbr" )
+ column=(type=char(255) updatewhereclause=yes name=receive_master_client_order_type dbname="Client_Order_Type" )
+ column=(type=char(255) updatewhereclause=yes name=receive_master_container_type dbname="Container_Type" )
+ column=(type=char(255) updatewhereclause=yes name=receive_master_from_wh_loc dbname="From_Wh_Loc" )
+ column=(type=char(255) updatewhereclause=yes name=receive_master_seal_nbr dbname="Seal_Nbr" )
+ column=(type=char(255) updatewhereclause=yes name=receive_master_vendor_invoice_nbr dbname="Vendor_Invoice_Nbr" )
+ column=(type=char(1) updatewhereclause=yes name=mobile_status_ind dbname="mobile_Status_Ind" )
+ column=(type=char(1) updatewhereclause=yes name=mobile_enabled_ind dbname="Mobile_Enabled_Ind" values="Release to Mobile	Y/Release to Mobile	N" )
+ column=(type=char(25) updatewhereclause=yes name=mobile_user_assigned dbname="Mobile_User_Assigned" )
+ column=(type=char(10) updatewhereclause=yes name=mobile_staging_location dbname="Mobile_Staging_Location" )
+ column=(type=datetime updatewhereclause=yes name=mobile_released_time dbname="Mobile_released_Time" )
+ column=(type=datetime updatewhereclause=yes name=mobile_putaway_start_time dbname="Mobile_Putaway_Start_Time" )
+ column=(type=datetime updatewhereclause=yes name=mobile_putaway_complete_time dbname="Mobile_Putaway_Complete_Time" )
+ column=(type=decimal(0) updatewhereclause=yes name=receive_master_priority dbname="Priority" )
+ column=(type=char(20) updatewhereclause=yes name=source_type dbname="Source_Type" )
+ column=(type=decimal(0) updatewhereclause=yes name=om_change_request_nbr dbname="OM_CHANGE_REQUEST_NBR" )
+ column=(type=char(1) updatewhereclause=yes name=om_order_type dbname="OM_Order_type" )
+ column=(type=char(1) updatewhereclause=yes name=om_confirmation_type dbname="OM_Confirmation_Type" )
+ retrieve="SELECT  Receive_Master.RO_No ,
+	Receive_Master.Project_ID ,
+	Receive_Master.Ord_Date ,
+	Receive_Master.Complete_Date ,
+	Receive_Master.Request_Date ,
+	Receive_Master.Arrival_Date ,
+	Receive_Master.Ord_Status ,
+	Receive_Master.Ord_Type ,
+	Receive_Master.Inventory_Type ,
+	Receive_Master.WH_Code ,
+	Receive_Master.Supp_Code , 
+	Receive_Master.Supp_Order_No ,
+	Receive_Master.Back_Order_No ,
+	Receive_Master.Supp_Invoice_No ,
+	Receive_Master.Ship_VIA ,
+	Receive_Master.Ship_Ref ,
+	Receive_Master.Ctn_Cnt ,
+	Receive_Master.Weight ,
+	Receive_Master.Remark ,
+	Receive_Master.Last_User ,
+	Receive_Master.Last_Update ,
+	Receive_Master.User_Field1 ,
+	Receive_Master.User_Field2 , 
+	Receive_Master.User_Field3 ,
+	Receive_Master.User_Field4 ,
+	Receive_Master.User_Field5 ,
+	Receive_Master.User_Field6 ,
+	Receive_Master.User_Field7 ,
+	Receive_Master.User_Field8 ,
+	Receive_Master.User_Field9 ,
+	Receive_Master.User_Field10 ,
+	Receive_Master.User_Field11 ,
+	Receive_Master.User_Field12 ,
+	Receive_Master.User_Field13 , 
+	Receive_Master.User_Field14 ,
+	Receive_Master.User_Field15,
+	Receive_Master.User_Field16,
+	Receive_Master.User_Field17, 
+	Supplier.Supp_Name ,
+	Receive_Master.Carrier ,
+	Receive_Master.Agent_Info ,
+	Receive_Master.Transport_Mode ,
+	Receive_Master.Customs_Doc ,
+	Receive_Master.Shipping_Carton_Volume ,
+	Receive_Master.EDI_Batch_Seq_No, 
+	Receive_MAster.Line_of_Business, 
+	Receive_MAster.Scanner_ID, 
+	Receive_MAster.Scanner_Status, 
+	Receive_MAster.gls_tr_id, 
+	Receive_Master.Consolidation_No, 
+	Receive_Master.AWB_Bol_no,
+	Receive_Master.DO_NO, 
+	Receive_ORder_Type.multiple_supplier_Ind, 
+	Receive_Master.Putaway_Start_Time,
+	Receive_Master.Create_User,
+	receive_master.crossdock_ind,
+	Receive_Master.OTM_Sent_Ind,
+	Receive_Master.Client_Cust_PO_Nbr,
+	Receive_Master.Client_Invoice_Nbr,
+	Receive_Master.Container_Nbr,
+	Receive_Master.Client_Order_Type,
+	Receive_Master.Container_Type,
+	Receive_Master.From_Wh_Loc,
+	Receive_Master.Seal_Nbr,
+	Receive_Master.Vendor_Invoice_Nbr, 
+	Receive_MAster.mobile_Status_Ind, 
+	Receive_MAster.Mobile_Enabled_Ind, 
+	Receive_MAster.Mobile_User_Assigned, 
+	Receive_MAster.Mobile_Staging_Location, 
+	Receive_MAster.Mobile_released_Time, 
+	Receive_MAster.Mobile_Putaway_Start_Time, 
+	Receive_MAster.Mobile_Putaway_Complete_Time, 
+	Receive_Master.Priority,
+	Receive_Master.Source_Type,
+	Receive_Master.OM_CHANGE_REQUEST_NBR,
+	Receive_Master.OM_Order_type,
+	Receive_Master.OM_Confirmation_Type   
+FROM Receive_Master WITH (NOLOCK),
+	Supplier WITH (NOLOCK), 
+	Receive_Order_Type WITH (NOLOCK)    
+WHERE ( Supplier.Project_ID = Receive_Master.Project_ID ) and
+	( Supplier.Supp_Code = Receive_Master.Supp_Code ) and
+	( ( Receive_Master.RO_No = :ro_no ) and 
+	Receive_master.Project_id = Receive_Order_type.Project_id and
+	Receive_master.ord_type = Receive_Order_type.ord_Type )  " arguments=(("ro_no", string)) )
+column(band=detail id=67 alignment="0" tabsequence=10 border="0" color="33554432" x="5" y="8" height="64" width="667" format="[general]" html.valueishtml="0"  name=mobile_enabled_ind visible="1" checkbox.text="Release to Mobile" checkbox.on="Y" checkbox.off="N" checkbox.scale=no checkbox.threed=yes  font.face="Arial" font.height="-11" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+text(band=detail alignment="1" text="Assign To:" border="0" color="33554432" x="823" y="8" height="64" width="270" html.valueishtml="0"  name=t_5 visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+column(band=detail id=68 alignment="0" tabsequence=20 border="5" color="33554432" x="1106" y="8" height="64" width="722" format="[general]" html.valueishtml="0"  name=mobile_user_assigned visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+text(band=detail alignment="1" text="Staging Loc:" border="0" color="33554432" x="1865" y="8" height="64" width="375" html.valueishtml="0"  name=t_6 visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+column(band=detail id=69 alignment="0" tabsequence=30 border="5" color="33554432" x="2254" y="8" height="64" width="535" format="[general]" html.valueishtml="0"  name=mobile_staging_location visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+text(band=detail alignment="1" text="Mobile Status:" border="0" color="33554432" x="201" y="92" height="68" width="375" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+text(band=detail alignment="1" text="Released:" border="0" color="33554432" x="1056" y="92" height="68" width="261" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+text(band=detail alignment="1" text="Putaway Start:" border="0" color="33554432" x="1870" y="96" height="60" width="366" html.valueishtml="0"  name=t_3 visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+text(band=detail alignment="1" text="Complete:" border="0" color="33554432" x="2789" y="92" height="68" width="270" html.valueishtml="0"  name=t_4 visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+column(band=detail id=66 alignment="2" tabsequence=32766 border="2" color="33554432" x="585" y="92" height="68" width="421" format="[general]" html.valueishtml="0"  name=mobile_status_ind visible="1" dddw.name=dddw_mobile_status dddw.displaycolumn=mobile_status_desc dddw.datacolumn=mobile_status_ind dddw.percentwidth=0 dddw.lines=0 dddw.limit=0 dddw.allowedit=no dddw.useasborder=no dddw.case=any  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+column(band=detail id=70 alignment="2" tabsequence=32766 border="2" color="33554432" x="1330" y="92" height="68" width="498" format="[shortdate] [time]" html.valueishtml="0"  name=mobile_released_time visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+column(band=detail id=71 alignment="2" tabsequence=32766 border="2" color="33554432" x="2258" y="92" height="68" width="494" format="[shortdate] [time]" html.valueishtml="0"  name=mobile_putaway_start_time visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+column(band=detail id=72 alignment="2" tabsequence=32766 border="2" color="33554432" x="3072" y="92" height="68" width="498" format="[shortdate] [time]" html.valueishtml="0"  name=mobile_putaway_complete_time visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+column(band=detail id=74 alignment="0" tabsequence=40 border="0" color="33554432" x="3570" y="0" height="72" width="101" format="[general]" html.valueishtml="0"  name=source_type visible="0" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-11" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+column(band=detail id=75 alignment="0" tabsequence=50 border="0" color="33554432" x="3671" y="0" height="72" width="576" format="[general]" html.valueishtml="0"  name=om_change_request_nbr visible="0" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-11" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+column(band=detail id=76 alignment="0" tabsequence=60 border="0" color="33554432" x="4247" y="0" height="72" width="32" format="[general]" html.valueishtml="0"  name=om_order_type visible="0" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-11" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+column(band=detail id=77 alignment="0" tabsequence=70 border="0" color="33554432" x="4279" y="0" height="72" width="32" format="[general]" html.valueishtml="0"  name=om_confirmation_type visible="0" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-11" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" pagingmethod=0 generatedddwframes="1" )
+xhtmlgen() cssgen(sessionspecific="0" )
+xmlgen(inline="0" )
+xsltgen()
+jsgen()
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )
+export.xhtml()
+ 

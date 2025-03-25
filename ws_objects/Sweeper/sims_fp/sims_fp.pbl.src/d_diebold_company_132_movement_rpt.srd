@@ -1,0 +1,258 @@
+﻿$PBExportHeader$d_diebold_company_132_movement_rpt.srd
+$PBExportComments$Diebold Company 132 Movement Report
+release 11;
+datawindow(units=0 timer_interval=0 color=16777215 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 1 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes print.preview.outline=yes hidegrayline=no showbackcoloronxp=no )
+header(height=4 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=76 color="536870912" )
+table(column=(type=char(50) updatewhereclause=yes name=sku dbname="sku" )
+ column=(type=char(20) updatewhereclause=yes name=supp_code dbname="supp_code" )
+ column=(type=datetime updatewhereclause=yes name=order_date dbname="order_date" )
+ column=(type=datetime updatewhereclause=yes name=complete_date dbname="complete_date" )
+ column=(type=char(11) updatewhereclause=yes name=ord_type dbname="ord_type" )
+ column=(type=decimal(5) updatewhereclause=yes name=in_qty dbname="in_qty" )
+ column=(type=decimal(5) updatewhereclause=yes name=out_qty dbname="out_qty" )
+ column=(type=char(30) updatewhereclause=yes name=orderno dbname="orderno" )
+ column=(type=char(10) updatewhereclause=yes name=l_code dbname="l_code" )
+ column=(type=char(10) updatewhereclause=yes name=wh_code dbname="Wh_code" )
+ column=(type=char(10) updatewhereclause=yes name=last_user dbname="last_user" )
+ column=(type=datetime updatewhereclause=yes name=last_update dbname="last_update" )
+ column=(type=decimal(5) updatewhereclause=yes name=quantity dbname="Quantity" )
+ column=(type=decimal(5) updatewhereclause=yes name=old_quantity dbname="Old_Quantity" )
+ column=(type=char(50) updatewhereclause=yes name=so dbname="SO" )
+ column=(type=char(20) updatewhereclause=yes name=old_so dbname="old_SO" )
+ column=(type=char(50) updatewhereclause=yes name=so_line dbname="SO_Line" )
+ column=(type=char(25) updatewhereclause=yes name=old_so_line dbname="old_SO_LINE" )
+ column=(type=char(50) updatewhereclause=yes name=container dbname="Container" )
+ column=(type=char(25) updatewhereclause=yes name=old_container dbname="old_Container" )
+ column=(type=char(20) updatewhereclause=yes name=reference_no dbname="Reference_No" )
+ column=(type=char(1) updatewhereclause=yes name=inv_type dbname="Inv_Type" )
+ column=(type=char(1) updatewhereclause=yes name=old_inventory_type dbname="Old_Inventory_type" )
+ column=(type=decimal(0) updatewhereclause=yes name=adj_no dbname="adj_no" )
+ retrieve="SELECT 	a.sku,
+			 a.supp_code,
+			B.ord_date as order_date, 
+			B.complete_date as complete_date, 
+			~"Receive~" as ord_type, 
+       	A.quantity as in_qty, 
+			0 as out_qty, 
+			convert(varchar,b.supp_invoice_no) as orderno,
+			a.l_code,
+		 	B.Wh_code, 
+			B.last_user, 
+			B.last_update,
+		 	0 As Quantity,
+			0 As Old_Quantity,
+			A.lot_no as ~"SO~",
+			~"~" As old_SO,
+			A.po_no as ~"SO_Line~",
+			~"~" As old_SO_LINE,
+			A.po_no2 as ~"Container~", 
+			~"~" As old_Container,
+			B.supp_order_no as Reference_No,
+		 	A.inventory_type as Inv_Type,
+			~"~" As Old_Inventory_type,
+		         0 as adj_no
+
+	FROM 	receive_putaway A with (nolock) 
+			INNER JOIN receive_master B with (nolock) ON (A.ro_no = B.ro_no)
+			inner join item_master im with (nolock)  on (a.sku = im.sku and a.supp_code = im.supp_code)
+
+	WHERE 	B.project_id 		= :as_project 	AND
+			b.Complete_Date 	>= :From_Date	AND 
+			b.Complete_Date 	<= :To_Date		AND 	
+			B.ord_status 		= 'C'  and
+			a.sku = a.sku_Parent and
+			a.Owner_Id = (select Owner_ID from owner where project_id = 'diebold' and owner_type = 'C' and owner_cd = '132')
+
+UNION ALL
+
+SELECT 	a.sku,
+			 a.supp_code,
+			B.ord_date as order_date, 
+			B.complete_date as complete_date, 
+			~"Kit FG~" as ord_type, 
+       	A.quantity as in_qty, 
+			0 as out_qty, 
+			convert(varchar,b.workorder_number) as orderno,
+			a.l_code,
+		 	B.Wh_code, 
+			B.last_user, 
+			B.last_update,
+		 	0,
+			0,
+			A.lot_no as ~"SO~", 
+			~"~",
+			A.po_no as ~"SO_Line~",
+			~"~",
+			A.po_no2 as ~"Container~", 
+			~"~",
+			B.delivery_Invoice_no as Reference_No,
+		 	A.inventory_type as Inv_Type,
+			~"~",
+		        0 as adj_no
+
+	FROM 	workOrder_putaway A with (nolock) 
+			INNER JOIN WorkOrder_master B with (nolock)  ON (A.wo_no = B.wo_no)
+			inner join item_master im with (nolock) on (a.sku = im.sku and a.supp_code = im.supp_code)
+
+	WHERE B.project_id 		= :as_project 	AND
+			b.Complete_Date 	>= :From_Date	AND 
+			b.Complete_Date 	<= :To_Date		AND 
+			B.ord_status 		= 'C'  and
+			a.Owner_Id = (select Owner_ID from owner where project_id = 'diebold' and owner_type = 'C' and owner_cd = '132')
+
+UNION ALL
+
+SELECT 	a.sku,
+			 a.supp_code,
+			B.ord_date as order_date, 
+			B.complete_date as complete_date, 
+			Case When A.Component_ind = 'W' Then ~"DO Kit Pick~" Else ~"Delivery~"  End as ord_type,  
+      	0 as in_qty, 
+			A.quantity as out_qty,
+			convert(varchar,b.invoice_no) as orderno,
+			A.l_code,
+			B.wh_code, 
+			B.last_user, 
+			B.last_update,
+			0,
+			0,
+			a.lot_no as ~"SO~", 
+			~"~",
+			a.po_no as ~"SO_Line~",
+			~"~",
+			a.po_no2 as ~"Container~",
+			~"~",
+			B.cust_order_no as Reference_No,
+			A.inventory_type as Inv_Type,
+			~"~",
+			 0 as adj_no 
+
+	FROM 	delivery_picking A with (nolock) 
+
+			INNER JOIN delivery_master   B with (nolock) ON (A.do_no = B.do_no)
+			inner join item_master im with (nolock)  on (a.sku = im.sku and a.supp_code = im.supp_code)
+
+	WHERE 	B.project_id = :as_project 	AND
+			B.ord_status in ('C', 'D') and
+			b.Complete_Date 	>= :From_Date	AND 
+			b.Complete_Date 	<= :To_Date		AND 
+			(a.sku = a.sku_Parent or a.Component_ind = 'W') and
+			a.Owner_Id = (select Owner_ID from owner where project_id = 'diebold' and owner_type = 'C' and owner_cd = '132')
+
+UNION ALL
+
+SELECT 	a.sku,
+			 a.supp_code,
+			B.ord_date as order_date, 
+			B.complete_date as complete_date, 
+			~"Kit Pick~" as ord_type, 
+      	0 as in_qty, 
+			A.quantity as out_qty,
+			convert(varchar,b.workorder_number) as orderno,
+			A.l_code,
+			B.wh_code, 
+			B.last_user, 
+			B.last_update,
+			0,
+			0,
+			a.lot_no as ~"SO~", 
+			~"~",
+			a.po_no as ~"SO_Line~",
+			~"~",
+			a.po_no2 as ~"Container~", 
+			~"~",
+			B.delivery_invoice_no as Reference_No,
+			A.inventory_type as Inv_Type,
+			~"~",
+			 0 as adj_no 
+
+	FROM 	workorder_picking A with (nolock) 
+
+			INNER JOIN workOrder_master B with (nolock)  ON (A.wo_no = B.wo_no)
+			inner join item_master im  with (nolock) on (a.sku = im.sku and a.supp_code = im.supp_code)
+
+	WHERE  B.project_id = :as_project 	AND
+			b.Complete_Date 	>= :From_Date	AND 
+			b.Complete_Date 	<= :To_Date		AND 
+			B.ord_status = 'C' and
+			a.Owner_Id = (select Owner_ID from owner where project_id = 'diebold' and owner_type = 'C' and owner_cd = '132')
+
+UNION ALL
+
+SELECT 	A.sku,
+		       A.supp_code, 
+			A.last_update as order_date, 
+			A.last_update as complete_date, 
+			~"Adjust~" as ord_type, 
+      	CASE
+         WHEN A.quantity > A.Old_quantity  THEN A.quantity - A.Old_quantity
+         ELSE 0
+         END as in_qty, 
+         CASE
+         WHEN A.quantity < A.Old_quantity  THEN A.Old_quantity - A.Quantity
+         ELSE 0
+         END as out_qty, 
+			convert(varchar,A.Adjust_No) as orderno, 
+			A.l_code,
+			A.wh_code, 
+			A.last_user, 
+			A.last_update,
+			A.Quantity,
+			A.Old_Quantity,
+			A.lot_no as ~"SO~", 
+			A.old_lot_no as ~"old_SO~",
+			A.po_no as ~"SO_Line~", 
+			A.old_po_no as ~"Old_SO_Line~",
+			A.po_no2 as ~"Container~",
+			A.old_po_no2 as ~"Old_Container~",
+			A.ref_no as Reference_No,
+			A.inventory_type as Inv_Type,
+			A.old_inventory_type,
+			A.Adjust_No as adj_no
+
+	FROM 	adjustment A with (nolock) 
+			inner join item_master im with (nolock)  on (a.sku = im.sku and a.supp_code = im.supp_code)
+
+	WHERE A.project_id 	= :as_project and
+			A.last_Update 	>= :From_Date	AND 
+			A.LAst_Update 	<= :To_Date		  and
+			a.Owner_Id = (select Owner_ID from owner where project_id = 'diebold' and owner_type = 'C' and owner_cd = '132')
+
+
+
+ORDER BY a.sku,
+         complete_date, 
+			ord_type, 
+			orderno
+" arguments=(("as_project", string),("from_date", datetime),("to_date", datetime))  sort="complete_date A " )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="0" color="0" x="14" y="4" height="56" width="274" format="[shortdate]" html.valueishtml="0"  name=complete_date visible="1" edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=8 alignment="0" tabsequence=32766 border="0" color="0" x="311" y="4" height="56" width="471" format="[general]" html.valueishtml="0"  name=orderno visible="1" edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="0" color="0" x="800" y="4" height="56" width="709" format="[general]" html.valueishtml="0"  name=sku visible="1" edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=5 alignment="0" tabsequence=32766 border="0" color="0" x="1531" y="4" height="56" width="311" format="[general]" html.valueishtml="0"  name=ord_type visible="1" edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=9 alignment="0" tabsequence=32766 border="0" color="0" x="1861" y="4" height="56" width="306" format="[general]" html.valueishtml="0"  name=l_code visible="1" edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="0" color="0" x="2190" y="0" height="60" width="443" format="[general]" html.valueishtml="0"  name=supp_code visible="1" edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=22 alignment="0" tabsequence=32766 border="0" color="0" x="3707" y="4" height="56" width="306" format="[general]" html.valueishtml="0"  name=inv_type visible="1" dddw.name=dddw_inventory_type_by_project dddw.displaycolumn=inv_type_desc dddw.datacolumn=inv_type dddw.percentwidth=0 dddw.lines=0 dddw.limit=0 dddw.allowedit=no dddw.useasborder=no dddw.case=any  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=21 alignment="0" tabsequence=32766 border="0" color="0" x="3378" y="4" height="56" width="311" format="[general]" html.valueishtml="0"  name=reference_no visible="1" edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=15 alignment="0" tabsequence=0 border="0" color="0" x="4992" y="4" height="56" width="1152" html.valueishtml="0"  name=so visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=6 alignment="1" tabsequence=32766 border="0" color="0" x="4032" y="4" height="56" width="370" format="#######.#####" html.valueishtml="0"  name=in_qty visible="1" editmask.mask="#######.#####" editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=7 alignment="1" tabsequence=32766 border="0" color="0" x="4421" y="4" height="56" width="343" format="#######.#####" html.valueishtml="0"  name=out_qty visible="1" editmask.mask="#######.#####" editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=11 alignment="0" tabsequence=32766 border="0" color="0" x="4777" y="4" height="56" width="192" format="[general]" html.valueishtml="0"  name=last_user visible="1" edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=16 alignment="0" tabsequence=0 border="0" color="0" x="6121" y="4" height="56" width="462" html.valueishtml="0"  name=old_so visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=17 alignment="0" tabsequence=0 border="0" color="0" x="6583" y="4" height="56" width="1152" html.valueishtml="0"  name=so_line visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=18 alignment="0" tabsequence=0 border="0" color="0" x="7735" y="4" height="56" width="576" html.valueishtml="0"  name=old_so_line visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=19 alignment="0" tabsequence=0 border="0" color="0" x="8311" y="4" height="56" width="1152" html.valueishtml="0"  name=container visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=20 alignment="0" tabsequence=0 border="0" color="0" x="9463" y="4" height="56" width="576" html.valueishtml="0"  name=old_container visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" pagingmethod=0 generatedddwframes="1" )
+xhtmlgen() cssgen(sessionspecific="0" )
+xmlgen(inline="0" )
+xsltgen()
+jsgen()
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )
+export.xhtml()
+ 

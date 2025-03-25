@@ -1,0 +1,48 @@
+﻿$PBExportHeader$d_powerwave_huawei_part_label.srd
+$PBExportComments$Powerwave Huawei Part Labels
+release 11;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=1 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=yes print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes print.preview.outline=yes hidegrayline=no showbackcoloronxp=no grid.lines=0 )
+header(height=72 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=84 color="536870912" )
+table(column=(type=char(50) updatewhereclause=yes name=delivery_detail_sku dbname="Delivery_Detail.SKU" )
+ column=(type=char(20) updatewhereclause=yes name=delivery_detail_huawei_item dbname="Delivery_Detail.Huawei Item" )
+ column=(type=char(50) updatewhereclause=yes name=delivery_picking_po_no dbname="Delivery_Picking.PO NO" )
+ column=(type=decimal(5) updatewhereclause=yes identity=yes name=delivery_picking_ship_qty dbname="ship_Qty" )
+ column=(type=long updatewhereclause=yes identity=yes name=c_print_qty dbname="c_print_qty" )
+ column=(type=char(1) updatewhereclause=yes name=c_print_ind dbname="c_print_ind" values="	Y/	N" )
+ retrieve="SELECT   dbo.Delivery_Detail.SKU, 
+			dbo.Delivery_Detail.User_Field1 AS [Huawei Item], 
+			dbo.Delivery_Picking.PO_No2 AS [PO NO], 
+         SUM(dbo.Delivery_Picking.Quantity) AS ship_Qty,
+			00001 as c_print_qty, 
+			' ' as c_print_ind   
+FROM     dbo.Delivery_Detail INNER JOIN dbo.Delivery_Picking 
+				ON dbo.Delivery_Detail.DO_No = dbo.Delivery_Picking.DO_No
+WHERE    dbo.Delivery_Detail.DO_No = :asDONO
+--WHERE     (dbo.Delivery_Detail.DO_No = 'COMCAST0633426')
+group by dbo.Delivery_Detail.SKU, dbo.Delivery_Detail.User_Field1, dbo.Delivery_Picking.PO_No2;           " arguments=(("asDONO", string)) )
+text(band=header alignment="2" text="Print" border="6" color="33554432" x="174" y="4" height="60" width="238" html.valueishtml="0"  name=c_print_qty_t visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Ship Qty" border="6" color="33554432" x="2615" y="4" height="60" width="389" html.valueishtml="0"  name=delivery_picking_ship_qty_t visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="PO NO" border="6" color="33554432" x="2135" y="4" height="60" width="471" html.valueishtml="0"  name=delivery_picking_po_no_t visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Item" border="6" color="33554432" x="1056" y="4" height="60" width="1070" html.valueishtml="0"  name=delivery_detail_huawei_item_t visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="SKU" border="6" color="33554432" x="421" y="4" height="60" width="626" html.valueishtml="0"  name=delivery_detail_sku_t visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Ind" border="6" color="33554432" x="9" y="4" height="60" width="155" html.valueishtml="0"  name=c_print_ind_t visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+column(band=detail id=5 alignment="0" tabsequence=20 border="0" color="33554432" x="178" y="4" height="76" width="233" format="[general]" html.valueishtml="0"  name=c_print_qty visible="1" editmask.spin=yes editmask.mask="####0" editmask.spinincr=0 editmask.focusrectangle=no  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+column(band=detail id=6 alignment="2" tabsequence=10 border="0" color="33554432" x="9" y="4" height="76" width="155" format="[general]" html.valueishtml="0"  name=c_print_ind visible="1" checkbox.text="" checkbox.on="Y" checkbox.off="N" checkbox.scale=no checkbox.threed=yes  font.face="Arial" font.height="-12" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="0" color="33554432" x="421" y="4" height="76" width="626" format="[general]" html.valueishtml="0"  name=delivery_detail_sku visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="0" color="33554432" x="1056" y="4" height="76" width="1070" format="[general]" html.valueishtml="0"  name=delivery_detail_huawei_item visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="0" color="33554432" x="2135" y="4" height="76" width="471" format="[general]" html.valueishtml="0"  name=delivery_picking_po_no visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+column(band=detail id=4 alignment="1" tabsequence=32766 border="0" color="33554432" x="2615" y="4" height="76" width="389" format="#,###0" html.valueishtml="0"  name=delivery_picking_ship_qty visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" pagingmethod=0 generatedddwframes="1" )
+xhtmlgen() cssgen(sessionspecific="0" )
+xmlgen(inline="0" )
+xsltgen()
+jsgen()
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )
+export.xhtml()
+ 

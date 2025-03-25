@@ -1,0 +1,11 @@
+HA$PBExportHeader$d_gemini_label.srd
+$PBExportComments$Gemini Label Image
+release 7;
+datawindow(units=2 timer_interval=0 color=12632256 processing=2 HTMLDW=no print.documentname="" print.orientation = 0 print.margin.left = 200 print.margin.right = 200 print.margin.top = 200 print.margin.bottom = 200 print.paper.source = 0 print.paper.size = 0 print.prompt=yes print.buttons=no print.preview.buttons=yes label.name="Laser-A4 Half Sheets (A5) L7168" label.width=8020 label.height=5400 label.rows=1 label.rows.spacing=0 label.columns=1 label.columns.spacing=0 label.topdown=no label.sheet=yes label.shape=roundrectangle label.ellipse_height=0 label.ellipse_width=0 )
+detail(height=5395 color="536870912" )
+table(column=(type=char(1) updatewhereclause=yes name=result dbname="result" )
+ )
+bitmap(band=detail filename="geminilabel.gif" x="0" y="20" height="5354" width="7958" border="0"  name=p_label  resizeable=1 )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="0" color="0" x="31" y="41" height="197" width="416" format="[general]"  name=result edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-12" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" )

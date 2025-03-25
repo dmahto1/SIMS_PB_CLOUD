@@ -1,0 +1,104 @@
+HA$PBExportHeader$d_comcast_ith_itd_report.srd
+release 11;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=1 HTMLDW=no print.printername="" print.documentname="" print.orientation = 1 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes print.preview.outline=yes hidegrayline=no showbackcoloronxp=no grid.lines=0 )
+header(height=144 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=80 color="536870912" )
+table(column=(type=char(15) updatewhereclause=yes name=tran_nbr dbname="tran_nbr" )
+ column=(type=char(40) updatewhereclause=yes name=ref_nbr dbname="ref_nbr" )
+ column=(type=char(30) updatewhereclause=yes name=pallet_id dbname="pallet_id" )
+ column=(type=char(30) updatewhereclause=yes name=bol_nbr dbname="bol_nbr" )
+ column=(type=char(10) updatewhereclause=yes name=wh_code dbname="wh_code" )
+ column=(type=char(50) updatewhereclause=yes name=carrier dbname="carrier" )
+ column=(type=char(30) updatewhereclause=yes name=waybill_nbr dbname="waybill_nbr" )
+ column=(type=datetime updatewhereclause=yes name=create_date dbname="create_date" )
+ column=(type=char(10) updatewhereclause=yes name=from_site_id dbname="from_site_id" )
+ column=(type=char(40) updatewhereclause=yes name=serial_no dbname="serial_no" )
+ column=(type=char(40) updatewhereclause=yes name=model_no dbname="model_no" )
+ column=(type=char(40) updatewhereclause=yes name=address_1 dbname="address_1" )
+ column=(type=char(40) updatewhereclause=yes name=address_2 dbname="address_2" )
+ column=(type=char(40) updatewhereclause=yes name=address_3 dbname="address_3" )
+ column=(type=char(40) updatewhereclause=yes name=address_4 dbname="address_4" )
+ column=(type=char(40) updatewhereclause=yes name=address_5 dbname="address_5" )
+ column=(type=char(40) updatewhereclause=yes name=attribute_1 dbname="attribute_1" )
+ column=(type=char(40) updatewhereclause=yes name=attribute_2 dbname="attribute_2" )
+ column=(type=char(40) updatewhereclause=yes name=attribute_3 dbname="attribute_3" )
+ column=(type=char(40) updatewhereclause=yes name=attribute_4 dbname="attribute_4" )
+ column=(type=char(40) updatewhereclause=yes name=attribute_5 dbname="attribute_5" )
+ retrieve=" SELECT ITH.tran_nbr,
+	ITH.ref_nbr,
+	ITH.pallet_id,
+	ITH.bol_nbr,
+	ITH.wh_code,
+	ITH.carrier,
+	ITH.waybill_nbr,
+	ITH.create_date,
+	ITH.from_site_id,
+	ITD.serial_no,
+	ITD.model_no,
+	ITD.address_1,
+	ITD.address_2,
+	ITD.address_3,
+	ITD.address_4,
+	ITD.address_5,
+	ITD.attribute_1,
+	ITD.attribute_2,
+	ITD.attribute_3,
+	ITD.attribute_4,
+	ITD.attribute_5
+FROM Comcast_ITH ITH, Comcast_ITD ITD
+WHERE ITH.tran_nbr = ITD.tran_nbr"  sort="ref_nbr A tran_nbr A serial_no A " )
+text(band=header alignment="2" text="RefNbr" border="6" color="33554432" x="14" y="8" height="128" width="462" html.valueishtml="0"  name=ref_nbr_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="TranNbr" border="6" color="33554432" x="489" y="8" height="128" width="398" html.valueishtml="0"  name=tran_nbr_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="SerialNbr" border="6" color="33554432" x="905" y="8" height="128" width="608" html.valueishtml="0"  name=serial_no_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="PalletId" border="6" color="33554432" x="1522" y="8" height="128" width="448" html.valueishtml="0"  name=pallet_id_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="BolNbr" border="6" color="33554432" x="1979" y="8" height="128" width="626" html.valueishtml="0"  name=bol_nbr_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="WHCode" border="6" color="33554432" x="2615" y="8" height="128" width="581" html.valueishtml="0"  name=wh_code_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Carrier" border="6" color="33554432" x="3205" y="8" height="128" width="654" html.valueishtml="0"  name=carrier_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="WaybillNbr" border="6" color="33554432" x="3867" y="8" height="128" width="567" html.valueishtml="0"  name=waybill_nbr_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="CreateDate" border="6" color="33554432" x="4443" y="8" height="128" width="402" html.valueishtml="0"  name=create_date_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="From SiteId" border="6" color="33554432" x="4855" y="8" height="128" width="338" html.valueishtml="0"  name=from_site_id_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="ModelNo" border="6" color="33554432" x="5202" y="8" height="128" width="613" html.valueishtml="0"  name=model_no_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Address1" border="6" color="33554432" x="5824" y="8" height="128" width="658" html.valueishtml="0"  name=address_1_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Address2" border="6" color="33554432" x="6491" y="8" height="128" width="686" html.valueishtml="0"  name=address_2_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Address3" border="6" color="33554432" x="7186" y="8" height="128" width="677" html.valueishtml="0"  name=address_3_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Address4" border="6" color="33554432" x="7872" y="8" height="128" width="635" html.valueishtml="0"  name=address_4_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="0" color="33554432" x="14" y="8" height="64" width="462" format="[general]" html.valueishtml="0"  name=ref_nbr visible="1" edit.limit=40 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="0" color="33554432" x="489" y="8" height="64" width="398" format="[general]" html.valueishtml="0"  name=tran_nbr visible="1" edit.limit=15 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=10 alignment="0" tabsequence=32766 border="0" color="33554432" x="910" y="8" height="64" width="603" format="[general]" html.valueishtml="0"  name=serial_no visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="0" color="33554432" x="1527" y="8" height="64" width="443" format="[general]" html.valueishtml="0"  name=pallet_id visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="0" color="33554432" x="1984" y="8" height="64" width="622" format="[general]" html.valueishtml="0"  name=bol_nbr visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="0" tabsequence=32766 border="0" color="33554432" x="2619" y="8" height="64" width="576" format="[general]" html.valueishtml="0"  name=wh_code visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="0" tabsequence=32766 border="0" color="33554432" x="3209" y="8" height="64" width="649" format="[general]" html.valueishtml="0"  name=carrier visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=7 alignment="0" tabsequence=32766 border="0" color="33554432" x="3872" y="8" height="64" width="562" format="[general]" html.valueishtml="0"  name=waybill_nbr visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=8 alignment="0" tabsequence=32766 border="0" color="33554432" x="4448" y="8" height="64" width="398" format="[shortdate] [time]" html.valueishtml="0"  name=create_date visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=9 alignment="0" tabsequence=32766 border="0" color="33554432" x="4859" y="8" height="64" width="334" format="[general]" html.valueishtml="0"  name=from_site_id visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=11 alignment="0" tabsequence=32766 border="0" color="33554432" x="5207" y="8" height="64" width="608" format="[general]" html.valueishtml="0"  name=model_no visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=12 alignment="0" tabsequence=32766 border="0" color="33554432" x="5829" y="8" height="64" width="654" format="[general]" html.valueishtml="0"  name=address_1 visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=13 alignment="0" tabsequence=32766 border="0" color="33554432" x="6496" y="8" height="64" width="681" format="[general]" html.valueishtml="0"  name=address_2 visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=14 alignment="0" tabsequence=32766 border="0" color="33554432" x="7191" y="8" height="64" width="672" format="[general]" html.valueishtml="0"  name=address_3 visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Address5" border="6" color="33554432" x="8517" y="8" height="128" width="626" html.valueishtml="0"  name=address_5_t visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Attribute 1" border="6" color="0" x="9152" y="8" height="128" width="626" html.valueishtml="0"  name=attribute_1_t visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Attribute 2" border="6" color="0" x="9797" y="8" height="128" width="626" html.valueishtml="0"  name=attribute_2_t visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+column(band=detail id=15 alignment="0" tabsequence=32766 border="0" color="33554432" x="7877" y="8" height="64" width="631" format="[general]" html.valueishtml="0"  name=address_4 visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=16 alignment="0" tabsequence=32766 border="0" color="33554432" x="8521" y="8" height="64" width="626" format="[general]" html.valueishtml="0"  name=address_5 visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=17 alignment="0" tabsequence=0 border="0" color="33554432" x="9157" y="8" height="64" width="626" html.valueishtml="0"  name=attribute_1 visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=18 alignment="0" tabsequence=0 border="0" color="33554432" x="9801" y="8" height="64" width="626" html.valueishtml="0"  name=attribute_2 visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=19 alignment="0" tabsequence=0 border="0" color="33554432" x="10441" y="8" height="64" width="626" html.valueishtml="0"  name=attribute_3 visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=20 alignment="0" tabsequence=0 border="0" color="33554432" x="11086" y="8" height="64" width="626" html.valueishtml="0"  name=attribute_4 visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=21 alignment="0" tabsequence=0 border="0" color="33554432" x="11735" y="8" height="64" width="626" html.valueishtml="0"  name=attribute_5 visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Attribute 3" border="6" color="0" x="10437" y="8" height="128" width="626" html.valueishtml="0"  name=attribute_3_t visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Attribute 4" border="6" color="0" x="11081" y="8" height="128" width="626" html.valueishtml="0"  name=attribute_4_t visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Attribute 5" border="6" color="0" x="11730" y="8" height="128" width="626" html.valueishtml="0"  name=attribute_5_t visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" pagingmethod=0 generatedddwframes="1" )
+xhtmlgen() cssgen(sessionspecific="0" )
+xmlgen(inline="0" )
+xsltgen()
+jsgen()
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )
+export.xhtml()
+ 

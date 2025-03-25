@@ -1,0 +1,95 @@
+HA$PBExportHeader$d_shipment_status.srd
+$PBExportComments$214 Staging table (Numbered 1,2,4 and 5)
+release 7;
+datawindow(units=0 timer_interval=0 color=16777215 processing=1 HTMLDW=no print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.prompt=no print.buttons=no print.preview.buttons=no grid.lines=0 )
+header(height=80 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=92 color="536870912" )
+table(column=(type=char(16) update=yes updatewhereclause=yes key=yes name=ship_no dbname="Ship_No" )
+ column=(type=char(8) update=yes updatewhereclause=yes key=yes name=ship_status_line_no dbname="Ship_Status_Line_No" )
+ column=(type=char(10) update=yes updatewhereclause=yes name=status_code dbname="Status_Code" )
+ column=(type=char(10) update=yes updatewhereclause=yes name=status_modifier dbname="Status_Modifier" )
+ column=(type=datetime update=yes updatewhereclause=yes name=status_date dbname="Status_Date" )
+ column=(type=char(10) update=yes updatewhereclause=yes name=status_source dbname="Status_Source" )
+ column=(type=char(22) update=yes updatewhereclause=yes name=pro_no dbname="Pro_No" )
+ column=(type=char(30) update=yes updatewhereclause=yes name=city dbname="City" )
+ column=(type=char(40) update=yes updatewhereclause=yes name=state dbname="State" )
+ column=(type=char(3) update=yes updatewhereclause=yes name=iso_country_code dbname="ISO_Country_Code" )
+ column=(type=decimal(0) update=yes updatewhereclause=yes name=over_qty dbname="Over_Qty" )
+ column=(type=decimal(0) update=yes updatewhereclause=yes name=short_qty dbname="Short_Qty" )
+ column=(type=decimal(0) update=yes updatewhereclause=yes name=damaged_qty dbname="Damaged_Qty" )
+ column=(type=char(10) update=yes updatewhereclause=yes name=container_id dbname="Container_ID" )
+ column=(type=decimal(0) update=yes updatewhereclause=yes name=ctn_cnt dbname="Ctn_Cnt" )
+ column=(type=char(250) update=yes updatewhereclause=yes name=remark dbname="Remark" )
+ column=(type=char(10) update=yes updatewhereclause=yes name=last_user dbname="Last_User" )
+ column=(type=datetime update=yes updatewhereclause=yes name=last_update dbname="Last_Update" )
+ column=(type=char(10) update=yes updatewhereclause=yes name=create_user dbname="Create_User" )
+ column=(type=datetime update=yes updatewhereclause=yes name=create_user_date dbname="Create_User_Date" )
+ column=(type=char(10) update=yes updatewhereclause=yes name=time_zone_id dbname="time_zone_id" )
+ retrieve="SELECT  Shipment_Status.Ship_No ,
+           Shipment_Status.Ship_Status_Line_No ,
+           Shipment_Status.Status_Code ,
+           Shipment_Status.Status_Modifier ,
+           Shipment_Status.Status_Date ,
+           Shipment_Status.Status_Source ,
+           Shipment_Status.Pro_No ,
+           Shipment_Status.City ,
+           Shipment_Status.State ,
+           Shipment_Status.ISO_Country_Code ,
+           Shipment_Status.Over_Qty ,
+           Shipment_Status.Short_Qty ,
+           Shipment_Status.Damaged_Qty ,
+           Shipment_Status.Container_ID ,
+           Shipment_Status.Ctn_Cnt ,
+           Shipment_Status.Remark ,
+           Shipment_Status.Last_User ,
+           Shipment_Status.Last_Update ,
+           Shipment_Status.Create_User ,
+           Shipment_Status.Create_User_Date ,
+           Shipment_Status.time_zone_id     
+        FROM Shipment_Status    " update="dbo.Shipment_Status" updatewhere=0 updatekeyinplace=yes )
+text(band=header alignment="2" text="Ship No" border="0" color="0" x="9" y="8" height="64" width="466"  name=ship_no_t  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Ship Status Line No" border="0" color="0" x="485" y="8" height="64" width="530"  name=ship_status_line_no_t  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Status Code" border="0" color="0" x="1024" y="8" height="64" width="329"  name=status_code_t  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Status Modifier" border="0" color="0" x="1362" y="8" height="64" width="398"  name=status_modifier_t  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Status Date" border="0" color="0" x="1769" y="8" height="64" width="603"  name=status_date_t  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Status Source" border="0" color="0" x="2382" y="8" height="64" width="379"  name=status_source_t  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Pro No" border="0" color="0" x="2770" y="8" height="64" width="631"  name=pro_no_t  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="City" border="0" color="0" x="3410" y="8" height="64" width="850"  name=city_t  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="State" border="0" color="0" x="4270" y="8" height="64" width="1125"  name=state_t  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Iso Country Code" border="0" color="0" x="5403" y="8" height="64" width="457"  name=iso_country_code_t  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Over Qty" border="0" color="0" x="5870" y="8" height="64" width="329"  name=over_qty_t  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Short Qty" border="0" color="0" x="6208" y="8" height="64" width="329"  name=short_qty_t  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Damaged Qty" border="0" color="0" x="6546" y="8" height="64" width="366"  name=damaged_qty_t  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Container Id" border="0" color="0" x="6921" y="8" height="64" width="315"  name=container_id_t  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Ctn Cnt" border="0" color="0" x="7246" y="8" height="64" width="329"  name=ctn_cnt_t  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Remark" border="0" color="0" x="7584" y="8" height="64" width="3511"  name=remark_t  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Last User" border="0" color="0" x="11104" y="8" height="64" width="302"  name=last_user_t  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Last Update" border="0" color="0" x="11415" y="8" height="64" width="603"  name=last_update_t  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Create User" border="0" color="0" x="12027" y="8" height="64" width="315"  name=create_user_t  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Create User Date" border="0" color="0" x="12352" y="8" height="64" width="603"  name=create_user_date_t  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=1 alignment="0" tabsequence=10 border="0" color="0" x="9" y="8" height="76" width="466" format="[general]"  name=ship_no edit.limit=16 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="0" tabsequence=20 border="0" color="0" x="485" y="8" height="76" width="530" format="[general]"  name=ship_status_line_no edit.limit=8 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="0" tabsequence=30 border="0" color="0" x="1024" y="8" height="76" width="329" format="[general]"  name=status_code edit.limit=10 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="0" tabsequence=40 border="0" color="0" x="1362" y="8" height="76" width="398" format="[general]"  name=status_modifier edit.limit=10 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="0" tabsequence=50 border="0" color="0" x="1769" y="8" height="76" width="603" format="[shortdate] [time]"  name=status_date edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="0" tabsequence=60 border="0" color="0" x="2382" y="8" height="76" width="379" format="[general]"  name=status_source edit.limit=10 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=7 alignment="0" tabsequence=70 border="0" color="0" x="2770" y="8" height="76" width="631" format="[general]"  name=pro_no edit.limit=22 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=8 alignment="0" tabsequence=80 border="0" color="0" x="3410" y="8" height="76" width="850" format="[general]"  name=city edit.limit=30 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=9 alignment="0" tabsequence=90 border="0" color="0" x="4270" y="8" height="76" width="1125" format="[general]"  name=state edit.limit=40 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=10 alignment="0" tabsequence=100 border="0" color="0" x="5403" y="8" height="76" width="457" format="[general]"  name=iso_country_code edit.limit=3 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=11 alignment="1" tabsequence=110 border="0" color="0" x="5870" y="8" height="76" width="329" format="[general]"  name=over_qty edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=12 alignment="1" tabsequence=120 border="0" color="0" x="6208" y="8" height="76" width="329" format="[general]"  name=short_qty edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=13 alignment="1" tabsequence=130 border="0" color="0" x="6546" y="8" height="76" width="366" format="[general]"  name=damaged_qty edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=14 alignment="0" tabsequence=140 border="0" color="0" x="6921" y="8" height="76" width="315" format="[general]"  name=container_id edit.limit=10 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=15 alignment="1" tabsequence=150 border="0" color="0" x="7246" y="8" height="76" width="329" format="[general]"  name=ctn_cnt edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=16 alignment="0" tabsequence=160 border="0" color="0" x="7584" y="8" height="76" width="3511" format="[general]"  name=remark edit.limit=250 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=17 alignment="0" tabsequence=170 border="0" color="0" x="11104" y="8" height="76" width="302" format="[general]"  name=last_user edit.limit=10 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=18 alignment="0" tabsequence=180 border="0" color="0" x="11415" y="8" height="76" width="603" format="[shortdate] [time]"  name=last_update edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=19 alignment="0" tabsequence=190 border="0" color="0" x="12027" y="8" height="76" width="315" format="[general]"  name=create_user edit.limit=10 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=20 alignment="0" tabsequence=200 border="0" color="0" x="12352" y="8" height="76" width="603" format="[shortdate] [time]"  name=create_user_date edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=21 alignment="0" tabsequence=0 border="0" color="0" x="12969" y="0" height="64" width="261"  name=time_zone_id  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="Time Zone Id" border="0" color="0" x="12965" y="4" height="76" width="265"  font.face="Arial" font.height="-12" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" )

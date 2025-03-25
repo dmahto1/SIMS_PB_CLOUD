@@ -1,0 +1,24 @@
+HA$PBExportHeader$dddw_sku_project.srd
+$PBExportComments$Dropdown of SKU for a project
+release 11;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes print.preview.outline=yes hidegrayline=no showbackcoloronxp=no )
+header(height=0 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=76 color="536870912" )
+table(column=(type=char(50) updatewhereclause=yes name=sku dbname="Item_Master.SKU" dbalias=".SKU" )
+ column=(type=char(10) updatewhereclause=yes name=project_id dbname="Item_Master.Project_ID" dbalias=".Project_ID" )
+ column=(type=char(10) updatewhereclause=yes name=item_master_grp dbname="Item_Master.GRP" dbalias=".GRP" )
+ retrieve="PBSELECT( VERSION(400) DISTINCT ()TABLE(NAME=~"dbo.Item_Master~" )  TABLE(NAME=~"dbo.Content~" ) COLUMN(NAME=~"dbo.Item_Master.SKU~") COLUMN(NAME=~"dbo.Item_Master.Project_ID~") COLUMN(NAME=~"dbo.Item_Master.GRP~")    JOIN (LEFT=~"dbo.Item_Master.Project_ID~"    OP =~"=~"RIGHT=~"dbo.Content.Project_ID~" )    JOIN (LEFT=~"dbo.Item_Master.SKU~"    OP =~"=~"RIGHT=~"dbo.Content.SKU~" )WHERE(    EXP1 =~"( ( dbo.Item_Master.Project_ID~"   OP =~"=~"    EXP2 =~":as_project ) )~" ) ) ARG(NAME = ~"as_project~" TYPE = string) " arguments=(("as_project", string)) )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="0" color="33554432" x="5" y="4" height="72" width="882" format="[general]" html.valueishtml="0"  name=sku visible="1" edit.limit=50 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="System" font.height="-9" font.weight="400"  font.family="2" font.pitch="1" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" pagingmethod=0 generatedddwframes="1" )
+xhtmlgen() cssgen(sessionspecific="0" )
+xmlgen(inline="0" )
+xsltgen()
+jsgen()
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )
+export.xhtml()
+ 

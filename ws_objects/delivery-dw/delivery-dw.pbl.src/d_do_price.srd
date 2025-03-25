@@ -1,0 +1,110 @@
+﻿$PBExportHeader$d_do_price.srd
+$PBExportComments$-
+release 11;
+datawindow(units=0 timer_interval=0 color=16777215 processing=1 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes print.preview.outline=yes hidegrayline=no showbackcoloronxp=no grid.lines=0 )
+header(height=144 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=92 color="536870912" )
+table(column=(type=char(50) updatewhereclause=yes name=sku dbname="SKU" )
+ column=(type=char(3) updatewhereclause=yes name=price_class dbname="Price_Class" )
+ column=(type=decimal(4) updatewhereclause=yes name=price_1 dbname="Price_1" )
+ column=(type=decimal(4) updatewhereclause=yes name=price_2 dbname="Price_2" )
+ column=(type=decimal(4) updatewhereclause=yes name=price_3 dbname="Price_3" )
+ column=(type=decimal(4) updatewhereclause=yes name=price_4 dbname="Price_4" )
+ column=(type=decimal(4) updatewhereclause=yes name=price_5 dbname="Price_5" )
+ column=(type=decimal(4) updatewhereclause=yes name=price_6 dbname="Price_6" )
+ column=(type=decimal(4) updatewhereclause=yes name=price_7 dbname="Price_7" )
+ column=(type=char(3) updatewhereclause=yes name=tax_class dbname="Tax_Class" )
+ column=(type=decimal(4) updatewhereclause=yes name=tax_1 dbname="Tax_1" )
+ column=(type=decimal(4) updatewhereclause=yes name=tax_2 dbname="Tax_2" )
+ column=(type=decimal(4) updatewhereclause=yes name=tax_3 dbname="Tax_3" )
+ column=(type=decimal(4) updatewhereclause=yes name=tax_4 dbname="Tax_4" )
+ column=(type=decimal(4) updatewhereclause=yes name=tax_5 dbname="Tax_5" )
+ column=(type=char(1) updatewhereclause=yes name=tax_type dbname="Tax_Type" )
+ retrieve="  SELECT PM.SKU,   
+         PM.Price_Class,   
+         PM.Price_1,   
+         PM.Price_2,   
+         PM.Price_3,   
+         PM.Price_4,   
+         PM.Price_5,   
+         PM.Price_6,   
+         PM.Price_7,   
+         TM.Tax_Class,    
+         TM.Tax_1,   
+         TM.Tax_2,   
+         TM.Tax_3,   
+         TM.Tax_4,   
+         TM.Tax_5,   
+         TM.Tax_Type  
+FROM Item_Master IM LEFT JOIN Tax_Master TM ON IM.Tax_Code = TM.Tax_Code 
+	 INNER JOIN Price_Master PM ON IM.Project_ID = PM.Project_ID
+	 AND IM.SKU = PM.SKU
+WHERE PM.Project_ID = :as_project
+	AND PM.SKU = :as_sku 
+	AND PM.Price_Class = :as_price_class
+	AND TM.Tax_Class = :as_tax_class   
+
+
+" arguments=(("as_project", string),("as_sku", string),("as_price_class", string),("as_tax_class", string)) )
+text(band=header alignment="2" text="Price Master
+Sku" border="0" color="0" x="9" y="8" height="128" width="576" html.valueishtml="0"  name=price_master_sku_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Price Master
+Price Class" border="0" color="0" x="594" y="8" height="128" width="334" html.valueishtml="0"  name=price_master_price_class_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Price Master
+Price 1" border="0" color="0" x="937" y="8" height="128" width="334" html.valueishtml="0"  name=price_master_price_1_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Price Master
+Price 2" border="0" color="0" x="1280" y="8" height="128" width="334" html.valueishtml="0"  name=price_master_price_2_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Price Master
+Price 3" border="0" color="0" x="1623" y="8" height="128" width="334" html.valueishtml="0"  name=price_master_price_3_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Price Master
+Price 4" border="0" color="0" x="1966" y="8" height="128" width="334" html.valueishtml="0"  name=price_master_price_4_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Price Master
+Price 5" border="0" color="0" x="2309" y="8" height="128" width="334" html.valueishtml="0"  name=price_master_price_5_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Price Master
+Price 6" border="0" color="0" x="2651" y="8" height="128" width="334" html.valueishtml="0"  name=price_master_price_6_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Price Master
+Price 7" border="0" color="0" x="2994" y="8" height="128" width="334" html.valueishtml="0"  name=price_master_price_7_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Tax Master
+Tax Class" border="0" color="0" x="3337" y="8" height="128" width="293" html.valueishtml="0"  name=tax_master_tax_class_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Tax Master
+Tax 1" border="0" color="0" x="3639" y="8" height="128" width="325" html.valueishtml="0"  name=tax_master_tax_1_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Tax Master
+Tax 2" border="0" color="0" x="3973" y="8" height="128" width="325" html.valueishtml="0"  name=tax_master_tax_2_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Tax Master
+Tax 3" border="0" color="0" x="4306" y="8" height="128" width="325" html.valueishtml="0"  name=tax_master_tax_3_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Tax Master
+Tax 4" border="0" color="0" x="4640" y="8" height="128" width="325" html.valueishtml="0"  name=tax_master_tax_4_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Tax Master
+Tax 5" border="0" color="0" x="4974" y="8" height="128" width="325" html.valueishtml="0"  name=tax_master_tax_5_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Tax Master
+Tax Type" border="0" color="0" x="5307" y="8" height="128" width="293" html.valueishtml="0"  name=tax_master_tax_type_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="0" color="0" x="9" y="8" height="76" width="576" format="[general]" html.valueishtml="0"  name=sku visible="1" edit.limit=50 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="0" color="0" x="594" y="8" height="76" width="334" format="[general]" html.valueishtml="0"  name=price_class visible="1" edit.limit=3 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="1" tabsequence=32766 border="0" color="0" x="937" y="8" height="76" width="334" format="[general]" html.valueishtml="0"  name=price_1 visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="1" tabsequence=32766 border="0" color="0" x="1280" y="8" height="76" width="334" format="[general]" html.valueishtml="0"  name=price_2 visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="1" tabsequence=32766 border="0" color="0" x="1623" y="8" height="76" width="334" format="[general]" html.valueishtml="0"  name=price_3 visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="1" tabsequence=32766 border="0" color="0" x="1966" y="8" height="76" width="334" format="[general]" html.valueishtml="0"  name=price_4 visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=7 alignment="1" tabsequence=32766 border="0" color="0" x="2309" y="8" height="76" width="334" format="[general]" html.valueishtml="0"  name=price_5 visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=8 alignment="1" tabsequence=32766 border="0" color="0" x="2651" y="8" height="76" width="334" format="[general]" html.valueishtml="0"  name=price_6 visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=9 alignment="1" tabsequence=32766 border="0" color="0" x="2994" y="8" height="76" width="334" format="[general]" html.valueishtml="0"  name=price_7 visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=10 alignment="0" tabsequence=32766 border="0" color="0" x="3337" y="8" height="76" width="293" format="[general]" html.valueishtml="0"  name=tax_class visible="1" edit.limit=3 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=11 alignment="1" tabsequence=32766 border="0" color="0" x="3639" y="8" height="76" width="325" format="[general]" html.valueishtml="0"  name=tax_1 visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=12 alignment="1" tabsequence=32766 border="0" color="0" x="3973" y="8" height="76" width="325" format="[general]" html.valueishtml="0"  name=tax_2 visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=13 alignment="1" tabsequence=32766 border="0" color="0" x="4306" y="8" height="76" width="325" format="[general]" html.valueishtml="0"  name=tax_3 visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=14 alignment="1" tabsequence=32766 border="0" color="0" x="4640" y="8" height="76" width="325" format="[general]" html.valueishtml="0"  name=tax_4 visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=15 alignment="1" tabsequence=32766 border="0" color="0" x="4974" y="8" height="76" width="325" format="[general]" html.valueishtml="0"  name=tax_5 visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=16 alignment="0" tabsequence=32766 border="0" color="0" x="5307" y="8" height="76" width="293" format="[general]" html.valueishtml="0"  name=tax_type visible="1" edit.limit=1 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=detail alignment="0" expression="If(isnull(tax_1), 0, tax_1) + If(isnull(tax_2), 0, tax_2) + If(isnull(tax_3), 0, tax_3) + If(isnull(tax_4), 0, tax_4) + If(isnull(tax_5), 0, tax_5)"border="0" color="0" x="5609" y="12" height="64" width="302" format="[general]" html.valueishtml="0"  name=tax visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" pagingmethod=0 generatedddwframes="1" )
+xhtmlgen() cssgen(sessionspecific="0" )
+xmlgen(inline="0" )
+xsltgen()
+jsgen()
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )
+export.xhtml()
+ 

@@ -1,0 +1,31 @@
+Save Format v3.0(19990112)
+@begin Libraries
+ "ancestors\\ancestors.pbl" "";
+@end;
+@begin Objects
+ "ancestors\\w_system_error.srw" "ancestors\\ancestors.pbl";
+ "ancestors\\w_std_query_window.srw" "ancestors\\ancestors.pbl";
+ "ancestors\\str_multiparms.srs" "ancestors\\ancestors.pbl";
+ "ancestors\\f_get_token.srf" "ancestors\\ancestors.pbl";
+ "ancestors\\w_master.srw" "ancestors\\ancestors.pbl";
+ "ancestors\\w_std_report.srw" "ancestors\\ancestors.pbl";
+ "ancestors\\w_preview.srw" "ancestors\\ancestors.pbl";
+ "ancestors\\u_select_available.sru" "ancestors\\ancestors.pbl";
+ "ancestors\\str_parms.srs" "ancestors\\ancestors.pbl";
+ "ancestors\\u_std_tab_query.sru" "ancestors\\ancestors.pbl";
+ "ancestors\\u_nvo_ship_documents.sru" "ancestors\\ancestors.pbl";
+ "ancestors\\w_std_simple_list.srw" "ancestors\\ancestors.pbl";
+ "ancestors\\w_response_ancestor.srw" "ancestors\\ancestors.pbl";
+ "ancestors\\w_printzoom.srw" "ancestors\\ancestors.pbl";
+ "ancestors\\w_main_ancestor.srw" "ancestors\\ancestors.pbl";
+ "ancestors\\w_std_master_detail.srw" "ancestors\\ancestors.pbl";
+ "ancestors\\u_ds_ancestor.sru" "ancestors\\ancestors.pbl";
+ "ancestors\\u_dw_ancestor.sru" "ancestors\\ancestors.pbl";
+ "ancestors\\n_cst_winsrv_preference.sru" "ancestors\\ancestors.pbl";
+ "ancestors\\n_cst_winsrv.sru" "ancestors\\ancestors.pbl";
+ "ancestors\\n_cst_string.sru" "ancestors\\ancestors.pbl";
+ "ancestors\\n_cst_resizeattrib.sru" "ancestors\\ancestors.pbl";
+ "ancestors\\n_cst_resize.sru" "ancestors\\ancestors.pbl";
+ "ancestors\\n_cst_menu.sru" "ancestors\\ancestors.pbl";
+ "ancestors\\n_base.sru" "ancestors\\ancestors.pbl";
+@end;

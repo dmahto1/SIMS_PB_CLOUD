@@ -1,0 +1,62 @@
+﻿$PBExportHeader$d_hahn_export_emerinv.srd
+$PBExportComments$Export GM Hahn Order confirmations (EMERINV.TXT)
+release 7;
+datawindow(units=0 timer_interval=0 color=16777215 processing=1 HTMLDW=no print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.prompt=no print.buttons=no print.preview.buttons=no grid.lines=0 )
+header(height=148 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=80 color="536870912" )
+table(column=(type=char(1) updatewhereclause=yes name=c_export_ind dbname="c_export_ind" values="	Y/	N" )
+ column=(type=char(16) updatewhereclause=yes name=do_no dbname="Delivery_Master.do_no" )
+ column=(type=char(20) updatewhereclause=yes name=cust_code dbname="Delivery_Master.Cust_Code" )
+ column=(type=char(50) updatewhereclause=yes name=invoice_no dbname="Delivery_Master.Invoice_NO" )
+ column=(type=char(20) updatewhereclause=yes name=cust_order_no dbname="Delivery_Master.Cust_Order_No" )
+ column=(type=char(20) updatewhereclause=yes name=user_field4 dbname="Delivery_Master.User_Field4" )
+ column=(type=char(25) updatewhereclause=yes name=carton_no dbname="Delivery_Packing.Carton_No" )
+ column=(type=char(50) updatewhereclause=yes name=sku dbname="Delivery_Packing.SKU" )
+ column=(type=char(3) updatewhereclause=yes name=country_of_origin dbname="Delivery_Packing.Country_of_Origin" )
+ column=(type=decimal(0) updatewhereclause=yes name=line_item_no dbname="Delivery_Packing.Line_Item_No" )
+ column=(type=decimal(0) updatewhereclause=yes name=quantity dbname="Delivery_Packing.Quantity" )
+ column=(type=char(1) updatewhereclause=yes name=ord_type dbname="Delivery_Master.Ord_Type" )
+ retrieve="  SELECT ' ' as c_export_ind, 
+			dbo.Delivery_Master.do_no, 
+			dbo.Delivery_Master.Cust_Code,   
+			dbo.DElivery_MAster.Invoice_NO, 
+         dbo.Delivery_Master.Cust_Order_No,   
+         dbo.Delivery_Master.User_Field4,   
+         dbo.Delivery_Packing.Carton_No,   
+         dbo.Delivery_Packing.SKU,   
+         dbo.Delivery_Packing.Country_of_Origin,   
+         dbo.Delivery_Packing.Line_Item_No, 
+			dbo.Delivery_Packing.Quantity, 
+			dbo.Delivery_MAster.Ord_Type 
+    FROM dbo.Delivery_Master,   
+         dbo.Delivery_Packing  
+   WHERE ( dbo.Delivery_Packing.DO_No = dbo.Delivery_Master.DO_No )    and
+			Project_id = :asProject and
+			ord_status = 'C' and
+			(File_transmit_ind is null or File_transmit_ind <> 'Y')
+" arguments=(("asProject", string))  sort="do_no A carton_no A line_item_no A sku A " )
+group(level=1 header.height=0 trailer.height=8 by=("do_no" ) header.color="536870912" trailer.color="12632256" )
+text(band=header alignment="2" text="" border="6" color="0" x="9" y="8" height="128" width="105"  name=c_export_ind_t  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="78567654" )
+text(band=header alignment="2" text="Dealer#" border="6" color="0" x="827" y="8" height="128" width="215"  name=delivery_master_cust_code_t  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="78567654" )
+text(band=header alignment="2" text="Carton#" border="6" color="0" x="2377" y="8" height="128" width="219"  name=delivery_packing_carton_no_t  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="78567654" )
+text(band=header alignment="2" text="GM Part # (SKU)" border="6" color="0" x="1568" y="8" height="128" width="594"  name=delivery_packing_sku_t  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="78567654" )
+text(band=header alignment="2" text="COO" border="6" color="0" x="2606" y="8" height="128" width="183"  name=delivery_packing_country_of_origin_t  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="78567654" )
+text(band=header alignment="2" text="LineItem #" border="6" color="0" x="2171" y="8" height="128" width="197"  name=delivery_packing_line_item_no_t  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="78567654" )
+text(band=header alignment="2" text="QTY" border="6" color="0" x="1266" y="8" height="128" width="293"  name=t_2  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="78567654" )
+text(band=header alignment="2" text="OrderType" border="6" color="0" x="1051" y="8" height="128" width="206"  name=t_3  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="78567654" )
+column(band=detail id=1 alignment="0" tabsequence=10 border="0" color="0" x="9" y="8" height="64" width="105" format="[general]"  name=c_export_ind checkbox.text="" checkbox.on="Y" checkbox.off="N" checkbox.scale=no checkbox.threed=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="0" color="0" x="123" y="8" height="64" width="530" format="[general]"  name=invoice_no edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="0" color="0" x="827" y="8" height="64" width="215" format="[general]"  name=cust_code edit.limit=20 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=7 alignment="0" tabsequence=32766 border="0" color="0" x="2377" y="8" height="64" width="219" format="[general]"  name=carton_no edit.limit=25 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=8 alignment="0" tabsequence=32766 border="0" color="0" x="1568" y="8" height="64" width="594" format="[general]"  name=sku edit.limit=50 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=9 alignment="0" tabsequence=32766 border="0" color="0" x="2606" y="8" height="64" width="183" format="[general]"  name=country_of_origin edit.limit=3 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=10 alignment="1" tabsequence=32766 border="0" color="0" x="2171" y="8" height="64" width="197" format="[general]"  name=line_item_no edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=11 alignment="1" tabsequence=32766 border="0" color="0" x="1266" y="8" height="64" width="293" format="[general]"  name=quantity edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="0" tabsequence=32766 border="0" color="0" x="1051" y="8" height="64" width="206" format="[general]"  name=user_field4 edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=12 alignment="0" tabsequence=0 border="0" color="0" x="667" y="8" height="64" width="155"  name=ord_type  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="OrdType" border="6" color="0" x="663" y="8" height="128" width="160"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="80269524" )
+text(band=header alignment="2" text="Opel Order #(Order Number)" border="6" color="0" x="123" y="8" height="128" width="530"  name=t_1  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="80269524" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" )

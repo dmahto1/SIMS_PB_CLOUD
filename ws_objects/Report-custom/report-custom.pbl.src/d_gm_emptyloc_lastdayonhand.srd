@@ -1,0 +1,61 @@
+﻿$PBExportHeader$d_gm_emptyloc_lastdayonhand.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=384 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=4 color="536870912" )
+detail(height=60 color="536870912" )
+table(column=(type=char(10) updatewhereclause=yes name=l_code dbname="Location.L_Code" )
+ column=(type=char(50) updatewhereclause=yes name=location_sku_reserved dbname="Location.SKU_Reserved" )
+ column=(type=datetime updatewhereclause=yes name=last_pick_date dbname="last_pick_date" )
+ column=(type=char(50) updatewhereclause=yes name=location_sku_reserved dbname="Location.SKU_Reserved" )
+ column=(type=char(10) updatewhereclause=yes name=project_warehouse_project_id dbname="Project_Warehouse.Project_ID" )
+ column=(type=char(10) updatewhereclause=yes name=location_wh_code dbname="Location.WH_Code" )
+ column=(type=char(10) updatewhereclause=yes name=numberofdaysempty dbname="NumberOfDaysEmpty" )
+ retrieve="  SELECT dbo.Location.L_Code,   
+         dbo.Location.SKU_Reserved,
+	   ( select max( dbo.delivery_master.complete_date ) 
+		 from dbo.delivery_master,   
+				    dbo.delivery_picking  
+		where ( dbo.delivery_picking.do_no = dbo.delivery_master.do_no ) and  
+				      ( dbo.delivery_master.project_id = dbo.project_warehouse.project_id ) and  
+				        dbo.delivery_picking.sku = dbo.location.sku_reserved   ) as ~"last_pick_date~"  ,
+		dbo.Location.SKU_Reserved,
+		dbo.Project_Warehouse.Project_ID,
+		dbo.Location.WH_Code,
+'          ' as 'NumberOfDaysEmpty'
+    FROM dbo.Location,   
+                dbo.Project_Warehouse  
+   WHERE ( dbo.Location.WH_Code = dbo.Project_Warehouse.WH_Code ) and  
+          ( dbo.Location.SKU_Reserved is not null ) AND  
+         ( len( rtrim(ltrim(dbo.Location.SKU_Reserved))) > 0 ) and
+         ( dbo.Location.SKU_Reserved not in (  select dbo.content.sku  
+                                                 							from dbo.content  
+                                               							 where dbo.content.project_id = dbo.project_warehouse.project_id  and
+																dbo.content.wh_code = dbo.project_warehouse.wh_code ) )   and
+dbo.Project_Warehouse.Project_ID = '*project*' 
+
+ORDER BY dbo.Location.L_Code ASC   
+;
+" )
+text(band=header alignment="1" text="Warehouse:" border="0" color="33554432" x="14" y="244" height="56" width="302" html.valueishtml="0"  name=t_4 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Empty Location Last Day On Hand Report" border="0" color="33554432" x="14" y="76" height="80" width="2839" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-12" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=header alignment="0" expression="string( datetime( today(), now() ), 'dddd mmmm dd, yyyy hh:mm am/pm' )"border="0" color="33554432" x="18" y="8" height="56" width="1339" format="[GENERAL]" html.valueishtml="0"  name=compute_1  tag="" visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=header alignment="1" expression="'Page ' + page() + ' of ' + pageCount()"border="0" color="33554432" x="2235" y="8" height="56" width="622" format="[general]" html.valueishtml="0"  name=page_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="Location" border="0" color="33554432" x="18" y="336" height="52" width="302" html.valueishtml="0"  name=location_l_code_t visible="1"  font.face="MS Sans Serif" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="Sku" border="0" color="33554432" x="1001" y="336" height="52" width="558" html.valueishtml="0"  name=location_sku_reserved_t visible="1"  font.face="MS Sans Serif" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Days W/O Content" border="0" color="33554432" x="1577" y="332" height="56" width="443" html.valueishtml="0"  name=days_without_content_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="1" text="Project:" border="0" color="33554432" x="14" y="164" height="56" width="302" html.valueishtml="0"  name=t_3 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Last Pick Date" border="0" color="33554432" x="338" y="336" height="52" width="645" html.valueishtml="0"  name=t_1 visible="1"  font.face="MS Sans Serif" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header id=6 alignment="0" tabsequence=32766 border="0" color="33554432" x="329" y="244" height="52" width="645" format="[general]" html.valueishtml="0"  name=location_wh_code visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="MS Sans Serif" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header id=5 alignment="0" tabsequence=32766 border="0" color="33554432" x="334" y="164" height="52" width="645" format="[general]" html.valueishtml="0"  name=project_warehouse_project_id visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="MS Sans Serif" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="2" tabsequence=32766 border="0" color="33554432" x="338" y="4" height="52" width="645" format="mm/dd/yyyy" html.valueishtml="0"  name=last_pick_date  tag="2:Last Pick Date" visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="MS Sans Serif" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="0" color="33554432" x="1001" y="4" height="52" width="558" format="[general]" html.valueishtml="0"  name=location_sku_reserved  tag="3:SKU" visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="MS Sans Serif" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=detail alignment="2" expression="daysafter( last_pick_date, datetime( today(), now() ))"border="0" color="33554432" x="1577" y="4" height="52" width="443" format="" html.valueishtml="0"  name=dayswithoutcontent  tag="4:Day Without Content" visible="1"  font.face="MS Sans Serif" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="0" color="33554432" x="18" y="0" height="56" width="302" format="[general]" html.valueishtml="0"  name=l_code  tag="1:Location" visible="1" edit.limit=10 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="MS Sans Serif" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=7 alignment="0" tabsequence=0 border="0" color="33554432" x="1536" y="104" height="52" width="507" html.valueishtml="0"  name=numberofdaysempty  tag="4:Day Without Content" visible="1"  font.face="MS Sans Serif" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

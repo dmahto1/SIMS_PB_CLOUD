@@ -1,0 +1,29 @@
+﻿$PBExportHeader$f_verify_if_numeric.srf
+global type f_verify_if_numeric from function_object
+end type
+
+forward prototypes
+global function boolean f_verify_if_numeric (string as_string)
+end prototypes
+
+global function boolean f_verify_if_numeric (string as_string);//TimA 10/06/11
+//Pass a string with a nemeric value.  This looks for anything in the string that is not a number.  Example: Periods, comas, dashes etc.
+//Start from Pandora issue #240.  Don't allow periods, coma's, etc in user_line_item_no
+
+long stringlen,  i
+Integer ll_Asc
+
+//Get the length of the string
+stringlen = Len(as_string)
+
+For i=1 to stringlen
+	//ll_Asc = Asc(Mid(as_string, i, 1))
+	//Only look at ASCII values between 48 and 57 which are 0-9
+	If Asc(Mid(as_string, i, 1)) < 48 or Asc(Mid(as_string, i, 1))  > 57  then
+		Return False
+	end if
+next
+
+Return True
+end function
+

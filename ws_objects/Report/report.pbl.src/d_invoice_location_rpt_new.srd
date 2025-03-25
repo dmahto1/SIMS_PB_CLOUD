@@ -1,0 +1,66 @@
+﻿$PBExportHeader$d_invoice_location_rpt_new.srd
+release 7;
+datawindow(units=0 timer_interval=0 color=16777215 processing=0 HTMLDW=no print.documentname="" print.orientation = 1 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.prompt=no print.buttons=no print.preview.buttons=no )
+header(height=432 color="536870912" )
+summary(height=76 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=84 color="536870912" )
+table(column=(type=char(16) update=yes updatewhereclause=yes name=do_no dbname="Delivery_Master.DO_No" )
+ column=(type=char(10) update=yes updatewhereclause=yes name=project_id dbname="Delivery_Master.Project_ID" )
+ column=(type=char(20) update=yes updatewhereclause=yes name=cust_order_no dbname="Delivery_Master.Cust_Order_No" )
+ column=(type=datetime update=yes updatewhereclause=yes name=complete_date dbname="Delivery_Master.Complete_Date" )
+ column=(type=char(20) update=yes updatewhereclause=yes name=cust_code dbname="Delivery_Master.Cust_Code" )
+ column=(type=char(40) update=yes updatewhereclause=yes name=cust_name dbname="Delivery_Master.Cust_Name" )
+ column=(type=char(15) update=yes updatewhereclause=yes name=zip dbname="Delivery_Master.Zip" )
+ column=(type=char(30) update=yes updatewhereclause=yes name=country dbname="Delivery_Master.Country" )
+ column=(type=char(10) update=yes updatewhereclause=yes name=delivery_master_wh_code dbname="Delivery_Master.WH_Code" )
+ column=(type=decimal(0) updatewhereclause=yes name=delivery_detail_alloc_qty dbname="Delivery_Detail.Alloc_Qty" )
+ column=(type=char(50) updatewhereclause=yes name=delivery_detail_sku dbname="Delivery_Detail.SKU" )
+ retrieve="  SELECT Delivery_Master.DO_No,   
+         Delivery_Master.Project_ID,   
+         Delivery_Master.Cust_Order_No,   
+         Delivery_Master.Complete_Date,   
+         Delivery_Master.Cust_Code,   
+         Delivery_Master.Cust_Name,   
+         Delivery_Master.Zip,   
+         Delivery_Master.Country,   
+         Delivery_Master.WH_Code,   
+         Delivery_Detail.Alloc_Qty,   
+         Delivery_Detail.SKU  
+    FROM Delivery_Master,   
+         Delivery_Detail  
+   WHERE ( Delivery_Detail.DO_No = Delivery_Master.DO_No ) and  
+         ( ( Delivery_Master.Ord_Status = 'C' ) )    
+"  sort="complete_date A cust_order_no A delivery_detail_sku A " )
+text(band=header alignment="2" text="" border="0" color="33554432" x="5" y="104" height="64" width="4539"  name=t_selection  resizeable=1  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Invoice Ship Report" border="0" color="33554432" x="9" y="12" height="80" width="4539"  name=t_3  font.face="Arial" font.height="-12" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="1" text="Report ID:" border="0" color="0" x="14" y="16" height="56" width="279"  name=t_1  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="SIMS208" border="0" color="0" x="315" y="16" height="56" width="265"  name=t_5  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=header alignment="1" expression="'Page ' + string(page()) + ' of ' + string(pageCount())"border="0" color="0" x="3899" y="12" height="64" width="635" format="[general]"  name=compute_1  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="1" text="Date:" border="0" color="0" x="151" y="68" height="56" width="137"  name=t_2  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=header alignment="0" expression="today()"border="0" color="0" x="315" y="68" height="56" width="539" format="[shortdate] [time]"  name=compute_2  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="1" text="Project Id:" border="0" color="0" x="14" y="124" height="56" width="279"  name=project_id_t  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header id=2 alignment="0" tabsequence=20 border="0" color="33554432" x="315" y="120" height="56" width="402" format="[general]"  name=project_id edit.limit=10 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="1" text="Wh Code:" border="0" color="0" x="23" y="180" height="56" width="270"  name=wh_code_t  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header id=9 alignment="0" tabsequence=32766 border="0" color="33554432" x="315" y="180" height="56" width="398" format="[general]"  name=delivery_master_wh_code edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+line(band=header x1="9" y1="428" x2="4503" y2="428"  name=l_1 pen.style="0" pen.width="5" pen.color="0"  background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="ClientOrder Nbr" border="0" color="0" x="5" y="308" height="112" width="306"  name=t_6  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="Product" border="0" color="0" x="539" y="364" height="56" width="233"  name=t_7  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="QTY" border="0" color="0" x="1797" y="364" height="56" width="101"  name=t_8  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="CompletionDate" border="0" color="0" x="1920" y="308" height="112" width="338"  name=complete_date_t  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Dealer
+Code" border="0" color="0" x="2295" y="312" height="108" width="197"  name=cust_code_t  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Dealer name" border="0" color="0" x="2766" y="364" height="56" width="379"  name=cust_name_t  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Zip" border="0" color="0" x="3666" y="364" height="56" width="96"  name=zip_t  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="Country" border="0" color="0" x="3872" y="364" height="56" width="229"  name=country_t  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="0" color="33554432" x="14" y="4" height="76" width="517" format="[general]"  name=cust_order_no edit.limit=20 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=11 alignment="0" tabsequence=32766 border="0" color="33554432" x="539" y="4" height="76" width="974" format="[general]"  name=delivery_detail_sku edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=10 alignment="1" tabsequence=32766 border="0" color="33554432" x="1527" y="4" height="76" width="375" format="#######.#####"  name=delivery_detail_alloc_qty editmask.mask="#######.#####" editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="0" color="33554432" x="1920" y="4" height="76" width="338" format="[shortdate] hh:mm"  name=complete_date edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=5 alignment="0" tabsequence=32766 border="0" color="33554432" x="2272" y="4" height="76" width="466" format="[general]"  name=cust_code edit.limit=20 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=6 alignment="0" tabsequence=32766 border="0" color="33554432" x="2752" y="4" height="76" width="878" format="[general]"  name=cust_name edit.limit=40 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=7 alignment="0" tabsequence=32766 border="0" color="33554432" x="3643" y="4" height="76" width="219" format="[general]"  name=zip edit.limit=15 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=8 alignment="0" tabsequence=32766 border="0" color="33554432" x="3877" y="4" height="76" width="640" format="[general]"  name=country edit.limit=30 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=summary alignment="0" text="***************************End of Report *******************************" border="0" color="0" x="1509" y="12" height="56" width="1513"  name=t_9  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" )

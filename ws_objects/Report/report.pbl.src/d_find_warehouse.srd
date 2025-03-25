@@ -1,0 +1,13 @@
+﻿$PBExportHeader$d_find_warehouse.srd
+$PBExportComments$Datawindow used for finding the warehouse name
+release 6;
+datawindow(units=0 timer_interval=0 color=16777215 processing=0 print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.prompt=no print.buttons=no print.preview.buttons=no )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=100 color="536870912" )
+table(column=(type=char(10) update=yes updatewhereclause=yes key=yes name=wh_code dbname="Warehouse.WH_Code" )
+ column=(type=char(40) update=yes updatewhereclause=yes name=wh_name dbname="Warehouse.WH_Name" )
+ retrieve="PBSELECT(TABLE(NAME=~"Warehouse~") COLUMN(NAME=~"Warehouse.WH_Code~")COLUMN(NAME=~"Warehouse.WH_Name~"))" update="Warehouse" updatewhere=1 updatekeyinplace=no )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="0" color="0" x="59" y="8" height="76" width="402" format="[general]"  name=wh_code edit.limit=10 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="0" color="0" x="571" y="8" height="76" width="1125" format="[general]"  name=wh_name edit.limit=40 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" cellpadding="0" cellspacing="0" generatecss="no" nowrap="yes")

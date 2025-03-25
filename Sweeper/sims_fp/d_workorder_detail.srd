@@ -1,0 +1,74 @@
+HA$PBExportHeader$d_workorder_detail.srd
+$PBExportComments$DW for saving new WorkOrder Detail Records
+release 11;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=1 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes print.preview.outline=yes hidegrayline=no showbackcoloronxp=no grid.lines=0 )
+header(height=80 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=92 color="536870912" )
+table(column=(type=char(16) update=yes updatewhereclause=yes key=yes name=wo_no dbname="WorkOrder_Detail.WO_NO" dbalias=".WO_NO" )
+ column=(type=decimal(0) update=yes updatewhereclause=yes key=yes name=line_item_no dbname="WorkOrder_Detail.Line_Item_No" dbalias=".Line_Item_No" )
+ column=(type=char(50) update=yes updatewhereclause=yes key=yes name=sku dbname="WorkOrder_Detail.SKU" dbalias=".SKU" )
+ column=(type=char(20) update=yes updatewhereclause=yes key=yes name=supp_code dbname="WorkOrder_Detail.Supp_code" dbalias=".Supp_code" )
+ column=(type=decimal(0) update=yes updatewhereclause=yes key=yes name=owner_id dbname="WorkOrder_Detail.Owner_ID" dbalias=".Owner_ID" )
+ column=(type=char(50) update=yes updatewhereclause=yes name=sku_parent dbname="WorkOrder_Detail.SKU_Parent" dbalias=".SKU_Parent" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=component_ind dbname="WorkOrder_Detail.Component_Ind" dbalias=".Component_Ind" )
+ column=(type=decimal(5) update=yes updatewhereclause=yes name=req_qty dbname="WorkOrder_Detail.Req_qty" dbalias=".Req_qty" )
+ column=(type=decimal(5) update=yes updatewhereclause=yes name=alloc_qty dbname="WorkOrder_Detail.Alloc_Qty" dbalias=".Alloc_Qty" )
+ column=(type=char(30) update=yes updatewhereclause=yes name=user_field1 dbname="WorkOrder_Detail.User_Field1" dbalias=".User_Field1" )
+ column=(type=char(30) update=yes updatewhereclause=yes name=user_field2 dbname="WorkOrder_Detail.User_Field2" dbalias=".User_Field2" )
+ column=(type=char(250) update=yes updatewhereclause=yes name=user_field3 dbname="WorkOrder_Detail.User_Field3" dbalias=".User_Field3" )
+ retrieve="  SELECT dbo.WorkOrder_Detail.WO_NO,   
+         dbo.WorkOrder_Detail.Line_Item_No,   
+         dbo.WorkOrder_Detail.SKU,   
+         dbo.WorkOrder_Detail.Supp_code,   
+         dbo.WorkOrder_Detail.Owner_ID,   
+         dbo.WorkOrder_Detail.SKU_Parent,   
+         dbo.WorkOrder_Detail.Component_Ind,   
+         dbo.WorkOrder_Detail.Req_qty,   
+         dbo.WorkOrder_Detail.Alloc_Qty,   
+         dbo.WorkOrder_Detail.User_Field1,   
+         dbo.WorkOrder_Detail.User_Field2,
+		dbo.WorkOrder_Detail.User_Field3  
+    FROM dbo.WorkOrder_Detail
+			Where sku = :asSku and
+					supp_code = :asSupplier and
+					Line_Item_No = :alLineItemNo and
+					Wo_No = :asWoNo
+   
+" update="dbo.WorkOrder_Detail" updatewhere=1 updatekeyinplace=no arguments=(("aswono", string),("assku", string),("assupplier", string),("allineitemno", number)) )
+text(band=header alignment="2" text="Wo No" border="0" color="33554432" x="9" y="8" height="64" width="466" html.valueishtml="0"  name=wo_no_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Line Item No" border="0" color="33554432" x="485" y="8" height="64" width="334" html.valueishtml="0"  name=line_item_no_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Sku" border="0" color="33554432" x="827" y="8" height="64" width="1399" html.valueishtml="0"  name=sku_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Supp Code" border="0" color="33554432" x="2235" y="8" height="64" width="576" html.valueishtml="0"  name=supp_code_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Owner Id" border="0" color="33554432" x="2821" y="8" height="64" width="329" html.valueishtml="0"  name=owner_id_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Sku Parent" border="0" color="33554432" x="3159" y="8" height="64" width="1399" html.valueishtml="0"  name=sku_parent_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Component Ind" border="0" color="33554432" x="4567" y="8" height="64" width="398" html.valueishtml="0"  name=component_ind_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Req Qty" border="0" color="33554432" x="4974" y="8" height="64" width="329" html.valueishtml="0"  name=req_qty_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Alloc Qty" border="0" color="33554432" x="5312" y="8" height="64" width="329" html.valueishtml="0"  name=alloc_qty_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="User Field1" border="0" color="33554432" x="5650" y="8" height="64" width="850" html.valueishtml="0"  name=user_field1_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="User Field2" border="0" color="33554432" x="6510" y="8" height="64" width="850" html.valueishtml="0"  name=user_field2_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=1 alignment="0" tabsequence=10 border="0" color="33554432" x="9" y="8" height="76" width="466" format="[general]" html.valueishtml="0"  name=wo_no visible="1" edit.limit=16 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="1" tabsequence=20 border="0" color="33554432" x="485" y="8" height="76" width="334" format="[general]" html.valueishtml="0"  name=line_item_no visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="0" tabsequence=30 border="0" color="33554432" x="827" y="8" height="76" width="1399" format="[general]" html.valueishtml="0"  name=sku visible="1" edit.limit=50 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="0" tabsequence=40 border="0" color="33554432" x="2235" y="8" height="76" width="576" format="[general]" html.valueishtml="0"  name=supp_code visible="1" edit.limit=20 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="1" tabsequence=50 border="0" color="33554432" x="2821" y="8" height="76" width="329" format="[general]" html.valueishtml="0"  name=owner_id visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="0" tabsequence=60 border="0" color="33554432" x="3159" y="8" height="76" width="1399" format="[general]" html.valueishtml="0"  name=sku_parent visible="1" edit.limit=50 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=7 alignment="0" tabsequence=70 border="0" color="33554432" x="4567" y="8" height="76" width="398" format="[general]" html.valueishtml="0"  name=component_ind visible="1" edit.limit=1 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=8 alignment="1" tabsequence=80 border="0" color="33554432" x="4974" y="8" height="76" width="329" format="[general]" html.valueishtml="0"  name=req_qty visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=9 alignment="1" tabsequence=90 border="0" color="33554432" x="5312" y="8" height="76" width="329" format="[general]" html.valueishtml="0"  name=alloc_qty visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=10 alignment="0" tabsequence=100 border="0" color="33554432" x="5650" y="8" height="76" width="850" format="[general]" html.valueishtml="0"  name=user_field1 visible="1" edit.limit=30 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=11 alignment="0" tabsequence=110 border="0" color="33554432" x="6510" y="8" height="76" width="850" format="[general]" html.valueishtml="0"  name=user_field2 visible="1" edit.limit=30 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=12 alignment="0" tabsequence=120 border="0" color="33554432" x="7374" y="0" height="64" width="736" html.valueishtml="0"  name=user_field3 visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="User Field3" border="0" color="0" x="7369" y="4" height="76" width="741" html.valueishtml="0"  name=user_field3_t visible="1"  font.face="Tahoma" font.height="-12" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" pagingmethod=0 generatedddwframes="1" )
+xhtmlgen() cssgen(sessionspecific="0" )
+xmlgen(inline="0" )
+xsltgen()
+jsgen()
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )
+export.xhtml()
+ 

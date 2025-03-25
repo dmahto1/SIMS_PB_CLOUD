@@ -1,0 +1,147 @@
+HA$PBExportHeader$d_inventory_by_sku_rw.srd
+$PBExportComments$Datawindow used for inventory by sku
+release 11;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 1 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes print.preview.outline=yes hidegrayline=no showbackcoloronxp=no )
+header(height=408 color="536870912" )
+summary(height=84 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=68 color="536870912" )
+table(column=(type=char(10) updatewhereclause=yes name=content_summary_project_id dbname="project_id" )
+ column=(type=char(10) updatewhereclause=yes name=content_summary_wh_code dbname="WH_Code" )
+ column=(type=char(20) updatewhereclause=yes name=content_summary_supp_code dbname="supp_code" )
+ column=(type=char(40) updatewhereclause=yes name=supp_name dbname="supp_name" )
+ column=(type=char(50) updatewhereclause=yes name=content_summary_sku dbname="sku" )
+ column=(type=char(50) updatewhereclause=yes name=item_master_alternate_sku dbname="alternate_sku" )
+ column=(type=char(70) updatewhereclause=yes name=item_master_description dbname="description" )
+ column=(type=decimal(4) updatewhereclause=yes name=item_master_std_cost dbname="Std_Cost" )
+ column=(type=char(40) updatewhereclause=yes name=project_name dbname="project_name" )
+ column=(type=decimal(5) updatewhereclause=yes identity=yes name=avail_qty dbname="avail_qty" )
+ column=(type=char(10) updatewhereclause=yes name=season_code dbname="season_code" )
+ column=(type=char(10) updatewhereclause=yes name=brand dbname="brand" )
+ column=(type=char(20) updatewhereclause=yes name=sub_category dbname="sub_category" )
+ column=(type=char(20) updatewhereclause=yes name=gender_category dbname="gender_category" )
+ column=(type=char(30) updatewhereclause=yes name=product_attribute dbname="product_attribute" )
+ column=(type=char(1) updatewhereclause=yes name=ord_type dbname="ord_type" )
+ column=(type=long updatewhereclause=yes identity=yes name=ageing dbname="Ageing" )
+ column=(type=char(50) updatewhereclause=yes name=content_summary_cost_price dbname="cost_price" )
+ column=(type=char(30) updatewhereclause=yes name=item_dept dbname="item_dept" )
+ retrieve="SELECT  	cs.project_id,
+						cs.WH_Code,
+						cs.supp_code,
+						supp_name = (select supp_name 
+											from supplier With (NoLock)
+												where supplier.project_id = cs.project_id and
+														supplier.supp_code = cs.supp_code),
+						cs.sku,
+						
+						itm.alternate_sku,
+						itm.description,
+						itm.Std_Cost,
+						project_name = (select project_desc
+					 		from project With (NoLock)
+								where project.project_id = cs.project_id),
+						sum(cs.avail_qty) as avail_qty,
+							itm.user_field4  as 'season_code',
+						itm.user_field5 as 'brand',
+						itm.user_field6 as 'sub_category',
+						itm.user_field7 as 'gender_category',
+						itm.user_field8 as 'product_attribute',
+
+
+						ord_type,
+						Ageing = CASE cs.Expiration_date  
+						 					WHEN '12/31/2999' THEN DateDiff(dd, receive_master.complete_date, GetDate())
+									 		ELSE DateDiff(dd, cs.Expiration_date, GetDate())
+											END,
+
+
+
+						cs.po_no as cost_price,
+						itm.user_field10 as 'item_dept'
+
+
+FROM					content_summary cs  With (NoLock) LEFT OUTER JOIN dbo.Receive_Master With (NoLock) ON cs.Project_ID = dbo.Receive_Master.Project_ID AND cs.RO_No = dbo.Receive_Master.RO_No,
+						inventory_type inv With (NoLock),
+						item_master itm With (NoLock), 
+						Owner With (NoLock)
+
+WHERE					cs.sku = itm.sku and
+                  cs.supp_code = itm.supp_code and
+						cs.inventory_type = inv.inv_type and
+                  cs.project_id = inv.project_id and
+						cs.project_id = itm.project_id and
+						cs.Owner_id = owner.Owner_id 
+ and  cs.project_id = 'RUN-WORLD' and  dbo.Receive_Master.Ord_Type <> 'X'
+
+
+GROUP BY cs.project_id, cs.wh_code, cs.supp_code, cs.sku,
+						itm.alternate_sku, itm.description, itm.UOM_1, itm.Std_Cost,
+						itm.user_field4,
+						itm.user_field5,
+						itm.user_field6,
+						itm.user_field7,
+						itm.user_field8,
+						itm.user_field9, cs.po_no, cs.Expiration_date, complete_date,
+						dbo.Receive_Master.Ord_Type,
+						itm.user_field10
+
+HAVING (sum(cs.avail_qty) > 0 );"  sort="content_summary_wh_code A content_summary_sku A ageing A " )
+group(level=1 header.height=0 trailer.height=0 by=("content_summary_wh_code" ) header.color="536870912" trailer.color="536870912" )
+group(level=2 header.height=0 trailer.height=92 by=("content_summary_sku" ) header.color="536870912" trailer.color="536870912" )
+text(band=header alignment="2" text="INVENTORY" border="0" color="0" x="14" y="12" height="92" width="4434" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-14" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="0" expression="today()"border="0" color="0" x="270" y="64" height="56" width="517" format="mm/dd/yyyy hh:mm" html.valueishtml="0"  name=compute_1 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="Date:" border="0" color="0" x="18" y="64" height="56" width="155" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="Project Name:" border="0" color="0" x="18" y="140" height="64" width="416" html.valueishtml="0"  name=t_5 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="Warehouse:" border="0" color="0" x="18" y="200" height="56" width="361" html.valueishtml="0"  name=content_summary_wh_code_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="
+SKU" border="0" color="0" x="18" y="284" height="112" width="128" html.valueishtml="0"  name=content_summary_sku_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header id=2 alignment="0" tabsequence=32766 border="0" color="0" x="1582" y="220" height="76" width="110" format="[general]" html.valueishtml="0"  name=content_summary_wh_code_1 visible="1~t0" edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header id=9 alignment="0" tabsequence=32766 border="0" color="33554432" x="389" y="140" height="64" width="1125" format="[general]" html.valueishtml="0"  name=project_name visible="1" edit.limit=40 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="" border="0" color="0" x="389" y="196" height="56" width="1083" html.valueishtml="0"  name=t_warehouse visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="1" expression="'Page: ' + page() + ' of ' + pagecount()"border="0" color="0" x="3899" y="12" height="56" width="539" format="[general]" html.valueishtml="0"  name=compute_2 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="
+Description" border="0" color="0" x="640" y="284" height="112" width="421" html.valueishtml="0"  name=t_7 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="1" text="QTY" border="0" color="0" x="1472" y="340" height="56" width="165" html.valueishtml="0"  name=content_summary_avail_qty_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Cost
+Price" border="0" color="0" x="1824" y="284" height="112" width="174" html.valueishtml="0"  name=t_8 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Retail
+Price" border="0" color="0" x="2144" y="284" height="112" width="215" html.valueishtml="0"  name=inventory_type_inv_type_desc_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Season
+Code" border="0" color="0" x="2359" y="284" height="112" width="256" html.valueishtml="0"  name=t_9 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Brand" border="0" color="0" x="2633" y="340" height="56" width="315" html.valueishtml="0"  name=t_6 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Sub
+Category" border="0" color="0" x="2967" y="284" height="112" width="311" html.valueishtml="0"  name=t_3 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Ageing" border="0" color="0" x="3607" y="340" height="56" width="178" html.valueishtml="0"  name=content_summary_sit_qty_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Gender
+Category" border="0" color="0" x="3296" y="284" height="112" width="297" html.valueishtml="0"  name=content_summary_alloc_qty_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Product
+Attibute" border="0" color="0" x="3808" y="284" height="112" width="315" html.valueishtml="0"  name=t_4 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+line(band=header x1="14" y1="404" x2="4512" y2="404"  name=l_1 visible="1" pen.style="0" pen.width="9" pen.color="0"  background.mode="2" background.color="16777215" )
+column(band=detail id=5 alignment="0" tabsequence=32766 border="0" color="33554432" x="18" y="4" height="76" width="613" format="[general]" html.valueishtml="0"  name=content_summary_sku visible="1" edit.limit=50 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=7 alignment="0" tabsequence=32766 border="0" color="33554432" x="640" y="4" height="76" width="750" format="[general]" html.valueishtml="0"  name=item_master_description visible="1" edit.limit=70 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=18 alignment="1" tabsequence=32766 border="0" color="0" x="1655" y="0" height="76" width="343" format="[general]" html.valueishtml="0"  name=content_summary_cost_price visible="1" edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=8 alignment="1" tabsequence=32766 border="0" color="0" x="2016" y="0" height="76" width="302" format="[general]" html.valueishtml="0"  name=item_master_std_cost visible="1" edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=12 alignment="2" tabsequence=32766 border="0" color="0" x="2633" y="0" height="56" width="315" format="[general]" html.valueishtml="0"  name=brand visible="1" edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=11 alignment="2" tabsequence=32766 border="0" color="0" x="2359" y="0" height="56" width="256" format="[general]" html.valueishtml="0"  name=season_code visible="1" edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=13 alignment="2" tabsequence=32766 border="0" color="0" x="2967" y="0" height="56" width="311" format="[general]" html.valueishtml="0"  name=sub_category visible="1" edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=14 alignment="2" tabsequence=32766 border="0" color="0" x="3296" y="0" height="56" width="297" format="[general]" html.valueishtml="0"  name=gender_category visible="1" edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=17 alignment="2" tabsequence=32766 border="0" color="0" x="3607" y="0" height="56" width="178" format="[general]" html.valueishtml="0"  name=ageing visible="1" edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=10 alignment="1" tabsequence=32766 border="0" color="33554432" x="1399" y="4" height="76" width="238" format="#######.#####" html.valueishtml="0"  name=avail_qty visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+line(band=trailer.2 x1="9" y1="84" x2="4507" y2="84"  name=l_2 visible="1" pen.style="0" pen.width="5" pen.color="0"  background.mode="2" background.color="16777215" )
+compute(band=trailer.2 alignment="1" expression="sum(avail_qty for group 2)"border="0" color="0" x="1257" y="8" height="64" width="379" format="#######.#####" html.valueishtml="0"  name=compute_3 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=summary alignment="0" text="END OF REPORT" border="0" color="0" x="2107" y="24" height="56" width="507" html.valueishtml="0"  name=t_11 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Item
+Dept" border="0" color="0" x="4142" y="284" height="112" width="315" html.valueishtml="0"  name=t_10 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=15 alignment="2" tabsequence=32766 border="0" color="0" x="3808" y="0" height="56" width="315" format="[general]" html.valueishtml="0"  name=product_attribute visible="1" edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=19 alignment="2" tabsequence=0 border="0" color="0" x="4142" y="0" height="56" width="315" html.valueishtml="0"  name=item_dept visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" pagingmethod=0 generatedddwframes="1" )
+xhtmlgen() cssgen(sessionspecific="0" )
+xmlgen(inline="0" )
+xsltgen()
+jsgen()
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )
+export.xhtml()
+ 

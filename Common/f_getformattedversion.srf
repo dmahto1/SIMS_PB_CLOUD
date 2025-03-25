@@ -1,0 +1,51 @@
+HA$PBExportHeader$f_getformattedversion.srf
+global type f_getformattedversion from function_object
+end type
+
+forward prototypes
+global function string f_getformattedversion ()
+end prototypes
+
+global function string f_getformattedversion ();// string f_getFormattedVersion()
+
+// Returns a formatted version number
+string release
+string rev
+string updatedate
+string version
+string workerant
+
+string msg  // used to display QA versions, Test, etc
+
+// msg = 'Smartcode'
+//msg = 'Test'  
+//msg = 'QA'
+ //msg = '' // production
+
+version = f_get_version()
+workerant = left( version, 2 )
+release = left( workerant, 1 )
+rev = right( workerant, 1 )
+//updatedate = right( version, 8 ) //29-Jun-2015 :Madhu- commented and shifted below
+
+//29-Jun-2015 :Madhu- Strip QA /PROD from the f_get_version() - START
+If Pos(version,",") > 0 THEN  
+	updatedate= trim(right(left(version,Pos(version,",") -1),8)) //client version
+	gs_buildVersion =Mid(f_get_version(), Pos(f_get_version(),",") +1, len(f_get_version())) //build Version DB
+ELSEIF Pos(version,"-") > 0 THEN
+	updatedate= trim(right(left(version,Pos(version,"-") -1),8))
+	gs_buildVersion =Mid(f_get_version(), Pos(f_get_version(),"-") +1, len(f_get_version()))
+END IF
+
+msg =gs_buildVersion
+//29-Jun-2015 :Madhu- Strip QA /PROD from the f_get_version() - END
+
+
+rev = trim( rev + " " + msg )
+version = trim( "Version: " + release + "." + rev + " ( " + updatedate +  " ) " )
+
+return version
+
+
+end function
+

@@ -1,0 +1,104 @@
+HA$PBExportHeader$f_getlocalworldtime.srf
+global type f_getLocalWorldTime from function_object
+end type
+
+forward prototypes
+global function datetime f_getlocalworldtime (string _whcode)
+end prototypes
+
+global function datetime f_getlocalworldtime (string _whcode);// datetime = f_getLocalWorldTime( whcode  )
+
+// We need to figure out what the local users time is based on GMT ( Greenwich Mean Time)
+
+datetime 		_userDateTime
+datetime		_systemTime
+int 				_dst
+decimal{2}		_gmtOffset
+int					_todayMonth
+int					_todayDay
+int					_dstStartMonth
+int					_dstStartDay
+int					_dstEndMonth
+int					_dstEndDay
+string 			test
+int 				lpos
+int 				minutes
+string 			lsDSTFlag
+datetime 		dststarts
+datetime 		dstends
+String				ls_time_zone	// LTK 20150424  
+
+select current_timestamp into :_systemTime
+from sysobjects;
+
+SELECT dbo.Warehouse.GMT_Offset,   
+			 dbo.Warehouse.DST_Flag,
+                dbo.Warehouse.Dylght_svngs_time_start,   
+                dbo.Warehouse.Dylght_svngs_time_end,
+			 dbo.Warehouse.TimeZone 
+INTO :_gmtOffset,:lsDSTFlag,:dststarts,:dstends, :ls_time_zone
+FROM dbo.Warehouse
+WHERE wh_code = :_whcode;
+
+if isNull( _gmtOffset ) then _gmtOffset = 0
+if isNull( lsDSTFlag ) then lsDSTFlag = 'N'
+
+// LTK 20150424  Only add DST offset if TImezone is blank. If timezone is populated, the OFfset includes DST if applicable
+
+_dst = 0
+if lsDSTFlag = 'Y' and ( IsNull( ls_time_zone ) or Trim(ls_time_zone) = "" ) then
+	
+	_dstStartMonth = Month( date( dststarts ) )
+	_dstStartDay = Day( date( dststarts) )
+	_dstEndMonth = Month( date( dstends ) )
+	_dstEndDay = Day( date( dstends ) )
+	_todayMonth = Month( date( _systemTime ) )
+	_todayDay = Day( date( _systemTime ) )
+
+//	if _todayMonth >= _dstStartMonth and _todayMonth <= _dstEndMonth then
+//		if _todayday >= _dstStartDay and _todayday <= _dstEndDay then
+//			_dst = 1
+//		end if
+//	end if
+
+	// 04/2010 - dts - made DST Fix that was done on client side back in 2008...
+	if _todayMonth > _dstStartMonth and _todayMonth < _dstEndMonth then
+		_dst = 1
+	ElseIf _todayMonth = _dstStartMonth Then
+		if _todayday >= _dstStartDay Then
+			_dst = 1
+		End If
+	ElseIf _todayMonth = _dstEndMonth then
+		If  _todayday <= _dstEndDay then
+			_dst = 1
+		End If
+	End If
+	
+end if
+
+_gmtOffset += _dst
+minutes = 0
+test = string( _gmtOffset )
+lpos = pos(  test,"." )
+if lpos > 0 then	test = right( test, (len(test) -lpos))
+minutes = integer( test )
+choose case minutes
+	case 25
+		minutes = 15
+	case 50
+		minutes = 30
+	case 75
+		minutes = 45
+end choose
+		
+select dateAdd( hour, :_gmtoffset, :_systemTime ) into :_userDateTime
+from sysobjects;
+if minutes > 0 then
+	select dateAdd( minute, :minutes, :_userDateTime ) into :_userDateTime
+	from sysobjects;
+end if
+
+return _userDateTime
+
+end function
+

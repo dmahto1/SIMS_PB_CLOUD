@@ -1,0 +1,116 @@
+﻿$PBExportHeader$d_delivery_bom.srd
+release 11;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=1 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes print.preview.outline=yes hidegrayline=no showbackcoloronxp=no grid.lines=0 )
+header(height=80 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=92 color="536870912" )
+table(column=(type=decimal(0) update=yes updatewhereclause=yes key=yes identity=yes name=delivery_bom_id dbname="Delivery_BOM.Delivery_BOM_ID" dbalias=".Delivery_BOM_ID" )
+ column=(type=char(10) update=yes updatewhereclause=yes name=project_id dbname="Delivery_BOM.Project_ID" dbalias=".Project_ID" )
+ column=(type=decimal(0) update=yes updatewhereclause=yes name=edi_batch_seq_no dbname="Delivery_BOM.EDI_Batch_Seq_No" dbalias=".EDI_Batch_Seq_No" )
+ column=(type=decimal(0) update=yes updatewhereclause=yes name=order_seq_no dbname="Delivery_BOM.Order_Seq_No" dbalias=".Order_Seq_No" )
+ column=(type=char(16) update=yes updatewhereclause=yes name=do_no dbname="Delivery_BOM.DO_NO" dbalias=".DO_NO" )
+ column=(type=decimal(0) update=yes updatewhereclause=yes name=line_item_no dbname="Delivery_BOM.Line_Item_No" dbalias=".Line_Item_No" )
+ column=(type=char(50) update=yes updatewhereclause=yes name=sku_parent dbname="Delivery_BOM.Sku_Parent" dbalias=".Sku_Parent" )
+ column=(type=char(50) update=yes updatewhereclause=yes name=sku_child dbname="Delivery_BOM.Sku_Child" dbalias=".Sku_Child" )
+ column=(type=char(20) update=yes updatewhereclause=yes name=supp_code_parent dbname="Delivery_BOM.Supp_Code_Parent" dbalias=".Supp_Code_Parent" )
+ column=(type=char(20) update=yes updatewhereclause=yes name=supp_code_child dbname="Delivery_BOM.Supp_Code_Child" dbalias=".Supp_Code_Child" )
+ column=(type=decimal(5) update=yes updatewhereclause=yes name=child_qty dbname="Delivery_BOM.Child_Qty" dbalias=".Child_Qty" )
+ column=(type=char(50) update=yes updatewhereclause=yes name=user_field1 dbname="Delivery_BOM.user_field1" dbalias=".user_field1" )
+ column=(type=char(50) update=yes updatewhereclause=yes name=user_field2 dbname="Delivery_BOM.user_field2" dbalias=".user_field2" )
+ column=(type=decimal(0) update=yes updatewhereclause=yes name=owner_id dbname="Delivery_BOM.Owner_ID" dbalias=".Owner_ID" )
+ column=(type=char(16) update=yes updatewhereclause=yes name=wo_no dbname="Delivery_BOM.WO_NO" dbalias=".WO_NO" )
+ column=(type=char(250) update=yes updatewhereclause=yes name=user_field3 dbname="Delivery_BOM.User_field3" dbalias=".User_field3" )
+ column=(type=char(250) update=yes updatewhereclause=yes name=user_field4 dbname="Delivery_BOM.User_field4" dbalias=".User_field4" )
+ column=(type=char(50) update=yes updatewhereclause=yes name=pick_lot_no dbname="Delivery_BOM.Pick_Lot_No" dbalias=".Pick_Lot_No" )
+ column=(type=char(50) update=yes updatewhereclause=yes name=pick_po_no dbname="Delivery_BOM.Pick_Po_No" dbalias=".Pick_Po_No" )
+ column=(type=char(50) update=yes updatewhereclause=yes name=pick_po_no2 dbname="Delivery_BOM.Pick_Po_No2" dbalias=".Pick_Po_No2" )
+ column=(type=char(250) update=yes updatewhereclause=yes name=user_field5 dbname="Delivery_BOM.User_field5" dbalias=".User_field5" )
+ column=(type=char(250) update=yes updatewhereclause=yes name=user_field6 dbname="Delivery_BOM.User_field6" dbalias=".User_field6" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=inventory_type dbname="Delivery_BOM.Inventory_Type" dbalias=".Inventory_Type" )
+ retrieve="SELECT dbo.Delivery_BOM.Delivery_BOM_ID,   
+		dbo.Delivery_BOM.Project_ID,   
+		dbo.Delivery_BOM.EDI_Batch_Seq_No,   
+		dbo.Delivery_BOM.Order_Seq_No,   
+		dbo.Delivery_BOM.DO_NO,   
+		dbo.Delivery_BOM.Line_Item_No,   
+		dbo.Delivery_BOM.Sku_Parent,   
+		dbo.Delivery_BOM.Sku_Child,   
+		dbo.Delivery_BOM.Supp_Code_Parent,   
+		dbo.Delivery_BOM.Supp_Code_Child,   
+		dbo.Delivery_BOM.Child_Qty,   
+		dbo.Delivery_BOM.user_field1,   
+		dbo.Delivery_BOM.user_field2,   
+		dbo.Delivery_BOM.Owner_ID,   
+		dbo.Delivery_BOM.WO_NO,   
+		dbo.Delivery_BOM.User_field3,   
+		dbo.Delivery_BOM.User_field4,   
+		dbo.Delivery_BOM.Pick_Lot_No,   
+		dbo.Delivery_BOM.Pick_Po_No,   
+		dbo.Delivery_BOM.Pick_Po_No2,   
+		dbo.Delivery_BOM.User_field5,   
+		dbo.Delivery_BOM.User_field6,   
+		dbo.Delivery_BOM.Inventory_Type  
+FROM dbo.Delivery_BOM   
+WHERE dbo.Delivery_BOM.Project_ID = :as_project
+AND dbo.Delivery_BOM.DO_NO = :as_dono
+AND dbo.Delivery_BOM.Line_Item_No = :al_lineitemno
+AND dbo.Delivery_BOM.Sku_Parent = :as_sku
+" update="dbo.Delivery_BOM" updatewhere=1 updatekeyinplace=no arguments=(("as_project", string),("as_dono", string),("al_lineitemno", number),("as_sku", string)) )
+text(band=header alignment="2" text="Delivery Bom Id" border="0" color="33554432" x="14" y="8" height="64" width="411" html.valueishtml="0"  name=delivery_bom_id_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Project Id" border="0" color="33554432" x="439" y="8" height="64" width="302" html.valueishtml="0"  name=project_id_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Edi Batch Seq No" border="0" color="33554432" x="754" y="8" height="64" width="475" html.valueishtml="0"  name=edi_batch_seq_no_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Order Seq No" border="0" color="33554432" x="1243" y="8" height="64" width="361" html.valueishtml="0"  name=order_seq_no_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Do No" border="0" color="33554432" x="1618" y="8" height="64" width="466" html.valueishtml="0"  name=do_no_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Line Item No" border="0" color="33554432" x="2098" y="8" height="64" width="334" html.valueishtml="0"  name=line_item_no_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Sku Parent" border="0" color="33554432" x="2446" y="8" height="64" width="1399" html.valueishtml="0"  name=sku_parent_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Sku Child" border="0" color="33554432" x="3858" y="8" height="64" width="1399" html.valueishtml="0"  name=sku_child_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Supp Code Parent" border="0" color="33554432" x="5271" y="8" height="64" width="576" html.valueishtml="0"  name=supp_code_parent_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Supp Code Child" border="0" color="33554432" x="5865" y="8" height="64" width="576" html.valueishtml="0"  name=supp_code_child_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Child Qty" border="0" color="33554432" x="6455" y="8" height="64" width="329" html.valueishtml="0"  name=child_qty_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="User Field1" border="0" color="33554432" x="6798" y="8" height="64" width="1399" html.valueishtml="0"  name=user_field1_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="User Field2" border="0" color="33554432" x="8210" y="8" height="64" width="1399" html.valueishtml="0"  name=user_field2_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Owner Id" border="0" color="33554432" x="9623" y="8" height="64" width="329" html.valueishtml="0"  name=owner_id_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Wo No" border="0" color="33554432" x="9966" y="8" height="64" width="466" html.valueishtml="0"  name=wo_no_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="User Field3" border="0" color="33554432" x="10446" y="8" height="64" width="4389" html.valueishtml="0"  name=user_field3_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="User Field4" border="0" color="33554432" x="14848" y="8" height="64" width="4389" html.valueishtml="0"  name=user_field4_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Pick Lot No" border="0" color="33554432" x="19250" y="8" height="64" width="1399" html.valueishtml="0"  name=pick_lot_no_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Pick Po No" border="0" color="33554432" x="20663" y="8" height="64" width="1399" html.valueishtml="0"  name=pick_po_no_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Pick Po No2" border="0" color="33554432" x="22075" y="8" height="64" width="1399" html.valueishtml="0"  name=pick_po_no2_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="User Field5" border="0" color="33554432" x="23488" y="8" height="64" width="4389" html.valueishtml="0"  name=user_field5_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="User Field6" border="0" color="33554432" x="27890" y="8" height="64" width="4389" html.valueishtml="0"  name=user_field6_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Inventory Type" border="0" color="33554432" x="32293" y="8" height="64" width="379" html.valueishtml="0"  name=inventory_type_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=1 alignment="1" tabsequence=32766 border="0" color="33554432" x="14" y="8" height="76" width="411" format="[general]" html.valueishtml="0"  name=delivery_bom_id visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="0" tabsequence=10 border="0" color="33554432" x="439" y="8" height="76" width="302" format="[general]" html.valueishtml="0"  name=project_id visible="1" edit.limit=10 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="1" tabsequence=20 border="0" color="33554432" x="754" y="8" height="76" width="475" format="[general]" html.valueishtml="0"  name=edi_batch_seq_no visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="1" tabsequence=30 border="0" color="33554432" x="1243" y="8" height="76" width="361" format="[general]" html.valueishtml="0"  name=order_seq_no visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="0" tabsequence=40 border="0" color="33554432" x="1618" y="8" height="76" width="466" format="[general]" html.valueishtml="0"  name=do_no visible="1" edit.limit=16 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="1" tabsequence=50 border="0" color="33554432" x="2098" y="8" height="76" width="334" format="[general]" html.valueishtml="0"  name=line_item_no visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=7 alignment="0" tabsequence=60 border="0" color="33554432" x="2446" y="8" height="76" width="1399" format="[general]" html.valueishtml="0"  name=sku_parent visible="1" edit.limit=50 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=8 alignment="0" tabsequence=70 border="0" color="33554432" x="3858" y="8" height="76" width="1399" format="[general]" html.valueishtml="0"  name=sku_child visible="1" edit.limit=50 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=9 alignment="0" tabsequence=80 border="0" color="33554432" x="5271" y="8" height="76" width="576" format="[general]" html.valueishtml="0"  name=supp_code_parent visible="1" edit.limit=20 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=10 alignment="0" tabsequence=90 border="0" color="33554432" x="5865" y="8" height="76" width="576" format="[general]" html.valueishtml="0"  name=supp_code_child visible="1" edit.limit=20 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=11 alignment="1" tabsequence=100 border="0" color="33554432" x="6455" y="8" height="76" width="329" format="[general]" html.valueishtml="0"  name=child_qty visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=12 alignment="0" tabsequence=110 border="0" color="33554432" x="6798" y="8" height="76" width="1399" format="[general]" html.valueishtml="0"  name=user_field1 visible="1" edit.limit=50 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=13 alignment="0" tabsequence=120 border="0" color="33554432" x="8210" y="8" height="76" width="1399" format="[general]" html.valueishtml="0"  name=user_field2 visible="1" edit.limit=50 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=14 alignment="1" tabsequence=130 border="0" color="33554432" x="9623" y="8" height="76" width="329" format="[general]" html.valueishtml="0"  name=owner_id visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=15 alignment="0" tabsequence=140 border="0" color="33554432" x="9966" y="8" height="76" width="466" format="[general]" html.valueishtml="0"  name=wo_no visible="1" edit.limit=16 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=16 alignment="0" tabsequence=150 border="0" color="33554432" x="10446" y="8" height="76" width="4389" format="[general]" html.valueishtml="0"  name=user_field3 visible="1" edit.limit=250 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=17 alignment="0" tabsequence=160 border="0" color="33554432" x="14848" y="8" height="76" width="4389" format="[general]" html.valueishtml="0"  name=user_field4 visible="1" edit.limit=250 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=18 alignment="0" tabsequence=170 border="0" color="33554432" x="19250" y="8" height="76" width="1399" format="[general]" html.valueishtml="0"  name=pick_lot_no visible="1" edit.limit=50 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=19 alignment="0" tabsequence=180 border="0" color="33554432" x="20663" y="8" height="76" width="1399" format="[general]" html.valueishtml="0"  name=pick_po_no visible="1" edit.limit=50 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=20 alignment="0" tabsequence=190 border="0" color="33554432" x="22075" y="8" height="76" width="1399" format="[general]" html.valueishtml="0"  name=pick_po_no2 visible="1" edit.limit=50 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=21 alignment="0" tabsequence=200 border="0" color="33554432" x="23488" y="8" height="76" width="4389" format="[general]" html.valueishtml="0"  name=user_field5 visible="1" edit.limit=250 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=22 alignment="0" tabsequence=210 border="0" color="33554432" x="27890" y="8" height="76" width="4389" format="[general]" html.valueishtml="0"  name=user_field6 visible="1" edit.limit=250 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=23 alignment="0" tabsequence=220 border="0" color="33554432" x="32293" y="8" height="76" width="379" format="[general]" html.valueishtml="0"  name=inventory_type visible="1" edit.limit=1 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" pagingmethod=0 generatedddwframes="1" )
+xhtmlgen() cssgen(sessionspecific="0" )
+xmlgen(inline="0" )
+xsltgen()
+jsgen()
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )
+export.xhtml()
+ 

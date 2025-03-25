@@ -1,0 +1,37 @@
+﻿$PBExportHeader$f_get_country_name.srf
+$PBExportComments$Return Country Name from Code
+global type f_get_country_name from function_object
+end type
+
+forward prototypes
+global function string f_get_country_name (string as_country_code)
+end prototypes
+
+global function string f_get_country_name (string as_country_code);
+String	lsCountryName
+Long		llCountryNo
+
+
+
+//We will validate from either the 2 or 3 char code and return the name
+
+If Len(Trim(as_country_Code)) = 2 Then /*2 char Country Code*/
+	
+	Select Country_Name
+	Into	:lsCOuntryName
+	From Country
+	Where emcn_code = :as_country_code;
+	
+Else /*use 3 char Code*/
+	
+	Select Country_Name
+	Into	:lsCOuntryName
+	From Country
+	Where iso_country_cd = :as_country_code;
+
+End If
+
+
+Return lsCountryName
+end function
+

@@ -1,0 +1,42 @@
+HA$PBExportHeader$f_parse_string_to_datastore.srf
+$PBExportComments$Parse a string to datastore using delimiter
+global type f_parse_string_to_datastore from function_object
+end type
+
+forward prototypes
+global function datastore f_parse_string_to_datastore (string as_import, string as_delimiter)
+end prototypes
+
+global function datastore f_parse_string_to_datastore (string as_import, string as_delimiter);//GailM 07/03/2017 - SIMSPEVS-654 - PAN SIMS allow container/serial capture in 2D Barcode - BOX ID
+// Parse a delimited string into a datastore 
+string      ls_sql_select, ls_dwsyntax,lsErr,lsTemp,lsStr,lsDel
+int li_pos, li_row
+
+Datastore lds_import  
+
+lds_import = Create Datastore
+ls_sql_select = 'select serial_no from carton_serial'
+ls_dwsyntax = SQLCA.SyntaxFromSQL ( ls_sql_select, "Style(Type=grid)", lsErr )
+lds_import.Create ( ls_dwsyntax, lsErr )
+
+li_row = 1
+lsStr = as_import
+lsDel = as_delimiter
+	
+Do While lsStr <> ''	
+	li_pos = pos( lsStr,lsDel )
+	if li_pos > 0 Then
+		lsTemp = Left( lsStr,li_pos -1 )
+		li_row = lds_import.InsertRow(0)
+		lds_import.SetItem( li_row,'serial_no', lsTemp)
+		lsStr = Right(lsStr,( len( lsStr ) - li_pos ))
+	Else
+		li_row = lds_import.InsertRow(0)
+		lds_import.SetItem( li_row,'serial_no', lsStr)
+		lsStr = ''
+	End If
+loop	
+
+return lds_import
+end function
+

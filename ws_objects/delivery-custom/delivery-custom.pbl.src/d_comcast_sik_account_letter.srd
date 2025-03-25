@@ -1,0 +1,32 @@
+﻿$PBExportHeader$d_comcast_sik_account_letter.srd
+$PBExportComments$Comcast SIK Account Activation letter
+release 11;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 0 print.margin.right = 0 print.margin.top = 0 print.margin.bottom = 0 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes print.preview.outline=yes hidegrayline=no showbackcoloronxp=no )
+header(height=0 color="536870912" )
+summary(height=252 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=1276 color="536870912" )
+table(column=(type=char(50) updatewhereclause=yes name=account_nbr dbname="account_nbr" )
+ column=(type=char(100) updatewhereclause=yes name=cust_name dbname="cust_Name" )
+ column=(type=char(100) updatewhereclause=yes name=description dbname="Description" )
+ column=(type=char(50) updatewhereclause=yes name=mac_id dbname="MAC_ID" )
+ )
+data("1234567890", "ADAM BERKOWITZ", "Digital Internet Modem MAC", "0014E88AW796", ) 
+group(level=1 header.height=0 trailer.height=0 by=("mac_id" ) newpage=yes header.color="536870912" trailer.color="536870912" )
+column(band=detail id=2 alignment="0" tabsequence=20 border="0" color="33554432" x="178" y="632" height="76" width="2121" format="[general]" html.valueishtml="0"  name=cust_name visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-12" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=detail alignment="0" text="Account Number:" border="0" color="33554432" x="192" y="908" height="64" width="462" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=1 alignment="0" tabsequence=10 border="0" color="33554432" x="791" y="908" height="64" width="1371" format="[general]" html.valueishtml="0"  name=account_nbr visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+line(band=summary x1="1463" y1="140" x2="2309" y2="140"  name=l_1 visible="1" pen.style="0" pen.width="5" pen.color="0"  background.mode="2" background.color="16777215" )
+column(band=summary id=4 alignment="0" tabsequence=40 border="0" color="33554432" x="791" y="64" height="76" width="777" format="[general]" html.valueishtml="0"  name=mac_id visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=summary alignment="0" text="Digital InternetModem MAC:" border="0" color="0" x="174" y="12" height="128" width="411" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" pagingmethod=0 generatedddwframes="1" )
+xhtmlgen() cssgen(sessionspecific="0" )
+xmlgen(inline="0" )
+xsltgen()
+jsgen()
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )
+export.xhtml()
+ 

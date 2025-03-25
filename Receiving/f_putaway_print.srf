@@ -1,0 +1,433 @@
+HA$PBExportHeader$f_putaway_print.srf
+$PBExportComments$*+Print Putaway list
+global type f_putaway_print from function_object
+end type
+
+forward prototypes
+global subroutine f_putaway_print (ref window aw_window, ref datawindow adw_main, ref datawindow adw_putaway, datawindow adw_rma_serial, ref datawindow adw_print, ref datastore ads_printaudit)
+end prototypes
+
+global subroutine f_putaway_print (ref window aw_window, ref datawindow adw_main, ref datawindow adw_putaway, datawindow adw_rma_serial, ref datawindow adw_print, ref datastore ads_printaudit);// 11/02 - PConkl - Chg QTY to Decimal
+
+// This event prints the PutawayList which is currently visible on the screen 
+// and not from the database
+
+Long ll_rowcnt, ll_row,  i, ll_rnt, llFindRow
+Decimal ldquantity, ld_fp_qty
+DateTime  ld_date
+String ls_sku, ls_serial, ls_lotno, ls_whcode, ls_inv_type ,ls_barcode
+String ls_location, ls_order,ls_customer, lsPrintAudit, lsFilter, lsRoNo
+String ls_lob_code, ls_grp_code, ls_lob, ls_grp, ls_serialized_ind
+String ls_description, ls_remark, ls_po, lsSupplier, lsSort, ls_ownername
+string lsUserField1, ls_ship_ref, ls_alt_sku , lsFind, im14, des // ams-muser delivery nu
+string ls_grp_cd, ls_last_sku, ls_last_Supplier, ls_pono2_ind, ls_container_ind
+String lsPoNo2, lsContainerId
+Boolean lb_foot_print =false
+Boolean lbRmaSerials
+Datawindowchild ldwc_type
+Int iiCopies, liRmaSerialRows, liRmaRow
+
+ls_last_sku = ""
+ls_last_Supplier = ""
+
+adw_print.GetChild("inventory_type", ldwc_type)
+ldwc_type.SetTransObject(sqlca)
+ldwc_type.Retrieve(gs_Project) /* 01/03 - PCONKL - Retrieve by Project*/
+If adw_putaway.AcceptText() = -1 Then Return
+adw_print.Reset()
+adw_putaway.Sort()
+
+liRmaSerialRows = adw_rma_serial.RowCount()
+ll_rowcnt = adw_putaway.RowCount()
+
+If ll_rowcnt = 0 Then
+	MessageBox("Putaway"," No Putaway list records to print!")
+	Return
+End if
+
+ls_order = adw_main.getitemstring(1,"supp_invoice_no")
+ld_date = adw_main.getitemdatetime(1,"arrival_date") 
+ls_whcode = adw_main.getitemstring(1,"wh_code")
+ls_remark = adw_main.getitemstring(1,"remark")
+lsRoNo = adw_main.getitemstring(1,"ro_no")
+
+// TAM 2011/03 W&S - Wine and Spirits
+if left(gs_project,3) = 'WS-' then
+	ls_ship_ref = adw_main.getitemstring(1,"ship_ref")
+end if
+
+SetPointer(Hourglass!)
+w_main.SetMicrohelp('Preparing Putaway list for Printing...')
+
+For i = 1 to ll_rowcnt
+	llFindRow = 0
+	ls_sku = adw_putaway.getitemstring(i,"sku")
+	ls_po = adw_putaway.getitemstring(i,"po_no")
+	ls_location = adw_putaway.getitemstring(i,"l_code")
+	lsPoNo2 = adw_putaway.GetItemString(i,"po_no2")
+	lsContainerId = adw_putaway.GetItemString(i,"container_id")
+	If gs_project ='PANDORA' Then
+		ls_pono2_ind = adw_putaway.getItemString(liRmaRow, 'PO_NO2_Controlled_Ind')
+		ls_container_ind = adw_putaway.getItemString(liRmaRow, 'container_tracking_Ind')
+		IF ls_pono2_ind ='Y' and ls_container_ind ='Y' and ls_serialized_ind ='B' Then
+			lb_foot_print = True
+		else
+			lb_foot_print = False
+		End If
+	End If
+	liRmaSerialRows = adw_rma_serial.Find("sku = '" + ls_sku + "' ", 1, adw_rma_serial.RowCount())
+	
+	
+	If liRmaSerialRows > 0 Then
+//		lsFind ="sku ='"+ls_sku+"' and l_code ='"+ls_location+"' and po_no='"+ls_po+"' and po_no2 = '" + lsPoNo2 + "' and container_id = '" + lsContainerId + "' "
+//		llFindRow = adw_rma_serial.Find(lsFind, 1, adw_rma_serial.RowCount())
+//		If llFindRow > 0 Then
+//			lsFind ="sku ='"+ls_sku+"' and l_code ='"+ls_location+"' and po_no='"+ls_po+"' and po_no2 = '" + lsPoNo2 + "' and container_id = '" + lsContainerId + "' "
+			lsFilter = "po_no2 = '" + lsPoNo2 + "' and container_id = '" + lsContainerId + "' "
+			adw_rma_serial.SetFilter(lsFilter)
+			adw_rma_serial.Filter()
+			For liRmaRow = 1 to adw_rma_serial.RowCount()
+				lsSupplier = adw_rma_serial.getitemstring(liRmaRow,"supp_code")
+				ls_serial = adw_rma_serial.getitemstring(liRmaRow,"serial_no")
+				ls_lotno = adw_rma_serial.getitemstring(liRmaRow,"lot_no")
+				ls_inv_type = adw_rma_serial.getitemstring(liRmaRow,"inventory_type")
+				ldquantity = adw_rma_serial.getitemnumber(liRmaRow,"serial_qty")
+				ls_ownername = adw_rma_serial.getitemstring(liRmaRow,"c_owner_name")
+				ls_serialized_ind = adw_rma_serial.getitemString(liRmaRow,"serialized_ind")
+
+				
+				lsFind ="sku ='"+ls_sku+"' and l_code ='"+ls_location+"' and po_no='"+ls_po+"' and po_no2 = '" + lsPoNo2 + "' and container_id = '" + lsContainerId + "' "
+				llFindRow = adw_print.find(lsFind, 0, adw_print.rowcount())
+				If llFindRow > 0 and lb_foot_print Then
+					ld_fp_qty = adw_print.getItemNumber(llFindRow, 'quantity')
+					adw_print.setItem(llFindRow, 'quantity', ld_fp_qty +ldquantity)
+					continue		
+				End If		
+				
+				ll_row = adw_print.InsertRow(0)
+				
+				adw_print.setitem(ll_row,"ro_no",ls_order)
+				adw_print.setitem(ll_row,"real_ro_no", lsRoNo) 
+				adw_print.setitem(ll_row,"project_id",gs_project) 
+				adw_print.setitem(ll_row,"ord_date",ld_date)
+				adw_print.setitem(ll_row,"remark",ls_remark)
+				adw_print.setitem(ll_row,"inventory_type",ls_inv_type)
+				adw_print.setitem(ll_row,"wh_code",ls_whcode)
+				adw_print.setitem(ll_row,"sku",ls_sku)
+				adw_print.setitem(ll_row,"supp_code",lsSupplier)
+				adw_print.setitem(ll_row,"sku_parent",adw_rma_serial.getitemstring(i,"sku_parent")) 
+				
+				IF upper(gs_project) = 'PANDORA' and lb_foot_print THEN
+					adw_print.setitem(ll_row,"serial_no", '-')
+				ELSE
+					adw_print.setitem(ll_row,"serial_no",ls_serial)
+				END IF
+				
+				adw_print.setitem(ll_row,"po_no",ls_po)
+				
+				// 11/19/09 - UJHALL - Set Pandora to use field found only on alternate datawindow
+				IF upper(gs_project) = 'PANDORA' THEN
+					adw_print.setitem(ll_row,"owner_cd",adw_rma_serial.getitemstring(liRmaRow,"owner_cd"))
+					adw_print.setitem(ll_row,"line_item_no",adw_rma_serial.getitemnumber(liRmaRow,"line_item_no"))
+					adw_print.setitem(ll_row,"description",adw_rma_serial.getitemstring(liRmaRow,"description"))
+					
+					//TAM 2017/03 SIMSPEVS-429 Added IM.UF9 to description if filled.
+					If Not IsNull(adw_rma_serial.getitemstring(liRmaRow,"item_master_user_field14")) or adw_rma_serial.getitemstring(liRmaRow,"item_master_user_field14")> '' Then
+						adw_print.setitem(ll_row,"description",adw_rma_serial.getitemstring(liRmaRow,"description") + adw_rma_serial.getitemstring(liRmaRow,"item_master_user_field14")  )
+					End if
+					
+					im14 = adw_rma_serial.getitemstring(liRmaRow,"item_master_user_field14") 
+					des = adw_print.getitemstring(ll_row,"description")
+					//TimA 04/15/15 Added  country_of_origin per Dave and Peter Clark
+					adw_print.setitem(ll_row,"country_of_origin",adw_rma_serial.getitemstring(liRmaRow,"country_of_origin"))
+					//TAM 08/11/18 Added  Added a couple new fields
+					adw_print.setitem(ll_row,"client_cust_po_nbr",adw_main.getitemstring(1,"client_cust_po_nbr")) 
+					adw_print.setitem(ll_row,"vendor_invoice_nbr",adw_main.getitemstring(1,"vendor_invoice_nbr")) 
+					
+					// LTK 20111129	Pandora #334
+					if adw_putaway.Object.qa_check_ind[i] = 'P' then
+						adw_print.Object.co_pkg_msg.visible = TRUE
+						adw_print.Object.co_pkg_msg.y = 168	// Move the message down in the detail band so it's displayed.
+						adw_print.setitem(ll_row,"co_pkg_msg","GPN is flagged to check for Defective Packaging.  If packaging is defective please contact your Local CSR.")
+					end if
+					
+					//GailM 1/2/2018 I357 F5734 S14571 PAN - HRI Alert for High Risk Inventory
+					if adw_rma_serial.Object.qa_check_ind[liRmaRow] = 'H' then
+						adw_print.Object.co_pkg_msg.visible = TRUE
+						adw_print.Object.co_pkg_msg.y = 168	// Move the message down in the detail band so it's displayed.
+						adw_print.setitem(ll_row,"co_pkg_msg","Attention! This is a High Risk Part.  Please follow Instruction according SWI WORK43225")
+					end if
+				END IF
+				
+				adw_print.setitem(ll_row,"po_no2",adw_rma_serial.getitemstring(liRmaRow,"po_no2")) 
+				adw_print.setitem(ll_row,"container_ID",adw_rma_serial.getitemstring(liRmaRow,"container_ID")) 
+				adw_print.setitem(ll_row,"expiration_Date",adw_rma_serial.getitemDateTime(liRmaRow,"expiration_Date")) 
+				adw_print.setitem(ll_row,"lot_no",ls_lotno)
+				adw_print.setitem(ll_row,"l_code",ls_location)
+				adw_print.setitem(ll_row,"quantity",ldquantity)
+				adw_print.setitem(ll_row,"component_ind",adw_rma_serial.getitemstring(liRmaRow,"component_ind")) 
+				adw_print.setitem(ll_row,"component_no",adw_rma_serial.getitemNumber(liRmaRow,"component_no")) 
+				
+			Next
+		Else
+			// pvh 01/12/2006 - ams-muser
+			if gs_project = 'AMS-MUSER' then
+				lsUserField1 = adw_putaway.object.user_field1[i]
+			end if
+			
+			lsSupplier = adw_putaway.getitemstring(i,"supp_code")
+			ls_serial = adw_putaway.getitemstring(i,"serial_no")
+			ls_po = adw_putaway.getitemstring(i,"po_no")
+			ls_lotno = adw_putaway.getitemstring(i,"lot_no")
+			ls_location = adw_putaway.getitemstring(i,"l_code")
+			ls_inv_type = adw_putaway.getitemstring(i,"inventory_type")
+			
+			//5-APR-2019 :Madhu SS31781 F14974 Putaway Serial RollUp - START
+			ls_serialized_ind = adw_putaway.getitemString(i,"serialized_ind")
+			IF g.ib_receive_putaway_serial_rollup_ind and (ls_serialized_ind ='Y' or ls_serialized_ind  ='B') THEN
+				ldquantity = adw_putaway.getitemnumber(i,"serial_qty")
+			ELSE
+				ldquantity = adw_putaway.getitemnumber(i,"quantity")
+			END IF
+			//5-APR-2019 :Madhu SS31781 F14974 Putaway Serial RollUp - END
+			
+			ls_ownername = adw_putaway.getitemstring(i,"c_owner_name")
+			
+			//8-APR-2019 :Madhu SS31781 F14974 Putaway Serial RollUp - START
+			IF gs_project ='PANDORA' and g.ib_receive_putaway_serial_rollup_ind THEN
+				
+				ls_pono2_ind = adw_putaway.getItemString(i, 'PO_NO2_Controlled_Ind')
+				ls_container_ind = adw_putaway.getItemString(i, 'container_tracking_Ind')
+				
+				IF ls_pono2_ind ='Y' and ls_container_ind ='Y' and ls_serialized_ind ='B' Then
+					lb_foot_print = True
+				else
+					lb_foot_print = False
+				END IF
+				
+				lsFind ="sku ='"+ls_sku+"' and l_code ='"+ls_location+"' and po_no='"+ls_po+"'"
+				llFindRow = adw_print.find(lsFind, 0, adw_print.rowcount())
+				
+				IF llFindRow > 0 and lb_foot_print THEN
+					ld_fp_qty = adw_print.getItemNumber(llFindRow, 'quantity')
+					adw_print.setItem(llFindRow, 'quantity', ld_fp_qty +ldquantity)
+					continue		
+				END IF
+				
+			END IF
+			//8-APR-2019 :Madhu SS31781 F14974 Putaway Serial RollUp - END
+			
+			ll_row = adw_print.InsertRow(0)
+			// pvh 01/12/2006 - ams-muser
+			if gs_project = 'AMS-MUSER' then
+				adw_print.object.user_field1[ ll_row ] = lsUserField1
+			end if
+			
+			///XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+			// BCR 22-SEP-2011: Franke_TH/Baseline modification for Serial No Capture
+			IF Upper(gs_project) = 'FRANKE_TH' THEN
+				CHOOSE CASE adw_putaway.getitemString(i,"serialized_ind") 
+				CASE 'Y', 'B'
+					adw_print.setitem(ll_row,"sn_scan", 'Y')
+				CASE ELSE
+					adw_print.setitem(ll_row,"sn_scan", 'N')
+				END CHOOSE
+			END IF
+			///XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+			
+			adw_print.setitem(ll_row,"ro_no",ls_order)
+			adw_print.setitem(ll_row,"real_ro_no", lsRoNo) 
+			adw_print.setitem(ll_row,"project_id",gs_project) 
+			adw_print.setitem(ll_row,"ord_date",ld_date)
+			adw_print.setitem(ll_row,"remark",ls_remark)
+			adw_print.setitem(ll_row,"inventory_type",ls_inv_type)
+			adw_print.setitem(ll_row,"wh_code",ls_whcode)
+			adw_print.setitem(ll_row,"sku",ls_sku)
+			adw_print.setitem(ll_row,"supp_code",lsSupplier)
+			adw_print.setitem(ll_row,"sku_parent",adw_putaway.getitemstring(i,"sku_parent")) 
+			
+			IF upper(gs_project) = 'PANDORA' and lb_foot_print THEN
+				adw_print.setitem(ll_row,"serial_no", '-')
+			ELSE
+				adw_print.setitem(ll_row,"serial_no",ls_serial)
+			END IF
+			
+			adw_print.setitem(ll_row,"po_no",ls_po)
+			
+			// 11/19/09 - UJHALL - Set Pandora to use field found only on alternate datawindow
+			IF upper(gs_project) = 'PANDORA' THEN
+				adw_print.setitem(ll_row,"owner_cd",adw_putaway.getitemstring(i,"owner_cd"))
+				adw_print.setitem(ll_row,"line_item_no",adw_putaway.getitemnumber(i,"line_item_no"))
+				adw_print.setitem(ll_row,"description",adw_putaway.getitemstring(i,"description"))
+				
+				//TAM 2017/03 SIMSPEVS-429 Added IM.UF9 to description if filled.
+				If Not IsNull(adw_putaway.getitemstring(i,"item_master_user_field14")) or adw_putaway.getitemstring(i,"item_master_user_field14")> '' Then
+					adw_print.setitem(ll_row,"description",adw_putaway.getitemstring(i,"description") + adw_putaway.getitemstring(i,"item_master_user_field14")  )
+				End if
+				
+				im14 = adw_putaway.getitemstring(i,"item_master_user_field14") 
+				des = adw_print.getitemstring(ll_row,"description")
+				//TimA 04/15/15 Added  country_of_origin per Dave and Peter Clark
+				adw_print.setitem(ll_row,"country_of_origin",adw_putaway.getitemstring(i,"country_of_origin"))
+				//TAM 08/11/18 Added  Added a couple new fields
+				adw_print.setitem(ll_row,"client_cust_po_nbr",adw_main.getitemstring(1,"client_cust_po_nbr")) 
+				adw_print.setitem(ll_row,"vendor_invoice_nbr",adw_main.getitemstring(1,"vendor_invoice_nbr")) 
+				
+				// LTK 20111129	Pandora #334
+				if adw_putaway.Object.qa_check_ind[i] = 'P' then
+					adw_print.Object.co_pkg_msg.visible = TRUE
+					adw_print.Object.co_pkg_msg.y = 168	// Move the message down in the detail band so it's displayed.
+					adw_print.setitem(ll_row,"co_pkg_msg","GPN is flagged to check for Defective Packaging.  If packaging is defective please contact your Local CSR.")
+				end if
+				
+				//GailM 1/2/2018 I357 F5734 S14571 PAN - HRI Alert for High Risk Inventory
+				if adw_putaway.Object.qa_check_ind[i] = 'H' then
+					adw_print.Object.co_pkg_msg.visible = TRUE
+					adw_print.Object.co_pkg_msg.y = 168	// Move the message down in the detail band so it's displayed.
+					adw_print.setitem(ll_row,"co_pkg_msg","Attention! This is a High Risk Part.  Please follow Instruction according SWI WORK43225")
+				end if
+			END IF
+			//KINDERIJK 
+			
+			//add the code for KINDERIJK  nxjain 2013/05/20
+			//The $$HEX1$$1820$$ENDHEX$$Item Group Code$$HEX2$$19202000$$ENDHEX$$is to be replaced by the $$HEX1$$1820$$ENDHEX$$Alternate SKU$$HEX2$$19202000$$ENDHEX$$as the text and data to be printed on this new Putaway List.
+			//The $$HEX1$$1820$$ENDHEX$$SKU$$HEX2$$19202000$$ENDHEX$$and $$HEX1$$1820$$ENDHEX$$Alternate SKU$$HEX2$$19202000$$ENDHEX$$printed data is to follow the same font size and format as the $$HEX1$$1820$$ENDHEX$$Order Nbr$$HEX2$$19202000$$ENDHEX$$data printed.
+			
+			
+			if  (gs_project) = 'KINDERDIJK' then
+				select Alternate_Sku  into :ls_alt_sku
+				from Item_Master
+				where Project_Id ='KINDERDijk' and SKU = :ls_sku ;
+				
+				adw_print.object.t_17.text = 'ALTERNATE SKU' 
+				if  not (isnull (ls_alt_sku)) then 
+					adw_print.Modify("grp.Width =2000")
+					adw_print.setitem(ll_row,"grp", ls_alt_sku)    
+					adw_print.Modify("grp.Width.Autosize=yes")
+					adw_print.Modify("grp.font.height=-10")
+					adw_print.object.grp.font.weight =700
+					adw_print.Modify("SKU.font.height=-10")
+				end if
+			end if
+			//end the code  nxjain 2013/05/20 
+			
+			//nxjain : 2014-01-15
+			
+			
+			//if Upper( gs_project ) = 'PE-THA' or  Upper( gs_project ) = 'PHILIPS-TH'  then
+			if Upper( gs_project ) = 'PE-THA' or  Upper( gs_project ) = 'PHILIPS-TH' or  Upper( gs_project ) = 'TPV'	or  Upper( gs_project ) ='FRANKE_TH'   then
+			
+				select  description   into  :ls_description
+				from Item_Master
+				where Project_Id =:gs_project and SKU = :ls_sku ;
+				
+				adw_print.object.t_17.text = 'Description' 
+				if  not (isnull (ls_alt_sku)) then 
+					adw_print.Modify("grp.Width =2000")
+					adw_print.setitem(ll_row,"grp", ls_description)    
+					adw_print.Modify("grp.Width.Autosize=yes")
+					adw_print.Modify("grp.font.height=-8")
+					adw_print.Modify("SKU.font.height=-8")
+				end if
+			end if
+			
+			//end the code  nxjain 2014-01-15
+			
+			
+			// TAM 2011/03 W&S - Wine and Spirits
+			if left(gs_project,3) = 'WS-' then
+				adw_print.setitem(ll_row,"ship_ref",ls_ship_ref)
+				adw_print.setitem(ll_row,"pack_size",adw_putaway.getitemstring(i,"user_field4"))
+				adw_print.setitem(ll_row,"description",adw_putaway.getitemstring(i,"description"))
+			end if
+			
+			adw_print.setitem(ll_row,"po_no2",adw_putaway.getitemstring(i,"po_no2")) 
+			adw_print.setitem(ll_row,"container_ID",adw_putaway.getitemstring(i,"container_ID")) 
+			adw_print.setitem(ll_row,"expiration_Date",adw_putaway.getitemDateTime(i,"expiration_Date")) 
+			adw_print.setitem(ll_row,"lot_no",ls_lotno)
+			adw_print.setitem(ll_row,"l_code",ls_location)
+			adw_print.setitem(ll_row,"quantity",ldquantity)
+			adw_print.setitem(ll_row,"component_ind",adw_putaway.getitemstring(i,"component_ind")) 
+			adw_print.setitem(ll_row,"component_no",adw_putaway.getitemNumber(i,"component_no")) 
+			
+			IF gs_project = 'PULSE' then //They are the only one using these new fields at this time.
+				adw_print.setitem(ll_row,"user_field3",adw_putaway.getitemString(i,"user_field3")) 	
+				adw_print.setitem(ll_row,"user_field4",adw_putaway.getitemString(i,"user_field4")) 
+				adw_print.setitem(ll_row,"user_field5",adw_putaway.getitemString(i,"user_field5")) 
+				adw_print.setitem(ll_row,"user_field6",adw_putaway.getitemString(i,"user_field6")) 
+				adw_print.setitem(ll_row,"user_field7",adw_putaway.getitemString(i,"user_field7")) 
+				adw_print.setitem(ll_row,"user_field8",adw_putaway.getitemString(i,"user_field8")) 
+				adw_print.setitem(ll_row,"user_field9",adw_putaway.getitemString(i,"user_field9")) 
+				adw_print.setitem(ll_row,"user_field10",adw_putaway.getitemString(i,"user_field10")) 
+				adw_print.setitem(ll_row,"user_field11",adw_putaway.getitemString(i,"user_field11")) 
+				adw_print.setitem(ll_row,"user_field12",adw_putaway.getitemString(i,"user_field12"))
+			END IF
+			
+			//MEA - Added 10/08
+			//nxjain 21-05-2013 
+			
+			if  (gs_project) <>  'KINDERDIJK' then
+				if adw_print.Describe("grp") <> "!" then
+				
+					if ls_last_sku <> ls_sku OR &
+					ls_last_Supplier <> lsSupplier THEN
+						ls_last_sku = ls_sku
+						ls_last_Supplier = lsSupplier
+						
+						SELECT grp INTO :ls_grp_cd
+						FROM Item_Master
+						WHERE project_id = :gs_Project AND sku = :ls_sku AND  supp_code = :lsSupplier;
+					end if
+					
+					adw_print.setitem(ll_row,"grp",ls_grp_cd)
+				end if
+			end if 
+			//nxjain  21-05-2013  end 
+		
+			//MEA - 7/13 - Added Per BoonHee
+			if upper(gs_project) = 'STBTH' then 
+				adw_print.setitem(ll_row,"rcv_slip_number",adw_main.getitemstring(1,"ship_ref"))
+			end if
+		End If
+//	End If
+Next
+
+
+
+
+//02/06 - PCONKL - we may have a project/warehouse level sort on the Putaway Report (Screen and report will be sorted the same if present)
+If g.of_project_warehouse(gs_project,ls_whcode) > 0 Then
+	if g.ids_project_warehouse.GetITemString(g.of_project_warehouse(gs_project,ls_whcode),'Receive_putaway_Sort_order') > "" Then
+		lsSort = g.ids_project_warehouse.GetITemString(g.of_project_warehouse(gs_project,ls_whcode),'Receive_putaway_Sort_order')
+		adw_print.SetSort(lsSort)
+	End If
+End If
+
+//Changed to A4
+if  (gs_project) =  'STBTH' then
+	adw_print.Modify("DataWindow.Print.Paper.Size = 9")
+end if
+
+adw_print.Sort()
+adw_print.GroupCalc()
+
+SetPointer(Arrow!)
+w_main.SetMicrohelp('Ready')
+
+
+Openwithparm(w_dw_print_options,adw_print) 
+
+//GailM 3/29/2018 - S17580 F7364 I623 - Google - SIMS Putaway and Picking Blind Count Sheets
+if  (gs_project) =  'PANDORA' then
+	lsPrintAudit = f_retrieve_parm( gs_project, 'AuditPrint', ls_whcode, 'USER_UPDATEABLE_IND' )
+	
+	If lsPrintAudit = 'Y' Then
+		iiCopies = integer(adw_print.describe('datawindow.print.Copies'))
+		ll_rnt = adw_print.ShareData( ads_PrintAudit )
+		
+		ads_PrintAudit.modify(" datawindow.print.copies = " + String(iiCopies))
+		Print( ads_PrintAudit )
+	End If
+End If
+end subroutine
+

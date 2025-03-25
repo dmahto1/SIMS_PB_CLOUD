@@ -1,0 +1,35 @@
+﻿$PBExportHeader$d_phxbrands_mtd_shipments.srd
+release 11;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=4 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes print.preview.outline=yes hidegrayline=no showbackcoloronxp=no  crosstab.dynamic = yes grid.lines=0 grid.columnmove=no selected.mouse=no )
+header[1](height=0 color="536870912" )
+header[2](height=136 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=84 color="536870912" )
+table(column=(type=char(20) updatewhereclause=yes name=sku dbname="sku" )
+ column=(type=number updatewhereclause=yes name=alloc_qty dbname="alloc_qty" )
+ retrieve="SELECT     dbo.Delivery_Master.WH_Code, dbo.Delivery_Detail.SKU, dbo.Delivery_Detail.Alloc_Qty
+FROM         dbo.Delivery_Master INNER JOIN
+                      dbo.Delivery_Detail ON dbo.Delivery_Master.DO_No = dbo.Delivery_Detail.DO_No
+WHERE     (dbo.Delivery_Master.Project_ID = 'PHXBRANDS') AND (DATEPART(month, dbo.Delivery_Master.Complete_Date) = :Month) AND (DATEPART(year, 
+                      dbo.Delivery_Master.Complete_Date) = :Year) AND (dbo.Delivery_Master.Ord_Status = 'C' OR
+                      dbo.Delivery_Master.Ord_Status = 'D') AND (dbo.Delivery_Master.Ord_Type <> 'T') AND (dbo.Delivery_Master.Ord_Type <> 'Z') AND
+						dbo.Delivery_Master.WH_Code <> 'PHX-DANV' AND
+						 dbo.Delivery_Detail.Alloc_Qty > 0
+ORDER BY dbo.Delivery_Detail.SKU ;" arguments=(("Month", number),("Year", number))  sort="sku A " )
+text(band=header[2] alignment="1" text="Sku" border="0" color="33554432" x="9" y="4" height="128" width="933" html.valueishtml="0"  name=sku_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header[2] alignment="1" text="@wh_code" border="0" color="33554432" x="951" y="4" height="128" width="576" html.valueishtml="0"  name=alloc_qty_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=1 alignment="1" tabsequence=32766 border="0" color="33554432" x="9" y="4" height="76" width="933" format="[general]" html.valueishtml="0"  name=sku visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="1" tabsequence=32766 border="0" color="33554432" x="951" y="4" height="76" width="576" format="#" html.valueishtml="0"  name=alloc_qty visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes crosstab.repeat=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+ crosstab(band = foreground  crosstabonly = yes 
+ columns = "wh_code" rows = "sku" values = "sum(alloc_qty for crosstab)" sourcenames = "wh_code, sku, alloc_qty")htmltable(border="0" cellpadding="1" cellspacing="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" pagingmethod=0 generatedddwframes="1" )
+xhtmlgen() cssgen(sessionspecific="0" )
+xmlgen(inline="0" )
+xsltgen()
+jsgen()
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )
+export.xhtml()
+ 

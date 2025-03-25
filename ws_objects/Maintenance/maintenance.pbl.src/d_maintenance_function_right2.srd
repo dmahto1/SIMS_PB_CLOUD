@@ -1,0 +1,79 @@
+﻿$PBExportHeader$d_maintenance_function_right2.srd
+$PBExportComments$- function rights
+release 11;
+datawindow(units=0 timer_interval=0 color=16777215 processing=1 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes print.preview.outline=yes hidegrayline=no showbackcoloronxp=no grid.lines=0 )
+header(height=76 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=80 color="536870912" )
+table(column=(type=char(10) updatewhereclause=yes name=project_project_id dbname="Project.Project_ID" )
+ column=(type=char(40) updatewhereclause=yes name=process_id_group_name dbname="Process_ID.Group_Name" )
+ column=(type=char(40) updatewhereclause=yes name=process_id_function_name dbname="Process_ID.Function_Name" )
+ column=(type=char(15) updatewhereclause=yes name=function_id dbname="Process_ID.Function_ID" )
+ column=(type=decimal(0) updatewhereclause=yes name=process_id_group_seq dbname="Process_ID.Group_Seq" )
+ column=(type=decimal(0) updatewhereclause=yes name=process_id_function_seq dbname="Process_ID.Function_Seq" )
+ column=(type=char(25) updatewhereclause=yes name=f_userid dbname="Function_Rights.F_UserID" )
+ column=(type=char(10) updatewhereclause=yes name=f_project_id dbname="Function_Rights.F_Project_ID" )
+ column=(type=char(15) updatewhereclause=yes name=f_function_id dbname="Function_Rights.F_Function_ID" )
+ column=(type=char(1) updatewhereclause=yes name=p_edit dbname="Function_Rights.P_Edit" values="	1/	0" )
+ column=(type=char(1) updatewhereclause=yes name=p_delete dbname="Function_Rights.P_Delete" values="	1/	0" )
+ column=(type=char(1) updatewhereclause=yes name=p_save dbname="Function_Rights.P_Save" values="	1/	0" )
+ column=(type=char(1) updatewhereclause=yes name=p_new dbname="Function_Rights.P_New" values="	1/	0" )
+ column=(type=char(1) updatewhereclause=yes name=p_confirm dbname="Function_Rights.P_Confirm" values="	1/	0" )
+ retrieve="  SELECT Project.Project_ID,   
+         Process_ID_b.Child_Desc as Group_Name,   
+         Process_ID_a.Child_Desc as Function_Name,    
+         Process_ID_a.Child_ID as Function_ID,   
+         Process_ID_b.Seq_No as Group_Seq,   
+         Process_ID_a.Seq_No as Function_Seq,    
+         Function_Rights.UserID as F_UserID,   
+         Function_Rights.Project_ID as F_Project_ID,   
+         Function_Rights.Child_ID as F_Function_ID,   
+         Function_Rights.P_Edit,   
+         Function_Rights.P_Delete,   
+         Function_Rights.P_Save,   
+         Function_Rights.P_New,   
+         Function_Rights.P_Confirm  
+      FROM Process_ID Process_ID_a
+             INNER JOIN Process_ID Process_ID_b
+                 ON Process_ID_A.Parent_ID = Process_ID_b.Child_ID
+             CROSS JOIN Project
+             LEFT JOIN Function_Rights
+                 ON Project.Project_ID = Function_Rights.Project_ID
+                     AND Process_ID_a.Child_ID = Function_Rights.Child_ID
+                     AND Function_Rights.UserID = :as_User
+" arguments=(("as_user", string))  sort="project_project_id A process_id_group_seq A process_id_function_seq A " )
+text(band=header alignment="2" text="Project ID" border="0" color="0" x="9" y="8" height="64" width="302" html.valueishtml="0"  name=project_project_id_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Function Group" border="0" color="0" x="320" y="8" height="64" width="814" html.valueishtml="0"  name=process_id_group_name_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Function Name" border="0" color="0" x="1143" y="8" height="64" width="809" html.valueishtml="0"  name=process_id_function_name_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Function Id" border="0" color="0" x="1961" y="8" height="64" width="439" html.valueishtml="0"  name=process_id_function_id_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="F Userid" border="0" color="0" x="2414" y="8" height="64" width="416" html.valueishtml="0"  name=function_rights_f_userid_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="F Project Id" border="0" color="0" x="2839" y="8" height="64" width="416" html.valueishtml="0"  name=function_rights_f_project_id_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="F Function Id" border="0" color="0" x="3264" y="8" height="64" width="439" html.valueishtml="0"  name=function_rights_f_function_id_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Inquiry" border="0" color="0" x="3712" y="8" height="64" width="242" html.valueishtml="0"  name=function_rights_p_edit_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Delete" border="0" color="0" x="4302" y="8" height="64" width="416" html.valueishtml="0"  name=function_rights_p_delete_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Confirm" border="0" color="0" x="4736" y="8" height="64" width="233" html.valueishtml="0"  name=function_rights_p_confirm_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Save" border="0" color="0" x="4215" y="8" height="64" width="242" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="New" border="0" color="0" x="3963" y="8" height="64" width="242" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="0" color="0" x="9" y="4" height="72" width="302" format="[general]" html.valueishtml="0"  name=project_project_id visible="1" edit.limit=10 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="0" color="0" x="320" y="4" height="72" width="814" format="[general]" html.valueishtml="0"  name=process_id_group_name visible="1" edit.limit=40 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="0" color="0" x="1143" y="4" height="72" width="809" format="[general]" html.valueishtml="0"  name=process_id_function_name visible="1" edit.limit=40 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="0" color="0" x="1966" y="4" height="72" width="434" format="[general]" html.valueishtml="0"  name=function_id visible="1" edit.limit=15 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=7 alignment="0" tabsequence=32766 border="0" color="0" x="2414" y="4" height="72" width="416" format="[general]" html.valueishtml="0"  name=f_userid visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=8 alignment="0" tabsequence=32766 border="0" color="0" x="2843" y="4" height="72" width="411" format="[general]" html.valueishtml="0"  name=f_project_id visible="1" edit.limit=10 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=9 alignment="0" tabsequence=32766 border="0" color="0" x="3269" y="4" height="72" width="434" format="[general]" html.valueishtml="0"  name=f_function_id visible="1" edit.limit=15 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=10 alignment="2" tabsequence=32766 border="0" color="0" x="3717" y="4" height="72" width="238" format="[general]" html.valueishtml="0"  name=p_edit visible="1" checkbox.text="" checkbox.on="1" checkbox.off="0" checkbox.scale=no checkbox.threed=no  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=13 alignment="2" tabsequence=32766 border="0" color="0" x="3968" y="4" height="72" width="238" format="[general]" html.valueishtml="0"  name=p_new visible="1" checkbox.text="" checkbox.on="1" checkbox.off="0" checkbox.scale=no checkbox.threed=no  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=12 alignment="2" tabsequence=32766 border="0" color="0" x="4219" y="4" height="72" width="238" format="[general]" html.valueishtml="0"  name=p_save visible="1" checkbox.text="" checkbox.on="1" checkbox.off="0" checkbox.scale=no checkbox.threed=no  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=11 alignment="2" tabsequence=32766 border="0" color="0" x="4471" y="4" height="72" width="247" format="[general]" html.valueishtml="0"  name=p_delete visible="1" checkbox.text="" checkbox.on="1" checkbox.off="0" checkbox.scale=no checkbox.threed=no  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=14 alignment="2" tabsequence=32766 border="0" color="0" x="4731" y="4" height="72" width="238" format="[general]" html.valueishtml="0"  name=p_confirm visible="1" checkbox.text="" checkbox.on="1" checkbox.off="0" checkbox.scale=no checkbox.threed=no  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" pagingmethod=0 generatedddwframes="1" )
+xhtmlgen() cssgen(sessionspecific="0" )
+xmlgen(inline="0" )
+xsltgen()
+jsgen()
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )
+export.xhtml()

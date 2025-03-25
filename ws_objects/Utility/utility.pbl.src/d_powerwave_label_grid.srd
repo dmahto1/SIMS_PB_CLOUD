@@ -1,0 +1,86 @@
+﻿$PBExportHeader$d_powerwave_label_grid.srd
+$PBExportComments$Powerwave Shipping labels
+release 11;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=1 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes print.preview.outline=yes hidegrayline=no showbackcoloronxp=no grid.lines=0 )
+header(height=72 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=76 color="536870912" )
+table(column=(type=char(1) updatewhereclause=yes name=c_print_ind dbname="c_Print_Ind" values="	Y/	N" )
+ column=(type=long updatewhereclause=yes identity=yes name=c_print_qty dbname="c_print_Qty" initial="1" )
+ column=(type=char(1) updatewhereclause=yes name=c_oem_label dbname="c_oem_label" )
+ column=(type=char(20) updatewhereclause=yes name=c_huawei_code dbname="c_huawei_code" )
+ column=(type=char(50) updatewhereclause=yes name=box_of dbname="Delivery_Packing.box_of" dbalias=".box_of" )
+ column=(type=char(25) updatewhereclause=yes name=carton_no dbname="Delivery_Packing.Carton_no" dbalias=".Carton_no" )
+ column=(type=char(50) updatewhereclause=yes name=sku dbname="Delivery_Packing.SKU" dbalias=".SKU" )
+ column=(type=char(20) updatewhereclause=yes name=supp_code dbname="Delivery_Packing.Supp_Code" dbalias=".Supp_Code" )
+ column=(type=char(3) updatewhereclause=yes name=country_of_origin dbname="Delivery_Packing.Country_of_Origin" dbalias=".Country_of_Origin" )
+ column=(type=decimal(2) updatewhereclause=yes name=length dbname="Delivery_Packing.length" dbalias=".length" )
+ column=(type=decimal(2) updatewhereclause=yes name=width dbname="Delivery_Packing.width" dbalias=".width" )
+ column=(type=decimal(2) updatewhereclause=yes name=height dbname="Delivery_Packing.height" dbalias=".height" )
+ column=(type=char(1) updatewhereclause=yes name=standard_of_measure dbname="Delivery_Packing.standard_of_measure" dbalias=".standard_of_measure" )
+ column=(type=decimal(5) updatewhereclause=yes identity=yes name=weight_gross dbname="weight_Gross" )
+ column=(type=decimal(5) updatewhereclause=yes identity=yes name=quantity dbname="Quantity" )
+ retrieve="  SELECT ' ' as c_Print_Ind, 
+			0001 as c_print_Qty, 
+			' ' as c_oem_label, 
+			'                    ' as c_huawei_code, 
+			dbo.Delivery_Packing.User_Field1 as box_of, 
+			dbo.Delivery_Packing.Carton_no, 
+         dbo.Delivery_Packing.SKU,   
+			dbo.Delivery_Packing.Supp_Code,  
+			dbo.Delivery_Packing.Country_of_Origin, 
+			dbo.Delivery_Packing.length,
+			dbo.Delivery_Packing.width,
+			dbo.Delivery_Packing.height, 
+			dbo.Delivery_Packing.standard_of_measure,
+         Max(dbo.Delivery_Packing.Weight_Gross) as weight_Gross,   
+         Sum(dbo.Delivery_Packing.Quantity) as Quantity
+    FROM dbo.Delivery_Packing  
+   WHERE delivery_Packing.do_no = :asDONO 
+Group By	dbo.Delivery_Packing.Carton_no, 
+         dbo.Delivery_Packing.SKU,   
+			dbo.Delivery_Packing.Supp_Code,  
+			dbo.Delivery_Packing.Country_of_Origin,
+			dbo.Delivery_Packing.length,
+			dbo.Delivery_Packing.width,
+			dbo.Delivery_Packing.height,
+			dbo.Delivery_Packing.standard_of_measure,
+			dbo.Delivery_Packing.User_Field1
+" arguments=(("asDONO", string))  sort="carton_no A sku A " )
+text(band=header alignment="2" text="" border="6" color="33554432" x="9" y="8" height="56" width="169" html.valueishtml="0"  name=c_print_ind_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Copies" border="6" color="0" x="187" y="8" height="56" width="261" html.valueishtml="0"  name=c_print_qty_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Carton Nbr" border="6" color="0" x="457" y="8" height="56" width="489" html.valueishtml="0"  name=delivery_packing_carton_no_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="SKU" border="6" color="0" x="955" y="8" height="56" width="457" html.valueishtml="0"  name=delivery_packing_sku_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="QTY" border="6" color="0" x="1422" y="8" height="56" width="242" html.valueishtml="0"  name=quantity_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="COO" border="6" color="0" x="1673" y="8" height="56" width="183" html.valueishtml="0"  name=country_of_origin_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Box" border="6" color="0" x="1865" y="8" height="56" width="306" html.valueishtml="0"  name=box_of_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Length" border="6" color="0" x="2181" y="8" height="56" width="261" html.valueishtml="0"  name=length_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Width" border="6" color="0" x="2450" y="8" height="56" width="261" html.valueishtml="0"  name=width_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Height" border="6" color="0" x="2720" y="8" height="56" width="265" html.valueishtml="0"  name=height_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="OEM" border="6" color="0" x="3003" y="8" height="56" width="270" html.valueishtml="0"  name=c_oem_label_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Mfg Date" border="6" color="0" x="3282" y="8" height="56" width="453" html.valueishtml="0"  name=c_huawei_code_t visible="1~tif(Upper( c_oem_label ) = 'HUAWEI',1,0)"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+column(band=detail id=1 alignment="2" tabsequence=10 border="0" color="0" x="9" y="8" height="60" width="169" format="[general]" html.valueishtml="0"  name=c_print_ind visible="1" checkbox.text="" checkbox.on="Y" checkbox.off="N" checkbox.scale=no checkbox.threed=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="2" tabsequence=20 border="5" color="0" x="187" y="8" height="60" width="261" format="[general]" html.valueishtml="0"  name=c_print_qty visible="1" editmask.spin=yes editmask.mask="###0" editmask.spinincr=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=7 alignment="0" tabsequence=32766 border="0" color="0" x="955" y="8" height="60" width="457" format="[general]" html.valueishtml="0"  name=sku visible="1" edit.limit=50 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="0" tabsequence=32766 border="0" color="0" x="457" y="8" height="60" width="489" format="[general]" html.valueishtml="0"  name=carton_no visible="1" edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="2" tabsequence=32766 border="0" color="0" x="1865" y="8" height="60" width="306" format="[general]" html.valueishtml="0"  name=box_of visible="1" edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=9 alignment="0" tabsequence=32766 border="0" color="0" x="1673" y="8" height="60" width="183" format="[general]" html.valueishtml="0"  name=country_of_origin visible="1" edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="2" tabsequence=32766 border="0" color="0" x="3003" y="8" height="60" width="270" format="[general]" html.valueishtml="0"  name=c_oem_label visible="1" edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="0" tabsequence=30 border="5" color="0" x="3282" y="8" height="60" width="453" format="[general]" html.valueishtml="0"  name=c_huawei_code visible="1~tif(Upper( c_oem_label ) = 'HUAWEI',1,0)" edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=15 alignment="1" tabsequence=32766 border="0" color="0" x="1422" y="8" height="60" width="242" format="#####" html.valueishtml="0"  name=quantity visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=10 alignment="1" tabsequence=32766 border="0" color="0" x="2185" y="8" height="60" width="256" format="[general]" html.valueishtml="0"  name=length visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=11 alignment="1" tabsequence=32766 border="0" color="0" x="2455" y="8" height="60" width="256" format="[general]" html.valueishtml="0"  name=width visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=12 alignment="1" tabsequence=32766 border="0" color="0" x="2725" y="8" height="60" width="261" format="[general]" html.valueishtml="0"  name=height visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+
+sparse(names="carton_no")htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" pagingmethod=0 generatedddwframes="1" )
+xhtmlgen() cssgen(sessionspecific="0" )
+xmlgen(inline="0" )
+xsltgen()
+jsgen()
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )
+export.xhtml()
+ 

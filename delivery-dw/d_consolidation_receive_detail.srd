@@ -1,0 +1,40 @@
+HA$PBExportHeader$d_consolidation_receive_detail.srd
+$PBExportComments$Consolidation Inbound Orders
+release 7;
+datawindow(units=0 timer_interval=0 color=16777215 processing=1 HTMLDW=no print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.prompt=no print.buttons=no print.preview.buttons=no grid.lines=0 )
+header(height=80 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=72 color="536870912" )
+table(column=(type=char(16) updatewhereclause=yes name=ro_no dbname="Receive_Master.Ro_No" )
+ column=(type=char(30) updatewhereclause=yes name=receive_master_supp_invoice_no dbname="Receive_Master.Supp_Invoice_No" )
+ column=(type=char(1) updatewhereclause=yes name=receive_master_ord_status dbname="Receive_Master.Ord_Status" )
+ column=(type=char(50) updatewhereclause=yes name=receive_detail_sku dbname="Receive_Detail.SKU" )
+ column=(type=decimal(5) updatewhereclause=yes name=receive_detail_req_qty dbname="Receive_Detail.Req_Qty" )
+ column=(type=decimal(0) updatewhereclause=yes name=receive_detail_line_item_no dbname="Receive_Detail.Line_Item_No" )
+ retrieve="  SELECT Receive_Master.Ro_No,   
+			Receive_Master.Supp_Invoice_No,
+			Receive_Master.Ord_Status, 
+         Receive_Detail.SKU,   
+         Receive_Detail.Req_Qty,   
+         Receive_Detail.Line_Item_No  
+    FROM Receive_Detail,   
+         Receive_Master  
+   WHERE ( Receive_Master.RO_No = Receive_Detail.RO_No )    and
+			Project_id = :asProject and
+			Consolidation_No = :asConsolNo
+" arguments=(("asProject", string),("asConSolNo", string))  sort="receive_master_supp_invoice_no A receive_detail_line_item_no A " )
+group(level=1 header.height=0 trailer.height=8 by=("receive_master_supp_invoice_no" ) header.color="536870912" trailer.color="12632256" )
+text(band=header alignment="2" text="SKU" border="6" color="0" x="1106" y="8" height="64" width="695"  name=receive_detail_sku_t  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="79741120" )
+text(band=header alignment="2" text="Qty" border="6" color="0" x="1810" y="8" height="64" width="421"  name=receive_detail_req_qty_t  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="79741120" )
+text(band=header alignment="2" text="Line" border="6" color="0" x="914" y="8" height="64" width="183"  name=t_1  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="79741120" )
+text(band=header alignment="2" text="Order Nbr" border="6" color="0" x="9" y="8" height="64" width="576"  name=receive_master_supp_invoice_no_t  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="79741120" )
+text(band=header alignment="2" text="Status" border="6" color="0" x="594" y="8" height="64" width="311"  name=t_2  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="79741120" )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="0" color="0" x="1106" y="8" height="56" width="695" format="[general]"  name=receive_detail_sku edit.limit=50 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="1" tabsequence=32766 border="0" color="0" x="1810" y="8" height="56" width="421" format="#######.#####"  name=receive_detail_req_qty edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="0" tabsequence=32766 border="0" color="0" x="914" y="8" height="56" width="183" format="[general]"  name=receive_detail_line_item_no edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="0" color="0" x="9" y="8" height="56" width="576" format="[general]"  name=receive_master_supp_invoice_no edit.limit=30 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="0" color="0" x="594" y="8" height="56" width="311" format="[general]"  name=receive_master_ord_status dddw.name=dddw_ord_status dddw.displaycolumn=ord_status_desc dddw.datacolumn=ord_status dddw.percentwidth=0 dddw.lines=0 dddw.limit=0 dddw.allowedit=no dddw.useasborder=no dddw.case=any  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+
+sparse(names="receive_master_supp_invoice_no")htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" )

@@ -1,0 +1,65 @@
+﻿$PBExportHeader$f_sort_string.srf
+$PBExportComments$Initial create
+global type f_sort_string from function_object
+end type
+
+forward prototypes
+global function string f_sort_string (string as_import, string as_delimiter)
+end prototypes
+
+global function string f_sort_string (string as_import, string as_delimiter);//GailM 7/1/2020 Alpha sort a comma-delimited string using datastore sorting
+String lsRtn
+string ls_sql_select, ls_dwsyntax,lsErr,lsTemp,lsStr,lsDel,lsSpace
+int 	li_pos, li_row
+n_cst_string inv_string
+Datastore lds_import  
+
+li_row = 1
+lsStr = as_import
+lsDel = as_delimiter
+lsSpace = " "
+lsRtn = ""
+
+lds_import = Create Datastore
+lds_import.DataObject = "d_find"
+lds_import.SetTransObject(SQLCA)
+
+Do While lsStr <> ''	
+	li_pos = pos( lsStr,lsDel )
+	if li_pos > 0 Then
+		lsTemp = Left( lsStr,li_pos -1 )
+		li_row = lds_import.InsertRow(0)
+		lds_import.SetItem( li_row,'find_column', lsTemp)
+		lsStr = inv_string.of_lefttrim(Right(lsStr,( len( lsStr ) - li_pos )))
+	Else
+		li_row = lds_import.InsertRow(0)
+		lds_import.SetItem( li_row,'find_column', lsStr)
+		lsStr = ''
+	End If
+loop	
+
+lds_import.SetSort("#1 A")
+lds_import.Sort()
+
+for li_row = 1 to lds_import.RowCount()
+	
+	if li_row = 1 then
+		lsRtn = lds_import.object.find_column[li_row]
+	end if
+	
+	if Pos(lsRtn, lds_import.object.find_column[li_row]) = 0 then
+		if Len(lsRtn) = 0 then
+			lsRtn +=  lds_import.object.find_column[li_row] 
+		else
+			lsRtn += lsDel + lsSpace + lds_import.object.find_column[li_row] 
+		end if
+	end if	
+next
+
+Destroy lds_import
+
+Return lsRtn
+
+
+end function
+

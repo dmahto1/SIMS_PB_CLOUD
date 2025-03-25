@@ -1,0 +1,39 @@
+HA$PBExportHeader$f_replace_pipe.srf
+global type f_replace_pipe from function_object
+end type
+
+forward prototypes
+global function string f_replace_pipe (string asstring)
+end prototypes
+
+global function string f_replace_pipe (string asstring);//GailM 02/26/15
+//Expecting a pipe delimited string - A pipe symbol will be replaced by a line feed
+//This will allow for proper display of an address
+
+String lsReturn, lsSym01, lsSym02, lsLineFeed
+int i, li_Nbr, li_Nbr2
+
+lsSym01 = '|'										//Pipe delimiter
+lsLineFeed = char(13)+char(10)				//Add a space to replace the CR/LF
+
+li_Nbr = 0
+li_Nbr2 = 1
+i = 1
+
+	lsReturn = TRIM(asString)
+	IF len(asString) > 1 THEN
+		Do While i < len(lsReturn)
+			if ( mid(asString,i,1) = lsSym01 ) then
+				lsReturn = LEFT(lsReturn, i - 1 + li_Nbr ) + lsLineFeed + RIGHT(lsReturn, len(lsReturn) - i - li_Nbr )
+				i++
+				li_Nbr++
+			end if
+			i++
+		loop
+	END IF
+
+//Returns the asString with line feeds
+Return lsReturn
+
+end function
+

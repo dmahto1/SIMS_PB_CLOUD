@@ -1,0 +1,81 @@
+HA$PBExportHeader$d_lam_shipping_label.srd
+$PBExportComments$DW For Scitex Shipping Label
+release 11;
+datawindow(units=0 timer_interval=0 color=1090519039 processing=1 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes print.preview.outline=yes hidegrayline=no showbackcoloronxp=no grid.lines=0 )
+header(height=132 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=76 color="536870912" )
+table(column=(type=char(20) updatewhereclause=yes name=cust_order_no dbname="Cust_Order_No" )
+ column=(type=char(16) updatewhereclause=yes name=delivery_master_do_no dbname="DO_No" )
+ column=(type=char(10) updatewhereclause=yes name=delivery_master_project_id dbname="Project_ID" )
+ column=(type=char(1) updatewhereclause=yes name=c_label_format dbname="c_label_format" )
+ column=(type=char(1) updatewhereclause=yes name=c_print_ind dbname="c_print_ind" values="	Y/	N" )
+ column=(type=char(50) updatewhereclause=yes name=invoice_no dbname="Invoice_No" )
+ column=(type=char(50) updatewhereclause=yes name=sku dbname="sku" )
+ column=(type=decimal(5) updatewhereclause=yes name=alloc_qty dbname="alloc_qty" )
+ column=(type=datetime updatewhereclause=yes name=request_date dbname="Request_Date" )
+ column=(type=char(50) updatewhereclause=yes name=c_cust_sku dbname="c_cust_Sku" )
+ column=(type=char(20) updatewhereclause=yes name=cust_code dbname="Cust_Code" )
+ column=(type=char(20) updatewhereclause=yes name=supp_code dbname="supp_code" )
+ column=(type=char(1) updatewhereclause=yes name=ord_type dbname="Ord_Type" )
+ column=(type=decimal(0) updatewhereclause=yes name=line_item_no dbname="Line_Item_No" )
+ column=(type=long updatewhereclause=yes identity=yes name=c_print_qty dbname="c_print_qty" )
+ retrieve="  SELECT DISTINCT    
+         Delivery_Master.Cust_Order_No,      
+         Delivery_Master.DO_No,   
+         Delivery_Master.Project_ID,   
+         ' ' as c_label_format,   
+         ' ' as c_print_ind,   
+         Delivery_Master.Invoice_No, 
+         Delivery_Detail.sku,  
+			Delivery_Detail.alloc_qty,
+         Delivery_Master.Request_Date,
+			space(50) as c_cust_Sku,
+			Delivery_Master.Cust_Code,
+		   Delivery_Detail.supp_code,
+			Delivery_Master.Ord_Type,
+			Delivery_Detail.Line_Item_No,
+			00001 as c_print_qty
+			
+    FROM Delivery_Detail,   
+         Item_Master,   
+         Delivery_Master 
+   WHERE  Delivery_Master.Do_NO = Delivery_Detail.Do_NO And
+         ( Item_Master.sku = Delivery_Detail.sku ) and  
+         ( Item_Master.supp_code = Delivery_Detail.supp_code ) and  
+         ( Item_Master.project_id = Delivery_Master.Project_ID ) and 
+         ( ( Delivery_Master.Project_ID = :as_project_id ) AND  
+         ( Delivery_Master.do_No = :as_do_no ) ) 
+" arguments=(("as_project_id", string),("as_do_no", string)) )
+text(band=header alignment="2" text="Prt" border="6" color="0" x="9" y="8" height="112" width="96" html.valueishtml="0"  name=obj_53251992 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="80269524" )
+text(band=header alignment="2" text="Sku" border="6" color="0" x="2574" y="8" height="112" width="818" html.valueishtml="0"  name=sku_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Customer Part Number" border="6" color="0" x="3401" y="8" height="112" width="750" html.valueishtml="0"  name=c_cust_sku_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Cust
+Order Nbr" border="6" color="0" x="901" y="8" height="112" width="361" html.valueishtml="0"  name=delivery_master_cust_order_no_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217750" )
+text(band=header alignment="2" text="Delivery Date" border="6" color="0" x="2135" y="8" height="112" width="430" html.valueishtml="0"  name=request_date_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Order
+Nbr" border="6" color="0" x="571" y="8" height="112" width="320" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="79741120" )
+text(band=header alignment="2" text="Print # Labels" border="6" color="0" x="114" y="8" height="112" width="448" html.valueishtml="0"  name=c_print_qty_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Line 
+Item No" border="6" color="0" x="1271" y="8" height="112" width="320" html.valueishtml="0"  name=line_item_no_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Qty" border="6" color="0" x="1600" y="8" height="112" width="526" html.valueishtml="0"  name=alloc_qty_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217750" )
+column(band=detail id=5 alignment="2" tabsequence=10 border="0" color="0" x="9" y="8" height="60" width="96" format="[general]" html.valueishtml="0"  name=c_print_ind visible="1" checkbox.text="" checkbox.on="Y" checkbox.off="N" checkbox.scale=no checkbox.threed=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1090519039" )
+column(band=detail id=1 alignment="2" tabsequence=32766 border="0" color="0" x="901" y="8" height="60" width="361" format="[general]" html.valueishtml="0"  name=cust_order_no visible="1" edit.limit=20 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1090519039" )
+column(band=detail id=7 alignment="2" tabsequence=32766 border="0" color="0" x="2574" y="8" height="60" width="818" format="[general]" html.valueishtml="0"  name=sku visible="1" edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1090519039" )
+column(band=detail id=10 alignment="2" tabsequence=40 border="0" color="0" x="3401" y="8" height="60" width="750" format="[general]" html.valueishtml="0"  name=c_cust_sku visible="1" edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1090519039" )
+column(band=detail id=9 alignment="2" tabsequence=32766 border="0" color="0" x="2135" y="8" height="60" width="430" format="[shortdate]" html.valueishtml="0"  name=request_date visible="1" edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1090519039" )
+column(band=detail id=14 alignment="2" tabsequence=32766 border="0" color="0" x="1271" y="8" height="60" width="320" format="[general]" html.valueishtml="0"  name=line_item_no visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1090519039" )
+column(band=detail id=8 alignment="2" tabsequence=30 border="0" color="0" x="1600" y="8" height="60" width="526" format="[general]" html.valueishtml="0"  name=alloc_qty visible="1" edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1090519039" )
+column(band=detail id=6 alignment="2" tabsequence=32766 border="0" color="0" x="571" y="8" height="60" width="320" format="[general]" html.valueishtml="0"  name=invoice_no visible="1" edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+column(band=detail id=15 alignment="0" tabsequence=20 border="0" color="0" x="114" y="8" height="56" width="448" format="[general]" html.valueishtml="0"  name=c_print_qty visible="1" editmask.spin=yes editmask.mask="####0" editmask.spinincr=0 editmask.focusrectangle=no  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" pagingmethod=0 generatedddwframes="1" )
+xhtmlgen() cssgen(sessionspecific="0" )
+xmlgen(inline="0" )
+xsltgen()
+jsgen()
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )
+export.xhtml()

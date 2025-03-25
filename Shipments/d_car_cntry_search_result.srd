@@ -1,0 +1,58 @@
+HA$PBExportHeader$d_car_cntry_search_result.srd
+$PBExportComments$Shipment Search Criteria Entry
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=1 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no grid.lines=0 )
+header(height=144 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=92 color="536870912" )
+table(column=(type=char(10) updatewhereclause=yes name=wh_code dbname="Carrier_Country.WH_Code" )
+ column=(type=char(20) updatewhereclause=yes name=carrier_code dbname="Carrier_Country.Carrier_Code" )
+ column=(type=char(3) updatewhereclause=yes name=country_code dbname="Carrier_Country.Country_Code" )
+ column=(type=char(1) updatewhereclause=yes name=depart_sunday dbname="Carrier_Country.Depart_Sunday" )
+ column=(type=char(1) updatewhereclause=yes name=depart_monday dbname="Carrier_Country.Depart_Monday" )
+ column=(type=char(1) updatewhereclause=yes name=depart_tuesday dbname="Carrier_Country.Depart_Tuesday" )
+ column=(type=char(1) updatewhereclause=yes name=depart_wednesday dbname="Carrier_Country.Depart_Wednesday" )
+ column=(type=char(1) updatewhereclause=yes name=depart_thursday dbname="Carrier_Country.Depart_Thursday" )
+ column=(type=char(1) updatewhereclause=yes name=depart_friday dbname="Carrier_Country.Depart_Friday" )
+ column=(type=char(1) updatewhereclause=yes name=depart_saturday dbname="Carrier_Country.Depart_Saturday" )
+ column=(type=decimal(0) updatewhereclause=yes name=default_transit_time dbname="Carrier_Country.Default_Transit_Time" )
+ retrieve="PBSELECT( VERSION(400) TABLE(NAME=~"dbo.Carrier_Country~" ) COLUMN(NAME=~"dbo.Carrier_Country.WH_Code~") COLUMN(NAME=~"dbo.Carrier_Country.Carrier_Code~") COLUMN(NAME=~"dbo.Carrier_Country.Country_Code~") COLUMN(NAME=~"dbo.Carrier_Country.Depart_Sunday~") COLUMN(NAME=~"dbo.Carrier_Country.Depart_Monday~") COLUMN(NAME=~"dbo.Carrier_Country.Depart_Tuesday~") COLUMN(NAME=~"dbo.Carrier_Country.Depart_Wednesday~") COLUMN(NAME=~"dbo.Carrier_Country.Depart_Thursday~") COLUMN(NAME=~"dbo.Carrier_Country.Depart_Friday~") COLUMN(NAME=~"dbo.Carrier_Country.Depart_Saturday~") COLUMN(NAME=~"dbo.Carrier_Country.Default_Transit_Time~")) " )
+text(band=header alignment="2" text="Default
+Transit Time" border="6" color="33554432" x="2546" y="8" height="128" width="398" html.valueishtml="0"  name=default_transit_time_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="
+Wh Code" border="6" color="33554432" x="9" y="8" height="128" width="485" html.valueishtml="0"  name=wh_code_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="
+Sun" border="6" color="33554432" x="1504" y="8" height="128" width="142" html.valueishtml="0"  name=depart_sunday_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="
+Carrier" border="6" color="33554432" x="503" y="8" height="128" width="576" html.valueishtml="0"  name=carrier_code_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="
+Country" border="6" color="33554432" x="1088" y="8" height="128" width="407" html.valueishtml="0"  name=country_code_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="
+Mon" border="6" color="33554432" x="1655" y="8" height="128" width="137" html.valueishtml="0"  name=depart_monday_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="
+Tue" border="6" color="33554432" x="1801" y="8" height="128" width="142" html.valueishtml="0"  name=depart_tuesday_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="
+Wed" border="6" color="33554432" x="1952" y="8" height="128" width="142" html.valueishtml="0"  name=depart_wednesday_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="
+Thur" border="6" color="33554432" x="2103" y="8" height="128" width="146" html.valueishtml="0"  name=depart_thursday_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="
+Fri" border="6" color="33554432" x="2258" y="8" height="128" width="137" html.valueishtml="0"  name=depart_friday_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="
+Sat" border="6" color="33554432" x="2405" y="8" height="128" width="133" html.valueishtml="0"  name=depart_saturday_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="0" color="33554432" x="9" y="8" height="76" width="485" format="[general]" html.valueishtml="0"  name=wh_code visible="1" edit.limit=10 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="0" color="33554432" x="503" y="8" height="76" width="576" format="[general]" html.valueishtml="0"  name=carrier_code visible="1" edit.limit=20 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="0" color="33554432" x="1088" y="8" height="76" width="407" format="[general]" html.valueishtml="0"  name=country_code visible="1" edit.limit=3 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=11 alignment="2" tabsequence=32766 border="0" color="33554432" x="2546" y="8" height="76" width="398" format="[general]" html.valueishtml="0"  name=default_transit_time visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="2" tabsequence=32766 border="0" color="33554432" x="1504" y="8" height="76" width="142" format="[general]" html.valueishtml="0"  name=depart_sunday visible="1" edit.limit=1 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="2" tabsequence=32766 border="0" color="33554432" x="1655" y="8" height="76" width="137" format="[general]" html.valueishtml="0"  name=depart_monday visible="1" edit.limit=1 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="2" tabsequence=32766 border="0" color="33554432" x="1801" y="8" height="76" width="142" format="[general]" html.valueishtml="0"  name=depart_tuesday visible="1" edit.limit=1 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=7 alignment="2" tabsequence=32766 border="0" color="33554432" x="1952" y="8" height="76" width="142" format="[general]" html.valueishtml="0"  name=depart_wednesday visible="1" edit.limit=1 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=8 alignment="2" tabsequence=32766 border="0" color="33554432" x="2103" y="8" height="76" width="146" format="[general]" html.valueishtml="0"  name=depart_thursday visible="1" edit.limit=1 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=9 alignment="2" tabsequence=32766 border="0" color="33554432" x="2258" y="8" height="76" width="137" format="[general]" html.valueishtml="0"  name=depart_friday visible="1" edit.limit=1 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=10 alignment="2" tabsequence=32766 border="0" color="33554432" x="2405" y="8" height="76" width="133" format="[general]" html.valueishtml="0"  name=depart_saturday visible="1" edit.limit=1 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

@@ -1,0 +1,55 @@
+HA$PBExportHeader$f_get_country_name.srf
+$PBExportComments$Return Country Name from Code
+global type f_get_country_name from function_object
+end type
+
+forward prototypes
+global function string f_get_country_name (string as_country_code)
+end prototypes
+
+global function string f_get_country_name (string as_country_code);
+String	lsCountryName, lsFind
+Long		llCountryNo, llFindRow
+
+
+
+//We will validate from either the 2 or 3 char code and return the name
+
+//If Len(Trim(as_country_Code)) = 2 Then /*2 char Country Code*/
+//	
+//	Select Country_Name
+//	Into	:lsCOuntryName
+//	From Country
+//	Where emcn_code = :as_country_code;
+//	
+//Else /*use 3 char Code*/
+//	
+//	Select Country_Name
+//	Into	:lsCOuntryName
+//	From Country
+//	Where iso_country_cd = :as_country_code;
+//
+//End If
+
+//01/06 - PCONKL - We already have the country table loaded in memory
+
+If Len(Trim(as_country_Code)) = 2 Then /*2 char Country Code*/
+	
+	lsFind = "Upper(designating_Code) = '" + upper(as_country_code) + "'"
+	
+Else /*use 3 char Code*/
+	
+	lsFind = "Upper(iso_Country_cd) = '" + upper(as_country_code) + "'"
+	
+End If
+
+llFindRow = g.ids_country.Find(lsFind,1,g.ids_country.rowCount())
+If llFindRow > 0 Then
+	lsCountryName = g.ids_country.GetITemString(llFindRow,'country_Name')
+Else
+	lsCountryName = ""
+End If
+
+Return lsCountryName
+end function
+

@@ -1,0 +1,42 @@
+Save Format v3.0(19990112)
+@begin Libraries
+ "shipments\\shipments.pbl" "";
+@end;
+@begin Objects
+ "shipments\\d_iqc.srd" "shipments\\shipments.pbl";
+ "shipments\\d_status_import_1.srd" "shipments\\shipments.pbl";
+ "shipments\\d_status_import_4.srd" "shipments\\shipments.pbl";
+ "shipments\\d_status_import_5.srd" "shipments\\shipments.pbl";
+ "shipments\\w_eta_maint.srw" "shipments\\shipments.pbl";
+ "shipments\\w_orphans.srw" "shipments\\shipments.pbl";
+ "shipments\\d_orphan_search_entry.srd" "shipments\\shipments.pbl";
+ "shipments\\d_ship_do_detail.srd" "shipments\\shipments.pbl";
+ "shipments\\d_shipment.srd" "shipments\\shipments.pbl";
+ "shipments\\w_shipments.srw" "shipments\\shipments.pbl";
+ "shipments\\d_orphan_search_result.srd" "shipments\\shipments.pbl";
+ "shipments\\d_transit_time_detail.srd" "shipments\\shipments.pbl";
+ "shipments\\d_shipment_header.srd" "shipments\\shipments.pbl";
+ "shipments\\d_ship_ro_detail.srd" "shipments\\shipments.pbl";
+ "shipments\\d_shipment_search_entry.srd" "shipments\\shipments.pbl";
+ "shipments\\d_3com_bol_order_detail.srd" "shipments\\shipments.pbl";
+ "shipments\\d_shipment_search_result.srd" "shipments\\shipments.pbl";
+ "shipments\\d_select_inbound_orders.srd" "shipments\\shipments.pbl";
+ "shipments\\d_3com_shipment_bol_master.srd" "shipments\\shipments.pbl";
+ "shipments\\d_car_cntry_search_entry.srd" "shipments\\shipments.pbl";
+ "shipments\\d_car_cntry_search_result.srd" "shipments\\shipments.pbl";
+ "shipments\\d_shipment_search_result_otm.srd" "shipments\\shipments.pbl";
+ "shipments\\d_orphan_master.srd" "shipments\\shipments.pbl";
+ "shipments\\d_shipment_detail.srd" "shipments\\shipments.pbl";
+ "shipments\\d_3com_tp_bol_shipment_prt.srd" "shipments\\shipments.pbl";
+ "shipments\\d_shipment_location.srd" "shipments\\shipments.pbl";
+ "shipments\\u_ds_datastore.sru" "shipments\\shipments.pbl";
+ "shipments\\w_select_shipments.srw" "shipments\\shipments.pbl";
+ "shipments\\d_3com_bol_shipment_prt.srd" "shipments\\shipments.pbl";
+ "shipments\\d_shipment_orderlevel.srd" "shipments\\shipments.pbl";
+ "shipments\\d_orphan_si4.srd" "shipments\\shipments.pbl";
+ "shipments\\d_orphan_si5.srd" "shipments\\shipments.pbl";
+ "shipments\\u_nvo_shipments.sru" "shipments\\shipments.pbl";
+ "shipments\\d_carrier_country.srd" "shipments\\shipments.pbl";
+ "shipments\\d_select_outbound_orders.srd" "shipments\\shipments.pbl";
+ "shipments\\d_shipment_status.srd" "shipments\\shipments.pbl";
+@end;

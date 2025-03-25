@@ -1,0 +1,58 @@
+HA$PBExportHeader$d_select_inbound_orders.srd
+$PBExportComments$Select Inbound orders to add to shipment
+release 7;
+datawindow(units=0 timer_interval=0 color=16777215 processing=1 HTMLDW=no print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.prompt=no print.buttons=no print.preview.buttons=no grid.lines=0 )
+header(height=80 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=68 color="536870912" )
+table(column=(type=char(1) updatewhereclause=yes name=c_select_ind dbname="c_select_Ind" values="	Y/	N" )
+ column=(type=char(16) update=yes updatewhereclause=yes name=ro_no dbname="Receive_Master.RO_No" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=ord_status dbname="Receive_Master.Ord_Status" values="New	N/Process	P/Complete	C/Void	V/" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=ord_type dbname="Receive_Master.Ord_Type" )
+ column=(type=char(20) update=yes updatewhereclause=yes name=supp_code dbname="Receive_Master.Supp_Code" )
+ column=(type=char(30) update=yes updatewhereclause=yes name=supp_invoice_no dbname="Receive_Master.Supp_Invoice_No" )
+ column=(type=char(100) updatewhereclause=yes name=supp_order_no dbname="Receive_Master.Supp_Order_No" )
+ column=(type=char(40) updatewhereclause=yes name=supplier_supp_name dbname="Supplier.Supp_Name" )
+ column=(type=char(40) updatewhereclause=yes name=supplier_address_1 dbname="Supplier.Address_1" )
+ column=(type=char(15) updatewhereclause=yes name=supplier_zip dbname="Supplier.Zip" )
+ retrieve="  SELECT ' ' as c_select_Ind, 
+			dbo.Receive_Master.RO_No,   
+         dbo.Receive_Master.Ord_Status,   
+         dbo.Receive_Master.Ord_Type,   
+         dbo.Receive_Master.Supp_Code,   
+         dbo.Receive_Master.Supp_Invoice_No,   
+			dbo.Receive_Master.Supp_Order_No,  
+         dbo.Supplier.Supp_Name,   
+         dbo.Supplier.Address_1,   
+         dbo.Supplier.Zip  
+    FROM dbo.Receive_Master,   
+         dbo.Supplier  
+   WHERE ( dbo.Supplier.Project_ID = dbo.Receive_Master.Project_ID ) and  
+         ( dbo.Supplier.Supp_Code = dbo.Receive_Master.Supp_Code )    and
+			Receive_Master.Project_ID = :asProject and 
+			(receive_master.Carrier = :asCarrier or Receive_Master.Carrier is null) and
+			(receive_master.awb_bol_no = :asawb or Receive_Master.awb_bol_no is null) and
+			(Supplier.Zip = :asZip or Supplier.Zip is null) and
+			Receive_master.Ord_Status <> 'V' and
+			(Receive_master.Ship_no is Null or REceive_master.Ship_no = '')
+			
+" arguments=(("asProject", string),("asCarrier", string),("asZip", string),("asAWB", string)) )
+text(band=header alignment="2" text="Order Nbr" border="6" color="0" x="105" y="8" height="64" width="370"  name=supp_invoice_no_t  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="79741120" )
+text(band=header alignment="2" text="Status" border="6" color="0" x="2117" y="8" height="64" width="288"  name=ord_status_t  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="79741120" )
+text(band=header alignment="2" text="Type" border="6" color="0" x="2414" y="8" height="64" width="361"  name=ord_type_t  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="79741120" )
+text(band=header alignment="2" text="Address 1" border="6" color="0" x="1358" y="8" height="64" width="507"  name=obj_27287617  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="79741120" )
+text(band=header alignment="2" text="Zip" border="6" color="0" x="1874" y="8" height="64" width="233"  name=obj_27292053  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="79741120" )
+text(band=header alignment="2" text="Supp Order No" border="6" color="0" x="485" y="8" height="64" width="457"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="79741120" )
+text(band=header alignment="2" text="Supplier" border="6" color="0" x="951" y="8" height="64" width="398"  name=t_1  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="79741120" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="0" color="0" x="2117" y="8" height="56" width="288" format="[general]"  name=ord_status ddlb.limit=0 ddlb.allowedit=no ddlb.case=any  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="0" color="0" x="2414" y="8" height="56" width="361" format="[general]"  name=ord_type dddw.name=dddw_receive_order_type dddw.displaycolumn=ord_type_desc dddw.datacolumn=ord_type dddw.percentwidth=0 dddw.lines=0 dddw.limit=0 dddw.allowedit=no dddw.useasborder=no dddw.case=any  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=9 alignment="0" tabsequence=32766 border="0" color="0" x="1358" y="8" height="56" width="507" format="[general]"  name=supplier_address_1 edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=10 alignment="0" tabsequence=32766 border="0" color="0" x="1874" y="8" height="56" width="233" format="[general]"  name=supplier_zip edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=7 alignment="0" tabsequence=32766 border="0" color="0" x="489" y="8" height="56" width="453"  name=supp_order_no  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=detail alignment="0" expression=" supp_code + ' - ' +  supplier_supp_name "border="0" color="0" x="951" y="8" height="56" width="398" format="[GENERAL]"  name=compute_1  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="" border="6" color="0" x="5" y="8" height="64" width="91"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="79741120" )
+column(band=detail id=6 alignment="0" tabsequence=32766 border="0" color="0" x="105" y="8" height="56" width="370" format="[general]"  name=supp_invoice_no edit.limit=30 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=1 alignment="0" tabsequence=10 border="0" color="0" x="9" y="8" height="56" width="87"  name=c_select_ind checkbox.text="" checkbox.on="Y" checkbox.off="N" checkbox.scale=no checkbox.threed=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" )

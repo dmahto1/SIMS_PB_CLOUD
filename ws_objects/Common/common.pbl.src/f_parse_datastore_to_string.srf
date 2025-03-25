@@ -1,0 +1,37 @@
+﻿$PBExportHeader$f_parse_datastore_to_string.srf
+$PBExportComments$Initial Create
+global type f_parse_datastore_to_string from function_object
+end type
+
+forward prototypes
+global function string f_parse_datastore_to_string (datastore dsinstore, string ascolumntoparse)
+end prototypes
+
+global function string f_parse_datastore_to_string (datastore dsinstore, string ascolumntoparse);String ls_values
+
+//For future reference:  asColumnToParse will be used in place of serial_no below.
+
+if dsInStore.RowCount() = 0 then
+	return "(null)"
+end if
+
+long i
+for i = 1 to dsInStore.RowCount()
+	
+	if i = 1 then
+		ls_values = "'" + dsInStore.object.serial_no[i] + "'"
+	end if
+	
+	if Pos(ls_values, dsInStore.object.serial_no[i]) = 0 then
+		if Len(ls_values) = 0 then
+			ls_values += "'" + dsInStore.object.serial_no[i] + "'"
+		else
+			ls_values += ", '" + dsInStore.object.serial_no[i] + "'"	
+		end if
+	end if	
+next
+
+return "(" + ls_values + ")"
+
+end function
+

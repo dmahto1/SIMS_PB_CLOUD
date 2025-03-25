@@ -1,0 +1,51 @@
+HA$PBExportHeader$d_powerwave_order_ship_status_rpt.srd
+release 11;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=1 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes print.preview.outline=yes hidegrayline=no showbackcoloronxp=no grid.lines=0 )
+header(height=76 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=92 color="536870912" )
+table(column=(type=char(50) updatewhereclause=yes name=invoice_no dbname="INVOICE_NO" )
+ column=(type=char(1) updatewhereclause=yes name=ord_status dbname="ORD_STATUS" )
+ column=(type=char(10) updatewhereclause=yes name=complete_date dbname="COMPLETE_DATE" )
+ column=(type=char(10) updatewhereclause=yes name=status_code dbname="STATUS_CODE" )
+ column=(type=char(10) updatewhereclause=yes name=status_date dbname="STATUS_DATE" )
+ column=(type=char(16) updatewhereclause=yes name=ship_no dbname="SHIP_NO" )
+ retrieve="SELECT DISTINCT DELIVERY_MASTER.INVOICE_NO	
+	,DELIVERY_MASTER.ORD_STATUS			
+	,CONVERT( CHAR (10), DELIVERY_MASTER.COMPLETE_DATE, 101 )      'COMPLETE_DATE'			
+	,SHIP_STAT.STATUS_CODE
+	,CONVERT( CHAR(10), SHIP_STAT.STATUS_DATE, 101 )   				'STATUS_DATE'		
+	,SHIPMENT.SHIP_NO
+   FROM SHIPMENT						
+   LEFT OUTER JOIN SHIPMENT_STATUS		SHIP_STAT				
+     ON SHIP_STAT.SHIP_NO = SHIPMENT.SHIP_NO     
+  INNER JOIN DELIVERY_MASTER				
+     ON DELIVERY_MASTER.AWB_BOL_No = SHIPMENT.AWB_BOL_No 
+    AND DELIVERY_MASTER.PROJECT_ID = SHIPMENT.PROJECT_ID 
+  WHERE ISNULL(SHIP_STAT.SHIP_STATUS_LINE_NO,0) = ISNULL( ( SELECT MAX(CONVERT(INT,SHIP_STATUS_LINE_NO))
+										    FROM SHIPMENT_STATUS		SHIP_STAT2   
+										   WHERE SHIP_STAT.SHIP_NO = SHIP_STAT2.SHIP_NO ),0 )
+    AND SHIP_STAT.STATUS_CODE NOT IN ( 'D', 'D1' )" )
+text(band=header alignment="2" text="Order No" border="0" color="33554432" x="9" y="8" height="64" width="576" html.valueishtml="0"  name=invoice_no_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Order Status" border="0" color="33554432" x="594" y="8" height="64" width="494" html.valueishtml="0"  name=ord_status_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Complete Date" border="0" color="33554432" x="1097" y="8" height="64" width="631" html.valueishtml="0"  name=complete_date_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Ship Status Code" border="0" color="33554432" x="1737" y="8" height="64" width="517" html.valueishtml="0"  name=status_code_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Ship No" border="0" color="33554432" x="2779" y="8" height="64" width="901" html.valueishtml="0"  name=ship_no_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Ship Status Date" border="0" color="33554432" x="2263" y="8" height="64" width="507" html.valueishtml="0"  name=status_date_t visible="1"  moveable=1  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=1 alignment="2" tabsequence=32766 border="0" color="33554432" x="9" y="8" height="76" width="576" format="[general]" html.valueishtml="0"  name=invoice_no visible="1" edit.limit=20 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="2" tabsequence=32766 border="0" color="33554432" x="594" y="8" height="76" width="494" format="[general]" html.valueishtml="0"  name=ord_status visible="1" edit.limit=1 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="2" tabsequence=32766 border="0" color="33554432" x="1097" y="8" height="76" width="631" format="[general]" html.valueishtml="0"  name=complete_date visible="1" edit.limit=10 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="2" tabsequence=32766 border="0" color="33554432" x="1737" y="8" height="76" width="517" format="[general]" html.valueishtml="0"  name=status_code visible="1" edit.limit=10 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="2" tabsequence=32766 border="0" color="33554432" x="2779" y="8" height="76" width="901" format="[general]" html.valueishtml="0"  name=ship_no visible="1" edit.limit=16 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="2" tabsequence=32766 border="0" color="33554432" x="2263" y="8" height="76" width="507" format="[general]" html.valueishtml="0"  name=status_date visible="1"  moveable=1 edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" pagingmethod=0 generatedddwframes="1" )
+xhtmlgen() cssgen(sessionspecific="0" )
+xmlgen(inline="0" )
+xsltgen()
+jsgen()
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )
+export.xhtml()

@@ -1,0 +1,115 @@
+﻿$PBExportHeader$d_shipment_detail_rpt.srd
+$PBExportComments$Delivery Allocation Report
+release 9;
+datawindow(units=0 timer_interval=60000 color=1073741824 processing=1 HTMLDW=no print.printername="" print.documentname="" print.orientation = 1 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no grid.lines=0 )
+header(height=408 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=84 color="536870912" )
+detail(height=76 color="536870912" )
+table(column=(type=char(10) updatewhereclause=yes name=wh_code dbname="WH_Code" )
+ column=(type=datetime updatewhereclause=yes name=schedule_date dbname="Schedule_Date" )
+ column=(type=datetime updatewhereclause=yes name=request_date dbname="Request_Date" )
+ column=(type=char(20) updatewhereclause=yes name=cust_order_no dbname="Cust_Order_No" )
+ column=(type=char(100) updatewhereclause=yes name=cust_name dbname="Cust_Name" )
+ column=(type=char(120) updatewhereclause=yes name=address_1 dbname="Address_1" )
+ column=(type=char(100) updatewhereclause=yes name=city dbname="City" )
+ column=(type=char(100) updatewhereclause=yes name=state dbname="State" )
+ column=(type=char(100) updatewhereclause=yes name=zip dbname="Zip" )
+ column=(type=char(50) updatewhereclause=yes name=invoice_no dbname="Invoice_No" )
+ column=(type=decimal(5) updatewhereclause=yes name=req_qty dbname="Req_Qty" )
+ column=(type=decimal(5) updatewhereclause=yes name=alloc_qty dbname="Alloc_Qty" )
+ column=(type=decimal(10) updatewhereclause=yes name=est_wgt dbname="Est_Wgt" )
+ column=(type=char(20) updatewhereclause=yes name=awb_bol dbname="AWB_BOL" )
+ column=(type=decimal(21) updatewhereclause=yes name=est_pallets dbname="Est_Pallets" )
+ retrieve="
+SELECT 
+Delivery_master.WH_CODE As 'WH_Code',
+Delivery_master.Schedule_Date As 'Schedule_Date', 
+Delivery_master.Request_date As 'Request_Date',
+Delivery_master.Cust_Order_no As 'Cust_Order_No', 
+Delivery_master.Cust_Name As 'Cust_Name',
+Delivery_master.Address_1 As 'Address_1',
+Delivery_master.City As 'City',
+Delivery_master.State As 'State',
+Delivery_master.Zip As 'Zip', 
+Delivery_master.Invoice_no As 'Invoice_No',
+Sum(Delivery_Detail.Req_Qty) As 'Req_Qty',
+Sum(Delivery_Detail.Alloc_Qty) As 'Alloc_Qty',
+Sum((Delivery_Detail.Req_Qty * Item_Master.Weight_1)) As 'Est_Wgt',
+Delivery_master.AWB_BOL_no As 'AWB_BOL',
+Sum(CASE Item_Master.UOM_2
+	WHEN 'PL' THEN (CASE delivery_master.ord_status WHEN 'N' THEN round((Delivery_Detail.Req_Qty)/ Item_Master.Qty_2,2) ELSE round((Delivery_Detail.Alloc_Qty) /   Item_Master.Qty_2,2) END)
+	ELSE 0
+END) As 'Est_Pallets'
+
+    FROM dbo.Delivery_Detail,   
+         dbo.Delivery_Master,   
+         dbo.Owner, 
+			dbo.Item_master  
+   WHERE ( dbo.Delivery_Master.DO_No = dbo.Delivery_Detail.DO_No ) and  
+         ( dbo.Delivery_Master.Project_ID = dbo.Owner.Project_ID ) and  
+         ( dbo.Delivery_Detail.Owner_ID = dbo.Owner.Owner_ID )  and
+			(Delivery_MASter.Project_id = Item_master.Project_id) and
+  			(Delivery_detail.SKU = Item_Master.SKU) and
+			(Delivery_Detail.Supp_Code = Item_MAster.Supp_Code) and  dbo.Delivery_Master.Project_ID = :project_id and  (ord_status <> 'C' AND ord_status <> 'V')
+GROUP BY Delivery_master.WH_CODE, Delivery_master.Do_No, Delivery_master.Schedule_Date, Delivery_master.Request_date	, Delivery_master.Cust_Order_no, Delivery_master.Cust_Name, Delivery_master.Address_1, Delivery_master.City, Delivery_master.State, Delivery_master.Zip, Delivery_master.Invoice_no, Delivery_master.AWB_BOL_no, Delivery_Master.Ord_Status
+
+ORDER BY Delivery_master.WH_CODE, Delivery_master.Request_date, Delivery_master.Invoice_no
+
+
+
+
+  
+ 
+
+
+
+" arguments=(("project_id", string)) )
+text(band=header alignment="2" text="Shipment Detail Report" border="0" color="33554432" x="1682" y="16" height="56" width="759" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+compute(band=header alignment="0" expression="today()"border="0" color="33554432" x="1221" y="68" height="56" width="453" format="[general]" html.valueishtml="0"  name=date_1 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+compute(band=header alignment="0" expression="'Page ' + page() + ' of ' + pageCount()"border="0" color="33554432" x="3296" y="68" height="76" width="722" format="[general]" html.valueishtml="0"  name=page_1 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+text(band=header alignment="1" text="Report Date:" border="0" color="33554432" x="782" y="68" height="56" width="430" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+text(band=header alignment="2" text="Schedule
+Date" border="0" color="0" x="343" y="284" height="112" width="430" html.valueishtml="0"  name=schedule_date_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Request
+Date" border="0" color="0" x="782" y="284" height="112" width="430" html.valueishtml="0"  name=request_date_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Cust Order
+No." border="0" color="0" x="1221" y="284" height="112" width="453" html.valueishtml="0"  name=cust_order_no_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Cust Name" border="0" color="0" x="1682" y="284" height="112" width="759" html.valueishtml="0"  name=cust_name_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Address 1" border="0" color="0" x="2450" y="284" height="112" width="837" html.valueishtml="0"  name=address_1_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="City" border="0" color="0" x="3296" y="284" height="112" width="722" html.valueishtml="0"  name=city_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="State" border="0" color="0" x="4027" y="284" height="112" width="704" html.valueishtml="0"  name=state_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Zip" border="0" color="0" x="4741" y="284" height="112" width="357" html.valueishtml="0"  name=zip_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Invoice
+No." border="0" color="0" x="5106" y="284" height="112" width="453" html.valueishtml="0"  name=invoice_no_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Req Qty" border="0" color="33554432" x="5568" y="284" height="112" width="434" html.valueishtml="0"  name=req_qty_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+text(band=header alignment="2" text="Alloc Qty" border="0" color="33554432" x="6011" y="284" height="112" width="512" html.valueishtml="0"  name=alloc_qty_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+text(band=header alignment="2" text="Est Wgt" border="0" color="33554432" x="6533" y="284" height="112" width="389" html.valueishtml="0"  name=est_wgt_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+text(band=header alignment="2" text="Awb Bol" border="0" color="33554432" x="6930" y="284" height="112" width="453" html.valueishtml="0"  name=awb_bol_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+text(band=header alignment="2" text="Est
+Pallets" border="0" color="33554432" x="7392" y="284" height="112" width="498" html.valueishtml="0"  name=est_pallets_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+text(band=header alignment="1" text="Project:" border="0" color="33554432" x="782" y="128" height="56" width="430" html.valueishtml="0"  name=t_3 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+compute(band=header alignment="0" expression=" project_id "border="0" color="33554432" x="1221" y="128" height="56" width="453" format="[GENERAL]" html.valueishtml="0"  name=compute_1 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+text(band=header alignment="2" text="Warehouse" border="0" color="33554432" x="9" y="284" height="112" width="325" html.valueishtml="0"  name=wh_code_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+column(band=detail id=2 alignment="2" tabsequence=32766 border="0" color="0" x="343" y="0" height="56" width="430" format="[shortdate] [time]" html.valueishtml="0"  name=schedule_date visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="2" tabsequence=32766 border="0" color="0" x="782" y="0" height="56" width="430" format="[shortdate] [time]" html.valueishtml="0"  name=request_date visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="2" tabsequence=32766 border="0" color="0" x="1221" y="0" height="56" width="453" format="[general]" html.valueishtml="0"  name=cust_order_no visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="2" tabsequence=32766 border="0" color="0" x="1682" y="0" height="56" width="759" format="[general]" html.valueishtml="0"  name=cust_name visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="2" tabsequence=32766 border="0" color="0" x="2450" y="0" height="56" width="837" format="[general]" html.valueishtml="0"  name=address_1 visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=7 alignment="2" tabsequence=32766 border="0" color="0" x="3296" y="0" height="56" width="722" format="[general]" html.valueishtml="0"  name=city visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=8 alignment="2" tabsequence=32766 border="0" color="0" x="4027" y="0" height="56" width="704" format="[general]" html.valueishtml="0"  name=state visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=9 alignment="2" tabsequence=32766 border="0" color="0" x="4741" y="0" height="56" width="357" format="[general]" html.valueishtml="0"  name=zip visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=10 alignment="2" tabsequence=32766 border="0" color="0" x="5106" y="0" height="56" width="453" format="[general]" html.valueishtml="0"  name=invoice_no visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=11 alignment="2" tabsequence=32766 border="0" color="0" x="5568" y="0" height="56" width="434" format="[general]" html.valueishtml="0"  name=req_qty visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=12 alignment="2" tabsequence=32766 border="0" color="0" x="6011" y="0" height="56" width="512" format="[general]" html.valueishtml="0"  name=alloc_qty visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=13 alignment="2" tabsequence=32766 border="0" color="0" x="6533" y="0" height="56" width="389" format="[general]" html.valueishtml="0"  name=est_wgt visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=14 alignment="2" tabsequence=32766 border="0" color="0" x="6930" y="0" height="56" width="453" format="[general]" html.valueishtml="0"  name=awb_bol visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="0" color="33554432" x="9" y="0" height="56" width="325" format="[general]" html.valueishtml="0"  name=wh_code visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+column(band=detail id=15 alignment="2" tabsequence=32766 border="0" color="0" x="7392" y="0" height="56" width="498" format="0.00" html.valueishtml="0"  name=est_pallets visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=footer alignment="2" expression="round(sum(est_pallets for all), 0)"border="0" color="0" x="7392" y="16" height="56" width="498" format="[GENERAL]" html.valueishtml="0"  name=compute_2 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=footer alignment="1" text="Total:" border="0" color="33554432" x="6930" y="16" height="56" width="453" html.valueishtml="0"  name=t_4 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

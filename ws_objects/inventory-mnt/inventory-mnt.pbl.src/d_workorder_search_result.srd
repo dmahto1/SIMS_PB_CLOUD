@@ -1,0 +1,77 @@
+﻿$PBExportHeader$d_workorder_search_result.srd
+$PBExportComments$- Work Order Search - REsults
+release 11;
+datawindow(units=0 timer_interval=0 color=16777215 processing=1 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes print.preview.outline=yes hidegrayline=no showbackcoloronxp=no grid.lines=0 )
+header(height=136 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=28 color="536870912" )
+detail(height=68 color="536870912" )
+table(column=(type=char(16) update=yes updatewhereclause=yes name=wo_no dbname="WO_NO" )
+ column=(type=char(10) update=yes updatewhereclause=yes name=project_id dbname="Project_ID" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=ord_type dbname="Ord_type" )
+ column=(type=datetime update=yes updatewhereclause=yes name=ord_date dbname="Ord_date" )
+ column=(type=datetime update=yes updatewhereclause=yes name=complete_date dbname="Complete_date" )
+ column=(type=datetime update=yes updatewhereclause=yes name=sched_date dbname="Sched_Date" )
+ column=(type=char(20) update=yes updatewhereclause=yes name=delivery_invoice_no dbname="Delivery_Invoice_No" )
+ column=(type=char(20) update=yes updatewhereclause=yes name=workorder_number dbname="WorkOrder_Number" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=ord_status dbname="Ord_Status" )
+ column=(type=decimal(0) update=yes updatewhereclause=yes name=priority dbname="Priority" )
+ column=(type=char(10) update=yes updatewhereclause=yes name=wh_code dbname="Wh_Code" )
+ column=(type=char(30) update=yes updatewhereclause=yes name=user_field1 dbname="User_Field1" )
+ column=(type=char(30) update=yes updatewhereclause=yes name=user_field2 dbname="User_Field2" )
+ column=(type=char(30) update=yes updatewhereclause=yes name=user_field3 dbname="User_Field3" )
+ column=(type=char(250) updatewhereclause=yes name=user_field4 dbname="User_Field4" )
+ retrieve="  SELECT Distinct WorkOrder_Master.WO_NO,   
+         WorkOrder_Master.Project_ID,   
+         WorkOrder_Master.Ord_type,   
+         WorkOrder_Master.Ord_date,   
+         WorkOrder_Master.Complete_date,   
+         WorkOrder_Master.Sched_Date,   
+         WorkOrder_Master.Delivery_Invoice_No,   
+         WorkOrder_Master.WorkOrder_Number,   
+         WorkOrder_Master.Ord_Status,   
+         WorkOrder_Master.Priority,   
+         WorkOrder_Master.Wh_Code,   
+         WorkOrder_Master.User_Field1,   
+         WorkOrder_Master.User_Field2,   
+         WorkOrder_Master.User_Field3,
+		WorkOrder_Master.User_Field4  
+    FROM WorkOrder_Master LEFT JOIN WorkOrder_Detail ON   WorkOrder_Master.wo_no = workorder_Detail.wo_no
+"  sort="wo_no D " )
+text(band=header alignment="2" text="WorkorderNbr" border="6" color="0" x="9" y="8" height="120" width="311" html.valueishtml="0"  name=workorder_number_t visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="79741120" )
+text(band=header alignment="2" text="OrderType" border="6" color="0" x="329" y="8" height="120" width="242" html.valueishtml="0"  name=ord_type_t visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="79741120" )
+text(band=header alignment="2" text="OrderDate" border="6" color="0" x="1225" y="8" height="120" width="416" html.valueishtml="0"  name=ord_date_t visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="79741120" )
+text(band=header alignment="2" text="CompleteDate" border="6" color="0" x="1650" y="8" height="120" width="411" html.valueishtml="0"  name=complete_date_t visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="79741120" )
+text(band=header alignment="2" text="SchedDate" border="6" color="0" x="2071" y="8" height="120" width="407" html.valueishtml="0"  name=sched_date_t visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="79741120" )
+text(band=header alignment="2" text="DeliveryInvoice Nbr" border="6" color="0" x="2487" y="8" height="120" width="343" html.valueishtml="0"  name=delivery_invoice_no_t visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="79741120" )
+text(band=header alignment="2" text="OrderStatus" border="6" color="0" x="581" y="8" height="120" width="302" html.valueishtml="0"  name=ord_status_t visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="79741120" )
+text(band=header alignment="2" text="Priority" border="6" color="0" x="2839" y="8" height="120" width="215" html.valueishtml="0"  name=priority_t visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="79741120" )
+text(band=header alignment="2" text="Warehouse" border="6" color="0" x="891" y="8" height="120" width="325" html.valueishtml="0"  name=wh_code_t visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="79741120" )
+text(band=header alignment="2" text="UserField 1" border="6" color="0" x="3063" y="8" height="120" width="265" html.valueishtml="0"  name=user_field1_t visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="79741120" )
+text(band=header alignment="2" text="UserField 2" border="6" color="0" x="3337" y="8" height="120" width="293" html.valueishtml="0"  name=user_field2_t visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="79741120" )
+column(band=detail id=8 alignment="0" tabsequence=32766 border="0" color="0" x="9" y="8" height="56" width="311" format="[general]" html.valueishtml="0"  name=workorder_number visible="1" edit.limit=20 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="0" color="0" x="329" y="8" height="56" width="242" format="[general]" html.valueishtml="0"  name=ord_type visible="1" dddw.name=dddw_workorder_types dddw.displaycolumn=code_descript dddw.datacolumn=code_id dddw.percentwidth=0 dddw.lines=0 dddw.limit=0 dddw.allowedit=no dddw.useasborder=no dddw.case=any  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="0" color="0" x="1225" y="8" height="56" width="416" format="[shortdate] [time]" html.valueishtml="0"  name=ord_date visible="1" editmask.mask="mm/dd/yy hh:mm" editmask.focusrectangle=no  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="0" tabsequence=32766 border="0" color="0" x="1650" y="8" height="56" width="411" format="[shortdate] [time]" html.valueishtml="0"  name=complete_date visible="1" editmask.mask="mm/dd/yy hh:mm" editmask.focusrectangle=no  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="0" tabsequence=32766 border="0" color="0" x="2071" y="8" height="56" width="407" format="[shortdate] [time]" html.valueishtml="0"  name=sched_date visible="1" editmask.mask="mm/dd/yy hh:mm" editmask.focusrectangle=no  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=7 alignment="0" tabsequence=32766 border="0" color="0" x="2487" y="8" height="56" width="343" format="[general]" html.valueishtml="0"  name=delivery_invoice_no visible="1" edit.limit=20 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=9 alignment="0" tabsequence=32766 border="0" color="0" x="581" y="8" height="56" width="302" format="[general]" html.valueishtml="0"  name=ord_status visible="1" dddw.name=dddw_workorder_status dddw.displaycolumn=workorder_status_desc dddw.datacolumn=workorder_status_cd dddw.percentwidth=0 dddw.lines=0 dddw.limit=0 dddw.allowedit=no dddw.useasborder=no dddw.case=any  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=10 alignment="1" tabsequence=32766 border="0" color="0" x="2839" y="8" height="56" width="215" format="[general]" html.valueishtml="0"  name=priority visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=11 alignment="0" tabsequence=32766 border="0" color="0" x="891" y="8" height="56" width="325" format="[general]" html.valueishtml="0"  name=wh_code visible="1" edit.limit=10 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=12 alignment="0" tabsequence=32766 border="0" color="0" x="3063" y="8" height="56" width="265" format="[general]" html.valueishtml="0"  name=user_field1 visible="1" edit.limit=30 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=13 alignment="0" tabsequence=32766 border="0" color="0" x="3337" y="8" height="56" width="293" format="[general]" html.valueishtml="0"  name=user_field2 visible="1" edit.limit=30 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=14 alignment="0" tabsequence=32766 border="0" color="0" x="3639" y="8" height="56" width="251" format="[general]" html.valueishtml="0"  name=user_field3 visible="1" edit.limit=30 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=15 alignment="0" tabsequence=0 border="0" color="0" x="3904" y="8" height="60" width="261" html.valueishtml="0"  name=user_field4 visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="UserField 3" border="6" color="0" x="3639" y="8" height="120" width="251" html.valueishtml="0"  name=user_field3_t visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="79741120" )
+text(band=header alignment="2" text="UserField 4" border="6" color="0" x="3899" y="8" height="120" width="265" html.valueishtml="0"  name=user_field4_t visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" pagingmethod=0 generatedddwframes="1" )
+xhtmlgen() cssgen(sessionspecific="0" )
+xmlgen(inline="0" )
+xsltgen()
+jsgen()
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )
+export.xhtml()
+ 

@@ -1,0 +1,31 @@
+Save Format v3.0(19990112)
+@begin Libraries
+ "delivery\\delivery.pbl" "";
+@end;
+@begin Objects
+ "delivery\\w_packlist_print_type.srw" "delivery\\delivery.pbl";
+ "delivery\\w_batch_pick.srw" "delivery\\delivery.pbl";
+ "delivery\\w_do_serialno.srw" "delivery\\delivery.pbl";
+ "delivery\\w_comcast_sik.srw" "delivery\\delivery.pbl";
+ "delivery\\d_serial_diff_search.srd" "delivery\\delivery.pbl";
+ "delivery\\w_do_notes.srw" "delivery\\delivery.pbl";
+ "delivery\\nvo_order.sru" "delivery\\delivery.pbl";
+ "delivery\\w_dssocket.srw" "delivery\\delivery.pbl";
+ "delivery\\d_confirm_batch_errors.srd" "delivery\\delivery.pbl";
+ "delivery\\w_do.srw" "delivery\\delivery.pbl";
+ "delivery\\nvo_coo.sru" "delivery\\delivery.pbl";
+ "delivery\\w_unallocate_location.srw" "delivery\\delivery.pbl";
+ "delivery\\w_delivery_order_dashboard.srw" "delivery\\delivery.pbl";
+ "delivery\\w_staging_location.srw" "delivery\\delivery.pbl";
+ "delivery\\w_print_ship_docs.srw" "delivery\\delivery.pbl";
+ "delivery\\w_pick_recommend.srw" "delivery\\delivery.pbl";
+ "delivery\\w_do_assign_scanner.srw" "delivery\\delivery.pbl";
+ "delivery\\w_batch_confirm_error.srw" "delivery\\delivery.pbl";
+ "delivery\\str_embargoed_country.srs" "delivery\\delivery.pbl";
+ "delivery\\w_do_copy_packlist.srw" "delivery\\delivery.pbl";
+ "delivery\\w_pick_exception.srw" "delivery\\delivery.pbl";
+ "delivery\\w_pick_print_order.srw" "delivery\\delivery.pbl";
+ "delivery\\w_delivery_bol.srw" "delivery\\delivery.pbl";
+ "delivery\\w_delivery_pod.srw" "delivery\\delivery.pbl";
+ "delivery\\w_embargo_override.srw" "delivery\\delivery.pbl";
+@end;

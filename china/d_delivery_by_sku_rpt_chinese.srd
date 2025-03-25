@@ -1,0 +1,60 @@
+HA$PBExportHeader$d_delivery_by_sku_rpt_chinese.srd
+$PBExportComments$Delivery by SKU Report
+release 11;
+datawindow(units=0 timer_interval=0 color=16777215 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes print.preview.outline=yes hidegrayline=no showbackcoloronxp=no )
+header(height=456 color="536870912" )
+summary(height=116 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=84 color="536870912" )
+table(column=(type=char(50) updatewhereclause=yes name=item_master_sku dbname="Item_Master.SKU" )
+ column=(type=char(20) updatewhereclause=yes name=item_master_supp_code dbname="Item_Master.Supp_Code" )
+ column=(type=char(50) updatewhereclause=yes name=item_master_alternate_sku dbname="Item_Master.Alternate_SKU" )
+ column=(type=decimal(0) updatewhereclause=yes name=total_shipped dbname="total_shipped" )
+ retrieve="  SELECT Item_Master.SKU,   
+         Item_Master.Supp_Code,   
+         Item_Master.Alternate_SKU, 
+			Sum(quantity) as total_shipped 
+    FROM Delivery_Picking,   
+         Delivery_Master,   
+         Item_Master  
+   WHERE ( Delivery_Master.DO_No = Delivery_Picking.DO_No ) and  
+         ( Delivery_Master.Project_ID = Item_Master.Project_ID ) and  
+         ( Item_Master.SKU = Delivery_Picking.SKU ) and  
+         ( Item_Master.Supp_Code = Delivery_Picking.Supp_code ) and
+			( Delivery_master.Ord_Status = 'C')
+	Group By Item_MASter.Sku, Item_MASter.Supp_code, Item_MAster.Alternate_sku   
+	having	Sum(quantity) > 0
+" )
+text(band=header alignment="2" text="$$HEX7$$0963278d6972167ff753d153278d$$ENDHEX$$" border="0" color="0" x="0" y="16" height="80" width="3442" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-12" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="$$HEX4$$d08f938f8c5b1062$$ENDHEX$$" border="0" color="0" x="0" y="84" height="80" width="3442" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-12" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=header alignment="1" expression="' $$HEX2$$71512000$$ENDHEX$$'+ pagecount() + ' $$HEX4$$759820002c7b2000$$ENDHEX$$' + page() + ' $$HEX1$$7598$$ENDHEX$$'
+"border="0" color="0" x="2226" y="12" height="56" width="1225" format="" html.valueishtml="0"  name=compute_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+text(band=header alignment="2" text="" border="0" color="0" x="0" y="236" height="60" width="3442" html.valueishtml="0"  name=st_dates visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="$$HEX6$$0d590854278dc154167ff753$$ENDHEX$$" border="0" color="0" x="1138" y="372" height="64" width="439" html.valueishtml="0"  name=item_master_alternate_sku_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="$$HEX4$$278dc154167ff753$$ENDHEX$$" border="0" color="0" x="105" y="376" height="64" width="293" html.valueishtml="0"  name=item_master_sku_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+line(band=header x1="91" y1="444" x2="3195" y2="444"  name=l_1 visible="1" pen.style="0" pen.width="5" pen.color="0"  background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="$$HEX3$$9b4f945e4655$$ENDHEX$$" border="0" color="0" x="2176" y="372" height="64" width="270" html.valueishtml="0"  name=item_master_supp_code_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="$$HEX4$$a5626888167ff753$$ENDHEX$$:" border="0" color="0" x="82" y="28" height="56" width="251" html.valueishtml="0"  name=t_4 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="SIMS207" border="0" color="0" x="338" y="28" height="56" width="265" html.valueishtml="0"  name=t_5 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="$$HEX4$$a5626888e5651f67$$ENDHEX$$:" border="0" color="0" x="78" y="84" height="56" width="251" html.valueishtml="0"  name=t_6 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=header alignment="0" expression="string(today(),'mm/dd/yyyy hh:mm')"border="0" color="0" x="338" y="80" height="56" width="485" format="[general]" html.valueishtml="0"  name=compute_2 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="1" text="$$HEX2$$d34e935e$$ENDHEX$$:" border="0" color="0" x="0" y="132" height="56" width="325" html.valueishtml="0"  name=t_7 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="" border="0" color="0" x="338" y="132" height="52" width="663" html.valueishtml="0"  name=st_warehouse visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="$$HEX4$$d153278d7065cf91$$ENDHEX$$" border="0" color="0" x="2789" y="372" height="64" width="407" html.valueishtml="0"  name=t_3 visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="0" color="0" x="1166" y="12" height="56" width="978" format="[general]" html.valueishtml="0"  name=item_master_alternate_sku visible="1" edit.limit=50 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="0" color="0" x="96" y="12" height="56" width="1047" format="[general]" html.valueishtml="0"  name=item_master_sku visible="1" edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="0" color="0" x="2176" y="12" height="56" width="485" format="[general]" html.valueishtml="0"  name=item_master_supp_code visible="1" edit.limit=20 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="1" tabsequence=32766 border="0" color="0" x="2734" y="12" height="56" width="448" format="#######.#####" html.valueishtml="0"  name=total_shipped visible="1" editmask.mask="#######.#####" editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=summary alignment="2" text="$$HEX6$$0854a18bd153278d7065cf91$$ENDHEX$$:" border="0" color="0" x="2263" y="36" height="64" width="457" html.valueishtml="0"  name=t_8 visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=summary alignment="1" expression="sum(total_shipped for all)"border="0" color="0" x="2734" y="36" height="64" width="448" format="#######.#####" html.valueishtml="0"  name=compute_3 visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" pagingmethod=0 generatedddwframes="1" )
+xhtmlgen() cssgen(sessionspecific="0" )
+xmlgen(inline="0" )
+xsltgen()
+jsgen()
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )
+export.xhtml()
+ 

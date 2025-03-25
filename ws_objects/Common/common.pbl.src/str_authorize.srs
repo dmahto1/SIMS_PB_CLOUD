@@ -1,0 +1,10 @@
+﻿$PBExportHeader$str_authorize.srs
+$PBExportComments$For passing authorize info
+global type str_authorize from structure
+	string		authorize_user		descriptor "comment" = "Authenticated user authorized to issue override"
+	string		authorize_license		descriptor "comment" = "State Department Issued License"
+	datetime		authorize_date		descriptor "comment" = "DateTime the override was recorded"
+	string		authorize_type		descriptor "comment" = "What type of authorization is needed"
+	integer		nreturn		descriptor "comment" = "Return value"
+end type
+

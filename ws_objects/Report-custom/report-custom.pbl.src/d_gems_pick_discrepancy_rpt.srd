@@ -1,0 +1,97 @@
+﻿$PBExportHeader$d_gems_pick_discrepancy_rpt.srd
+release 11;
+datawindow(units=2 timer_interval=0 color=16777215 processing=1 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 700 print.margin.right = 250 print.margin.top = 250 print.margin.bottom = 250 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes print.preview.outline=yes hidegrayline=no showbackcoloronxp=no grid.lines=1 grid.columnmove=no selected.mouse=no )
+header(height=1114 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=187 color="536870912" )
+table(column=(type=char(10) updatewhereclause=yes name=project_project_id dbname="Project_ID" )
+ column=(type=char(40) updatewhereclause=yes name=project_project_desc dbname="Project_Desc" )
+ column=(type=datetime updatewhereclause=yes name=delivery_master_ord_date dbname="Ord_Date" )
+ column=(type=char(10) updatewhereclause=yes name=delivery_master_wh_code dbname="WH_Code" )
+ column=(type=char(50) updatewhereclause=yes name=delivery_master_invoice_no dbname="Invoice_No" )
+ column=(type=char(50) updatewhereclause=yes name=delivery_detail_sku dbname="SKU" )
+ column=(type=decimal(5) updatewhereclause=yes name=delivery_detail_req_qty dbname="Req_Qty" )
+ column=(type=decimal(5) updatewhereclause=yes name=delivery_detail_alloc_qty dbname="Alloc_Qty" )
+ column=(type=char(4) updatewhereclause=yes name=delivery_detail_uom dbname="UOM" )
+ column=(type=char(20) updatewhereclause=yes name=delivery_detail_user_field1 dbname="User_Field1" )
+ column=(type=char(10) updatewhereclause=yes name=l_code dbname="L_code" )
+ column=(type=char(20) updatewhereclause=yes name=owner_owner_cd dbname="Owner_Cd" )
+ column=(type=decimal(0) updatewhereclause=yes name=delivery_detail_line_item_no dbname="Line_Item_No" )
+ retrieve="  SELECT Project.Project_ID,   
+         Project.Project_Desc,   
+         Delivery_Master.Ord_Date,   
+         Delivery_Master.WH_Code,   
+         Delivery_Master.Invoice_No,   
+         Delivery_Detail.SKU,   
+         Delivery_Detail.Req_Qty,  
+			Delivery_Detail.Alloc_Qty,  
+         Delivery_Detail.UOM,   
+         Delivery_Detail.User_Field1,   
+         IsNull(Default_Putaway_Location.L_Code,Item_Master.L_Code) as L_code,   
+         Owner.Owner_Cd,   
+         Delivery_Detail.Line_Item_No  
+    FROM Delivery_Master
+   INNER JOIN Project
+      ON Delivery_Master.Project_ID = Project.Project_ID
+   INNER JOIN Inventory_Type
+      ON Delivery_Master.Project_ID = Inventory_Type.Project_ID
+    INNER JOIN Delivery_Detail
+      ON Delivery_Master.DO_No = Delivery_Detail.DO_No
+     AND Inventory_Type.Inv_Type_Desc = Delivery_Detail.User_Field1 
+     AND Delivery_Detail.Alloc_Qty <> Delivery_Detail.Req_Qty
+   INNER JOIN Owner
+      ON Delivery_Detail.Owner_ID = Owner.Owner_ID   
+   INNER JOIN Item_Master
+      ON Delivery_Master.Project_ID = Item_Master.Project_ID
+     AND Delivery_Detail.SKU = Item_Master.SKU
+     AND Delivery_Detail.Supp_code = Item_Master.Supp_Code
+    LEFT OUTER JOIN Default_Putaway_Location
+      ON Delivery_Master.Project_ID = Default_Putaway_Location.Project_ID  
+     AND Delivery_Master.WH_Code = Default_Putaway_Location.WH_Code  
+     AND Delivery_Detail.SKU = Default_Putaway_Location.SKU  
+     AND Delivery_Detail.Supp_code = Default_Putaway_Location.Supp_Code  
+     AND Inventory_Type.Inv_Type = Default_Putaway_Location.Default_Column_2  
+     AND Owner.Owner_Cd = Default_Putaway_Location.Default_Column_1
+   WHERE ( Delivery_Master.Project_ID = :as_project ) AND  
+        ( Delivery_Master.Ord_Status = 'I' or Delivery_Master.Ord_Status = 'N') AND  
+        ( Delivery_Master.Invoice_No = :as_order ) AND  
+        ( Delivery_Master.WH_Code = :as_warehouse )    
+" arguments=(("as_project", string),("as_warehouse", string),("as_order", string))  sort="delivery_detail_line_item_no A delivery_detail_sku A " )
+text(band=background alignment="2" text="Picking Discrepancy Report" border="0" color="0" x="2197" y="0" height="260" width="3187" html.valueishtml="0"  name=t_3 visible="1"  font.face="Arial" font.height="-16" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=background alignment="0" text="Report ID: GEMSPICK" border="0" color="0" x="10" y="10" height="156" width="1500" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+line(band=background x1="10" y1="1104" x2="7239" y2="1104"  name=l_1 visible="1" pen.style="0" pen.width="20" pen.color="0"  background.mode="2" background.color="16777215" )
+compute(band=background alignment="1" expression="'Page: ' + page() + ' of ' + pageCount()"border="0" color="0" x="6260" y="20" height="260" width="979" format="[general]" html.valueishtml="0"  name=page_1 visible="1"  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=background alignment="0" expression="'Date:' + String(today(), 'mm/dd/yyy hh:mm')"border="0" color="0" x="0" y="177" height="156" width="1739" format="[GENERAL]" html.valueishtml="0"  name=compute_2 visible="1"  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=background alignment="0" expression="'Warehouse: ' +  delivery_master_wh_code"border="0" color="0" x="10" y="656" height="156" width="2520" format="[GENERAL]" html.valueishtml="0"  name=compute_4 visible="1"  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=background alignment="0" expression="'Order Nbr.: ' +  delivery_master_invoice_no "border="0" color="0" x="10" y="489" height="156" width="2520" format="[GENERAL]" html.valueishtml="0"  name=compute_3 visible="1"  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=background alignment="0" expression="'Order Date: ' + String( delivery_master_ord_date , 'mm/dd/yyyy hh:mm')"border="0" color="0" x="4364" y="489" height="156" width="2697" format="[GENERAL]" html.valueishtml="0"  name=compute_5 visible="1"  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=background alignment="0" expression="'Project: ' +  project_project_desc "border="0" color="0" x="4364" y="656" height="156" width="2718" format="[GENERAL]" html.valueishtml="0"  name=compute_6 visible="1"  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="SKU" border="0" color="0" x="510" y="927" height="156" width="1489" html.valueishtml="0"  name=delivery_detail_sku_t visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="UOM" border="0" color="0" x="2020" y="927" height="156" width="500" html.valueishtml="0"  name=delivery_detail_uom_t visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Inventory Type" border="0" color="0" x="3177" y="927" height="156" width="895" html.valueishtml="0"  name=delivery_detail_user_field1_t visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="L Code" border="0" color="0" x="4093" y="927" height="156" width="833" html.valueishtml="0"  name=l_code_t visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="Op Seq" border="0" color="0" x="20" y="927" height="156" width="468" html.valueishtml="0"  name=t_5 visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Owner" border="0" color="0" x="2541" y="927" height="156" width="614" html.valueishtml="0"  name=t_9 visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="1" text="Req QTY" border="0" color="0" x="4947" y="927" height="156" width="770" html.valueishtml="0"  name=t_11 visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="1" text="Alloc Qty" border="0" color="0" x="5739" y="927" height="156" width="739" html.valueishtml="0"  name=t_12 visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="1" text="Difference" border="0" color="0" x="6500" y="927" height="156" width="718" html.valueishtml="0"  name=t_13 visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=11 alignment="0" tabsequence=32766 border="0" color="0" x="4093" y="11" height="156" width="833" format="[general]" html.valueishtml="0"  name=l_code visible="1" edit.limit=10 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=13 alignment="0" tabsequence=32766 border="0" color="0" x="20" y="11" height="156" width="468" format="[general]" html.valueishtml="0"  name=delivery_detail_line_item_no visible="1" edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="0" tabsequence=32766 border="0" color="0" x="510" y="11" height="156" width="1489" format="[general]" html.valueishtml="0"  name=delivery_detail_sku visible="1" edit.limit=50 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=9 alignment="0" tabsequence=32766 border="0" color="0" x="2020" y="11" height="156" width="500" format="[general]" html.valueishtml="0"  name=delivery_detail_uom visible="1" edit.limit=4 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=10 alignment="0" tabsequence=32766 border="0" color="0" x="3177" y="11" height="156" width="895" format="[general]" html.valueishtml="0"  name=delivery_detail_user_field1 visible="1" edit.limit=20 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=12 alignment="0" tabsequence=32766 border="0" color="0" x="2541" y="21" height="156" width="614" format="[general]" html.valueishtml="0"  name=owner_owner_cd visible="1" edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=7 alignment="1" tabsequence=32766 border="0" color="0" x="4947" y="11" height="156" width="770" format="#######.#####" html.valueishtml="0"  name=delivery_detail_req_qty visible="1" editmask.mask="#######.#####" editmask.focusrectangle=no  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=8 alignment="1" tabsequence=32766 border="0" color="0" x="5739" y="11" height="156" width="739" format="#######.#####" html.valueishtml="0"  name=delivery_detail_alloc_qty visible="1" editmask.mask="#######.#####" editmask.focusrectangle=no  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=detail alignment="1" expression=" delivery_detail_req_qty -  delivery_detail_alloc_qty "border="0" color="0" x="6500" y="11" height="156" width="718" format="#######.#####" html.valueishtml="0"  name=compute_1 visible="1"  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" pagingmethod=0 generatedddwframes="1" )
+xhtmlgen() cssgen(sessionspecific="0" )
+xmlgen(inline="0" )
+xsltgen()
+jsgen()
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )
+export.xhtml()

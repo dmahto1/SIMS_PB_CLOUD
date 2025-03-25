@@ -1,0 +1,85 @@
+﻿$PBExportHeader$d_fast_moving_rpt_chinese.srd
+$PBExportComments$fast moving Report
+release 11;
+datawindow(units=0 timer_interval=0 color=16777215 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 1 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes print.preview.outline=yes hidegrayline=no showbackcoloronxp=no )
+header(height=380 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=72 color="536870912" )
+table(column=(type=char(50) updatewhereclause=yes name=delivery_detail_sku dbname="SKU" )
+ column=(type=decimal(5) updatewhereclause=yes identity=yes name=cku dbname="" )
+ column=(type=decimal(5) updatewhereclause=yes identity=yes name=cku dbname="" )
+ column=(type=long updatewhereclause=yes identity=yes name=no_of_orders dbname="No_of_Orders" )
+ column=(type=char(70) updatewhereclause=yes name=item_master_description dbname="Description" )
+ column=(type=char(75) updatewhereclause=yes name=native_description dbname="Native_Description" )
+ column=(type=char(20) updatewhereclause=yes name=item_master_supp_code dbname="supp_code" )
+ column=(type=char(10) updatewhereclause=yes name=delivery_detail_grp dbname="grp" )
+ retrieve="  SELECT Delivery_Detail.SKU,   
+         sum(Delivery_Detail.Req_Qty),   
+         sum(Delivery_Detail.Alloc_Qty), 
+			count(Delivery_Master.DO_NO) As 'No_of_Orders',  
+         Item_Master.Description,
+ Item_Master.Native_Description,
+			item_master.supp_code, 
+			grp 
+    FROM Delivery_Detail,   
+         Delivery_Master,   
+         Item_Master   
+   WHERE Delivery_master.project_id = :project and
+			( Delivery_Detail.DO_No = Delivery_Master.DO_No ) and  
+         ( Item_Master.SKU = Delivery_Detail.SKU )    and
+         ( Item_Master.supp_code = Delivery_Detail.supp_code )    and 
+			ord_date >= :From_date and
+			ord_date <= :To_date and
+			wh_code = :warehouse and
+			grp =  COALESCE(:group, grp) and
+			Delivery_Detail.supp_code =  COALESCE(:supp_code, Delivery_Detail.supp_code)
+
+
+Group By Delivery_Detail.SKU,
+			Item_Master.Description,
+			Item_Master.Native_Description,
+			item_master.supp_code,
+			grp
+" arguments=(("project", string),("warehouse", string),("group", string),("from_date", datetime),("to_date", datetime),("supp_code", string)) )
+text(band=header alignment="0" text="报表日期:" border="0" color="0" x="23" y="72" height="56" width="251" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="高流动性产品报表" border="0" color="0" x="1280" y="12" height="64" width="901" html.valueishtml="0"  name=t_3 visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="报表编号:" border="0" color="0" x="23" y="12" height="56" width="251" html.valueishtml="0"  name=t_5 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+line(band=header x1="18" y1="372" x2="4425" y2="372"  name=l_1 visible="1" pen.style="0" pen.width="5" pen.color="0"  background.mode="1" background.color="536870912" )
+compute(band=header alignment="1" expression="' 共 '+ pagecount() + ' 页 第 ' + page() + ' 页'"border="0" color="0" x="3291" y="28" height="56" width="1193" format="[general]" html.valueishtml="0"  name=compute_3 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+text(band=header alignment="0" text="开始时间:" border="0" color="0" x="23" y="140" height="56" width="251" html.valueishtml="0"  name=t_6 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=header alignment="0" expression="string(today(),'mm/dd/yyyy hh:mm')"border="0" color="0" x="288" y="72" height="56" width="402" format="[general]" html.valueishtml="0"  name=compute_1 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="SIMS306" border="0" color="0" x="288" y="12" height="56" width="265" html.valueishtml="0"  name=t_4 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="0" expression="string( from_date ,'mm/dd/yyyy hh:mm') + ' 结束时间: ' + String( to_date ,'mm/dd/yyyy hh:mm')"border="0" color="0" x="283" y="140" height="64" width="1920" format="[general]" html.valueishtml="0"  name=compute_2 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="序号" border="0" color="0" x="18" y="244" height="112" width="151" html.valueishtml="0"  name=t_7 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="货品编号" border="0" color="0" x="192" y="300" height="56" width="741" html.valueishtml="0"  name=delivery_detail_sku_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="供应商编号" border="0" color="0" x="951" y="300" height="56" width="389" html.valueishtml="0"  name=t_10 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="产品类别" border="0" color="0" x="1353" y="300" height="56" width="238" html.valueishtml="0"  name=t_11 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="描述" border="0" color="0" x="1627" y="300" height="56" width="325" html.valueishtml="0"  name=item_master_description_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="本地货品描述" border="0" color="0" x="2427" y="244" height="112" width="933" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="发货
+数量" border="0" color="0" x="3621" y="244" height="112" width="352" html.valueishtml="0"  name=compute_0003_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="订单
+总数" border="0" color="0" x="3986" y="244" height="112" width="466" html.valueishtml="0"  name=t_9 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="订货
+数量" border="0" color="0" x="3378" y="244" height="112" width="224" html.valueishtml="0"  name=t_8 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=detail alignment="2" expression="Getrow()"border="0" color="0" x="23" y="4" height="60" width="151" format="[general]" html.valueishtml="0"  name=c_rownum visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="0" color="0" x="192" y="4" height="60" width="741" format="[general]" html.valueishtml="0"  name=delivery_detail_sku visible="1" edit.limit=20 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=7 alignment="0" tabsequence=32766 border="0" color="0" x="951" y="4" height="60" width="389" format="[general]" html.valueishtml="0"  name=item_master_supp_code visible="1" edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=detail alignment="0" expression=" delivery_detail_grp "border="0" color="0" x="1353" y="4" height="60" width="256" format="[GENERAL]" html.valueishtml="0"  name=compute_4 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="0" tabsequence=32766 border="0" color="0" x="1627" y="4" height="60" width="786" format="[general]" html.valueishtml="0"  name=item_master_description visible="1" edit.limit=50 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="0" tabsequence=32766 border="0" color="0" x="2427" y="8" height="56" width="942" format="[general]" html.valueishtml="0"  name=native_description visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="1" tabsequence=32766 border="0" color="0" x="3383" y="4" height="60" width="219" format="#######.#####" html.valueishtml="0"  name=no_of_orders visible="1" edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="1" tabsequence=32766 border="0" color="0" x="3611" y="8" height="56" width="416" format="[general]" html.valueishtml="0"  name=cku visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="1" tabsequence=32766 border="0" color="0" x="4041" y="8" height="56" width="416" format="[general]" html.valueishtml="0"  name=cku_1 visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" pagingmethod=0 generatedddwframes="1" )
+xhtmlgen() cssgen(sessionspecific="0" )
+xmlgen(inline="0" )
+xsltgen()
+jsgen()
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )
+export.xhtml()
+ 

@@ -1,0 +1,27 @@
+HA$PBExportHeader$d_comcast_serial_generator.srd
+$PBExportComments$test DW for creating barcoded serials for scanning
+release 11;
+datawindow(units=2 timer_interval=0 color=1073741824 processing=2 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 188 print.margin.right = 187 print.margin.top = 500 print.margin.bottom = 500 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes print.preview.outline=yes hidegrayline=no showbackcoloronxp=no label.name="Laser Address 1.00 x 2.63 5160,5260" label.width=2625 label.height=1000 label.rows=10 label.rows.spacing=0 label.columns=3 label.columns.spacing=125 label.topdown=no label.sheet=yes label.shape=roundrectangle label.ellipse_height=0 label.ellipse_width=0 )
+detail(height=1000 color="536870912" )
+table(column=(type=char(20) updatewhereclause=yes name=pallet_id dbname="Carton_Serial.Pallet_ID" dbalias=".Pallet_ID" )
+ column=(type=char(50) updatewhereclause=yes name=serial dbname="serial" )
+ retrieve="  SELECT dbo.Carton_Serial.Pallet_ID,   
+			rtrim(serial_no) as serial
+        
+    FROM dbo.Carton_Serial   
+Where project_id = 'comcast' and pallet_id = :pallet
+" arguments=(("pallet", string)) )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="0" color="33554432" x="406" y="20" height="197" width="1312" format="[general]" html.valueishtml="0"  name=pallet_id visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="0" tabsequence=0 border="0" color="33554432" x="20" y="687" height="187" width="2552" html.valueishtml="0"  name=serial visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=detail alignment="0" expression="'*' + trim(serial) + '*'"border="0" color="33554432" x="72" y="291" height="375" width="3156" format="[GENERAL]" html.valueishtml="0"  name=compute_1 visible="1"  font.face="3 of 9 Barcode" font.height="-20" font.weight="400"  font.family="1" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" pagingmethod=0 generatedddwframes="1" )
+xhtmlgen() cssgen(sessionspecific="0" )
+xmlgen(inline="0" )
+xsltgen()
+jsgen()
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )
+export.xhtml()
+ 

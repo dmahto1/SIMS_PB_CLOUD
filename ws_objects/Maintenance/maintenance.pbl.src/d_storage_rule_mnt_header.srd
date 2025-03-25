@@ -1,0 +1,39 @@
+﻿$PBExportHeader$d_storage_rule_mnt_header.srd
+$PBExportComments$Storage rule Maintenance - header
+release 11;
+datawindow(units=0 timer_interval=0 color=67108864 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes print.preview.outline=yes hidegrayline=no showbackcoloronxp=no )
+header(height=0 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=200 color="536870912" )
+table(column=(type=char(16) update=yes updatewhereclause=yes key=yes name=sr_id dbname="Storage_Rule_Header.SR_ID" )
+ column=(type=char(10) update=yes updatewhereclause=yes name=project_id dbname="Storage_Rule_Header.Project_ID" )
+ column=(type=char(10) update=yes updatewhereclause=yes name=wh_code dbname="Storage_Rule_Header.WH_Code" )
+ column=(type=char(10) update=yes updatewhereclause=yes name=storage_rule_cd dbname="Storage_Rule_Header.Storage_Rule_CD" )
+ column=(type=char(50) update=yes updatewhereclause=yes name=storage_rule_desc dbname="Storage_Rule_Header.Storage_Rule_Desc" )
+ retrieve="  SELECT dbo.Storage_Rule_Header.SR_ID,   
+         dbo.Storage_Rule_Header.Project_ID,   
+         dbo.Storage_Rule_Header.WH_Code,   
+         dbo.Storage_Rule_Header.Storage_Rule_CD,   
+         dbo.Storage_Rule_Header.Storage_Rule_Desc  
+    FROM dbo.Storage_Rule_Header   
+	Where Project_id = :asProject and 
+			Storage_Rule_CD = :asStorageCd
+" update="dbo.Storage_Rule_Header" updatewhere=1 updatekeyinplace=no arguments=(("AsProject", string),("asStorageCd", string)) )
+column(band=detail id=3 alignment="0" tabsequence=10 border="5" color="33554432" x="1527" y="12" height="64" width="562" format="[general]" html.valueishtml="0"  name=wh_code visible="1" dddw.name=dddw_warehouse_by_Project dddw.displaycolumn=wh_code dddw.datacolumn=wh_code dddw.percentwidth=0 dddw.lines=0 dddw.limit=0 dddw.allowedit=no dddw.useasborder=no dddw.case=any dddw.nilisnull=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=detail alignment="1" text="Desccription:" border="0" color="33554432" x="46" y="100" height="64" width="517" html.valueishtml="0"  name=storage_rule_desc_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="0" tabsequence=20 border="5" color="33554432" x="581" y="104" height="64" width="1504" format="[general]" html.valueishtml="0"  name=storage_rule_desc visible="1" edit.limit=50 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=detail alignment="1" text="Warehouse:" border="0" color="33554432" x="1120" y="12" height="64" width="389" html.valueishtml="0"  name=wh_code_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="0" color="0" x="590" y="12" height="64" width="512" format="[general]" html.valueishtml="0"  name=storage_rule_cd visible="1" edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=detail alignment="0" text="Storage Rule CD:" border="0" color="33554432" x="69" y="12" height="64" width="498" html.valueishtml="0"  name=storage_rule_cd_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" font.underline="1" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" pagingmethod=0 generatedddwframes="1" )
+xhtmlgen() cssgen(sessionspecific="0" )
+xmlgen(inline="0" )
+xsltgen()
+jsgen()
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )
+export.xhtml()
+ 

@@ -1,0 +1,32 @@
+HA$PBExportHeader$d_nike_part_label_screen.srd
+$PBExportComments$Nike Part label as visualized on the screen (not printed)
+release 7;
+datawindow(units=0 timer_interval=0 color=16777215 processing=0 HTMLDW=no print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.prompt=no print.buttons=no print.preview.buttons=no )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=372 color="536870912" )
+table(column=(type=char(50) updatewhereclause=yes name=sku dbname="Item_Master.SKU" )
+ column=(type=char(70) updatewhereclause=yes name=description dbname="Item_Master.Description" )
+ column=(type=char(20) updatewhereclause=yes name=user_field6 dbname="Item_Master.User_Field6" )
+ column=(type=char(6) updatewhereclause=yes name=c_style dbname="c_style" )
+ column=(type=char(3) updatewhereclause=yes name=c_color dbname="c_color" )
+ column=(type=char(3) updatewhereclause=yes name=c_flex dbname="c_flex" )
+ retrieve="  SELECT Item_Master.SKU,   
+         Item_Master.Description,   
+         Item_Master.User_Field6, 
+			'      ' as c_style, 
+			'   ' as c_color, 
+			'   ' as c_flex   
+    FROM Item_Master   
+	Where Project_id = :asProject and SKU = :asSKU" arguments=(("asProject", string),("asSKU", string)) )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="0" color="0" x="27" y="8" height="76" width="987" format="[general]"  name=description edit.limit=70 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="2" tabsequence=32766 border="0" color="0" x="178" y="188" height="64" width="242" format="[general]"  name=c_style edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="2" tabsequence=32766 border="0" color="0" x="430" y="188" height="64" width="242" format="[general]"  name=c_color edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="2" tabsequence=32766 border="0" color="0" x="681" y="188" height="64" width="242" format="[general]"  name=c_flex edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=detail alignment="2" text="STYLE" border="0" color="0" x="178" y="116" height="64" width="242"  name=t_1  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=detail alignment="2" text="FLEX" border="0" color="0" x="681" y="116" height="64" width="242"  name=t_3  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=detail alignment="2" text="COLOR" border="0" color="0" x="430" y="116" height="64" width="242"  name=t_2  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=detail alignment="2" text="UPC:" border="0" color="0" x="160" y="284" height="64" width="142"  name=t_4  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="0" color="0" x="329" y="284" height="64" width="626" format="[general]"  name=user_field6 edit.limit=20 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" )

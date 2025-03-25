@@ -1,0 +1,36 @@
+HA$PBExportHeader$d_supplier_bc_list.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no rows_per_detail = 3 )
+header(height=172 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=500 color="536870912" )
+table(column=(type=char(10) update=yes updatewhereclause=yes name=project_id dbname="Supplier.Project_ID" )
+ column=(type=char(22) updatewhereclause=yes name=supp_code_bc dbname="Supp_code_bc" )
+ column=(type=char(20) updatewhereclause=yes name=supp_code_hr dbname="Supplier.Supp_code_hr" )
+ column=(type=char(40) update=yes updatewhereclause=yes name=supp_name dbname="Supplier.Supp_Name" )
+ retrieve="  SELECT dbo.Supplier.Project_ID,   
+         ( ~"*~" + rtrim(dbo.Supplier.Supp_Code) + ~"*~" ) as ~"Supp_code_bc~",   
+		dbo.Supplier.Supp_Code as ~"Supp_code_hr~",   
+         dbo.Supplier.Supp_Name  
+    FROM dbo.Supplier  
+   WHERE dbo.Supplier.Project_ID = :project    and
+supp_code <> 'XX'
+" arguments=(("project", string)) )
+column(band=detail id=4 alignment="2" tabsequence=32766 border="0" color="33554432" x="18" y="12" height="76" width="1125" format="[general]" html.valueishtml="0" row_in_detail=1  name=supp_name_1 visible="1" edit.limit=40 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="2" tabsequence=32766 border="0" color="33554432" x="18" y="396" height="64" width="1125" format="[general]" html.valueishtml="0" row_in_detail=1  name=supp_code_hr_1 visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="2" tabsequence=32766 border="0" color="0" x="18" y="168" height="132" width="1125" format="[general]" html.valueishtml="0" row_in_detail=1  name=supp_code_bc_1 visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="3 of 9 Barcode" font.height="-22" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="2" tabsequence=32766 border="0" color="0" x="1161" y="168" height="132" width="1125" format="[general]" html.valueishtml="0" row_in_detail=2  name=supp_code_bc_2 visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="3 of 9 Barcode" font.height="-22" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="2" tabsequence=32766 border="0" color="33554432" x="1161" y="12" height="76" width="1125" format="[general]" html.valueishtml="0" row_in_detail=2  name=supp_name_2 visible="1" edit.limit=40 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="2" tabsequence=32766 border="0" color="33554432" x="1161" y="396" height="64" width="1125" format="[general]" html.valueishtml="0" row_in_detail=2  name=supp_code_hr_2 visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="2" tabsequence=32766 border="0" color="0" x="2304" y="164" height="132" width="1125" format="[general]" html.valueishtml="0" row_in_detail=3  name=supp_code_bc_3 visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="3 of 9 Barcode" font.height="-22" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="2" tabsequence=32766 border="0" color="33554432" x="2304" y="12" height="76" width="1125" format="[general]" html.valueishtml="0" row_in_detail=3  name=supp_name_3 visible="1" edit.limit=40 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="2" tabsequence=32766 border="0" color="33554432" x="2304" y="396" height="64" width="1125" format="[general]" html.valueishtml="0" row_in_detail=3  name=supp_code_hr_3 visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+line(band=header x1="5" y1="164" x2="3410" y2="164"  name=l_2 visible="1" pen.style="0" pen.width="14" pen.color="0"  background.mode="2" background.color="16777215" )
+line(band=detail x1="5" y1="488" x2="3410" y2="488"  name=l_1 visible="1" pen.style="0" pen.width="14" pen.color="0"  background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Supplier Barcode List" border="0" color="0" x="5" y="4" height="132" width="3406" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-20" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

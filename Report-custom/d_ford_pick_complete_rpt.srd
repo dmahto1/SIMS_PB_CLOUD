@@ -1,0 +1,71 @@
+HA$PBExportHeader$d_ford_pick_complete_rpt.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=344 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=72 color="536870912" )
+table(column=(type=char(50) updatewhereclause=yes name=sku dbname="Delivery_Detail.SKU" )
+ column=(type=char(70) updatewhereclause=yes name=description dbname="Item_Master.Description" )
+ column=(type=char(40) updatewhereclause=yes name=supplier dbname="Supplier.Supplier" )
+ column=(type=char(40) updatewhereclause=yes name=wh_name dbname="Warehouse.wh_Name" )
+ column=(type=char(40) updatewhereclause=yes name=project dbname="Project.project_desc" )
+ column=(type=decimal(5) updatewhereclause=yes name=total_picked_quantity dbname="Picked_Quantity" )
+ retrieve="SELECT dbo.Delivery_Detail.SKU,   
+         dbo.Item_Master.Description,   
+         dbo.Supplier.Supp_Name Supplier,   
+	dbo.warehouse.wh_Name,
+dbo.project.project_desc,
+         sum( dbo.Delivery_Detail.Alloc_Qty) Picked_Quantity  
+    FROM dbo.Delivery_Detail,   
+         dbo.Delivery_Master,   
+         dbo.Item_Master,   
+         dbo.Supplier,
+		dbo.warehouse,
+		dbo.project
+   WHERE ( dbo.Delivery_Detail.DO_No = dbo.Delivery_Master.DO_No ) and  
+         ( dbo.Delivery_Detail.SKU = dbo.Item_Master.SKU ) and  
+         ( dbo.Delivery_Detail.Supp_code = dbo.Item_Master.Supp_Code ) and  
+         ( dbo.Delivery_Detail.Owner_ID = dbo.Item_Master.Owner_ID ) and  
+         ( dbo.Item_Master.Project_ID = dbo.Supplier.Project_ID ) and  
+         ( dbo.Item_Master.Supp_Code = dbo.Supplier.Supp_Code ) and  
+		(dbo.Delivery_Master.wh_code = dbo.warehouse.wh_code) and
+		( dbo.Delivery_Master.project_id = dbo.project.project_id) and
+		(dbo.Delivery_Detail.Alloc_Qty > 0) and
+	     (dbo.Delivery_Master.Ord_status in ('D','C')) and 
+         ( ( dbo.Delivery_Master.Pick_Complete >= :pickDateFrom ) AND  
+         ( dbo.Delivery_Master.Pick_Complete <= :pickDateTo ) AND  
+         ( dbo.Delivery_Master.Project_ID = :project ) )   
+GROUP BY dbo.Delivery_Detail.SKU,   
+         dbo.Item_Master.Description,   
+         dbo.Supplier.Supp_Name,
+		dbo.Delivery_Master.wh_code,dbo.warehouse.wh_Name,dbo.project.project_desc" arguments=(("project", string),("pickdatefrom", datetime),("pickdateto", datetime)) )
+text(band=header alignment="2" text="WEEKLY PICKING REPORT" border="0" color="33554432" x="9" y="4" height="56" width="3717" html.valueishtml="0"  name=t_10 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=header alignment="1" expression="'Page ' + page() + ' of ' + pageCount()"border="0" color="33554432" x="3159" y="4" height="56" width="562" format="[general]" html.valueishtml="0"  name=page_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="0" color="33554432" x="14" y="4" height="56" width="713" format="[general]" html.valueishtml="0"  name=sku visible="1" edit.limit=50 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="0" color="33554432" x="741" y="8" height="56" width="1458" format="[general]" html.valueishtml="0"  name=description visible="1" edit.limit=70 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="0" color="33554432" x="2217" y="8" height="56" width="864" format="[general]" html.valueishtml="0"  name=supplier visible="1" edit.limit=40 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="1" tabsequence=32766 border="0" color="33554432" x="3090" y="8" height="56" width="530" format="###,###,###,##0." html.valueishtml="0"  name=total_picked_quantity visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+line(band=detail x1="9" y1="68" x2="3726" y2="68"  name=l_1 visible="1" pen.style="0" pen.width="5" pen.color="0"  background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="Pick Complete To:" border="0" color="33554432" x="1541" y="196" height="56" width="526" html.valueishtml="0"  name=t_5 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="1" text="Pick Complete From:" border="0" color="33554432" x="1541" y="132" height="56" width="526" html.valueishtml="0"  name=t_4 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="SKU" border="0" color="33554432" x="14" y="272" height="56" width="713" html.valueishtml="0"  name=t_6 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="DESCRIPTION" border="0" color="33554432" x="741" y="272" height="56" width="1458" html.valueishtml="0"  name=t_7 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="SUPPLIER" border="0" color="33554432" x="2217" y="272" height="56" width="864" html.valueishtml="0"  name=t_8 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="1" text="Total Quantity Picked" border="0" color="33554432" x="3090" y="272" height="56" width="530" html.valueishtml="0"  name=t_9 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+line(band=header x1="9" y1="336" x2="3726" y2="336"  name=l_2 visible="1" pen.style="0" pen.width="14" pen.color="0"  background.mode="2" background.color="16777215" )
+compute(band=header alignment="0" expression=" pickdatefrom "border="0" color="33554432" x="2080" y="132" height="56" width="562" format="MM/DD/YYYY HH:MM:SS am/pm" html.valueishtml="0"  name=compute_2 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=header alignment="0" expression=" pickdateto "border="0" color="33554432" x="2080" y="196" height="56" width="562" format="MM/DD/YYYY HH:MM:SS am/pm" html.valueishtml="0"  name=compute_3 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header id=5 alignment="0" tabsequence=32766 border="0" color="33554432" x="384" y="136" height="56" width="1125" format="[general]" html.valueishtml="0"  name=project visible="1" edit.limit=40 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header id=4 alignment="0" tabsequence=32766 border="0" color="33554432" x="379" y="200" height="56" width="1129" format="[general]" html.valueishtml="0"  name=wh_name visible="1" edit.limit=40 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=header alignment="0" expression="string(datetime(today(),now()),~"mm/dd/yyyy hh:mm am/pm~")"border="0" color="33554432" x="379" y="72" height="56" width="946" format="[GENERAL]" html.valueishtml="0"  name=compute_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="SIMS028" border="0" color="33554432" x="384" y="4" height="56" width="206" html.valueishtml="0"  name=t_12 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="Warehouse:" border="0" color="33554432" x="18" y="196" height="56" width="357" html.valueishtml="0"  name=t_3 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="Project Name:" border="0" color="33554432" x="18" y="136" height="56" width="357" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="Date:" border="0" color="33554432" x="18" y="72" height="56" width="357" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="Report ID: " border="0" color="33554432" x="18" y="4" height="56" width="357" html.valueishtml="0"  name=t_11 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

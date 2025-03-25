@@ -1,0 +1,64 @@
+HA$PBExportHeader$d_nycsp_raw_material_details_sims.srd
+release 11;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes print.preview.outline=yes hidegrayline=no showbackcoloronxp=no )
+header(height=260 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=72 color="536870912" )
+table(column=(type=char(10) updatewhereclause=yes name=content_wh_code dbname="Content.WH_Code" )
+ column=(type=char(50) updatewhereclause=yes name=content_sku dbname="Content.SKU" )
+ column=(type=char(70) updatewhereclause=yes name=item_master_description dbname="Item_Master.Description" )
+ column=(type=char(20) updatewhereclause=yes name=content_supp_code dbname="Content.Supp_Code" )
+ column=(type=char(10) updatewhereclause=yes name=content_l_code dbname="Content.L_Code" )
+ column=(type=char(50) updatewhereclause=yes name=content_lot_no dbname="Content.Lot_No" )
+ column=(type=datetime updatewhereclause=yes name=content_expiration_date dbname="Content.Expiration_Date" )
+ column=(type=decimal(5) updatewhereclause=yes name=content_avail_qty dbname="Content.Avail_Qty" )
+ retrieve="//---------------------------------------
+//Raw Material Details in SIMS
+//--------------------------------------
+  SELECT dbo.Content.WH_Code,  dbo.Content.SKU,  dbo.Item_Master.Description,  dbo.Content.Supp_Code, dbo.Content.L_Code,  dbo.Content.Lot_No, dbo.Content.Expiration_Date, dbo.Content.Avail_Qty   
+    FROM dbo.Content, dbo.Item_Master  
+   WHERE ( dbo.Item_Master.Project_ID = dbo.Content.Project_ID ) and  ( dbo.Item_Master.SKU = dbo.Content.SKU ) and  
+         ( dbo.Item_Master.Supp_Code = dbo.Content.Supp_Code ) and ( ( dbo.Content.Project_ID = 'NYCSP' ) AND  
+         ( dbo.Content.Component_No = 0 ) )   ;
+
+" )
+compute(band=header alignment="0" expression="'Page ' + page() + ' of ' + pageCount()"border="0" color="33554432" x="2615" y="28" height="64" width="562" format="[general]" html.valueishtml="0"  name=page_1 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="Date:" border="0" color="0" x="18" y="28" height="56" width="155" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="0" expression="today()"border="0" color="33554432" x="215" y="28" height="60" width="462" format="[general]" html.valueishtml="0"  name=date_1 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="NEW  YORK  CITY RAW MATERIAL DETAIL IN SIMS" border="0" color="0" x="727" y="28" height="80" width="1792" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-12" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Content
+Wh Code" border="0" color="33554432" x="5" y="140" height="112" width="302" html.valueishtml="0"  name=content_wh_code_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=1 alignment="2" tabsequence=32766 border="0" color="33554432" x="5" y="4" height="60" width="302" format="[general]" html.valueishtml="0"  name=content_wh_code visible="1" edit.limit=10 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="Content
+Sku" border="0" color="33554432" x="443" y="140" height="112" width="434" html.valueishtml="0"  name=content_sku_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="0" color="33554432" x="443" y="4" height="60" width="526" format="[general]" html.valueishtml="0"  name=content_sku visible="1" edit.limit=50 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="Item Master
+Description" border="0" color="33554432" x="1006" y="140" height="112" width="1947" html.valueishtml="0"  name=item_master_description_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="Content
+Supp Code" border="0" color="33554432" x="2958" y="140" height="112" width="434" html.valueishtml="0"  name=content_supp_code_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="Content
+L Code" border="0" color="33554432" x="3511" y="140" height="112" width="306" html.valueishtml="0"  name=content_l_code_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="Content
+Lot No" border="0" color="33554432" x="3849" y="140" height="112" width="1399" html.valueishtml="0"  name=content_lot_no_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="Content
+Expiration Date" border="0" color="33554432" x="5253" y="140" height="112" width="603" html.valueishtml="0"  name=content_expiration_date_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="Content
+Avail Qty" border="0" color="33554432" x="5861" y="140" height="112" width="329" html.valueishtml="0"  name=content_avail_qty_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="0" color="33554432" x="1006" y="4" height="60" width="1947" format="[general]" html.valueishtml="0"  name=item_master_description visible="1" edit.limit=70 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="0" color="33554432" x="2958" y="4" height="60" width="576" format="[general]" html.valueishtml="0"  name=content_supp_code visible="1" edit.limit=20 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="0" tabsequence=32766 border="0" color="33554432" x="3538" y="4" height="60" width="306" format="[general]" html.valueishtml="0"  name=content_l_code visible="1" edit.limit=10 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="0" tabsequence=32766 border="0" color="33554432" x="3849" y="4" height="60" width="1399" format="[general]" html.valueishtml="0"  name=content_lot_no visible="1" edit.limit=50 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=7 alignment="0" tabsequence=32766 border="0" color="33554432" x="5253" y="4" height="60" width="603" format="[shortdate] [time]" html.valueishtml="0"  name=content_expiration_date visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=8 alignment="0" tabsequence=32766 border="0" color="33554432" x="5861" y="4" height="60" width="329" format="[general]" html.valueishtml="0"  name=content_avail_qty visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" pagingmethod=0 generatedddwframes="1" )
+xhtmlgen() cssgen(sessionspecific="0" )
+xmlgen(inline="0" )
+xsltgen()
+jsgen()
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )
+export.xhtml()
+ 

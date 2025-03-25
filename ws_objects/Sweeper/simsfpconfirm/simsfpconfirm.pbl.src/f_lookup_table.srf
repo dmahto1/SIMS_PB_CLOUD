@@ -1,0 +1,27 @@
+﻿$PBExportHeader$f_lookup_table.srf
+$PBExportComments$Given a project and code type, evaluate possible code_id.  Return true if found, false if not.
+global type f_lookup_table from function_object
+end type
+
+forward prototypes
+global function boolean f_lookup_table (string as_project, string as_code_type, string as_code_id)
+end prototypes
+
+global function boolean f_lookup_table (string as_project, string as_code_type, string as_code_id);/*
+	Within a given a project, determine if as_code_id in lookup_table with given as_code_type.
+*/
+int li_cnt = 0
+
+select count(*) into :li_cnt from lookup_table 
+where project_id = :as_project 
+and code_type = :as_code_type 
+and code_id = :as_code_id;
+
+if li_cnt = 1 then
+	return true
+else
+	return false
+end if
+
+end function
+

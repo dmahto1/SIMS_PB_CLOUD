@@ -1,0 +1,15 @@
+﻿$PBExportHeader$d_invoice_search.srd
+$PBExportComments$Search datawindow used for invoice information
+release 6;
+datawindow(units=0 timer_interval=0 color=12632256 processing=0 print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.prompt=no print.buttons=no print.preview.buttons=no )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=72 color="536870912" )
+table(column=(type=char(10) updatewhereclause=no name=warehouse dbname="warehouse" )
+ column=(type=char(16) updatewhereclause=no name=invoice_no dbname="do_no" )
+ )
+text(band=detail alignment="0" text="Warehouse:"border="0" color="0" x="18" y="4" height="56" width="302"  name=warehouse_t  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=1 alignment="0" tabsequence=10 border="5" color="0" x="338" y="4" height="56" width="768" format="[general]"  name=warehouse dddw.name=d_dddw_project_whse dddw.displaycolumn=warehouse_wh_name dddw.datacolumn=wh_code dddw.percentwidth=100 dddw.lines=0 dddw.limit=0 dddw.allowedit=no dddw.useasborder=yes dddw.case=any dddw.vscrollbar=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=detail alignment="0" text="Order Nbr:"border="0" color="0" x="1321" y="4" height="56" width="265"  name=do_no_t  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="0" tabsequence=20 border="5" color="0" x="1605" y="4" height="56" width="923" format="[general]"  name=invoice_no edit.limit=0 edit.case=upper edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+htmltable(border="1" cellpadding="0" cellspacing="0" generatecss="no" nowrap="yes")

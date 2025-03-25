@@ -1,0 +1,31 @@
+HA$PBExportHeader$f_get_sscc_number.srf
+$PBExportComments$S29552 F13772 I1745 PhilipsCLS BlueHeart
+global type f_get_sscc_number from function_object
+end type
+
+forward prototypes
+global function string f_get_sscc_number (string asproject, string assupplier)
+end prototypes
+
+global function string f_get_sscc_number (string asproject, string assupplier);String lsSSCC, lsPrefix, lsSupplier
+Decimal 	ld_NxtSeq
+Int liCheck
+
+If asProject = "PHILIPSCLS" Then
+	select gs1_sscc_company_cd into :lsPrefix from supplier where project_id = :asProject and supp_code = :asSupplier using sqlca;
+End If
+
+If IsNull(lsPrefix) or lsPrefix = '' Then 
+	return "-1"
+End If
+
+sqlca.sp_next_avail_seq_no(asProject, asSupplier, "SSCC" , ld_NxtSeq)			//get the next available GSIN seq no
+lsSSCC = lsPrefix + String(Long(ld_NxtSeq),"0000000") 
+
+liCheck = f_calc_uccs_check_Digit( lsSSCC )
+ 
+lsSSCC = lsSSCC + string(liCheck)
+ 
+return lsSSCC
+end function
+

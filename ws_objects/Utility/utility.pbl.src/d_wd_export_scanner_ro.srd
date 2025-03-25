@@ -1,0 +1,45 @@
+﻿$PBExportHeader$d_wd_export_scanner_ro.srd
+$PBExportComments$Export Western Digital Scanner - Receive Order
+release 7;
+datawindow(units=0 timer_interval=0 color=16777215 processing=1 HTMLDW=no print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.prompt=no print.buttons=no print.preview.buttons=no grid.lines=0 )
+header(height=84 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=64 color="536870912" )
+table(column=(type=char(1) updatewhereclause=yes name=c_export_ind dbname="c_export_ind" values="	Y/	N" )
+ column=(type=char(30) updatewhereclause=yes name=supp_invoice_no dbname="Receive_Master.Supp_Invoice_No" )
+ column=(type=char(16) updatewhereclause=yes name=ro_no dbname="Receive_Master.RO_No" )
+ column=(type=char(50) updatewhereclause=yes name=sku dbname="Receive_Detail.SKU" )
+ column=(type=decimal(0) updatewhereclause=yes name=req_qty dbname="Receive_Detail.Req_Qty" )
+ column=(type=datetime updatewhereclause=yes name=ord_date dbname="Receive_Master.Ord_Date" )
+ column=(type=char(10) updatewhereclause=yes name=user_field1 dbname="Receive_Master.User_field1" )
+ retrieve="  SELECT ' ' as c_export_ind, 
+			 dbo.Receive_Master.Supp_Invoice_No,   
+			dbo.Receive_Master.RO_No,   
+			 dbo.Receive_Detail.SKU,   
+			dbo.Receive_Detail.Req_Qty,
+         dbo.Receive_Master.Ord_Date, 
+			dbo.Receive_MAster.User_field1   
+    FROM dbo.Receive_Detail,   
+         dbo.Receive_Master  
+   WHERE ( dbo.Receive_Master.RO_No = dbo.Receive_Detail.RO_No ) and
+			project_id = :project and
+			ord_status = 'N'
+" arguments=(("project", string))  sort="ro_no A sku A " )
+group(level=1 header.height=0 trailer.height=8 by=("ro_no" ) header.color="536870912" trailer.color="12632256" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="0" color="0" x="105" y="4" height="56" width="567" format="[general]"  name=supp_invoice_no edit.limit=30 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="0" color="0" x="681" y="4" height="56" width="494" format="[general]"  name=ro_no edit.limit=16 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="0" color="0" x="1184" y="4" height="56" width="1001" format="[general]"  name=sku edit.limit=50 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="1" tabsequence=32766 border="0" color="0" x="2194" y="4" height="56" width="251" format="[general]"  name=req_qty edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="0" tabsequence=32766 border="0" color="0" x="2455" y="4" height="56" width="512" format="[shortdate] [time]"  name=ord_date edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=7 alignment="0" tabsequence=32766 border="0" color="0" x="2976" y="4" height="56" width="133" format="[general]"  name=user_field1 edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="" border="6" color="0" x="9" y="8" height="64" width="87"  name=t_1  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="78567654" )
+text(band=header alignment="2" text="Supp Invoice No" border="6" color="0" x="105" y="8" height="64" width="567"  name=receive_master_supp_invoice_no_t  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="78567654" )
+text(band=header alignment="2" text="Ro No" border="6" color="0" x="681" y="8" height="64" width="494"  name=receive_master_ro_no_t  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="78567654" )
+text(band=header alignment="2" text="Sku" border="6" color="0" x="1184" y="8" height="64" width="1001"  name=receive_detail_sku_t  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="78567654" )
+text(band=header alignment="2" text="Req Qty" border="6" color="0" x="2194" y="8" height="64" width="251"  name=receive_detail_req_qty_t  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="78567654" )
+text(band=header alignment="2" text="Ord Date" border="6" color="0" x="2455" y="8" height="64" width="512"  name=receive_master_ord_date_t  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="78567654" )
+text(band=header alignment="2" text="UF 1" border="6" color="0" x="2976" y="8" height="64" width="133"  name=t_2  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="78567654" )
+column(band=detail id=1 alignment="0" tabsequence=10 border="0" color="0" x="9" y="4" height="56" width="87" format="[general]"  name=c_export_ind checkbox.text="" checkbox.on="Y" checkbox.off="N" checkbox.scale=yes checkbox.threed=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="78567654" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" )

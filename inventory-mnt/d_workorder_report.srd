@@ -1,0 +1,111 @@
+HA$PBExportHeader$d_workorder_report.srd
+$PBExportComments$* Work Order Report
+release 9;
+datawindow(units=0 timer_interval=0 color=16777215 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=832 color="536870912" )
+summary(height=6216 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=100 color="536870912"  height.autosize=yes)
+table(column=(type=char(10) updatewhereclause=yes name=workorder_master_project_id dbname="Project_ID" )
+ column=(type=char(1) updatewhereclause=yes name=ord_type dbname="Ord_type" )
+ column=(type=datetime updatewhereclause=yes name=workorder_master_ord_date dbname="Ord_date" )
+ column=(type=datetime updatewhereclause=yes name=workorder_master_complete_date dbname="Complete_date" )
+ column=(type=datetime updatewhereclause=yes name=workorder_master_sched_date dbname="Sched_Date" )
+ column=(type=char(20) updatewhereclause=yes name=workorder_master_delivery_invoice_no dbname="Delivery_Invoice_No" )
+ column=(type=char(20) updatewhereclause=yes name=workorder_master_workorder_number dbname="WorkOrder_Number" )
+ column=(type=char(1) updatewhereclause=yes name=ord_status dbname="Ord_Status" )
+ column=(type=decimal(0) updatewhereclause=yes name=workorder_master_priority dbname="Priority" )
+ column=(type=char(10) updatewhereclause=yes name=workorder_master_wh_code dbname="Wh_Code" )
+ column=(type=char(250) updatewhereclause=yes name=workorder_master_remarks dbname="Remarks" )
+ column=(type=char(30) updatewhereclause=yes name=workorder_master_user_field1 dbname="User_Field1" )
+ column=(type=char(30) updatewhereclause=yes name=workorder_master_user_field2 dbname="USer_Field2" )
+ column=(type=char(50) updatewhereclause=yes name=workorder_detail_sku dbname="SKU" )
+ column=(type=decimal(0) updatewhereclause=yes name=workorder_detail_line_item_no dbname="Line_Item_No" )
+ column=(type=char(20) updatewhereclause=yes name=workorder_detail_supp_code dbname="Supp_code" )
+ column=(type=decimal(5) updatewhereclause=yes name=workorder_detail_req_qty dbname="Req_qty" )
+ column=(type=char(70) updatewhereclause=yes name=item_master_description dbname="Description" )
+ column=(type=decimal(0) updatewhereclause=yes name=part_upc_code dbname="part_upc_Code" )
+ column=(type=char(50) updatewhereclause=yes name=alternate_sku dbname="Alternate_SKU" )
+ column=(type=long updatewhereclause=yes name=c_fg_qty dbname="c_fg_qty" )
+ retrieve="  SELECT WorkOrder_Master.Project_ID,   
+         WorkOrder_Master.Ord_type,   
+         WorkOrder_Master.Ord_date,   
+         WorkOrder_Master.Complete_date,   
+         WorkOrder_Master.Sched_Date,   
+         WorkOrder_Master.Delivery_Invoice_No,   
+         WorkOrder_Master.WorkOrder_Number,   
+         WorkOrder_Master.Ord_Status,   
+         WorkOrder_Master.Priority,   
+         WorkOrder_Master.Wh_Code,   
+         WorkOrder_Master.Remarks,   
+			Workorder_MAster.User_Field1, 
+			WorkOrder_Master.USer_Field2, 
+         WorkOrder_Detail.SKU,   
+         WorkOrder_Detail.Line_Item_No,   
+         WorkOrder_Detail.Supp_code,   
+         WorkOrder_Detail.Req_qty, 
+			Item_MAster.Description, 
+			Item_MAster.part_upc_Code, 
+			Item_master.Alternate_SKU, 
+			0000000 as c_fg_qty    
+    FROM WorkOrder_Detail,   
+         WorkOrder_Master, 
+			Item_MAster  
+   WHERE ( WorkOrder_Master.WO_NO = WorkOrder_Detail.WO_NO)    
+			And WorkOrder_Master.wo_no = :AsWONO and
+			Item_Master.Project_id = Workorder_master.Project_id and
+			Item_master.SKU = Workorder_Detail.SKU and
+			Item_Master.Supp_code = Workorder_Detail.Supp_Code 
+" arguments=(("asWONO", string)) )
+text(band=header alignment="0" text="" border="2" color="0" x="14" y="156" height="80" width="1056" html.valueishtml="0"  name=t_3 visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Work Order Report" border="0" color="0" x="14" y="20" height="92" width="3470" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-14" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="1" text="Date:" border="0" color="0" x="69" y="28" height="60" width="155" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="1" text="Project:" border="0" color="0" x="14" y="72" height="60" width="210" html.valueishtml="0"  name=workorder_master_project_id_t visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header id=1 alignment="0" tabsequence=32766 border="0" color="0" x="238" y="72" height="56" width="302" format="[general]" html.valueishtml="0"  name=workorder_master_project_id visible="1" edit.limit=10 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=header alignment="0" expression="Today()"border="0" color="0" x="238" y="24" height="56" width="549" format="[SHORTDATE] [TIME]" html.valueishtml="0"  name=compute_1 visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header id=7 alignment="0" tabsequence=32766 border="0" color="0" x="530" y="164" height="64" width="503" format="[general]" html.valueishtml="0"  name=workorder_master_workorder_number visible="1" edit.limit=20 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="1" text="Work Order Nbr:" border="0" color="0" x="18" y="164" height="64" width="494" html.valueishtml="0"  name=workorder_master_workorder_number_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=header alignment="1" expression="'Page ' + Page() + ' of ' + pageCount()"border="0" color="0" x="2981" y="24" height="56" width="494" format="[GENERAL]" html.valueishtml="0"  name=compute_2 visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header id=6 alignment="0" tabsequence=32766 border="0" color="0" x="535" y="256" height="60" width="576" format="[general]" html.valueishtml="0"  name=workorder_master_delivery_invoice_no visible="1" edit.limit=20 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="1" text="Delivery Order Nbr:~tif(ord_type = 'P','Receive Order Nbr:','Delivery Order Nbr:')" border="0" color="0" x="0" y="256" height="60" width="517" html.valueishtml="0"  name=workorder_master_delivery_invoice_no_t visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header id=9 alignment="0" tabsequence=32766 border="0" color="0" x="539" y="308" height="60" width="256" format="[general]" html.valueishtml="0"  name=workorder_master_priority visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="1" text="Priority:" border="0" color="0" x="128" y="308" height="60" width="389" html.valueishtml="0"  name=workorder_master_priority_t visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="1" text="Warehouse:" border="0" color="0" x="1335" y="156" height="60" width="384" html.valueishtml="0"  name=workorder_master_wh_code_t visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="1" text="Order Status:" border="0" color="0" x="1335" y="208" height="60" width="384" html.valueishtml="0"  name=workorder_master_ord_status_t visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="1" text="Order Date:" border="0" color="0" x="2418" y="156" height="60" width="517" html.valueishtml="0"  name=workorder_master_ord_date_t visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header id=3 alignment="0" tabsequence=32766 border="0" color="0" x="2949" y="156" height="60" width="526" format="[shortdate] [time]" html.valueishtml="0"  name=workorder_master_ord_date visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="1" text="Schedule Date:" border="0" color="0" x="2418" y="208" height="60" width="517" html.valueishtml="0"  name=workorder_master_sched_date_t visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header id=5 alignment="0" tabsequence=32766 border="0" color="0" x="2949" y="208" height="60" width="526" format="[shortdate] [time]" html.valueishtml="0"  name=workorder_master_sched_date visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header id=10 alignment="0" tabsequence=32766 border="0" color="0" x="1737" y="156" height="60" width="549" format="[general]" html.valueishtml="0"  name=workorder_master_wh_code visible="1" edit.limit=10 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header id=8 alignment="0" tabsequence=32766 border="0" color="0" x="1737" y="208" height="60" width="549" format="[general]" html.valueishtml="0"  name=ord_status visible="1" dddw.name=dddw_workorder_status dddw.displaycolumn=workorder_status_desc dddw.datacolumn=workorder_status_cd dddw.percentwidth=0 dddw.lines=0 dddw.limit=0 dddw.allowedit=no dddw.useasborder=no dddw.case=any dddw.imemode=0  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header id=2 alignment="0" tabsequence=32766 border="0" color="0" x="1737" y="260" height="60" width="549" format="[general]" html.valueishtml="0"  name=ord_type visible="1" dddw.name=dddw_workorder_types dddw.displaycolumn=code_descript dddw.datacolumn=code_id dddw.percentwidth=0 dddw.lines=0 dddw.limit=0 dddw.allowedit=no dddw.useasborder=no dddw.case=any dddw.imemode=0  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="1" text="Order Type:" border="0" color="0" x="1335" y="260" height="60" width="384" html.valueishtml="0"  name=workorder_master_ord_type_t visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header id=4 alignment="0" tabsequence=32766 border="0" color="0" x="2949" y="260" height="60" width="526" format="[shortdate] [time]" html.valueishtml="0"  name=workorder_master_complete_date visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="1" text="Complete Date:" border="0" color="0" x="2418" y="260" height="60" width="517" html.valueishtml="0"  name=workorder_master_complete_date_t visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="1" text="Remarks:" border="0" color="0" x="215" y="420" height="60" width="306" html.valueishtml="0"  name=workorder_master_remarks_t visible="1"  slideup=allabove  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header id=11 alignment="0" tabsequence=32766 border="2" color="0" x="539" y="420" height="180" width="2912" format="[general]" html.valueishtml="0"  name=workorder_master_remarks visible="1"  slideup=allabove edit.limit=250 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autovscroll=yes edit.imemode=0  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="Items/Bill of Material" border="2" color="0" x="37" y="620" height="80" width="846" html.valueishtml="0"  name=t_4 visible="1"  font.face="Arial" font.height="-12" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="Line" border="0" color="0" x="18" y="760" height="64" width="201" html.valueishtml="0"  name=workorder_detail_line_item_no_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" font.underline="1" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="Sku" border="0" color="0" x="206" y="760" height="64" width="517" html.valueishtml="0"  name=workorder_detail_sku_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" font.underline="1" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="Alt SKU" border="0" color="0" x="1019" y="760" height="64" width="507" html.valueishtml="0"  name=t_11 visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" font.underline="1" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="UPC" border="0" color="0" x="1623" y="760" height="64" width="315" html.valueishtml="0"  name=t_7 visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" font.underline="1" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="Description" border="0" color="0" x="2080" y="760" height="64" width="494" html.valueishtml="0"  name=t_6 visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" font.underline="1" background.mode="1" background.color="536870912" )
+text(band=header alignment="1" text="Qty" border="0" color="0" x="2830" y="760" height="64" width="210" html.valueishtml="0"  name=workorder_detail_req_qty_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" font.underline="1" background.mode="1" background.color="536870912" )
+text(band=header alignment="1" text="Qty" border="0" color="0" x="3246" y="760" height="64" width="210" html.valueishtml="0"  name=t_10 visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" font.underline="1" background.mode="1" background.color="536870912" )
+text(band=header alignment="1" text="Ord" border="0" color="0" x="2830" y="712" height="64" width="210" html.valueishtml="0"  name=t_8 visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="1" text="FG" border="0" color="0" x="3246" y="712" height="64" width="210" html.valueishtml="0"  name=t_9 visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=15 alignment="0" tabsequence=32766 border="0" color="0" x="32" y="8" height="64" width="137" format="[general]" html.valueishtml="0"  name=workorder_detail_line_item_no visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=17 alignment="1" tabsequence=32766 border="0" color="0" x="2642" y="8" height="64" width="411" format="#######.#####" html.valueishtml="0"  name=workorder_detail_req_qty visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=21 alignment="1" tabsequence=32766 border="0" color="0" x="3067" y="8" height="64" width="416" format="#######.#####" html.valueishtml="0"  name=c_fg_qty visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=14 alignment="0" tabsequence=32766 border="0" color="0" x="197" y="8" height="64" width="786" format="[general]" html.valueishtml="0"  name=workorder_detail_sku visible="1" edit.limit=50 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=18 alignment="0" tabsequence=32766 border="0" color="0" x="2089" y="8" height="64" width="521" format="[general]" html.valueishtml="0"  name=item_master_description visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=20 alignment="0" tabsequence=32766 border="0" color="0" x="1010" y="8" height="64" width="581" format="[general]" html.valueishtml="0"  name=alternate_sku visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=19 alignment="0" tabsequence=32766 border="0" color="0" x="1627" y="8" height="64" width="443" format="[general]" html.valueishtml="0"  name=part_upc_code visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+report(band=detail dataobject="d_workorder_report_bom" x="320" y="80" height="16" width="2802" border="0"  height.autosize=yes criteria="" nest_arguments=((" workorder_master_project_id "),(" workorder_detail_sku "),(" workorder_detail_supp_code "),(" workorder_detail_req_qty "),(" asWONO ")) trail_footer = yes  name=dw_2 visible="1"  slideup=directlyabove )
+report(band=summary dataobject="d_workorder_report_instructions" x="165" y="140" height="24" width="3250" border="0"  height.autosize=yes criteria="" nest_arguments=((" asWONO ")) trail_footer = yes  name=dw_1 visible="1"  slideleft=yes  slideup=directlyabove )
+text(band=summary alignment="0" text="Instructions" border="2" color="0" x="37" y="40" height="80" width="846" html.valueishtml="0"  name=t_5 visible="1"  font.face="Arial" font.height="-12" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

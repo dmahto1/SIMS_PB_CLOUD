@@ -1,0 +1,72 @@
+﻿$PBExportHeader$d_viaware_conversion_inv_netapp.srd
+$PBExportComments$Inventory to be exported to Vaiware for Netapp
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=1 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no grid.lines=0 )
+header(height=80 color="536870912" )
+summary(height=76 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=68 color="536870912" )
+table(column=(type=char(50) updatewhereclause=yes name=sku dbname="SKU" )
+ column=(type=char(10) updatewhereclause=yes name=l_code dbname="L_Code" )
+ column=(type=char(50) updatewhereclause=yes name=lot_no dbname="Lot_No" )
+ column=(type=char(50) updatewhereclause=yes name=po_no dbname="PO_No" )
+ column=(type=char(50) updatewhereclause=yes name=po_no2 dbname="PO_No2" )
+ column=(type=char(3) updatewhereclause=yes name=country_of_origin dbname="Country_of_Origin" )
+ column=(type=decimal(5) updatewhereclause=yes name=qty dbname="qty" )
+ column=(type=datetime updatewhereclause=yes name=complete_date dbname="Complete_Date" )
+ column=(type=char(250) updatewhereclause=yes name=remark dbname="Remark" )
+ column=(type=char(20) updatewhereclause=yes name=ro_no dbname="Ro_NO" )
+ column=(type=char(50) updatewhereclause=yes name=revision dbname="Revision" )
+ retrieve="  SELECT	dbo.Content.SKU,   
+         dbo.Content.L_Code,   
+         dbo.Content.Lot_No,   
+         dbo.Content.PO_No,   
+         dbo.Content.PO_No2,   
+			Country_of_Origin, 
+			Sum(dbo.Content.Avail_Qty) as ~"qty~", 
+			Receive_MASter.Complete_Date, 
+			Receive_MASter.Remark, 
+			Content.Ro_NO, 
+			(Select Max (user_Field2) from Receive_Detail where REceive_Detail.ro_no =  Content.ro_no and  Receive_Detail.SKU = Content.SKU) as ~"Revision~"
+			
+    FROM dbo.Content, Receive_Master
+	Where Content.project_id = :asProject and
+			Content.ro_no = Receive_Master.ro_no and
+			avail_qty > 0
+
+Group By	dbo.Content.SKU,   
+			 dbo.Content.L_Code, 
+         dbo.Content.Lot_No,   
+         dbo.Content.PO_No,   
+         dbo.Content.PO_No2, 
+			Country_of_Origin, 
+			Receive_MASter.Complete_Date, 
+			Receive_MASter.Remark, 
+			Content.Ro_NO" arguments=(("asProject", string))  sort="complete_date A sku A l_code A " )
+text(band=header alignment="2" text="Sku" border="6" color="33554432" x="558" y="8" height="64" width="640" html.valueishtml="0"  name=sku_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Location" border="6" color="33554432" x="1207" y="8" height="64" width="297" html.valueishtml="0"  name=l_code_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="SO/Line" border="6" color="33554432" x="1513" y="8" height="64" width="393" html.valueishtml="0"  name=lot_no_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="HAT" border="6" color="33554432" x="1915" y="8" height="64" width="773" html.valueishtml="0"  name=po_no_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Receipt Date" border="6" color="33554432" x="197" y="8" height="64" width="352" html.valueishtml="0"  name=complete_date_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Row" border="6" color="0" x="9" y="8" height="64" width="178" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Rev~~Box Count" border="6" color="33554432" x="2697" y="8" height="64" width="526" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="COO" border="6" color="0" x="3232" y="8" height="64" width="206" html.valueishtml="0"  name=country_of_origin_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="0" color="33554432" x="558" y="4" height="56" width="640" format="[general]" html.valueishtml="0"  name=sku visible="1" edit.limit=50 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="0" color="33554432" x="1207" y="4" height="56" width="297" format="[general]" html.valueishtml="0"  name=l_code visible="1" edit.limit=10 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="0" color="33554432" x="1513" y="4" height="56" width="393" format="[general]" html.valueishtml="0"  name=lot_no visible="1" edit.limit=50 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="0" color="33554432" x="1915" y="4" height="56" width="773" format="[general]" html.valueishtml="0"  name=po_no visible="1" edit.limit=50 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=8 alignment="2" tabsequence=32766 border="0" color="33554432" x="197" y="4" height="56" width="352" format="[shortdate]" html.valueishtml="0"  name=complete_date visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=detail alignment="0" expression="getrow()"border="0" color="33554432" x="9" y="4" height="56" width="178" format="[GENERAL]" html.valueishtml="0"  name=compute_2 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" )
+compute(band=detail alignment="0" expression="revision + ~"~~~~~" + If(po_no2 <> '-',po_no2,'')"border="0" color="33554432" x="2697" y="4" height="56" width="526" format="[GENERAL]" html.valueishtml="0"  name=c_revision visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="0" tabsequence=32766 border="0" color="33554432" x="3232" y="4" height="56" width="206" format="[general]" html.valueishtml="0"  name=country_of_origin visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=summary alignment="1" expression="~"TOTAL:    ~" + sum(qty for all)"border="0" color="33554432" x="3447" y="8" height="56" width="457" format="[General]" html.valueishtml="0"  name=compute_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Qty" border="6" color="0" x="3447" y="8" height="64" width="457" html.valueishtml="0"  name=qty_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Remark/Import Permit" border="6" color="0" x="3913" y="4" height="64" width="695" html.valueishtml="0"  name=remark_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+column(band=detail id=7 alignment="1" tabsequence=32766 border="0" color="33554432" x="3447" y="4" height="56" width="457" format="#######.0" html.valueishtml="0"  name=qty visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=9 alignment="0" tabsequence=0 border="0" color="33554432" x="3918" y="4" height="56" width="690" html.valueishtml="0"  name=remark visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+
+sparse(names="complete_date	sku	l_code	lot_no	po_no")htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )
