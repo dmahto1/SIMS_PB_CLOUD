@@ -576,7 +576,8 @@ Choose Case Upper(asproject)
 			FileWrite(giLogFileNo, lsLogOut)
 		//20-Feb-2017 :Madhu -SIMSPEVS-492 - Don't resend RS file, if Order is Re-confirmed -END
 		Else
-			liRC =iu_nvo_kendo.uf_gi( asproject, asdono) //call GI function
+			//liRC =iu_nvo_kendo.uf_gi( asproject, asdono) //call GI function // Dinesh -02/16/2023
+				liRC =iu_nvo_kendo.uf_gi( asproject, asdono, 'RS') //call GI function -// Dinesh -02/16/2023 - SIMS-167- SIMS KENDO - Post ship confirm
 		End If
 	
 	//15-Sep-2016 Madhu -KDO-1003407	- Generate GI file for International Orders (other than US) -END
@@ -1085,8 +1086,19 @@ Choose Case Upper(asproject)
 				iu_edi_confirmations_baseline_unicode = Create u_nvo_edi_confirmations_baseline_unicode
 		End If		
 			
-		liRC = iu_edi_confirmations_baseline_unicode.uf_gr(asProject, asOrderID)		
+		liRC = iu_edi_confirmations_baseline_unicode.uf_gr(asProject, asOrderID)	
+		
+		// Begin - Dinesh - 04/04/2023 - GEISTLICH - Inbound receipt order
+		
+	Case  'GEISTLICH' 
+		
+			If Not isvalid(iu_edi_confirmations_baseline_unicode) Then
+				iu_edi_confirmations_baseline_unicode = Create u_nvo_edi_confirmations_baseline_unicode
+			End If		
+			
+			liRC = iu_edi_confirmations_baseline_unicode.uf_gr(asProject, asOrderID)	
 
+		// End - Dinesh - 04/04/2023 - GEISTLICH - Inbound receipt order
 		
 	Case  'KARCHER'//TAM 2012/07 Added Karcher// TAM2014/09 Added Bosch
 		
@@ -1671,7 +1683,8 @@ Choose Case Upper(asproject)
 		End If		
 		
 		//GI to ICC
-		liRC = iu_nvo_kendo.uf_gi(asProject, asDONO)
+		//liRC = iu_nvo_kendo.uf_gi(asProject, asDONO) // Dinesh - 02/16/2023-  SIMS-167-SIMS KENDO - Post Ship Confirmation
+		liRC = iu_nvo_kendo.uf_gi(asProject, asDONO,'GI')
 		
 	Case  'WS-PR' /* 02/2016 -TAM*/
 		

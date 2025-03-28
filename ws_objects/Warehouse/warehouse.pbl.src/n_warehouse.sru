@@ -650,9 +650,11 @@ CHOOSE CASE as_mesure_from
   CASE  'IN'
 		IF as_mesure_to = 'CM' THEN  lr_rtn = round(ar_data * 2.54,2)
   CASE  'PO'
-	   IF as_mesure_to = 'KG' THEN  lr_rtn = round(ar_data * 0.454 ,2)
+	   //IF as_mesure_to = 'KG' THEN  lr_rtn = round(ar_data * 0.454 ,2)
+		IF as_mesure_to = 'KG' THEN  lr_rtn = round(ar_data * 0.454 ,4) // Dinesh - 01/24/2025- SIMS-648-Development for Google - SIMS Packing list tab and SIMS Printed Packing list missing weights 
   CASE  'KG'
-	   IF as_mesure_to = 'PO' THEN  lr_rtn = round(ar_data * 2.2026432,2)
+	   //IF as_mesure_to = 'PO' THEN  lr_rtn = round(ar_data * 2.2026432,2)
+	   IF as_mesure_to = 'PO' THEN  lr_rtn = round(ar_data * 2.2026432,4) // Dinesh - 01/24/2025- SIMS-648-Development for Google - SIMS Packing list tab and SIMS Printed Packing list missing weights 
   CASE  'M'
 	   IF as_mesure_to = 'FT' THEN  lr_rtn = round(ar_data * 3.2808399,2)
   CASE  'FT'

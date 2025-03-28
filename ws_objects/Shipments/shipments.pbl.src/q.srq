@@ -1,0 +1,2 @@
+﻿$PBExportHeader$q.srq
+PBSELECT( VERSION(400) TABLE(NAME="dbo.User_WareHouse" ) COLUMN(NAME="dbo.User_WareHouse.WH_Code") COLUMN(NAME="dbo.User_WareHouse.Project_Id") COLUMN(NAME="dbo.User_WareHouse.UserId")WHERE(    EXP1 ="dbo.User_WareHouse.UserId"   OP ="="    EXP2 =":userid" ) ) ARG(NAME = "userid" TYPE = string) 

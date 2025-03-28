@@ -46,6 +46,8 @@ Protected string is_flatfiledirin = "//klrprfp001/pdashare/from_pandora"
 Protected string is_ftpdirectoryout = "//klrprfp001/pdashare/to_pandora"
 Boolean ib_filter_allocated //SIMSPEVS-420
 datastore ids3PLCC, idsCCMaster
+string is_OwnerCd // Dinesh - 12/16/2022- SIMS-151-Google - SIMS - Data Center ABC Cycle Counting Part 2
+Boolean ib_dc_wh
 
 end variables
 
@@ -81,15 +83,15 @@ public function integer uf_process_ups_ftpin (string aspath, string asproject)
 public function integer uf_update_content (string as_wh)
 public function integer uf_process_cc (string aspath, string asproject, ref string asownercd, ref string asorderno)
 protected function boolean f_file_load (string as_project, string as_path, string as_inifile, string as_type)
-public function integer uf_create_system_cycle_counts (string asproject, string aswhcode)
 public function string uf_get_next_avail_cc_no (string asproject)
-public function str_parms uf_build_cc_sku_list (string asproject, string aswhcode, string asformatloc)
 public function integer uf_process_cc_eod_report (string as_ini_file, string as_project, datetime ad_next_runtime_date)
 public function integer uf_process_cc_inv_snapshot (string as_ini_file, string as_project)
-public function datastore uf_build_cc_system_criteria (string as_cc_no, string as_count_type, str_parms as_count_value)
-public function datastore uf_build_cc_master (string asccno, string asproject, string aswhcode, string ascccode, datetime adtwhtime, string asremarks)
 public function integer uf_process_insert_system_cc_orders (ref datastore adsccmaster, ref datastore adscc3pl)
 public function integer uf_update_content_cc_no (string asproject, string aswhcode, ref datastore ads3plcc)
+public function datastore uf_build_cc_master (string asccno, string asproject, string asownercode, string aswhcode, string ascccode, datetime adtwhtime, string asremarks)
+public function integer uf_create_system_cycle_counts (string asproject, string aswhcode, string asstringparm)
+public function str_parms uf_build_cc_sku_list (string asproject, string asownercd, string aswhcode, string asformatloc)
+public function datastore uf_build_cc_system_criteria (string as_cc_no, string as_count_type, str_parms as_count_value, string as_ownercd)
 end prototypes
 
 public function integer uf_process_files (string asproject, string aspath, string asfile, string asinifile);//Process the correct file type based on the first 2 characters of the file name
@@ -4015,6 +4017,8 @@ next //next row in data from file
  //TimA 01/17/13 Pandora issue #501
 //Varables are called in function uf_sendemailnotification
 asownercd = lsOwnerCd
+is_OwnerCd = lsOwnerCd // Dinesh - 12/16/2022- SIMS-151- Google - SIMS - Data Center ABC Cycle Counting Part 2
+
 asorderno = lsOrderNo
 
 //Save the Changes
@@ -4252,389 +4256,6 @@ fileclose ( ll_fileid )
 return lb_goodimport	
 end function
 
-public function integer uf_create_system_cycle_counts (string asproject, string aswhcode);//10-NOV-2017 :Madhu PEVS-806 - 3PL Cycle Count Orders
-
-//a. If SKU is Serialized and Count All Locations Flag is Enabled -> create new CC for each serialized SKU from Location (Count By Sku)
-//b. If SKU is Serialized and Count All Locations Flag is Disabled -> create new CC for against Location Limit (Count By Location).
-//c. If SKU is Non-Serialized and Locations Per Count > 0 -> create new CC for against Location Limit (Count By Location).
-//d. If SKU is Foot Print -> creare new CC for each Foot Print SKU from Location (Count By Sku)
-
-string lsLogOut, sql_syntax, lsErrors, 	ls_count_All_Locations, ls_cc_No, ls_class_code
-string	ls_location_list[], ls_empty_list[], ls_formatted_locations, ls_sku, ls_daily_limit, ls_om_enabled
-long 	ll_row, ll_locations_Limit, ll_serialized_count, ll_Non_serialized_count, ll_count, ll_sku_row, ll_rc, ll_eligible_count
-long	ll_cc_count, ll_criteria_count, ll_daily_count, ll_remain_count, ll_sku_loc_count, ll_Foot_Print_count
-Decimal ldCCNO
-DateTime ldtwhTime
-Boolean lbCreateNewCC, lbCreateSystemCriteria, lbCountBySku
-str_parms ls_sku_list, ls_loc_list, ls_empty_str, ls_sku_parm
-
-Datastore ldsBuildList
-n_string_util  ln_string_util
-ln_string_util = CREATE n_string_util
-
-SetPointer(Hourglass!)
-
-//write to screen and Log File
-lsLogOut = '      - Start Processing Function - 3PL Cycle Count Order - uf_create_system_cycle_counts()  against  wh_code: '+aswhcode+ ' - ' +String(Today(), "mm/dd/yyyy hh:mm:ss")
-FileWrite(giLogFileNo,lsLogOut)
-gu_nvo_process_files.uf_write_log(lsLogOut)
-
-//Initialize variables
-lbCreateNewCC =FALSE
-lbCreateSystemCriteria =FALSE
-lbCountBySku = FALSE
-ll_count =0
-
-If Not isvalid(ids3PLCC) Then
-	ids3PLCC = Create u_ds_datastore
-	ids3PLCC.dataobject= 'd_cc_system_criteria'
-End If
-ids3PLCC.SetTransObject(SQLCA)
-
-If Not isvalid(idsCCMaster) Then
-	idsCCMaster = Create u_ds_datastore
-	idsCCMaster.dataobject= 'd_cc_master'
-End If
-idsCCMaster.SetTransObject(SQLCA)
-
-//Is Warehouse -OM Enabled
-select OM_Enabled_Ind into :ls_om_enabled 
-from Warehouse with(nolock) 
-where Wh_code =:aswhcode 
-using sqlca;
-	
-IF upper(ls_om_enabled) <> 'Y' Then
- 	lsLogOut = '        3PL Cycle Count Order - processing uf_create_system_cycle_counts()  against  wh_code: '+aswhcode+ ' is not OM Enabled.! No System Cycle Counts will be generated.'
-	FileWrite(gilogFileNo,lsLogOut)
-   	RETURN -1
-End If
-	
-ldtwhTime = f_getLocalWorldTime(aswhcode) //Warehouse Local Time
-
-//get Daily System generated CC Order Limit
-// TAM - 2018/05 - S18503 - Now limiting number of Cycles Counts from the Warehouse 
-//get required values from Project Warehouse table.
-SELECT CC_count_All_Locs_For_Serialized_Sku,CC_Num_Locs_Per_Count, max_cycle_count
-	INTO :ls_count_All_Locations, :ll_locations_Limit, :ll_daily_count
-FROM Project_Warehouse with(nolock)  WHERE wh_code= :aswhcode
-using SQLCA;
-
-If ll_daily_count = 0 or isNull(ll_daily_count)   then
-	ls_daily_limit =f_retrieve_parm(asproject, 'CycleCount','System')
-	If IsNumber(ls_daily_limit) Then ll_daily_count =long(ls_daily_limit)
-End If
-
-
-//set default values
-If IsNULL(ls_count_All_Locations) Then ls_count_All_Locations ='N'
-If IsNull(ll_locations_Limit) Then ll_locations_Limit =0;
-
-//build SQL Query to pull all eligible records for CC.
-//TAM 2018/04 -S17607 - Exclude Inventory with Locations = "Research" or "Reconp" or or PoNo = "Research" 
-//07-JUNE-2018 :Madhu DE4625 - Create CC Order per Foot Print Item
-//TAM 2019/06 -S34780 - Don't include Packaging owners(Owner Codes ending in 'PK') in System generated CC's
-ldsBuildList = create Datastore
-sql_syntax =	"	SELECT Distinct A.L_Code as L_code, B.CC_Class_Code as CC_Class_Code, count(*) as Serialized_count, 0 as Non_Serialized_count, 0 as Foot_Print_count	"
-sql_syntax +=	"	FROM Content A with(nolock)	"
-sql_syntax +=	"	INNER JOIN Item_Master B with(nolock) ON A.Project_Id= B.Project_Id	"
-sql_syntax +=	"	AND A.SKU = B.SKU and A.Supp_Code = B.Supp_code	"
-sql_syntax +=	"	INNER JOIN Owner O with (nolock) on A.Project_Id= O.Project_Id	"
-sql_syntax +=	"	AND A.Owner_Id = O.Owner_id "	
-sql_syntax +=	"	Where A.Project_Id='"+asproject+"' and A.WH_Code ='"+aswhcode+"'	"
-sql_syntax +=	"	AND DATEDIFF(DAY, A.Last_Cycle_Count, GETDATE()) > B.CC_Freq	"
-sql_syntax +=	"	AND (A.CC_No ='-' OR  A.CC_No IS NULL)	"
-sql_syntax +=	"	AND B.Serialized_Ind <> 'N'	 AND (B.PO_No2_Controlled_Ind <> 'Y' OR B.Container_Tracking_Ind <> 'Y') "
-sql_syntax +=	"	AND B.CC_Class_Code in ('A','B','C')	"
-sql_syntax +=	"	AND (A.L_code Not Like 'RESEARCH%' and A.L_code Not Like 'RECONP%'  )	"
-sql_syntax +=	"	AND A.PO_NO Not Like 'RESEARCH%' 	"
-sql_syntax +=	"	AND O.Owner_CD Not Like '%PK' 	"
-sql_syntax +=	"	Group By A.L_Code, B.CC_Class_Code	"
-sql_syntax +=	"	UNION	"
-sql_syntax +=	"	SELECT Distinct A.L_Code as L_code, B.CC_Class_Code as CC_Class_Code, 0 as Serialized_count, count(*) as Non_Serialized_count, 0 as Foot_Print_count	"
-sql_syntax +=	"	FROM Content A with(nolock)	"
-sql_syntax +=	"	INNER JOIN Item_Master B with(nolock) ON A.Project_Id= B.Project_Id	"
-sql_syntax +=	"	AND A.SKU = B.SKU and A.Supp_Code = B.Supp_code	"
-sql_syntax +=	"	INNER JOIN Owner O with (nolock) on A.Project_Id= O.Project_Id	"
-sql_syntax +=	"	AND A.Owner_Id = O.Owner_id "	
-sql_syntax +=	"	Where A.Project_Id='"+asproject+"' and A.WH_Code ='"+aswhcode+"'	"
-sql_syntax +=	"	AND DATEDIFF(DAY, A.Last_Cycle_Count, GETDATE()) > B.CC_Freq	"
-sql_syntax +=	"	AND (A.CC_No ='-' OR  A.CC_No IS NULL)	"
-sql_syntax +=	"	AND B.Serialized_Ind = 'N'	"
-sql_syntax +=	"	AND B.CC_Class_Code in ('A','B','C')	"
-sql_syntax +=	"	AND (A.L_code Not Like 'RESEARCH%' and A.L_code Not Like 'RECONP%'  )	"
-sql_syntax +=	"	AND A.PO_NO Not Like 'RESEARCH%' 	"
-sql_syntax +=	"	AND O.Owner_CD Not Like '%PK' 	"
-sql_syntax +=	"	Group By A.L_Code, B.CC_Class_Code	"
-sql_syntax +=	"	UNION	"
-sql_syntax +=	"	SELECT Distinct A.L_Code as L_code, B.CC_Class_Code as CC_Class_Code, 0 as Serialized_count, 0 as Non_Serialized_count, count(*) as Foot_Print_count	"
-sql_syntax +=	"	FROM Content A with(nolock)	"
-sql_syntax +=	"	INNER JOIN Owner O with (nolock) on A.Project_Id= O.Project_Id	"
-sql_syntax +=	"	AND A.Owner_Id = O.Owner_id "	
-sql_syntax +=	"	INNER JOIN Item_Master B with(nolock) ON A.Project_Id= B.Project_Id	"
-sql_syntax +=	"	AND A.SKU = B.SKU and A.Supp_Code = B.Supp_code	"
-sql_syntax +=	"	Where A.Project_Id='"+asproject+"' and A.WH_Code ='"+aswhcode+"'	"
-sql_syntax +=	"	AND DATEDIFF(DAY, A.Last_Cycle_Count, GETDATE()) > B.CC_Freq	"
-sql_syntax +=	"	AND (A.CC_No ='-' OR  A.CC_No IS NULL)	"
-sql_syntax +=	"	AND B.Serialized_Ind = 'B' AND B.PO_No2_Controlled_Ind='Y' AND B.Container_Tracking_Ind='Y'		"
-sql_syntax +=	"	AND B.CC_Class_Code in ('A','B','C')	"
-sql_syntax +=	"	AND (A.L_code Not Like 'RESEARCH%' and A.L_code Not Like 'RECONP%'  )	"
-sql_syntax +=	"	AND A.PO_NO Not Like 'RESEARCH%' 	"
-sql_syntax +=	"	AND O.Owner_CD Not Like '%PK' 	"
-sql_syntax +=	"	Group By A.L_Code, B.CC_Class_Code	"
-sql_syntax +=	"	Order By Foot_Print_count desc, Serialized_count desc, B.CC_Class_Code, A.L_Code	"
-
-ldsBuildList.create( SQLCA.SyntaxFromSql(sql_syntax, "", lsErrors))
-
-IF len(lsErrors) > 0 THEN
- 	lsLogOut = "        *** Unable to create datastore for PANDORA 3PL System Cycle Count Orders .~r~r" + lsErrors
-	FileWrite(gilogFileNo,lsLogOut)
-   	RETURN -1
-END IF
-
-ldsBuildList.SetTransObject(SQLCA)
-ll_eligible_count = ldsBuildList.retrieve( )
-
-//write to screen and Log File
-lsLogOut = '      - Processing Function - 3PL Cycle Count Order - uf_create_system_cycle_counts(). - ' + ' Total Eligible Records: '+string(ll_eligible_count) + ' Per Count Location Limit: '+ string(ll_locations_Limit) + ' Count All Locations for Serialized Sku is Enabled: ' + ls_count_All_Locations
-FileWrite(giLogFileNo,lsLogOut)
-gu_nvo_process_files.uf_write_log(lsLogOut)
-
-//Process of Foot Print Items - Apply Filter
-ldsBuildList.setfilter( " Foot_Print_count > 0")
-ldsBuildList.filter( )
-ll_Foot_Print_count = ldsBuildList.rowcount( )
-
-ll_remain_count = ll_daily_count //store daily limit into remaining Limit
-
-// (A) build Foot Print Items - Irrespective of Count All Loc Flag
-IF ll_Foot_Print_count > 0  Then
-	lbCountBySku = TRUE //all serialized Items count By Sku
-	
-	//write to screen and Log File
-	lsLogOut = '      -  Processing Function - 3PL Cycle Count Order - uf_create_system_cycle_counts(). - ' + ' Foot Print Item Count:' +string(ll_serialized_count) + ' - Count All Locations for Foot Print SKU'
-	FileWrite(giLogFileNo,lsLogOut)
-	gu_nvo_process_files.uf_write_log(lsLogOut)
-
-	//setting counts against Daily Limit
-	If ll_Foot_Print_count >= ll_daily_count Then
-		ll_Foot_Print_count = ll_daily_count
-		ll_remain_count = 0
-	else
-		ll_remain_count = ll_daily_count - ll_Foot_Print_count
-	End If
-
-	//write to screen and Log File
-	lsLogOut = '      -  Processing Function - 3PL Cycle Count Order - uf_create_system_cycle_counts(). - ' + ' Processing Serialized Item Limit Count:' +string(ll_serialized_count) + ' - Count All Locations for Foot Print SKU'
-	FileWrite(giLogFileNo,lsLogOut)
-	gu_nvo_process_files.uf_write_log(lsLogOut)
-
-	For ll_row =1 to ll_Foot_Print_count
-		ls_location_list[ UpperBound(ls_location_list) + 1 ] = ldsBuildList.getItemString( ll_row, 'L_Code')
-		ls_class_code =ldsBuildList.getItemString( ll_row, 'CC_Class_Code')
-	Next	
-	
-	If UpperBound(ls_location_list) > 0 Then 
-		ls_formatted_locations = ln_string_util.of_format_string( ls_location_list, n_string_util.FORMAT1 ) //formatted Locations
-		ls_sku_list =this.uf_build_cc_sku_list( asproject, aswhcode, ls_formatted_locations) //get all distinct SKU List
-		IF ls_sku_list.boolean_arg[1] =TRUE THEN 	Return -1
-	End If
-	
-	//Limit to create CC Order against SKU
-	ll_sku_loc_count = UpperBound(ls_sku_list.string_arg)
-	
-	FOR ll_sku_row =1 to ll_sku_loc_count
-		ls_sku_parm.string_arg[1] = ls_sku_list.string_arg[ll_sku_row] //store SKU value into Parm
-		ls_sku = ls_sku_list.string_arg[ll_sku_row]
-		
-		SELECT CC_Class_Code into :ls_class_code FROM Item_Master with(nolock) WHERE Project_Id = :asproject and Sku =:ls_sku USING sqlca;
-		
-		ls_cc_No = this.uf_get_next_avail_cc_no( asproject) //get Next CC No
-		idsCCMaster = this.uf_build_cc_master( ls_cc_No, asproject, aswhcode, ls_class_code ,ldtwhTime, 'Count All Locations for Foot Print SKU ' + ls_sku) //build CC Master Records
-		
-		If idsCCMaster.rowcount( ) > 0 Then 
-			ids3PLCC = this.uf_build_cc_system_criteria( ls_cc_No, 'S', ls_sku_parm) //build System Criteria Records
-		else
-			Return -1
-		End If
-	NEXT
-	
-	//clear list
-	ls_location_list[] = ls_empty_list[]
-	ls_loc_list.string_arg  = ls_empty_str.string_arg //clear Location List
-	ls_sku_list.string_arg = ls_empty_str.string_arg //clear sku List
-End IF
-
-
-//clear filter
-ldsBuildList.setfilter( "")
-ldsBuildList.filter( )
-ldsBuildList.rowcount( )
-
-//Process of Serialized Items - Apply Filter
-ldsBuildList.setfilter( " Serialized_count > 0")
-ldsBuildList.filter( )
-ll_serialized_count = ldsBuildList.rowcount( )
-
-// (B) build Serialized Items - If count All Serilized Ind Locations Flag is Enabled
-IF ll_serialized_count > 0 and upper(ls_count_All_Locations) ='Y' Then
-	lbCountBySku = TRUE //all serialized Items count By Sku
-	
-	//write to screen and Log File
-	lsLogOut = '      -  Processing Function - 3PL Cycle Count Order - uf_create_system_cycle_counts(). - ' + ' Serialized Item Count:' +string(ll_serialized_count) + ' - Count All Locations for Serialized SKU'
-	FileWrite(giLogFileNo,lsLogOut)
-	gu_nvo_process_files.uf_write_log(lsLogOut)
-
-
- //MEA SEPT-2018 : MEA DE5705 - System generated CC are not dropping for serialized GPN.
- //changed as per Madhu
- 
-// //setting counts against Daily Limit
-//
-//If ((ll_remain_count > 0) and (ll_serialized_count > ll_remain_count)) Then
-//
-//                ll_serialized_count = ll_remain_count
-//	              ll_remain_count = 0
- 
-//setting counts against Daily Limit
-
-If (ll_remain_count > 0) Then
-       If (ll_serialized_count > ll_remain_count) Then
-                ll_serialized_count = ll_remain_count
-                ll_remain_count = 0
-	  End If
-
-		//write to screen and Log File
-		lsLogOut = '      -  Processing Function - 3PL Cycle Count Order - uf_create_system_cycle_counts(). - ' + ' Processing Serialized Item Limit Count:' +string(ll_serialized_count) + ' - Count All Locations for Serialized SKU'
-		FileWrite(giLogFileNo,lsLogOut)
-		gu_nvo_process_files.uf_write_log(lsLogOut)
-	
-		For ll_row =1 to ll_serialized_count
-			ls_location_list[ UpperBound(ls_location_list) + 1 ] = ldsBuildList.getItemString( ll_row, 'L_Code')
-			ls_class_code =ldsBuildList.getItemString( ll_row, 'CC_Class_Code')
-		Next	
-		
-		If UpperBound(ls_location_list) > 0 Then 
-			ls_formatted_locations = ln_string_util.of_format_string( ls_location_list, n_string_util.FORMAT1 ) //formatted Locations
-			ls_sku_list =this.uf_build_cc_sku_list( asproject, aswhcode, ls_formatted_locations) //get all distinct SKU List
-			IF ls_sku_list.boolean_arg[1] =TRUE THEN 	Return -1
-		End If
-	
-		//Limit to create CC Order against SKU
-		ll_sku_loc_count = UpperBound(ls_sku_list.string_arg)
-		
-		FOR ll_sku_row =1 to ll_sku_loc_count
-			ls_sku_parm.string_arg[1] = ls_sku_list.string_arg[ll_sku_row] //store SKU value into Parm
-			ls_sku = ls_sku_list.string_arg[ll_sku_row]
-			
-			SELECT CC_Class_Code into :ls_class_code FROM Item_Master with(nolock) WHERE Project_Id = :asproject and Sku =:ls_sku USING sqlca;
-			
-			ls_cc_No = this.uf_get_next_avail_cc_no( asproject) //get Next CC No
-			idsCCMaster = this.uf_build_cc_master( ls_cc_No, asproject, aswhcode, ls_class_code ,ldtwhTime, 'Count All Locations for Serialized SKU ' + ls_sku) //build CC Master Records
-			
-			If idsCCMaster.rowcount( ) > 0 Then 
-				ids3PLCC = this.uf_build_cc_system_criteria( ls_cc_No, 'S', ls_sku_parm) //build System Criteria Records
-			else
-				Return -1
-			End If
-		NEXT
-	End If
-End IF
-
-// (C) build Serialized /Non-Serialized Items - If count All Serilized Ind Locations Flag is Disabled - then count by Location Limit
-IF ll_locations_Limit > 0 Then
-	//clear filter
-	ldsBuildList.setfilter( "")
-	ldsBuildList.filter( )
-	ldsBuildList.rowcount( )
-	
-	//If serialized SKU's already counted, count only Non-Serialized Items.
-	If lbCountBySku = TRUE Then
-		//Process of Non-Serialized Items - Apply Filter
-		ldsBuildList.setfilter( " Non_Serialized_count > 0")
-		ldsBuildList.filter( )
-		ll_Non_serialized_count = ldsBuildList.rowcount( )
-	else
-		//If serialized SKU's are NOT counted, count only all Items.
-		ll_Non_serialized_count = ldsBuildList.rowcount( )
-	End IF
-	
-	//write to screen and Log File
-	lsLogOut = '      -  Processing Function - 3PL Cycle Count Order - uf_create_system_cycle_counts(). - ' + ' Non-Serialized Item(s) Count:' +string(ll_Non_Serialized_count) 
-	FileWrite(giLogFileNo,lsLogOut)
-	gu_nvo_process_files.uf_write_log(lsLogOut)
-	
-	//setting counts against Daily Limit
-	If ll_remain_count > 0  Then
-		
-		If ll_Non_serialized_count > ll_remain_count Then
-			ll_Non_serialized_count = ll_remain_count
-			ll_remain_count = 0
-		End If
-		
-		//write to screen and Log File
-		lsLogOut = '      -  Processing Function - 3PL Cycle Count Order - uf_create_system_cycle_counts(). - ' + ' Processing Non-Serialized Item(s) Limit Count:' +string(ll_Non_Serialized_count) 
-		FileWrite(giLogFileNo,lsLogOut)
-		gu_nvo_process_files.uf_write_log(lsLogOut)
-		
-		
-		For ll_row =1 to ll_Non_serialized_count
-			ll_count++
-			ls_loc_list.string_arg[ll_count] =ldsBuildList.getItemString( ll_row, 'L_Code')
-			ls_class_code =ldsBuildList.getItemString( ll_row, 'CC_Class_Code')
-			
-			IF lbCreateNewCC =FALSE Then
-				ls_cc_No = this.uf_get_next_avail_cc_no( asproject) //get Next CC No
-				idsCCMaster = this.uf_build_cc_master( ls_cc_No, asproject, aswhcode, ls_class_code, ldtwhTime, 'Count By Locations for Serialized/Non-Serialized SKU') //build CC_Master records
-			End IF
-			
-			//create new CC record aginst Limit
-			IF (ll_locations_Limit - ll_count) > 0 Then
-				lbCreateNewCC =TRUE
-				lbCreateSystemCriteria =FALSE
-			else
-				lbCreateNewCC =FALSE
-				lbCreateSystemCriteria =TRUE
-			End IF
-			
-			IF lbCreateSystemCriteria =TRUE THEN
-				ids3PLCC = this.uf_build_cc_system_criteria( ls_cc_No, 'L', ls_loc_list) //build CC_System_Criteria records
-				lbCreateSystemCriteria =FALSE //re-initialize value
-				ll_count =0 //re-initialize value
-				ls_loc_list.string_arg  = ls_empty_str.string_arg //clear Location List
-			End IF
-		Next
-		
-		If upperbound(ls_loc_list.string_arg) > 0 Then 
-			ids3PLCC = this.uf_build_cc_system_criteria( ls_cc_No, 'L', ls_loc_list) //build CC_System_Criteria records - Any Open System Criteria Records
-		End If
-	End IF
-End IF
-
-//(C) Write Records into DB
-ll_cc_count = idsCCMaster.rowcount( )
-ll_criteria_count = ids3PLCC.rowcount( )
-
-//write to screen and Log File
-lsLogOut = '      -  Processing Function - 3PL Cycle Count Order - uf_create_system_cycle_counts() - CC Master Count: '+nz(string(ll_cc_count),'-')+' - CC Criteria Count: '+nz(string(ll_criteria_count),'-')
-lsLogOut += ' - have to be inserted into DB.' 
-FileWrite(giLogFileNo,lsLogOut)
-gu_nvo_process_files.uf_write_log(lsLogOut)
- 
-If ll_cc_count > 0 and  ll_criteria_count > 0 Then ll_rc = this.uf_process_insert_system_cc_orders( idsCCMaster, ids3PLCC) //Insert CC Records
-If ll_rc = 0 Then	this.uf_update_content_cc_no( asproject, aswhcode, ids3PLCC) //Update Content Records
-
-//Destroy Datastores
-destroy ids3PLCC
-destroy idsCCMaster
-
-//write to screen and Log File
-lsLogOut = '      - End Processing Function - 3PL Cycle Count Order - uf_create_system_cycle_counts() against wh_code: '+aswhcode+ ' - ' +String(Today(), "mm/dd/yyyy hh:mm:ss")
-FileWrite(giLogFileNo,lsLogOut)
-gu_nvo_process_files.uf_write_log(lsLogOut)
-
-Return 0
-end function
-
 public function string uf_get_next_avail_cc_no (string asproject);//13-Nov-2017 :Madhu PEVS-806 - 3PL Cycle Count Orders
 
 string ls_cc_No
@@ -4645,58 +4266,6 @@ sqlca.sp_next_avail_seq_no(asproject, "CC_Master", "CC_No" , ldCCNO)
 ls_cc_No = asproject + String(Long(ldCCNo),"000000")
 
 Return ls_cc_No
-end function
-
-public function str_parms uf_build_cc_sku_list (string asproject, string aswhcode, string asformatloc);//13-NOV-2017 :Madhu PEVS-806 - 3PL Cycle Count Orders
-
-string		sql_syntax, lsErrors, lsLogOut, ls_skuList[]
-long		ll_serialized_list, ll_row
-str_parms ls_str_parms
-
-Datastore ldsSKUList
-
-ls_str_parms.boolean_arg[1] =FALSE //set default value
-
-//write to screen and Log File
-lsLogOut = '      -  Start Processing Function - 3PL Cycle Count Order - uf_build_cc_sku_list(). - for wh_code: '+ aswhcode
-FileWrite(giLogFileNo,lsLogOut)
-gu_nvo_process_files.uf_write_log(lsLogOut)
-
-
-//build SQL Qeury to pull all distinct Serialized Items.
-ldsSKUList = create Datastore
-sql_syntax =	"	SELECT Distinct A.SKU as SKU, B.Serialized_Ind	"
-sql_syntax +=	"	FROM Content A with(nolock)	"
-sql_syntax +=	"	INNER JOIN Item_Master B with(nolock) ON A.Project_Id= B.Project_Id	"
-sql_syntax +=	"	AND A.SKU = B.SKU and A.Supp_Code = B.Supp_code	"
-sql_syntax +=	"	AND B.Serialized_Ind <> 'N'	"
-sql_syntax +=	"	Where A.Project_Id='"+asproject+"'	"
-sql_syntax +=	"	AND A.WH_Code ='"+aswhcode+"'	"
-sql_syntax +=	"	AND A.L_Code IN ("+asformatloc+")"
-sql_syntax +=	"	Order By A.SKU 	"
-
-ldsSKUList.create( SQLCA.SyntaxFromSql(sql_syntax, "", lsErrors))
-
-IF len(lsErrors) > 0 THEN
- 	lsLogOut = "        *** Unable to create datastore to Pull Serialized Items of PANDORA 3PL System Cycle Count Orders .~r~r" + lsErrors
-	FileWrite(gilogFileNo,lsLogOut)
-	ls_str_parms.boolean_arg[1] =TRUE
-END IF
-
-ldsSKUList.SetTransObject(SQLCA)
-ll_serialized_list =ldsSKUList.retrieve( )
-
-FOR ll_row =1 to ll_serialized_list
-	ls_str_parms.string_arg[ll_row] = ldsSKUList.getItemString(ll_row, 'SKU')
-NEXT
-
-//write to screen and Log File
-lsLogOut = '      -  End Processing Function - 3PL Cycle Count Order - uf_build_cc_sku_list(). - for wh_code: '+ aswhcode + ' Serialized SKU count: '+string(ll_serialized_list)
-FileWrite(giLogFileNo,lsLogOut)
-gu_nvo_process_files.uf_write_log(lsLogOut)
-
-destroy ldsSKUList
-Return  ls_str_parms
 end function
 
 public function integer uf_process_cc_eod_report (string as_ini_file, string as_project, datetime ad_next_runtime_date);//16-Nov-2017 :Madhu PEVS-806 3PL Cycle Count Order
@@ -4847,80 +4416,6 @@ Destroy ldsccInv
 RETURN 0
 end function
 
-public function datastore uf_build_cc_system_criteria (string as_cc_no, string as_count_type, str_parms as_count_value);//13-NOV-2017 :Madhu PEVS-806 - 3PL Cycle Count Orders
-//Build System Criteria Records
-
-string lsLogOut, lsFind
-long llCCRow, ll_row, llFindRow
-
-If Not isvalid(ids3PLCC) Then
-	ids3PLCC = Create u_ds_datastore
-	ids3PLCC.dataobject= 'd_cc_system_criteria'
-	ids3PLCC.SetTransObject(SQLCA)
-End If
-
-//Write to File and Screen
-lsLogOut = '      - 3PL Cycle Count Order -Start Processing of uf_build_cc_system_criteria()- Building CC System Criteria Records '
-FileWrite(giLogFileNo,lsLogOut)
-gu_nvo_process_files.uf_write_log(lsLogOut)
-
-llFindRow = 0
-
-//build CC_System_Criteria records
-FOR ll_row =1 to UpperBound(as_count_value.string_arg)
-	
-	//Write to File and Screen
-	lsFind = "CC_No ='"+as_cc_no+"' and Count_Type ='"+as_count_type+"' and Count_Value ='"+trim(as_count_value.string_arg[ll_row])+"'"
-	If ids3PLCC.rowcount() > 0 Then llFindRow = ids3PLCC.find( lsFind, 1,ids3PLCC.rowcount())
-
-	lsLogOut = '      - 3PL Cycle Count Order - Processing of uf_build_cc_system_criteria()- Find Record: '+lsFind+ ' Find Row Count: '+nz(string(llFindRow), '-')
-	lsLogOut +=' Build CC System Criteria Record Count: '+ nz(string( ids3PLCC.rowcount()), '-')
-	FileWrite(giLogFileNo,lsLogOut)
-	gu_nvo_process_files.uf_write_log(lsLogOut)
-
-	IF llFindRow =0 Then
-		llCCRow = ids3PLCC.insertrow( 0)
-		ids3PLCC.setItem( llCCRow, 'CC_No', as_cc_no)
-		ids3PLCC.setItem( llCCRow, 'Count_Type', as_count_type)
-		ids3PLCC.setItem( llCCRow, 'Count_Value', trim(as_count_value.string_arg[ll_row]))
-	End IF
-Next
-
-//Write to File and Screen
-lsLogOut = '      - 3PL Cycle Count Order -End Processing of uf_build_cc_system_criteria()- Building CC System Criteria Records '
-FileWrite(giLogFileNo,lsLogOut)
-gu_nvo_process_files.uf_write_log(lsLogOut)
-
-Return ids3PLCC
-end function
-
-public function datastore uf_build_cc_master (string asccno, string asproject, string aswhcode, string ascccode, datetime adtwhtime, string asremarks);//13-NOV-2017 :Madhu PEVS-806 - 3PL Cycle Count Orders
-long llNewRow
-
-If Not isvalid(idsCCMaster) Then
-	idsCCMaster = Create u_ds_datastore
-	idsCCMaster.dataobject= 'd_cc_master'
-	idsCCMaster.SetTransObject(SQLCA)
-End If
-
-//build CC_Master records
-llNewRow = idsCCMaster.insertrow( 0)
-idsCCMaster.SetItem(llNewRow, 'cc_no', asccno)
-idsCCMaster.SetItem(llNewRow, 'project_id', asproject)
-idsCCMaster.SetItem(llNewRow, 'wh_code', aswhcode)
-idsCCMaster.SetItem(llNewRow, 'last_update', Today())
-idsCCMaster.SetItem(llNewRow, 'last_user', 'SIMSFP')
-idsCCMaster.SetItem(llNewRow, 'ord_date', adtwhtime)
-idsCCMaster.SetItem(llNewRow, 'Ord_type', 'X') //System generated
-idsCCMaster.SetItem(llNewRow, 'Ord_Status', 'N')
-idsCCMaster.SetItem(llNewRow, 'class', ascccode)
-idsCCMaster.SetItem(llNewRow, 'class_end', ascccode)
-idsCCMaster.SetItem(llNewRow, 'Remark', asremarks)
-
-
-Return idsCCMaster
-end function
-
 public function integer uf_process_insert_system_cc_orders (ref datastore adsccmaster, ref datastore adscc3pl);//05-Dec-2017 :Madhu PEVS-806 3PL Cycle Count Orders.
 string	lsLogOut
 long 	ll_cc_count, ll_criteria_count, ll_rc
@@ -5024,6 +4519,748 @@ FileWrite(giLogFileNo,lsLogOut)
 gu_nvo_process_files.uf_write_log(lsLogOut)
 
 Return 0
+end function
+
+public function datastore uf_build_cc_master (string asccno, string asproject, string asownercode, string aswhcode, string ascccode, datetime adtwhtime, string asremarks);//13-NOV-2017 :Madhu PEVS-806 - 3PL Cycle Count Orders
+long llNewRow
+string ls_owner_id
+
+If Not isvalid(idsCCMaster) Then
+	idsCCMaster = Create u_ds_datastore
+	idsCCMaster.dataobject= 'd_cc_master'
+	idsCCMaster.SetTransObject(SQLCA)
+End If
+
+//build CC_Master records
+llNewRow = idsCCMaster.insertrow( 0)
+idsCCMaster.SetItem(llNewRow, 'cc_no', asccno)
+idsCCMaster.SetItem(llNewRow, 'project_id', asproject)
+idsCCMaster.SetItem(llNewRow, 'wh_code', aswhcode)
+idsCCMaster.SetItem(llNewRow, 'last_update', Today())
+idsCCMaster.SetItem(llNewRow, 'last_user', 'SIMSFP')
+idsCCMaster.SetItem(llNewRow, 'ord_date', adtwhtime)
+idsCCMaster.SetItem(llNewRow, 'Ord_type', 'X') //System generated
+idsCCMaster.SetItem(llNewRow, 'Ord_Status', 'N')
+idsCCMaster.SetItem(llNewRow, 'class', ascccode)
+idsCCMaster.SetItem(llNewRow, 'class_end', ascccode)
+idsCCMaster.SetItem(llNewRow, 'Remark', asremarks)
+// Begin - Dinesh - SIMS-151- 12/27/2022- Google - SIMS - Data Center ABC Cycle Counting Part 2
+if ib_dc_wh= True then
+	idsCCMaster.SetItem(llNewRow, 'User_Field3','YES') 
+	select Owner_Id into :ls_owner_id from Owner where owner_cd= :asownercode; 
+	idsCCMaster.SetItem(llNewRow, 'owner_id', ls_owner_id)
+	
+end if
+// End - Dinesh - SIMS-151- 12/27/2022- Google - SIMS - Data Center ABC Cycle Counting Part 2
+
+Return idsCCMaster
+end function
+
+public function integer uf_create_system_cycle_counts (string asproject, string aswhcode, string asstringparm);//10-NOV-2017 :Madhu PEVS-806 - 3PL Cycle Count Orders
+
+//a. If SKU is Serialized and Count All Locations Flag is Enabled -> create new CC for each serialized SKU from Location (Count By Sku)
+//b. If SKU is Serialized and Count All Locations Flag is Disabled -> create new CC for against Location Limit (Count By Location).
+//c. If SKU is Non-Serialized and Locations Per Count > 0 -> create new CC for against Location Limit (Count By Location).
+//d. If SKU is Foot Print -> creare new CC for each Foot Print SKU from Location (Count By Sku)
+
+string lsLogOut, sql_syntax, lsErrors, 	ls_count_All_Locations, ls_cc_No, ls_class_code,ls_owner_cd,ls_Prev_ownercd,ls_Prev_ownercd1
+string	ls_location_list[], ls_empty_list[], ls_formatted_locations, ls_sku, ls_daily_limit, ls_om_enabled,ls_owner_cd1
+long 	ll_row, ll_locations_Limit, ll_serialized_count, ll_Non_serialized_count, ll_count, ll_sku_row, ll_rc, ll_eligible_count
+long	ll_cc_count, ll_criteria_count, ll_daily_count, ll_remain_count, ll_sku_loc_count, ll_Foot_Print_count,ll_owner_cnt
+Decimal ldCCNO
+DateTime ldtwhTime
+Boolean lbCreateNewCC, lbCreateSystemCriteria, lbCountBySku
+str_parms ls_sku_list, ls_loc_list, ls_empty_str, ls_sku_parm
+
+Datastore ldsBuildList
+n_string_util  ln_string_util
+ln_string_util = CREATE n_string_util
+
+SetPointer(Hourglass!)
+
+//write to screen and Log File
+lsLogOut = '      - Start Processing Function - 3PL Cycle Count Order - uf_create_system_cycle_counts()  against  wh_code: '+aswhcode+ ' - ' +String(Today(), "mm/dd/yyyy hh:mm:ss")
+FileWrite(giLogFileNo,lsLogOut)
+gu_nvo_process_files.uf_write_log(lsLogOut)
+
+//Initialize variables
+lbCreateNewCC =FALSE
+lbCreateSystemCriteria =FALSE
+lbCountBySku = FALSE
+ll_count =0
+
+If Not isvalid(ids3PLCC) Then
+	ids3PLCC = Create u_ds_datastore
+	ids3PLCC.dataobject= 'd_cc_system_criteria'
+End If
+ids3PLCC.SetTransObject(SQLCA)
+
+If Not isvalid(idsCCMaster) Then
+	idsCCMaster = Create u_ds_datastore
+	idsCCMaster.dataobject= 'd_cc_master'
+End If
+idsCCMaster.SetTransObject(SQLCA)
+
+//Is Warehouse -OM Enabled
+select OM_Enabled_Ind into :ls_om_enabled 
+from Warehouse with(nolock) 
+where Wh_code =:aswhcode 
+using sqlca;
+	
+IF upper(ls_om_enabled) <> 'Y' Then
+ 	lsLogOut = '        3PL Cycle Count Order - processing uf_create_system_cycle_counts()  against  wh_code: '+aswhcode+ ' is not OM Enabled.! No System Cycle Counts will be generated.'
+	FileWrite(gilogFileNo,lsLogOut)
+   	RETURN -1
+End If
+	
+ldtwhTime = f_getLocalWorldTime(aswhcode) //Warehouse Local Time
+
+//get Daily System generated CC Order Limit
+// TAM - 2018/05 - S18503 - Now limiting number of Cycles Counts from the Warehouse 
+//get required values from Project Warehouse table.
+SELECT CC_count_All_Locs_For_Serialized_Sku,CC_Num_Locs_Per_Count, max_cycle_count
+	INTO :ls_count_All_Locations, :ll_locations_Limit, :ll_daily_count
+FROM Project_Warehouse with(nolock)  WHERE wh_code= :aswhcode
+using SQLCA;
+
+If ll_daily_count = 0 or isNull(ll_daily_count)   then
+	ls_daily_limit =f_retrieve_parm(asproject, 'CycleCount','System')
+	If IsNumber(ls_daily_limit) Then ll_daily_count =long(ls_daily_limit)
+End If
+
+
+//set default values
+If IsNULL(ls_count_All_Locations) Then ls_count_All_Locations ='N'
+If IsNull(ll_locations_Limit) Then ll_locations_Limit =0;
+
+//build SQL Query to pull all eligible records for CC.
+//TAM 2018/04 -S17607 - Exclude Inventory with Locations = "Research" or "Reconp" or or PoNo = "Research" 
+//07-JUNE-2018 :Madhu DE4625 - Create CC Order per Foot Print Item
+//TAM 2019/06 -S34780 - Don't include Packaging owners(Owner Codes ending in 'PK') in System generated CC's
+ldsBuildList = create Datastore
+sql_syntax +=	"	SELECT Distinct A.L_Code as L_code, B.CC_Class_Code as CC_Class_Code, B.DC_Class_Code as DC_Class_code,O.Owner_Cd as Owner_CD,count(*) as Serialized_count, 0 as Non_Serialized_count, 0 as Foot_Print_count,count(Owner_Cd) as Owner_cnt	"
+ // 03/14/2024- Dinesh - SIMS-443- Google SIMS - SIMS is creating duplicate System Generated Cycle counts for the same GPN/Locations - update 0 as footprint in the above line
+sql_syntax +=	"	FROM Content A with(nolock)	"// Dinesh - 01/25/2023- SIMS-151-  Google - SIMS - Data Center ABC Cycle Counting Part 2 - added field B.DC_Class_Code as DC_Class_code in the below query
+sql_syntax +=	"	INNER JOIN Item_Master B with(nolock) ON A.Project_Id= B.Project_Id	"
+sql_syntax +=	"	AND A.SKU = B.SKU and A.Supp_Code = B.Supp_code	"
+sql_syntax +=	"	INNER JOIN Owner O with (nolock) on A.Project_Id= O.Project_Id	"
+sql_syntax +=	"	AND A.Owner_Id = O.Owner_id "	
+sql_syntax +=	"	Where A.Project_Id='"+asproject+"' and A.WH_Code ='"+aswhcode+"'	"
+//end if
+
+// Dhirendra - SIMS-80 Check parm_string field of activity_shedule table for  Data centere fequency -Start
+IF isnull(asstringparm) or asstringparm ='' then  // Dinesh - 12/16/2022- SIMS-151-  Google - SIMS - Data Center ABC Cycle Counting Part 2
+	sql_syntax +=	"	AND DATEDIFF(DAY, A.Last_Cycle_Count, GETDATE()) > B.CC_Freq	"
+	sql_syntax +=	"	AND B.CC_Class_Code in ('A','B','C')	"
+else
+	sql_syntax +=	"	AND DATEDIFF(DAY, A.Last_Cycle_Count, GETDATE()) > B.DC_Freq	" // Dinesh - 12/16/2022- SIMS-151-  Google - SIMS - Data Center ABC Cycle Counting Part 2
+	sql_syntax +=	"	AND B.DC_Class_Code in ('A','B','C')	"
+end if  
+// Dhirendra - SIMS-55 Check parm_string field of activity_shedule table for  Data centere fequency -End
+sql_syntax +=	"	AND (A.CC_No ='-' OR  A.CC_No IS NULL)	"
+sql_syntax +=	"	AND B.Serialized_Ind <> 'N'	 AND (B.PO_No2_Controlled_Ind <> 'Y' OR B.Container_Tracking_Ind <> 'Y') "
+//sql_syntax +=	"	AND B.CC_Class_Code in ('A','B','C')	"
+//sql_syntax +=	"	AND (A.L_code Not Like 'RESEARCH%' and A.L_code Not Like 'RECONP%'  )	" // Dinesh - 04/18/2023- SIMS-197- Google - SIMS - Cycle Count Adjustment Changes
+sql_syntax +=	"	AND ((A.L_code Not Like 'RESEARCH%') and A.L_code Not Like 'RECONP%'  )	" // Dinesh - 04/18/2023- SIMS-197- Google - SIMS - Cycle Count Adjustment Changes
+//sql_syntax +=	"	AND A.PO_NO Not Like 'RESEARCH%' 	"// Dinesh - 04/18/2023- SIMS-197- Google - SIMS - Cycle Count Adjustment Changes
+//sql_syntax +=	"	AND (A.PO_NO Like 'MAIN%' )	" // Dinesh - 04/18/2023- SIMS-197- Google - SIMS - Cycle Count Adjustment Changes
+//Commented the line above - 11/29/2023- Dinesh- po_no like 'main%' - SIMS-362-Google-  system-generated Cycle Count issue   
+sql_syntax +=	"	AND O.Owner_CD  Not Like '%PR' " // Dinesh - 04/18/2023- SIMS-197- Google - SIMS - Cycle Count Adjustment Changes
+sql_syntax +=	"	AND O.Owner_CD Not Like '%PK' "
+sql_syntax +=	"	Group By A.L_Code, B.CC_Class_Code,B.DC_Class_Code,O.Owner_Cd	"
+//IF isnull(asstringparm) or asstringparm ='' then  // Dinesh - 01/20/2023- SIMS-151-  Google - SIMS - Data Center ABC Cycle Counting Part 2
+//	sql_syntax +=	"	Group By A.L_Code,B.CC_Class_Code,O.Owner_Cd 	"
+//else
+//	sql_syntax +=	"	Group By A.L_Code,B.DC_Class_Code,O.Owner_Cd 	"
+sql_syntax +=	"	UNION	"
+//sql_syntax =	"	SELECT Distinct A.L_Code as L_code, B.DC_Class_Code as DC_Class_code,O.Owner_Cd as Owner_CD, count(*) as Serialized_count, 0 as Non_Serialized_count, 0 as Foot_Print_count,count(Owner_Cd) as Owner_cnt	"
+sql_syntax +=	"	SELECT Distinct A.L_Code as L_code, B.CC_Class_Code as CC_Class_Code,B.DC_Class_Code as DC_Class_code,O.Owner_Cd as Owner_CD, 0 as Serialized_count, count(*) as Non_Serialized_count, 0 as Foot_Print_count,count(Owner_Cd) as Owner_cnt	"
+sql_syntax +=	"	FROM Content A with(nolock)	" // Dinesh - 12/19/2022- SIMS-151-  Google - SIMS - Data Center ABC Cycle Counting Part 2 - added field B.DC_Class_Code as DC_Class_code in the below query
+sql_syntax +=	"	INNER JOIN Item_Master B with(nolock) ON A.Project_Id= B.Project_Id	"
+sql_syntax +=	"	AND A.SKU = B.SKU and A.Supp_Code = B.Supp_code	"
+sql_syntax +=	"	INNER JOIN Owner O with (nolock) on A.Project_Id= O.Project_Id	"
+sql_syntax +=	"	AND A.Owner_Id = O.Owner_id "	
+sql_syntax +=	"	Where A.Project_Id='"+asproject+"' and A.WH_Code ='"+aswhcode+"'	"
+//end if
+IF isnull(asstringparm) or asstringparm ='' then  // Dinesh - 12/16/2022- SIMS-151-  Google - SIMS - Data Center ABC Cycle Counting Part 2
+	sql_syntax +=	"	AND DATEDIFF(DAY, A.Last_Cycle_Count, GETDATE()) > B.CC_Freq	"
+	sql_syntax +=	"	AND B.CC_Class_Code in ('A','B','C')	"
+else
+	sql_syntax +=	"	AND DATEDIFF(DAY, A.Last_Cycle_Count, GETDATE()) > B.DC_Freq	" // Dinesh - 12/16/2022- SIMS-151-  Google - SIMS - Data Center ABC Cycle Counting Part 2
+	sql_syntax +=	"	AND B.DC_Class_Code in ('A','B','C')	"
+end if 
+sql_syntax +=	"	AND (A.CC_No ='-' OR  A.CC_No IS NULL)	"
+sql_syntax +=	"	AND B.Serialized_Ind = 'N'	"
+//sql_syntax +=	"	AND B.CC_Class_Code in ('A','B','C')	"
+//sql_syntax +=	"	AND (A.L_code Not Like 'RESEARCH%' and A.L_code Not Like 'RECONP%'  )	"  // Dinesh - 04/18/2023- SIMS-197- Google - SIMS - Cycle Count Adjustment Changes
+sql_syntax +=	"	AND ((A.L_code Not Like 'RESEARCH%') and A.L_code Not Like 'RECONP%'  )" // Dinesh - 04/18/2023- SIMS-197- Google - SIMS - Cycle Count Adjustment Changes
+//sql_syntax +=	"	AND A.PO_NO Not Like 'RESEARCH%' 	"  // Dinesh - 04/18/2023- SIMS-197- Google - SIMS - Cycle Count Adjustment Changes
+//sql_syntax +=	"	AND (A.PO_NO Like 'MAIN%' )	" // Dinesh - 04/18/2023- SIMS-197- Google - SIMS - Cycle Count Adjustment Changes
+//Commented the line above - 11/29/2023- Dinesh- po_no like 'main%' - SIMS-362-Google-  system-generated Cycle Count issue
+sql_syntax +=	"	AND O.Owner_CD Not Like '%PR' " // Dinesh - 04/18/2023- SIMS-197- Google - SIMS - Cycle Count Adjustment Changes
+sql_syntax +=	"	AND O.Owner_CD Not Like '%PK' 	"
+sql_syntax +=	"	Group By A.L_Code, B.CC_Class_Code,B.DC_Class_Code,O.Owner_Cd 	"
+//IF isnull(asstringparm) or asstringparm ='' then  // Dinesh - 01/20/2023- SIMS-151-  Google - SIMS - Data Center ABC Cycle Counting Part 2
+//	sql_syntax +=	"	Group By A.L_Code,B.CC_Class_Code,O.Owner_Cd 	"
+//else
+//	sql_syntax +=	"	Group By A.L_Code,B.DC_Class_Code,O.Owner_Cd 	"
+//end if
+sql_syntax +=	"	UNION	"
+//sql_syntax =	"	SELECT Distinct A.L_Code as L_code, B.DC_Class_Code as DC_Class_code,O.Owner_Cd as Owner_CD, count(*) as Serialized_count, 0 as Non_Serialized_count, 0 as Foot_Print_count,count(Owner_Cd) as Owner_cnt	"
+sql_syntax +=	"	SELECT Distinct A.L_Code as L_code, B.CC_Class_Code as CC_Class_Code, B.DC_Class_Code as DC_Class_code,O.Owner_Cd as Owner_CD,0 as Serialized_count, 0 as Non_Serialized_count, count(*) as Foot_Print_count,count(Owner_Cd) as Owner_cnt	"
+sql_syntax +=	"	FROM Content A with(nolock)	"// Dinesh - 12/19/2022- SIMS-151-  Google - SIMS - Data Center ABC Cycle Counting Part 2 - added field B.DC_Class_Code as DC_Class_code in the below query
+sql_syntax +=	"	INNER JOIN Owner O with (nolock) on A.Project_Id= O.Project_Id	"
+sql_syntax +=	"	AND A.Owner_Id = O.Owner_id "	
+sql_syntax +=	"	INNER JOIN Item_Master B with(nolock) ON A.Project_Id= B.Project_Id	"
+sql_syntax +=	"	AND A.SKU = B.SKU and A.Supp_Code = B.Supp_code	"
+sql_syntax +=	"	Where A.Project_Id='"+asproject+"' and A.WH_Code ='"+aswhcode+"'	" 
+//end if
+IF isnull(asstringparm) or asstringparm ='' then  // Dinesh - 12/16/2022- SIMS-151-  Google - SIMS - Data Center ABC Cycle Counting Part 2
+	sql_syntax +=	"	AND DATEDIFF(DAY, A.Last_Cycle_Count, GETDATE()) > B.CC_Freq	"
+	sql_syntax +=	"	AND B.CC_Class_Code in ('A','B','C')	"
+else
+	sql_syntax +=	"	AND DATEDIFF(DAY, A.Last_Cycle_Count, GETDATE()) > B.DC_Freq	" // Dinesh - 12/16/2022- SIMS-151-  Google - SIMS - Data Center ABC Cycle Counting Part 2
+	sql_syntax +=	"	AND B.DC_Class_Code in ('A','B','C')	"
+end if 
+sql_syntax +=	"	AND (A.CC_No ='-' OR  A.CC_No IS NULL)	"
+sql_syntax +=	"	AND B.Serialized_Ind = 'B' AND B.PO_No2_Controlled_Ind='Y' AND B.Container_Tracking_Ind='Y'		"
+//sql_syntax +=	"	AND B.CC_Class_Code in ('A','B','C')	"
+//sql_syntax +=	"	AND (A.L_code Not Like 'RESEARCH%' and A.L_code Not Like 'RECONP%'  )	" // Dinesh - 04/18/2023- SIMS-197- Google - SIMS - Cycle Count Adjustment Changes
+sql_syntax +=	"	AND ((A.L_code Not Like 'RESEARCH%') and A.L_code Not Like 'RECONP%'  )	" // Dinesh - 04/18/2023- SIMS-197- Google - SIMS - Cycle Count Adjustment Changes
+//sql_syntax +=	"	AND A.PO_NO Not Like 'RESEARCH%'	" // Dinesh - 04/18/2023- SIMS-197- Google - SIMS - Cycle Count Adjustment Changes
+//sql_syntax +=	"	AND (A.PO_NO Like 'MAIN%' )	" // Dinesh - 04/18/2023- SIMS-197- Google - SIMS - Cycle Count Adjustment Changes
+//Commented the line above - 11/29/2023- Dinesh- po_no like 'main%' - SIMS-362-Google-  system-generated Cycle Count issue
+sql_syntax +=	"	AND O.Owner_CD  Not Like '%PR' " // Dinesh - 04/18/2023- SIMS-197- Google - SIMS - Cycle Count Adjustment Changes
+sql_syntax +=	"	AND O.Owner_CD Not Like '%PK' 	"
+sql_syntax +=	"	Group By A.L_Code, B.CC_Class_Code,B.DC_Class_Code,O.Owner_Cd 	"
+//IF isnull(asstringparm) or asstringparm ='' then  // Dinesh - 01/20/2023- SIMS-151-  Google - SIMS - Data Center ABC Cycle Counting Part 2
+//	sql_syntax +=	"	Group By A.L_Code,B.CC_Class_Code,B.DC_Class_Code,O.Owner_Cd 	"
+//else
+//	sql_syntax +=	"	Group By A.L_Code,B.DC_Class_Code,B.DC_Class_Code,O.Owner_Cd 	"
+//end if
+ // Begin - 03/14/2024- Dinesh - SIMS-443- Google SIMS - SIMS is creating duplicate System Generated Cycle counts for the same GPN/Locations 
+IF isnull(asstringparm) or asstringparm ='' then  // Dinesh - 01/20/2023- SIMS-151-  Google - SIMS - Data Center ABC Cycle Counting Part 2
+	sql_syntax +=	"	Order By Foot_Print_count desc, Serialized_count desc ,B.CC_Class_Code,B.DC_Class_Code, A.L_Code	"
+else
+	sql_syntax +=	"	Order By Foot_Print_count desc, Serialized_count desc, B.DC_Class_Code,B.CC_Class_Code, A.L_Code	"
+end if
+// End - 03/14/2024- Dinesh - SIMS-443- Google SIMS - SIMS is creating duplicate System Generated Cycle counts for the same GPN/Locations 
+//sql_syntax +=	"	Order By Foot_Print_count desc, Serialized_count desc,B.CC_Class_Code, B.DC_Class_Code, A.L_Code	"
+
+ldsBuildList.create( SQLCA.SyntaxFromSql(sql_syntax, "", lsErrors))
+
+IF len(lsErrors) > 0 THEN
+ 	lsLogOut = "        *** Unable to create datastore for PANDORA 3PL System Cycle Count Orders .~r~r" + lsErrors
+	FileWrite(gilogFileNo,lsLogOut)
+   	RETURN -1
+END IF
+
+ldsBuildList.SetTransObject(SQLCA)
+ll_eligible_count = ldsBuildList.retrieve( )
+
+//write to screen and Log File
+lsLogOut = '      - Processing Function - 3PL Cycle Count Order - uf_create_system_cycle_counts(). - ' + ' Total Eligible Records: '+string(ll_eligible_count) + ' Per Count Location Limit: '+ string(ll_locations_Limit) + ' Count All Locations for Serialized Sku is Enabled: ' + ls_count_All_Locations
+FileWrite(giLogFileNo,lsLogOut)
+gu_nvo_process_files.uf_write_log(lsLogOut)
+
+//Process of Foot Print Items - Apply Filter
+ldsBuildList.setfilter( " Foot_Print_count > 0")
+ldsBuildList.filter( )
+ll_Foot_Print_count = ldsBuildList.rowcount( )
+
+ll_remain_count = ll_daily_count //store daily limit into remaining Limit
+
+// (A) build Foot Print Items - Irrespective of Count All Loc Flag
+IF ll_Foot_Print_count > 0  Then
+	lbCountBySku = TRUE //all serialized Items count By Sku
+	
+	//write to screen and Log File
+	lsLogOut = '      -  Processing Function - 3PL Cycle Count Order - uf_create_system_cycle_counts(). - ' + ' Foot Print Item Count:' +string(ll_serialized_count) + ' - Count All Locations for Foot Print SKU'
+	FileWrite(giLogFileNo,lsLogOut)
+	gu_nvo_process_files.uf_write_log(lsLogOut)
+
+	//setting counts against Daily Limit
+	If ll_Foot_Print_count >= ll_daily_count Then
+		ll_Foot_Print_count = ll_daily_count
+		ll_remain_count = 0
+	else
+		ll_remain_count = ll_daily_count - ll_Foot_Print_count
+	End If
+
+	//write to screen and Log File
+	lsLogOut = '      -  Processing Function - 3PL Cycle Count Order - uf_create_system_cycle_counts(). - ' + ' Processing Serialized Item Limit Count:' +string(ll_serialized_count) + ' - Count All Locations for Foot Print SKU'
+	FileWrite(giLogFileNo,lsLogOut)
+	gu_nvo_process_files.uf_write_log(lsLogOut)
+	// Begin - 03/14/2024- Dinesh - SIMS-443- Google SIMS - SIMS is creating duplicate System Generated Cycle counts for the same GPN/Locations 
+	long ll_Foot_Print_count1
+	ll_Foot_Print_count1=ll_Foot_Print_count
+	ls_owner_cd=""
+	ls_Prev_ownercd ="DCDCDCDC"
+	For ll_row =1 to ll_Foot_Print_count
+		ls_location_list[ UpperBound(ls_location_list) + 1 ] = ldsBuildList.getItemString( ll_row, 'L_Code')
+		
+	NEXT
+	
+		IF isnull(asstringparm) or asstringparm ='' then // Dinesh - 12/19/2022- SIMS-151-  Google - SIMS - Data Center ABC Cycle Counting Part 2
+					ls_class_code =ldsBuildList.getItemString( ll_row, 'CC_Class_Code')
+					ib_dc_wh= False
+				else
+					ls_class_code =ldsBuildList.getItemString( ll_row, 'DC_Class_Code')
+					ls_owner_cd= 	ldsBuildList.getItemString( ll_row, 'Owner_Cd')	
+					ib_dc_wh= True
+				End if
+				
+				 if ib_dc_wh= True then
+				   
+						ls_owner_cd=""
+						ls_Prev_ownercd="DCDCDCDC"	
+						For ll_row =1 to ll_Foot_Print_count1
+							 if ls_Prev_ownercd <> ls_owner_cd then // Dinesh - SIMS-443- 03/14/2024
+								If UpperBound(ls_location_list) > 0 Then 
+									ls_formatted_locations = ln_string_util.of_format_string( ls_location_list, n_string_util.FORMAT1 ) //formatted Locations
+									//ls_sku_list =this.uf_build_cc_sku_list( asproject, aswhcode, ls_formatted_locations) //get all distinct SKU List
+									ls_sku_list= this.uf_build_cc_sku_list( asproject,ls_owner_cd, aswhcode, ls_formatted_locations) //get all distinct SKU List // Dinesh -12/22/2022-  SIMS-151- Added Parameter Ownercd
+									IF ls_sku_list.boolean_arg[1] =TRUE THEN 	Return -1
+								End If
+			
+								//Limit to create CC Order against SKU
+								ll_sku_loc_count = UpperBound(ls_sku_list.string_arg)
+						
+								FOR ll_sku_row =1 to ll_sku_loc_count
+										ls_sku_parm.string_arg[1] = ls_sku_list.string_arg[ll_sku_row] //store SKU value into Parm
+										ls_sku = ls_sku_list.string_arg[ll_sku_row]
+										
+										SELECT DC_Class_Code into :ls_class_code FROM Item_Master with(nolock) WHERE Project_Id = :asproject and Sku =:ls_sku USING sqlca;
+										
+										ls_cc_No = this.uf_get_next_avail_cc_no( asproject) //get Next CC No
+										//idsCCMaster = this.uf_build_cc_master( ls_cc_No, asproject, aswhcode, ls_class_code ,ldtwhTime, 'Count All Locations for Serialized SKU ' + ls_sku) //build CC Master Records
+										idsCCMaster = this.uf_build_cc_master( ls_cc_No, asproject, ls_owner_cd,aswhcode, ls_class_code ,ldtwhTime, 'Count All Locations for Foot Print SKU' + ls_sku + ' and Owner Code ' + ls_owner_cd ) //build CC Master Records
+										If idsCCMaster.rowcount( ) > 0 Then 
+											//ids3PLCC = this.uf_build_cc_system_criteria( ls_cc_No, 'S', ls_sku_parm) //build System Criteria Records
+											ids3PLCC = this.uf_build_cc_system_criteria( ls_cc_No, 'S', ls_sku_parm,ls_owner_cd) //build System Criteria Records // Dinesh - 01/03/2023- SIMS-151-  Google - SIMS - Data Center ABC Cycle Counting Part 2 - Added new parameter asownercode
+										else
+											Return -1
+										End If
+									NEXT
+								End if
+									ls_Prev_ownercd=ls_owner_cd		
+							NEXT
+						End if
+						
+						 if ib_dc_wh= False  then // Dinesh - SIMS-443- 03/14/2024
+						 
+								If UpperBound(ls_location_list) > 0 Then 
+										ls_formatted_locations = ln_string_util.of_format_string( ls_location_list, n_string_util.FORMAT1 ) //formatted Locations
+										//ls_sku_list =this.uf_build_cc_sku_list( asproject, aswhcode, ls_formatted_locations) //get all distinct SKU List
+										ls_sku_list= this.uf_build_cc_sku_list( asproject,ls_owner_cd, aswhcode, ls_formatted_locations) //get all distinct SKU List // Dinesh -12/22/2022-  SIMS-151- Added Parameter Ownercd
+										IF ls_sku_list.boolean_arg[1] =TRUE THEN 	Return -1
+									End If
+					
+									//Limit to create CC Order against SKU
+									ll_sku_loc_count = UpperBound(ls_sku_list.string_arg)
+							
+									FOR ll_sku_row =1 to ll_sku_loc_count
+											ls_sku_parm.string_arg[1] = ls_sku_list.string_arg[ll_sku_row] //store SKU value into Parm
+											ls_sku = ls_sku_list.string_arg[ll_sku_row]
+											
+											SELECT CC_Class_Code into :ls_class_code FROM Item_Master with(nolock) WHERE Project_Id = :asproject and Sku =:ls_sku USING sqlca;
+											
+											ls_cc_No = this.uf_get_next_avail_cc_no( asproject) //get Next CC No
+											//idsCCMaster = this.uf_build_cc_master( ls_cc_No, asproject, aswhcode, ls_class_code ,ldtwhTime, 'Count All Locations for Serialized SKU ' + ls_sku) //build CC Master Records
+											idsCCMaster = this.uf_build_cc_master( ls_cc_No, asproject, ls_owner_cd,aswhcode, ls_class_code ,ldtwhTime, 'Count All Locations for Foot Print SKU ' + ls_sku ) //build CC Master Records
+											If idsCCMaster.rowcount( ) > 0 Then 
+												//ids3PLCC = this.uf_build_cc_system_criteria( ls_cc_No, 'S', ls_sku_parm) //build System Criteria Records
+												ids3PLCC = this.uf_build_cc_system_criteria( ls_cc_No, 'S', ls_sku_parm,ls_owner_cd) //build System Criteria Records // Dinesh - 01/03/2023- SIMS-151-  Google - SIMS - Data Center ABC Cycle Counting Part 2 - Added new parameter asownercode
+											else
+												Return -1
+											End If
+										NEXT
+								End if
+// End - 03/14/2024- Dinesh - SIMS-443- Google SIMS - SIMS is creating duplicate System Generated Cycle counts for the same GPN/Locations 
+							//NEXT
+	// End - Dinesh - 12/19/2022- SIMS-151-  Google - SIMS - Data Center ABC Cycle Counting Part 2
+	//clear list
+	ls_location_list[] = ls_empty_list[]
+	ls_loc_list.string_arg  = ls_empty_str.string_arg //clear Location List
+	ls_sku_list.string_arg = ls_empty_str.string_arg //clear sku List
+End IF
+
+
+//clear filter
+ldsBuildList.setfilter( "")
+ldsBuildList.filter( )
+ldsBuildList.rowcount( )
+
+//Process of Serialized Items - Apply Filter
+ldsBuildList.setfilter( " Serialized_count > 0")
+ldsBuildList.filter( )
+ll_serialized_count = ldsBuildList.rowcount( )
+
+// (B) build Serialized Items - If count All Serilized Ind Locations Flag is Enabled
+IF ll_serialized_count > 0 and upper(ls_count_All_Locations) ='Y' Then
+	lbCountBySku = TRUE //all serialized Items count By Sku
+	
+	//write to screen and Log File
+	lsLogOut = '      -  Processing Function - 3PL Cycle Count Order - uf_create_system_cycle_counts(). - ' + ' Serialized Item Count:' +string(ll_serialized_count) + ' - Count All Locations for Serialized SKU'
+	FileWrite(giLogFileNo,lsLogOut)
+	gu_nvo_process_files.uf_write_log(lsLogOut)
+
+
+ //MEA SEPT-2018 : MEA DE5705 - System generated CC are not dropping for serialized GPN.
+ //changed as per Madhu
+ 
+// //setting counts against Daily Limit
+//
+//If ((ll_remain_count > 0) and (ll_serialized_count > ll_remain_count)) Then
+//
+//                ll_serialized_count = ll_remain_count
+//	              ll_remain_count = 0
+ 
+//setting counts against Daily Limit
+
+If (ll_remain_count > 0) Then
+       If (ll_serialized_count > ll_remain_count) Then
+                ll_serialized_count = ll_remain_count
+                ll_remain_count = 0
+	  End If
+
+		//write to screen and Log File
+		lsLogOut = '      -  Processing Function - 3PL Cycle Count Order - uf_create_system_cycle_counts(). - ' + ' Processing Serialized Item Limit Count:' +string(ll_serialized_count) + ' - Count All Locations for Serialized SKU'
+		FileWrite(giLogFileNo,lsLogOut)
+		gu_nvo_process_files.uf_write_log(lsLogOut)
+		// Begin - Dinesh - 12/19/2022- SIMS-151-  Google - SIMS - Data Center ABC Cycle Counting Part 2
+		// Begin - 03/14/2024- Dinesh - SIMS-443- Google SIMS - SIMS is creating duplicate System Generated Cycle counts for the same GPN/Locations 
+		long ll_serialized_count1
+		ll_serialized_count1=ll_serialized_count
+		For ll_row =1 to ll_serialized_count
+			ls_location_list[ UpperBound(ls_location_list) + 1 ] = ldsBuildList.getItemString( ll_row, 'L_Code')
+		
+		Next	
+				IF isnull(asstringparm) or asstringparm ='' then // Dinesh - 12/19/2022- SIMS-151-  Google - SIMS - Data Center ABC Cycle Counting Part 2
+					ls_class_code =ldsBuildList.getItemString( ll_row, 'CC_Class_Code')
+					ib_dc_wh= False
+				else
+					ls_class_code =ldsBuildList.getItemString( ll_row, 'DC_Class_Code')
+					ls_owner_cd= 	ldsBuildList.getItemString( ll_row, 'Owner_Cd')	
+					ib_dc_wh= True
+				End if
+				
+				 if ib_dc_wh= True then
+				   
+						ls_owner_cd=""
+						ls_Prev_ownercd="DCDCDCDC"	
+						For ll_row =1 to ll_serialized_count1
+							 if ls_Prev_ownercd <> ls_owner_cd then // Dinesh - SIMS-443- 03/14/2024
+					
+								If UpperBound(ls_location_list) > 0 Then 
+									ls_formatted_locations = ln_string_util.of_format_string( ls_location_list, n_string_util.FORMAT1 ) //formatted Locations
+									//ls_sku_list =this.uf_build_cc_sku_list( asproject, aswhcode, ls_formatted_locations) //get all distinct SKU List
+									ls_sku_list= this.uf_build_cc_sku_list( asproject,ls_owner_cd, aswhcode, ls_formatted_locations) //get all distinct SKU List // Dinesh -12/22/2022-  SIMS-151- Added Parameter Ownercd
+									IF ls_sku_list.boolean_arg[1] =TRUE THEN 	Return -1
+								End If
+			
+								//Limit to create CC Order against SKU
+								ll_sku_loc_count = UpperBound(ls_sku_list.string_arg)
+						
+								FOR ll_sku_row =1 to ll_sku_loc_count
+										ls_sku_parm.string_arg[1] = ls_sku_list.string_arg[ll_sku_row] //store SKU value into Parm
+										ls_sku = ls_sku_list.string_arg[ll_sku_row]
+										
+										SELECT DC_Class_Code into :ls_class_code FROM Item_Master with(nolock) WHERE Project_Id = :asproject and Sku =:ls_sku USING sqlca;
+										
+										ls_cc_No = this.uf_get_next_avail_cc_no( asproject) //get Next CC No
+										//idsCCMaster = this.uf_build_cc_master( ls_cc_No, asproject, aswhcode, ls_class_code ,ldtwhTime, 'Count All Locations for Serialized SKU ' + ls_sku) //build CC Master Records
+										idsCCMaster = this.uf_build_cc_master( ls_cc_No, asproject, ls_owner_cd,aswhcode, ls_class_code ,ldtwhTime, 'Count All Locations for Serialized SKU ' + ls_sku + ' and Owner Code ' + ls_owner_cd ) //build CC Master Records
+										If idsCCMaster.rowcount( ) > 0 Then 
+											//ids3PLCC = this.uf_build_cc_system_criteria( ls_cc_No, 'S', ls_sku_parm) //build System Criteria Records
+											ids3PLCC = this.uf_build_cc_system_criteria( ls_cc_No, 'S', ls_sku_parm,ls_owner_cd) //build System Criteria Records // Dinesh - 01/03/2023- SIMS-151-  Google - SIMS - Data Center ABC Cycle Counting Part 2 - Added new parameter asownercode
+										else
+											Return -1
+										End If
+									NEXT
+								End if
+									ls_Prev_ownercd=ls_owner_cd		
+							NEXT
+						End if
+						
+						 if ib_dc_wh= False  then // Dinesh - SIMS-443- 03/14/2024
+						 
+								If UpperBound(ls_location_list) > 0 Then 
+										ls_formatted_locations = ln_string_util.of_format_string( ls_location_list, n_string_util.FORMAT1 ) //formatted Locations
+										//ls_sku_list =this.uf_build_cc_sku_list( asproject, aswhcode, ls_formatted_locations) //get all distinct SKU List
+										ls_sku_list= this.uf_build_cc_sku_list( asproject,ls_owner_cd, aswhcode, ls_formatted_locations) //get all distinct SKU List // Dinesh -12/22/2022-  SIMS-151- Added Parameter Ownercd
+										IF ls_sku_list.boolean_arg[1] =TRUE THEN 	Return -1
+									End If
+					
+									//Limit to create CC Order against SKU
+									ll_sku_loc_count = UpperBound(ls_sku_list.string_arg)
+							
+									FOR ll_sku_row =1 to ll_sku_loc_count
+											ls_sku_parm.string_arg[1] = ls_sku_list.string_arg[ll_sku_row] //store SKU value into Parm
+											ls_sku = ls_sku_list.string_arg[ll_sku_row]
+											
+											SELECT CC_Class_Code into :ls_class_code FROM Item_Master with(nolock) WHERE Project_Id = :asproject and Sku =:ls_sku USING sqlca;
+											
+											ls_cc_No = this.uf_get_next_avail_cc_no( asproject) //get Next CC No
+											//idsCCMaster = this.uf_build_cc_master( ls_cc_No, asproject, aswhcode, ls_class_code ,ldtwhTime, 'Count All Locations for Serialized SKU ' + ls_sku) //build CC Master Records
+											idsCCMaster = this.uf_build_cc_master( ls_cc_No, asproject, ls_owner_cd,aswhcode, ls_class_code ,ldtwhTime, 'Count All Locations for Serialized SKU ' + ls_sku) //build CC Master Records
+											If idsCCMaster.rowcount( ) > 0 Then 
+												//ids3PLCC = this.uf_build_cc_system_criteria( ls_cc_No, 'S', ls_sku_parm) //build System Criteria Records
+												ids3PLCC = this.uf_build_cc_system_criteria( ls_cc_No, 'S', ls_sku_parm,ls_owner_cd) //build System Criteria Records // Dinesh - 01/03/2023- SIMS-151-  Google - SIMS - Data Center ABC Cycle Counting Part 2 - Added new parameter asownercode
+											else
+												Return -1
+											End If
+									NEXT
+							End if
+			End If
+End IF
+// End - 03/14/2024- Dinesh - SIMS-443- Google SIMS - SIMS is creating duplicate System Generated Cycle counts for the same GPN/Locations 
+// (C) build Serialized /Non-Serialized Items - If count All Serilized Ind Locations Flag is Disabled - then count by Location Limit
+IF ll_locations_Limit > 0 Then
+	//clear filter
+	ldsBuildList.setfilter( "")
+	ldsBuildList.filter( )
+	ldsBuildList.rowcount( )
+	
+	//If serialized SKU's already counted, count only Non-Serialized Items.
+	If lbCountBySku = TRUE Then
+		//Process of Non-Serialized Items - Apply Filter
+		ldsBuildList.setfilter( " Non_Serialized_count > 0")
+		ldsBuildList.filter( )
+		ll_Non_serialized_count = ldsBuildList.rowcount( )
+	else
+		//If serialized SKU's are NOT counted, count only all Items.
+		ll_Non_serialized_count = ldsBuildList.rowcount( )
+	End IF
+	
+	//write to screen and Log File
+	lsLogOut = '      -  Processing Function - 3PL Cycle Count Order - uf_create_system_cycle_counts(). - ' + ' Non-Serialized Item(s) Count:' +string(ll_Non_Serialized_count) 
+	FileWrite(giLogFileNo,lsLogOut)
+	gu_nvo_process_files.uf_write_log(lsLogOut)
+	
+	//setting counts against Daily Limit
+	If ll_remain_count > 0  Then
+		
+		If ll_Non_serialized_count > ll_remain_count Then
+			ll_Non_serialized_count = ll_remain_count
+			ll_remain_count = 0
+		End If
+		
+		//write to screen and Log File
+		lsLogOut = '      -  Processing Function - 3PL Cycle Count Order - uf_create_system_cycle_counts(). - ' + ' Processing Non-Serialized Item(s) Limit Count:' +string(ll_Non_Serialized_count) 
+		FileWrite(giLogFileNo,lsLogOut)
+		gu_nvo_process_files.uf_write_log(lsLogOut)
+		// Begin - 03/14/2024- Dinesh - SIMS-443- Google SIMS - SIMS is creating duplicate System Generated Cycle counts for the same GPN/Locations 
+		ls_owner_cd=""
+		ls_Prev_ownercd="DCDCDCDC"
+		For ll_row =1 to ll_Non_serialized_count
+			ll_count++
+			ls_loc_list.string_arg[ll_count] =ldsBuildList.getItemString( ll_row, 'L_Code')
+			
+			IF isnull(asstringparm) or asstringparm ='' then // Dinesh - 12/19/2022- SIMS-151-  Google - SIMS - Data Center ABC Cycle Counting Part 2
+					ls_class_code =ldsBuildList.getItemString( ll_row, 'CC_Class_Code')
+					ib_dc_wh= False
+			else
+					ls_class_code =ldsBuildList.getItemString( ll_row, 'DC_Class_Code')
+					ls_owner_cd= 	ldsBuildList.getItemString( ll_row, 'Owner_Cd')	
+					ib_dc_wh= True
+			End if
+				
+				//ls_class_code =ldsBuildList.getItemString( ll_row, 'CC_Class_Code')  // COMMENTED 03/14/2024- Dinesh - SIMS-443- Google SIMS - SIMS is creating duplicate System Generated Cycle counts for the same GPN/Locations 	
+				 if ib_dc_wh= True then
+						if ls_Prev_ownercd <> ls_owner_cd then // Dinesh - SIMS-443- 03/14/2024
+			
+								IF lbCreateNewCC =FALSE Then
+									ls_cc_No = this.uf_get_next_avail_cc_no( asproject) //get Next CC No
+									idsCCMaster = this.uf_build_cc_master( ls_cc_No, asproject, ls_owner_cd,aswhcode, ls_class_code ,ldtwhTime, 'Count By Locations for Non-Serialized SKU') //build CC Master Records
+								End IF
+								
+								//create new CC record aginst Limit
+								IF (ll_locations_Limit - ll_count) > 0 Then
+									lbCreateNewCC =TRUE
+									lbCreateSystemCriteria =FALSE
+								else
+									lbCreateNewCC =FALSE
+									lbCreateSystemCriteria =TRUE
+								End IF
+								
+								IF lbCreateSystemCriteria =TRUE THEN
+									//ids3PLCC = this.uf_build_cc_system_criteria( ls_cc_No, 'L', ls_loc_list) //build CC_System_Criteria records
+									ids3PLCC = this.uf_build_cc_system_criteria( ls_cc_No, 'L', ls_loc_list,ls_owner_cd) //build System Criteria Records // Dinesh - 01/03/2023- SIMS-151-  Google - SIMS - Data Center ABC Cycle Counting Part 2 - Added new parameter asownercode
+									lbCreateSystemCriteria =FALSE //re-initialize value
+									ll_count =0 //re-initialize value
+									ls_loc_list.string_arg  = ls_empty_str.string_arg //clear Location List
+								End IF
+							END if
+						 End if
+							
+						 if ib_dc_wh= False then
+			
+								IF lbCreateNewCC =FALSE Then
+									ls_cc_No = this.uf_get_next_avail_cc_no( asproject) //get Next CC No
+									idsCCMaster = this.uf_build_cc_master( ls_cc_No, asproject, ls_owner_cd,aswhcode, ls_class_code ,ldtwhTime, 'Count By Locations for Non-Serialized SKU') //build CC Master Records
+								End IF
+								
+								//create new CC record aginst Limit
+								IF (ll_locations_Limit - ll_count) > 0 Then
+									lbCreateNewCC =TRUE
+									lbCreateSystemCriteria =FALSE
+								else
+									lbCreateNewCC =FALSE
+									lbCreateSystemCriteria =TRUE
+								End IF
+								
+								IF lbCreateSystemCriteria =TRUE THEN
+									//ids3PLCC = this.uf_build_cc_system_criteria( ls_cc_No, 'L', ls_loc_list) //build CC_System_Criteria records
+									ids3PLCC = this.uf_build_cc_system_criteria( ls_cc_No, 'L', ls_loc_list,ls_owner_cd) //added ls_loc_list in place of ls_sku_list 03/15/2024 -Dinesh - SIMS-443- Google SIMS - SIMS is creating duplicate System Generated Cycle counts for the same GPN/Locations 			
+									lbCreateSystemCriteria =FALSE //re-initialize value
+									ll_count =0 //re-initialize value
+									ls_loc_list.string_arg  = ls_empty_str.string_arg //clear Location List
+								End IF
+				
+							End if
+							ls_Prev_ownercd = ls_owner_cd
+						
+						Next
+				// End - 03/14/2024- Dinesh - SIMS-443- Google SIMS - SIMS is creating duplicate System Generated Cycle counts for the same GPN/Locations 			
+		
+				If upperbound(ls_loc_list.string_arg) > 0 Then 
+					//ids3PLCC = this.uf_build_cc_system_criteria( ls_cc_No, 'L', ls_loc_list) //build CC_System_Criteria records - Any Open System Criteria Records
+					ids3PLCC = this.uf_build_cc_system_criteria( ls_cc_No, 'L', ls_loc_list,ls_owner_cd)  //added ls_loc_list in place of ls_sku_list 03/19/2024 -Dinesh - SIMS-443- Google SIMS - SIMS is creating duplicate System Generated Cycle counts for the same GPN/Locations 		
+					
+				End If			
+		End IF
+End IF
+
+//(C) Write Records into DB
+ll_cc_count = idsCCMaster.rowcount( )
+ll_criteria_count = ids3PLCC.rowcount( )
+
+//write to screen and Log File
+lsLogOut = '      -  Processing Function - 3PL Cycle Count Order - uf_create_system_cycle_counts() - CC Master Count: '+nz(string(ll_cc_count),'-')+' - CC Criteria Count: '+nz(string(ll_criteria_count),'-')
+lsLogOut += ' - have to be inserted into DB.' 
+FileWrite(giLogFileNo,lsLogOut)
+gu_nvo_process_files.uf_write_log(lsLogOut)
+ 
+If ll_cc_count > 0 and  ll_criteria_count > 0 Then ll_rc = this.uf_process_insert_system_cc_orders( idsCCMaster, ids3PLCC) //Insert CC Records
+If ll_rc = 0 Then	this.uf_update_content_cc_no( asproject, aswhcode, ids3PLCC) //Update Content Records
+
+//Destroy Datastores
+destroy ids3PLCC
+destroy idsCCMaster
+
+//write to screen and Log File
+lsLogOut = '      - End Processing Function - 3PL Cycle Count Order - uf_create_system_cycle_counts() against wh_code: '+aswhcode+ ' - ' +String(Today(), "mm/dd/yyyy hh:mm:ss")
+FileWrite(giLogFileNo,lsLogOut)
+gu_nvo_process_files.uf_write_log(lsLogOut)
+
+Return 0
+end function
+
+public function str_parms uf_build_cc_sku_list (string asproject, string asownercd, string aswhcode, string asformatloc);//13-NOV-2017 :Madhu PEVS-806 - 3PL Cycle Count Orders
+
+string		sql_syntax, lsErrors, lsLogOut, ls_skuList[]
+long		ll_serialized_list, ll_row,ll_owner_id
+str_parms ls_str_parms
+
+Datastore ldsSKUList
+
+ls_str_parms.boolean_arg[1] =FALSE //set default value
+
+//write to screen and Log File
+lsLogOut = '      -  Start Processing Function - 3PL Cycle Count Order - uf_build_cc_sku_list(). - for wh_code: '+ aswhcode
+FileWrite(giLogFileNo,lsLogOut)
+gu_nvo_process_files.uf_write_log(lsLogOut)
+
+select owner_id into :ll_owner_id from owner where owner_cd=:asownercd;// Dinesh -01/25/2023- SIMS-151-SIMS-Data Center ABC Cycle counting Part 2
+//build SQL Qeury to pull all distinct Serialized Items.
+ldsSKUList = create Datastore
+
+sql_syntax =	"	SELECT Distinct A.SKU as SKU, B.Serialized_Ind	"
+sql_syntax +=	"	FROM Content A with(nolock)	"
+sql_syntax +=	"	INNER JOIN Item_Master B with(nolock) ON A.Project_Id= B.Project_Id	"
+sql_syntax +=	"	AND A.SKU = B.SKU and A.Supp_Code = B.Supp_code	"
+sql_syntax +=	"	AND B.Serialized_Ind <> 'N'	"
+sql_syntax +=	"	Where A.Project_Id='"+asproject+"'	"
+sql_syntax +=	"	AND A.WH_Code ='"+aswhcode+"'	"
+sql_syntax +=	"	AND A.L_Code IN ("+asformatloc+")"
+if ll_owner_id <> 0 then
+//or not isnull(string(ll_owner_id)) then // // Dinesh -01/19/2024- SIMS-398-Google- SIMS Prod- System Generated Cycle counts are missing SLA
+	sql_syntax +=   "   AND A.Owner_id= "+string(ll_owner_id)  // Dinesh -01/25/2023- SIMS-151-SIMS-Data Center ABC Cycle counting Part 2
+End if
+sql_syntax +=	"	Order By A.SKU 	"
+
+
+ldsSKUList.create( SQLCA.SyntaxFromSql(sql_syntax, "", lsErrors))
+
+IF len(lsErrors) > 0 THEN
+ 	lsLogOut = "        *** Unable to create datastore to Pull Serialized Items of PANDORA 3PL System Cycle Count Orders .~r~r" + lsErrors
+	FileWrite(gilogFileNo,lsLogOut)
+	ls_str_parms.boolean_arg[1] =TRUE
+END IF
+
+ldsSKUList.SetTransObject(SQLCA)
+ll_serialized_list =ldsSKUList.retrieve( )
+
+FOR ll_row =1 to ll_serialized_list
+	ls_str_parms.string_arg[ll_row] = ldsSKUList.getItemString(ll_row, 'SKU')
+NEXT
+
+//write to screen and Log File
+lsLogOut = '      -  End Processing Function - 3PL Cycle Count Order - uf_build_cc_sku_list(). - for wh_code: '+ aswhcode + ' Serialized SKU count: '+string(ll_serialized_list)
+FileWrite(giLogFileNo,lsLogOut)
+gu_nvo_process_files.uf_write_log(lsLogOut)
+
+destroy ldsSKUList
+Return  ls_str_parms
+end function
+
+public function datastore uf_build_cc_system_criteria (string as_cc_no, string as_count_type, str_parms as_count_value, string as_ownercd);//13-NOV-2017 :Madhu PEVS-806 - 3PL Cycle Count Orders
+//Build System Criteria Records
+
+string lsLogOut, lsFind
+long llCCRow, ll_row, llFindRow
+
+If Not isvalid(ids3PLCC) Then
+	ids3PLCC = Create u_ds_datastore
+	ids3PLCC.dataobject= 'd_cc_system_criteria'
+	ids3PLCC.SetTransObject(SQLCA)
+End If
+
+//Write to File and Screen
+lsLogOut = '      - 3PL Cycle Count Order -Start Processing of uf_build_cc_system_criteria()- Building CC System Criteria Records '
+FileWrite(giLogFileNo,lsLogOut)
+gu_nvo_process_files.uf_write_log(lsLogOut)
+
+llFindRow = 0
+
+//build CC_System_Criteria records
+FOR ll_row =1 to UpperBound(as_count_value.string_arg)
+	
+	//Write to File and Screen
+	lsFind = "CC_No ='"+as_cc_no+"' and Count_Type ='"+as_count_type+"' and Count_Value ='"+trim(as_count_value.string_arg[ll_row])+"'"
+	If ids3PLCC.rowcount() > 0 Then llFindRow = ids3PLCC.find( lsFind, 1,ids3PLCC.rowcount())
+
+	lsLogOut = '      - 3PL Cycle Count Order - Processing of uf_build_cc_system_criteria()- Find Record: '+lsFind+ ' Find Row Count: '+nz(string(llFindRow), '-')
+	lsLogOut +=' Build CC System Criteria Record Count: '+ nz(string( ids3PLCC.rowcount()), '-')
+	FileWrite(giLogFileNo,lsLogOut)
+	gu_nvo_process_files.uf_write_log(lsLogOut)
+
+	IF llFindRow =0 Then
+		llCCRow = ids3PLCC.insertrow( 0)
+		ids3PLCC.setItem( llCCRow, 'CC_No', as_cc_no)
+		ids3PLCC.setItem( llCCRow, 'Count_Type', as_count_type)
+		ids3PLCC.setItem( llCCRow, 'Count_Value', trim(as_count_value.string_arg[ll_row]))
+		ids3PLCC.setItem( llCCRow, 'Owner_Cd',as_ownercd)
+	End IF
+Next
+
+//Write to File and Screen
+lsLogOut = '      - 3PL Cycle Count Order -End Processing of uf_build_cc_system_criteria()- Building CC System Criteria Records '
+FileWrite(giLogFileNo,lsLogOut)
+gu_nvo_process_files.uf_write_log(lsLogOut)
+
+Return ids3PLCC
 end function
 
 on u_nvo_proc_pandora2.create

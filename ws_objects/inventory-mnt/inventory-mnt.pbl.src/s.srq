@@ -1,0 +1,2 @@
+﻿$PBExportHeader$s.srq
+PBSELECT( VERSION(400) TABLE(NAME="dbo.Content_summary" ALIAS="NOLOCK" )  TABLE(NAME="dbo.Item_Master" ALIAS="NOLOCK" ) COMPUTE(NAME="'-' as RO_No") COMPUTE(NAME="sum( dbo.Content_summary.Avail_Qty ) as Qty") COMPUTE(NAME="sum( dbo.Content_summary.Alloc_Qty ) as AllocQty")WHERE(    EXP1 ="NOLOCK.owner_id"   OP ="="    EXP2 =":owner_id" ) ) ARG(NAME = "owner_id" TYPE = number) 

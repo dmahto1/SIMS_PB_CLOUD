@@ -21,7 +21,8 @@ end variables
 forward prototypes
 public function integer uf_gr (string asproject, string asrono)
 public function integer uf_adjustment (string asproject, long aladjustid)
-public function integer uf_gi (string asproject, string asdono)
+public function integer uf_postship_confirm (string asproject, string asdono)
+public function integer uf_gi (string asproject, string asdono, string astype)
 end prototypes
 
 public function integer uf_gr (string asproject, string asrono);//Prepare a Goods Receipt Transaction for Baseline Unicode for the order that was just confirmed
@@ -771,7 +772,166 @@ gu_nvo_process_files.uf_process_flatfile_outbound_unicode(idsOut,asProject)
 Return 0
 end function
 
-public function integer uf_gi (string asproject, string asdono);//Prepare a Goods Issue Transaction for Baseline Unicode for the order that was just confirmed
+public function integer uf_postship_confirm (string asproject, string asdono);//Prepare a Goods post shipment confirmation
+// Dinesh - 10/10/2022 -SIMS-101 - SIMS KENDO - Post Ship Confirmation //
+
+Long			llRowPos, llRowCount, llFindRow,	llNewRow, llLineItemNo,	llBatchSeq, llArrayPos, llArrayCount, llCartonCount, llPalletCount, llQtyarray[]
+				
+String		lsOutString,	lsMessage, 	 lsLogOut, lsFileName, lsCarton, lsCartonSave, lsDim, lsdimsarray[], lsSOM, lsCarrier, lsSCAC, lsShipRef, lsWarehouse
+String  	lsFreight_Cost, lsTemp, lssku, lsSuppCode, lsLineItemNo, lsOrdStatus, lsCartonNo, lsUCCCompanyPrefix, lsUCCLocationPrefix, lsWHCode, lsUCCS
+integer    liCheck
+
+DEcimal		ldBatchSeq, ldNetWeight, ldGrossWeight, ldCBM,ldBatchSeq1,ldBatchSeq2
+Integer		liRC
+Boolean		lbFound
+
+Long llDetailFind, llPackFind, llcount
+lsDelimitChar = char(9)
+
+//If Not isvalid(idsOut) Then
+//	idsOut = Create Datastore
+//	idsOut.Dataobject = 'd_edi_generic_out'
+//	lirc = idsOut.SetTransobject(sqlca)
+//End If
+//
+//If Not isvalid(idsDOMain) Then
+//	idsDOMain = Create Datastore
+//	idsDOMain.Dataobject = 'd_do_master'
+//	idsDOMain.SetTransObject(SQLCA)
+//End If
+//
+//If Not isvalid(idsDoDetail) Then
+//	idsDoDetail = Create Datastore
+//	idsDoDetail.Dataobject = 'd_do_Detail'
+//	idsDoDetail.SetTransObject(SQLCA)
+//End If
+//
+//If Not isvalid(idsDoPick) Then
+//	idsDoPick = Create Datastore
+////  TAM 07/19/2012 Changed the datawindow to look at Picking Detail with an out Join to Delivery_serial_detail.  This is so we can populate scanned serial numbers on the GI file
+////	idsDoPick.Dataobject = 'd_do_Picking'
+//	idsDoPick.Dataobject = 'd_do_Picking_detail_baseline'  
+//	idsDoPick.SetTransObject(SQLCA)
+//End If
+
+//If Not isvalid(idsDoPack) Then
+//	idsDoPack = Create Datastore
+//	idsDoPack.Dataobject = 'd_do_Packing'
+//	idsDoPack.SetTransObject(SQLCA)
+//End If
+
+
+idsOut.Reset()
+
+lsLogOut = "        Creating PGI For DONO: " + asDONO
+FileWrite(gilogFileNo,lsLogOut)
+
+//Retreive Delivery Master and Detail  records for this DONO
+If idsDOMain.Retrieve(asDoNo) <> 1 Then
+	lsLogOut = "        *** Unable to retreive Delivery Order Header For DONO: " + asDONO
+	FileWrite(gilogFileNo,lsLogOut)
+	Return -1
+End If
+
+// 03/07 - PCONKL - If not received elctronically, don't send a confirmation
+If idsDOMain.GetITemNumber(1,'edi_batch_seq_no') = 0 or isNull(idsDOMain.GetITemNumber(1,'edi_batch_seq_no'))    Then Return 0
+
+If idsDOMain.GetITemstring(1,'country') = 'US'  Then Return 0 // Dinesh - 12/09/2022-  SIMS-134- PGI File should not be generated for orders with Ship to Country as US.
+
+//idsDoDetail.Retrieve(asDoNo)
+//
+idsDoPick.Retrieve(asDoNo)
+//
+//idsDoPack.Retrieve(asDoNo)
+
+//Get the Next Batch Seq Nbr - Used for all writing to generic tables
+ldBatchSeq = gu_nvo_process_files.uf_get_next_seq_no(asproject,'Post_Shipment_File','Post_Ship')
+If ldBatchSeq <= 0 Then
+	lsLogOut = "        *** Unable to retrieve the next available sequence number~rfor Post Shipment Confirmation.~r~rConfirmation will not be sent to Kendo!'"
+	FileWrite(gilogFileNo,lsLogOut)
+	Return -1
+End If
+
+
+llRowCount = idsDoPick.RowCount()
+
+For llRowPos = 1 to llRowCOunt
+
+	//llNewRow = idsOut.insertRow(0)
+
+       
+		lsOutString = 'PGI' + lsDelimitChar
+
+	//GI002 Project ID	C(10)	Yes	N/A	Project identifier	
+	lsOutString +=  asproject + lsDelimitChar
+	
+	//GI003 Warehouse	C(10)	Yes		Shipping Warehouse	
+	lsOutString += idsDoMain.GetItemString(1,'wh_code') + lsDelimitChar
+	
+	//Pack SSCC
+//		If idsDoMain.GetItemString(1,'wh_code') <> '' Then
+//			lsOutString += idsDoMain.GetItemString(1,'wh_code')  + lsDelimitChar
+//		Else
+//			lsOutString +=lsDelimitChar
+//		End If	
+	
+	//GI016 Ship Date	Date	No	N/A	Actual Ship date
+	
+
+	lsTemp = String( idsDoMain.GetItemDateTime(1,'complete_date'),'yyyymmdd') 
+	
+	// If complete date is null, provide current date.
+	If IsNull(lsTemp) or lsTemp='' or lsTemp=' ' or len(lsTemp) =0 	then 
+		lsTemp = string(datetime(today(), now()),"yyyymmdd") 
+	End IF
+
+	lsOutString += lsTemp+ lsDelimitChar
+	
+	//This is their Sales Order Number that we are storing in the Consolidation NO so multiple picks are consolidated
+	// We may have multiple shipments for the same SO so we are appending a *2, *3, etc so we need to strip it off here
+	
+	lsTemp = String(idsDoMain.GetItemString(1,'Consolidation_no'))
+	
+	If pos(lsTemp,"*") > 0 Then
+		lsTemp = left(lsTemp,pos(lsTemp,"*") - 1)
+	End If
+	
+	If lsTemp <> '' Then 
+		lsOutString += lsTemp  // + lsDelimitChar
+	Else
+		//lsOutString +=lsDelimitChar  
+	End If
+	
+	if ldBatchSeq1 <> ldBatchSeq then
+		
+			llNewRow = idsOut.insertRow(0)
+			ldBatchSeq1= ldBatchSeq
+
+	else
+		continue
+
+		
+	End If
+	
+	idsOut.SetItem(llNewRow,'Project_id', asProject)
+	idsOut.SetItem(llNewRow,'edi_batch_seq_no', Long(ldBatchSeq))
+	idsOut.SetItem(llNewRow,'line_seq_no', llNewRow)
+	idsOut.SetItem(llNewRow,'batch_data', lsOutString)
+	lsFileName = 'PGI' + String(ldBatchSeq,'000000') + '.dat'
+	idsOut.SetItem(llNewRow,'file_name', lsFileName)
+	
+
+next /*next Delivery Detail record */
+
+
+
+//Write the Outbound File - no need to save and re-retrieve - just use the currently loaded DW
+gu_nvo_process_files.uf_process_flatfile_outbound_unicode(idsOut,asProject)
+
+Return 0
+end function
+
+public function integer uf_gi (string asproject, string asdono, string astype);//Prepare a Goods Issue Transaction for Baseline Unicode for the order that was just confirmed
 
 
 
@@ -784,1220 +944,1005 @@ integer    liCheck
 DEcimal		ldBatchSeq, ldNetWeight, ldGrossWeight, ldCBM
 Integer		liRC
 Boolean		lbFound
+lsDelimitChar = char(9)
 
 Long llDetailFind, llPackFind, llcount
 
-If Not isvalid(idsOut) Then
-	idsOut = Create Datastore
-	idsOut.Dataobject = 'd_edi_generic_out'
-	lirc = idsOut.SetTransobject(sqlca)
-End If
-
-If Not isvalid(idsDOMain) Then
-	idsDOMain = Create Datastore
-	idsDOMain.Dataobject = 'd_do_master'
-	idsDOMain.SetTransObject(SQLCA)
-End If
-
-If Not isvalid(idsDoDetail) Then
-	idsDoDetail = Create Datastore
-	idsDoDetail.Dataobject = 'd_do_Detail'
-	idsDoDetail.SetTransObject(SQLCA)
-End If
-
-If Not isvalid(idsDoPick) Then
-	idsDoPick = Create Datastore
-//  TAM 07/19/2012 Changed the datawindow to look at Picking Detail with an out Join to Delivery_serial_detail.  This is so we can populate scanned serial numbers on the GI file
-//	idsDoPick.Dataobject = 'd_do_Picking'
-	idsDoPick.Dataobject = 'd_do_Picking_detail_baseline'  
-	idsDoPick.SetTransObject(SQLCA)
-End If
-
-If Not isvalid(idsDoPack) Then
-	idsDoPack = Create Datastore
-	idsDoPack.Dataobject = 'd_do_Packing'
-	idsDoPack.SetTransObject(SQLCA)
-End If
-
-
-idsOut.Reset()
-
-lsLogOut = "        Creating GI For DONO: " + asDONO
-FileWrite(gilogFileNo,lsLogOut)
-
-//Retreive Delivery Master and Detail  records for this DONO
-If idsDOMain.Retrieve(asDoNo) <> 1 Then
-	lsLogOut = "        *** Unable to retreive Delivery Order Header For DONO: " + asDONO
+if astype='GI' then  //Dinesh - 02/16/2023- SIMS-167-SIMS KENDO - Post Ship Confirmation
+		
+	If Not isvalid(idsOut) Then
+		idsOut = Create Datastore
+		idsOut.Dataobject = 'd_edi_generic_out'
+		lirc = idsOut.SetTransobject(sqlca)
+	End If
+	
+	If Not isvalid(idsDOMain) Then
+		idsDOMain = Create Datastore
+		idsDOMain.Dataobject = 'd_do_master'
+		idsDOMain.SetTransObject(SQLCA)
+	End If
+	
+	If Not isvalid(idsDoDetail) Then
+		idsDoDetail = Create Datastore
+		idsDoDetail.Dataobject = 'd_do_Detail'
+		idsDoDetail.SetTransObject(SQLCA)
+	End If
+	
+	If Not isvalid(idsDoPick) Then
+		idsDoPick = Create Datastore
+	//  TAM 07/19/2012 Changed the datawindow to look at Picking Detail with an out Join to Delivery_serial_detail.  This is so we can populate scanned serial numbers on the GI file
+	//	idsDoPick.Dataobject = 'd_do_Picking'
+		idsDoPick.Dataobject = 'd_do_Picking_detail_baseline'  
+		idsDoPick.SetTransObject(SQLCA)
+	End If
+	
+	If Not isvalid(idsDoPack) Then
+		idsDoPack = Create Datastore
+		idsDoPack.Dataobject = 'd_do_Packing'
+		idsDoPack.SetTransObject(SQLCA)
+	End If
+	
+	
+	idsOut.Reset()
+	
+	lsLogOut = "        Creating GI For DONO: " + asDONO
 	FileWrite(gilogFileNo,lsLogOut)
-	Return -1
-End If
-
-// 03/07 - PCONKL - If not received elctronically, don't send a confirmation
-//If idsDOMain.GetITemNumber(1,'edi_batch_seq_no') = 0 or isNull(idsDOMain.GetITemNumber(1,'edi_batch_seq_no'))    Then Return 0
-
-idsDoDetail.Retrieve(asDoNo)
-
-idsDoPick.Retrieve(asDoNo)
-
-idsDoPack.Retrieve(asDoNo)
-
-//Get the Next Batch Seq Nbr - Used for all writing to generic tables
-ldBatchSeq = gu_nvo_process_files.uf_get_next_seq_no(asproject,'Good_Issue_File','Good_Issue')
-If ldBatchSeq <= 0 Then
-	lsLogOut = "        *** Unable to retrieve the next available sequence number~rfor Goods Issue Confirmation.~r~rConfirmation will not be sent to Kendo!'"
-	FileWrite(gilogFileNo,lsLogOut)
-	Return -1
-End If
-
-//21-Feb-2017 :Madhu-SIMSPEVS-492 Generate GI file upon Order Reconfirmation
-//15-Sep-2016 Madhu -KDO 1003407 - Send GI file for Ready To Ship -START
-// Don't generate duplicate GI file, if it has already been shipped.
-//select count(*) into :llcount 
-//from Batch_Transaction with(nolock) 
-//where Project_Id= :asproject and Trans_Order_Id= :asdono and Trans_Status ='C' USING SQLCA;
-//
-//If llcount >0 Then
-//	lsLogOut ="			*** GI File has already generated through either ReadyToShip or Normal Order Confirmation Process"
-//	FileWrite(gilogFileNo, lsLogOut)
-//	Return 99	//delete record
-//End If
-////15-Sep-2016 Madhu -KDO 1003407 - Send GI file for Ready To Ship -END
-
-//Write the rows to the generic output table - delimited by lsDelimitChar
-
-llRowCount = idsDoPick.RowCount()
-
-For llRowPos = 1 to llRowCOunt
-
-	llNewRow = idsOut.insertRow(0)
-
-
-	//dts - 11/24/2020 - DE18598 lsSku = idsdoPick.GetITEmString(llRowPos,'sku')
-	lsSku = Upper(idsdoPick.GetITEmString(llRowPos,'sku'))
-	lsSuppCode =  Upper(idsdoPick.GetITEmString(llRowPos,'supp_code'))
-	lsLineItemNo = String(idsdoPick.GetITemNumber(llRowPos, 'Line_item_No'))
-	lsOrdStatus = idsDoMain.GetItemString(1,'Ord_Status') 
-
-	//dts - 11/24/2020 - DE18598 llDetailFind = idsDoDetail.Find("sku='"+lsSku+"' and Upper(supp_code) = '"+lsSuppCode+"' and line_item_no = " + string(lsLineItemNo), 1, idsDoDetail.RowCount())
-	llDetailFind = idsDoDetail.Find("Upper(sku)='"+lsSku+"' and Upper(supp_code) = '"+lsSuppCode+"' and line_item_no = " + string(lsLineItemNo), 1, idsDoDetail.RowCount())
-
-
-	//Can't Find Detail
-	IF llDetailFind <= 0 then 
-		continue
-		
-	End If
-
-	//DE18598 llPackFind = idsDoPack.Find("sku='"+lsSku+"' and Upper(supp_code) = '"+lsSuppCode+"' and line_item_no=" + string(lsLineItemNo), 1, idsDoPack.RowCount())
-	llPackFind = idsDoPack.Find("Upper(sku)='"+lsSku+"' and Upper(supp_code) = '"+lsSuppCode+"' and line_item_no=" + string(lsLineItemNo), 1, idsDoPack.RowCount())
-
-
-
-	//Field Name	Type	Req.	Default	Description
-	//GI001 Record_ID	C(2)	Yes	“GI”	Goods issue confirmation identifier
 	
-	//MEA - 8/12 - If the file is being generated from a ‘Ready to Ship’ transaction, the Record ID will be ‘RS’ instead of ‘GI’. This is a baseline change.
-	
-	//15-Sep-2016 Madhu- KDO-1003407- Always send as GI.
-	//IF lsOrdStatus = 'R' THEN
-	//	lsOutString = 'RS' + lsDelimitChar	
-	//ELSE
-		lsOutString = 'GI' + lsDelimitChar
-	//END IF
-
-	
-	//GI002 Project ID	C(10)	Yes	N/A	Project identifier	
-	lsOutString +=  asproject + lsDelimitChar
-	
-	//GI003 Warehouse	C(10)	Yes		Shipping Warehouse	
-	lsOutString += idsDoMain.GetItemString(1,'wh_code') + lsDelimitChar
-	
-	//GI004 Delivery Number	C(10)	Yes	N/A	Delivery Order Number		
-	lsOutString += idsDoMain.GetItemString(1,'Invoice_no') + lsDelimitChar	
-	
-	//GI005 Delivery Line Item	N(6,0)	Yes	N/A	Delivery order item line number	
-	lsOutString += String(idsdoPick.GetITemNumber(llRowPos, 'Line_item_No')) + lsDelimitChar
-	
-	//GI006 SKU	C(50)	Yes	N/A	Material number
-	lsOutString += lsSku  + lsDelimitChar	
-	
-	//GI007 Quantity	N(15,5)	Yes	N/A	Actual shipped quantity
-	If 	idsdoPick.GetITemString(llRowPos,'Serial_No') <> '' Then
-		lsOutString += String( idsdoPick.GetITemNumber(llRowPos,'serial_qty')) + lsDelimitChar
-	Else
-		lsOutString += String( idsdoPick.GetITemNumber(llRowPos,'quantity')) + lsDelimitChar
-	End If	
-	
-	//GI008 Inventory Type	C(1)	Yes	N/A	Item condition	
-	lsOutString += String( idsdoPick.GetITemString(llRowPos,'Inventory_Type')) + lsDelimitChar
-	
-	//GI009 Lot Number	C(50)	No	N/A	1st User Defined Inventory field	
-	lsTemp = idsdoPick.GetITemString(llRowPos,'Lot_No')
-	
-	If IsNull(lsTemp) or lsTemp='-' then lsTemp = ''
-	
-	lsOutString += lsTemp+ lsDelimitChar	
-	
-	//GI010 PO NBR	C(50)	No	N/A	2nd User Defined Inventory field
-	lsTemp = idsdoPick.GetITemString(llRowPos,'PO_No')
-	
-	If IsNull(lsTemp) then lsTemp = ''
-	
-	If  lsTemp <> '-' Then
-		lsOutString += lsTemp + lsDelimitChar
-	Else
-		lsOutString += lsDelimitChar
-	End If		
-	
-	//GI011PO NBR 2	C(50)	No	N/A	3rd User Defined Inventory Field
-	lsTemp = idsdoPick.GetITemString(llRowPos,'PO_No2')
-	
-	If IsNull(lsTemp) then lsTemp = ''
-	
-	If  lsTemp <> '-' Then
-		lsOutString += lsTemp + lsDelimitChar
-	Else
-		lsOutString += lsDelimitChar
-	End If		
-	
-	//GI012 Serial Number	C(50)	No	N/A	Qty must be 1 if present
-	lsTemp = idsdoPick.GetITemString(llRowPos,'Serial_No')
-	
-	If IsNull(lsTemp) then lsTemp = ''
-	
-	If  lsTemp <> '-' Then
-		lsOutString += lsTemp + lsDelimitChar
-	Else
-		lsOutString += lsDelimitChar
-	End If	
-	
-	//GI013 Container ID	C(25)	No	N/A			
-	lsTemp = idsdoPick.GetITemString(llRowPos,'Container_ID')
-	
-	If IsNull(lsTemp) then lsTemp = ''
-
-	If  lsTemp <> '-' Then
-		lsOutString += lsTemp + lsDelimitChar
-	Else
-		lsOutString += lsDelimitChar
-	End If	
-	
-	//GI014 Expiration Date	Date	No	N/A	
-	lsOutString += String( idsdoPick.GetITemDateTime(llRowPos,'Expiration_Date'),'yyyymmdd') + lsDelimitChar		
-
-	//GI015 Price	N(12,4)	No	N/A		
-	lsTemp = String(idsdoPick.GetItemDecimal(llRowPos, "Price"))
-	
-	If IsNull(lsTemp) then lsTemp = ''
-	
-	lsOutString += lsTemp+ lsDelimitChar	
-	
-	
-	//GI016 Ship Date	Date	No	N/A	Actual Ship date
-	lsTemp = String( idsDoMain.GetItemDateTime(1,'complete_date'),'yyyymmdd') 
-	
-	//27-Feb-2016 Madhu - If complete date is null, provide current date.
-	If IsNull(lsTemp) or lsTemp='' or lsTemp=' ' or len(lsTemp) =0 	then 
-		lsTemp = string(datetime(today(), now()),"yyyymmdd") 
-	End IF
-
-	
-	lsOutString += lsTemp+ lsDelimitChar
-	
-	//GI017 Package Count	N(5,0)	No	N/A	Total no. of package in delivery
-	lsTemp = String(1)  	  //if idsDoPack > 0 then idsDoPack.GetItemDecimal(llPackFind,'complete_date'))
-	
-	If IsNull(lsTemp) then lsTemp = ''
-	
-	lsOutString += lsTemp+ lsDelimitChar	
-	
-	//GI018 Ship Tracking Number (AWB)	C(25)	No	N/A		
-	If idsDoMain.GetItemString(1,'awb_bol_no') <> '' Then
-		//BCR 30-DEC-2011: Geistlich UAT fix...
-//		lsOutString += String(idsDoMain.GetItemString(1,'Ship_Ref')) + lsDelimitChar
-		lsOutString += String(idsDoMain.GetItemString(1,'awb_bol_no')) + lsDelimitChar
-	Else
-		lsOutString += lsDelimitChar
-	End If				
-	
-	//GI019 Carrier	C (20)	No	N/A	Input by user	
-	If idsDoMain.GetItemString(1,'Carrier') <> '' Then
-		lsOutString += String(idsDoMain.GetItemString(1,'Carrier')) + lsDelimitChar
-	Else
-		lsOutString += lsDelimitChar
-	End If				
-		
-	//GI020 Freight Cost	N(10,3)	No	N/A		
-	lsFreight_Cost = String(idsDoMain.GetItemDecimal(1,'Freight_Cost'))
-
-	IF IsNull(lsFreight_Cost) then lsFreight_Cost = ""
-	
-	lsOutString += lsFreight_Cost + lsDelimitChar
-		
-	
-	//GI021 Freight Terms	C(20)	No	N/A	
-	
-	If idsDoMain.GetItemString(1,'Freight_Terms') <> '' Then
-		lsOutString += String(idsDoMain.GetItemString(1,'Freight_Terms')) + lsDelimitChar
-	Else
-		lsOutString += lsDelimitChar
-	End If				
-	
-	//GI022 Total Weight	N(12,2)	No	N/A		
-	IF llPackFind > 0 then
-		lsTemp = String( idsDoPack.GetItemDecimal(llPackFind,'weight_gross')) 
-	Else
-		lsTemp = ""	
+	//Retreive Delivery Master and Detail  records for this DONO
+	If idsDOMain.Retrieve(asDoNo) <> 1 Then
+		lsLogOut = "        *** Unable to retreive Delivery Order Header For DONO: " + asDONO
+		FileWrite(gilogFileNo,lsLogOut)
+		Return -1
 	End If
 	
-	If IsNull(lsTemp) then lsTemp = ''
+	// 03/07 - PCONKL - If not received elctronically, don't send a confirmation
+	//If idsDOMain.GetITemNumber(1,'edi_batch_seq_no') = 0 or isNull(idsDOMain.GetITemNumber(1,'edi_batch_seq_no'))    Then Return 0
 	
-	lsOutString += lsTemp+ lsDelimitChar		
+	idsDoDetail.Retrieve(asDoNo)
 	
-	//GI023 Transportation Mode	C(10)	No	N/A		
-	If idsDoMain.GetItemString(1,'transport_mode') <> '' Then
-		lsOutString += String(idsDoMain.GetItemString(1,'transport_mode')) + lsDelimitChar
-	Else
-		lsOutString += lsDelimitChar
-	End If			
+	idsDoPick.Retrieve(asDoNo)
 	
-	//GI024 Delivery Date	Date	No	N/A		
-	lsTemp =  String( idsDoMain.GetItemDateTime(1,'complete_date'),'yyyymmdd') 
+	idsDoPack.Retrieve(asDoNo)
 	
-	If IsNull(lsTemp) then lsTemp = ''
-	
-	lsOutString += lsTemp+ lsDelimitChar	
-	
-	//GI025 Detail User Field1	C(20)	No	N/A	User Field	
-	If idsdoDetail.GetItemString(llDetailFind,'user_field1') <> '' Then
-		lsOutString += String(idsdoDetail.GetItemString(llDetailFind,'user_field1')) + lsDelimitChar
-	Else
-		lsOutString += lsDelimitChar
-	End If	
-	
-	//GI026 Detail User Field2	C(20)	No	N/A	User Field	
-	If idsdoDetail.GetItemString(llDetailFind,'user_field2') <> '' Then
-		lsOutString += String(idsdoDetail.GetItemString(llDetailFind,'user_field2')) + lsDelimitChar
-	Else
-		lsOutString += lsDelimitChar
-	End If		
-	
-	//GI027 Detail User Field3	C(30)	No	N/A	User Field	
-	If idsdoDetail.GetItemString(llDetailFind,'user_field3') <> '' Then
-		lsOutString += String(idsdoDetail.GetItemString(llDetailFind,'user_field3')) + lsDelimitChar
-	Else
-		lsOutString += lsDelimitChar
-	End If		
-	
-	//GI028 Detail User Field4	C(30)	No	N/A	User Field	
-	If idsdoDetail.GetItemString(llDetailFind,'user_field4') <> '' Then
-		lsOutString += String(idsdoDetail.GetItemString(llDetailFind,'user_field4')) + lsDelimitChar
-	Else
-		lsOutString += lsDelimitChar
-	End If		
-	
-	//GI029 Detail User Field5	C(30)	No	N/A	User Field	
-	If idsdoDetail.GetItemString(llDetailFind,'user_field5') <> '' Then
-		lsOutString += String(idsdoDetail.GetItemString(llDetailFind,'user_field5')) + lsDelimitChar
-	Else
-		lsOutString += lsDelimitChar
-	End If		
-	
-	//GI030 Detail User Field6	C(30)	No	N/A	User Field	
-	If idsdoDetail.GetItemString(llDetailFind,'user_field6') <> '' Then
-		lsOutString += String(idsdoDetail.GetItemString(llDetailFind,'user_field6')) + lsDelimitChar
-	Else
-		lsOutString += lsDelimitChar
-	End If			
-	
-	//GI031 Detail User Field7	C(30)	No	N/A	User Field	
-	If idsdoDetail.GetItemString(llDetailFind,'user_field7') <> '' Then
-		lsOutString += String(idsdoDetail.GetItemString(llDetailFind,'user_field7')) + lsDelimitChar
-	Else
-		lsOutString += lsDelimitChar
-	End If			
-	
-	//GI032 Detail User Field8	C(30)	No	N/A	User Field	
-	If idsdoDetail.GetItemString(llDetailFind,'user_field8') <> '' Then
-		lsOutString += String(idsdoDetail.GetItemString(llDetailFind,'user_field8')) + lsDelimitChar
-	Else
-		lsOutString += lsDelimitChar
-	End If			
-	
-	//*****************/MAster User fieldxxx**************************************
-	//GI033 Master User Field2	C(10)	No	N/A	User Field	
-	If idsDoMain.GetItemString(1,'user_field2') <> '' Then
-		lsOutString += String(idsDoMain.GetItemString(1,'user_field2')) + lsDelimitChar
-	Else
-		lsOutString += lsDelimitChar
-	End If		
-
-	//GI034 Master User Field3	C(10)	No	N/A	User Field
-	If idsDoMain.GetItemString(1,'user_field3') <> '' Then
-		lsOutString += String(idsDoMain.GetItemString(1,'user_field3')) + lsDelimitChar
-	Else
-		lsOutString += lsDelimitChar
-	End If	
-
-	//GI035 Master User Field4	C(20)	No	N/A	User Field
-	If idsDoMain.GetItemString(1,'user_field4') <> '' Then
-		lsOutString += String(idsDoMain.GetItemString(1,'user_field4')) + lsDelimitChar
-	Else
-		lsOutString += lsDelimitChar
-	End If	
-
-	//GI036 Master User Field5	C(20)	No	N/A	User Field
-	If idsDoMain.GetItemString(1,'user_field5') <> '' Then
-		lsOutString += String(idsDoMain.GetItemString(1,'user_field5')) + lsDelimitChar
-	Else
-		lsOutString += lsDelimitChar
-	End If	
-		
-	//GI037 Master User Field6	C(20)	No	N/A	User Field
-	If idsDoMain.GetItemString(1,'user_field6') <> '' Then
-		lsOutString += String(idsDoMain.GetItemString(1,'user_field6')) + lsDelimitChar
-	Else
-		lsOutString += lsDelimitChar
-	End If	
-
-	//GI038 Master User Field7	C(30)	No	N/A	User Field
-	If idsDoMain.GetItemString(1,'user_field7') <> '' Then
-		lsOutString += String(idsDoMain.GetItemString(1,'user_field7')) + lsDelimitChar
-	Else
-		lsOutString += lsDelimitChar
-	End If	
-
-	//GI039 Master User Field8	C(60)	No	N/A	User Field
-	If idsDoMain.GetItemString(1,'user_field8') <> '' Then
-		lsOutString += String(idsDoMain.GetItemString(1,'user_field8')) + lsDelimitChar
-	Else
-		lsOutString += lsDelimitChar
-	End If	
-
-	//GI040 Master User Field9	C(30)	No	N/A	User Field	
-	If idsDoMain.GetItemString(1,'user_field9') <> '' Then
-		lsOutString += String(idsDoMain.GetItemString(1,'user_field9')) + lsDelimitChar
-	Else
-		lsOutString += lsDelimitChar
-	End If		
-	
-	//GI041 Master User Field10	C(30)	No	N/A	User Field	BOL No,  we are sending awb_nol_no in GI041 position
-	If idsDoMain.GetItemString(1,'awb_bol_no') <> '' Then
-		lsOutString += String(idsDoMain.GetItemString(1,'awb_bol_no')) + lsDelimitChar
-	Else
-		lsOutString += lsDelimitChar
-	End If		
-	
-	//GI042 Master User Field11	C(30)	No	N/A	User Field	Carrier Pro No, we are sending carrier_pro_no in GI042 position
-	If idsDoMain.GetItemString(1,'carrier_pro_no') <> '' Then
-		lsOutString += String(idsDoMain.GetItemString(1,'carrier_pro_no')) + lsDelimitChar
-	Else
-		lsOutString += lsDelimitChar
-	End If		
-	
-	//GI043 Master User Field12	C(50)	No	N/A	User Field	
-	If idsDoMain.GetItemString(1,'user_field12') <> '' Then
-		lsOutString += String(idsDoMain.GetItemString(1,'user_field12')) + lsDelimitChar
-	Else
-		lsOutString += lsDelimitChar
-	End If		
-	
-	//GI044 Master User Field13	C(50)	No	N/A	User Field	
-	If idsDoMain.GetItemString(1,'user_field13') <> '' Then
-		lsOutString += String(idsDoMain.GetItemString(1,'user_field13')) + lsDelimitChar
-	Else
-		lsOutString += lsDelimitChar
-	End If	
-	
-	//GI045 Master User Field14	C(50)	No	N/A	User Field
-	If idsDoMain.GetItemString(1,'user_field14') <> '' Then
-		lsOutString += String(idsDoMain.GetItemString(1,'user_field14')) + lsDelimitChar
-	Else
-		lsOutString += lsDelimitChar
-	End If		
-	
-	//GI046 Master User Field15	C(50)	No	N/A	User Field	
-	If idsDoMain.GetItemString(1,'user_field15') <> '' Then
-		lsOutString += String(idsDoMain.GetItemString(1,'user_field15')) + lsDelimitChar
-	Else
-		lsOutString += lsDelimitChar
-	End If		
-	
-	//GI047 Master User Field16	C(100)	No	N/A	User Field	
-	If idsDoMain.GetItemString(1,'user_field16') <> '' Then
-		lsOutString += String(idsDoMain.GetItemString(1,'user_field16')) + lsDelimitChar
-	Else
-		lsOutString += lsDelimitChar
-	End If		
-	
-	//GI048 Master User Field17	C(100)	No	N/A	User Field	
-	If idsDoMain.GetItemString(1,'user_field17') <> '' Then
-		lsOutString += String(idsDoMain.GetItemString(1,'user_field17')) + lsDelimitChar
-	Else
-		lsOutString += lsDelimitChar
-	End If		
-	
-	//GI049 Master User Field18	C(100)	No	N/A	User Field	
-	If idsDoMain.GetItemString(1,'user_field18') <> '' Then
-		lsOutString += String(idsDoMain.GetItemString(1,'user_field18')) + lsDelimitChar
-	Else
-		lsOutString +=lsDelimitChar
-	End If		
-	
-	//GI050 CustomerCode		
-	If idsDoMain.GetItemString(1,'cust_code') <> '' Then
-		lsOutString += String(idsDoMain.GetItemString(1,'cust_code')) + lsDelimitChar
-	Else
-		lsOutString +=lsDelimitChar
-	End If	
-	
-	//GI051 Ship To Name	
-	If idsDoMain.GetItemString(1,'cust_name') <> '' Then
-		lsOutString += String(idsDoMain.GetItemString(1,'cust_name')) + lsDelimitChar
-	Else
-		lsOutString +=lsDelimitChar
-	End If		
-	
-	//GI052 Ship Address 1		
-	If idsDoMain.GetItemString(1,'address_1') <> '' Then
-		lsOutString += String(idsDoMain.GetItemString(1,'address_1')) + lsDelimitChar
-	Else
-		lsOutString +=lsDelimitChar
-	End If		
-	
-	//GI053 Ship Address 2		
-	If idsDoMain.GetItemString(1,'address_2') <> '' Then
-		lsOutString += String(idsDoMain.GetItemString(1,'address_2')) + lsDelimitChar
-	Else
-		lsOutString +=lsDelimitChar
-	End If		
-
-	//GI054 Ship Address 3		
-	If idsDoMain.GetItemString(1,'address_3') <> '' Then
-		lsOutString += String(idsDoMain.GetItemString(1,'address_3')) + lsDelimitChar
-	Else
-		lsOutString +=lsDelimitChar
-	End If		
-	
-		
-	//GI055 Ship Address 4		
-	If idsDoMain.GetItemString(1,'address_4') <> '' Then
-		lsOutString += String(idsDoMain.GetItemString(1,'address_4')) + lsDelimitChar
-	Else
-		lsOutString +=lsDelimitChar
-	End If		
-	
-	//GI056 Ship City		
-	If idsDoMain.GetItemString(1,'city') <> '' Then
-		lsOutString += String(idsDoMain.GetItemString(1,'city')) + lsDelimitChar
-	Else
-		lsOutString +=lsDelimitChar
-	End If		
-	
-	//GI057 Ship State	
-		If idsDoMain.GetItemString(1,'state') <> '' Then
-		lsOutString += String(idsDoMain.GetItemString(1,'state')) + lsDelimitChar
-	Else
-		lsOutString +=lsDelimitChar
-	End If	
-	
-	//GI058 Ship Postal Code
-	
-	If idsDoMain.GetItemString(1,'zip') <> '' Then
-		lsOutString += String(idsDoMain.GetItemString(1,'zip')) + lsDelimitChar
-	Else
-		lsOutString +=lsDelimitChar
-	End If		
-	
-	//GI059 Ship Country
-	If idsDoMain.GetItemString(1,'country') <> '' Then
-		lsOutString += String(idsDoMain.GetItemString(1,'country')) + lsDelimitChar
-	Else
-		lsOutString +=lsDelimitChar
-	End If	
-	
-	//GI060 Ship Telephone	
-	If idsDoMain.GetItemString(1,'tel') <> '' Then
-		lsOutString += String(idsDoMain.GetItemString(1,'tel')) + lsDelimitChar
-	Else
-		lsOutString +=lsDelimitChar
-	End If	
-
-	//GI061 UnitOfMeasure (quantity)	
-	If idsdoDetail.GetItemString(llDetailFind,'uom') <> '' Then
-		lsOutString += String(idsdoDetail.GetItemString(llDetailFind,'uom')) + lsDelimitChar
-	Else
-		lsOutString += lsDelimitChar
-	End If
-
-	//GI062 CountryOfOrigin	
-	 lsTemp = idsdoPick.GetITemString(llRowPos,'country_of_origin')
-
-	If IsNull(lsTemp) then lsTemp = ''
-	
-	lsOutString += lsTemp+ lsDelimitChar	
-
-
-	//GI063 Master User Field19		
-	If idsDoMain.GetItemString(1,'user_field19') <> '' Then
-		lsOutString += String(idsDoMain.GetItemString(1,'user_field19')) + lsDelimitChar
-	Else
-		lsOutString +=lsDelimitChar
-	End If		
-	
-	//GI064 Master User Field20	
-	If idsDoMain.GetItemString(1,'user_field20') <> '' Then
-		lsOutString += String(idsDoMain.GetItemString(1,'user_field20')) + lsDelimitChar
-	Else
-		lsOutString +=lsDelimitChar
-	End If	
-
-	//GI065 Master User Field21		
-	If idsDoMain.GetItemString(1,'user_field21') <> '' Then
-		lsOutString += String(idsDoMain.GetItemString(1,'user_field21')) + lsDelimitChar
-	Else
-		lsOutString +=lsDelimitChar
-	End If				
-		
-
-	//GI066 Master User User Field22	
-	If idsDoMain.GetItemString(1,'user_field22') <> '' Then
-		lsOutString += String(idsDoMain.GetItemString(1,'user_field22')) + lsDelimitChar
-	Else
-		lsOutString +=lsDelimitChar  
-	End If		
-	
-	// 01/16 - PCONKL - New named fields...
-	
-	//GI067 Master Department Code	
-	If idsDoMain.GetItemString(1,'Department_Code') <> '' Then
-		lsOutString += String(idsDoMain.GetItemString(1,'Department_Code')) + lsDelimitChar
-	Else
-		lsOutString +=lsDelimitChar  
-	End If		
-	
-	//GI068 Master Department Name	
-	If idsDoMain.GetItemString(1,'Department_Name') <> '' Then
-		lsOutString += String(idsDoMain.GetItemString(1,'Department_Name')) + lsDelimitChar
-	Else
-		lsOutString +=lsDelimitChar  
-	End If		
-	
-	//GI069 Master Department Code	
-	If idsDoMain.GetItemString(1,'Division') <> '' Then
-		lsOutString += String(idsDoMain.GetItemString(1,'Division')) + lsDelimitChar
-	Else
-		lsOutString +=lsDelimitChar  
-	End If		
-	
-	//GI070 Master Vendor	
-	If idsDoMain.GetItemString(1,'Vendor') <> '' Then
-		lsOutString += String(idsDoMain.GetItemString(1,'Vendor')) + lsDelimitChar
-	Else
-		lsOutString +=lsDelimitChar  
-	End If		
-	
-	//GI071 Detail - Buyer Part	
-	If idsdoDetail.GetItemString(llDetailFind,'Buyer_Part') <> '' Then
-		lsOutString += String(idsdoDetail.GetItemString(llDetailFind,'Buyer_Part')) + lsDelimitChar
-	Else
-		lsOutString += lsDelimitChar
-	End If		
-	
-	//GI072 Detail - Vendor Part	
-	If idsdoDetail.GetItemString(llDetailFind,'Vendor_Part') <> '' Then
-		lsOutString += String(idsdoDetail.GetItemString(llDetailFind,'Vendor_Part')) + lsDelimitChar
-	Else
-		lsOutString += lsDelimitChar
-	End If		
-	
-	//GI073 Detail - UPC	
-	If idsdoDetail.GetItemString(llDetailFind,'UPC') <> '' Then
-		lsOutString += String(idsdoDetail.GetItemString(llDetailFind,'UPC')) + lsDelimitChar
-	Else
-		lsOutString += lsDelimitChar
-	End If		
-	
-	//GI074 Detail - EAN	
-	If idsdoDetail.GetItemString(llDetailFind,'EAN') <> '' Then
-		lsOutString += String(idsdoDetail.GetItemString(llDetailFind,'EAN')) + lsDelimitChar
-	Else
-		lsOutString += lsDelimitChar
-	End If		
-	
-	//GI075 Detail - GTIN	
-	If idsdoDetail.GetItemString(llDetailFind,'GTIN') <> '' Then
-		lsOutString += String(idsdoDetail.GetItemString(llDetailFind,'GTIN')) + lsDelimitChar
-	Else
-		lsOutString += lsDelimitChar
-	End If		
-	
-	//GI076 Detail - Department Name 	
-	If idsdoDetail.GetItemString(llDetailFind,'Department_Name') <> '' Then
-		lsOutString += String(idsdoDetail.GetItemString(llDetailFind,'Department_Name')) + lsDelimitChar
-	Else
-		lsOutString += lsDelimitChar
-	End If		
-	
-	//GI077 Detail - Division	
-	If idsdoDetail.GetItemString(llDetailFind,'Division') <> '' Then
-		lsOutString += String(idsdoDetail.GetItemString(llDetailFind,'Division')) + lsDelimitChar
-	Else
-		lsOutString += lsDelimitChar
-	End If		
-	
-	//GI078 SSCC - **Not in Master or Detail, not sure why it's on the layout but it's been published, leave blank for now **
-	lsOutString += lsDelimitChar
-	
-	//GI079 Master Account Number	
-	If idsDoMain.GetItemString(1,'Account_Nbr') <> '' Then
-		lsOutString += String(idsDoMain.GetItemString(1,'Account_Nbr')) + lsDelimitChar
-	Else
-		lsOutString +=lsDelimitChar  
-	End If		
-	
-	//GI080 Master ASN Number	
-	If idsDoMain.GetItemString(1,'ASN_Number') <> '' Then
-		lsOutString += String(idsDoMain.GetItemString(1,'ASN_Number')) + lsDelimitChar
-	Else
-		lsOutString +=lsDelimitChar  
-	End If		
-	
-	//GI081 Master Client Cust PO Nbr	
-	If idsDoMain.GetItemString(1,'Client_Cust_PO_Nbr') <> '' Then
-		lsOutString += String(idsDoMain.GetItemString(1,'Client_Cust_PO_Nbr')) + lsDelimitChar
-	Else
-		lsOutString +=lsDelimitChar  
-	End If	
-	
-	//GI082 Master Client Cust SO Nbr	
-	If idsDoMain.GetItemString(1,'Client_Cust_SO_Nbr') <> '' Then
-		lsOutString += String(idsDoMain.GetItemString(1,'Client_Cust_SO_Nbr')) + lsDelimitChar
-	Else
-		lsOutString +=lsDelimitChar  
-	End If	
-	
-	//GI083 Master Container Nbr	
-	If idsDoMain.GetItemString(1,'Container_Nbr') <> '' Then
-		lsOutString += String(idsDoMain.GetItemString(1,'Container_Nbr')) + lsDelimitChar
-	Else
-		lsOutString +=lsDelimitChar  
-	End If	
-	
-	//GI084 Master Dock Code	
-	If idsDoMain.GetItemString(1,'Dock_Code') <> '' Then
-		lsOutString += String(idsDoMain.GetItemString(1,'Dock_Code')) + lsDelimitChar
-	Else
-		lsOutString +=lsDelimitChar  
-	End If	
-	
-	//GI085 Master Document Codes	
-	If idsDoMain.GetItemString(1,'Document_Codes') <> '' Then
-		lsOutString += String(idsDoMain.GetItemString(1,'Document_Codes')) + lsDelimitChar
-	Else
-		lsOutString +=lsDelimitChar  
-	End If	
-	
-	//GI086 Master Equipment Nbr	
-	If String(idsDoMain.GetItemNumber(1,'Equipment_Nbr')) <> '' Then
-		lsOutString += String(idsDoMain.GetItemNumber(1,'Equipment_Nbr')) + lsDelimitChar
-	Else
-		lsOutString +=lsDelimitChar  
-	End If	
-	
-	//GI087 Master FOB	
-	If idsDoMain.GetItemString(1,'FOB') <> '' Then
-		lsOutString += String(idsDoMain.GetItemString(1,'FOB')) + lsDelimitChar
-	Else
-		lsOutString +=lsDelimitChar  
-	End If	
-	
-	//GI088 Master FOB	Bill Duty Acct
-	If idsDoMain.GetItemString(1,'FOB_Bill_Duty_Acct') <> '' Then
-		lsOutString += String(idsDoMain.GetItemString(1,'FOB_Bill_Duty_Acct')) + lsDelimitChar
-	Else
-		lsOutString +=lsDelimitChar  
-	End If	
-	
-	//GI089 Master FOB	Bill Duty Party
-	If idsDoMain.GetItemString(1,'FOB_Bill_Duty_Party') <> '' Then
-		lsOutString += String(idsDoMain.GetItemString(1,'FOB_Bill_Duty_Party')) + lsDelimitChar
-	Else
-		lsOutString +=lsDelimitChar  
-	End If	
-	
-	//GI090 Master FOB	Bill Freight Party
-	If idsDoMain.GetItemString(1,'FOB_Bill_Freight_Party') <> '' Then
-		lsOutString += String(idsDoMain.GetItemString(1,'FOB_Bill_Freight_Party')) + lsDelimitChar
-	Else
-		lsOutString +=lsDelimitChar  
-	End If	
-	
-	//GI091 Master FOB	Bill Freight To Acct
-	If idsDoMain.GetItemString(1,'FOB_Bill_Freight_To_Acct') <> '' Then
-		lsOutString += String(idsDoMain.GetItemString(1,'FOB_Bill_Freight_To_Acct')) + lsDelimitChar
-	Else
-		lsOutString +=lsDelimitChar  
-	End If	
-	
-	//GI092 Master From Warehouse
-	If idsDoMain.GetItemString(1,'From_wh_Loc') <> '' Then
-		lsOutString += String(idsDoMain.GetItemString(1,'From_Wh_Loc')) + lsDelimitChar
-	Else
-		lsOutString +=lsDelimitChar  
-	End If	
-	
-	//GI093 Master Routing Number
-	If idsDoMain.GetItemString(1,'Routing_Nbr') <> '' Then
-		lsOutString += String(idsDoMain.GetItemString(1,'Routing_Nbr')) + lsDelimitChar
-	Else
-		lsOutString +=lsDelimitChar  
-	End If	
-	
-	//GI094 Master Seal Number
-	If idsDoMain.GetItemString(1,'Seal_Nbr') <> '' Then
-		lsOutString += String(idsDoMain.GetItemString(1,'Seal_Nbr')) + lsDelimitChar
-	Else
-		lsOutString +=lsDelimitChar  
-	End If	
-	
-	//GI095 Master Shipping Route
-	If idsDoMain.GetItemString(1,'Shipping_Route') <> '' Then
-		lsOutString += String(idsDoMain.GetItemString(1,'Shipping_Route')) + lsDelimitChar
-	Else
-		lsOutString +=lsDelimitChar  
-	End If	
-	
-	//GI096 Master SLI Nbr
-	If idsDoMain.GetItemString(1,'SLI_Nbr') <> '' Then
-		lsOutString += String(idsDoMain.GetItemString(1,'SLI_Nbr')) + lsDelimitChar
-	Else
-		lsOutString +=lsDelimitChar  
-	End If	
-	
-	//GI097 Detail - client Cust Line No	
-	If idsdoDetail.GetItemString(llDetailFind,'Client_Cust_Line_No') <> '' Then
-		lsOutString += String(idsdoDetail.GetItemString(llDetailFind,'Client_Cust_Line_No')) + lsDelimitChar
-	Else
-		lsOutString += lsDelimitChar
-	End If	
-	
-	//GI098 Detail - VAT ID	
-	If idsdoDetail.GetItemString(llDetailFind,'vat_identifier') <> '' Then
-		lsOutString += String(idsdoDetail.GetItemString(llDetailFind,'vat_identifier')) + lsDelimitChar
-	Else
-		lsOutString += lsDelimitChar
-	End If	
-	
-	//GI099 Detail - CI Value	
-	If idsdoDetail.GetItemString(llDetailFind,'CI_Value') <> '' Then
-		lsOutString += String(idsdoDetail.GetItemString(llDetailFind,'CI_Value')) + lsDelimitChar
-	Else
-		lsOutString += lsDelimitChar
-	End If	
-	
-	//GI100 Detail - Currency
-	If idsdoDetail.GetItemString(llDetailFind,'Currency') <> '' Then
-		lsOutString += String(idsdoDetail.GetItemString(llDetailFind,'Currency')) + lsDelimitChar
-	Else
-		lsOutString += lsDelimitChar
-	End If	
-	
-	//GI101 Detail - Cust Line Nbr
-	If idsdoDetail.GetItemString(llDetailFind,'Cust_Line_Nbr') <> '' Then
-		lsOutString += String(idsdoDetail.GetItemString(llDetailFind,'Cust_Line_Nbr')) + lsDelimitChar
-	Else
-		lsOutString += lsDelimitChar
-	End If	
-	
-	//GI102 Detail - Client Cust Invoice
-	If idsdoDetail.GetItemString(llDetailFind,'Client_Cust_Invoice') <> '' Then
-		lsOutString += String(idsdoDetail.GetItemString(llDetailFind,'Client_Cust_Invoice')) + lsDelimitChar
-	Else
-		lsOutString += lsDelimitChar
-	End If	
-	
-	//GI103 Detail - Cust PO
-	If idsdoDetail.GetItemString(llDetailFind,'Cust_PO_Nbr') <> '' Then
-		lsOutString += String(idsdoDetail.GetItemString(llDetailFind,'Cust_PO_Nbr')) + lsDelimitChar
-	Else
-		lsOutString += lsDelimitChar
-	End If	
-	
-	//GI104 Detail - Delivery Nbr
-	If idsdoDetail.GetItemString(llDetailFind,'Delivery_Nbr') <> '' Then
-		lsOutString += String(idsdoDetail.GetItemString(llDetailFind,'Delivery_Nbr')) + lsDelimitChar
-	Else
-		lsOutString += lsDelimitChar
-	End If	
-	
-	//GI105 Detail - Internal Price
-	If idsdoDetail.GetItemString(llDetailFind,'Internal_Price') <> '' Then
-		lsOutString += String(idsdoDetail.GetItemString(llDetailFind,'Internal_Price')) + lsDelimitChar
-	Else
-		lsOutString += lsDelimitChar
-	End If	
-	
-	//GI106 Detail - Client Inv Type
-	If idsdoDetail.GetItemString(llDetailFind,'Client_Inv_Type') <> '' Then
-		lsOutString += String(idsdoDetail.GetItemString(llDetailFind,'Client_Inv_Type')) + lsDelimitChar
-	Else
-		lsOutString += lsDelimitChar
-	End If	
-	
-	//GI107 Detail - Permit Nbr
-	If idsdoDetail.GetItemString(llDetailFind,'Permit_Nbr') <> '' Then
-		lsOutString += String(idsdoDetail.GetItemString(llDetailFind,'Permit_Nbr')) + lsDelimitChar
-	Else
-		lsOutString += lsDelimitChar
-	End If	
-	
-	//GI108 Detail - Supp_Code
-	If idsdoDetail.GetItemString(llDetailFind,'Supp_Code') <> '' Then
-		lsOutString += String(idsdoDetail.GetItemString(llDetailFind,'Supp_Code')) + lsDelimitChar
-	Else
-		lsOutString += lsDelimitChar
-	End If	
-	
-	//GI109 Detail - User Line item No
-	If idsdoDetail.GetItemString(llDetailFind,'User_Line_Item_No') <> '' Then
-		lsOutString += String(idsdoDetail.GetItemString(llDetailFind,'User_Line_Item_No')) + lsDelimitChar
-	Else
-		lsOutString += lsDelimitChar
-	End If	
-	
-	//GI110 Master Order Type
-	If idsDoMain.GetItemString(1,'Ord_Type') <> '' Then
-		lsOutString += String(idsDoMain.GetItemString(1,'Ord_Type')) + lsDelimitChar
-	Else
-		lsOutString +=lsDelimitChar  
-	End If	
-	
-	//GI111 Detail - Cust SKU
-	If idsdoDetail.GetItemString(llDetailFind,'Customer_SKU') <> '' Then
-		lsOutString += String(idsdoDetail.GetItemString(llDetailFind,'Customer_SKU')) + lsDelimitChar
-	Else
-		lsOutString += lsDelimitChar
-	End If	
-	
-	//GI112 MasterCustomer Order Nbr 
-	If idsDoMain.GetItemString(1,'Cust_Order_No') <> '' Then
-		lsOutString += String(idsDoMain.GetItemString(1,'Cust_Order_No')) + lsDelimitChar
-	Else
-		lsOutString +=lsDelimitChar  
-	End If	
-	
-	//GI113 Detail - Mark For Name
-	If idsdoDetail.GetItemString(llDetailFind,'Mark_For_Name') <> '' Then
-		lsOutString += String(idsdoDetail.GetItemString(llDetailFind,'Mark_For_Name')) + lsDelimitChar
-	Else
-		lsOutString += lsDelimitChar
-	End If	
-	
-	//GI114 Detail - Mark For Address 1
-	If idsdoDetail.GetItemString(llDetailFind,'Mark_For_Address_1') <> '' Then
-		lsOutString += String(idsdoDetail.GetItemString(llDetailFind,'Mark_For_Address_1')) + lsDelimitChar
-	Else
-		lsOutString += lsDelimitChar
-	End If	
-	
-	//GI115 Detail - Mark For Address 2
-	If idsdoDetail.GetItemString(llDetailFind,'Mark_For_Address_2') <> '' Then
-		lsOutString += String(idsdoDetail.GetItemString(llDetailFind,'Mark_For_Address_2')) + lsDelimitChar
-	Else
-		lsOutString += lsDelimitChar
-	End If	
-	
-	//GI116 Detail - Mark For Address 3
-	If idsdoDetail.GetItemString(llDetailFind,'Mark_For_Address_3') <> '' Then
-		lsOutString += String(idsdoDetail.GetItemString(llDetailFind,'Mark_For_Address_3')) + lsDelimitChar
-	Else
-		lsOutString += lsDelimitChar
-	End If	
-	
-	//GI117 Detail - Mark For Address 4
-	If idsdoDetail.GetItemString(llDetailFind,'Mark_For_Address_4') <> '' Then
-		lsOutString += String(idsdoDetail.GetItemString(llDetailFind,'Mark_For_Address_4')) + lsDelimitChar
-	Else
-		lsOutString += lsDelimitChar
-	End If	
-	
-	//GI118 Detail - Mark For City
-	If idsdoDetail.GetItemString(llDetailFind,'Mark_For_City') <> '' Then
-		lsOutString += String(idsdoDetail.GetItemString(llDetailFind,'Mark_For_City')) + lsDelimitChar
-	Else
-		lsOutString += lsDelimitChar
-	End If	
-	
-	//GI119 Detail - Mark For State
-	If idsdoDetail.GetItemString(llDetailFind,'Mark_For_State') <> '' Then
-		lsOutString += String(idsdoDetail.GetItemString(llDetailFind,'Mark_For_State')) + lsDelimitChar
-	Else
-		lsOutString += lsDelimitChar
-	End If	
-	
-	//GI120 Detail - Mark For Zip
-	If idsdoDetail.GetItemString(llDetailFind,'Mark_For_Zip') <> '' Then
-		lsOutString += String(idsdoDetail.GetItemString(llDetailFind,'Mark_For_Zip')) + lsDelimitChar
-	Else
-		lsOutString += lsDelimitChar
-	End If	
-	
-	//GI121 Detail - Mark For Country
-	If idsdoDetail.GetItemString(llDetailFind,'Mark_For_Country') <> '' Then
-		lsOutString += String(idsdoDetail.GetItemString(llDetailFind,'Mark_For_Country')) + lsDelimitChar
-	Else
-		lsOutString += lsDelimitChar
-	End If	
-	
-	//GI 122 - DONO  
-	lsOutString += asDONO + lsDelimitChar
-	
-	
-	//GI123 - Consolidation_No (ERPORDERNO)- ** LAST COLUMN*/
-	//This is their Sales Order Number that we are storing in the Consolidation NO so multiple picks are consolidated
-	// We may have multiple shipments for the same SO so we are appending a *2, *3, etc so we need to strip it off here
-	
-	lsTemp = String(idsDoMain.GetItemString(1,'Consolidation_no'))
-	
-	If pos(lsTemp,"*") > 0 Then
-		lsTemp = left(lsTemp,pos(lsTemp,"*") - 1)
+	//Get the Next Batch Seq Nbr - Used for all writing to generic tables
+	ldBatchSeq = gu_nvo_process_files.uf_get_next_seq_no(asproject,'Good_Issue_File','Good_Issue')
+	If ldBatchSeq <= 0 Then
+		lsLogOut = "        *** Unable to retrieve the next available sequence number~rfor Goods Issue Confirmation.~r~rConfirmation will not be sent to Kendo!'"
+		FileWrite(gilogFileNo,lsLogOut)
+		Return -1
 	End If
 	
-	If lsTemp <> '' Then
-		lsOutString += lsTemp  // + lsDelimitChar
-	Else
-		//lsOutString +=lsDelimitChar  
-	End If	
+	//Begin - 10/10/2022 - Dinesh - SIMS-101 - SIMS-101-SIMS KENDO - Post Ship Confirmation - Send PGI file for post ship conformation
+	//select count(*) into :llcount 
+	//from Batch_Transaction with(nolock) 
+	//where Project_Id= :asproject and Trans_Order_Id= :asdono and Trans_Status ='C' USING SQLCA;
 	
-	idsOut.SetItem(llNewRow,'Project_id', asProject)
-	idsOut.SetItem(llNewRow,'edi_batch_seq_no', Long(ldBatchSeq))
-	idsOut.SetItem(llNewRow,'line_seq_no', llNewRow)
-	idsOut.SetItem(llNewRow,'batch_data', lsOutString)
-	lsFileName = 'GI' + String(ldBatchSeq,'000000') + '.dat'
-	idsOut.SetItem(llNewRow,'file_name', lsFileName)
+	//If llcount >0 Then
+	 
+	//End If
+	//End - 10/10/2022 - Dinesh - SIMS-101 - SIMS-101-SIMS KENDO - Post Ship Confirmation - Send PGI file for post ship conformation
 	
-
-next /*next Delivery Detail record */
-
-
-IF ProfileString(gsinifile, asproject, "IncludeGIPackDetail",'N')  = 'Y' THEN
-
-	//Get the Project / Warehouse defaults for UCC
+	//uf_postship_confirm(asproject,asdono) //Dinesh
 	
-	lsWHCode = idsDoMain.GetItemString(1,'wh_code')
+	//21-Feb-2017 :Madhu-SIMSPEVS-492 Generate GI file upon Order Reconfirmation
+	//15-Sep-2016 Madhu -KDO 1003407 - Send GI file for Ready To Ship -START
+	// Don't generate duplicate GI file, if it has already been shipped.
+	//select count(*) into :llcount 
+	//from Batch_Transaction with(nolock) 
+	//where Project_Id= :asproject and Trans_Order_Id= :asdono and Trans_Status ='C' USING SQLCA;
+	//
+	//If llcount >0 Then
+	//	lsLogOut ="			*** GI File has already generated through either ReadyToShip or Normal Order Confirmation Process"
+	//	FileWrite(gilogFileNo, lsLogOut)
+	//	Return 99	//delete record
+	//End If
+	////15-Sep-2016 Madhu -KDO 1003407 - Send GI file for Ready To Ship -END
 	
-	SELECT Project.UCC_Company_Prefix INTO :lsUCCCompanyPrefix FROM Project WHERE Project_ID = :asproject USING SQLCA;
+	//Write the rows to the generic output table - delimited by lsDelimitChar
 	
-	IF IsNull(lsUCCCompanyPrefix) Then lsUCCCompanyPrefix = ''
-	
-	SELECT Warehouse.UCC_Location_Prefix INTO :lsUCCLocationPrefix FROM Warehouse WHERE WH_Code = :lsWHCode USING SQLCA;
-	
-	IF IsNull(lsUCCLocationPrefix) Then lsUCCLocationPrefix = ''
-			
-	
-	llRowCount = idsDoPack.RowCount()
+	llRowCount = idsDoPick.RowCount()
 	
 	For llRowPos = 1 to llRowCOunt
 	
 		llNewRow = idsOut.insertRow(0)
 	
 	
-		lsSku = idsdoPack.GetITEmString(llRowPos,'sku')
-		lsSuppCode =  Upper(idsdoPack.GetITEmString(llRowPos,'supp_code'))
-		lsLineItemNo = String(idsdoPack.GetITemNumber(llRowPos, 'Line_item_No'))
+		//dts - 11/24/2020 - DE18598 lsSku = idsdoPick.GetITEmString(llRowPos,'sku')
+		lsSku = Upper(idsdoPick.GetITEmString(llRowPos,'sku'))
+		lsSuppCode =  Upper(idsdoPick.GetITEmString(llRowPos,'supp_code'))
+		lsLineItemNo = String(idsdoPick.GetITemNumber(llRowPos, 'Line_item_No'))
 		lsOrdStatus = idsDoMain.GetItemString(1,'Ord_Status') 
-		lsSOM = idsdoPack.GetITEmString(llRowPos,'standard_of_measure')
 	
-		//Record_ID (‘PK’)
+		//dts - 11/24/2020 - DE18598 llDetailFind = idsDoDetail.Find("sku='"+lsSku+"' and Upper(supp_code) = '"+lsSuppCode+"' and line_item_no = " + string(lsLineItemNo), 1, idsDoDetail.RowCount())
+		llDetailFind = idsDoDetail.Find("Upper(sku)='"+lsSku+"' and Upper(supp_code) = '"+lsSuppCode+"' and line_item_no = " + string(lsLineItemNo), 1, idsDoDetail.RowCount())
 	
-		lsOutString = 'PK' + lsDelimitChar	
 	
-		//Project ID	C(10)	Yes	N/A	Project identifier
+		//Can't Find Detail
+		IF llDetailFind <= 0 then 
+			continue
+			
+		End If
+	
+		//DE18598 llPackFind = idsDoPack.Find("sku='"+lsSku+"' and Upper(supp_code) = '"+lsSuppCode+"' and line_item_no=" + string(lsLineItemNo), 1, idsDoPack.RowCount())
+		llPackFind = idsDoPack.Find("Upper(sku)='"+lsSku+"' and Upper(supp_code) = '"+lsSuppCode+"' and line_item_no=" + string(lsLineItemNo), 1, idsDoPack.RowCount())
+	
+	
+	
+		//Field Name	Type	Req.	Default	Description
+		//GI001 Record_ID	C(2)	Yes	“GI”	Goods issue confirmation identifier
 		
+		//MEA - 8/12 - If the file is being generated from a ‘Ready to Ship’ transaction, the Record ID will be ‘RS’ instead of ‘GI’. This is a baseline change.
+		
+		//15-Sep-2016 Madhu- KDO-1003407- Always send as GI.
+		//IF lsOrdStatus = 'R' THEN
+		//	lsOutString = 'RS' + lsDelimitChar	
+		//ELSE
+			lsOutString = 'GI' + lsDelimitChar
+		//END IF
+	
+		
+		//GI002 Project ID	C(10)	Yes	N/A	Project identifier	
 		lsOutString +=  asproject + lsDelimitChar
 		
-		//Delivery Number	C(10)	Yes	N/A	Delivery Order Number
+		//GI003 Warehouse	C(10)	Yes		Shipping Warehouse	
+		lsOutString += idsDoMain.GetItemString(1,'wh_code') + lsDelimitChar
 		
+		//GI004 Delivery Number	C(10)	Yes	N/A	Delivery Order Number		
 		lsOutString += idsDoMain.GetItemString(1,'Invoice_no') + lsDelimitChar	
 		
-		//Carton Number 
+		//GI005 Delivery Line Item	N(6,0)	Yes	N/A	Delivery order item line number	
+		lsOutString += String(idsdoPick.GetITemNumber(llRowPos, 'Line_item_No')) + lsDelimitChar
 		
-		//On the Packing Segment, we need to prefix the carton number with the Project level and Warehouse level UCC values. 
-		//Carton Number will end up being an 18 digit value consisting of ‘Project.UCC_Company_Prefix’ (8) + ‘Warehouse.UCC_Location_Prefix’(1) + ‘Delivery_Packing.Carton_No’ (9).  This can be baseline as those fields will be blank if not used.
-		
-		lsCartonNo = idsdoPack.GetITemString(llRowPos, 'Carton_No')
-		
-		If lsCartonNo <> '' Then
-			lsOutString += lsCartonNo  + lsDelimitChar
-		ELSE
-			lsOutString +=lsDelimitChar //17-Dec-2014 :Madhu- Added code to pass even if it is empty.
-	
-		END IF
-		
-		//Line Item Number
-		
-		lsOutString += String(idsdoPack.GetITemNumber(llRowPos, 'Line_item_No')) + lsDelimitChar
-		
-		//SKU
-		
+		//GI006 SKU	C(50)	Yes	N/A	Material number
 		lsOutString += lsSku  + lsDelimitChar	
 		
-		//Qty
-		
-		lsOutString += String( idsdoPack.GetITemNumber(llRowPos,'quantity')) + lsDelimitChar
-		
-		//Weight (Gross for carton, repeated for all records)
-		
-		//Need to validate. - Make sure this is summing up correctly.
-		
-		If String(idsDoPack.GetItemNumber(llRowPos,'Weight_Gross')) <> '' Then
-			lsOutString += String(idsDoPack.GetItemNumber(llRowPos,'Weight_Gross')) + lsDelimitChar
+		//GI007 Quantity	N(15,5)	Yes	N/A	Actual shipped quantity
+		If 	idsdoPick.GetITemString(llRowPos,'Serial_No') <> '' Then
+			lsOutString += String( idsdoPick.GetITemNumber(llRowPos,'serial_qty')) + lsDelimitChar
 		Else
-			lsOutString += "0" + lsDelimitChar
-		End If	 
-						
-		
-		//Weight Unit (for the current line/SKU) KG or LB
-		 
-		 If lsSOM <> '' Then
-			IF Trim(lsSOM) = 'E' THEN
-				lsOutString += 'LB' + lsDelimitChar
-			ELSE
-				lsOutString += 'KG' + lsDelimitChar
-			END IF
-		Else
-			lsOutString +=lsDelimitChar
+			lsOutString += String( idsdoPick.GetITemNumber(llRowPos,'quantity')) + lsDelimitChar
 		End If	
+		
+		//GI008 Inventory Type	C(1)	Yes	N/A	Item condition	
+		lsOutString += String( idsdoPick.GetITemString(llRowPos,'Inventory_Type')) + lsDelimitChar
+		
+		//GI009 Lot Number	C(50)	No	N/A	1st User Defined Inventory field	
+		lsTemp = idsdoPick.GetITemString(llRowPos,'Lot_No')
+		
+		If IsNull(lsTemp) or lsTemp='-' then lsTemp = ''
+		
+		lsOutString += lsTemp+ lsDelimitChar	
+		
+		//GI010 PO NBR	C(50)	No	N/A	2nd User Defined Inventory field
+		lsTemp = idsdoPick.GetITemString(llRowPos,'PO_No')
+		
+		If IsNull(lsTemp) then lsTemp = ''
+		
+		If  lsTemp <> '-' Then
+			lsOutString += lsTemp + lsDelimitChar
+		Else
+			lsOutString += lsDelimitChar
+		End If		
+		
+		//GI011PO NBR 2	C(50)	No	N/A	3rd User Defined Inventory Field
+		lsTemp = idsdoPick.GetITemString(llRowPos,'PO_No2')
+		
+		If IsNull(lsTemp) then lsTemp = ''
+		
+		If  lsTemp <> '-' Then
+			lsOutString += lsTemp + lsDelimitChar
+		Else
+			lsOutString += lsDelimitChar
+		End If		
+		
+		//GI012 Serial Number	C(50)	No	N/A	Qty must be 1 if present
+		lsTemp = idsdoPick.GetITemString(llRowPos,'Serial_No')
+		
+		If IsNull(lsTemp) then lsTemp = ''
+		
+		If  lsTemp <> '-' Then
+			lsOutString += lsTemp + lsDelimitChar
+		Else
+			lsOutString += lsDelimitChar
+		End If	
+		
+		//GI013 Container ID	C(25)	No	N/A			
+		lsTemp = idsdoPick.GetITemString(llRowPos,'Container_ID')
+		
+		If IsNull(lsTemp) then lsTemp = ''
+	
+		If  lsTemp <> '-' Then
+			lsOutString += lsTemp + lsDelimitChar
+		Else
+			lsOutString += lsDelimitChar
+		End If	
+		
+		//GI014 Expiration Date	Date	No	N/A	
+		lsOutString += String( idsdoPick.GetITemDateTime(llRowPos,'Expiration_Date'),'yyyymmdd') + lsDelimitChar		
+	
+		//GI015 Price	N(12,4)	No	N/A		
+		lsTemp = String(idsdoPick.GetItemDecimal(llRowPos, "Price"))
+		
+		If IsNull(lsTemp) then lsTemp = ''
+		
+		lsOutString += lsTemp+ lsDelimitChar	
+		
+		
+		//GI016 Ship Date	Date	No	N/A	Actual Ship date
+		lsTemp = String( idsDoMain.GetItemDateTime(1,'complete_date'),'yyyymmdd') 
+		
+		//27-Feb-2016 Madhu - If complete date is null, provide current date.
+		If IsNull(lsTemp) or lsTemp='' or lsTemp=' ' or len(lsTemp) =0 	then 
+			lsTemp = string(datetime(today(), now()),"yyyymmdd") 
+		End IF
 	
 		
-		//Weight SOM (standard of meas)
+		lsOutString += lsTemp+ lsDelimitChar
 		
-		 If lsSOM <> '' Then
-			IF Trim(lsSOM) = 'E' THEN
-				lsOutString += 'LB' + lsDelimitChar
-			ELSE
-				lsOutString += 'KG' + lsDelimitChar
-			END IF
+		//GI017 Package Count	N(5,0)	No	N/A	Total no. of package in delivery
+		lsTemp = String(1)  	  //if idsDoPack > 0 then idsDoPack.GetItemDecimal(llPackFind,'complete_date'))
+		
+		If IsNull(lsTemp) then lsTemp = ''
+		
+		lsOutString += lsTemp+ lsDelimitChar	
+		
+		//GI018 Ship Tracking Number (AWB)	C(25)	No	N/A		
+		If idsDoMain.GetItemString(1,'awb_bol_no') <> '' Then
+			//BCR 30-DEC-2011: Geistlich UAT fix...
+	//		lsOutString += String(idsDoMain.GetItemString(1,'Ship_Ref')) + lsDelimitChar
+			lsOutString += String(idsDoMain.GetItemString(1,'awb_bol_no')) + lsDelimitChar
 		Else
-			lsOutString +=lsDelimitChar
-		End If	
+			lsOutString += lsDelimitChar
+		End If				
 		
-		//Carton Length
-	 
-		If String(idsDoPack.GetItemNumber(llRowPos,'Length')) <> '' Then
-			lsOutString += String(idsDoPack.GetItemNumber(llRowPos,'Length')) + lsDelimitChar
+		//GI019 Carrier	C (20)	No	N/A	Input by user	
+		If idsDoMain.GetItemString(1,'Carrier') <> '' Then
+			lsOutString += String(idsDoMain.GetItemString(1,'Carrier')) + lsDelimitChar
 		Else
-			lsOutString +=lsDelimitChar
-		End If	 			 
-					 
-					 
-		
-		//Carton Width
-		 
-		 If String(idsDoPack.GetItemNumber(llRowPos,'Width')) <> '' Then
-			lsOutString += String(idsDoPack.GetItemNumber(llRowPos,'Width')) + lsDelimitChar
-		Else
-			lsOutString +=lsDelimitChar
-		End If	 			
-						 
-		 
-		
-		//Carton Height
-					
-		 If String(idsDoPack.GetItemNumber(llRowPos,'Height')) <> '' Then
-			lsOutString += String(idsDoPack.GetItemNumber(llRowPos,'Height')) + lsDelimitChar
-		Else
-			lsOutString +=lsDelimitChar
-		End If	 			
-							
-		
-		//Carton DIM SOM (standard of meas) IN or CM
-		
-		 If lsSOM <> '' Then
-			IF Trim(lsSOM) = 'E' THEN
-				lsOutString += 'IN' + lsDelimitChar
-			ELSE
-				lsOutString += 'CM' + lsDelimitChar
-			END IF
-		Else
-			lsOutString +=lsDelimitChar
-		End If	
-		
-		//Ship Tracking Number
-		
+			lsOutString += lsDelimitChar
+		End If				
+			
+		//GI020 Freight Cost	N(10,3)	No	N/A		
+		lsFreight_Cost = String(idsDoMain.GetItemDecimal(1,'Freight_Cost'))
 	
-		 If idsDoPack.GetItemString(llRowPos,'Shipper_Tracking_ID') <> '' Then
-			lsOutString += String(idsDoPack.GetItemString(llRowPos,'Shipper_Tracking_ID')) + lsDelimitChar
-		Else
-			lsOutString +=lsDelimitChar
-		End If	    
+		IF IsNull(lsFreight_Cost) then lsFreight_Cost = ""
 		
-		//User Field 1
+		lsOutString += lsFreight_Cost + lsDelimitChar
+			
 		
-		If idsDoPack.GetItemString(llRowPos,'user_field1') <> '' Then
-			lsOutString += String(idsDoPack.GetItemString(llRowPos,'user_field1')) + lsDelimitChar
+		//GI021 Freight Terms	C(20)	No	N/A	
+		
+		If idsDoMain.GetItemString(1,'Freight_Terms') <> '' Then
+			lsOutString += String(idsDoMain.GetItemString(1,'Freight_Terms')) + lsDelimitChar
 		Else
-			lsOutString +=lsDelimitChar
+			lsOutString += lsDelimitChar
+		End If				
+		
+		//GI022 Total Weight	N(12,2)	No	N/A		
+		IF llPackFind > 0 then
+			lsTemp = String( idsDoPack.GetItemDecimal(llPackFind,'weight_gross')) 
+		Else
+			lsTemp = ""	
+		End If
+		
+		If IsNull(lsTemp) then lsTemp = ''
+		
+		lsOutString += lsTemp+ lsDelimitChar		
+		
+		//GI023 Transportation Mode	C(10)	No	N/A		
+		If idsDoMain.GetItemString(1,'transport_mode') <> '' Then
+			lsOutString += String(idsDoMain.GetItemString(1,'transport_mode')) + lsDelimitChar
+		Else
+			lsOutString += lsDelimitChar
+		End If			
+		
+		//GI024 Delivery Date	Date	No	N/A		
+		lsTemp =  String( idsDoMain.GetItemDateTime(1,'complete_date'),'yyyymmdd') 
+		
+		If IsNull(lsTemp) then lsTemp = ''
+		
+		lsOutString += lsTemp+ lsDelimitChar	
+		
+		//GI025 Detail User Field1	C(20)	No	N/A	User Field	
+		If idsdoDetail.GetItemString(llDetailFind,'user_field1') <> '' Then
+			lsOutString += String(idsdoDetail.GetItemString(llDetailFind,'user_field1')) + lsDelimitChar
+		Else
+			lsOutString += lsDelimitChar
 		End If	
 		
-		//User Field 2
+		//GI026 Detail User Field2	C(20)	No	N/A	User Field	
+		If idsdoDetail.GetItemString(llDetailFind,'user_field2') <> '' Then
+			lsOutString += String(idsdoDetail.GetItemString(llDetailFind,'user_field2')) + lsDelimitChar
+		Else
+			lsOutString += lsDelimitChar
+		End If		
 		
-		If idsDoPack.GetItemString(llRowPos,'user_field2') <> '' Then
-			lsOutString += String(idsDoPack.GetItemString(llRowPos,'user_field2'))  + lsDelimitChar
+		//GI027 Detail User Field3	C(30)	No	N/A	User Field	
+		If idsdoDetail.GetItemString(llDetailFind,'user_field3') <> '' Then
+			lsOutString += String(idsdoDetail.GetItemString(llDetailFind,'user_field3')) + lsDelimitChar
+		Else
+			lsOutString += lsDelimitChar
+		End If		
+		
+		//GI028 Detail User Field4	C(30)	No	N/A	User Field	
+		If idsdoDetail.GetItemString(llDetailFind,'user_field4') <> '' Then
+			lsOutString += String(idsdoDetail.GetItemString(llDetailFind,'user_field4')) + lsDelimitChar
+		Else
+			lsOutString += lsDelimitChar
+		End If		
+		
+		//GI029 Detail User Field5	C(30)	No	N/A	User Field	
+		If idsdoDetail.GetItemString(llDetailFind,'user_field5') <> '' Then
+			lsOutString += String(idsdoDetail.GetItemString(llDetailFind,'user_field5')) + lsDelimitChar
+		Else
+			lsOutString += lsDelimitChar
+		End If		
+		
+		//GI030 Detail User Field6	C(30)	No	N/A	User Field	
+		If idsdoDetail.GetItemString(llDetailFind,'user_field6') <> '' Then
+			lsOutString += String(idsdoDetail.GetItemString(llDetailFind,'user_field6')) + lsDelimitChar
+		Else
+			lsOutString += lsDelimitChar
+		End If			
+		
+		//GI031 Detail User Field7	C(30)	No	N/A	User Field	
+		If idsdoDetail.GetItemString(llDetailFind,'user_field7') <> '' Then
+			lsOutString += String(idsdoDetail.GetItemString(llDetailFind,'user_field7')) + lsDelimitChar
+		Else
+			lsOutString += lsDelimitChar
+		End If			
+		
+		//GI032 Detail User Field8	C(30)	No	N/A	User Field	
+		If idsdoDetail.GetItemString(llDetailFind,'user_field8') <> '' Then
+			lsOutString += String(idsdoDetail.GetItemString(llDetailFind,'user_field8')) + lsDelimitChar
+		Else
+			lsOutString += lsDelimitChar
+		End If			
+		
+		//*****************/MAster User fieldxxx**************************************
+		//GI033 Master User Field2	C(10)	No	N/A	User Field	
+		If idsDoMain.GetItemString(1,'user_field2') <> '' Then
+			lsOutString += String(idsDoMain.GetItemString(1,'user_field2')) + lsDelimitChar
+		Else
+			lsOutString += lsDelimitChar
+		End If		
+	
+		//GI034 Master User Field3	C(10)	No	N/A	User Field
+		If idsDoMain.GetItemString(1,'user_field3') <> '' Then
+			lsOutString += String(idsDoMain.GetItemString(1,'user_field3')) + lsDelimitChar
+		Else
+			lsOutString += lsDelimitChar
+		End If	
+	
+		//GI035 Master User Field4	C(20)	No	N/A	User Field
+		If idsDoMain.GetItemString(1,'user_field4') <> '' Then
+			lsOutString += String(idsDoMain.GetItemString(1,'user_field4')) + lsDelimitChar
+		Else
+			lsOutString += lsDelimitChar
+		End If	
+	
+		//GI036 Master User Field5	C(20)	No	N/A	User Field
+		If idsDoMain.GetItemString(1,'user_field5') <> '' Then
+			lsOutString += String(idsDoMain.GetItemString(1,'user_field5')) + lsDelimitChar
+		Else
+			lsOutString += lsDelimitChar
+		End If	
+			
+		//GI037 Master User Field6	C(20)	No	N/A	User Field
+		If idsDoMain.GetItemString(1,'user_field6') <> '' Then
+			lsOutString += String(idsDoMain.GetItemString(1,'user_field6')) + lsDelimitChar
+		Else
+			lsOutString += lsDelimitChar
+		End If	
+	
+		//GI038 Master User Field7	C(30)	No	N/A	User Field
+		If idsDoMain.GetItemString(1,'user_field7') <> '' Then
+			lsOutString += String(idsDoMain.GetItemString(1,'user_field7')) + lsDelimitChar
+		Else
+			lsOutString += lsDelimitChar
+		End If	
+	
+		//GI039 Master User Field8	C(60)	No	N/A	User Field
+		If idsDoMain.GetItemString(1,'user_field8') <> '' Then
+			lsOutString += String(idsDoMain.GetItemString(1,'user_field8')) + lsDelimitChar
+		Else
+			lsOutString += lsDelimitChar
+		End If	
+	
+		//GI040 Master User Field9	C(30)	No	N/A	User Field	
+		If idsDoMain.GetItemString(1,'user_field9') <> '' Then
+			lsOutString += String(idsDoMain.GetItemString(1,'user_field9')) + lsDelimitChar
+		Else
+			lsOutString += lsDelimitChar
+		End If		
+		
+		//GI041 Master User Field10	C(30)	No	N/A	User Field	BOL No,  we are sending awb_nol_no in GI041 position
+		If idsDoMain.GetItemString(1,'awb_bol_no') <> '' Then
+			lsOutString += String(idsDoMain.GetItemString(1,'awb_bol_no')) + lsDelimitChar
+		Else
+			lsOutString += lsDelimitChar
+		End If		
+		
+		//GI042 Master User Field11	C(30)	No	N/A	User Field	Carrier Pro No, we are sending carrier_pro_no in GI042 position
+		If idsDoMain.GetItemString(1,'carrier_pro_no') <> '' Then
+			lsOutString += String(idsDoMain.GetItemString(1,'carrier_pro_no')) + lsDelimitChar
+		Else
+			lsOutString += lsDelimitChar
+		End If		
+		
+		//GI043 Master User Field12	C(50)	No	N/A	User Field	
+		If idsDoMain.GetItemString(1,'user_field12') <> '' Then
+			lsOutString += String(idsDoMain.GetItemString(1,'user_field12')) + lsDelimitChar
+		Else
+			lsOutString += lsDelimitChar
+		End If		
+		
+		//GI044 Master User Field13	C(50)	No	N/A	User Field	
+		If idsDoMain.GetItemString(1,'user_field13') <> '' Then
+			lsOutString += String(idsDoMain.GetItemString(1,'user_field13')) + lsDelimitChar
+		Else
+			lsOutString += lsDelimitChar
+		End If	
+		
+		//GI045 Master User Field14	C(50)	No	N/A	User Field
+		If idsDoMain.GetItemString(1,'user_field14') <> '' Then
+			lsOutString += String(idsDoMain.GetItemString(1,'user_field14')) + lsDelimitChar
+		Else
+			lsOutString += lsDelimitChar
+		End If		
+		
+		//GI046 Master User Field15	C(50)	No	N/A	User Field	
+		If idsDoMain.GetItemString(1,'user_field15') <> '' Then
+			lsOutString += String(idsDoMain.GetItemString(1,'user_field15')) + lsDelimitChar
+		Else
+			lsOutString += lsDelimitChar
+		End If		
+		
+		//GI047 Master User Field16	C(100)	No	N/A	User Field	
+		If idsDoMain.GetItemString(1,'user_field16') <> '' Then
+			lsOutString += String(idsDoMain.GetItemString(1,'user_field16')) + lsDelimitChar
+		Else
+			lsOutString += lsDelimitChar
+		End If		
+		
+		//GI048 Master User Field17	C(100)	No	N/A	User Field	
+		If idsDoMain.GetItemString(1,'user_field17') <> '' Then
+			lsOutString += String(idsDoMain.GetItemString(1,'user_field17')) + lsDelimitChar
+		Else
+			lsOutString += lsDelimitChar
+		End If		
+		
+		//GI049 Master User Field18	C(100)	No	N/A	User Field	
+		If idsDoMain.GetItemString(1,'user_field18') <> '' Then
+			lsOutString += String(idsDoMain.GetItemString(1,'user_field18')) + lsDelimitChar
 		Else
 			lsOutString +=lsDelimitChar
 		End If		
-
-		// 01/16 - PCONKL - New Named Fields
 		
-		//InterPack Count
-		If idsDoPack.GetItemString(llRowPos,'Interpack_Count') <> '' Then
-			lsOutString += String(idsDoPack.GetItemString(llRowPos,'Interpack_Count'))  + lsDelimitChar
+		//GI050 CustomerCode		
+		If idsDoMain.GetItemString(1,'cust_code') <> '' Then
+			lsOutString += String(idsDoMain.GetItemString(1,'cust_code')) + lsDelimitChar
 		Else
 			lsOutString +=lsDelimitChar
 		End If	
 		
-		//InterPack Type
-		If idsDoPack.GetItemString(llRowPos,'Interpack_Type') <> '' Then
-			lsOutString += String(idsDoPack.GetItemString(llRowPos,'Interpack_Type'))  + lsDelimitChar
+		//GI051 Ship To Name	
+		If idsDoMain.GetItemString(1,'cust_name') <> '' Then
+			lsOutString += String(idsDoMain.GetItemString(1,'cust_name')) + lsDelimitChar
+		Else
+			lsOutString +=lsDelimitChar
+		End If		
+		
+		//GI052 Ship Address 1		
+		If idsDoMain.GetItemString(1,'address_1') <> '' Then
+			lsOutString += String(idsDoMain.GetItemString(1,'address_1')) + lsDelimitChar
+		Else
+			lsOutString +=lsDelimitChar
+		End If		
+		
+		//GI053 Ship Address 2		
+		If idsDoMain.GetItemString(1,'address_2') <> '' Then
+			lsOutString += String(idsDoMain.GetItemString(1,'address_2')) + lsDelimitChar
+		Else
+			lsOutString +=lsDelimitChar
+		End If		
+	
+		//GI054 Ship Address 3		
+		If idsDoMain.GetItemString(1,'address_3') <> '' Then
+			lsOutString += String(idsDoMain.GetItemString(1,'address_3')) + lsDelimitChar
+		Else
+			lsOutString +=lsDelimitChar
+		End If		
+		
+			
+		//GI055 Ship Address 4		
+		If idsDoMain.GetItemString(1,'address_4') <> '' Then
+			lsOutString += String(idsDoMain.GetItemString(1,'address_4')) + lsDelimitChar
+		Else
+			lsOutString +=lsDelimitChar
+		End If		
+		
+		//GI056 Ship City		
+		If idsDoMain.GetItemString(1,'city') <> '' Then
+			lsOutString += String(idsDoMain.GetItemString(1,'city')) + lsDelimitChar
+		Else
+			lsOutString +=lsDelimitChar
+		End If		
+		
+		//GI057 Ship State	
+			If idsDoMain.GetItemString(1,'state') <> '' Then
+			lsOutString += String(idsDoMain.GetItemString(1,'state')) + lsDelimitChar
 		Else
 			lsOutString +=lsDelimitChar
 		End If	
 		
-		//Pack SSCC
-		If idsDoPack.GetItemString(llRowPos,'Pack_SSCC_No') <> '' Then
-			lsOutString += String(idsDoPack.GetItemString(llRowPos,'Pack_SSCC_No'))  + lsDelimitChar
+		//GI058 Ship Postal Code
+		
+		If idsDoMain.GetItemString(1,'zip') <> '' Then
+			lsOutString += String(idsDoMain.GetItemString(1,'zip')) + lsDelimitChar
+		Else
+			lsOutString +=lsDelimitChar
+		End If		
+		
+		//GI059 Ship Country
+		If idsDoMain.GetItemString(1,'country') <> '' Then
+			lsOutString += String(idsDoMain.GetItemString(1,'country')) + lsDelimitChar
 		Else
 			lsOutString +=lsDelimitChar
 		End If	
 		
-		//Pack Lot
-		If idsDoPack.GetItemString(llRowPos,'Pack_Lot_No') <> '' Then
-			lsOutString += String(idsDoPack.GetItemString(llRowPos,'Pack_Lot_No'))  + lsDelimitChar
+		//GI060 Ship Telephone	
+		If idsDoMain.GetItemString(1,'tel') <> '' Then
+			lsOutString += String(idsDoMain.GetItemString(1,'tel')) + lsDelimitChar
 		Else
 			lsOutString +=lsDelimitChar
 		End If	
+	
+		//GI061 UnitOfMeasure (quantity)	
+		If idsdoDetail.GetItemString(llDetailFind,'uom') <> '' Then
+			lsOutString += String(idsdoDetail.GetItemString(llDetailFind,'uom')) + lsDelimitChar
+		Else
+			lsOutString += lsDelimitChar
+		End If
+	
+		//GI062 CountryOfOrigin	
+		 lsTemp = idsdoPick.GetITemString(llRowPos,'country_of_origin')
+	
+		If IsNull(lsTemp) then lsTemp = ''
 		
-		//Pack PONO
-		If idsDoPack.GetItemString(llRowPos,'Pack_PO_No') <> '' Then
-			lsOutString += String(idsDoPack.GetItemString(llRowPos,'Pack_PO_No'))  + lsDelimitChar
+		lsOutString += lsTemp+ lsDelimitChar	
+	
+	
+		//GI063 Master User Field19		
+		If idsDoMain.GetItemString(1,'user_field19') <> '' Then
+			lsOutString += String(idsDoMain.GetItemString(1,'user_field19')) + lsDelimitChar
+		Else
+			lsOutString +=lsDelimitChar
+		End If		
+		
+		//GI064 Master User Field20	
+		If idsDoMain.GetItemString(1,'user_field20') <> '' Then
+			lsOutString += String(idsDoMain.GetItemString(1,'user_field20')) + lsDelimitChar
 		Else
 			lsOutString +=lsDelimitChar
 		End If	
-		
-		//Pack PONO2
-		If idsDoPack.GetItemString(llRowPos,'Pack_PO_No2') <> '' Then
-			lsOutString += String(idsDoPack.GetItemString(llRowPos,'Pack_PO_No2'))  + lsDelimitChar
+	
+		//GI065 Master User Field21		
+		If idsDoMain.GetItemString(1,'user_field21') <> '' Then
+			lsOutString += String(idsDoMain.GetItemString(1,'user_field21')) + lsDelimitChar
 		Else
 			lsOutString +=lsDelimitChar
+		End If				
+			
+	
+		//GI066 Master User User Field22	
+		If idsDoMain.GetItemString(1,'user_field22') <> '' Then
+			lsOutString += String(idsDoMain.GetItemString(1,'user_field22')) + lsDelimitChar
+		Else
+			lsOutString +=lsDelimitChar  
+		End If		
+		
+		// 01/16 - PCONKL - New named fields...
+		
+		//GI067 Master Department Code	
+		If idsDoMain.GetItemString(1,'Department_Code') <> '' Then
+			lsOutString += String(idsDoMain.GetItemString(1,'Department_Code')) + lsDelimitChar
+		Else
+			lsOutString +=lsDelimitChar  
+		End If		
+		
+		//GI068 Master Department Name	
+		If idsDoMain.GetItemString(1,'Department_Name') <> '' Then
+			lsOutString += String(idsDoMain.GetItemString(1,'Department_Name')) + lsDelimitChar
+		Else
+			lsOutString +=lsDelimitChar  
+		End If		
+		
+		//GI069 Master Department Code	
+		If idsDoMain.GetItemString(1,'Division') <> '' Then
+			lsOutString += String(idsDoMain.GetItemString(1,'Division')) + lsDelimitChar
+		Else
+			lsOutString +=lsDelimitChar  
+		End If		
+		
+		//GI070 Master Vendor	
+		If idsDoMain.GetItemString(1,'Vendor') <> '' Then
+			lsOutString += String(idsDoMain.GetItemString(1,'Vendor')) + lsDelimitChar
+		Else
+			lsOutString +=lsDelimitChar  
+		End If		
+		
+		//GI071 Detail - Buyer Part	
+		If idsdoDetail.GetItemString(llDetailFind,'Buyer_Part') <> '' Then
+			lsOutString += String(idsdoDetail.GetItemString(llDetailFind,'Buyer_Part')) + lsDelimitChar
+		Else
+			lsOutString += lsDelimitChar
+		End If		
+		
+		//GI072 Detail - Vendor Part	
+		If idsdoDetail.GetItemString(llDetailFind,'Vendor_Part') <> '' Then
+			lsOutString += String(idsdoDetail.GetItemString(llDetailFind,'Vendor_Part')) + lsDelimitChar
+		Else
+			lsOutString += lsDelimitChar
+		End If		
+		
+		//GI073 Detail - UPC	
+		If idsdoDetail.GetItemString(llDetailFind,'UPC') <> '' Then
+			lsOutString += String(idsdoDetail.GetItemString(llDetailFind,'UPC')) + lsDelimitChar
+		Else
+			lsOutString += lsDelimitChar
+		End If		
+		
+		//GI074 Detail - EAN	
+		If idsdoDetail.GetItemString(llDetailFind,'EAN') <> '' Then
+			lsOutString += String(idsdoDetail.GetItemString(llDetailFind,'EAN')) + lsDelimitChar
+		Else
+			lsOutString += lsDelimitChar
+		End If		
+		
+		//GI075 Detail - GTIN	
+		If idsdoDetail.GetItemString(llDetailFind,'GTIN') <> '' Then
+			lsOutString += String(idsdoDetail.GetItemString(llDetailFind,'GTIN')) + lsDelimitChar
+		Else
+			lsOutString += lsDelimitChar
+		End If		
+		
+		//GI076 Detail - Department Name 	
+		If idsdoDetail.GetItemString(llDetailFind,'Department_Name') <> '' Then
+			lsOutString += String(idsdoDetail.GetItemString(llDetailFind,'Department_Name')) + lsDelimitChar
+		Else
+			lsOutString += lsDelimitChar
+		End If		
+		
+		//GI077 Detail - Division	
+		If idsdoDetail.GetItemString(llDetailFind,'Division') <> '' Then
+			lsOutString += String(idsdoDetail.GetItemString(llDetailFind,'Division')) + lsDelimitChar
+		Else
+			lsOutString += lsDelimitChar
+		End If		
+		
+		//GI078 SSCC - **Not in Master or Detail, not sure why it's on the layout but it's been published, leave blank for now **
+		lsOutString += lsDelimitChar
+		
+		//GI079 Master Account Number	
+		If idsDoMain.GetItemString(1,'Account_Nbr') <> '' Then
+			lsOutString += String(idsDoMain.GetItemString(1,'Account_Nbr')) + lsDelimitChar
+		Else
+			lsOutString +=lsDelimitChar  
+		End If		
+		
+		//GI080 Master ASN Number	
+		If idsDoMain.GetItemString(1,'ASN_Number') <> '' Then
+			lsOutString += String(idsDoMain.GetItemString(1,'ASN_Number')) + lsDelimitChar
+		Else
+			lsOutString +=lsDelimitChar  
+		End If		
+		
+		//GI081 Master Client Cust PO Nbr	
+		If idsDoMain.GetItemString(1,'Client_Cust_PO_Nbr') <> '' Then
+			lsOutString += String(idsDoMain.GetItemString(1,'Client_Cust_PO_Nbr')) + lsDelimitChar
+		Else
+			lsOutString +=lsDelimitChar  
 		End If	
 		
-		//Outerpack SSCC - ** Last Column **
-		If idsDoPack.GetItemString(llRowPos,'Outerpack_SSCC_No') <> '' Then
-			lsOutString += String(idsDoPack.GetItemString(llRowPos,'Outerpack_SSCC_No'))  //+ lsDelimitChar
+		//GI082 Master Client Cust SO Nbr	
+		If idsDoMain.GetItemString(1,'Client_Cust_SO_Nbr') <> '' Then
+			lsOutString += String(idsDoMain.GetItemString(1,'Client_Cust_SO_Nbr')) + lsDelimitChar
 		Else
-		//	lsOutString +=lsDelimitChar
+			lsOutString +=lsDelimitChar  
+		End If	
+		
+		//GI083 Master Container Nbr	
+		If idsDoMain.GetItemString(1,'Container_Nbr') <> '' Then
+			lsOutString += String(idsDoMain.GetItemString(1,'Container_Nbr')) + lsDelimitChar
+		Else
+			lsOutString +=lsDelimitChar  
+		End If	
+		
+		//GI084 Master Dock Code	
+		If idsDoMain.GetItemString(1,'Dock_Code') <> '' Then
+			lsOutString += String(idsDoMain.GetItemString(1,'Dock_Code')) + lsDelimitChar
+		Else
+			lsOutString +=lsDelimitChar  
+		End If	
+		
+		//GI085 Master Document Codes	
+		If idsDoMain.GetItemString(1,'Document_Codes') <> '' Then
+			lsOutString += String(idsDoMain.GetItemString(1,'Document_Codes')) + lsDelimitChar
+		Else
+			lsOutString +=lsDelimitChar  
+		End If	
+		
+		//GI086 Master Equipment Nbr	
+		If String(idsDoMain.GetItemNumber(1,'Equipment_Nbr')) <> '' Then
+			lsOutString += String(idsDoMain.GetItemNumber(1,'Equipment_Nbr')) + lsDelimitChar
+		Else
+			lsOutString +=lsDelimitChar  
+		End If	
+		
+		//GI087 Master FOB	
+		If idsDoMain.GetItemString(1,'FOB') <> '' Then
+			lsOutString += String(idsDoMain.GetItemString(1,'FOB')) + lsDelimitChar
+		Else
+			lsOutString +=lsDelimitChar  
+		End If	
+		
+		//GI088 Master FOB	Bill Duty Acct
+		If idsDoMain.GetItemString(1,'FOB_Bill_Duty_Acct') <> '' Then
+			lsOutString += String(idsDoMain.GetItemString(1,'FOB_Bill_Duty_Acct')) + lsDelimitChar
+		Else
+			lsOutString +=lsDelimitChar  
+		End If	
+		
+		//GI089 Master FOB	Bill Duty Party
+		If idsDoMain.GetItemString(1,'FOB_Bill_Duty_Party') <> '' Then
+			lsOutString += String(idsDoMain.GetItemString(1,'FOB_Bill_Duty_Party')) + lsDelimitChar
+		Else
+			lsOutString +=lsDelimitChar  
+		End If	
+		
+		//GI090 Master FOB	Bill Freight Party
+		If idsDoMain.GetItemString(1,'FOB_Bill_Freight_Party') <> '' Then
+			lsOutString += String(idsDoMain.GetItemString(1,'FOB_Bill_Freight_Party')) + lsDelimitChar
+		Else
+			lsOutString +=lsDelimitChar  
+		End If	
+		
+		//GI091 Master FOB	Bill Freight To Acct
+		If idsDoMain.GetItemString(1,'FOB_Bill_Freight_To_Acct') <> '' Then
+			lsOutString += String(idsDoMain.GetItemString(1,'FOB_Bill_Freight_To_Acct')) + lsDelimitChar
+		Else
+			lsOutString +=lsDelimitChar  
+		End If	
+		
+		//GI092 Master From Warehouse
+		If idsDoMain.GetItemString(1,'From_wh_Loc') <> '' Then
+			lsOutString += String(idsDoMain.GetItemString(1,'From_Wh_Loc')) + lsDelimitChar
+		Else
+			lsOutString +=lsDelimitChar  
+		End If	
+		
+		//GI093 Master Routing Number
+		If idsDoMain.GetItemString(1,'Routing_Nbr') <> '' Then
+			lsOutString += String(idsDoMain.GetItemString(1,'Routing_Nbr')) + lsDelimitChar
+		Else
+			lsOutString +=lsDelimitChar  
+		End If	
+		
+		//GI094 Master Seal Number
+		If idsDoMain.GetItemString(1,'Seal_Nbr') <> '' Then
+			lsOutString += String(idsDoMain.GetItemString(1,'Seal_Nbr')) + lsDelimitChar
+		Else
+			lsOutString +=lsDelimitChar  
+		End If	
+		
+		//GI095 Master Shipping Route
+		If idsDoMain.GetItemString(1,'Shipping_Route') <> '' Then
+			lsOutString += String(idsDoMain.GetItemString(1,'Shipping_Route')) + lsDelimitChar
+		Else
+			lsOutString +=lsDelimitChar  
+		End If	
+		
+		//GI096 Master SLI Nbr
+		If idsDoMain.GetItemString(1,'SLI_Nbr') <> '' Then
+			lsOutString += String(idsDoMain.GetItemString(1,'SLI_Nbr')) + lsDelimitChar
+		Else
+			lsOutString +=lsDelimitChar  
+		End If	
+		
+		//GI097 Detail - client Cust Line No	
+		If idsdoDetail.GetItemString(llDetailFind,'Client_Cust_Line_No') <> '' Then
+			lsOutString += String(idsdoDetail.GetItemString(llDetailFind,'Client_Cust_Line_No')) + lsDelimitChar
+		Else
+			lsOutString += lsDelimitChar
+		End If	
+		
+		//GI098 Detail - VAT ID	
+		If idsdoDetail.GetItemString(llDetailFind,'vat_identifier') <> '' Then
+			lsOutString += String(idsdoDetail.GetItemString(llDetailFind,'vat_identifier')) + lsDelimitChar
+		Else
+			lsOutString += lsDelimitChar
+		End If	
+		
+		//GI099 Detail - CI Value	
+		If idsdoDetail.GetItemString(llDetailFind,'CI_Value') <> '' Then
+			lsOutString += String(idsdoDetail.GetItemString(llDetailFind,'CI_Value')) + lsDelimitChar
+		Else
+			lsOutString += lsDelimitChar
+		End If	
+		
+		//GI100 Detail - Currency
+		If idsdoDetail.GetItemString(llDetailFind,'Currency') <> '' Then
+			lsOutString += String(idsdoDetail.GetItemString(llDetailFind,'Currency')) + lsDelimitChar
+		Else
+			lsOutString += lsDelimitChar
+		End If	
+		
+		//GI101 Detail - Cust Line Nbr
+		If idsdoDetail.GetItemString(llDetailFind,'Cust_Line_Nbr') <> '' Then
+			lsOutString += String(idsdoDetail.GetItemString(llDetailFind,'Cust_Line_Nbr')) + lsDelimitChar
+		Else
+			lsOutString += lsDelimitChar
+		End If	
+		
+		//GI102 Detail - Client Cust Invoice
+		If idsdoDetail.GetItemString(llDetailFind,'Client_Cust_Invoice') <> '' Then
+			lsOutString += String(idsdoDetail.GetItemString(llDetailFind,'Client_Cust_Invoice')) + lsDelimitChar
+		Else
+			lsOutString += lsDelimitChar
+		End If	
+		
+		//GI103 Detail - Cust PO
+		If idsdoDetail.GetItemString(llDetailFind,'Cust_PO_Nbr') <> '' Then
+			lsOutString += String(idsdoDetail.GetItemString(llDetailFind,'Cust_PO_Nbr')) + lsDelimitChar
+		Else
+			lsOutString += lsDelimitChar
+		End If	
+		
+		//GI104 Detail - Delivery Nbr
+		If idsdoDetail.GetItemString(llDetailFind,'Delivery_Nbr') <> '' Then
+			lsOutString += String(idsdoDetail.GetItemString(llDetailFind,'Delivery_Nbr')) + lsDelimitChar
+		Else
+			lsOutString += lsDelimitChar
+		End If	
+		
+		//GI105 Detail - Internal Price
+		If idsdoDetail.GetItemString(llDetailFind,'Internal_Price') <> '' Then
+			lsOutString += String(idsdoDetail.GetItemString(llDetailFind,'Internal_Price')) + lsDelimitChar
+		Else
+			lsOutString += lsDelimitChar
+		End If	
+		
+		//GI106 Detail - Client Inv Type
+		If idsdoDetail.GetItemString(llDetailFind,'Client_Inv_Type') <> '' Then
+			lsOutString += String(idsdoDetail.GetItemString(llDetailFind,'Client_Inv_Type')) + lsDelimitChar
+		Else
+			lsOutString += lsDelimitChar
+		End If	
+		
+		//GI107 Detail - Permit Nbr
+		If idsdoDetail.GetItemString(llDetailFind,'Permit_Nbr') <> '' Then
+			lsOutString += String(idsdoDetail.GetItemString(llDetailFind,'Permit_Nbr')) + lsDelimitChar
+		Else
+			lsOutString += lsDelimitChar
+		End If	
+		
+		//GI108 Detail - Supp_Code
+		If idsdoDetail.GetItemString(llDetailFind,'Supp_Code') <> '' Then
+			lsOutString += String(idsdoDetail.GetItemString(llDetailFind,'Supp_Code')) + lsDelimitChar
+		Else
+			lsOutString += lsDelimitChar
+		End If	
+		
+		//GI109 Detail - User Line item No
+		If idsdoDetail.GetItemString(llDetailFind,'User_Line_Item_No') <> '' Then
+			lsOutString += String(idsdoDetail.GetItemString(llDetailFind,'User_Line_Item_No')) + lsDelimitChar
+		Else
+			lsOutString += lsDelimitChar
+		End If	
+		
+		//GI110 Master Order Type
+		If idsDoMain.GetItemString(1,'Ord_Type') <> '' Then
+			lsOutString += String(idsDoMain.GetItemString(1,'Ord_Type')) + lsDelimitChar
+		Else
+			lsOutString +=lsDelimitChar  
+		End If	
+		
+		//GI111 Detail - Cust SKU
+		If idsdoDetail.GetItemString(llDetailFind,'Customer_SKU') <> '' Then
+			lsOutString += String(idsdoDetail.GetItemString(llDetailFind,'Customer_SKU')) + lsDelimitChar
+		Else
+			lsOutString += lsDelimitChar
+		End If	
+		
+		//GI112 MasterCustomer Order Nbr 
+		If idsDoMain.GetItemString(1,'Cust_Order_No') <> '' Then
+			lsOutString += String(idsDoMain.GetItemString(1,'Cust_Order_No')) + lsDelimitChar
+		Else
+			lsOutString +=lsDelimitChar  
+		End If	
+		
+		//GI113 Detail - Mark For Name
+		If idsdoDetail.GetItemString(llDetailFind,'Mark_For_Name') <> '' Then
+			lsOutString += String(idsdoDetail.GetItemString(llDetailFind,'Mark_For_Name')) + lsDelimitChar
+		Else
+			lsOutString += lsDelimitChar
+		End If	
+		
+		//GI114 Detail - Mark For Address 1
+		If idsdoDetail.GetItemString(llDetailFind,'Mark_For_Address_1') <> '' Then
+			lsOutString += String(idsdoDetail.GetItemString(llDetailFind,'Mark_For_Address_1')) + lsDelimitChar
+		Else
+			lsOutString += lsDelimitChar
+		End If	
+		
+		//GI115 Detail - Mark For Address 2
+		If idsdoDetail.GetItemString(llDetailFind,'Mark_For_Address_2') <> '' Then
+			lsOutString += String(idsdoDetail.GetItemString(llDetailFind,'Mark_For_Address_2')) + lsDelimitChar
+		Else
+			lsOutString += lsDelimitChar
+		End If	
+		
+		//GI116 Detail - Mark For Address 3
+		If idsdoDetail.GetItemString(llDetailFind,'Mark_For_Address_3') <> '' Then
+			lsOutString += String(idsdoDetail.GetItemString(llDetailFind,'Mark_For_Address_3')) + lsDelimitChar
+		Else
+			lsOutString += lsDelimitChar
+		End If	
+		
+		//GI117 Detail - Mark For Address 4
+		If idsdoDetail.GetItemString(llDetailFind,'Mark_For_Address_4') <> '' Then
+			lsOutString += String(idsdoDetail.GetItemString(llDetailFind,'Mark_For_Address_4')) + lsDelimitChar
+		Else
+			lsOutString += lsDelimitChar
+		End If	
+		
+		//GI118 Detail - Mark For City
+		If idsdoDetail.GetItemString(llDetailFind,'Mark_For_City') <> '' Then
+			lsOutString += String(idsdoDetail.GetItemString(llDetailFind,'Mark_For_City')) + lsDelimitChar
+		Else
+			lsOutString += lsDelimitChar
+		End If	
+		
+		//GI119 Detail - Mark For State
+		If idsdoDetail.GetItemString(llDetailFind,'Mark_For_State') <> '' Then
+			lsOutString += String(idsdoDetail.GetItemString(llDetailFind,'Mark_For_State')) + lsDelimitChar
+		Else
+			lsOutString += lsDelimitChar
+		End If	
+		
+		//GI120 Detail - Mark For Zip
+		If idsdoDetail.GetItemString(llDetailFind,'Mark_For_Zip') <> '' Then
+			lsOutString += String(idsdoDetail.GetItemString(llDetailFind,'Mark_For_Zip')) + lsDelimitChar
+		Else
+			lsOutString += lsDelimitChar
+		End If	
+		
+		//GI121 Detail - Mark For Country
+		If idsdoDetail.GetItemString(llDetailFind,'Mark_For_Country') <> '' Then
+			lsOutString += String(idsdoDetail.GetItemString(llDetailFind,'Mark_For_Country')) + lsDelimitChar
+		Else
+			lsOutString += lsDelimitChar
+		End If	
+		
+		//GI 122 - DONO  
+		lsOutString += asDONO + lsDelimitChar
+		
+		
+		//GI123 - Consolidation_No (ERPORDERNO)- ** LAST COLUMN*/
+		//This is their Sales Order Number that we are storing in the Consolidation NO so multiple picks are consolidated
+		// We may have multiple shipments for the same SO so we are appending a *2, *3, etc so we need to strip it off here
+		
+		lsTemp = String(idsDoMain.GetItemString(1,'Consolidation_no'))
+		
+		If pos(lsTemp,"*") > 0 Then
+			lsTemp = left(lsTemp,pos(lsTemp,"*") - 1)
+		End If
+		
+		If lsTemp <> '' Then
+			lsOutString += lsTemp  // + lsDelimitChar
+		Else
+			//lsOutString +=lsDelimitChar  
 		End If	
 		
 		idsOut.SetItem(llNewRow,'Project_id', asProject)
@@ -2008,14 +1953,248 @@ IF ProfileString(gsinifile, asproject, "IncludeGIPackDetail",'N')  = 'Y' THEN
 		idsOut.SetItem(llNewRow,'file_name', lsFileName)
 		
 	
-	next /*next Delivery Pack record */
+	next /*next Delivery Detail record */
+	
+	
+	IF ProfileString(gsinifile, asproject, "IncludeGIPackDetail",'N')  = 'Y' THEN
+	
+		//Get the Project / Warehouse defaults for UCC
+		
+		lsWHCode = idsDoMain.GetItemString(1,'wh_code')
+		
+		SELECT Project.UCC_Company_Prefix INTO :lsUCCCompanyPrefix FROM Project WHERE Project_ID = :asproject USING SQLCA;
+		
+		IF IsNull(lsUCCCompanyPrefix) Then lsUCCCompanyPrefix = ''
+		
+		SELECT Warehouse.UCC_Location_Prefix INTO :lsUCCLocationPrefix FROM Warehouse WHERE WH_Code = :lsWHCode USING SQLCA;
+		
+		IF IsNull(lsUCCLocationPrefix) Then lsUCCLocationPrefix = ''
+				
+		
+		llRowCount = idsDoPack.RowCount()
+		
+		For llRowPos = 1 to llRowCOunt
+		
+			llNewRow = idsOut.insertRow(0)
+		
+		
+			lsSku = idsdoPack.GetITEmString(llRowPos,'sku')
+			lsSuppCode =  Upper(idsdoPack.GetITEmString(llRowPos,'supp_code'))
+			lsLineItemNo = String(idsdoPack.GetITemNumber(llRowPos, 'Line_item_No'))
+			lsOrdStatus = idsDoMain.GetItemString(1,'Ord_Status') 
+			lsSOM = idsdoPack.GetITEmString(llRowPos,'standard_of_measure')
+		
+			//Record_ID (‘PK’)
+		
+			lsOutString = 'PK' + lsDelimitChar	
+		
+			//Project ID	C(10)	Yes	N/A	Project identifier
+			
+			lsOutString +=  asproject + lsDelimitChar
+			
+			//Delivery Number	C(10)	Yes	N/A	Delivery Order Number
+			
+			lsOutString += idsDoMain.GetItemString(1,'Invoice_no') + lsDelimitChar	
+			
+			//Carton Number 
+			
+			//On the Packing Segment, we need to prefix the carton number with the Project level and Warehouse level UCC values. 
+			//Carton Number will end up being an 18 digit value consisting of ‘Project.UCC_Company_Prefix’ (8) + ‘Warehouse.UCC_Location_Prefix’(1) + ‘Delivery_Packing.Carton_No’ (9).  This can be baseline as those fields will be blank if not used.
+			
+			lsCartonNo = idsdoPack.GetITemString(llRowPos, 'Carton_No')
+			
+			If lsCartonNo <> '' Then
+				lsOutString += lsCartonNo  + lsDelimitChar
+			ELSE
+				lsOutString +=lsDelimitChar //17-Dec-2014 :Madhu- Added code to pass even if it is empty.
+		
+			END IF
+			
+			//Line Item Number
+			
+			lsOutString += String(idsdoPack.GetITemNumber(llRowPos, 'Line_item_No')) + lsDelimitChar
+			
+			//SKU
+			
+			lsOutString += lsSku  + lsDelimitChar	
+			
+			//Qty
+			
+			lsOutString += String( idsdoPack.GetITemNumber(llRowPos,'quantity')) + lsDelimitChar
+			
+			//Weight (Gross for carton, repeated for all records)
+			
+			//Need to validate. - Make sure this is summing up correctly.
+			
+			If String(idsDoPack.GetItemNumber(llRowPos,'Weight_Gross')) <> '' Then
+				lsOutString += String(idsDoPack.GetItemNumber(llRowPos,'Weight_Gross')) + lsDelimitChar
+			Else
+				lsOutString += "0" + lsDelimitChar
+			End If	 
+							
+			
+			//Weight Unit (for the current line/SKU) KG or LB
+			 
+			 If lsSOM <> '' Then
+				IF Trim(lsSOM) = 'E' THEN
+					lsOutString += 'LB' + lsDelimitChar
+				ELSE
+					lsOutString += 'KG' + lsDelimitChar
+				END IF
+			Else
+				lsOutString +=lsDelimitChar
+			End If	
+		
+			
+			//Weight SOM (standard of meas)
+			
+			 If lsSOM <> '' Then
+				IF Trim(lsSOM) = 'E' THEN
+					lsOutString += 'LB' + lsDelimitChar
+				ELSE
+					lsOutString += 'KG' + lsDelimitChar
+				END IF
+			Else
+				lsOutString +=lsDelimitChar
+			End If	
+			
+			//Carton Length
+		 
+			If String(idsDoPack.GetItemNumber(llRowPos,'Length')) <> '' Then
+				lsOutString += String(idsDoPack.GetItemNumber(llRowPos,'Length')) + lsDelimitChar
+			Else
+				lsOutString +=lsDelimitChar
+			End If	 			 
+						 
+						 
+			
+			//Carton Width
+			 
+			 If String(idsDoPack.GetItemNumber(llRowPos,'Width')) <> '' Then
+				lsOutString += String(idsDoPack.GetItemNumber(llRowPos,'Width')) + lsDelimitChar
+			Else
+				lsOutString +=lsDelimitChar
+			End If	 			
+							 
+			 
+			
+			//Carton Height
+						
+			 If String(idsDoPack.GetItemNumber(llRowPos,'Height')) <> '' Then
+				lsOutString += String(idsDoPack.GetItemNumber(llRowPos,'Height')) + lsDelimitChar
+			Else
+				lsOutString +=lsDelimitChar
+			End If	 			
+								
+			
+			//Carton DIM SOM (standard of meas) IN or CM
+			
+			 If lsSOM <> '' Then
+				IF Trim(lsSOM) = 'E' THEN
+					lsOutString += 'IN' + lsDelimitChar
+				ELSE
+					lsOutString += 'CM' + lsDelimitChar
+				END IF
+			Else
+				lsOutString +=lsDelimitChar
+			End If	
+			
+			//Ship Tracking Number
+			
+		
+			 If idsDoPack.GetItemString(llRowPos,'Shipper_Tracking_ID') <> '' Then
+				lsOutString += String(idsDoPack.GetItemString(llRowPos,'Shipper_Tracking_ID')) + lsDelimitChar
+			Else
+				lsOutString +=lsDelimitChar
+			End If	    
+			
+			//User Field 1
+			
+			If idsDoPack.GetItemString(llRowPos,'user_field1') <> '' Then
+				lsOutString += String(idsDoPack.GetItemString(llRowPos,'user_field1')) + lsDelimitChar
+			Else
+				lsOutString +=lsDelimitChar
+			End If	
+			
+			//User Field 2
+			
+			If idsDoPack.GetItemString(llRowPos,'user_field2') <> '' Then
+				lsOutString += String(idsDoPack.GetItemString(llRowPos,'user_field2'))  + lsDelimitChar
+			Else
+				lsOutString +=lsDelimitChar
+			End If		
+	
+			// 01/16 - PCONKL - New Named Fields
+			
+			//InterPack Count
+			If idsDoPack.GetItemString(llRowPos,'Interpack_Count') <> '' Then
+				lsOutString += String(idsDoPack.GetItemString(llRowPos,'Interpack_Count'))  + lsDelimitChar
+			Else
+				lsOutString +=lsDelimitChar
+			End If	
+			
+			//InterPack Type
+			If idsDoPack.GetItemString(llRowPos,'Interpack_Type') <> '' Then
+				lsOutString += String(idsDoPack.GetItemString(llRowPos,'Interpack_Type'))  + lsDelimitChar
+			Else
+				lsOutString +=lsDelimitChar
+			End If	
+			
+			//Pack SSCC
+			If idsDoPack.GetItemString(llRowPos,'Pack_SSCC_No') <> '' Then
+				lsOutString += String(idsDoPack.GetItemString(llRowPos,'Pack_SSCC_No'))  + lsDelimitChar
+			Else
+				lsOutString +=lsDelimitChar
+			End If	
+			
+			//Pack Lot
+			If idsDoPack.GetItemString(llRowPos,'Pack_Lot_No') <> '' Then
+				lsOutString += String(idsDoPack.GetItemString(llRowPos,'Pack_Lot_No'))  + lsDelimitChar
+			Else
+				lsOutString +=lsDelimitChar
+			End If	
+			
+			//Pack PONO
+			If idsDoPack.GetItemString(llRowPos,'Pack_PO_No') <> '' Then
+				lsOutString += String(idsDoPack.GetItemString(llRowPos,'Pack_PO_No'))  + lsDelimitChar
+			Else
+				lsOutString +=lsDelimitChar
+			End If	
+			
+			//Pack PONO2
+			If idsDoPack.GetItemString(llRowPos,'Pack_PO_No2') <> '' Then
+				lsOutString += String(idsDoPack.GetItemString(llRowPos,'Pack_PO_No2'))  + lsDelimitChar
+			Else
+				lsOutString +=lsDelimitChar
+			End If	
+			
+			//Outerpack SSCC - ** Last Column **
+			If idsDoPack.GetItemString(llRowPos,'Outerpack_SSCC_No') <> '' Then
+				lsOutString += String(idsDoPack.GetItemString(llRowPos,'Outerpack_SSCC_No'))  //+ lsDelimitChar
+			Else
+			//	lsOutString +=lsDelimitChar
+			End If	
+			
+			idsOut.SetItem(llNewRow,'Project_id', asProject)
+			idsOut.SetItem(llNewRow,'edi_batch_seq_no', Long(ldBatchSeq))
+			idsOut.SetItem(llNewRow,'line_seq_no', llNewRow)
+			idsOut.SetItem(llNewRow,'batch_data', lsOutString)
+			lsFileName = 'GI' + String(ldBatchSeq,'000000') + '.dat'
+			idsOut.SetItem(llNewRow,'file_name', lsFileName)
+			
+		
+		next /*next Delivery Pack record */
+	
+	END IF
+	
+	//Write the Outbound File - no need to save and re-retrieve - just use the currently loaded DW
+	gu_nvo_process_files.uf_process_flatfile_outbound_unicode(idsOut,asProject)
+	uf_postship_confirm(asproject,asdono) //Dinesh - 02/16/2023- SIMS-167-SIMS KENDO - Post Ship Confirmation
 
-END IF
-
-//Write the Outbound File - no need to save and re-retrieve - just use the currently loaded DW
-gu_nvo_process_files.uf_process_flatfile_outbound_unicode(idsOut,asProject)
-
-
+else //Dinesh - 02/16/2023- SIMS-101-SIMS KENDO - Post Ship Confirmation 
+	
+end if
+//uf_postship_confirm(asproject,asdono) //Dinesh - 10/10/2022- SIMS-101-SIMS KENDO - Post Ship Confirmation
 
 Return 0
 end function

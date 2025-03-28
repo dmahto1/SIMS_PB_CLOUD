@@ -2408,11 +2408,18 @@ REturn isREportReplicated
 end function
 
 public subroutine of_sims_notification (integer al_interval);//09-APR-2015 Madhu SIMS Timer Notification Alert Functionality
-
+long ll_time
 //Look which Alert Type Flag is turned ON
 IF gs_ShutdownFlag ='Y' and ib_shutdown =TRUE THEN //On next cycle of interval, force to shutdown SIMS instance.
-	ib_shutdown =FALSE
-	HALT CLOSE 	//Auto shutdown SIMS
+		//of_sims_notification_process() //process for notification alert
+		ib_shutdown =FALSE
+		//timer(al_interval)
+		//of_sims_notification_process()
+		// Begin - Dinesh - 05/31/2024- SIMS-473- Google - SIMS – SIMS Timer Enhancement
+		//select time_interval into:ll_time from SIMS_Notification_user where user_id=:gs_userid using sqlca;
+		HALT CLOSE 	//Auto shutdown SIMS
+		//sleep(1)
+		// End - Dinesh - 05/31/2024- SIMS-473- Google - SIMS – SIMS Timer Enhancemen
 	
 ELSEIF gs_ShutdownFlag ='Y' and ib_shutdown =FALSE THEN //First cycle, set boolean value to TRUE and send an alert message.
 	of_sims_notification_process() //process for notification alert
@@ -2471,13 +2478,18 @@ IF gs_Projectlist ='*ALL' and gs_Userlist ='*ALL' THEN
 
 	ib_Flag =TRUE
 	gbLogin =TRUE
+	// Begin - Dinesh - 05/31/2024- SIMS-473-Google - SIMS – SIMS Timer Enhancement
 	MessageBox("SIMS Alert Notification",ls_Alert_Msg,StopSign!)
-
+		if gs_ShutdownFlag ='Y'   then
+			MessageBox("SIMS Alert Notification", "Please save all your changes within " + string(gi_time_interval) + " Seconds. It is going to be shut down.",StopSign!)
+		end if
+	//End - Dinesh - 05/31/2024- SIMS-473-Google - SIMS – SIMS Timer Enhancement
 //B. only selected project users get an alert message
-ELSEIF gs_Projectlist <> '*ALL' and gs_Userlist ='*ALL' THEN 
+ELSEIF upper(gs_Projectlist) <> '*ALL' and gs_Userlist ='*ALL' THEN 
 
 	//check whether logged user is associated with selected project.		
-	lsSql ="SELECT COUNT(*) FROM User_Project WITH (NOLOCK) WHERE Project_Id IN (" + gs_Projectlist +") and UserId ='"+gs_userId+"'"
+	lsSql ="SELECT COUNT(*) FROM User_Project WITH (NOLOCK) WHERE Project_Id IN ('" + gs_project + "') and UserId ='"+gs_userId+"'"
+	// "SELECT * FROM SERIAL_NUMBER_INVENTORY WHERE PROJECT_ID = '" + gs_project + "' AND SERIAL_NO = '" + Right(lsSerial ,len(lsSerial) -1) + "' AND SKU in ( " + ls_formatted_gpns + " ) "
 	ldsUser.create( SQLCA.SyntaxFromSql(lsSql,"",lsErrors))
 	
 	IF len(lsErrors) > 0 THEN
@@ -2487,41 +2499,67 @@ ELSEIF gs_Projectlist <> '*ALL' and gs_Userlist ='*ALL' THEN
 		li_rowcount =ldsUser.retrieve( )
 	END IF
 	
-	IF li_rowcount > 0 and Pos(gs_Projectlist,gs_project) > 0 THEN 	//Login Project should be in selected project list
+	IF li_rowcount > 0 and upper(gs_Projectlist)=upper(gs_project) then // Dinesh - 05/31/2024- SIMS-473-Google - SIMS – SIMS Timer Enhancement
+		//Login Project should be in selected project list
+	//IF li_rowcount > 0 and Pos(gs_Projectlist,gs_project) > 0 THEN 	//Login Project should be in selected project list// Dinesh - 05/31/2024- SIMS-473-Google - SIMS – SIMS Timer Enhancement
 		ib_Flag =TRUE
 		gbLogin =TRUE
+		// Begin - Dinesh - 05/31/2024- SIMS-473-Google - SIMS – SIMS Timer Enhancement
 		MessageBox("SIMS Alert Notification",ls_Alert_Msg,StopSign!)
-	ELSE
-		ib_Flag =FALSE
-		gbLogin =FALSE
+		if gs_ShutdownFlag ='Y'   then
+			MessageBox("SIMS Alert Notification", "Please save all your changes within " + string(gi_time_interval) + " Seconds. It is going to be shut down.",StopSign!)
+		end if
+		// End - Dinesh - 05/31/2024- SIMS-473-Google - SIMS – SIMS Timer Enhancement
+//	ELSE
+//		ib_Flag =FALSE
+//		gbLogin =FALSE
 	END IF
 
 //C. only selected users get an alert message against all assigned projects
-ELSEIF gs_Projectlist ='*ALL' and gs_Userlist <> '*ALL' THEN
+ELSEIF gs_Projectlist ='*ALL' and gs_Userlist <> '*ALL'  and  upper(gs_Userlist) = upper(gs_Userid) THEN
 
-	IF Pos(gs_Userlist,gs_userId) > 0  THEN 	
+	//IF Pos(gs_Userlist,gs_userId) > 0  THEN // Dinesh - 05/31/2024- SIMS-473- Google - SIMS – SIMS Timer Enhancement
+	//IF  gs_Projectlist=gs_project then // Dinesh - 05/31/2024- SIMS-473- Google - SIMS – SIMS Timer Enhancement
 		ib_Flag =TRUE
 		gbLogin =TRUE
+		// Begin - Dinesh - 05/31/2024- SIMS-473-Google - SIMS – SIMS Timer Enhancement
 		MessageBox("SIMS Alert Notification",ls_Alert_Msg,StopSign!)
-	ELSE
-		ib_Flag =FALSE
-		gbLogin =FALSE
-	END IF
+		
+		if gs_ShutdownFlag ='Y'   then
+			MessageBox("SIMS Alert Notification", "Please save all your changes within " + string(gi_time_interval) + " Seconds. It is going to be shut down.",StopSign!)
+		end if
+		
+		// End - Dinesh - 05/31/2024- SIMS-473-Google - SIMS – SIMS Timer Enhancement
+//	ELSE
+	//	ib_Flag =FALSE
+	//	gbLogin =FALSE
+	//END IF
 
 //D. only selected Project and selected users get an alert message
-ELSEIF  gs_Projectlist <> '*ALL' and gs_Userlist <> '*ALL' THEN
+ELSEIF  upper(gs_Projectlist) <> '*ALL' and upper(gs_Userlist) <> '*ALL' and  upper(gs_Userlist) =upper(gs_Userid) THEN
+	// Begin - Dinesh - 05/31/2024- SIMS-473- Google - SIMS – SIMS Timer Enhancement
+	//li_Pos1 =Pos(gs_Projectlist,gs_project)
+	//li_Pos =Pos(gs_Userlist,gs_userId)
 	
-	li_Pos1 =Pos(gs_Projectlist,gs_project)
-	li_Pos =Pos(gs_Userlist,gs_userId)
-	
-	IF li_Pos > 0 and li_Pos1 > 0 THEN 	
+	//IF li_Pos > 0 and li_Pos1 > 0 THEN 	
+	// End - Dinesh - 05/31/2024- commented above line SIMS-473- Google - SIMS – SIMS Timer Enhancement
+	IF upper(gs_Projectlist)=gs_project and upper(gs_userlist) = upper(gs_userid) then // Dinesh - 05/31/2024- SIMS-473- Google - SIMS – SIMS Timer Enhancement
 		ib_Flag =TRUE
 		gbLogin =TRUE
+		// Begin - Dinesh - 05/31/2024- SIMS-473-Google - SIMS – SIMS Timer Enhancement
 		MessageBox("SIMS Alert Notification",ls_Alert_Msg,StopSign!)
-	ELSE
-		ib_Flag =FALSE
-		gbLogin =FALSE
+		if gs_ShutdownFlag ='Y'   then
+			MessageBox("SIMS Alert Notification", "Please save all your changes within " + string(gi_time_interval) + " Seconds. It is going to be shut down.",StopSign!)
+		end if
+		// End - Dinesh - 05/31/2024- SIMS-473-Google - SIMS – SIMS Timer Enhancement
+//	ELSE
+//		ib_Flag =FALSE
+//		gbLogin =FALSE
 	END IF
+ELSE
+	ib_Flag =FALSE
+	gbLogin =FALSE
+	
 	
 END IF
 end subroutine

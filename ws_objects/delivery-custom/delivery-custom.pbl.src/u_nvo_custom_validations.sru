@@ -24,7 +24,7 @@ Boolean	lbNotCarton
 DateTime ldt_schedule_datetime, ldtToday
 String ls_country_code, lsSiteID, lsFind
 int blank_emc_codes
-string ls_do_no
+string ls_do_no,ls_Cust_code
 Datastore	lds_compare
 String ls_DWG_UPLOAD
 Decimal ldReqQty,ldAllocQty //29-Apr-2015 :Madhu- Added for FRIEDRICH
@@ -358,6 +358,32 @@ Choose Case Upper(gs_project)
 	//MEA - 5/13 - Multi-Confirm not added for Pandora
 
 	Case 'PANDORA'
+		
+		//Begin Dinesh 05/25/2021 S57453- Google - SIMS - Bill of Lading Changes
+		string ls_trailer_num,ls_seal_num
+	If (w_do.idw_main.getitemstring(1,'Carrier')='LSLGFTLSTD' or w_do.idw_main.getitemstring(1,'Carrier')='LSLGFTLTMD') and ((isnull(w_do.idw_main.getitemstring(1,'user_field6'))) or (w_do.idw_main.getitemstring(1,'user_field6') = '')) then
+			messagebox (w_do.is_title, "Trailer Number can not be left blank, Please enter the Trailer number!", StopSign!)
+			w_do.tab_main.SelectTab(2)
+			w_do.idw_other.SetColumn('user_field6')
+			w_do.idw_Other.SetFocus()
+			ls_trailer_num=w_do.idw_main.getitemstring(1,'user_field6')
+			w_do.idw_main.SetItem( 1, "user_field6", ls_trailer_num)
+			Return - 1
+	end if 
+	ls_Cust_code = w_do.idw_main.GetItemString(1, 'cust_code')          //Akash Baghel......10/19/2023...... SIMS-338.....SIMS PIP/SIP - Re-enable WMS CUTOVER functionality
+	//If (w_do.idw_main.getitemstring(1,'Carrier')='LSLGFTLSTD' or w_do.idw_main.getitemstring(1,'Carrier')='LSLGFTLTMD' or w_do.idw_main.getitemstring(1,'Carrier')='MLOGSHLSHL') and ((isnull(w_do.idw_main.getitemstring(1,'user_field3'))) or (w_do.idw_main.getitemstring(1,'user_field3') = '')) then
+		If ls_cust_code <> 'WMSCUTOVER' and (w_do.idw_main.getitemstring(1,'Carrier')='LSLGFTLSTD' or w_do.idw_main.getitemstring(1,'Carrier')='LSLGFTLTMD' or w_do.idw_main.getitemstring(1,'Carrier')='MLOGSHLSHL') and ((isnull(w_do.idw_main.getitemstring(1,'user_field3'))) or (w_do.idw_main.getitemstring(1,'user_field3') = '')) then	     ////Akash Baghel....10/19/2023...... WMSCUTOVER Condition SIMS-338.....SIMS PIP/SIP - Re-enable WMS CUTOVER functionality
+	//If (w_do.idw_main.getitemstring(1,'Carrier')='LSLGFTLSTD' or w_do.idw_main.getitemstring(1,'Carrier')='LSLGFTLTMD' or w_do.idw_main.getitemstring(1,'Carrier')='MLOGSHLSHL') and ((isnull(w_do.idw_main.getitemstring(1,'user_field3'))) or (w_do.idw_main.getitemstring(1,'user_field3') = '')) then
+			messagebox (w_do.is_title, "Seal Number can not be left blank, Please enter the Seal number!", StopSign!)
+			w_do.tab_main.SelectTab(2)
+			w_do.idw_other.SetColumn('user_field3')
+			w_do.idw_Other.SetFocus()
+			ls_seal_num=w_do.idw_main.getitemstring(1,'user_field3')
+			w_do.idw_main.SetItem( 1, "user_field3", ls_seal_num)
+			Return - 1
+	
+	End If
+		//End Dinesh 05/25/2021 S57453- Google - SIMS - Bill of Lading Changes
 		
 		string ls_transport_mode, ls_freight_terms
 

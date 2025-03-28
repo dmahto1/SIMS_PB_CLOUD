@@ -39,6 +39,7 @@ String gsDoNo,gsRoNo //29-Sep-2014 :Madhu -KLN B2B Conversion to SPS
 String gsEmailSubject //2019/05/31  - S33973  - Added a global email subjuct line to allow customization within a process
 
 end variables
+
 global type sims3fp from application
 string appname = "sims3fp"
 end type

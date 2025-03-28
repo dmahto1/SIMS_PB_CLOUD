@@ -45,6 +45,56 @@ type dw_search_entry from datawindow within tabpage_search
 end type
 type tabpage_order from userobject within tab_main
 end type
+type cb_search1 from commandbutton within tabpage_order
+end type
+type st_count2 from statictext within tabpage_order
+end type
+type st_4 from statictext within tabpage_order
+end type
+type st_count1 from statictext within tabpage_order
+end type
+type st_3 from statictext within tabpage_order
+end type
+type sle_shipmentid from singlelineedit within tabpage_order
+end type
+type cb_search2 from commandbutton within tabpage_order
+end type
+type st_2 from statictext within tabpage_order
+end type
+type cbx_loading from checkbox within tabpage_order
+end type
+type cbx_packing from checkbox within tabpage_order
+end type
+type cbx_picking from checkbox within tabpage_order
+end type
+type cbx_new from checkbox within tabpage_order
+end type
+type dw_warehouse from datawindow within tabpage_order
+end type
+type st_warehouse from statictext within tabpage_order
+end type
+type cb_9 from commandbutton within tabpage_order
+end type
+type cb_cancel from commandbutton within tabpage_order
+end type
+type cb_save from commandbutton within tabpage_order
+end type
+type cb_refresh from commandbutton within tabpage_order
+end type
+type cb_5 from commandbutton within tabpage_order
+end type
+type cb_4 from commandbutton within tabpage_order
+end type
+type cb_3 from commandbutton within tabpage_order
+end type
+type cb_2 from commandbutton within tabpage_order
+end type
+type cb_1 from commandbutton within tabpage_order
+end type
+type dw_consolidated_shipment from datawindow within tabpage_order
+end type
+type dw_shipment from datawindow within tabpage_order
+end type
 type cb_otmchanged from commandbutton within tabpage_order
 end type
 type dw_packprint from datawindow within tabpage_order
@@ -67,7 +117,38 @@ type cb_printpack from commandbutton within tabpage_order
 end type
 type cb_add from commandbutton within tabpage_order
 end type
+type gb_1 from groupbox within tabpage_order
+end type
+type gb_2 from groupbox within tabpage_order
+end type
+type gb_3 from groupbox within tabpage_order
+end type
 type tabpage_order from userobject within tab_main
+cb_search1 cb_search1
+st_count2 st_count2
+st_4 st_4
+st_count1 st_count1
+st_3 st_3
+sle_shipmentid sle_shipmentid
+cb_search2 cb_search2
+st_2 st_2
+cbx_loading cbx_loading
+cbx_packing cbx_packing
+cbx_picking cbx_picking
+cbx_new cbx_new
+dw_warehouse dw_warehouse
+st_warehouse st_warehouse
+cb_9 cb_9
+cb_cancel cb_cancel
+cb_save cb_save
+cb_refresh cb_refresh
+cb_5 cb_5
+cb_4 cb_4
+cb_3 cb_3
+cb_2 cb_2
+cb_1 cb_1
+dw_consolidated_shipment dw_consolidated_shipment
+dw_shipment dw_shipment
 cb_otmchanged cb_otmchanged
 dw_packprint dw_packprint
 dw_order dw_order
@@ -79,6 +160,9 @@ cb_selectall_orders cb_selectall_orders
 st_1 st_1
 cb_printpack cb_printpack
 cb_add cb_add
+gb_1 gb_1
+gb_2 gb_2
+gb_3 gb_3
 end type
 type tabpage_detail from userobject within tab_main
 end type
@@ -143,11 +227,12 @@ end type
 end forward
 
 global type w_shipments from w_std_master_detail
-integer width = 3814
-integer height = 2365
+integer width = 4521
+integer height = 2384
 string title = "Shipments"
 event ue_print_bol ( )
 event ue_process_bol ( )
+event ue_insert ( )
 end type
 global w_shipments w_shipments
 
@@ -162,6 +247,11 @@ DataStore ids_do_main, ids_do_other,ids_do_detail,  ids_pick, ids_pack, ids_seri
 String 	isOrigSQL, isShipNo, is_OldNew, is_bolno, is_dono, is_text[], isrodono
 Boolean	ibOrdersAdded, ibStatChanged, ibAWBChanged, ibZipChanged, ibCarrierChanged, ibMorkKitOrder, ib_UpdateOrderRemoveStatus
 integer	ii_bol_current_page, ii_bol_current_row
+string is_shipment_id
+long il_row
+boolean ib_save= False,ib_right= False,ib_left=False,ib_all_left=False,ib_all_right= False,ib_shipexist=False
+string is_status_new,is_status_picking,is_status_packing,is_status_loading,is_invoice,is_shipment_id_all,is_new_shipmentid,is_shipmentid
+BOOLEAN ib_ship= false
 
 
 
@@ -179,6 +269,8 @@ public function integer wf_create_inbound (ref datastore adwmain, string asdono)
 public function string pandora_getwarehouse (string as_cust)
 public function string pandora_getowner (string astype, string asvalue)
 public function integer wf_lock (boolean ab_lock)
+public function string wf_filter_status (string as_status)
+public function string wf_shipment_id ()
 end prototypes
 
 event ue_print_bol();
@@ -2310,6 +2402,52 @@ END IF
 Return 0
 end function
 
+public function string wf_filter_status (string as_status);// Begin - Dinesh - 02/19/2024- Google - SIMS – Shuttle Consolidation and BOL Printing (368)
+string ls_Filter,ls_wh_code
+if as_status = 'N' then
+	ls_Filter ='ls_Filter'
+	ls_Filter = "Ord_Status = 'N' "
+end if	  
+if  as_status = 'A' then
+	ls_Filter='A'
+end if
+
+if  as_status = 'I' then
+	ls_Filter= 'I'
+	ls_Filter = "Ord_Status = 'I' "
+	 tab_main.tabpage_order.dw_shipment.setfilter(ls_filter)
+	 tab_main.tabpage_order.dw_shipment.filter()
+	  tab_main.tabpage_order.dw_shipment.rowcount()  
+end if
+if  as_status = 'L' then
+	ls_Filter='L'  
+end if
+return ls_Filter
+
+// End - Dinesh - 02/19/2024- Google - SIMS – Shuttle Consolidation and BOL Printing (368)
+
+end function
+
+public function string wf_shipment_id ();long i
+string ls_shipmentid_exist,ls_shipmentid,ls_invoice_no,lsMessage
+boolean lb_shipexist
+decimal ldshipmentid
+for i=1 to tab_main.tabpage_order.dw_consolidated_shipment.rowcount()
+		ls_shipmentid_exist=  tab_main.tabpage_order.dw_consolidated_shipment.GetITemString(1,'shipment_id')
+			 if ls_shipmentid_exist='' or isnull(ls_shipmentid_exist) then
+				lb_shipexist= False
+				sqlca.sp_next_avail_seq_no(gs_project,'Delivery_Master','Shipment_Id',ldshipmentid) //get the next available shipment id
+				Execute Immediate "COMMIT" using SQLCA;
+				ls_shipmentid = 'SHL' + String(Long(ldshipmentid),"0000000")		
+			else
+				ls_shipmentid = ls_shipmentid_exist
+			End if
+next
+lb_shipexist= True
+return ls_shipmentid
+	
+end function
+
 on w_shipments.create
 int iCurrent
 call super::create
@@ -2320,8 +2458,9 @@ call super::destroy
 if IsValid(MenuID) then destroy(MenuID)
 end on
 
-event ue_postopen;call super::ue_postopen;DatawindowChild	ldwc, ldwc2, ldwc_ordstatus, ldwc_shipordstatus
-
+event ue_postopen;call super::ue_postopen;DatawindowChild	ldwc, ldwc2, ldwc_ordstatus, ldwc_shipordstatus,ldwc_wh_code
+ long ll_ret,ll_wh
+ string ls_wh_code,lsFilter // Dinesh - 02/21/2024- SIMS-378- Google - SIMS – Shuttle Consolidation and BOL Printing (368)
 iw_window = This
 
 iu_Shipments = Create u_nvo_shipments
@@ -2409,6 +2548,18 @@ If gs_project = 'PANDORA' Then
 	 idw_search.GetChild("ord_status", ldwc_ordstatus)
 	 ldwc_ordstatus.SetTransObject(SQLCA)	
 	 ldwc_ordstatus.Retrieve(gs_project)		
+	 
+	 // Beign -Dinesh -  SIMS-378 - Google - SIMS – Shuttle Consolidation and BOL Printing (368)
+	 tab_main.tabpage_order.dw_shipment.dataobject ='d_shipment_order'
+	 tab_main.tabpage_order.dw_warehouse.SetTransObject(SQLCA)	
+	 tab_main.tabpage_order.dw_warehouse.Retrieve()
+	 tab_main.tabpage_order.dw_warehouse.GetChild('wh_code', ldwc_wh_code)
+	 ldwc_wh_code.SetTransObject(SQLCA)	
+	 ldwc_wh_code.Retrieve()
+	 lsFilter = "Upper(userid) = '" + Upper(gs_userid) + "'"
+	ldwc_wh_code.SetFilter(lsFilter)
+	ldwc_wh_code.Filter()
+	  // End - Dinesh - SIMS-378 - Google - SIMS – Shuttle Consolidation and BOL Printing (368)
 	
 	//On the shipment main screen
 	 idw_main.object.ord_status.dddw.name='dddw_shipment_order_status_otm'		
@@ -2661,6 +2812,21 @@ if g.ibEtaMaintEnabled then
 //	tab_main.tabpage_main.cb_GetETA.visible = false
 //	tab_main.tabpage_main.cb_ETAmaint.visible = false
 end if
+
+// Beign -Dinesh -02/21/2024-  SIMS-378 - Google - SIMS – Shuttle Consolidation and BOL Printing (368)
+	 long ll_ret,ll_wh
+	 string ls_wh_code,lsFilter
+	 datawindowchild ldwc_wh_code
+	 tab_main.tabpage_order.dw_shipment.dataobject ='d_shipment_orders'
+	 tab_main.tabpage_order.dw_warehouse.SetTransObject(SQLCA)	
+	 tab_main.tabpage_order.dw_warehouse.Retrieve()
+	 tab_main.tabpage_order.dw_warehouse.GetChild('wh_code', ldwc_wh_code)
+	 ldwc_wh_code.SetTransObject(SQLCA)	
+	 ldwc_wh_code.Retrieve()
+	 lsFilter = "Upper(userid) = '" + Upper(gs_userid) + "'"
+	ldwc_wh_code.SetFilter(lsFilter)
+	ldwc_wh_code.Filter()
+	// End - Dinesh 02/21/2024 - SIMS-378 - Google - SIMS – Shuttle Consolidation and BOL Printing (368)
 
 tab_main.tabpage_bol.dw_bol_entry.Reset()
 tab_main.tabpage_bol.dw_bol_prt.Reset()
@@ -3127,11 +3293,31 @@ END IF
 
 end event
 
+event close;call super::close;// Begin - Dinesh - 03/05/2024- SIMS-378- Google - Consolidated Shipment orders
+IF ib_save= FALSE and ib_ship= True THEN
+	if messagebox('WARNING','Do you really want to save the changes?' ,question!, yesno! ) = 2 THEN  
+		ib_save= True
+		   tab_main.tabpage_order.sle_shipmentid.SetFocus()
+		Return
+	else
+		open(w_shipments)
+		tab_main.tabpage_order.cb_save.SetFocus()
+		tab_main.tabpage_order.cb_save.triggerevent(clicked!)
+		MessageBox('','Record Saved!')
+		
+	end if
+else
+	Close(w_shipments)
+end if
+// End - Dinesh - 03/05/2024- SIMS-378- Google - Consolidated Shipment orders
+	
+end event
+
 type tab_main from w_std_master_detail`tab_main within w_shipments
 integer x = 0
-integer y = 13
-integer width = 3708
-integer height = 2122
+integer y = 12
+integer width = 4485
+integer height = 2124
 tabpage_order tabpage_order
 tabpage_detail tabpage_detail
 tabpage_status tabpage_status
@@ -3160,11 +3346,18 @@ destroy(this.tabpage_status)
 destroy(this.tabpage_bol)
 end on
 
+event tab_main::selectionchanged;call super::selectionchanged;// Begin - Dinesh - 03/05/2024- SIMS-378- Google - SIMS – Shuttle Consolidation and BOL Printing (368)
+Choose Case newIndex
+	case 2
+		ib_ship= True
+	case else
+		ib_ship= False
+End choose
+end event
+
 type tabpage_main from w_std_master_detail`tabpage_main within tab_main
-integer x = 15
-integer y = 99
-integer width = 3679
-integer height = 2010
+integer width = 4448
+integer height = 1996
 string text = "Shipment Info"
 tab_locations tab_locations
 cb_geteta cb_geteta
@@ -3207,10 +3400,8 @@ destroy(this.st_shipment_awb_bol_nbr)
 end on
 
 type tabpage_search from w_std_master_detail`tabpage_search within tab_main
-integer x = 15
-integer y = 99
-integer width = 3679
-integer height = 2010
+integer width = 4448
+integer height = 1996
 cb_shipment_clear cb_shipment_clear
 cb_shipment_search cb_shipment_search
 dw_search_result dw_search_result
@@ -3241,10 +3432,10 @@ end on
 
 type tab_locations from tab within tabpage_main
 boolean visible = false
-integer x = 22
-integer y = 909
-integer width = 2992
-integer height = 877
+integer x = 23
+integer y = 908
+integer width = 2994
+integer height = 876
 integer taborder = 30
 integer textsize = -8
 integer weight = 700
@@ -3273,10 +3464,10 @@ destroy(this.tabpage_dest)
 end on
 
 type tabpage_origin from userobject within tab_locations
-integer x = 15
-integer y = 90
-integer width = 2962
-integer height = 774
+integer x = 18
+integer y = 104
+integer width = 2958
+integer height = 756
 long backcolor = 79741120
 string text = "Ship From"
 long tabtextcolor = 33554432
@@ -3296,7 +3487,7 @@ end on
 
 type dw_origin from u_dw_ancestor within tabpage_origin
 integer y = 16
-integer width = 2977
+integer width = 2976
 integer height = 704
 integer taborder = 20
 boolean bringtotop = true
@@ -3312,10 +3503,10 @@ event itemchanged;call super::itemchanged;ib_changed = True
 end event
 
 type tabpage_dest from userobject within tab_locations
-integer x = 15
-integer y = 90
-integer width = 2962
-integer height = 774
+integer x = 18
+integer y = 104
+integer width = 2958
+integer height = 756
 long backcolor = 79741120
 string text = "Ship To"
 long tabtextcolor = 33554432
@@ -3335,8 +3526,8 @@ end on
 
 type dw_dest from u_dw_ancestor within tabpage_dest
 integer y = 16
-integer width = 3248
-integer height = 733
+integer width = 3250
+integer height = 732
 integer taborder = 20
 string dataobject = "d_shipment_location"
 boolean border = false
@@ -3350,10 +3541,10 @@ event itemchanged;call super::itemchanged;ib_changed = True
 end event
 
 type cb_geteta from commandbutton within tabpage_main
-integer x = 900
-integer y = 1914
+integer x = 901
+integer y = 1916
 integer width = 402
-integer height = 77
+integer height = 76
 integer taborder = 40
 boolean bringtotop = true
 integer textsize = -10
@@ -3432,10 +3623,10 @@ end if
 end event
 
 type cb_getetd from commandbutton within tabpage_main
-integer x = 472
-integer y = 1914
+integer x = 471
+integer y = 1916
 integer width = 402
-integer height = 77
+integer height = 76
 integer taborder = 40
 boolean bringtotop = true
 integer textsize = -10
@@ -3474,10 +3665,10 @@ end if
 end event
 
 type cb_etamaint from commandbutton within tabpage_main
-integer x = 1331
-integer y = 1914
+integer x = 1330
+integer y = 1916
 integer width = 402
-integer height = 77
+integer height = 76
 integer taborder = 40
 boolean bringtotop = true
 integer textsize = -10
@@ -3507,9 +3698,9 @@ OpenSheetwithparm(w_eta_maint, lStrparms, w_main, gi_menu_pos, Original!)
 end event
 
 type dw_master from u_dw_ancestor within tabpage_main
-integer y = 19
-integer width = 3664
-integer height = 1875
+integer y = 20
+integer width = 3666
+integer height = 1876
 integer taborder = 20
 boolean bringtotop = true
 string dataobject = "d_shipment_header"
@@ -3658,7 +3849,7 @@ end event
 type sle_awb from singlelineedit within tabpage_main
 integer x = 530
 integer y = 16
-integer width = 655
+integer width = 654
 integer height = 96
 integer taborder = 30
 boolean bringtotop = true
@@ -3677,8 +3868,8 @@ iw_window.TriggerEvent('ue_Retrieve')
 end event
 
 type st_shipment_awb_bol_nbr from statictext within tabpage_main
-integer y = 35
-integer width = 527
+integer y = 36
+integer width = 526
 integer height = 64
 boolean bringtotop = true
 integer textsize = -9
@@ -3700,10 +3891,10 @@ g.of_check_label_button(this)
 end event
 
 type cb_shipment_clear from commandbutton within tabpage_search
-integer x = 3321
-integer y = 211
+integer x = 3319
+integer y = 212
 integer width = 315
-integer height = 106
+integer height = 108
 integer taborder = 30
 integer textsize = -9
 integer weight = 700
@@ -3724,10 +3915,10 @@ g.of_check_label_button(this)
 end event
 
 type cb_shipment_search from commandbutton within tabpage_search
-integer x = 3321
-integer y = 77
+integer x = 3319
+integer y = 76
 integer width = 315
-integer height = 99
+integer height = 100
 integer taborder = 40
 integer textsize = -9
 integer weight = 700
@@ -3748,10 +3939,10 @@ g.of_check_label_button(this)
 end event
 
 type dw_search_result from u_dw_ancestor within tabpage_search
-integer x = 4
-integer y = 458
-integer width = 3635
-integer height = 1434
+integer x = 5
+integer y = 460
+integer width = 3662
+integer height = 1436
 integer taborder = 20
 string dataobject = "d_shipment_search_result"
 boolean hscrollbar = true
@@ -3919,9 +4110,9 @@ end event
 
 type dw_search_entry from datawindow within tabpage_search
 integer x = 18
-integer y = 42
+integer y = 44
 integer width = 3639
-integer height = 403
+integer height = 404
 integer taborder = 30
 string title = "none"
 string dataobject = "d_shipment_search_entry"
@@ -3952,15 +4143,40 @@ end event
 type tabpage_order from userobject within tab_main
 event create ( )
 event destroy ( )
-integer x = 15
-integer y = 99
-integer width = 3679
-integer height = 2010
+integer x = 18
+integer y = 112
+integer width = 4448
+integer height = 1996
 long backcolor = 79741120
 string text = "Orders"
 long tabtextcolor = 33554432
 long tabbackcolor = 79741120
 long picturemaskcolor = 536870912
+cb_search1 cb_search1
+st_count2 st_count2
+st_4 st_4
+st_count1 st_count1
+st_3 st_3
+sle_shipmentid sle_shipmentid
+cb_search2 cb_search2
+st_2 st_2
+cbx_loading cbx_loading
+cbx_packing cbx_packing
+cbx_picking cbx_picking
+cbx_new cbx_new
+dw_warehouse dw_warehouse
+st_warehouse st_warehouse
+cb_9 cb_9
+cb_cancel cb_cancel
+cb_save cb_save
+cb_refresh cb_refresh
+cb_5 cb_5
+cb_4 cb_4
+cb_3 cb_3
+cb_2 cb_2
+cb_1 cb_1
+dw_consolidated_shipment dw_consolidated_shipment
+dw_shipment dw_shipment
 cb_otmchanged cb_otmchanged
 dw_packprint dw_packprint
 dw_order dw_order
@@ -3972,9 +4188,37 @@ cb_selectall_orders cb_selectall_orders
 st_1 st_1
 cb_printpack cb_printpack
 cb_add cb_add
+gb_1 gb_1
+gb_2 gb_2
+gb_3 gb_3
 end type
 
 on tabpage_order.create
+this.cb_search1=create cb_search1
+this.st_count2=create st_count2
+this.st_4=create st_4
+this.st_count1=create st_count1
+this.st_3=create st_3
+this.sle_shipmentid=create sle_shipmentid
+this.cb_search2=create cb_search2
+this.st_2=create st_2
+this.cbx_loading=create cbx_loading
+this.cbx_packing=create cbx_packing
+this.cbx_picking=create cbx_picking
+this.cbx_new=create cbx_new
+this.dw_warehouse=create dw_warehouse
+this.st_warehouse=create st_warehouse
+this.cb_9=create cb_9
+this.cb_cancel=create cb_cancel
+this.cb_save=create cb_save
+this.cb_refresh=create cb_refresh
+this.cb_5=create cb_5
+this.cb_4=create cb_4
+this.cb_3=create cb_3
+this.cb_2=create cb_2
+this.cb_1=create cb_1
+this.dw_consolidated_shipment=create dw_consolidated_shipment
+this.dw_shipment=create dw_shipment
 this.cb_otmchanged=create cb_otmchanged
 this.dw_packprint=create dw_packprint
 this.dw_order=create dw_order
@@ -3986,7 +4230,35 @@ this.cb_selectall_orders=create cb_selectall_orders
 this.st_1=create st_1
 this.cb_printpack=create cb_printpack
 this.cb_add=create cb_add
-this.Control[]={this.cb_otmchanged,&
+this.gb_1=create gb_1
+this.gb_2=create gb_2
+this.gb_3=create gb_3
+this.Control[]={this.cb_search1,&
+this.st_count2,&
+this.st_4,&
+this.st_count1,&
+this.st_3,&
+this.sle_shipmentid,&
+this.cb_search2,&
+this.st_2,&
+this.cbx_loading,&
+this.cbx_packing,&
+this.cbx_picking,&
+this.cbx_new,&
+this.dw_warehouse,&
+this.st_warehouse,&
+this.cb_9,&
+this.cb_cancel,&
+this.cb_save,&
+this.cb_refresh,&
+this.cb_5,&
+this.cb_4,&
+this.cb_3,&
+this.cb_2,&
+this.cb_1,&
+this.dw_consolidated_shipment,&
+this.dw_shipment,&
+this.cb_otmchanged,&
 this.dw_packprint,&
 this.dw_order,&
 this.cb_confirm,&
@@ -3996,10 +4268,38 @@ this.cb_clearall_orders,&
 this.cb_selectall_orders,&
 this.st_1,&
 this.cb_printpack,&
-this.cb_add}
+this.cb_add,&
+this.gb_1,&
+this.gb_2,&
+this.gb_3}
 end on
 
 on tabpage_order.destroy
+destroy(this.cb_search1)
+destroy(this.st_count2)
+destroy(this.st_4)
+destroy(this.st_count1)
+destroy(this.st_3)
+destroy(this.sle_shipmentid)
+destroy(this.cb_search2)
+destroy(this.st_2)
+destroy(this.cbx_loading)
+destroy(this.cbx_packing)
+destroy(this.cbx_picking)
+destroy(this.cbx_new)
+destroy(this.dw_warehouse)
+destroy(this.st_warehouse)
+destroy(this.cb_9)
+destroy(this.cb_cancel)
+destroy(this.cb_save)
+destroy(this.cb_refresh)
+destroy(this.cb_5)
+destroy(this.cb_4)
+destroy(this.cb_3)
+destroy(this.cb_2)
+destroy(this.cb_1)
+destroy(this.dw_consolidated_shipment)
+destroy(this.dw_shipment)
 destroy(this.cb_otmchanged)
 destroy(this.dw_packprint)
 destroy(this.dw_order)
@@ -4011,9 +4311,1105 @@ destroy(this.cb_selectall_orders)
 destroy(this.st_1)
 destroy(this.cb_printpack)
 destroy(this.cb_add)
+destroy(this.gb_1)
+destroy(this.gb_2)
+destroy(this.gb_3)
 end on
 
+type cb_search1 from commandbutton within tabpage_order
+integer x = 1582
+integer y = 224
+integer width = 329
+integer height = 96
+integer taborder = 30
+integer textsize = -10
+integer weight = 700
+fontcharset fontcharset = ansi!
+fontpitch fontpitch = variable!
+fontfamily fontfamily = swiss!
+string facename = "Arial"
+string text = "Search"
+end type
+
+event clicked;		// Begin - Dinesh - 02/27/2024- SIMS-378- Google - SIMS – Shuttle Consolidation and BOL Printing (368)
+		String lsSqlSyntax,ls_whcode,ls_carrier
+		long llIdx
+		ls_whcode=  tab_main.tabpage_order.dw_warehouse.GetITemString(1,'wh_code')
+		 ls_carrier= 'MLOGSHLSHL'
+		if ls_whcode ='' or isnull(ls_whcode) then
+			messagebox('Alert','Please select the Warehouse code first !')
+		return
+		end if
+		 If  tab_main.tabpage_order.cbx_new.Checked = false AND tab_main.tabpage_order.cbx_picking.Checked = false AND tab_main.tabpage_order.cbx_packing.Checked = false AND tab_main.tabpage_order.cbx_loading.Checked = false then
+			tab_main.tabpage_order.dw_shipment.dataobject ='d_shipment_order'
+			tab_main.tabpage_order.dw_shipment.SetTransObject(sqlca)
+			lsSqlSyntax = tab_main.tabpage_order.dw_shipment.GetSQLSelect()
+			lsSqlSyntax = lsSqlSyntax+" where carrier=" +"'"+ls_carrier+"'"+ " and wh_code=" +"'"+ls_whcode+"'"+ " and ord_status in('N','I','A','L')"
+			llIdx = tab_main.tabpage_order.dw_shipment.SetSQLSelect( lsSqlSyntax )
+			lsSqlSyntax = tab_main.tabpage_order.dw_shipment.getSQLSelect()
+			tab_main.tabpage_order.dw_shipment.Retrieve()
+		else
+			tab_main.tabpage_order.dw_shipment.dataobject ='d_shipment_order'
+			tab_main.tabpage_order.dw_shipment.SetTransObject(sqlca)
+			lsSqlSyntax = tab_main.tabpage_order.dw_shipment.GetSQLSelect()
+			lsSqlSyntax = lsSqlSyntax+" where carrier=" +"'"+ls_carrier+"'"+ " and wh_code=" +"'"+ls_whcode+"'"+ " and ord_status in(" +"'"+is_status_new+  "'"+','+ "'"+is_status_picking+  "'"+','+ "'"+is_status_packing+  "'"+','+ "'"+is_status_loading+  "')"
+			llIdx = tab_main.tabpage_order.dw_shipment.SetSQLSelect( lsSqlSyntax )
+			lsSqlSyntax = tab_main.tabpage_order.dw_shipment.getSQLSelect()
+			tab_main.tabpage_order.dw_shipment.Retrieve()
+		end if
+			st_count1.text= string(dw_shipment.rowcount())
+		 //End - Dinesh - 02/27/2024- SIMS-378- Google - SIMS – Shuttle Consolidation and BOL Printing (368)
+end event
+
+type st_count2 from statictext within tabpage_order
+integer x = 2560
+integer y = 1384
+integer width = 123
+integer height = 64
+integer textsize = -10
+integer weight = 700
+fontcharset fontcharset = ansi!
+fontpitch fontpitch = variable!
+fontfamily fontfamily = swiss!
+string facename = "Arial"
+long textcolor = 8388608
+long backcolor = 67108864
+alignment alignment = center!
+boolean focusrectangle = false
+end type
+
+type st_4 from statictext within tabpage_order
+integer x = 2322
+integer y = 1380
+integer width = 306
+integer height = 64
+integer textsize = -10
+integer weight = 700
+fontcharset fontcharset = ansi!
+fontpitch fontpitch = variable!
+fontfamily fontfamily = swiss!
+string facename = "Arial"
+long textcolor = 8388608
+long backcolor = 67108864
+string text = "count:"
+alignment alignment = center!
+boolean focusrectangle = false
+end type
+
+type st_count1 from statictext within tabpage_order
+integer x = 325
+integer y = 1384
+integer width = 178
+integer height = 64
+integer textsize = -10
+integer weight = 700
+fontcharset fontcharset = ansi!
+fontpitch fontpitch = variable!
+fontfamily fontfamily = swiss!
+string facename = "Arial"
+long textcolor = 8388608
+long backcolor = 67108864
+alignment alignment = center!
+boolean focusrectangle = false
+end type
+
+type st_3 from statictext within tabpage_order
+integer x = 78
+integer y = 1380
+integer width = 306
+integer height = 64
+integer textsize = -10
+integer weight = 700
+fontcharset fontcharset = ansi!
+fontpitch fontpitch = variable!
+fontfamily fontfamily = swiss!
+string facename = "Arial"
+long textcolor = 8388608
+long backcolor = 67108864
+string text = "count:"
+alignment alignment = center!
+boolean focusrectangle = false
+end type
+
+type sle_shipmentid from singlelineedit within tabpage_order
+integer x = 2327
+integer y = 136
+integer width = 585
+integer height = 96
+integer taborder = 70
+integer textsize = -10
+integer weight = 700
+fontcharset fontcharset = ansi!
+fontpitch fontpitch = variable!
+fontfamily fontfamily = swiss!
+string facename = "Arial"
+long textcolor = 33554432
+borderstyle borderstyle = stylelowered!
+end type
+
+type cb_search2 from commandbutton within tabpage_order
+integer x = 2976
+integer y = 136
+integer width = 329
+integer height = 96
+integer taborder = 60
+integer textsize = -10
+integer weight = 700
+fontcharset fontcharset = ansi!
+fontpitch fontpitch = variable!
+fontfamily fontfamily = swiss!
+string facename = "Arial"
+string text = "Search"
+end type
+
+event clicked;// Begin - Dinesh - 02/21/2024- SIMS-378- Google - SIMS – Shuttle Consolidation and BOL Printing (368)
+string lsSqlSyntax,ls_shipmentid,ls_whcode,ls_carrier
+long llIdx,llFindRow
+ tab_main.tabpage_order.st_count2.visible=True
+ls_shipmentid = sle_shipmentid.text
+ls_carrier='MLOGSHLSHL'
+ls_whcode=  tab_main.tabpage_order.dw_warehouse.GetITemString(1,'wh_code')
+IF ib_save= FALSE THEN
+	if messagebox('WARNING','Do you really want to save the changes?' ,question!, yesno! ) = 2 THEN  // Dinesh - 02/19/2024- SIMS-378- Google - Consolidated Shipment orders
+		ib_save= True
+		 tab_main.tabpage_order.dw_consolidated_shipment.reset()
+		  tab_main.tabpage_order.sle_shipmentid.SelectText(1,len(sle_shipmentid.Text))
+ 		 //tab_main.tabpage_order.sle_shipmentid.Clear()
+		  // sle_shipmentid.SetFocus()
+		Return
+	else
+
+		cb_save.SetFocus()
+	end if
+else
+		if ls_whcode ='' or isnull(ls_whcode) then
+			messagebox('Alert','Please select the Warehouse code!')
+			tab_main.tabpage_order.dw_warehouse.setfocus()
+			return	
+		end if
+		if ls_shipmentid ='' or isnull(ls_shipmentid) then
+			messagebox('Alert','Please enter the shipment ID!')
+			tab_main.tabpage_order.sle_shipmentid.setfocus()
+			return
+		end if
+				 tab_main.tabpage_order.dw_consolidated_shipment.dataobject ='d_consolidated_shipment_orders'
+				tab_main.tabpage_order.dw_consolidated_shipment.SetTransObject(sqlca)
+				lsSqlSyntax = tab_main.tabpage_order.dw_consolidated_shipment.GetSQLSelect()
+				lsSqlSyntax = lsSqlSyntax+" where carrier=" +"'"+ls_carrier+"'"+ " and wh_code=" +"'"+ls_whcode+"'"+ " and shipment_id=" +"'"+upper(ls_shipmentid)+  "'"
+				 tab_main.tabpage_order.dw_consolidated_shipment.SetTransObject(sqlca)
+				 llIdx = tab_main.tabpage_order.dw_consolidated_shipment.SetSQLSelect( lsSqlSyntax )
+				 tab_main.tabpage_order.dw_consolidated_shipment.Retrieve()
+				 llFindRow =  tab_main.tabpage_order.dw_consolidated_shipment.Find("shipment_id = '" + upper(ls_shipmentid) + "'",1, tab_main.tabpage_order.dw_consolidated_shipment.RowCount())
+		if llFindRow > 0 then
+			else
+				MessageBox('Shipment ID', 'Shipment ID you are searching for does not exist in the shuttle for the warehouse: ' + ls_whcode + " Please enter valid Shipment ID !")	
+		end if
+		st_count2.text= string(tab_main.tabpage_order.dw_consolidated_shipment.rowcount())
+	end if
+ // End - Dinesh - 02/21/2024- SIMS-378- Google - SIMS – Shuttle Consolidation and BOL Printing (368)
+end event
+
+type st_2 from statictext within tabpage_order
+integer x = 2299
+integer y = 64
+integer width = 402
+integer height = 64
+integer textsize = -10
+integer weight = 700
+fontcharset fontcharset = ansi!
+fontpitch fontpitch = variable!
+fontfamily fontfamily = swiss!
+string facename = "Arial"
+long textcolor = 8388608
+long backcolor = 67108864
+string text = "Shipment ID"
+alignment alignment = center!
+boolean focusrectangle = false
+end type
+
+type cbx_loading from checkbox within tabpage_order
+integer x = 1221
+integer y = 244
+integer width = 402
+integer height = 80
+integer textsize = -10
+integer weight = 700
+fontcharset fontcharset = ansi!
+fontpitch fontpitch = variable!
+fontfamily fontfamily = swiss!
+string facename = "Arial"
+long textcolor = 8388608
+long backcolor = 67108864
+string text = "Loading"
+end type
+
+event clicked;// Begin - Dinesh - 02/21/2024- SIMS-378- Google - SIMS – Shuttle Consolidation and BOL Printing (368)
+string ls_status,ls_status_loading
+If this.Checked = true then
+//	tab_main.tabpage_order.cbx_packing.checked=false
+//	tab_main.tabpage_order.cbx_picking.checked=false
+//	tab_main.tabpage_order.cbx_new.checked=false
+	tab_main.tabpage_order.st_3.visible= True
+	tab_main.tabpage_order.st_count1.visible=True
+	ls_status_loading= 'L'
+	is_status_loading=ls_status_loading
+else
+	ls_status_loading= ''
+	is_status_loading=ls_status_loading
+	
+	//wf_filter_status(ls_status)
+end if
+// End - Dinesh - 02/21/2024- SIMS-378- Google - SIMS – Shuttle Consolidation and BOL Printing (368)
+	
+end event
+
+type cbx_packing from checkbox within tabpage_order
+integer x = 1221
+integer y = 148
+integer width = 402
+integer height = 80
+integer textsize = -10
+integer weight = 700
+fontcharset fontcharset = ansi!
+fontpitch fontpitch = variable!
+fontfamily fontfamily = swiss!
+string facename = "Arial"
+long textcolor = 8388608
+long backcolor = 67108864
+string text = "Packing"
+end type
+
+event clicked;// Begin - Dinesh - 02/21/2024- SIMS-378- Google - SIMS – Shuttle Consolidation and BOL Printing (368)
+string ls_status,ls_status_packing
+If this.Checked = true then
+//	tab_main.tabpage_order.cbx_new.checked=false
+//	tab_main.tabpage_order.cbx_picking.checked=false
+//	tab_main.tabpage_order.cbx_loading.checked=false
+	tab_main.tabpage_order.st_3.visible= True
+	tab_main.tabpage_order.st_count1.visible=True
+	ls_status_packing= 'A'
+	is_status_packing =ls_status_packing
+else
+	ls_status_packing= ''
+	is_status_packing =ls_status_packing
+	//wf_filter_status(ls_status)
+end if
+// End - Dinesh - 02/21/2024- SIMS-378- Google - SIMS – Shuttle Consolidation and BOL Printing (368)
+	
+end event
+
+type cbx_picking from checkbox within tabpage_order
+integer x = 896
+integer y = 244
+integer width = 402
+integer height = 80
+integer textsize = -10
+integer weight = 700
+fontcharset fontcharset = ansi!
+fontpitch fontpitch = variable!
+fontfamily fontfamily = swiss!
+string facename = "Arial"
+long textcolor = 8388608
+long backcolor = 67108864
+string text = "Picking"
+end type
+
+event clicked;// Begin - Dinesh - 02/21/2024- SIMS-378- Google - SIMS – Shuttle Consolidation and BOL Printing (368)
+string ls_status,ls_status_picking
+If this.Checked = true then
+//	tab_main.tabpage_order.cbx_packing.checked=false
+//	tab_main.tabpage_order.cbx_new.checked=false
+//	tab_main.tabpage_order.cbx_loading.checked=false
+	tab_main.tabpage_order.st_3.visible= True
+	tab_main.tabpage_order.st_count1.visible=True
+	ls_status_picking= 'I'
+	is_status_picking = ls_status_picking
+else
+	ls_status_picking= ''
+	is_status_picking = ls_status_picking
+	//wf_filter_status(ls_status)
+end if
+// End - Dinesh - 02/21/2024- SIMS-378- Google - SIMS – Shuttle Consolidation and BOL Printing (368)
+	
+end event
+
+type cbx_new from checkbox within tabpage_order
+integer x = 896
+integer y = 144
+integer width = 402
+integer height = 80
+integer textsize = -10
+integer weight = 700
+fontcharset fontcharset = ansi!
+fontpitch fontpitch = variable!
+fontfamily fontfamily = swiss!
+string facename = "Arial"
+long textcolor = 8388608
+long backcolor = 67108864
+string text = "New"
+end type
+
+event clicked;// Begin - Dinesh - 02/21/2024- SIMS-378- Google - SIMS – Shuttle Consolidation and BOL Printing (368)
+string ls_status,ls_status_new
+If this.Checked = true then
+	tab_main.tabpage_order.st_3.visible= True
+	tab_main.tabpage_order.st_count1.visible=True
+	ls_status_new= 'N'
+	is_status_new= ls_status_new
+else
+	ls_status_new= ''
+	is_status_new= ls_status_new
+	//wf_filter_status(ls_status)
+end if
+// End - Dinesh - 02/21/2024- SIMS-378- Google - SIMS – Shuttle Consolidation and BOL Printing (368)
+
+	
+end event
+
+type dw_warehouse from datawindow within tabpage_order
+integer x = 14
+integer y = 136
+integer width = 512
+integer height = 100
+integer taborder = 40
+string title = "none"
+string dataobject = "d_shipment_order_wh"
+boolean livescroll = true
+borderstyle borderstyle = stylelowered!
+end type
+
+event itemchanged;////Begin - 02/20/2024 - Dinesh - SIMS-378- Google - SIMS – Shuttle Consolidation and BOL Printing (368)
+string ls_status_packing,ls_status_new,ls_status_picking,ls_status_loading
+ tab_main.tabpage_order.dw_shipment.dataobject ='d_shipment_order'
+ tab_main.tabpage_order.dw_shipment.SetTransObject(SQLCA)	
+// tab_main.tabpage_order.dw_shipment.Retrieve(data,'MLOGSHLSHL')
+ tab_main.tabpage_order.cbx_new.checked=false
+ tab_main.tabpage_order.cbx_packing.checked=false
+ tab_main.tabpage_order.cbx_picking.checked=false
+ tab_main.tabpage_order.cbx_loading.checked=false
+ ls_status_packing= ''
+is_status_packing =ls_status_packing
+ls_status_new= ''
+is_status_new =ls_status_new
+ls_status_picking= ''
+is_status_picking =ls_status_picking
+ls_status_loading= ''
+is_status_loading =ls_status_loading
+// //End - 02/20/2024 - Dinesh - SIMS-378- Google - SIMS – Shuttle Consolidation and BOL Printing (368)
+end event
+
+type st_warehouse from statictext within tabpage_order
+integer y = 64
+integer width = 402
+integer height = 64
+integer textsize = -10
+integer weight = 700
+fontcharset fontcharset = ansi!
+fontpitch fontpitch = variable!
+fontfamily fontfamily = swiss!
+string facename = "Arial"
+long textcolor = 8388608
+long backcolor = 67108864
+string text = "Warehouse"
+alignment alignment = center!
+boolean focusrectangle = false
+end type
+
+type cb_9 from commandbutton within tabpage_order
+integer x = 2597
+integer y = 1592
+integer width = 357
+integer height = 96
+integer taborder = 110
+integer textsize = -10
+integer weight = 400
+fontcharset fontcharset = ansi!
+fontpitch fontpitch = variable!
+fontfamily fontfamily = swiss!
+string facename = "Arial"
+string text = "Print BOL"
+end type
+
+event clicked;//Begin - 02/20/2024 - Dinesh - SIMS-378- Google - SIMS – Shuttle Consolidation and BOL Printing (368)
+string ls_shipmentid,ls_ord_status,lsFind,ls_invoice
+long llFindRow,i
+datastore lds_consolidated
+IF ib_save= FALSE THEN
+	if messagebox('WARNING','Do you really want to save the changes?' ,question!, yesno! ) = 2 THEN  // Dinesh - 02/19/2024- SIMS-378- Google - Consolidated Shipment orders
+		ib_save= True
+		  tab_main.tabpage_order.dw_consolidated_shipment.reset()
+		 // tab_main.tabpage_order.sle_shipmentid.SelectText(1,len(sle_shipmentid.Text))
+ 		 // tab_main.tabpage_order.sle_shipmentid.Clear()
+		   sle_shipmentid.SetFocus()
+		Return
+	else
+		cb_save.SetFocus()
+	end if
+else	
+ls_shipmentid=  tab_main.tabpage_order.dw_consolidated_shipment.GetITemString(1,'shipment_id')
+tab_main.tabpage_order.dw_consolidated_shipment.SetFocus()
+tab_main.tabpage_order.dw_consolidated_shipment.accepttext()
+IF tab_main.tabpage_order.dw_consolidated_shipment.AcceptText() = 1 THEN
+	llFindRow = tab_main.tabpage_order.dw_consolidated_shipment.Find( "ord_status = 'N'", 1, tab_main.tabpage_order.dw_consolidated_shipment.rowcount( ) )
+	ls_invoice=  tab_main.tabpage_order.dw_consolidated_shipment.GetITemString(llFindRow,'invoice_no')
+	if llFindRow > 0 then
+		//messagebox('Warning','Please select only Packing and Loading status orders ')
+		MessageBox("Validation Error", "Please select only Packing and Loading status orders " + ls_invoice + " is a new status order."  )
+		return
+	else
+		openwithparm(w_delivery_bol,ls_shipmentid)
+	end if
+end if
+End if
+//End - 02/20/2024 - Dinesh - SIMS-378- Google - SIMS – Shuttle Consolidation and BOL Printing (368)
+end event
+
+type cb_cancel from commandbutton within tabpage_order
+integer x = 2181
+integer y = 1592
+integer width = 357
+integer height = 96
+integer taborder = 100
+integer textsize = -10
+integer weight = 400
+fontcharset fontcharset = ansi!
+fontpitch fontpitch = variable!
+fontfamily fontfamily = swiss!
+string facename = "Arial"
+string text = "Cancel"
+end type
+
+event clicked;//Begin - 02/20/2024 - Dinesh - SIMS-378- Google - SIMS – Shuttle Consolidation and BOL Printing (368)
+IF ib_save= FALSE THEN
+	if messagebox('WARNING','Do you really want to save the changes?' ,question!, yesno! ) = 2 THEN  // Dinesh - 02/19/2024- SIMS-378- Google - Consolidated Shipment orders
+		ib_save= True
+		 tab_main.tabpage_order.dw_consolidated_shipment.reset()
+		  tab_main.tabpage_order.sle_shipmentid.SelectText(1,len(sle_shipmentid.Text))
+ 		 //tab_main.tabpage_order.sle_shipmentid.Clear()
+		  // sle_shipmentid.SetFocus()
+		Return
+	else
+		cb_save.SetFocus()
+	end if
+else
+
+	close(w_shipments)
+end if
+
+//End if
+
+end event
+
+type cb_save from commandbutton within tabpage_order
+integer x = 1769
+integer y = 1592
+integer width = 357
+integer height = 96
+integer taborder = 90
+integer textsize = -10
+integer weight = 400
+fontcharset fontcharset = ansi!
+fontpitch fontpitch = variable!
+fontfamily fontfamily = swiss!
+string facename = "Arial"
+string text = "Save"
+end type
+
+event clicked;// Begin - Dinesh - 02/19/2024- SIMS-378- Google - SIMS – Shuttle Consolidation and BOL Printing (368)
+decimal ldshipmentid
+string ls_shipmentid,lsMessage,lsErrText,ls_invoice_no,ls_wh_code,ls_shipment_id,ls_shipmentid_exist,ls_invoice_no1,ls_shipmentid_exist1
+ string ls_status_packing,ls_status_new,ls_status_picking,ls_status_loading,lsFilter
+  STRING ls_invoiceNO
+long i,ll_count,llFindRow,llFindRow1
+int liRC
+boolean lb_shipexist
+ib_save= False
+lb_shipexist= True
+ldshipmentid=0
+string ls_shipment_id_next
+ls_shipment_id_next= is_shipment_id
+if tab_main.tabpage_order.dw_consolidated_shipment.rowcount() > 0 then
+	
+	if ib_right= True then
+		Execute Immediate "Begin Transaction" using SQLCA;
+		
+			ls_shipmentid_exist1=  tab_main.tabpage_order.dw_consolidated_shipment.GetITemString(1,'shipment_id')
+			IF Sqlca.Sqlcode = 0 THEN
+				SetMicroHelp("Record Saved!")
+				for i=1 to tab_main.tabpage_order.dw_consolidated_shipment.rowcount()
+					ls_invoice_no= tab_main.tabpage_order.dw_consolidated_shipment.getitemstring(i,'invoice_no')
+						if ib_shipexist= True then
+							UPDATE delivery_master SET 	shipment_id = :is_shipmentid, awb_bol_no= :is_shipmentid WHERE project_id = :gs_project AND invoice_no = :ls_invoice_no USING SQLCA;
+							Execute Immediate "COMMIT" using SQLCA;
+						else
+							UPDATE delivery_master SET 	shipment_id = :is_new_shipmentid,awb_bol_no= :is_new_shipmentid WHERE project_id = :gs_project AND invoice_no = :ls_invoice_no USING SQLCA;
+							Execute Immediate "COMMIT" using SQLCA;
+						end if
+					next
+	
+					if ib_shipexist= True then
+							MessageBox('Shuttle Consolidation', "Shipment ID: " +is_shipmentid + " is successfully added for the shuttle consolidation! ")
+					else
+							MessageBox('Shuttle Consolidation', "Shipment ID: " +is_new_shipmentid + " is successfully generated for the shuttle consolidation !")		
+					End if
+					
+					ELSE
+							lsErrText = sqlca.sqlerrtext /*text will be lost after rollback*/
+								Execute Immediate "ROLLBACK" using SQLCA;
+								MessageBox('Shuttle Consolidation', "Unable to add/generate the order for Shuttle Consolidation!~r~r" + lsErrText)
+								Return 1
+					END IF
+				END IF
+			END IF
+		if tab_main.tabpage_order.dw_consolidated_shipment.rowcount() > 0  then
+			if ib_all_right = True then	
+					Execute Immediate "Begin Transaction" using SQLCA;
+						 // Dinesh - Begin - 03/04/2024- Google - SIMS-378- Shuttle order shipment
+					IF Sqlca.Sqlcode = 0 THEN
+							SetMicroHelp("Record Saved!")
+							for i=1 to tab_main.tabpage_order.dw_consolidated_shipment.rowcount()
+								ls_invoice_no1= tab_main.tabpage_order.dw_consolidated_shipment.getitemstring(i,'invoice_no')
+								UPDATE delivery_master SET 	shipment_id = :is_new_shipmentid,awb_bol_no=:is_new_shipmentid WHERE project_id = :gs_project AND invoice_no = :ls_invoice_no1 USING SQLCA;
+								Execute Immediate "COMMIT" using SQLCA;	
+							next
+							MessageBox('Shuttle Consolidation', "Shipment id is generated successfully for all the selected shuttle orders in the shuttle consolidation !")
+							//tab_main.tabpage_order.dw_consolidated_shipment.settrans(sqlca)
+							//tab_main.tabpage_order.dw_consolidated_shipment.Retrieve()
+					
+				 	ELSE
+						lsErrText = sqlca.sqlerrtext /*text will be lost after rollback*/
+						Execute Immediate "ROLLBACK" using SQLCA;
+						MessageBox('Shuttle Consolidation', "Unable to generate the order for Shuttle Consolidation!~r~r" + lsErrText)
+						Return 1
+					END IF
+				End if
+		end if
+			
+	if  ib_left = True then		
+		Execute Immediate "Begin Transaction" using SQLCA;
+		 // Dinesh - Begin - 03/04/2024- Google - SIMS-378- Shuttle order shipment
+			IF Sqlca.Sqlcode = 0 THEN
+				SetMicroHelp("Record Saved!")
+				//tab_main.tabpage_order.dw_consolidated_shipment.update()
+				UPDATE delivery_master SET 	shipment_id = '' WHERE project_id = :gs_project AND invoice_no = :is_invoice USING SQLCA;
+				Execute Immediate "COMMIT" using SQLCA;	
+				MessageBox('Shuttle Consolidation', "Order number: " +is_invoice + " is successfully removed from the shuttle consolidation !")
+				//tab_main.tabpage_order.dw_consolidated_shipment.Retrieve()
+			ELSE
+				lsErrText = sqlca.sqlerrtext /*text will be lost after rollback*/
+					Execute Immediate "ROLLBACK" using SQLCA;
+					MessageBox('Shuttle Consolidation', "Unable to remove the order from Shuttle Consolidation!~r~r" + lsErrText)
+					Return 1
+			END IF
+		End if
+	if ib_all_left = True then		 
+		Execute Immediate "Begin Transaction" using SQLCA;
+		 // Dinesh - Begin - 03/04/2024- Google - SIMS-378- Shuttle order shipment
+			IF Sqlca.Sqlcode = 0 THEN
+				SetMicroHelp("Record Saved!")
+				UPDATE delivery_master SET 	shipment_id = '' WHERE project_id = :gs_project AND shipment_id = :is_shipment_id_all USING SQLCA;
+				Execute Immediate "COMMIT" using SQLCA;	
+				MessageBox('Shuttle Consolidation', "All orders of shipment_id: " +is_shipment_id_all + " are successfully removed from the shuttle consolidation !")
+				//tab_main.tabpage_order.dw_consolidated_shipment.Retrieve()
+			ELSE
+				lsErrText = sqlca.sqlerrtext /*text will be lost after rollback*/
+					Execute Immediate "ROLLBACK" using SQLCA;
+					MessageBox('Shuttle Consolidation', "Unable to remove the order from Shuttle Consolidation!~r~r" + lsErrText)
+					Return 1
+			END IF
+		End if
+		
+//		if ib_all_right = True then	
+//			Execute Immediate "Begin Transaction" using SQLCA;
+//		 // Dinesh - Begin - 03/04/2024- Google - SIMS-378- Shuttle order shipment
+//			IF Sqlca.Sqlcode = 0 THEN
+//				SetMicroHelp("Record Saved!")
+//				for i=1 to tab_main.tabpage_order.dw_consolidated_shipment.rowcount()
+//					ls_invoice_no1= tab_main.tabpage_order.dw_consolidated_shipment.getitemstring(i,'invoice_no')
+//					UPDATE delivery_master SET 	shipment_id = :is_new_shipmentid WHERE project_id = :gs_project AND invoice_no = :ls_invoice_no1 USING SQLCA;
+//					Execute Immediate "COMMIT" using SQLCA;	
+//				next
+//				MessageBox('Shuttle Consolidation', "Shipment id is generated successfully for all the selected shuttle orders in the shuttle consolidation !")
+//				//tab_main.tabpage_order.dw_consolidated_shipment.settrans(sqlca)
+//				//tab_main.tabpage_order.dw_consolidated_shipment.Retrieve()
+//			ELSE
+//				lsErrText = sqlca.sqlerrtext /*text will be lost after rollback*/
+//					Execute Immediate "ROLLBACK" using SQLCA;
+//					MessageBox('Shuttle Consolidation', "Unable to remove the order from Shuttle Consolidation!~r~r" + lsErrText)
+//					Return 1
+//			END IF
+//		End if
+//				 // Dinesh - End - 03/04/2024- Google - SIMS-378- Shuttle order shipment
+	//end if
+//	if ib_right= False and ib_left = False and ib_all_left=false then
+//		MessageBox('Shuttle Consolidation', "No change made in the shuttle orders !")
+//		return
+//	end if
+		
+ tab_main.tabpage_order.cbx_new.checked=false
+ tab_main.tabpage_order.cbx_packing.checked=false
+ tab_main.tabpage_order.cbx_picking.checked=false
+ tab_main.tabpage_order.cbx_loading.checked=false
+  ls_status_packing= ''
+is_status_packing =ls_status_packing
+ls_status_new= ''
+is_status_new =ls_status_new
+ls_status_picking= ''
+is_status_picking =ls_status_picking
+ls_status_loading= ''
+is_status_loading =ls_status_loading
+cb_search1.triggerevent(clicked!)
+ib_save= TRUE
+ib_right=false
+ib_left=false
+ib_all_left = false
+ib_all_right=false
+//tab_main.tabpage_order.dw_consolidated_shipment.settrans(sqlca)
+//tab_main.tabpage_order.dw_consolidated_shipment.Retrieve()
+st_count2.text= string(tab_main.tabpage_order.dw_consolidated_shipment.rowcount())
+// End - Dinesh - 02/19/2024- SIMS-378- Google - SIMS – Shuttle Consolidation and BOL Printing (368)
+
+
+ 
+end event
+
+type cb_refresh from commandbutton within tabpage_order
+integer x = 1362
+integer y = 1592
+integer width = 357
+integer height = 96
+integer taborder = 80
+integer textsize = -10
+integer weight = 700
+fontcharset fontcharset = ansi!
+fontpitch fontpitch = variable!
+fontfamily fontfamily = swiss!
+string facename = "Arial"
+string text = "Refresh"
+end type
+
+event clicked;////Begin - 02/20/2024 - Dinesh - SIMS-378- Google - SIMS – Shuttle Consolidation and BOL Printing (368)
+string ls_status_packing,ls_status_new,ls_status_picking,ls_status_loading
+ tab_main.tabpage_order.cbx_new.checked=false
+ tab_main.tabpage_order.cbx_packing.checked=false
+ tab_main.tabpage_order.cbx_picking.checked=false
+ tab_main.tabpage_order.cbx_loading.checked=false
+  ls_status_packing= ''
+is_status_packing =ls_status_packing
+ls_status_new= ''
+is_status_new =ls_status_new
+ls_status_picking= ''
+is_status_picking =ls_status_picking
+ls_status_loading= ''
+is_status_loading =ls_status_loading
+cb_search1.triggerevent(clicked!)
+
+// //End - 02/20/2024 - Dinesh - SIMS-378- Google - SIMS – Shuttle Consolidation and BOL Printing (368)
+
+
+end event
+
+type cb_5 from commandbutton within tabpage_order
+integer x = 2053
+integer y = 1148
+integer width = 210
+integer height = 112
+integer taborder = 70
+integer textsize = -10
+integer weight = 700
+fontcharset fontcharset = ansi!
+fontpitch fontpitch = variable!
+fontfamily fontfamily = swiss!
+string facename = "Arial"
+string text = "Reset"
+end type
+
+event clicked;// Begin - Dinesh - 02/19/2024- SIMS-378- Google - SIMS – Shuttle Consolidation and BOL Printing (368)
+ tab_main.tabpage_order.sle_shipmentid.SelectText(1,len(sle_shipmentid.Text))
+  tab_main.tabpage_order.sle_shipmentid.Clear()
+//  tab_main.tabpage_order.st_count2.clear()
+ tab_main.tabpage_order.st_count2.visible=false
+   tab_main.tabpage_order.sle_shipmentid.setfocus()
+ tab_main.tabpage_order.dw_consolidated_shipment.reset()
+ st_count2.text= string( tab_main.tabpage_order.dw_consolidated_shipment.rowcount())
+ // End - Dinesh - 02/19/2024- SIMS-378- Google - SIMS – Shuttle Consolidation and BOL Printing (368)
+end event
+
+type cb_4 from commandbutton within tabpage_order
+integer x = 2053
+integer y = 1016
+integer width = 206
+integer height = 112
+integer taborder = 60
+integer textsize = -10
+integer weight = 700
+fontcharset fontcharset = ansi!
+fontpitch fontpitch = variable!
+fontfamily fontfamily = swiss!
+string facename = "Arial"
+string text = "<<<"
+end type
+
+event clicked;// Begin - Dinesh - 02/21/2024- SIMS-378- Google - SIMS – Shuttle Consolidation and BOL Printing (368)
+tab_main.tabpage_order.dw_consolidated_shipment.TriggerEvent('ue_clear_all')
+ib_all_left = True
+ib_left=false
+ib_right = false
+ib_all_right=false
+ib_save= false
+end event
+
+type cb_3 from commandbutton within tabpage_order
+integer x = 2053
+integer y = 884
+integer width = 206
+integer height = 112
+integer taborder = 50
+integer textsize = -10
+integer weight = 700
+fontcharset fontcharset = ansi!
+fontpitch fontpitch = variable!
+fontfamily fontfamily = swiss!
+string facename = "Arial"
+string text = "<"
+end type
+
+event clicked;// Begin - Dinesh - 02/21/2024- SIMS-378- Google - SIMS – Shuttle Consolidation and BOL Printing (368)
+ long ll_row
+ tab_main.tabpage_order.dw_consolidated_shipment.accepttext()
+ll_row=  tab_main.tabpage_order.dw_consolidated_shipment.GetRow()
+  tab_main.tabpage_order.dw_consolidated_shipment.SelectRow(0, FALSE)
+  tab_main.tabpage_order.dw_consolidated_shipment.SelectRow(ll_row, TRUE)
+tab_main.tabpage_order.dw_consolidated_shipment.TriggerEvent('ue_delete')
+ib_left = True
+ib_right=false
+ib_all_left = false
+ib_all_right=false
+ib_save= false
+
+end event
+
+type cb_2 from commandbutton within tabpage_order
+integer x = 2053
+integer y = 752
+integer width = 206
+integer height = 112
+integer taborder = 40
+integer textsize = -10
+integer weight = 700
+fontcharset fontcharset = ansi!
+fontpitch fontpitch = variable!
+fontfamily fontfamily = swiss!
+string facename = "Arial"
+string text = ">>>"
+end type
+
+event clicked;// Begin - Dinesh - 02/21/2024- SIMS-378- Google - SIMS – Shuttle Consolidation and BOL Printing (368)
+tab_main.tabpage_order.dw_consolidated_shipment.TriggerEvent('ue_select_all')
+
+ib_all_right = True
+ib_left=false
+ib_all_left = false
+ib_right=false
+ib_save= false
+end event
+
+type cb_1 from commandbutton within tabpage_order
+integer x = 2053
+integer y = 612
+integer width = 206
+integer height = 112
+integer taborder = 30
+integer textsize = -10
+integer weight = 700
+fontcharset fontcharset = ansi!
+fontpitch fontpitch = variable!
+fontfamily fontfamily = swiss!
+string facename = "Arial"
+string text = ">"
+end type
+
+event clicked; // Begin - Dinesh - 02/21/2024- SIMS-378- Google - SIMS – Shuttle Consolidation and BOL Printing (368)
+ long ll_row
+ tab_main.tabpage_order.dw_shipment.accepttext()
+ll_row=  tab_main.tabpage_order.dw_shipment.GetRow()
+  tab_main.tabpage_order.dw_shipment.SelectRow(0, FALSE)
+  tab_main.tabpage_order.dw_shipment.SelectRow(ll_row, TRUE)
+ if ll_row < 1 then
+	 messagebox('warning','Please select the order from the shuttle order wondow')
+	 return
+else
+tab_main.tabpage_order.dw_consolidated_shipment.TriggerEvent('ue_insert')
+
+ib_right= True
+ib_left=false
+ib_all_left = false
+ib_all_right=false
+ib_save= false
+end if
+end event
+
+type dw_consolidated_shipment from datawindow within tabpage_order
+event ue_insert ( )
+event ue_shipment_id ( )
+event ue_select_all ( )
+event ue_delete ( )
+event ue_clear_all ( )
+integer x = 2322
+integer y = 448
+integer width = 2057
+integer height = 936
+integer taborder = 50
+string title = "none"
+string dataobject = "d_consolidated_shipment_orders"
+boolean hscrollbar = true
+boolean vscrollbar = true
+boolean livescroll = true
+borderstyle borderstyle = stylelowered!
+end type
+
+event ue_insert();//Dinesh - 02/19/2024- Begin - SIMS-378- Google - SIMS – Shuttle Consolidation and BOL Printing (368)
+Long ll_row,ll_countrow,i,ll_count,j
+string ls_invoice_no,ls_shipmentid,ls_shipmentid_exist,ls_new_shipmentid,ls_invoice_no_ship1,ls_invoice_no_ship2,ls_invoice_no_ship_select
+datastore lds_shipment
+This.SetFocus()
+If This.AcceptText() = -1 Then Return
+
+lds_shipment= create datastore 
+lds_shipment.dataobject='d_shipment_order'
+lds_shipment.settrans(sqlca)
+This.accepttext()
+ll_row = This.GetRow()
+ll_countrow = This.rowcount()
+ls_shipmentid_exist= tab_main.tabpage_order.dw_shipment.GetITemString( tab_main.tabpage_order.dw_shipment.GetRow(),'shipment_id')
+for i =1 to ll_countrow
+	ls_invoice_no= tab_main.tabpage_order.dw_shipment.GetITemString( tab_main.tabpage_order.dw_shipment.GetRow(),'invoice_no')
+	if ls_invoice_no = this.getitemstring(i,'invoice_no') then
+		messagebox('Shuttle order','Shuttle order: '+ ls_invoice_no+ ' is already added for consolidation. ')
+		ib_all_right = False
+		ib_right= False
+		//tab_main.tabpage_order.dw_consolidated_shipment.setfocus()
+		return 
+		
+	end if
+next
+if tab_main.tabpage_order.dw_consolidated_shipment.rowcount() > 0 then
+		ls_shipmentid=  tab_main.tabpage_order.dw_consolidated_shipment.GetITemString(1,'shipment_id')
+	else
+		ls_shipmentid=  tab_main.tabpage_order.dw_shipment.GetITemString(tab_main.tabpage_order.dw_shipment.GetRow(),'shipment_id')
+end if
+ll_row= ll_countrow
+If ll_row > 0 Then
+	ll_row = This.InsertRow(ll_row + 1)
+	This.ScrollToRow(ll_row)	
+Else
+	ll_row = This.InsertRow(0)
+End If	
+
+	This.SetITem(ll_row,'invoice_no', tab_main.tabpage_order.dw_shipment.GetITemString( tab_main.tabpage_order.dw_shipment.GetRow(),'invoice_no'))
+	This.SetITem(ll_row,'cust_code', tab_main.tabpage_order.dw_shipment.GetITemString( tab_main.tabpage_order.dw_shipment.GetRow(),'cust_code'))
+
+	if ls_shipmentid="" then
+		setnull(ls_shipmentid)
+	end if
+	if ls_shipmentid <> "" or  not isnull(ls_shipmentid) then
+		ls_invoice_no_ship_select= tab_main.tabpage_order.dw_shipment.GetITemString( tab_main.tabpage_order.dw_shipment.GetRow(),'invoice_no')
+		if messagebox('WARNING','Do you wish to consolidate the shuttle order:' +ls_invoice_no_ship_select+ ' with an existing ' + ls_shipmentid + ' Shipment ID?',question!, yesno! ) = 2 THEN 
+			This.deleterow(ll_row)
+			ib_all_right = False
+			ib_right= False
+			Return
+		else
+		ls_invoice_no_ship1= tab_main.tabpage_order.dw_shipment.GetITemString( tab_main.tabpage_order.dw_shipment.GetRow(),'invoice_no')
+		is_shipmentid= ls_shipmentid
+		This.SetITem(ll_row,'shipment_id', is_shipmentid)
+		This.SetITem(ll_row,'awb_bol_no', is_shipmentid)
+
+		end if
+		ib_shipexist= True
+	else
+		is_new_shipmentid= wf_shipment_id()
+		ls_invoice_no_ship2= tab_main.tabpage_order.dw_shipment.GetITemString( tab_main.tabpage_order.dw_shipment.GetRow(),'invoice_no')
+		This.SetITem(ll_row,'shipment_id', is_new_shipmentid)
+		This.SetITem(ll_row,'awb_bol_no', is_new_shipmentid)
+		ib_shipexist= False
+		
+end if 
+	
+	This.SetITem(ll_row,'address_1', tab_main.tabpage_order.dw_shipment.GetITemString( tab_main.tabpage_order.dw_shipment.GetRow(),'address_1'))
+	This.SetITem(ll_row,'address_2', tab_main.tabpage_order.dw_shipment.GetITemString( tab_main.tabpage_order.dw_shipment.GetRow(),'address_2'))
+	This.SetITem(ll_row,'ord_status', tab_main.tabpage_order.dw_shipment.GetITemString( tab_main.tabpage_order.dw_shipment.GetRow(),'ord_status'))
+	This.SetITem(ll_row,'project_id', tab_main.tabpage_order.dw_shipment.GetITemString( tab_main.tabpage_order.dw_shipment.GetRow(),'project_id'))
+	//Resequence
+
+st_count2.text= string(tab_main.tabpage_order.dw_consolidated_shipment.rowcount())
+//This.TriggerEvent('ue_shipment_id')
+// End- Dinesh - 02/19/2024 SIMS-378- Google - SIMS – Shuttle Consolidation and BOL Printing (368)
+	
+	
+
+
+
+
+
+
+end event
+
+event ue_shipment_id();// Begin - Dinesh - 02/21/2024- SIMS-378- Google - SIMS – Shuttle Consolidation and BOL Printing (368)
+Long	llRowCount,	&
+		llRowPos
+llRowCount = This.RowCount()
+For llRowPos = 1 to llRowCount
+	This.SetITem(llRowPos,'shipment_id','')
+Next
+end event
+
+event ue_select_all();//Copy all rows from Available
+// Begin - Dinesh - 02/20/2024- SIMS-378- Google - SIMS – Shuttle Consolidation and BOL Printing (368)
+Long ll_row,			&
+		llAvailCount,	&
+		llAvailPos,ll_countrow,i,j,ll_countrow1,llRowPos
+string ls_invoice_no
+
+This.SetFocus()
+//If This.AcceptText() = -1 Then Return
+//
+//This.TriggerEvent('ue_clear_all')/*clear existing rows */
+
+This.SetRedraw(False)
+ll_row = This.GetRow()
+ll_countrow = This.rowcount()
+ll_countrow1 = tab_main.tabpage_order.dw_shipment.rowcount()
+for i =1 to ll_countrow
+	ls_invoice_no= tab_main.tabpage_order.dw_shipment.GetITemString( i,'invoice_no')
+		for j =1  to ll_countrow1
+			if ls_invoice_no = this.getitemstring(j,'invoice_no') then
+				messagebox('Shuttle order','Shuttle order: '+ ls_invoice_no+ ' is already added for consolidation. ')
+			return 
+			end if
+		next
+next
+
+llAvailCount = tab_main.tabpage_order.dw_shipment.RowCOunt()
+if messagebox('WARNING','Do you wish to consolidate all the shuttle orders into one Shipment ID?',question!, yesno! ) = 2 THEN 
+			For llRowPos = llAvailCount to 1 step - 1
+				This.DEleteRow(llRowPos)
+			Next 
+			Return
+else
+		
+For llAvailPos = 1 to llAvailCount
+	
+	ll_row = This.InsertRow(0)
+	This.SetITem(ll_row,'invoice_no',tab_main.tabpage_order.dw_shipment.GetITemString(llAvailPos,'invoice_no'))
+	This.SetITem(ll_row,'cust_code',tab_main.tabpage_order.dw_shipment.GetITemString(llAvailPos,'cust_code'))
+	is_new_shipmentid= wf_shipment_id()
+	This.SetITem(ll_row,'shipment_id', is_new_shipmentid)
+	This.SetITem(ll_row,'awb_bol_no', is_new_shipmentid)
+	//ib_shipexist= False
+	//This.SetITem(ll_row,'shipment_id',tab_main.tabpage_order.dw_shipment.GetITemString(llAvailPos,'shipment_id'))
+	This.SetITem(ll_row,'address_1',tab_main.tabpage_order.dw_shipment.GetITemString(llAvailPos,'address_1'))
+	This.SetITem(ll_row,'address_2',tab_main.tabpage_order.dw_shipment.GetITemString(llAvailPos,'address_2'))
+	This.SetITem(ll_row,'ord_status',tab_main.tabpage_order.dw_shipment.GetITemString(llAvailPos,'ord_status'))
+
+Next
+end if
+
+This.SetRedraw(True)
+// End - Dinesh - 02/21/2024- SIMS-378- Google - SIMS – Shuttle Consolidation and BOL Printing (368)
+
+
+
+
+
+end event
+
+event ue_delete();string ls_invoice,lsErrText
+//Dinesh -02/21/2024-  Begin - SIMS-378- Google - SIMS – Shuttle Consolidation and BOL Printing (368)
+Long ll_row,ll_countrow,i
+string ls_invoice_no,ls_shipmentid
+tab_main.tabpage_order.dw_shipment.SetFocus()
+If tab_main.tabpage_order.dw_shipment.AcceptText() = -1 Then Return	
+Execute Immediate "Begin Transaction" using SQLCA;
+If this.GetRow() > 0 Then
+	is_invoice= tab_main.tabpage_order.dw_consolidated_shipment.GetITemString(This.GetRow(),'invoice_no')
+	if messagebox('WARNING','Do you really want to remove the Shuttle order: ' + is_invoice + ' from shuttle Consolidation window?' ,question!, yesno! ) = 2 THEN  // Dinesh - 02/19/2024- SIMS-378- Google - Consolidated Shipment orders
+		Return
+	else
+		This.DEleteRow(This.GetRow())	
+	end if		
+End If
+//End- 02/21/2024- Dinesh- SIMS-378- Google - SIMS – Shuttle Consolidation and BOL Printing (368)
+end event
+
+event ue_clear_all();//Clear all rows
+//Dinesh -02/21/2024-  Begin - SIMS-378- Google - SIMS – Shuttle Consolidation and BOL Printing (368)
+Long	llRowCount, llRowPos,i
+string ls_invoice,lserrtext
+This.SetRedraw(False)
+
+llRowCount = This.RowCount()
+Execute Immediate "Begin Transaction" using SQLCA;
+If llRowCount > 0 Then
+	is_shipment_id_all= tab_main.tabpage_order.dw_consolidated_shipment.GetITemString(1,'shipment_id')
+	if messagebox('WARNING','Do you really want to remove all the orders of shipment ID: ' + is_shipment_id_all + ' from shuttle Consolidation window?' ,question!, yesno! ) = 2 THEN  // Dinesh - 02/19/2024- SIMS-378- Google - Consolidated Shipment orders
+		Return
+	else
+		For llRowPos = llRowCount to 1 step - 1
+			This.DEleteRow(llRowPos)
+		Next
+		ib_all_left = True
+	end if
+	End If
+This.SetRedraw(True)
+//Dinesh -02/21/2024-  End - SIMS-378- Google - SIMS – Shuttle Consolidation and BOL Printing (368)
+end event
+
+event itemchanged;//Dinesh -02/29/2024-  Begin - SIMS-378- Google - SIMS – Shuttle Consolidation and BOL Printing (368)
+is_shipment_id= data
+il_row= this.getrow()
+end event
+
+event clicked;//Begin - Dinesh - 02/28/2024 - SIMS-378- Shuttle consolidation shipment
+IF row > 0 THEN
+	This.SelectRow(0, FALSE)
+	This.SelectRow(row, TRUE)
+end if
+//End - Dinesh - 02/28/2024 - SIMS-378- Shuttle consolidation shipment
+end event
+
+event constructor;//ib_right= False// Dinesh - 03/04/2024- SIMS-SIMS-373- Google - Shuttle shipment order
+//ib_left=False
+end event
+
+type dw_shipment from datawindow within tabpage_order
+integer x = 14
+integer y = 444
+integer width = 1975
+integer height = 948
+integer taborder = 40
+string title = "none"
+string dataobject = "d_shipment_order"
+boolean hscrollbar = true
+boolean vscrollbar = true
+boolean livescroll = true
+borderstyle borderstyle = stylelowered!
+end type
+
+event retrieveend;//Begin -02/20/2024-  Dinesh - SIMS-378-Google - SIMS – Outbound RMA Number
+st_count1.text= string(dw_shipment.rowcount())
+end event
+
+event clicked;//Begin - Dinesh - 02/28/2024 - SIMS-378- Shuttle consolidation shipment
+IF row > 0 THEN
+	This.SelectRow(0, FALSE)
+	This.SelectRow(row, TRUE)
+end if
+//End - Dinesh - 02/28/2024 - SIMS-378- Shuttle consolidation shipment
+end event
+
 type cb_otmchanged from commandbutton within tabpage_order
+boolean visible = false
 integer x = 2373
 integer y = 16
 integer width = 581
@@ -4090,9 +5486,9 @@ end event
 
 type dw_packprint from datawindow within tabpage_order
 boolean visible = false
-integer x = 1704
+integer x = 1705
 integer y = 1040
-integer width = 688
+integer width = 690
 integer height = 400
 integer taborder = 40
 string title = "none"
@@ -4112,9 +5508,10 @@ event ue_printci ( )
 event ue_enable ( )
 event ue_clearall ( )
 event ue_selectall ( )
-integer x = 22
-integer y = 125
-integer width = 2695
+boolean visible = false
+integer x = 2057
+integer y = 168
+integer width = 2697
 integer height = 1840
 integer taborder = 20
 string dataobject = "d_shipment_orderlevel"
@@ -5010,7 +6407,8 @@ Return 0
 end event
 
 type cb_confirm from commandbutton within tabpage_order
-integer x = 2044
+boolean visible = false
+integer x = 2043
 integer y = 16
 integer width = 325
 integer height = 96
@@ -5041,9 +6439,10 @@ idw_Order.TriggerEvent("ue_checkstatus")
 end event
 
 type cb_printci from commandbutton within tabpage_order
-integer x = 1704
+boolean visible = false
+integer x = 1705
 integer y = 16
-integer width = 336
+integer width = 338
 integer height = 96
 integer taborder = 50
 integer textsize = -10
@@ -5067,9 +6466,10 @@ idw_Order.TriggerEvent("ue_printCI")
 end event
 
 type cb_delete_order from commandbutton within tabpage_order
-integer x = 625
+boolean visible = false
+integer x = 626
 integer y = 16
-integer width = 691
+integer width = 690
 integer height = 96
 integer taborder = 30
 integer textsize = -8
@@ -5090,6 +6490,7 @@ g.of_check_label_button(this)
 end event
 
 type cb_clearall_orders from commandbutton within tabpage_order
+boolean visible = false
 integer x = 315
 integer y = 16
 integer width = 311
@@ -5136,6 +6537,7 @@ g.of_check_label_button(this)
 end event
 
 type cb_selectall_orders from commandbutton within tabpage_order
+boolean visible = false
 integer y = 16
 integer width = 311
 integer height = 96
@@ -5200,9 +6602,10 @@ g.of_check_label_button(this)
 end event
 
 type st_1 from statictext within tabpage_order
+boolean visible = false
 integer x = 3003
-integer y = 26
-integer width = 673
+integer y = 28
+integer width = 672
 integer height = 64
 integer textsize = -8
 integer weight = 700
@@ -5222,9 +6625,10 @@ g.of_check_label_button(this)
 end event
 
 type cb_printpack from commandbutton within tabpage_order
+boolean visible = false
 integer x = 1317
 integer y = 16
-integer width = 391
+integer width = 393
 integer height = 96
 integer taborder = 40
 integer textsize = -10
@@ -5262,9 +6666,9 @@ end event
 type cb_add from commandbutton within tabpage_order
 boolean visible = false
 integer x = 2725
-integer y = 26
+integer y = 28
 integer width = 421
-integer height = 77
+integer height = 76
 integer taborder = 80
 integer textsize = -8
 integer weight = 700
@@ -5284,11 +6688,61 @@ event constructor;
 g.of_check_label_button(this)
 end event
 
+type gb_1 from groupbox within tabpage_order
+integer x = 855
+integer y = 64
+integer width = 1134
+integer height = 292
+integer taborder = 40
+integer textsize = -10
+integer weight = 700
+fontcharset fontcharset = ansi!
+fontpitch fontpitch = variable!
+fontfamily fontfamily = swiss!
+string facename = "Arial"
+long textcolor = 8388608
+long backcolor = 67108864
+string text = "Order Status"
+end type
+
+type gb_2 from groupbox within tabpage_order
+integer y = 364
+integer width = 1993
+integer height = 1092
+integer taborder = 30
+integer textsize = -10
+integer weight = 700
+fontcharset fontcharset = ansi!
+fontpitch fontpitch = variable!
+fontfamily fontfamily = swiss!
+string facename = "Arial"
+long textcolor = 8388608
+long backcolor = 67108864
+string text = "Shuttle Orders"
+end type
+
+type gb_3 from groupbox within tabpage_order
+integer x = 2295
+integer y = 356
+integer width = 2107
+integer height = 1104
+integer taborder = 40
+integer textsize = -10
+integer weight = 700
+fontcharset fontcharset = ansi!
+fontpitch fontpitch = variable!
+fontfamily fontfamily = swiss!
+string facename = "Arial"
+long textcolor = 8388608
+long backcolor = 67108864
+string text = "Shuttle Consolidation"
+end type
+
 type tabpage_detail from userobject within tab_main
-integer x = 15
-integer y = 99
-integer width = 3679
-integer height = 2010
+integer x = 18
+integer y = 112
+integer width = 4448
+integer height = 1996
 long backcolor = 79741120
 string text = "Shipment Detail"
 long tabtextcolor = 33554432
@@ -5327,9 +6781,9 @@ destroy(this.dw_detail)
 end on
 
 type st_double_click_on_order_to_edit from statictext within tabpage_detail
-integer x = 2948
-integer y = 19
-integer width = 673
+integer x = 2949
+integer y = 20
+integer width = 672
 integer height = 64
 integer textsize = -8
 integer weight = 700
@@ -5352,7 +6806,7 @@ type cb_clearall_detail from commandbutton within tabpage_detail
 integer x = 329
 integer y = 16
 integer width = 311
-integer height = 77
+integer height = 76
 integer taborder = 40
 integer textsize = -8
 integer weight = 700
@@ -5384,7 +6838,7 @@ end event
 type cb_selectall_detail from commandbutton within tabpage_detail
 integer y = 16
 integer width = 311
-integer height = 77
+integer height = 76
 integer taborder = 40
 integer textsize = -8
 integer weight = 700
@@ -5416,10 +6870,10 @@ g.of_check_label_button(this)
 end event
 
 type cb_delete_orders from commandbutton within tabpage_detail
-integer x = 764
+integer x = 763
 integer y = 16
-integer width = 673
-integer height = 77
+integer width = 672
+integer height = 76
 integer taborder = 40
 integer textsize = -8
 integer weight = 700
@@ -5442,7 +6896,7 @@ type cb_add_orders from commandbutton within tabpage_detail
 integer x = 1463
 integer y = 16
 integer width = 421
-integer height = 77
+integer height = 76
 integer taborder = 30
 integer textsize = -8
 integer weight = 700
@@ -5463,9 +6917,9 @@ end event
 
 type dw_detail from u_dw_ancestor within tabpage_detail
 event ue_add_orders ( )
-integer y = 122
-integer width = 3536
-integer height = 1706
+integer y = 124
+integer width = 3538
+integer height = 1708
 integer taborder = 20
 string dataobject = "d_shipment_detail"
 boolean hscrollbar = true
@@ -5720,10 +7174,10 @@ End If
 end event
 
 type tabpage_status from userobject within tab_main
-integer x = 15
-integer y = 99
-integer width = 3679
-integer height = 2010
+integer x = 18
+integer y = 112
+integer width = 4448
+integer height = 1996
 long backcolor = 79741120
 string text = "Shipment Status"
 long tabtextcolor = 33554432
@@ -5764,8 +7218,8 @@ end on
 type cb_orphans from commandbutton within tabpage_status
 integer x = 2103
 integer y = 16
-integer width = 505
-integer height = 77
+integer width = 503
+integer height = 76
 integer taborder = 50
 integer textsize = -8
 integer weight = 700
@@ -5796,10 +7250,10 @@ g.of_check_label_button(this)
 end event
 
 type cb_clearall_status from commandbutton within tabpage_status
-integer x = 336
+integer x = 338
 integer y = 16
 integer width = 311
-integer height = 77
+integer height = 76
 integer taborder = 40
 integer textsize = -8
 integer weight = 700
@@ -5830,10 +7284,10 @@ g.of_check_label_button(this)
 end event
 
 type cb_selectall_status from commandbutton within tabpage_status
-integer x = 15
+integer x = 14
 integer y = 16
 integer width = 311
-integer height = 77
+integer height = 76
 integer taborder = 40
 integer textsize = -8
 integer weight = 700
@@ -5865,10 +7319,10 @@ g.of_check_label_button(this)
 end event
 
 type cb_delete_status from commandbutton within tabpage_status
-integer x = 801
+integer x = 800
 integer y = 16
-integer width = 655
-integer height = 77
+integer width = 654
+integer height = 76
 integer taborder = 50
 integer textsize = -8
 integer weight = 700
@@ -5888,10 +7342,10 @@ g.of_check_label_button(this)
 end event
 
 type cb_add_status from commandbutton within tabpage_status
-integer x = 1485
+integer x = 1486
 integer y = 16
 integer width = 585
-integer height = 77
+integer height = 76
 integer taborder = 40
 integer textsize = -8
 integer weight = 700
@@ -5911,8 +7365,8 @@ g.of_check_label_button(this)
 end event
 
 type dw_status from u_dw_ancestor within tabpage_status
-integer y = 122
-integer width = 3463
+integer y = 124
+integer width = 3465
 integer height = 1696
 integer taborder = 20
 string dataobject = "d_shipment_status"
@@ -5988,10 +7442,10 @@ end event
 type tabpage_bol from userobject within tab_main
 event create ( )
 event destroy ( )
-integer x = 15
-integer y = 99
-integer width = 3679
-integer height = 2010
+integer x = 18
+integer y = 112
+integer width = 4448
+integer height = 1996
 long backcolor = 79741120
 string text = "BOL"
 long tabtextcolor = 33554432
@@ -6022,9 +7476,9 @@ destroy(this.dw_bol_entry)
 end on
 
 type cb_bol_print from commandbutton within tabpage_bol
-integer x = 2297
-integer y = 61
-integer width = 322
+integer x = 2295
+integer y = 60
+integer width = 320
 integer height = 96
 integer taborder = 60
 boolean bringtotop = true
@@ -6041,9 +7495,9 @@ event clicked;iw_window.triggerEvent("ue_print_bol")
 end event
 
 type cb_generate_bol from commandbutton within tabpage_bol
-integer x = 1872
-integer y = 58
-integer width = 336
+integer x = 1874
+integer y = 60
+integer width = 338
 integer height = 96
 integer taborder = 70
 boolean bringtotop = true
@@ -6060,10 +7514,10 @@ event clicked;iw_window.TriggerEvent("ue_process_bol")
 end event
 
 type dw_bol_prt from u_dw_ancestor within tabpage_bol
-integer x = 22
-integer y = 243
-integer width = 3493
-integer height = 1482
+integer x = 23
+integer y = 244
+integer width = 4430
+integer height = 1484
 integer taborder = 30
 boolean hscrollbar = true
 boolean vscrollbar = true
@@ -6071,8 +7525,8 @@ end type
 
 type dw_bol_entry from datawindow within tabpage_bol
 boolean visible = false
-integer y = 10
-integer width = 1514
+integer y = 12
+integer width = 1513
 integer height = 192
 integer taborder = 10
 string dataobject = "d_bol_entry"

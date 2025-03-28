@@ -60,7 +60,7 @@ end variables
 
 event open;call super::open;Integer i, li_ret
 Datawindowchild ldwc_carrier_Group
-
+String ls_transport_mode
 // Intialize
 
 is_title = This.Title
@@ -106,6 +106,7 @@ This.TriggerEvent("ue_edit")
 tab_main.tabpage_defaults.visible = false
 
 //3COM_Nash - LMS Rating Flags
+
 
 IF Upper(gs_project) = "3COM_NASH" THEN
 	
@@ -441,6 +442,7 @@ end type
 event tab_main::selectionchanged;//For updating sort option
 String lsCarrierGroup
 CHOOSE CASE newindex
+		
 	CASE 2
 		wf_check_menu(TRUE,'sort')
 		idw_current = idw_search
@@ -453,11 +455,11 @@ end event
 on tab_main.create
 this.tabpage_defaults=create tabpage_defaults
 this.tabpage_warehouse=create tabpage_warehouse
-int iCurrent
 call super::create
-iCurrent=UpperBound(this.Control)
-this.Control[iCurrent+1]=this.tabpage_defaults
-this.Control[iCurrent+2]=this.tabpage_warehouse
+this.Control[]={this.tabpage_main,&
+this.tabpage_search,&
+this.tabpage_defaults,&
+this.tabpage_warehouse}
 end on
 
 on tab_main.destroy
@@ -509,6 +511,14 @@ destroy(this.st_carrier_code)
 destroy(this.sle_carrier)
 destroy(this.dw_project)
 end on
+
+event tabpage_main::constructor;call super::constructor;
+//IF gs_project='PANDORA' then
+//	idw_main.allow_dg.visible=True
+//else
+//	idw_main.allow_dg.visible=False
+//End if
+end event
 
 type tabpage_search from w_std_master_detail`tabpage_search within tab_main
 integer width = 3520
@@ -588,7 +598,7 @@ end type
 
 event modified;String lsCarrier, lsCarrierGroup
 Long   ll_rows, ll_Pro_Rows
-
+String ls_transport_mode
 lsCarrier = This.Text
 
 
@@ -598,6 +608,15 @@ lsCarrierGroup = RightTrim(idw_main.GetItemString(ll_rows,'carrier_group' ))
 If IsNull(lsCarrierGroup ) or lsCarrierGroup = '' Then
 	lsCarrierGroup = lsCarrier
 End if
+
+// Begin - Dinesh - SIMS-348 - Google - SIMS - Dangerous Goods Exception
+IF Upper(gs_project) = "PANDORA" THEN
+		ls_transport_mode= idw_main.getitemstring(1,'transport_mode')
+		if (ls_transport_mode = 'GROUND' or  ls_transport_mode = 'OCEAN') then
+			idw_main.setitem(1,'allow_dg','Y')
+		end if
+End if
+// End - Dinesh - SIMS-348 - Google - SIMS - Dangerous Goods Exception
 
 IF ib_edit THEN /* Edit Mode */
 
@@ -660,7 +679,7 @@ type dw_project from u_dw_ancestor within tabpage_main
 event itemchange pbm_dwnitemchange
 integer x = 101
 integer y = 168
-integer width = 3109
+integer width = 3328
 integer height = 2000
 boolean bringtotop = true
 string dataobject = "d_maintenance_carrier"
@@ -671,7 +690,7 @@ end type
 event itemchanged;//TimA 09/08/15 Added in new carrier group.
 //This is needed to group carrier codes into on pro number calculation if needed.
 
-String lsCarrier,lsCarrierGroup, lsCarrierChanged, lsGetPrefixSufix
+String lsCarrier,lsCarrierGroup, lsCarrierChanged, lsGetPrefixSufix,ls_transport_mode
 Long llRows,i, llGetValues, llChangedRow, llCountOfGroupsFound
 Int liReplace
 ib_changed = True
@@ -679,6 +698,7 @@ ib_UpdateProWarehouse = False
 llGetValues = 0
 lsGetPrefixSufix = ''
 llChangedRow = idwc_carrier_Group.Getrow()
+
 If Upper(dwo.name) = 'CARRIER_GROUP' then
 	If Not Isnull(data) then
 		ib_changed = True
@@ -732,12 +752,69 @@ If Upper(dwo.name) = 'CARRIER_GROUP' then
 		End if
 	End if
 End if
+// Beigin - 11/10/2023- Dinesh - SIMS-348 - Google - SIMS - Dangerous Goods Exception
+if gs_project='PANDORA' then
+	If dwo.name= 'transport_mode' then
+		idw_main.accepttext()
+		ls_transport_mode= idw_main.getitemstring(1,'transport_mode')
+			if (ls_transport_mode = 'GROUND' or  ls_transport_mode = 'OCEAN') then
+				idw_main.setitem(1,'allow_dg','Y')
+			else
+				idw_main.setitem(1,'allow_dg','N')
+			end if
+	end if
+end if
+// End - 11/10/2023- Dinesh - SIMS-348 - Google - SIMS - Dangerous Goods Exception
+
 end event
 
 event process_enter;If This.GetColumnName() <> "remark" Then
 	Send(Handle(This),256,9,Long(0,0))
 	Return 1
 End If
+end event
+
+event clicked;call super::clicked; // Begin - 11/10/2023- Dinesh - SIMS-348 - Google - SIMS - Dangerous Goods Exception
+string ls_transport_mode,ls_allow
+If dwo.name= 'allow_dg' then
+	
+	ls_transport_mode= idw_main.getitemstring(1,'transport_mode')
+	IF ls_transport_mode <> '' OR not isnull(ls_transport_mode) then
+		If gs_role = "-1" Then
+			this.object.allow_dg.protect=0
+		else
+			this.object.allow_dg.protect=1
+		end if
+	elseif  ls_transport_mode = 'GROUND' OR ls_transport_mode= 'OCEAN' then
+			ls_allow= idw_main.getitemstring(1,'allow_dg')
+			if ls_allow='' or isnull(ls_allow) then
+				messagebox('Validation check','This is Ground/Occean mode transportation hence it always allow Dangerous Goods shipment')
+				return -1
+			end if
+	elseif ls_transport_mode='' or isnull(ls_transport_mode) then
+		messagebox('Validation check','Please enter the transport mode first')
+		return -1
+	End if
+
+end if
+
+//  End - 11/10/2023- Dinesh - SIMS-348 - Google - SIMS - Dangerous Goods Exception
+end event
+
+event retrieveend;call super::retrieveend; // Begin - 11/10/2023- Dinesh - SIMS-348 - Google - SIMS - Dangerous Goods Exception
+ string ls_allow
+if gs_project='PANDORA' then
+	this.Modify("allow_dg.Visible=1")
+else
+	this.Modify("allow_dg.Visible=0")
+end if
+
+ls_allow= idw_main.getitemstring(1,'allow_dg')
+	if ls_allow='' or isnull(ls_allow) then
+		idw_main.setitem(1,'allow_dg','N')
+end if
+
+ // End - 11/10/2023- Dinesh - SIMS-348 - Google - SIMS - Dangerous Goods Exception
 end event
 
 type cb_carrier_search from commandbutton within tabpage_search

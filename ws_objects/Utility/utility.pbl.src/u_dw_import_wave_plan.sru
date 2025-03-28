@@ -233,7 +233,7 @@ else
 			w_import.cb_save.Enabled = FALSE
 			this.setfocus( )
 			this.setcolumn("col2")
-			return "XPO WAREHOUSE should not be Empty. Or please delete Empty rows!"
+			return "GXO WAREHOUSE should not be Empty. Or please delete Empty rows!"
 	End If
 
 End IF

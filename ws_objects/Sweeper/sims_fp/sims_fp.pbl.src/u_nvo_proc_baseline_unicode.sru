@@ -162,7 +162,7 @@ integer 	liLoadRet, liProcessRet
 Boolean	bRet
 
 Choose Case Upper(Left(asFile,2))
-		
+
 	Case  'PM'  
 		
 		liRC = uf_process_purchase_order(asPath, asProject)
@@ -965,8 +965,13 @@ For llRowPos = 1 to llRowCOunt
 next /*next output record */
 
 
+
 //Write the Outbound File - no need to save and re-retrieve - just use the currently loaded DW
 gu_nvo_process_files.uf_process_flatfile_outbound_unicode(ldsOut,lsProject)
+
+//ldsOut.SaveAs("C:\sims3fp\flatfileout\ldsout1",Excel!,TRUE) // Dinesh
+
+
 
 // TAM 2011/09  Added ability to email the report
 
@@ -1031,6 +1036,11 @@ BOOLEAN lbBillToAddress
 STRING lsBillToAddr1, lsBillToAddr2, lsBillToAddr3, lsBillToAddr4, lsBillToCity
 STRING	lsBillToState, lsBillToZip, lsBillToCountry, lsBillToTel, lsBillToName
 STRING ls_InventoryType, lsNoteType, lsNoteText
+//Start..Akash baghel...02/26/2025...SIMS-667 Development for Geistlich - 3rd Party Address Mapping in Delivery Order
+BOOLEAN lb3PAddress
+STRING ls3PAddr1, ls3PAddr2, ls3PAddr3, ls3PAddr4, ls3PCity
+STRING	ls3PState, ls3PZip, ls3PCountry, ls3PTel, ls3PName, ls3PCountry1
+//End..Akash baghel...02/26/2025...SIMS-667 Development for Geistlich - 3rd Party Address Mapping in Delivery Order
 
 
 u_ds_datastore 	ldsSOheader,	&
@@ -1311,12 +1321,20 @@ else
 					ldsSOheader.SetItem(liNewRow,'ship_via', lsTemp)
 				End If				
 				
-				//Freight Terms	C(20)	No	N/A	
+				//Freight Terms	C(20)	No	N/A
+				lb3PAddress = False      //Start..Akash baghel...02/26/2025...SIMS-667 Development for Geistlich - 3rd Party Address Mapping in Delivery Order
 	
 				lsTemp = Trim(ldsImport.GetItemString(llFileRowPos, "col15"))
 		
 				If NOT(IsNull(lsTemp) OR trim(lsTemp) = '') Then
-					ldsSOheader.SetItem(liNewRow,'freight_terms', lsTemp)
+					// Begin -Dinesh - 12/10/2024- SIMS-610- Development for Geistlich - Third Party Orders processing in TRAX
+					if lsTemp = 'TP' and upper(asproject) ='GEISTLICH' then
+						 ldsSOheader.SetItem(liNewRow,'freight_terms', 'TPP')
+						 lb3PAddress = True   //Start..Akash baghel...02/26/2025...SIMS-667 Development for Geistlich - 3rd Party Address Mapping in Delivery Order
+					else
+						 ldsSOheader.SetItem(liNewRow,'freight_terms', lsTemp)
+					end if
+					// End - Dinesh - 12/10/2024- SIMS-610- Development for Geistlich - Third Party Orders processing in TRAX
 				End If			
 				
 				//Agent Info	C(30)	No	N/A	
@@ -1334,9 +1352,8 @@ else
 		
 				If NOT(IsNull(lsTemp) OR trim(lsTemp) = '') Then
 					ldsSOheader.SetItem(liNewRow,'cust_name', lsTemp)
-				End If				
-	
-					
+					ls3PName = trim(lsTemp)  //..Akash baghel...02/25/2025...SIMS-667 Development for Geistlich - 3rd Party Address Mapping in Delivery Order
+				End If								
 				
 				//Ship Address 1	C(60)	No	N/A	
 				
@@ -1344,6 +1361,7 @@ else
 		
 				If NOT(IsNull(lsTemp) OR trim(lsTemp) = '') Then
 					ldsSOheader.SetItem(liNewRow,'address_1', lsTemp)
+					ls3PAddr1 = trim(lsTemp)  //..Akash baghel...02/25/2025...SIMS-667 Development for Geistlich - 3rd Party Address Mapping in Delivery Order
 				End If			
 				
 				//Ship Address 2	C(60)	No	N/A	
@@ -1352,6 +1370,7 @@ else
 		
 				If NOT(IsNull(lsTemp) OR trim(lsTemp) = '') Then
 					ldsSOheader.SetItem(liNewRow,'address_2', lsTemp)
+					ls3PAddr2 = trim(lsTemp)  //..Akash baghel...02/25/2025...SIMS-667 Development for Geistlich - 3rd Party Address Mapping in Delivery Order
 				End If				
 				
 				//Ship Address 3	C(60)	No	N/A	
@@ -1360,6 +1379,7 @@ else
 		
 				If NOT(IsNull(lsTemp) OR trim(lsTemp) = '') Then
 					ldsSOheader.SetItem(liNewRow,'address_3', lsTemp)
+					ls3PAddr3 = trim(lsTemp)  //..Akash baghel...02/25/2025...SIMS-667 Development for Geistlich - 3rd Party Address Mapping in Delivery Order
 				End If	
 				
 				//Ship Address 4	C6)	No	N/A	
@@ -1368,6 +1388,7 @@ else
 		
 				If NOT(IsNull(lsTemp) OR trim(lsTemp) = '') Then
 					ldsSOheader.SetItem(liNewRow,'address_4', lsTemp)
+					ls3PAddr4 = trim(lsTemp)  //..Akash baghel...02/25/2025...SIMS-667 Development for Geistlich - 3rd Party Address Mapping in Delivery Order
 				End If				
 				
 				//Ship City	C(50)	No	N/A	
@@ -1376,6 +1397,7 @@ else
 		
 				If NOT(IsNull(lsTemp) OR trim(lsTemp) = '') Then
 					ldsSOheader.SetItem(liNewRow,'city', lsTemp)
+					ls3PCity = trim(lsTemp)  //..Akash baghel...02/25/2025...SIMS-667 Development for Geistlich - 3rd Party Address Mapping in Delivery Order
 				End If			
 				
 				//Ship State	C(50)	No	N/A
@@ -1384,6 +1406,7 @@ else
 		
 				If NOT(IsNull(lsTemp) OR trim(lsTemp) = '') Then
 					ldsSOheader.SetItem(liNewRow,'state', lsTemp)
+					ls3PState = trim(lsTemp)  //..Akash baghel...02/25/2025...SIMS-667 Development for Geistlich - 3rd Party Address Mapping in Delivery Order
 				End If				
 				
 				//Ship Postal Code	C(50)	No	N/A	
@@ -1392,6 +1415,7 @@ else
 		
 				If NOT(IsNull(lsTemp) OR trim(lsTemp) = '') Then
 					ldsSOheader.SetItem(liNewRow,'zip', lsTemp)
+					ls3PZip = trim(lsTemp)  //..Akash baghel...02/25/2025...SIMS-667 Development for Geistlich - 3rd Party Address Mapping in Delivery Order
 				End If				
 				
 				//Ship Country	C(50)	No	N/A	
@@ -1400,6 +1424,7 @@ else
 		
 				If NOT(IsNull(lsTemp) OR trim(lsTemp) = '') Then
 					ldsSOheader.SetItem(liNewRow,'country', lsTemp)
+					ls3PCountry = trim(lsTemp)  //..Akash baghel...02/25/2025...SIMS-667 Development for Geistlich - 3rd Party Address Mapping in Delivery Order
 				End If				
 				
 				//Ship Tel	C(20)	No	N/A	
@@ -1408,6 +1433,7 @@ else
 		
 				If NOT(IsNull(lsTemp) OR trim(lsTemp) = '') Then
 					ldsSOheader.SetItem(liNewRow,'tel', lsTemp)
+					ls3PTel = trim(lsTemp)  //..Akash baghel...02/25/2025...SIMS-667 Development for Geistlich - 3rd Party Address Mapping in Delivery Order
 				End If				
 	
 	
@@ -1789,11 +1815,20 @@ else
 					ldsSOheader.SetItem(liNewRow,'SLI_Nbr', lsTemp)
 				End If			
 	
-				lsTemp = Trim(ldsImport.GetItemString(llFileRowPos, "col87"))
-		
+				lsTemp = Trim(ldsImport.GetItemString(llFileRowPos, "col87")) // Trax_Acct_No
+				
 				If NOT(IsNull(lsTemp) OR trim(lsTemp) = '') Then
-					ldsSOheader.SetItem(liNewRow,'Trax_Acct_No', lsTemp)
-				End If			
+						ldsSOheader.SetItem(liNewRow,'Trax_Acct_No', lsTemp)
+				End if
+				// Begin - Dinesh - 12/10/2024- SIMS-610- Development for Geistlich - Third Party Orders processing in TRAX
+				If upper(asproject) = 'GEISTLICH' then
+						lsTemp = Trim(ldsImport.GetItemString(llFileRowPos, "col15")) // Col15 - Freight_Terms 
+						If lsTemp = 'TP'  then
+							lsTemp = Trim(ldsImport.GetItemString(llFileRowPos, "col60")) //Col60 - ship account number - User_field20-  delivery_master- copy from Delivery_Master.User_field20  - to Delivery_Master.Trax_Acct_No
+							ldsSOheader.SetItem(liNewRow,'Trax_Acct_No', lsTemp)
+						end if 
+				end if
+				// End - Dinesh -  12/10/2024- SIMS-610- Development for Geistlich - Third Party Orders processing in TRAX
 	
 				lsTemp = Trim(ldsImport.GetItemString(llFileRowPos, "col88"))
 		
@@ -1860,6 +1895,40 @@ else
 					ldsDOAddress.SetItem(llNewAddressRow,'tel',lsBillToTel)
 					
 				End If /*alt address exists*/
+				
+		 //Start..Akash baghel...02/25/2025...SIMS-667 Development for Geistlich - 3rd Party Address Mapping in Delivery Order
+				
+			If lb3PAddress  and upper(asproject) ='GEISTLICH' Then
+				
+		         llNewAddressRow = ldsDOAddress.InsertRow(0)
+				ldsDOAddress.SetITem(llNewAddressRow,'project_id', lsProject) /*Project ID*/
+				ldsDOAddress.SetItem(llNewAddressRow,'edi_batch_seq_no',llbatchseq) /*batch seq No*/
+				ldsDOAddress.SetItem(llNewAddressRow,'order_seq_no',llOrderSeq) 
+				
+				ldsDOAddress.SetItem(llNewAddressRow,'address_type','3P')
+				ldsDOAddress.SetItem(llNewAddressRow,'Name',ls3PName)
+				ldsDOAddress.SetItem(llNewAddressRow,'address_1',ls3PAddr1)
+				ldsDOAddress.SetItem(llNewAddressRow,'address_2',ls3PAddr2)
+				ldsDOAddress.SetItem(llNewAddressRow,'address_3',ls3PAddr3)
+				ldsDOAddress.SetItem(llNewAddressRow,'address_4',ls3PAddr4)
+				ldsDOAddress.SetItem(llNewAddressRow,'City',ls3PCity)
+				ldsDOAddress.SetItem(llNewAddressRow,'State',ls3PState)
+				ldsDOAddress.SetItem(llNewAddressRow,'Zip',ls3PZip)
+				
+				//Start...Akash Baghel....03/07/2025.....SIMS-677 Geistlich - 3rd Party Address - map country from 3-char to 2-char
+			If Len(ls3PCountry) = 3 Then 
+				Select Designating_Code INTO :ls3PCountry1 
+				from Country with(nolock)
+				where ISO_Country_Cd = :ls3PCountry   Using sqlca; 
+				ldsDOAddress.SetItem(llNewAddressRow,'Country',ls3PCountry1)
+			  ELSE
+				ldsDOAddress.SetItem(llNewAddressRow,'Country',ls3PCountry)
+			End if
+			  //END...Akash Baghel....03/07/2025.....SIMS-677 Geistlich - 3rd Party Address - map country from 3-char to 2-char
+				ldsDOAddress.SetItem(llNewAddressRow,'tel',ls3PTel)
+		
+			 End if	
+			//End..Akash baghel...02/25/2025...SIMS-667 Development for Geistlich - 3rd Party Address Mapping in Delivery Order	
 				
 				//28-March-2017 :Madhu - SIMSPEVS-535 - Add Return Address for GEI -START
 				//20-AUG-2018 :Madhu S22535 - Don't add RT address for GEI

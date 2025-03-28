@@ -20,7 +20,7 @@ table(column=(type=char(10) updatewhereclause=yes key=yes name=content_project_i
  column=(type=char(50) updatewhereclause=yes key=yes name=content_po_no2 dbname="Content.PO_No2" )
  column=(type=char(2) updatewhereclause=yes name=content_reason_cd dbname="Content.Reason_Cd" )
  column=(type=decimal(5) updatewhereclause=yes name=content_component_qty dbname="Content.Component_Qty" )
- column=(type=decimal(5) updatewhereclause=yes name=content_avail_qty dbname="Content.Avail_Qty" )
+ column=(type=decimal(5) update=yes updatewhereclause=yes name=content_avail_qty dbname="Content.Avail_Qty" )
  column=(type=char(25) updatewhereclause=yes name=content_last_user dbname="Content.Last_User" )
  column=(type=datetime updatewhereclause=yes name=content_last_update dbname="Content.Last_Update" )
  column=(type=decimal(0) updatewhereclause=yes name=content_component_no dbname="Content.Component_No" )

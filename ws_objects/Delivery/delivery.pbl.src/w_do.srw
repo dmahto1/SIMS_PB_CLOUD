@@ -3,6 +3,8 @@ $PBExportComments$+Delivery Order
 forward
 global type w_do from w_std_master_detail
 end type
+type cb_readonly from commandbutton within tabpage_main
+end type
 type st_shipment from statictext within tabpage_main
 end type
 type st_shipment_nbr from statictext within tabpage_main
@@ -131,11 +133,14 @@ type dw_search from u_dw_ancestor within tabpage_search
 end type
 type tabpage_other from userobject within tab_main
 end type
+type cb_lock_load_google from commandbutton within tabpage_other
+end type
 type cb_assign_pro from commandbutton within tabpage_other
 end type
 type dw_other from u_dw_ancestor within tabpage_other
 end type
 type tabpage_other from userobject within tab_main
+cb_lock_load_google cb_lock_load_google
 cb_assign_pro cb_assign_pro
 dw_other dw_other
 end type
@@ -257,6 +262,8 @@ cb_pick_delete cb_pick_delete
 end type
 type tabpage_pack from userobject within tab_main
 end type
+type cb_print_sscc_label from commandbutton within tabpage_pack
+end type
 type cb_pack_copypaste from commandbutton within tabpage_pack
 end type
 type cb_lock_load from commandbutton within tabpage_pack
@@ -308,6 +315,7 @@ end type
 type cb_pack_delete from commandbutton within tabpage_pack
 end type
 type tabpage_pack from userobject within tab_main
+cb_print_sscc_label cb_print_sscc_label
 cb_pack_copypaste cb_pack_copypaste
 cb_lock_load cb_lock_load
 sle_carton_scan_t sle_carton_scan_t
@@ -602,13 +610,16 @@ Boolean ib_show_otm_ord_status = false
 Boolean ib_show_mobile_status = false
 Boolean ib_ariens_on_hold_service_call = false
 Boolean ib_ShortShipEnabled, ib_under_picked, ib_ShortShipUnlocked, ibResetUpdateRequired
+Boolean ib_access=False
 
 String isTMSstatus					//GailM 11/19/2018 S25773:  N = NotTMS, T = TMS, & Z = TMS overriddent
+string is_shipment_id,is_eng,is_metric // Dinesh - 02082022
 
 //GailM 1/2/2018 I357 F5734 S14571 PAN - HRI Alert for High Risk Inventory
-Boolean ib_hri_ind
+Boolean ib_hri_ind,ib_readonly= False
+long inewindex
 
-Long ll_checkboxrow
+Long ll_checkboxrow,il_userspid
 
 //TimA 03/26/13
 Datawindowchild idw_From_Loc
@@ -648,6 +659,7 @@ Long ll_Skip_OTM, ll_SkipOTMFlag //Sometime we need to skip a call to OTM for En
 //GailM 07/03/2017 - SIMSPEVS-654 - Add boolean ibMIM to identify an order as MIM
 Boolean ibEUFlag
 Boolean ibDejaVu, ibLPN, ibMIM, ibFootprint, ibCntrSerial	 //TAM 2018/02 S141838  GWM 20180220 DE3189
+String is_find_match // Dinesh - SIMS-198 - Screen lock orders
 
 Datawindowchild idwOTM_Status
 n_otm i_otm
@@ -660,10 +672,10 @@ CommandButton icb_pick_insert, icb_pick_delete, icb_wt_dims
 CommandButton icb_pick_generate, icb_pick_print,icb_pick_copy, icb_pick_unallocate
 CommandButton icb_pack_insert, icb_pack_delete
 CommandButton icb_pack_copy, icb_pack_print, icb_Shipment, icb_ReadyToShip, icb_notes, icb_ship_docs
-CommandButton icb_ci_load_tender, icb_serial, icb_import_ib, icb_lock_load
+CommandButton icb_ci_load_tender, icb_serial, icb_import_ib, icb_lock_load,icb_lock_load_google
 
 String is_sql,isoriqsqldropdown
-String is_dono, is_sku
+String is_dono, is_sku,is_order_new
 String is_content_sql
 String is_pd_sql
 String dw_
@@ -706,6 +718,7 @@ string ispacksuppliers[]
 decimal idpacksupplierqty[]
 string isInvalidSku
 string isInvalidSupplier
+boolean ib_pack
 // pvh 02/03/06
 datastore idsparentskbychild
 
@@ -721,6 +734,7 @@ long ilComponent_no, ilParent_rowno, ilParent_maxrow // 01/03/2011 ujh: S/N_Pfx1
 boolean ibcalcAllocated
 boolean	ibPickModified
 Boolean	ibServerAllocationEnabled, ibUnconfirmRequested, ibUnconfirmFullCircle
+Boolean ib_enable_bol // Dinesh -S66897
 
 u_nvo_check_digit_validations iuo_check_digit_validations
 String	isPandoraToProject
@@ -765,7 +779,7 @@ String isDetailRecordsToReConfirm
 
 Boolean	ibConfirmShipment
 //TimA 06/05/14 Pandora issue #855 boolean for the copy rows button on the pack list tab
-Boolean ibCopied
+Boolean ibCopied,ib_search= True
 String isSkuCopied
 
 String is_warehouse_of_create_inbound		// 	Missing confirmation changes - LTK 20141218 
@@ -780,6 +794,7 @@ String is_nfNextTab
 //GailM 06/20/2017 Pandora SIMSPEVS-605 - Validate BoxIDs - Do not allow pack and serial lists to be generated while there are BoxIDs to scan
 Long il_ContainerTracked
 Long il_CountNotScanned
+boolean ib_lock= True
 
 //TimA 07/16/15
 String is_BoxIDLookup
@@ -811,6 +826,8 @@ Boolean ibCanSplitContainer, ibSplitContainerRequired
 Boolean ibEscape = FALSE	//GailM DE15963
 String isLoad_Status, isLoadId //TAM 2018/08 S22531
 Boolean ibSelected, ibPharmacyProcessing
+String is_pack_po_no2,is_display_name,is_userid,is_invoice_no,is_user_id
+long il_find_matchW,il_find_matchR
 end variables
 
 forward prototypes
@@ -941,6 +958,8 @@ public function string getlocationtype (string aswhcode, string aslocation)
 public function string addcomma (string asinput, string asallinput)
 protected function integer uf_print_a4_label ()
 public subroutine f_crossdock ()
+public subroutine wf_set_carton_type ()
+public subroutine wf_delivery_order_readonly (boolean ab_read)
 end prototypes
 
 event ue_pack_print();// This event prints the Packing List which is currently visible on the screen 
@@ -1586,7 +1605,7 @@ For i = 1 to ll_cnt
         idw_packprint.setitem(j,"bill_to_state",lsstate_to)
         idw_packprint.setitem(j,"bill_to_zip",lszip_to)
 	   idw_packprint.setitem(j,"bill_to_country",lscountry_to)
-		//Begin - S58363- 06/14/2021- H2O+ - SIMS: Update SO Packing List
+		//Begin -Dinesh -  S58363- 06/14/2021- H2O+ - SIMS: Update SO Packing List
 	elseif  ls_ord_type='S' then
 		Select cust_name, Address_1, Address_2, Address_3, Address_4, city, state, zip, country,tel,email_address
         Into    :lsName, :lsaddr1, :lsAddr2, :lsaddr3, :lsaddr4, :lsCity, :lsState, :lsZip, :lsCountry,:lstel,:lsemail
@@ -1613,7 +1632,7 @@ For i = 1 to ll_cnt
         idw_packprint.setitem(j,"ship_from_state",lsstate)
         idw_packprint.setitem(j,"ship_from_zip",lszip)
 		idw_packprint.setitem(j,"ship_from_country",lscountry)
-	//End - S58363- 06/14/2021- H2O+ - SIMS: Update SO Packing List
+	//End -Dinesh - S58363- 06/14/2021- H2O+ - SIMS: Update SO Packing List
 	else
 		 idw_packprint.setitem(j,"component_ind",idw_pack.getitemstring(i,"component_ind")) /* 02/01 - PCONKL - sort component master to top*/
                 
@@ -1798,8 +1817,13 @@ SetProfileString(gs_inifile,'PRINTERS','PACKLIST',lsPrinter)
 If message.doubleparm = 1 then
         If idw_main.GetItemString(1,"ord_status") = "N" or &
                 idw_main.GetItemString(1,"ord_status") = "P" or &
-                idw_main.GetItemString(1,"ord_status") = "I" Then 
-                idw_main.SetItem(1,"ord_status","A")
+                idw_main.GetItemString(1,"ord_status") = "I" or &
+			   idw_main.GetItemString(1,"ord_status") = "A" Then 
+					 if gs_project='PANDORA' then
+						idw_main.SetItem(1,"ord_status","L") // DINESH - 03/17/2023- sims-73- Google - SIMS - Load Lock and New Loading Status
+					else
+						 idw_main.SetItem(1,"ord_status","A")
+					end if
                 ib_changed = TRUE
                 iw_window.trigger event ue_save()
         End If
@@ -2619,11 +2643,11 @@ end event
 
 event ue_generate_pack();Long ll_cnt, ll_row, i,llFindRow,  llLoopCount, llLoopPos,llLineITemNo, llLineItemNoHold, llCarton, llPackFindRow, ll_owner_id
 Decimal ld_gross_weight, ld_weight , ld_length, ld_width, ld_height,ld_qty, ldSetQty, ldParentQty, ldPickQty, ldSerialQty, ldPackQty,ld_qty2,ld_cbm,ld_gs_weight
-integer li_foundrow, j,  li_indx, li_PickCount
+integer li_foundrow, j,  li_indx, li_PickCount,k
 STRING lsSKU, lsSkuParent, lsSupplier, lsSkuParentHold, lsSkuHold,lsFind, lsSerialNo,ls_std_measure , lsPackFind, lsOwnerName, ls_INActiveCustomerName
 String  ls_wh_code,ls_std_measure_w,lsSupplierhold,  lscusttype, lscarton, lsLotNo, lsPoNo, lsPoNo2, lscontainerId, lscontainerIdHold
 Boolean	lbBundled, lbNewCarton,lbSingleCarton, lbGenerateFromSerial, ibCopyRowInsert
-String lsLotNoHold, lsPoNoHold, lsPoNo2Hold, lsGSIN, lsSSCC, lsPrevGSIN
+String lsLotNoHold, lsPoNoHold, lsPoNo2Hold, lsGSIN, lsSSCC, lsPrevGSIN,ls_pack_po_no2,ls_pack_sscc_no,ls_carton,ls_carton_prev
 Datetime ldtExpDate, ldtExpDateHold
 Long	ll_method_trace_id, ll_Findrow
 String lsdo_no	//TAM Riverbed 2012/01
@@ -2665,7 +2689,8 @@ End If
 lsSQLSelect = idw_pack.GetSQLSelect()
 // 09/05 - PCONKL - If there are packages shipped by TRAX, they must be voided before regenerating (can't delete shipped rows)
 If idw_Pack.Find("Tracking_Id_type='T'",1, idw_Pack.RowCount()) > 0 Then
-	messagebox(is_title,'One or more cartons on the current Packing List were shipped by TRAX.~rThese cartons must be voided before you can re-generate the Packing List.',StopSign!)
+//	messagebox(is_title,'One or more cartons on the current Packing List were shipped by TRAX.~rThese cartons must be voided before you can re-generate the Packing List.',StopSign!) // Dinesh - 02/06/2025- SIMS-641- Development for Delivery Order screen change for ConnectShip 
+	messagebox(is_title,'One or more cartons on the current Packing List were shipped by ConnectShip.~rThese cartons must be voided before you can re-generate the Packing List.',StopSign!)// Dinesh - 02/06/2025- SIMS-641- Development for Delivery Order screen change for ConnectShip 
 	return
 End If
 
@@ -2973,15 +2998,27 @@ If ibGenerateFromSerial Then /* Generate from Serial Tab*/
 			End if
 	
 			//One ROw for each Carton/SKU/Line ITem (Carton already assigned in the Serial Tab)
-			If lbFootPrint or idw_serial.getItemString( i, 'serial_type' ) = 'Serial' Then
+			//Start- Dhirendra -S59788  Changes ls_find string for the new carton type overpack
+			IF  lbFootPrint or idw_serial.getItemString( i, 'serial_type' ) = 'Serial' Then
 				//Get container id from picking list in same row as serial no
-				lsContainerId = idw_serial.getItemString( i, 'container_id' )
-				lsFind = "Upper(carton_no) = '" + upper(lsCarton) + "' and upper(sku) = '" + upper(lsSKU) + "' and Upper(supp_code) = '" + Upper(lsSupplier) + "' and line_item_no = " + String(llLineITemNo) + " and Upper( pack_container_id ) = '" + Upper( lsContainerId ) + "' "
+				IF gs_project ='PANDORA' and  lbFootPrint  then
+					lsContainerId = idw_serial.getItemString( i, 'container_id' )
+					lsFind = "Upper(carton_no) = '" + upper(lsCarton) + "' and upper(sku) = '" + upper(lsSKU) + "' and Upper(supp_code) = '" + Upper(lsSupplier) + "' and line_item_no = " + String(llLineITemNo) + " and Upper( pack_container_id ) = '" + Upper( lsContainerId ) + "' "
+				elseif gs_project ='PANDORA' and  lbFootPrint =FALSE  then
+					lsFind = "Upper(pack_container_id) = '" + upper(lsCarton) + "' and upper(sku) = '" + upper(lsSKU) + "' and Upper(supp_code) = '" + Upper(lsSupplier) + "' and line_item_no = " + String(llLineITemNo)
+				else 
+					lsContainerId = idw_serial.getItemString( i, 'container_id' )
+					lsFind = "Upper(carton_no) = '" + upper(lsCarton) + "' and upper(sku) = '" + upper(lsSKU) + "' and Upper(supp_code) = '" + Upper(lsSupplier) + "' and line_item_no = " + String(llLineITemNo) + " and Upper( pack_container_id ) = '" + Upper( lsContainerId ) + "' "
+				end if 
 			Else
-				lsContainerId = idw_serial.getItemString(i, 'carton_no' )
-				lsFind = "Upper(carton_no) = '" + upper(lsCarton) + "' and upper(sku) = '" + upper(lsSKU) + "' and Upper(supp_code) = '" + Upper(lsSupplier) + "' and line_item_no = " + String(llLineITemNo)
+				//dts - S59788 - 08/21/2021 - now setting Serial Carton_No to do_no Sequence type Carton_No
+				//        - and using Pack_Container_ID in FIND (to create new row if Carton_No is the same (could probably just use Pack_Container_ID as a Container shouldn't be split over multiple Cartons, but....)
+				//lsContainerId = idw_serial.getItemString(i, 'carton_no' )
+				//lsFind = "Upper(carton_no) = '" + upper(lsCarton) + "' and upper(sku) = '" + upper(lsSKU) + "' and Upper(supp_code) = '" + Upper(lsSupplier) + "' and line_item_no = " + String(llLineITemNo)
+				lsContainerId = idw_serial.getItemString( i, 'container_id' )
+				lsFind = "Upper( pack_container_id ) = '" + Upper( lsContainerId ) + "' and Upper(carton_no) = '" + upper(lsCarton) + "' and upper(sku) = '" + upper(lsSKU) + "' and Upper(supp_code) = '" + Upper(lsSupplier) + "' and line_item_no = " + String(llLineITemNo) 
 			End If
-			
+	//END - Dhirendra -S59788  Changes ls_find string for the new carton type overpack	
 			llFindRow = idw_Pack.Find(lsFind,1,idw_Pack.RowCount())
 		
 			If llFindRow > 0 Then
@@ -2992,13 +3029,37 @@ If ibGenerateFromSerial Then /* Generate from Serial Tab*/
 			Else /* add a new PAcking Row */
 						
 				ll_row = idw_pack.InsertRow(0)
-				idw_pack.SetItem(ll_row,"pack_container_id", lsContainerId)
+				
 				idw_pack.SetItem(ll_row,"component_ind",idw_serial.GetItemString(i,'component_ind'))
 				idw_pack.SetItem(ll_row,"do_no", idw_main.GetItemString(1,"do_no"))
 				idw_pack.SetItem(ll_row,"sku", lsSku)
 				idw_pack.SetItem(ll_row,"supp_code", lsSupplier)
 				idw_pack.SetITem(ll_row,'line_item_No',llLIneItemNo) /* 09/01 Pconkl */
-				idw_pack.SetItem(ll_row,"carton_no", idw_serial.GetItemString(i,'carton_no'))
+				//Dhirendra -S59788 PANDORA-overpack caton type packing screen functionality -Start
+				IF Upper(gs_project) = 'PANDORA' and ls_ContainerTrackingInd <> 'Y' then
+					idw_pack.Modify("pack_container_id.Protect=1")
+					idw_pack.Modify("pack_po_no2.Protect=1")
+					// begin SIMS 217 - adding for container Id Akash....05/31/2023	
+				     if  len(lsContainerId) >3 then
+						idw_pack.SetItem(ll_row,"pack_container_id",lsContainerId)
+				     else 
+						idw_pack.SetItem(ll_row,"pack_container_id",idw_serial.GetItemString(i,'carton_no'))
+					end if
+				// END   SIMS 217 - adding for container Id Akash....05/31/2023
+				    // idw_pack.SetItem(ll_row,"pack_container_id",idw_serial.GetItemString(i,'carton_no'))  SIMS 217 - adding for container Id Akash....05/31/2023
+				     idw_pack.SetItem(ll_row,"carton_no", right(idw_serial.GetItemString(i,'carton_no'),(len(idw_serial.GetItemString(i,'carton_no'))-1)))
+				elseif Upper(gs_project) = 'PANDORA' and ls_ContainerTrackingInd = 'Y' then
+					idw_pack.Modify("pack_container_id.Protect=1")
+					idw_pack.Modify("pack_po_no2.Protect=1")
+				     idw_pack.SetItem(ll_row,"pack_container_id", lsContainerId)
+				     idw_pack.SetItem(ll_row,"carton_no",idw_serial.GetItemString(i,'carton_no')) //dts - S59788 - 08/21/2021 - Now setting Carton_no on Serial tab to do_no + sequence
+					//dts idw_pack.SetItem(ll_row,"carton_no",wf_set_Pack_carton(ll_row))
+			     else
+				     idw_pack.SetItem(ll_row,"pack_container_id", lsContainerId)
+				     idw_pack.SetItem(ll_row,"carton_no",idw_serial.GetItemString(i,'carton_no'))
+					//dts - S59788 - 08/21/2021 idw_pack.SetItem(ll_row,"carton_no",wf_set_Pack_carton(ll_row))
+			     end if 
+			     //Dhirendra -S59788 PANDORA-overpack caton type packing screen functionality -END
 				idw_pack.SetItem(ll_row,"quantity",1) /*looping for each instance of Qty*/	
 				idw_pack.SetItem(ll_row,"outerpack_id",1) /* 04/16 - PCONKL - Default outerpack To 1 */
 				idw_pack.SetItem(ll_row,"serialized_ind", lsSerializedInd	)	/* 01/18 - GailM - S14978 */
@@ -3292,8 +3353,8 @@ If ibGenerateFromSerial = FALSE or ibMixedSerialPickRows = TRUE Then /* Generate
 			End If
 		
 		// TAM 2018/11/05 - DE7010 - Need to compare UPPer(lsSupplier)
-//		ElseIf lsSKU <> lsSKUHOld or lsSupplier <> lsSupplierhold or Upper(gs_Project) ='RIVERBED' Then  //10-Oct-2013 :Madhu Added projectId  
-		ElseIf lsSKU <> lsSKUHOld or Upper(lsSupplier) <> Upper(lsSupplierhold) or Upper(gs_Project) ='RIVERBED' Then  //10-Oct-2013 :Madhu Added projectId  
+		//ElseIf lsSKU <> lsSKUHOld or lsSupplier <> lsSupplierhold or Upper(gs_Project) ='RIVERBED' Then  //10-Oct-2013 :Madhu Added projectId  
+		ElseIf lsSKU <> lsSKUHOld or Upper(lsSupplier) <> Upper(lsSupplierhold) or Upper(gs_Project) ='RIVERBED' or (Upper(gs_project) = 'BOSCH') Then  // Dinesh 03/16/2023 - SIMS-151- BOSCH Label
 		
 			ll_row = idw_pack.InsertRow(0)
 			lsSkuHold = lsSku
@@ -3338,8 +3399,9 @@ If ibGenerateFromSerial = FALSE or ibMixedSerialPickRows = TRUE Then /* Generate
 
 //		If Upper(gs_project) = 'GM_MONTRY'  and (lscusttype  <> "PDC" and lscusttype <> "ACDELCOPDC"  or isnull(lscusttype)) then 
 //		If (Upper(gs_project) = 'RIVERBED' and llBOMCount > 0) or (Upper(gs_project) = 'GM_MONTRY'  and (lscusttype  <> "PDC" and lscusttype <> "ACDELCOPDC"  or isnull(lscusttype))) then  //10-Oct-2013 :Madhu commented
-		If (Upper(gs_project) = 'RIVERBED') or (Upper(gs_project) ='ARIENS' and (ls_Serialized_Ind ='B' or ls_Serialized_Ind ='O')) or (Upper(gs_project) = 'GM_MONTRY'  and (lscusttype  <> "PDC" and lscusttype <> "ACDELCOPDC"  or isnull(lscusttype))) then  //10-Oct-2013 :Madhu Removed llBOMCount condition to generate packlist records with qty=1
-		
+		//If (Upper(gs_project) = 'RIVERBED') or (Upper(gs_project) ='ARIENS' and (ls_Serialized_Ind ='B' or ls_Serialized_Ind ='O')) or (Upper(gs_project) = 'GM_MONTRY'  and (lscusttype  <> "PDC" and lscusttype <> "ACDELCOPDC"  or isnull(lscusttype))) then  //10-Oct-2013 :Madhu Removed llBOMCount condition to generate packlist records with qty=1 // Dinesh - 03/16/2023- SIMS-151- BOSCH Label change
+		 // Dinesh - 03/16/2023- SIMS-151- BOSCH Label change
+		 If (Upper(gs_project) = 'BOSCH') or (Upper(gs_project) = 'RIVERBED') or (Upper(gs_project) ='ARIENS' and (ls_Serialized_Ind ='B' or ls_Serialized_Ind ='O')) or (Upper(gs_project) = 'GM_MONTRY'  and (lscusttype  <> "PDC" and lscusttype <> "ACDELCOPDC"  or isnull(lscusttype))) then  //10-Oct-2013 :Madhu Removed llBOMCount condition to generate packlist records with qty=1 
 			llLoopCount = idw_pick.GetItemnumber(i,'quantity') /*loop once for each qty*/
 			ldSetQty = 1 /*set each qty to 1*/
 			
@@ -3417,6 +3479,27 @@ If ibGenerateFromSerial = FALSE or ibMixedSerialPickRows = TRUE Then /* Generate
 			IF Upper(gs_project) = 'GEISTLICH' THEN
 				idw_pack.SetItem(ll_row,"user_field1",idw_pick.GetItemString(i,'lot_no'))
 			END IF
+//			
+//			// Begin - Dinesh -SIMS-107- 02/08/2023-Upper(gs_project) = "BOSCH") for pack  SSCC number
+//				IF (Upper(gs_project) = "BOSCH") AND idw_pack.RowCount() > 0 then
+//					ls_carton=''
+//					For li_indx = 1 to idw_pack.RowCount()
+//						ls_pack_sscc_no=idw_pack.GetItemString(li_indx, "pack_sscc_no")
+//						ls_carton=idw_pack.GetItemString(li_indx, "carton_no")
+//							If ls_pack_sscc_no='' or isnull(ls_pack_sscc_no)  Then
+//								if ls_carton_prev <> ls_carton then
+//									lsSSCC = f_get_sscc_number( gs_project, idw_pack.GetItemString(li_indx, "supp_code") )
+//									
+//								else
+//									continue;
+//								end if
+//								ls_carton_prev = ls_carton
+//								idw_pack.SetItem(li_indx, "pack_sscc_no", lsSSCC)
+//							else
+//							End if
+//						Next
+//				End if
+			// End - Dinesh -SIMS-107- 02/08/2023-Upper(gs_project) = "BOSCH") for pack  SSCC number
 			
 			//11-JUNE-2018 :Madhu S20055 - KDO - Add ‘Pick Location’ to UF2 of Pack List.
 			 IF Upper(gs_Project) ='KENDO' and lsSKU <> ls_prev_sku Then
@@ -3703,6 +3786,8 @@ IF Upper(gs_project) = "PHXBRANDS" OR  Upper(gs_project) = "SIKA" THEN
 	
 END IF
 
+
+
 //MEA - 01/16/2012
 
 //No. of Carton in Other Info tab should be populated by getting the Total Cartons in Packing List tab after the packing list 
@@ -3726,6 +3811,8 @@ IF Upper(gs_project) = "PANDORA" THEN
 		end if
 	END IF	
 END IF	
+
+wf_set_carton_type()  // Dinesh - 06242022 - S72575- Google - SIMS - Outbound Processing Changes (Carton_Type / Pack_PO_NO2 portion)
 
 //IF Upper(gs_project) = "FLEX-SIN" THEN
 //
@@ -3784,32 +3871,50 @@ END IF
 //GailM 2/18/2019 S29552 F13773 I1745 Philips BlueHeart  - SIMS - Product Picked - Client Changes
 //GailM 9/3/2019 S36484 F17554 Philips Batch GSIN
 //GailM 11/18/2020 S51441/F26536/I2978 PhilipsDA mimic PHILIPSCLS in Outbound order
-IF (Upper(gs_project) = "PHILIPSCLS" OR Upper(gs_project) = "PHILIPS-DA") AND idw_pack.RowCount() > 0 then
-	DateTime ldtPickEnd
-	ldtPickEnd = f_get_date("END")
-	idw_main.SetItem(1, "pick_complete",ldtPickEnd)
-	idw_main.SetItem(1, "transport_mode", "LT")
-	
-	lsPrevGSIN = idw_main.GetItemString(1, "user_field4")
-	If lsPrevGSIN <> '' Then
-		If MessageBox(is_title,"GSIN already assigned as " + lsPrevGSIN + ".  Do you wish to overwrite?",Question!,YesNo!,2) = 1 Then
-			idw_main.SetItem(1, "user_field4", f_get_gsin_number( gs_project, lsSupplier))
-		End If
-	Else
-		idw_main.SetItem(1, "user_field4", f_get_gsin_number( gs_project, lsSupplier))
-	End If
+//IF (Upper(gs_project) = "PHILIPSCLS" OR Upper(gs_project) = "PHILIPS-DA") AND idw_pack.RowCount() > 0 then
+IF (Upper(gs_project) = "PHILIPSCLS" OR Upper(gs_project) = "PHILIPS-DA" OR Upper(gs_project) = "BOSCH") AND idw_pack.RowCount() > 0 then  // Dinesh - 03/16/2023- SIMS-151- BOSCH Label change
+	 IF (Upper(gs_project) = "BOSCH") then // Dinesh - 03/16/2023- SIMS-151- BOSCH Label change
+	 else
+		
+			DateTime ldtPickEnd
+			ldtPickEnd = f_get_date("END")
+			idw_main.SetItem(1, "pick_complete",ldtPickEnd)
+			idw_main.SetItem(1, "transport_mode", "LT")
+			
+			lsPrevGSIN = idw_main.GetItemString(1, "user_field4")
+			If lsPrevGSIN <> '' Then
+				If MessageBox(is_title,"GSIN already assigned as " + lsPrevGSIN + ".  Do you wish to overwrite?",Question!,YesNo!,2) = 1 Then
+					idw_main.SetItem(1, "user_field4", f_get_gsin_number( gs_project, lsSupplier))
+				End If
+			Else
+				idw_main.SetItem(1, "user_field4", f_get_gsin_number( gs_project, lsSupplier))
+			End If
+		END IF   // Dinesh - 03/16/2023- SIMS-151- BOSCH Label change
 
 	For li_indx = 1 to idw_pack.RowCount()
+		 // Begin - Dinesh - 03/16/2023- SIMS-151- BOSCH Label change
+		 IF Upper(gs_project) = "BOSCH" then
+			if Upper(idw_main.GetITemString(1,'User_Field22'))='SSCC' then  // Begin - Dinesh - 07/28/2023- SIMS-151- BOSCH Label change
+				lsSSCC = f_get_sscc_number( gs_project, idw_pack.GetItemString(li_indx, "supp_code") )
+				idw_pack.SetItem(li_indx, "pack_sscc_no", lsSSCC)
+			else // Added condition on sending SSCC number to EDI for user_field22 null
+				idw_pack.SetItem(li_indx, "pack_sscc_no",'')
+			end if
+		else
+		 // End - Dinesh - 03/16/2023- SIMS-151- BOSCH Label change
 		lsSSCC = f_get_sscc_number( gs_project, idw_pack.GetItemString(li_indx, "supp_code") )
 		idw_pack.SetItem(li_indx, "pack_sscc_no", lsSSCC)
 		idw_pack.SetItem(li_indx, "invoice_no", idw_main.GetItemString(1, "invoice_no"))
 		idw_pack.SetItem(li_indx, "ord_status", idw_main.GetItemString(1, "ord_status"))
 		idw_pack.SetItem(li_indx, "user_field4", idw_main.GetItemString(1, "user_field4"))
 		idw_pack.SetItem(li_indx, "carton_type", "CS")
+		end if
 	Next
 	lsGSIN = f_get_gsin_number( gs_project, lsSupplier) 
 	idw_main.SetItem(1, "user_field4", lsGSIN)
 End IF
+
+
 
 SetPointer(Arrow!)
 idw_pack.SetFocus()
@@ -4135,7 +4240,28 @@ If gs_project = "PANDORA" THEN
 	
 	// LTK 20110817	#258 Capture the initial status for possible reversion.
 	ls_initial_ord_status = idw_main.getItemString(1,'ord_status')
-
+	
+	// Begin - Dinesh -12/22/2021- DE24075- Google - SIMS Production - Outbound order completed without Serial Numbers
+	//int j
+	//long llLineNum
+	//string llserialno
+	//If tab_main.tabpage_serial.dw_serial.RowCount() > 0 then
+		//FOR j = 1 to tab_main.tabpage_serial.dw_serial.RowCount()
+		//	llserialno = tab_main.tabpage_serial.dw_serial.GetItemString(j,"serial_no")
+		//	llLineNum = tab_main.tabpage_serial.dw_serial.GetItemNumber(j,"line_item_no")
+			//if llserialno = '' or Isnull(llserialno) then
+					//wf_display_message("Serial Number is required on line item no: " +  String (llLineNum)) 
+					//tab_main.selecttab(6)
+				//	tab_main.tabpage_serial.dw_serial.scrolltorow(j)
+				//	f_setfocus(idw_serial, j, "serial_no")
+//					tab_main.tabpage_serial.dw_serial.Protect = TRUE
+					
+					//Return -1
+			//end if
+		//NEXT
+	//end if
+	
+	// End - Dinesh -12/22/2021- DE24075- Google - SIMS Production - Outbound order completed without Serial Numbers
 End If //Pandora
 
 	//SARUN2016July26 To avoid blank status
@@ -4305,6 +4431,7 @@ if is_Ready_Or_Confirm = 'READY' or is_Ready_Or_Confirm = 'BOTH'  then
 		Return -1 
 	End If
 	
+//	// Check required fields for detail record
 	If idw_detail.AcceptText() = -1 Then 
 		tab_main.SelectTab(3) 
 		idw_detail.SetFocus()
@@ -4417,9 +4544,14 @@ if is_Ready_Or_Confirm = 'READY' or is_Ready_Or_Confirm = 'BOTH'  then
 	// KRZ If this is the PANDORA project,
 	If  upper(gs_project) =  'PANDORA' Then
 		//If idw_pack.RowCount() <= 0 Then
-		If idw_pack.RowCount() <= 0 and ls_cust_code <> 'WMSCUTOVER' then //dts - skipping this validation for WMS Cut-over orders (where inventory is 'shipped' out of SIMS)
-			wf_display_message('You must generate the Pack List before confirming this order!')    //MEA - 5/13 - Added Multi-Confirm
-			//Messagebox(is_title,'You must generate the Pack List before confirming this order!')
+		//If idw_pack.RowCount() <= 0 and ls_cust_code <> 'WMSCUTOVER' then //dts - skipping this validation for WMS Cut-over orders (where inventory is 'shipped' out of SIMS) // Dinesh - 03/16/2023- SIMS-53- Google - SIMS - Load Lock and New Loading Status
+		// Begin - Dinesh - 03/16/2023- SIMS-53- Google - SIMS - Load Lock and New Loading Status
+		If idw_pack.RowCount() <= 0  and  ls_cust_code <> 'WMSCUTOVER' then 	// Dinesh - 03/16/2023- SIMS-53- Google - SIMS - Load Lock and New Loading Status
+			wf_display_message('You must generate the PACK LIST and LOAD the order first before confirming this order!')    //MEA - 5/13 - Added Multi-Confirm
+//			Return -1	
+//		elseif  idw_pack.RowCount() > 0 and ls_cust_code <> 'WMSCUTOVER' then 	
+//			wf_display_message('You must LOAD the order first before confirming this order!')    //MEA - 5/13 - Added Multi-Confirm
+		// End Dinesh - 03/16/2023- SIMS-53- Google - SIMS - Load Lock and New Loading Status
 			//f_method_trace( ll_method_trace_id, this.ClassName(), 'End ue_confirm' + ' You must generate the Pack List before confirming this order' )		//08-Feb-2013  :Madhu commented
 			f_method_trace_special( gs_project, this.ClassName() + ' - ue_confirm', 'End ue_confirm' + ' You must generate the Pick List before confirming this order' ,is_dono, ' ',' ',isinvoice_no) //08-Feb-2013  :Madhu added			
 			Return -1
@@ -4485,10 +4617,11 @@ if is_Ready_Or_Confirm = 'READY' or is_Ready_Or_Confirm = 'BOTH'  then
 		End If
 	
 		// Check required fields for detail record
-		If f_check_required(is_title, idw_detail) = -1 Then
+		If ls_cust_code = 'WMSCUTOVER' Then                  //Akash Baghel......10/17/2023...... SIMS-338.....SIMS PIP/SIP - Re-enable WMS CUTOVER functionality
+       Elseif f_check_required(is_title, idw_detail) = -1 Then
 			tab_main.SelectTab(3) 
 			Return -1
-		End If
+	  End If
 	
 		// Check required fields for picking list record
 		If f_check_required(is_title, idw_pick) = -1 Then
@@ -4728,7 +4861,8 @@ if is_Ready_Or_Confirm = 'READY' or is_Ready_Or_Confirm = 'BOTH'  then
 	and code_type = 'CI_EXCEPTION'
 	and Code_Id = :ls_cust_code
 	and User_Updateable_Ind = 'Y';
-
+	
+	
 	//TimA 04/21/11 Pandora Issue#187
 	//Mandate successful CI before completing Outbound
 	IF gs_project = 'PANDORA' and Upper(Trim(ls_uf22_enabled)) = 'Y' and ll_CI_Exception = 0 then
@@ -6136,7 +6270,9 @@ Choose Case Upper(lsCArrier)
 End Choose
 
 //Only enable export if order has been packed GAP 9/02, 01/03 - or complete/Delivered (for HAHN)
+// Begin-DINESH - 03/17/2023- sims-73- Google - SIMS - Load Lock and New Loading Status // Added 'L'
 If Idw_Main.GetItemString(1,'ord_status') = 'A' or &
+	Idw_Main.GetItemString(1,'ord_status') = 'L' or & 
 	 Idw_Main.GetItemString(1,'ord_status') = 'C' or &
 	 Idw_Main.GetItemString(1,'ord_status') = 'D' Then
 			tab_main.tabpage_carrier.cb_export_to_carrier.Enabled = True
@@ -8501,6 +8637,7 @@ CHOOSE CASE ai_number
 			tab_main.tabpage_pack.rb_metric.Enabled= TRUE 
 			IF idw_pack.object.standard_of_measure[1] = 'E' THEN
 				tab_main.tabpage_pack.rb_eng.Checked = TRUE
+				tab_main.tabpage_pack.cb_ci_load_tender.Enabled= False // Dinesh -09/01/2023- SIMS-293- Google- DIMS and Weights are missing in the 945CI we send to customer
 			ELSE
 				tab_main.tabpage_pack.rb_metric.Checked = TRUE
 			END IF
@@ -8539,6 +8676,7 @@ string lsFindStr
 string ls_dw_color
 String ls_load_Id 
 String lsSerialValFlag
+ ib_enable_bol=false
 
 //Delivery Main information
 i=1
@@ -8762,7 +8900,7 @@ where project_id = :GS_Project and do_no = :is_dono ;
 		
 // TAM - 2018/08 - S22531 - Button to lock/unlock load is visible to pandora only and will be set below
 icb_lock_load.Enabled = False
-
+icb_lock_load_google.Enabled = False // Dinesh - 03/17/2023- SIMS-53- Google - SIMS - Load Lock and New Loading Status
 
 If llcount > 0 then
 	icb_notes.Enabled = True
@@ -8993,8 +9131,8 @@ Choose Case lsStatus
 		
 	// GailM - 08/06/2014 - Pandora Issue 888 Added status Z (Order is being confirmed  by another - display only)
 	//27-Jul-2016 :Madhu- Moved "Z" to below - to lock order same as completed.
-	
-	Case "P", "I", "A","Q" /* 11/11 - PCONKL - added 'Q' for Nike to denote time between exporting to scanner and re-
+	// DINESH - 03/16/2023- sims-73- Google - SIMS - Load Lock and New Loading Status // Added Loading "L" status
+	Case "P", "I", "A","Q","L" /* 11/11 - PCONKL - added 'Q' for Nike to denote time between exporting to scanner and re-
 importing*/
 
       	i_nwarehouse.of_settab(idw_main,lstr_parms,1) 
@@ -9014,6 +9152,11 @@ importing*/
 		tab_main.tabpage_pick.Enabled = True
 		tab_main.tabpage_pack.Enabled = True
 		tab_main.tabpage_bol.Enabled = True 
+		// Begin - 02072022- Dinesh - S66897- Google - SIMS - CBOL Changes
+		if gs_project='PANDORA' then
+			tab_main.tabpage_bol.Enabled = False   
+		end if	
+		// End - 02072022- Dinesh - S66897- Google - SIMS - CBOL Changes
 		tab_main.tabpage_Carrier.Enabled = True
 
 		
@@ -9054,11 +9197,24 @@ importing*/
 		icb_pick_unallocate.enabled =True //27-SEP-2017 :Madhu PEVS-848 KDO Return to Stock
 		
 		// 05/04 - PCONKL - Shipments only enabled in Packing
+	// Begin - Dinesh - 03/17/2023 - SIMS-53- Google - SIMS - Load Lock and New Loading Status
+	if gs_project='PANDORA' then
+			
+		If lsStatus = 'L' Then
+			icb_Shipment.Enabled = True
+		Else
+			icb_Shipment.Enabled = False
+		End If
+	// End - Dinesh - 03/17/2023 - SIMS-53- Google - SIMS - Load Lock and New Loading Status
+	else
 		If lsStatus = 'A' Then
 			icb_Shipment.Enabled = True
 		Else
 			icb_Shipment.Enabled = False
 		End If
+	end if
+		
+			
 		
 		// 08/04 - TAM - Notes enabled only if available
 		
@@ -9074,6 +9230,10 @@ importing*/
 		End If
 			 
 		IF lsStatus <> 'A' THEN wf_assignetom(0)//Disable the Engish to Metrics Radio Buttons 
+		// Begin-DINESH - 03/17/2023- sims-73- Google - SIMS - Load Lock and New Loading Status
+		If gs_project='PANDORA' THEN
+			IF lsStatus <> 'L' THEN wf_assignetom(0)//Disable the Engish to Metrics Radio Buttons 
+		End if
 		
 		// 01/01 PCONKL - Enable updating of Outbound Serial #'s
 		// 01/09 - Don't want to allow manual updating for LMC
@@ -9249,6 +9409,11 @@ CASE "C" , "D", "R","Z" /* 03/25/10 dts - HOLD status moved below to act like VO
 		tab_main.tabpage_pick.Enabled = True
 		tab_main.tabpage_pack.Enabled = True
 		tab_main.tabpage_bol.Enabled = True 
+		// Begin - 02072022- Dinesh - S66897- Google - SIMS - CBOL Changes
+		if gs_project='PANDORA' then
+			tab_main.tabpage_bol.Enabled = False   
+		end if
+		// End - 02072022- Dinesh - S66897- Google - SIMS - CBOL Changes
 		wf_enable_trax() /*enable or disable trax page depening on warehouse setting*/
 		tab_main.tabpage_main.cb_do_select_customer.visible=False 
 //		icb_dn.Enabled = True
@@ -9564,6 +9729,10 @@ IF gs_project = 'PANDORA' THEN
 		idw_main.Modify("schedule_date.Background.Color = '" +  idw_main.object.datawindow.color + "'")
 		idw_main.Object.edm_generate_datetime.Protect = TRUE
 		idw_main.Modify("edm_generate_datetime.Background.Color = '" +  idw_main.object.datawindow.color + "'")
+		//Begin - Dinesh - 12/14/2021- S65679- Google SIMS TMS change: Ready by date to be read only
+		idw_main.Object.ready_by_date.Protect = TRUE
+		idw_main.Modify("ready_by_date.Background.Color = '" +  idw_main.object.datawindow.color + "'")
+		//End - Dinesh - 12/14/2021- S65679- Google SIMS TMS change: Ready by date to be read only
 		
 	ELSE
 		wf_lock(false)
@@ -9655,37 +9824,51 @@ IF gs_project = 'PANDORA' THEN
 //	If ls_uf1 = 'DOS' or  ls_uf1 = 'PIU' or ls_uf1 = 'NOS' or isloadId = '' or isNull(isloadId) then 	//Not eligable for lock/unlock
 	If ls_uf1 = 'DOS' or  ls_uf1 = 'PIU' or ls_uf1 = 'NOS' or ls_uf1 = 'GND' or isloadId = '' or isNull(isloadId) or isloadId = 'NA' then 	//Not eligable for lock/unlock
 		tab_main.tabpage_pack.cb_lock_load.visible = False
+		tab_main.tabpage_other.cb_lock_load_google.visible = True  // DINESH - 03/16/2023- sims-53- Google - SIMS - Load Lock and New Loading Status
 	Else
 		tab_main.tabpage_pack.cb_lock_load.visible = False  //Set to novisible and only make visible if conditions are met
+		tab_main.tabpage_other.cb_lock_load_google.visible = False  // DINESH - 03/16/2023- sims-53- Google - SIMS - Load Lock and New Loading Status
 		//GailM 10/15/2018 Temporarily use flag to disable this function until other testing is done
 		//21-Jan-2018 :Madhu DE8262 TMS Make Visiblle "Unlock Load" button, if an Order is re-retrived.
 		If f_retrieve_parm("PANDORA","FLAG","TMS") = "Y" and  f_retrieve_parm("PANDORA","SKIP_TMS", isWareHouse, "CODE_DESCRIPT")  <> "SKIP_IT" THEN
 			if idw_Pack.RowCount() > 0 and idw_main.getitemstring(1,'Load_Lock') ='Y' and (isLoad_Status = '' or isLoad_Status='NOLOCK')  then  
-				icb_lock_load.Text = 'Unlock Load'
-				tab_main.tabpage_pack.cb_lock_load.visible = true
-				icb_lock_load.Enabled = True
+				//icb_lock_load.Text = 'Unlock Load'
+				icb_lock_load_google.Text = 'Unlock Load'  // Dinesh - 03/17/2023- SIMS-53- Google - SIMS - Load Lock and New Loading Status
+				tab_main.tabpage_pack.cb_lock_load.visible = False // Lock button turn off for Google - dinesh 03/16/2023
+				tab_main.tabpage_other.cb_lock_load_google.visible = True // DINESH - 03/16/2023- sims-53- Google - SIMS - Load Lock and New Loading Status
+				//icb_lock_load.Enabled = True
+				icb_lock_load_google.Enabled = True  // Dinesh - 03/17/2023- SIMS-53- Google - SIMS - Load Lock and New Loading Status
 				isLoad_Status = 'NOLOCK'
 			End If
 			if idw_Pack.RowCount() > 0 and idw_main.getitemstring(1,'Load_Lock') ='N' and (isLoad_Status = ''  or isLoad_Status ='LOCK' ) then 
-					icb_lock_load.Text = 'Lock Load'
-					tab_main.tabpage_pack.cb_lock_load.visible = true
-					icb_lock_load.Enabled = True
+					//icb_lock_load.Text = 'Lock Load'
+					icb_lock_load_google.Text = 'Lock Load'  // Dinesh - 03/17/2023- SIMS-53- Google - SIMS - Load Lock and New Loading Status
+					tab_main.tabpage_pack.cb_lock_load.visible = False // DINESH - 03/16/2023- sims-53- Google - SIMS - Load Lock and New Loading Status // lock button turn off
+					tab_main.tabpage_other.cb_lock_load_google.visible = True // DINESH - 03/16/2023- sims-53- Google - SIMS - Load Lock and New Loading Status
+					//icb_lock_load.Enabled = True
+					icb_lock_load_google.Enabled = True  // Dinesh - 03/17/2023- SIMS-53- Google - SIMS - Load Lock and New Loading Status
 					isLoad_Status = 'LOCK'
 			End If
 			
 			//if idw_Pack.RowCount() = 0 and idw_main.getitemstring(1,'Load_Lock') ='Y' and isLoad_Status = 'LOCK'   then   // Dinesh-  07/27/2021-Google TMS change: Google - SIMS Load Lock Changes 
 			   if idw_Pack.RowCount() = 0 and idw_main.getitemstring(1,'Load_Lock') ='Y' and (isLoad_Status = ""  or isLoad_Status ='NOLOCK')  then  
-					icb_lock_load.Text = 'Unlock Load'
-					tab_main.tabpage_pack.cb_lock_load.visible = true
-					icb_lock_load.Enabled = True
+					//icb_lock_load.Text = 'Unlock Load'
+					icb_lock_load_google.Text = 'Unlock Load'
+					tab_main.tabpage_pack.cb_lock_load.visible = False // Lock load button turn off for google - // DINESH - 03/16/2023- sims-53- Google - SIMS - Load Lock and New Loading Status
+					tab_main.tabpage_other.cb_lock_load_google.visible = True // DINESH - 03/16/2023- sims-53- Google - SIMS - Load Lock and New Loading Status
+					//icb_lock_load.Enabled = True
+					icb_lock_load_google.Enabled = True  // Dinesh - 03/17/2023- SIMS-53- Google - SIMS - Load Lock and New Loading Status
 					isLoad_Status = 'NOLOCK' // Dinesh - 07/27/2021-Google TMS change: Google - SIMS Load Lock Changes
 				End If
 			
 			// Begin - Dinesh - 07/27/2021- S59638- Google TMS change: Google - SIMS Load Lock Changes
 			if idw_Pack.RowCount() = 0 and idw_main.getitemstring(1,'Load_Lock') ='N' and (isLoad_Status = ""  or isLoad_Status ='LOCK')  then  
-					icb_lock_load.Text = 'Lock Load'
-					tab_main.tabpage_pack.cb_lock_load.visible = true
-					icb_lock_load.Enabled = True
+					//icb_lock_load.Text = 'Lock Load'
+					icb_lock_load_google.Text = 'Lock Load'  // Dinesh - 03/17/2023- SIMS-53- Google - SIMS - Load Lock and New Loading Status
+					tab_main.tabpage_pack.cb_lock_load.visible = False // Lock load button turn off for google - // DINESH - 03/16/2023- sims-53- G
+					tab_main.tabpage_other.cb_lock_load_google.visible = true // DINESH - 03/16/2023- sims-53- Google - SIMS - Load Lock and New Loading Status
+					//icb_lock_load.Enabled = True
+					icb_lock_load_google.Enabled = True // Dinesh - 03/17/2023- SIMS-53- Google - SIMS - Load Lock and New Loading Status
 					isLoad_Status = 'LOCK'
 			End If
 			// End - Dinesh - 07/27/2021- S59638- Google TMS change: Google - SIMS Load Lock Changes
@@ -9742,11 +9925,23 @@ ELSE
 End If
 
 //02/08 - PConkl - For Super Duper Users (IT Team), allow to un-confirm an order by changing the status dropdown
-If (gs_role = '-1' or gs_role = '0') and (lsStatus = 'C' or lsStatus = 'D' or lsStatus = 'V' or lsStatus = 'R' ) Then
-	idw_Main.SetTabOrder("ord_status",10) 
-Else
-	idw_Main.SetTabOrder("ord_status",0) 
-End If
+// Begin - DINESH - 03/16/2023- sims-73- Google - SIMS - Load Lock and New Loading Status
+if gs_project='PANDORA' then
+	If (gs_role = '-1' or gs_role = '0') and (lsStatus = 'C' or lsStatus = 'D' or lsStatus = 'V' or lsStatus = 'R' or lsStatus = 'A' or lsStatus = 'L' ) Then  // Begin-DINESH - 03/17/2023- sims-73- Google - SIMS - Load Lock and New Loading Status // Added 'L'
+		
+		idw_Main.SetTabOrder("ord_status",10)                                                                                                                        // Added lsStatus='A'
+	Else
+		idw_Main.SetTabOrder("ord_status",0) 
+	End If
+// End - DINESH - 03/16/2023- sims-73- Google - SIMS - Load Lock and New Loading Status
+else
+	If (gs_role = '-1' or gs_role = '0') and (lsStatus = 'C' or lsStatus = 'D' or lsStatus = 'V' or lsStatus = 'R') Then // DINESH - 03/16/2023- sims-73- Google - SIMS - Load Lock and New Loading Status
+		
+		idw_Main.SetTabOrder("ord_status",10)                                                                                                                        // Added lsStatus='A'
+	Else
+		idw_Main.SetTabOrder("ord_status",0) 
+	End If
+end if
 	
 	
 // 11/02 - PConkl - Hide unused fields on Picking
@@ -9911,7 +10106,8 @@ decimal ldquantity, ldweight, ldlength, ldwidth, ldheight, ldgirth, ldord_qty, l
 decimal ldserializedqty, ldserialqty, ldpickqty, ldscanty, ld_pack_qty1, ldScanQty, ldallocqty
 boolean lbvalidate
 datastore ldsdimensions
-
+long ll_text_length  //Dhirendra
+String ls_prefix
 // 10/08/2010 - must default crossdock_ind since datawindow considers it required, even though it's not.
 if isnull(idw_main.GetItemString(1, "crossdock_ind")) or trim(idw_main.GetItemString(1, "crossdock_ind")) ='' then
 	idw_main.SetItem(1, 'crossdock_ind', 'N')
@@ -9923,6 +10119,12 @@ if isnull(idw_main.GetItemString(1, "ignore_shelflife_ind")) or trim(idw_main.Ge
 end if
 
 //Jxlim 07/16/2010
+
+//// Begin 01/25/2022 - S64720 -Dinesh - Buy sell purchase order since datawindow considers it required, even though it's not.
+if isnull(idw_main.GetItemString(1, "user_field21")) or trim(idw_main.GetItemString(1, "user_field21")) ='' then
+	idw_main.SetItem(1, 'user_field21', '')
+end if
+//// End 01/25/2022 - S64720- Dinesh - Buy sell purchase order since datawindow considers it required, even though it's not.
 ids_compare_underscanned = Create datastore
 ids_compare_underscanned.Dataobject = 'd_do_compare_underscanned' 
 ids_compare_underscanned.SetTransObject(sqlca)
@@ -10177,20 +10379,35 @@ For i = 1 to ll_cnt
 	//11/09 - PCONKL - Allowing Serials to be generated first
 	If g.ibCartonSerialvalidationRequired and idw_pack.RowCount() > 0 Then
 				
-			If (isnull(tab_main.tabpage_serial.dw_serial.GetITemString(i,'carton_no')) or tab_main.tabpage_serial.dw_serial.GetITemString(i,'carton_no') = "" ) and &
-				tab_main.tabpage_serial.dw_serial.GetITemString(i,'serial_no') > "" Then
+		If (isnull(tab_main.tabpage_serial.dw_serial.GetITemString(i,'carton_no')) or tab_main.tabpage_serial.dw_serial.GetITemString(i,'carton_no') = "" ) and &
+			tab_main.tabpage_serial.dw_serial.GetITemString(i,'serial_no') > "" Then
+		
+				MessageBox(is_title,"Carton Number required for Serial Numbers!")
+				f_setfocus(tab_main.tabpage_serial.dw_serial, i, "carton_no")
+				Return -1
 			
-					MessageBox(is_title,"Carton Number required for Serial Numbers!")
-					f_setfocus(tab_main.tabpage_serial.dw_serial, i, "carton_no")
-					Return -1
-				
-			Else 
+		Else 
 			
-				If ibSerialCartonNoChanged  Then		/* 01/18 - GailM - S14978 */
-					//Do nothing
-				Else
+			If ibSerialCartonNoChanged  Then		/* 01/18 - GailM - S14978 */
+						//Do nothing
+			Else
+				//Dhirendra -S59788 PANDORA-overpack caton type packing screen functionality -Start	
+				IF gs_project ='PANDORA' then 
+					if tab_main.tabpage_serial.dw_serial.GetITemString(i,'container_tracking_ind') ='Y' THEN
+					// lsFind = "Upper(carton_no) = '" + Upper(tab_main.tabpage_serial.dw_serial.GetITemString(i,'carton_no')) + "'"
+						lsFind = "Upper(pack_container_id) = '" +tab_main.tabpage_serial.dw_serial.GetITemString(i,'container_id')+ "'" 
+					else 
+						ll_text_length =(len(tab_main.tabpage_serial.dw_serial.GetITemString(i,'carton_no')) -1)
+						ls_prefix	 = left(tab_main.tabpage_serial.dw_serial.GetITemString(i,'carton_no'),1)
+						IF ls_prefix = 'T'  Then
+							  lsFind = "Upper(pack_container_id) = '" +Upper(tab_main.tabpage_serial.dw_serial.GetITemString(i,'carton_no'))+ "'" 
+						else 
+							lsFind = "Upper(carton_no) = '" + Upper(tab_main.tabpage_serial.dw_serial.GetITemString(i,'carton_no')) + "'"
+						END IF
+					End if
+				else //non-Pandora
 					lsFind = "Upper(carton_no) = '" + Upper(tab_main.tabpage_serial.dw_serial.GetITemString(i,'carton_no')) + "'" 
-				//	lsFind += "and Upper(supp_code) = '" + Upper(tab_main.tabpage_serial.dw_serial.GetITemString(i,'supp_code')) + "'" 
+					//	lsFind += "and Upper(supp_code) = '" + Upper(tab_main.tabpage_serial.dw_serial.GetITemString(i,'supp_code')) + "'" 
 					lsFind += " and Line_Item_No = " + String(tab_main.tabpage_serial.dw_serial.GetITemNumber(i,'line_item_no')) 
 				
 					//Sku is either parent or child SKU - determine from Pick List
@@ -10201,17 +10418,18 @@ For i = 1 to ll_cnt
 					Else
 						lsFind += " and Upper(sku) = '" + Upper(tab_main.tabpage_serial.dw_serial.GetITemString(i,'sku')) + "'"
 					End If
-			
-					If idw_Pack.Find(lsFind,1,idw_Pack.RowCount()) < 1 Then
-								
-							MessageBox(is_title,"Pack Row not found for this Carton/Line/SKU/Supplier!")
-							tab_main.selecttab(6)
-							f_setfocus(tab_main.tabpage_serial.dw_serial, i, "carton_no")
-							Return -1
-							
-					End If
-				End If	
-			End If
+				END IF 
+				 //Dhirendra -S59788 PANDORA-overpack caton type packing screen functionality -EN
+				If idw_Pack.Find(lsFind,1,idw_Pack.RowCount()) < 1 Then
+						
+					MessageBox(is_title,"Pack Row not found for this Carton/Line/SKU/Supplier!")
+					tab_main.selecttab(6)
+					f_setfocus(tab_main.tabpage_serial.dw_serial, i, "carton_no")
+					Return -1
+						
+				End If
+			End If	
+		End If
 			
 	End If /*need to validate Carton Serial match */
 	
@@ -10394,6 +10612,27 @@ IF gs_project = 'WARNER' THEN
 	End If	
 END IF
 
+//Begin -04062022-  Dinesh - S69824- Google -  SIMS - Saudi Arabia Shipments
+//			If Upper(gs_project) = 'PANDORA' then
+//						string ls_DONO,ls_country
+//						long ll_count
+//							ls_DONO = idw_Main.GetITemString(1,'do_no')
+//							ls_whcode = idw_Main.GetITemString(1,'wh_code')
+//							select Country into :ls_country from Delivery_Master where Project_ID = :gs_project and do_no=:ls_DONO and Country='NL' USING SQLCA;
+//						
+//							if ls_country='NL' then
+//								Select count(*) INTO :ll_count FROM lookup_table with (NoLock) 
+//								Where Project_ID = :gs_project AND Code_Type = 'SAUDI_ARABIA_SHIPMENT' AND code_id=:ls_whcode USING SQLCA;
+//							
+//									if ll_count <= 0 then
+//										
+//										messagebox('Alert',"This is a Saudi Arabia Shipment and this warehouse is not allowed to ship to this country. Please contact Google to cancel this order.")
+//										return -1
+//									end if
+//							end if
+//					End if
+//					End -04062022-  Dinesh - S69824- Google -  SIMS - Saudi Arabia Shipments
+//
 //11-APR-2018 :Madhu S18131 - 1 COO Per Line Item No of an International Order
 If upper(gs_project) ='PANDORA' and wf_multiple_coo_validation(idw_main.GeTItemString(1,'wh_code')) < 0 Then Return -1
 
@@ -11494,7 +11733,7 @@ ElseIf gs_project = 'PANDORA' and  g.is_unique_pack_cartonnumbers = 'Y' Then
 			Return -1
 		End If
 	End If
-	
+		
 ElseIf g.is_unique_pack_cartonnumbers = 'Y' Then
 		
 	// 11/05 - PCONKL - We will also allow them to change to a carton number that already exists (for PHX Brands who has a different schema for #'s)
@@ -12596,7 +12835,7 @@ For llRowPos = 1 to llRowCount
 			 //2019/03/08 - TAM - Only for PhilipsCls - Could probably be baseline but don't know the impact of other projects 
  			//GailM 11/18/2020 S51441/F26536/I2978 PhilipsDA mimic PHILIPSCLS in Outbound order
 			If idw_pack.GetITemString(llRowPos,'pack_sscc_no') <> idw_pack.GetITemString(llFindRow,'pack_sscc_no') or isnull(idw_pack.GetITemString(llRowPos,'pack_sscc_no')) Then
-				IF Upper(gs_project) = 'PHILIPSCLS' OR Upper(gs_project) = 'PHILIPS-DA' Then
+				IF Upper(gs_project) = 'PHILIPSCLS' OR Upper(gs_project) = 'PHILIPS-DA' OR Upper(gs_project) = 'BOSCH' Then // Dinesh 02/22/2022- SIMS-107-SIMS BOSCH SSCC LABEL
 					idw_pack.SetItem(llRowPos,'pack_sscc_no',idw_pack.GetITemString(llFindRow,'pack_sscc_no'))
 				End If
 			End If
@@ -12828,11 +13067,12 @@ FOR i = liStart to liEnd
 	   round(i_nwarehouse.of_convert(idw_pack.getItemDecimal(i,"length"),"IN","CM"),2)
 		//	   round(i_nwarehouse.of_convert(idw_pack.getItemDecimal(i,"cbm"),"IN","CM"),2)		
 		idw_pack.object.weight_net[i]= & 
-	   round(i_nwarehouse.of_convert(idw_pack.getItemDecimal(i,"weight_net"),"PO","KG"),2)
+		round(i_nwarehouse.of_convert(idw_pack.getItemDecimal(i,"weight_net"),"PO","KG"),4) // Dinesh - 01/28/2025- SIMS-648-Development for Google - SIMS Packing list tab and SIMS Printed Packing list missing weights 
+		//round(i_nwarehouse.of_convert(idw_pack.getItemDecimal(i,"weight_net"),"PO","KG"),2)
 		idw_pack.object.weight_gross[i]= & 
-	   round(i_nwarehouse.of_convert(idw_pack.getItemDecimal(i,"weight_gross"),"PO","KG"),2)		
-		
-	ELSE
+		round(i_nwarehouse.of_convert(idw_pack.getItemDecimal(i,"weight_gross"),"PO","KG"),4) // Dinesh - 01/28/2025- SIMS-648-Development for Google - SIMS Packing list tab and SIMS Printed Packing list missing weights 
+		//round(i_nwarehouse.of_convert(idw_pack.getItemDecimal(i,"weight_gross"),"PO","KG"),2)
+	   ELSE
 		
 		ld_result=round(i_nwarehouse.of_convert(idw_pack.getItemDecimal(i,"height"),"CM","IN"),2)
 		idw_pack.object.height[i]= ld_result	   
@@ -12842,10 +13082,12 @@ FOR i = liStart to liEnd
 	   round(i_nwarehouse.of_convert(idw_pack.getItemDecimal(i,"length"),"CM","IN"),2)
 //				idw_pack.object.cbm[i]= & 
 //	   round(i_nwarehouse.of_convert(idw_pack.getItemDecimal(i,"cbm"),"CM","IN"),2)
-		idw_pack.object.weight_net[i]= & 
-	   round(i_nwarehouse.of_convert(idw_pack.getItemDecimal(i,"weight_net"),"KG","PO"),2)
-		idw_pack.object.weight_gross[i]= & 
-	   round(i_nwarehouse.of_convert(idw_pack.getItemDecimal(i,"weight_gross"),"KG","PO"),2)
+		idw_pack.object.weight_net[i]= &
+		round(i_nwarehouse.of_convert(idw_pack.getItemDecimal(i,"weight_net"),"KG","PO"),4) // Dinesh - 01/24/2025- SIMS-648-Development for Google - SIMS Packing list tab and SIMS Printed Packing list missing weights 
+		//round(i_nwarehouse.of_convert(idw_pack.getItemDecimal(i,"weight_net"),"KG","PO"),2)
+		idw_pack.object.weight_gross[i]= &
+		round(i_nwarehouse.of_convert(idw_pack.getItemDecimal(i,"weight_gross"),"KG","PO"),4) // Dinesh - 01/24/2025- SIMS-648-Development for Google - SIMS Packing list tab and SIMS Printed Packing list missing weights 
+		//round(i_nwarehouse.of_convert(idw_pack.getItemDecimal(i,"weight_gross"),"KG","PO"),2)
 	END IF
 	
 	idw_pack.object.cbm[i]=round(idw_pack.object.length[i] * idw_pack.object.width[i] * idw_pack.object.height[i],2)
@@ -13225,7 +13467,7 @@ public function boolean f_packprint_pandora ();// This event prints the Packing 
 // Any custom Pack Print routines are called from the clicked event of the print button
 // pvh - 09/15/06 bluecoat
 //GailM 03/14/13 Pandora issue #581. Added lsUserField11,lsUserField12 for Pandora danger sku printing showing UN# and PI#
-string trackingids = 'Tracking Ids: ', ls_noteline
+string trackingids = 'Tracking Ids: ', ls_noteline,ls_check_first_char
 string acomma = ", ", ls_notes
 String ls_address,lsfind,ls_text[], lscusttype, lscustcode, lsSerial, lsNotes, ls_inventory_type_desc,ls_etom, lsSupplierName, lsDONO
 String ls_project_id , ls_sku ,lsSKUHold,  ls_description,ls_alt_sku, ls_supplier, lsHazCode, lsHazText, lsTransportMode
@@ -13449,7 +13691,12 @@ For i = 1 to ll_cnt
 	//TAM 2016/08/11 - Added new field to Packlist
 	idw_packprint.setitem(j,"client_cust_po_nbr",idw_main.getitemstring(1,"client_cust_po_nbr"))
 	idw_packprint.setitem(j,"do_no",idw_Main.GetItemString(1,'do_no'))
-	
+	//Dhirendra - Google - SIMS - Buy Sell Project- 12-06-2021 ---Start
+	if gs_project ='PANDORA' then 
+	idw_packprint.setitem(j,"client_cust_so_nbr",idw_main.getitemstring(1,"client_cust_so_nbr"))
+	idw_packprint.setitem(j,"customer_sku",idw_detail.getitemstring(i,"customer_sku"))
+end if 
+	//Dhirendra - Google - SIMS - Buy Sell Project  ---End
 	//10/11/2010 ujh use variable to allow for dataobject with supplier column removed
 	IF idw_packPrint.Dataobject = ls_d_packing_prt THEN
 		idw_packprint.setitem(j,"schedule_date",idw_main.getitemdatetime(1,"schedule_date"))			
@@ -13468,7 +13715,11 @@ For i = 1 to ll_cnt
 		idw_packprint.SetITem(j,'c_first_carton_row', idw_pack.getitemString(i,"c_first_carton_row"))
 		idw_packprint.setitem(j,"unit_weight",idw_pack.getitemDecimal(i,"weight_gross")) 
 	else
-		idw_packprint.setitem(j,"unit_weight",idw_pack.getitemDecimal(i,"weight_net")) /*take from displayed pask list instead of DB*/
+		//idw_packprint.setitem(j,"unit_weight",idw_pack.getitemDecimal(i,"weight_net")) /*take from displayed pask list instead of DB*/// commented this line Dinesh -04/04/2024 -  SIMS-411- Google - Net weight calculation on the printed packing list is not correct*/
+		//idw_packprint.setitem(j,"unit_weight",idw_pack.getitemDecimal(i,"weight_net")) /*take from displayed pask list instead of DB*/// Dinesh -04/04/2024 -  SIMS-411- Google - Net weight calculation on the printed packing list is not correct*/// commented this line and added below line - Dinesh -11/06/2024 -  SIMS-591- Google - Development for Google - SIMS -SIMS net weight at GPN Level 
+		idw_packprint.setitem(j,"unit_weight",idw_pack.getitemDecimal(i,"weight_net")*(idw_pack.getitemNumber(i,"quantity"))) // Dinesh -11/06/2024 -  SIMS-591- Google - Development for Google - SIMS -SIMS net weight at GPN Level 
+		idw_packprint.setitem(j,"unit_weight_1",idw_pack.getitemDecimal(i,"weight_net")*(idw_pack.getitemNumber(i,"quantity"))) /*take from displayed pask list instead of DB*/// Dinesh -04/04/2024 -  SIMS-411- Google - Net weight calculation on the printed packing list is not correct*/
+		idw_pack.getitemNumber(i,"quantity")
 	end if
 	
 	idw_packprint.setitem(j,"standard_of_measure",idw_pack.getitemString(i,"standard_of_measure"))
@@ -13481,13 +13732,28 @@ For i = 1 to ll_cnt
 		idw_packprint.setitem(j,"User_Field5",idw_other.getitemString(1,"user_field5")) 
 		idw_packprint.setitem(j, "Load_Id", idw_main.getItemString(1, "Load_Id"))
 		idw_packprint.setitem(j, "Load_Sequence", idw_main.getItemNumber(1, "Load_Sequence"))
+		 // Begin - Dinesh - 07/31/2023- SIMS-253- Google - SIMS - Packing list change
+		idw_packprint.setitem(j, "awb_bol_no", idw_other.getItemString(1, "awb_bol_no"))
+		idw_packprint.setitem(j, "do_no_1", idw_Main.getItemString(1, "do_no")) // Dinesh - 07/31/2023- SIMS-253- Google - SIMS - Packing list change
+		idw_packprint.setitem(j, "line_item_no", idw_pack.getItemNumber(i, "line_item_no")) // Dinesh - 07/31/2023- SIMS-253- Google - SIMS - Packing list change
+		idw_packprint.setitem(j, "carton_type", idw_pack.getItemString(i, "carton_type")) // Dinesh - 07/31/2023- SIMS-253- Google - SIMS - Packing list change
+		idw_packprint.setitem(j, "net_weight", idw_pack.getItemDecimal(i, "weight_net")) // Dinesh - 07/31/2023- SIMS-253- Google - SIMS - Packing list change
+		idw_packprint.setitem(j, "gross_weight", idw_pack.getItemDecimal(i, "weight_gross")) 
+		idw_packprint.setitem(j, "rma_number", idw_detail.getItemstring(i, "user_field8")) // Dinesh - 02/15/2024- SIMS-412 - Google - SIMS – Outbound RMA Number
+//		idw_packprint.setitem(j, "net_weight", idw_pack.getItemDecimal(i, "weight_net")) // Dinesh - 07/31/2023- SIMS-253- Google - SIMS - Packing list change
+//		idw_packprint.setitem(j, "gross_weight", idw_pack.getItemDecimal(i, "weight_gross")) 
 		
+		// End - Dinesh - 07/31/2023- SIMS-253- Google - SIMS - Packing list change
 		//14-MAR-2019 :Madhu S31050 Additional Packing Notes for EU
 		IF ls_country_ind ='Y' THEN
-			ls_additional_pack_info = "PLEASE NOTE: These items are controlled by the U.S. Government and authorized for export only to the country of ultimate destination for use by the ultimate consignee or end-user(s) herein identified. They may not be resold, transferred, or otherwise disposed of, to any other country or to any person other than the authorized ultimate consignee or end-user(s), either in their original form or after being incorporated into other items, without first obtaining approval from the U.S. government or as otherwise authorized by U.S. law and regulations. Dual-use items listed in Annex 1 of Regulation (EC) No 428/2009 are subject to controls and require a license to leave the EU. For questions about the export control classification of these items, please contact emea-log-compliance@google.com"
+			// Begin -Dinesh - SIMS-253-Google - SIMS - Packing list change
+			ls_additional_pack_info = "PLEASE NOTE: These items are controlled by the U.S. Government and authorized for export only to the country of ultimate destination for use by the ultimate consignee or end-user(s) herein identified. They may not be resold, transferred, or otherwise disposed of, to any other country or to any person other than the authorized ultimate consignee or end-user(s), either in their original form or after being incorporated into other items, without first obtaining approval from the U.S. government or as otherwise authorized by U.S. law and regulations. Dual-use items listed in Annex 1 of Regulation (EC) No 2021/821 are subject to controls and require a license to leave the EU. For questions about the export control classification of these items, please contact emea-log-compliance@google.com"
+			//ls_additional_pack_info = "PLEASE NOTE: These items are controlled by the U.S. Government and authorized for export only to the country of ultimate destination for use by the ultimate consignee or end-user(s) herein identified. They may not be resold, transferred, or otherwise disposed of, to any other country or to any person other than the authorized ultimate consignee or end-user(s), either in their original form or after being incorporated into other items, without first obtaining approval from the U.S. government or as otherwise authorized by U.S. law and regulations. Dual-use items listed in Annex 1 of Regulation (EC) No 428/2009 are subject to controls and require a license to leave the EU. For questions about the export control classification of these items, please contact emea-log-compliance@google.com"
 		ELSE
-			ls_additional_pack_info = "PLEASE NOTE: These items are controlled by the U.S. Government and authorized for export only to the country of ultimate destination for use by the ultimate consignee or end-user(s) herein identified. They may not be resold, transferred, or otherwise disposed of, to any other country or to any person other than the authorized ultimate consignee or end-user(s), either in their original form or after being incorporated into other items, without first obtaining approval from the U.S. government or as otherwise authorized by U.S. law and regulations. Dual-use items listed in Annex 1 of Regulation (EC) No 428/2009 are subject to controls and require a license to leave the EU."
+			ls_additional_pack_info = "PLEASE NOTE: These items are controlled by the U.S. Government and authorized for export only to the country of ultimate destination for use by the ultimate consignee or end-user(s) herein identified. They may not be resold, transferred, or otherwise disposed of, to any other country or to any person other than the authorized ultimate consignee or end-user(s), either in their original form or after being incorporated into other items, without first obtaining approval from the U.S. government or as otherwise authorized by U.S. law and regulations. Dual-use items listed in Annex 1 of Regulation (EC) No 2021/821 are subject to controls and require a license to leave the EU."
+			//ls_additional_pack_info = "PLEASE NOTE: These items are controlled by the U.S. Government and authorized for export only to the country of ultimate destination for use by the ultimate consignee or end-user(s) herein identified. They may not be resold, transferred, or otherwise disposed of, to any other country or to any person other than the authorized ultimate consignee or end-user(s), either in their original form or after being incorporated into other items, without first obtaining approval from the U.S. government or as otherwise authorized by U.S. law and regulations. Dual-use items listed in Annex 1 of Regulation (EC) No 428/2009 are subject to controls and require a license to leave the EU."
 		END IF
+		// End - Dinesh - SIMS-253-Google - SIMS - Packing list change
 		
 		idw_packprint.setitem(j, "additional_pack_info", ls_additional_pack_info)
 		
@@ -13630,11 +13896,24 @@ For i = 1 to ll_cnt
 	If idw_serial.RowCount() > 0 Then
 		lsSerial = ""
 		ls_carton_no =  Upper(idw_Pack.GetItemString(i,'carton_no'))
-		ll_line_Item_No = idw_Pack.GetITemNumber(i,'line_item_No')
-		
-		lsSerial = this.uf_get_serialnos( ls_sku, ls_carton_no ) //31-MAY-2018 :Madhu DE4500 - Don't include Line Item No
+		ll_line_Item_No = idw_Pack.GetITemNumber(i,'line_item_No') 
+		//Made Changes By Dhirendra -S66896- Google -Fix for Serial Number Packing List Start
+		IF  Upper(gs_project) = 'PANDORA' then
+		ls_check_first_char = "T"+ls_carton_no
+		IF ls_check_first_char =  idw_Pack.GetItemString(i,'pack_container_id') then 
+			lsSerial = this.uf_get_serialnos( ls_sku, ls_check_first_char )
+			idw_packprint.setitem(j,"serial_no",lsSerial)
+	       else 
+		      lsSerial = this.uf_get_serialnos( ls_sku, ls_carton_no )
+				idw_packprint.setitem(j,"serial_no",lsSerial)
+	end if 
+	END IF
+else 
+	 lsSerial = this.uf_get_serialnos( ls_sku, ls_carton_no )
 		idw_packprint.setitem(j,"serial_no",lsSerial)
+	
 	End If /*serial numbers exist*/
+	//Made Changes By Dhirendra -S66896- Google -Fix for Serial Number Packing List END 
 	
 	//idw_packprint.setitem(j,"serial_no",idw_pack.getitemstring(i,"free_form_serial_no")) /* 02/01 - PCONKL*/
 	idw_packprint.setitem(j,"component_ind",idw_pack.getitemstring(i,"component_ind")) /* 02/01 - PCONKL - sort component master to top*/
@@ -13752,28 +14031,44 @@ For i = 1 to ll_cnt
 		lds_serial_pack_List.setitem(ll_New_Row,"cust_code",idw_main.getitemstring(1,"cust_code"))
 		lds_serial_pack_List.setitem(ll_New_Row,"ord_no",idw_main.getitemstring(1,"cust_order_no"))
 		lds_serial_pack_List.setitem(ll_New_Row,"client_cust_po_nbr",idw_main.getitemstring(1,"client_cust_po_nbr"))
+		//Dhirendra - Google - SIMS - Buy Sell Project- 12-06-2021 ---Start
+		lds_serial_pack_List.setitem(ll_New_Row,"client_cust_so_nbr",idw_main.getitemstring(1,"client_cust_so_nbr"))
+		//Dhirendra - Google - SIMS - Buy Sell Project- 12-06-2021 ---END 
 		lds_serial_pack_List.setitem(ll_New_Row,"User_Field5",idw_other.getitemString(1,"user_field5"))
-		
+
 		lds_serial_pack_List.setitem(ll_New_Row,"carrier", idw_other.getitemString(1,"carrier") )
 		lds_serial_pack_List.setitem(ll_New_Row,"ship_via",idw_other.getitemString(1,"ship_via"))
 		lds_serial_pack_List.setitem(ll_New_Row,"sch_cd",idw_other.getitemString(1,"user_field1"))
 		lds_serial_pack_List.setitem(ll_New_Row,"freight_terms",idw_other.getitemstring(1,"freight_terms"))
 		lds_serial_pack_List.setitem(ll_New_Row,"do_no",idw_Main.GetItemString(1,'do_no'))
-
 		lds_serial_pack_List.setitem(ll_New_Row,"ord_date",idw_main.getitemdatetime(1,"ord_date"))
 		lds_serial_pack_List.setitem(ll_New_Row,"complete_date",idw_main.getitemdatetime(1,"complete_date"))
 		lds_serial_pack_List.setitem(ll_New_Row,"request_date",idw_main.getitemdatetime(1,"request_date"))
 		lds_serial_pack_List.setitem(ll_New_Row,"schedule_date",idw_main.getitemdatetime(1,"schedule_date"))			
-
+      
 		ls_carton_no =  Upper(idw_Pack.GetItemString(i,'carton_no'))
 		ll_line_Item_No = idw_Pack.GetITemNumber(i,'line_item_No')
 		
 		lds_serial_pack_List.setitem(ll_New_Row, "carton_no", ls_carton_no)
 		lds_serial_pack_List.setitem(ll_New_Row, "sku", ls_sku)
+		//Dhirendra - Google - SIMS - Buy Sell Project- 12-06-2021 ---Start
+         lds_serial_pack_List.setitem(ll_New_Row,"customer_sku",idw_detail.getitemstring(ll_New_Row,"Customer_Sku"))
+			//Dhirendra - Google - SIMS - Buy Sell Project- 12-06-2021 ---END
 		lds_serial_pack_List.setitem(ll_New_Row, "upc_Code", lsUPC)
-
-		lsSerial = this.uf_get_serialnos( ls_sku, ls_carton_no ) //31-MAY-2018 :Madhu DE4500 - Don't include Line Item No
+        //Made Changes By Dhirendra -S66896- Google -Fix for Serial Number Packing List Start
+		  IF  Upper(gs_project) = 'PANDORA' then
+		ls_check_first_char = "T"+ls_carton_no
+		IF ls_check_first_char =  idw_Pack.GetItemString(i,'pack_container_id') then 
+			lsSerial = this.uf_get_serialnos( ls_sku, ls_check_first_char )
+	else 
+		lsSerial = this.uf_get_serialnos( ls_sku, ls_carton_no )
+	end if 
+else 
+	lsSerial = this.uf_get_serialnos( ls_sku, ls_carton_no )
+	END IF
+		//lsSerial = this.uf_get_serialnos( ls_sku, ls_carton_no ) //31-MAY-2018 :Madhu DE4500 - Don't include Line Item No
 		lds_serial_pack_List.setitem(ll_New_Row, "serial_no", lsSerial)
+	//Made Changes By Dhirendra -S66896- Google -Fix for Serial Number Packing List Start
 	
 		lds_serial_pack_List.setitem(ll_New_Row,"packlist_notes",idw_main.getitemString(1,"packlist_notes"))
 		lds_serial_pack_List.setitem(ll_New_Row,"remark",idw_main.getitemstring(1,"remark"))
@@ -13848,8 +14143,9 @@ SetProfileString(gs_inifile,'PRINTERS','PACKLIST',lsPrinter)
 If message.doubleparm = 1 then
 	If idw_main.GetItemString(1,"ord_status") = "N" or &
 	idw_main.GetItemString(1,"ord_status") = "P" or &
-	idw_main.GetItemString(1,"ord_status") = "I" Then 
-		idw_main.SetItem(1,"ord_status","A")
+	idw_main.GetItemString(1,"ord_status") = "I" OR &
+	idw_main.GetItemString(1,"ord_status") = "A" Then // DINESH - 03/17/2023- sims-73- Google - SIMS - Load Lock and New Loading Status
+		idw_main.SetItem(1,"ord_status","L") // DINESH - 03/17/2023- sims-73- Google - SIMS - Load Lock and New Loading Status
 		ib_changed = TRUE
 		iw_window.trigger event ue_save()
 	End If
@@ -14135,7 +14431,8 @@ If idw_main.RowCount() > 0 Then
 						idw_pick.RowCount() > 0 and &
 				  ( idw_main.object.ord_status[1] = 'P' or &
 					idw_main.object.ord_status[1] = 'I'  or &
-					idw_main.object.ord_status[1] = 'A' ) Then
+					idw_main.object.ord_status[1] = 'A' or &
+					idw_main.object.ord_status[1] = 'L' ) Then // Begin-DINESH - 03/17/2023- sims-73- Google - SIMS - Load Lock and New Loading StatusThen
 					
 			tab_main.tabpage_main.cb_emc.enabled = True
 	Else
@@ -15137,7 +15434,9 @@ If isOTMEnabled = 'Y' Then
 	
 					wf_set_otm_message('O')
 					idw_main.object.otm_call_date.visible = False
-					idw_main.object.otm_call_date_t.visible = False		
+					idw_main.object.otm_call_date_t.visible = False	
+					
+						
 			End Choose
 			//Jxlim 03/21/2012 Protect also when OTM_Status is Non_OTM(N) BRD #337 Pandora-OTM can be unlocked via F10 on ue_unlock
 			idw_main.Object.otm_status.Protect = TRUE
@@ -15284,7 +15583,9 @@ If idw_main.GetItemString(1,'OTM_Status') = 'N' and &
     (idw_Main.GetITEmString(1,'ord_status') = 'N' or &  
 	idw_Main.GetITEmString(1,'ord_status') = 'P' or &
 	idw_Main.GetITEmString(1,'ord_status') = 'I' or &
-	idw_Main.GetITEmString(1,'ord_status') = 'A') Then
+	idw_Main.GetITEmString(1,'ord_status') = 'A' or &	
+	idw_Main.GetITEmString(1,'ord_status') = 'L') Then // Dinesh - 05/08/2023- SIMS-53- Google - SIMS - Load Lock and New Loading Status
+	
 	If Not IsNull(idw_main.GetItemDateTime(1, 'schedule_date')) and gs_project <> 'PANDORA'  Then
 //	If Not IsNull(idw_main.GetItemDateTime(1, 'schedule_date')) Then
 		idw_main.setitem(1,'schedule_date', ldtNull )
@@ -15675,7 +15976,19 @@ if Upper(gs_project) = 'PANDORA' then
 
 	icb_ci_load_tender.enabled = lb_enabled
 	
+	// Begin - Dinesh -09/01/2023- SIMS-293- Google- DIMS and Weights are missing in the 945CI we send to customer
+if Upper(gs_project) = 'PANDORA'	then
+		is_eng=tab_main.tabpage_pack.rb_eng.text 
+		 if tab_main.tabpage_pack.rb_eng.checked = TRUE and is_eng='English' then
+			 tab_main.tabpage_pack.cb_ci_load_tender.enabled= False
+			 lb_enabled= False
+		end if
+end if
+// End - Dinesh -09/01/2023- SIMS-293- Google- DIMS and Weights are missing in the 945CI we send to customer
+
 	return lb_enabled
+
+
 
 elseif Upper(gs_project) = 'PHYSIO-MAA' or Upper(gs_project) = 'PHYSIO-XD' then
 
@@ -18031,7 +18344,7 @@ end function
 public function boolean wf_is_country_eu_to_eu (string as_from_country, string as_to_country);// LTK 20120202	Added this function for the CI check on ue_confirm
 // ET3 20121220	Modified to process for exceptions list ... note: as_to_country appears to be ship_to ?!?!
 // wf_is_country_eu_to_eu
- 
+return false // 02092022- Dinesh - S66849-Google - SIMS - Change in Commercial Invoice for EU to EU orders
 boolean lb_return = FALSE
 boolean lb_exception_found = FALSE
 integer i
@@ -19491,18 +19804,32 @@ DateTime	ldtToday
 If ib_Changed Then
 	Messagebox(is_title, 'Please save your changes first.')	
 End If
-
-If idw_main.getitemstring(1,'Ord_status') = 'A' Then
-	
-	//TODO - Add websphere call
-	
-	ldtToday = f_getLocalWorldTime( idw_main.getitemstring(1,'wh_code') ) 
-	idw_Main.SetITem(1,'pack_complete_Date', ldtToday)
-	tab_main.tabpage_Main.cb_custom1.enabled = False
-	
-	Messagebox(is_title,'Pack Complete Message sent to customer.')
-
-End If
+// Begin-DINESH - 03/17/2023- sims-73- Google - SIMS - Load Lock and New Loading Status
+if gs_project = 'PANDORA' then
+			If idw_main.getitemstring(1,'Ord_status') = 'L' Then
+			
+			//TODO - Add websphere call
+			
+			ldtToday = f_getLocalWorldTime( idw_main.getitemstring(1,'wh_code') ) 
+			idw_Main.SetITem(1,'pack_complete_Date', ldtToday)
+			tab_main.tabpage_Main.cb_custom1.enabled = False
+			
+			Messagebox(is_title,'Pack Complete Message sent to customer.')
+		
+			End If
+	// End-DINESH - 03/17/2023- sims-73- Google - SIMS - Load Lock and New Loading Status
+else
+			If idw_main.getitemstring(1,'Ord_status') = 'A' Then
+			
+			//TODO - Add websphere call
+			
+			ldtToday = f_getLocalWorldTime( idw_main.getitemstring(1,'wh_code') ) 
+			idw_Main.SetITem(1,'pack_complete_Date', ldtToday)
+			tab_main.tabpage_Main.cb_custom1.enabled = False
+			
+			Messagebox(is_title,'Pack Complete Message sent to customer.')
+			end if
+End if			
 
 REturn 0
 end function
@@ -19803,7 +20130,11 @@ CHOOSE CASE lsOrdstatus
 
 	CASE 'Z'
 		If idw_pack.rowcount( ) > 0 Then
-			lsStatus ='A' //set Order status to packing
+			//if gs_project='PANDORA' then
+//				lsStatus ='L' //set Order status to Loading // Dinesh - 04/20/2023- SIMS-53- Google - SIMS - Load Lock and New Loading Status
+//			else
+				lsStatus ='A' //set Order status to packing
+//			//end if
 		elseIf idw_pick.rowcount( ) > 0 Then
 			lsStatus ='P' //set Order status to process
 		else
@@ -19851,7 +20182,7 @@ If ( fs_Status = 'Z' ) Then
 
 	wf_check_status() //27-Jul-2016 :Madhu- calling to lock order same as completed Order
 	
-Elseif fs_Status = 'A' or fs_Status = 'P' Then
+Elseif fs_Status = 'A' or fs_Status = 'L' or fs_Status = 'P' Then // Dinesh - 04/20/2023- SIMS-53 -Google - SIMS - Load Lock and New Loading Status
 	UPDATE delivery_master
 	SET ord_status = 'Z'
 	WHERE do_no = :as_dono;
@@ -20394,7 +20725,8 @@ IF upper(gs_project) ='KENDO' THEN
 
 	if Left(icb_confirm.Text,2) =  'Re' Then //If it is re-confirm an order, generate GI file
 		return 0
-	elseif llrscount =0 and llgicount =0 then //If No GI file created, generate GI file.
+	//elseif llrscount =0 and llgicount =0 then //If No GI file created, generate GI file.
+	elseif llrscount =0 or llgicount =0 then //If No GI file created, generate GI file. // Dinesh - 02/16/2023 - SIMS-167- Kendo PGI file
 		return 0
 	else 
 		return -1
@@ -20443,7 +20775,7 @@ public function integer wf_check_carrier_dangerous_goods ();//31-May-2016 :Madhu
 //If carrier.Transportation Mode= AIR and Shipping_Restriction=AIR, should prompt an error message.
 
 long 	ll_row,ll_carrier_row,ll_detail_rowcount,ll_sku_row,ll_hazardous_rowcount,ll_findrow
-string ls_transportmode,ls_sku,ls_suppcode,ls_hazardcd,ls_find,ls_carrier_find,ls_carrier,ls_transmode
+string ls_transportmode,ls_sku,ls_suppcode,ls_hazardcd,ls_find,ls_carrier_find,ls_carrier,ls_transmode,ls_allow_dg
 
 //Load Hazardous Materials
 ids_hazardoussku.reset()
@@ -20460,7 +20792,8 @@ ls_transmode =UPPER(TRIM(idw_other.getitemstring(1,'transport_mode'))) //Get Ord
 ll_carrier_row =g.ids_dddw_carrier.find( ls_carrier_find, 1, g.ids_dddw_carrier.rowcount( )) //find carrier row
 If ll_carrier_row <> 0 Then
 	ls_transportmode = g.ids_dddw_carrier.getitemstring(ll_carrier_row,'transport_mode') //get Carrier Level Transportation Mode
-
+	//ls_allow_dg = g.ids_dddw_carrier.getitemstring(ll_carrier_row,'allow_dg') //get Carrier Level allow dg //Dinesh - 11/10/2023- SIMS-348- Google - SIMS - Dangerous Goods Exception
+	select allow_dg into :ls_allow_dg from carrier_master where Carrier_Code=:ls_carrier using sqlca;  //get Carrier Level allow dg //Dinesh - 11/10/2023- SIMS-348- Google - SIMS - Dangerous Goods Exception
 	If upper(ls_transportmode) = "AIR"  OR upper(ls_transmode) ="AIR" Then
 		ll_detail_rowcount =idw_detail.rowcount( ) //Get Detail row count
 		
@@ -20480,14 +20813,16 @@ If ll_carrier_row <> 0 Then
 				ll_findrow=ids_hazardoussku.find( ls_find, 0, ids_hazardoussku.rowcount())
 	
 				//If Shipping Restrictions value is AIR return -1 to throw an error message
-				If upper(ids_hazardoussku.getitemstring(ll_findrow,'Shipping_Restrictions')) ="AIR" Then
+				//If upper(ids_hazardoussku.getitemstring(ll_findrow,'Shipping_Restrictions')) ="AIR" Then //Dinesh - 11/10/2023- SIMS-348- Google - SIMS - Dangerous Goods Exception
+				If upper(ids_hazardoussku.getitemstring(ll_findrow,'Shipping_Restrictions')) ="AIR" and  ls_allow_dg ='N' Then //Dinesh - 11/10/2023- SIMS-348- Google - SIMS - Dangerous Goods Exception
 					is_dangerous_item =ls_sku //set Dangerous Item
 					Return -1
 				End If
 					
 			NEXT
 		End If
-	End If
+	End If //
+	 
 Else
 	// The carrier is no longer active -  Cannot determine dangerous goods.
 	MessageBox("Dangerous Cargo Warning","Carrier is no longer active.~nCould not determine dangerous items, if appropriate." )
@@ -21582,6 +21917,12 @@ if isnull(idw_main.GetItemString(1, "ignore_shelflife_ind")) or trim(idw_main.Ge
 	idw_main.SetItem(1, 'ignore_shelflife_ind', 'N')
 end if
 
+//// Begin 01/25/2022 - S64720- Dinesh - Buy sell purchase order since datawindow considers it required, even though it's not.
+if isnull(idw_main.GetItemString(1, "user_field21")) or trim(idw_main.GetItemString(1, "user_field21")) ='' then
+	idw_main.SetItem(1, 'user_field21', '')
+end if
+//// End 01/25/2022 -S64720- Dinesh - Buy sell purchase order since datawindow considers it required, even though it's not.
+
 doResetSupplierArrays()
 
 If idw_main.AcceptText() = -1 Then 
@@ -21836,7 +22177,16 @@ For i = 1 to ll_cnt
 		If g.is_allow_alt_supplier_pick = "N" Then
 			lsFind += 	" and Upper(supp_code) = '" + Upper(ls_supp_code) + "'"
 		End If
-	
+		// Begin - Dinesh - 08/02/2024- SIMS-497-Google SIMS Packing list saving issue.
+		if gs_project='PANDORA' then
+				ld_pack_qty=idw_pack.getitemnumber(i,'quantity')
+				if ld_pack_qty= 0 then
+					//Messagebox(is_title,"Packing inventory quantity can not be Null or 0, please check!", StopSign!)
+					Messagebox(is_title,"Packing inventory quantity can not be Null or 0, please check!")
+					return -1
+				end if
+		end if
+		// End - Dinesh - 08/02/2024- SIMS-497-Google SIMS Packing list saving issue.
 		ll_row1 = ids_compare.find(lsFind, 1,ids_compare.rowcount())
 	
 		if ll_row1 < 1 then
@@ -22211,7 +22561,8 @@ End If
 //09/05 - PCONKL - Can't delete a row that was shipped by TRAX until it is voided
 For i = 1 to liRows
 	If idw_pack.GetItemString( i, 'tracking_id_Type') = 'T' Then
-		Messagebox(is_title,"Carton at row " + String(i) + " has been shipped by TRAX.~rYou must Void the carton before you can delete it.",StopSign!)
+		//Messagebox(is_title,"Carton at row " + String(i) + " has been shipped by TRAX.~rYou must Void the carton before you can delete it.",StopSign!)
+		Messagebox(is_title,"Carton at row " + String(i) + " has been shipped by ConnectShip.~rYou must Void the carton before you can delete it.",StopSign!)//Dinesh - 02/06/2025- SIMS-641-Development for Delivery Order screen change for ConnectShip 
 		liRtn = -2
 		continue
 	End If
@@ -22259,7 +22610,7 @@ Choose Case lsStatus
 
 Case "N" 
 	tab_main.tabpage_serial.enabled = false
-Case "P", "I", "A","Q" 
+Case "P", "I", "A","Q"
 	
 	if  idw_detail.RowCount() <= 0 then
 		tab_main.tabpage_serial.enabled = false
@@ -22447,6 +22798,112 @@ public subroutine f_crossdock ();//// dinesh - 02/03/2021- S52817 -Google - SIMS
 //	elseif  (not isnull(ls_User_field16) or ls_User_field16 <>'') and (not isnull(ls_User_field18) or ls_User_field18 <> '') then
 //			idw_main.SetItem(1, "crossdock_ind",'Y')
 //end if
+end subroutine
+
+public subroutine wf_set_carton_type ();string ls_pack_po_no2
+long k,ll_line_item_pack,ll_line_item_pick,j
+
+// Begin Dinesh - 06222022- S72575 Google - SIMS - Outbound Processing Changes (Carton_Type / Pack_PO_NO2 portion)
+//Begin - Dinesh - 05/31/2024- SIMS-478- Google SIMS - Blank Container type Unable to save packing list
+	if upper(gs_project) = 'PANDORA' then
+		
+		for k=1 to idw_Pack.rowcount()
+			ll_line_item_pack=idw_Pack.GetItemnumber(k, "line_item_no")
+			 for j =1 to idw_pick.rowcount()
+				ll_line_item_pick=idw_pick.GetItemnumber(j, "line_item_no")
+				if ll_line_item_pack= ll_line_item_pick then
+						ls_pack_po_no2=idw_pick.GetItemString(j, "po_no2")
+					
+				end if
+
+		if ls_pack_po_no2= "" then
+			
+			setnull(ls_pack_po_no2)
+			
+		end if
+		//commented the above line - End - Dinesh - 05/31/2024- SIMS-478- Google SIMS - Blank Container type Unable to save packing list
+		//if  ((ls_Pack_Po_No2 <> "" or not isnull(ls_Pack_Po_No2))  then
+		if  (ls_Pack_Po_No2 <> "" or not isnull(ls_Pack_Po_No2) ) then //Dinesh - 05/31/2024- SIMS-478- Google SIMS - Blank Container type Unable to save packing list
+			idw_Pack.object.carton_type[k]='Pallet'
+		end if
+		if  (ls_Pack_Po_No2 = '-') then
+			
+			idw_Pack.object.carton_type[k]=''
+		end if
+			
+		if  (ls_Pack_Po_No2 = "" or  isnull(ls_Pack_Po_No2)) then //Dinesh - 05/31/2024- SIMS-478- Google SIMS - Blank Container type Unable to save packing list
+			idw_Pack.object.carton_type[k]=''
+		end if
+		
+		next
+		
+	next
+		
+	end if
+		
+		// End Dinesh - 06222022- S72575 Google - SIMS - Outbound Processing Changes (Carton_Type / Pack_PO_NO2 portion)
+
+end subroutine
+
+public subroutine wf_delivery_order_readonly (boolean ab_read);
+if ab_read=True then
+	idw_other.object.datawindow.readonly = 'yes'
+	idw_main.object.datawindow.readonly = 'yes'
+	idw_detail.object.datawindow.readonly = 'yes'
+	idw_pick.object.datawindow.readonly = 'yes'
+	idw_pack.object.datawindow.readonly = 'yes'
+	idw_serial.object.datawindow.readonly = 'yes'
+	tab_main.tabpage_main.tab_address.tabpage_shipto.dw_shipto.Enabled = False
+	tab_main.tabpage_main.tab_address.tabpage_bt.dw_bt.Enabled = False
+	tab_main.tabpage_main.tab_address.tabpage_it.dw_it.Enabled = False
+	tab_main.tabpage_main.tab_address.tabpage_st.dw_st.Enabled = False
+	tab_main.tabpage_main.tab_address.tabpage_trax_3rd_party.dw_trax_3rd_party.Enabled = False
+	tab_main.tabpage_main.tab_address.tabpage_rt.dw_rt.Enabled = False 	
+	tab_main.tabpage_detail.sle_verify.enabled=False
+	tab_main.tabpage_serial.cb_undo.enabled = False
+	tab_main.tabpage_serial.cb_generate_ob_serial.enabled = False
+	tab_main.tabpage_serial.cb_ob_serial_insert.enabled = False
+	tab_main.tabpage_serial.cb_new_carton.enabled = False
+	tab_main.tabpage_serial.cb_copy_serial.enabled = False
+	tab_main.tabpage_serial.cb_ob_serial_delete.enabled = False
+	tab_main.tabpage_serial.cbx_print_labels.enabled = False
+	tab_main.tabpage_serial.rb_manual.enabled = False
+	tab_main.tabpage_serial.rb_barcode.enabled = False
+	tab_main.tabpage_pack.cb_print_dn.enabled = False
+	tab_main.tabpage_pack.cb_pack_generate.enabled = False
+	tab_main.tabpage_pack.cb_pack_insert.enabled = False
+	tab_main.tabpage_pack.cb_pack_copy.enabled= False
+	tab_main.tabpage_pack.cb_pack_delete.enabled= False
+	tab_main.tabpage_pack.cb_import_pack.enabled= False
+	tab_main.tabpage_pack.cb_calc_carton_count.enabled= False
+	tab_main.tabpage_pack.cb_ci_load_tender.enabled= False
+	tab_main.tabpage_pack.cb_import_pack.enabled= False
+	tab_main.tabpage_pack.rb_metric.enabled= False
+	tab_main.tabpage_pack.rb_eng.enabled= False
+	tab_main.tabpage_pack.cbx_show_comp_pack.enabled= False
+	tab_main.tabpage_pack.dw_packlist_notes.object.datawindow.readonly='yes'
+	tab_main.tabpage_pack.cbx_gen_level2_qty.enabled= False
+	tab_main.tabpage_detail.cb_do_det_insert.enabled = False
+	tab_main.tabpage_detail.cb_do_det_delete.enabled = False	
+	tab_main.tabpage_detail.cb_import_ib.Enabled = False
+	tab_main.tabpage_pick.cb_pick_generate.enabled = False
+	tab_main.tabpage_pick.cb_pick_delete.enabled = False	
+	tab_main.tabpage_pick.cb_pick_insert.enabled = False		
+	tab_main.tabpage_pick.cb_pick_copy.enabled = False	
+	tab_main.tabpage_pick.cb_lmsroute.enabled = False  
+	tab_main.tabpage_pick.cb_pick_unallocate.enabled= False
+	tab_main.tabpage_pick.cbx_partial_bom.enabled= False
+	tab_main.tabpage_pick.cbx_show_comp.enabled= False
+	//tab_main.tabpage_pick.cb_pick_print.enabled = False
+	tab_main.tabpage_pick.cb_picklocs.enabled = False 
+	tab_main.tabpage_pick.dw_pick_mobile.object.datawindow.readonly='yes'
+	tab_main.tabpage_main.cb_do_confirm.enabled = False
+	tab_main.tabpage_main.cb_do_void.enabled = False
+	tab_main.tabpage_main.cb_do_notes.enabled = False
+	tab_main.tabpage_main.cb_do_readytoship.enabled = False
+	
+
+end if
 end subroutine
 
 on w_do.create
@@ -22660,59 +23117,70 @@ end event
 event ue_save;// pvh 09/08/05 - modified to remove references to Gemini Tab
 //MEA - 5/13 - Not all Pandora code moved to OTM NVO. Will move gradually as per conversation with Tim as to not break anything.
 
-Long   	ll_result, ll_rowcount, ll_numpicks, ll_picknum, ll_numexistingci, ll_numpackrows
-LONG     ll_packrownum, ll_numexistingup
-LONG	 	llFindRow, ll_stockTransf, llPickCount
-string 	ls_costcenter, ls_location	, ls_cartontype, ls_country, ls_ups
-String 	ls_order, lsMsg, lsDONO, lsOrdStat, lsErrText, &
-			lsModify, lsRC, lsSKU, ls_wh_code,ls_trac_id, lsContentErrorText, &
-			ls_INActiveCustomerName,  lsOwnerName, lsComponentInd, &
-			ls_COO, ls_COO_db, ls_error, lsOldCustCode, lsNewCustCode, lsCustText, ls_ErrText, ls_Temp, &
-			ls_container_id_scanned_ind
-string 	lsInvoiceNo //TAM W&S
-long   	ll_no, i,j, llRowCount, llRowPos, llSerialCount, llSerialPos,ll_row, llOwnerID, ll_COO_len, llOwnerID_Prev
-Integer	liRC
-Boolean	lbContentFailed
-DateTime	ldttoday, ldtlastDBUpdate, ldtPickComplete//, ldtm_temptime
-String	ls_user_field1, ls_sku, ls_Cust_code,lsuf2
-Long		llcount, llTransID, llNoteSeqNo,ll_detaillineno
+Long   ll_result, ll_rowcount, ll_numpicks, ll_picknum, ll_numexistingci, ll_numpackrows,ll_rownum,ll_row_pick,ll_count1,ll_spidR,ll_spid
+LONG     ll_packrownum, ll_numexistingup,ll_rownum1
+LONG llFindRow, ll_stockTransf, llPickCount,ll_item_no,ll_flag=1
+Boolean   lb_match=true,lb_readonly=False
+string ls_costcenter, ls_location , ls_cartontype, ls_country, ls_ups,lsTemp,lsfind_container_id,ls_container_order,lsTemp1,ls_Load_Lock,ls_invoice_no,ls_userspid
+String ls_order, lsMsg, lsDONO, lsOrdStat, lsErrText, &
+lsModify, lsRC, lsSKU, ls_wh_code,ls_trac_id, lsContentErrorText, &
+ls_INActiveCustomerName,  lsOwnerName, lsComponentInd, &
+ls_COO, ls_COO_db, ls_error, lsOldCustCode, lsNewCustCode, lsCustText, ls_ErrText, ls_Temp, &
+ls_container_id_scanned_ind,ls_detail_container_id,ls_pick_container_id,ls_po_no2_ind, ls_container_no_ind
+string lsInvoiceNo,ls_spid //TAM W&S
+long   ll_no, i,j, llRowCount, llRowPos, llSerialCount, llSerialPos,ll_row, llOwnerID, ll_COO_len, llOwnerID_Prev
+Integer liRC
+Boolean lbContentFailed,lb_trailer_no , lb_seal_no,lb_lock = True // Dinesh - 03/16/2023- SIMS-53-Google - SIMS - Load Lock and New Loading Status
+DateTime ldttoday, ldtlastDBUpdate, ldtPickComplete//, ldtm_temptime
+String ls_user_field1, ls_sku, ls_Cust_code,lsuf2,ls_Edit_modeW
+Long llcount, llTransID, llNoteSeqNo,ll_detaillineno,ll_res
 dwItemStatus l_status, l_pro_status
-integer 	li_line_item_no,i_indx
-string  	ls_do, ls_freightterms, ls_transmode, ls_carrier, ls_ShipVIA, ls_userf1
-boolean 	lb_failed
-Decimal 	ld_NxtSeq // 01/03/2011 ujh: S/N_Pa  
-datetime ldt_RequestDate
-String 	ab_error_message_title, ab_error_message //TimA 04/15/2011 capture the error message in of_error_on_serial_no_exists to help with possible locking in SIMS
-Boolean 	lbSave //TimA 04/26/11 Pandora Issue #211 The Pick complete date is not being written to the CI 3B18.  Confirming the CI transaction before the order is save may be the problem
-Boolean 	lbGenerateCI, lbGenerateUP, lb_stockTransf_created
-Boolean	lbTempBoolean1, lbTempBoolean2, lbTempBoolean3
-
+integer li_line_item_no,i_indx
+string   ls_do, ls_freightterms, ls_transmode, ls_carrier, ls_ShipVIA, ls_userf1
+boolean lb_failed
+Decimal ld_NxtSeq // 01/03/2011 ujh: S/N_Pa  
+datetime ldt_RequestDate,ld_entry_dateR,ld_entry_dateW
+String ab_error_message_title, ab_error_message //TimA 04/15/2011 capture the error message in of_error_on_serial_no_exists to help with possible locking in SIMS
+Boolean lbSave //TimA 04/26/11 Pandora Issue #211 The Pick complete date is not being written to the CI 3B18.  Confirming the CI transaction before the order is save may be the problem
+Boolean lbGenerateCI, lbGenerateUP, lb_stockTransf_created
+Boolean lbTempBoolean1, lbTempBoolean2, lbTempBoolean3
+string ls_trailer_num,ls_seal_num // Dinesh - 05/27/2021-S57453-Google - SIMS - Bill of Lading Changes
+string ls_DONO,ls_whcode
+long ll_count
 //TimA 08/11/11 Pandora issue #261
-String 	ls_ShipType,ls_WarehouseCode,ls_Sku2,ls_serial_No, lsSuppCode, ls_L_Code, ls_Inventory_Type, ls_Country_of_Origin, ls_Lot_No, ls_PO_No, ls_PO_No2, ls_Container_ID
+String ls_ShipType,ls_WarehouseCode,ls_Sku2,ls_serial_No, lsSuppCode, ls_L_Code, ls_Inventory_Type, ls_Country_of_Origin, ls_Lot_No, ls_PO_No, ls_PO_No2, ls_Container_ID
 Datetime ld_Expiration_Date
-Boolean 	lb_send_nike_dst
-Long		ll_method_trace_id, lldeletedPackcount
+Boolean lb_send_nike_dst,lb_read
+Long ll_method_trace_id, lldeletedPackcount,k
 Datetime ldt_Original_RDD
-
+string ls_User_Id,ls_Order_No,ls_screen_name,ls_Edit_Mode,ls_display_name,ls_display_name1
+Datetime ldt_Entry_Date,ldt_Out_Date
+datastore lds_screen_lock
+lb_read=False // Dinesh - 06/16/2023- SIMS-198- Read only orders
 //TimA 12/30/11 OTM Project
-n_otm 	ln_otm
+n_otm ln_otm
 If Not isvalid(ln_otm) Then
-	ln_otm = CREATE n_otm
+ln_otm = CREATE n_otm
 End if
-String 	ls_action, ls_return_cd, ls_error_message,lsProcessOTM, ls_color
-String 	lsOTMStatus, lsSetOTM
-Boolean 	lbOTMFlag, lb_rd_change, lb_sd_change, lb_dd_change
-Integer 	li_OTM_Return
-String 	lsOTMFromCountry,lsShipNo, ls_Code_Descript
+String ls_action, ls_return_cd, ls_error_message,lsProcessOTM, ls_color
+String lsOTMStatus, lsSetOTM
+Boolean lbOTMFlag, lb_rd_change, lb_sd_change, lb_dd_change,lb_skip
+Integer li_OTM_Return
+String lsOTMFromCountry,lsShipNo, ls_Code_Descript
 DateTime ldtOTMCallDate
-//u_nvo_sims_ccc	lu_ccc
-//Datastore	ldsSerial
+string ls_invoice,ls_order_type,ls_User_IdW
+//u_nvo_sims_ccc lu_ccc
+//Datastore ldsSerial
 
 lbContentFailed = False
 lb_rd_change = False
 lb_sd_change = False
 
-is_sku = ''	//Jxlim 12/20/2012 BRD #464
+is_sku = '' //Jxlim 12/20/2012 BRD #464
+
+//if lb_lock = False then
+//	isLoad_Status = 'UNLOCK_ON_SAVE' // Dinesh -04/04/2023- SIMS-53- Google- Load lock and new loading status
+//end if
 
 //08-Feb-2013  :Madhu code -START
 string lsinvoice_no
@@ -22724,6 +23192,132 @@ using sqlca;
 isinvoice_no =lsinvoice_no
 //08-Feb-2013  :Madhu code -END
 
+//Begin -04062022-  Dinesh - S69824- Google -  SIMS - Saudi Arabia Shipments
+If Upper(gs_project) = 'PANDORA' then
+	ls_DONO = idw_Main.GetITemString(1,'do_no')
+	ls_whcode = idw_Main.GetITemString(1,'wh_code')
+	select Country into :ls_country from Delivery_Master where Project_ID = :gs_project and do_no=:ls_DONO and Country='SA' USING SQLCA;
+	if ls_country='SA' then
+			Select count(*) INTO :ll_count FROM lookup_table with (NoLock)
+			Where Project_ID = :gs_project AND Code_Type = 'SAUDI_ARABIA_SHIPMENT' AND code_id=:ls_whcode USING SQLCA;
+		if ll_count <= 0 then
+			ls_error = "This is a Saudi Arabia Shipment and this warehouse is not allowed to ship to this country. Please contact Google to cancel this order."
+			lb_failed = true
+		end if
+	end if
+
+	// Begin  - Dinesh - 06/15/2023- SIMS-198- Google - SIMS - Read Only Access
+				ls_invoice_no= idw_main.GetItemString(1,'invoice_no')
+				lds_screen_lock = Create datastore
+				lds_screen_lock.Dataobject = 'd_screen_lock_order_r'
+				lds_screen_lock.settrans(sqlca)
+				lds_screen_lock.retrieve(gs_System_No,'R')
+				select count(*) into : il_find_matchW from Screen_Lock with(nolock) where Order_No= :gs_System_No and Edit_Mode='W' and screen_name='Delivery Order' using sqlca;
+				select user_id,UserSPID,Edit_Mode,Entry_Date into :ls_User_IdW,:ll_spid,:ls_Edit_modeW,:ld_entry_dateW  from Screen_Lock with(nolock) where Order_No= :gs_System_No and Edit_Mode='W' and screen_name='Delivery Order' using sqlca;
+				select count(*) into : il_find_matchR from Screen_Lock with(nolock) where Order_No= :gs_System_No and Edit_Mode='R' and screen_name='Delivery Order' using sqlca;
+				select user_id,UserSPID,Edit_Mode,Entry_Date,order_no into :ls_User_Id,:ll_spidR,:ls_Edit_Mode,:ld_entry_dateR,:ls_Order_No from Screen_Lock with(nolock) where Order_No= :gs_System_No and Edit_Mode='R' and userspid = :gl_userspid and screen_name='Delivery Order' using sqlca;
+				select display_name into :ls_display_name from usertable with (Nolock) where userid=:ls_User_IdW;
+					if  (il_find_matchW > 0 and il_find_matchR > 0) and (ls_Order_No=gs_System_No and gs_userid <> ls_User_IdW  and ll_spidR = gl_userspid ) then
+						//if  il_find_matchW > 0 and ls_Order_No=gs_System_No  and gs_userid <> ls_User_IdW and ll_spidR <> gl_userspid and gs_System_No <> '' and ls_Edit_Mode='R' then						
+						 lb_failed= True
+						 if  lb_failed= True then
+							messagebox(is_title,'User Name: ' + ls_display_name + '/Session: ' + string(ll_spid) + ' is already accessing the Order Number ' + ls_invoice_no + '.~r~n~r~nThe screen is locked and can be accessible to read mode only.Please contact your Site Manager/Supervisor to unlock the screen or wait for sweeper to run for clearing the locked order.', Stopsign! )
+							ls_error= 'Please try accessing this order after some time'
+							lb_readonly= True
+							lb_failed= true
+							wf_delivery_order_readonly(lb_readonly)
+						
+						end if
+					
+					elseif (il_find_matchW > 0 and  il_find_matchR > 0) and (ls_Order_No=gs_System_No and gs_userid = ls_User_IdW and ls_Edit_mode='R' and  ll_spidR = gl_userspid) then
+						 lb_failed= True
+						 if lb_failed= True then
+						 	messagebox(is_title,'Hey!! You have already opened another session: ' +string(ll_spid)+ ' for the same Order Number ' + ls_invoice_no + '.~r~nPlease close all your current/previous session first and then re-open the order.', Stopsign! )
+							ls_error= 'Please close all your previouos session and re- open the order again'
+							lb_readonly= True
+							lb_failed= True
+							wf_delivery_order_readonly(lb_readonly)
+						end if
+					elseif ib_access= True and (il_find_matchW = 0 and  il_find_matchR > 0) and (ls_Order_No=gs_System_No and gs_userid = ls_User_Id and ls_Edit_mode='R' and  ll_spidR = gl_userspid) then
+						
+						messagebox(is_title,'Hey!! You have changed this order to READ ONLY ACCESS, session: ' +string(ll_spidR)+ '.', Stopsign! )
+							ls_error= 'Please close all your current session and re- open the order again to make any change for this order'
+							lb_readonly= True
+							lb_failed= True
+							wf_delivery_order_readonly(lb_readonly)
+					else
+						
+					end if
+				
+	
+		
+		// End Dinesh S51817 - 01/22/21 - Google - SIMS - SAP Conversion - GUI
+
+// End - Dinesh-  06/15/2023- SIMS-198- Google - SIMS - Read Only Access
+
+// Quit processing
+If lb_failed then
+// Set microhelp.
+SetMicroHelp("Save Failed!")
+messagebox (is_Title, ls_error, StopSign!)
+lbSave = False
+return -1
+End If //end if
+End if
+//End -04062022-  Dinesh - S69824- Google -  SIMS - Saudi Arabia Shipments
+
+//Begin -05112022-  Dinesh - S71358- Google - SIMS - RMA/Harvest Pick Exceptions
+If Upper(gs_project) = 'PANDORA' then
+ls_detail_container_id =''
+ls_DONO = idw_Main.GetITemString(1,'do_no')
+
+for ll_rownum=1 to idw_pick.rowcount()
+lsTemp = idw_pick.GetitemString(ll_rownum,'Container_ID')  
+ lsTemp1 = idw_pick.GetitemString(ll_rownum,'po_no2')
+ ls_po_no2_ind = idw_pick.GetitemString(ll_rownum,'PO_NO2_Controlled_Ind')  
+ ls_container_no_ind = idw_pick.GetitemString(ll_rownum,'container_tracking_Ind')
+	
+ll_item_no= idw_pick.Getitemnumber(ll_rownum,'line_item_no')  
+    lsfind_container_id = "Upper(user_field7) = '" + upper(lsTEmp) + "' or Upper(user_field7) ='"+ upper(lsTEmp1) + "' and line_item_no=  "+string(ll_item_no) +""
+//lsTemp=lsTemp
+ ls_container_order = idw_detail.GetitemString(ll_rownum,'user_field7')
+ 
+ if ls_container_order='' then
+setnull(ls_container_order)
+end if
+If  idw_detail.Find(lsfind_container_id,1,idw_detail.RowCount()) < 1 Then
+//Begin - 053022-  Dinesh - S71358- Google - SIMS - RMA/Harvest Pick Exceptions
+if ls_container_no_ind='Y'  and ls_po_no2_ind='N' then
+lsTemp=lsTemp
+elseif ls_po_no2_ind='Y' and ls_container_no_ind='N' then
+lsTEmp=lsTEmp1
+elseif ls_container_no_ind='Y'  and ls_po_no2_ind='Y' then
+lsTemp=lsTemp
+elseif ls_container_no_ind='N'  and ls_po_no2_ind='N' then
+lsTemp=''
+end if
+if  ls_container_order <> " " or not isnull(ls_container_order) then
+ll_flag=0
+ 
+if ll_flag = 0 then
+ls_detail_container_id= ls_detail_container_id + lsTemp +" ,"
+else
+ll_flag=1
+end if
+ lb_match=false
+ 
+else
+
+end if
+//End - 053022-  Dinesh - S71358- Google - SIMS - RMA/Harvest Pick Exceptions
+end if
+next
+if lb_match= false then
+Messagebox(is_title,"This is an RMA/Harvest order. RMA/Harvest orders need to have specific container order ID's in the order. You will need to either fix the inventory by stock adjustments or have the order cancelled in SAP. Below are the mismatched id(s) : "+ ls_detail_container_id +".",Stopsign!)
+return 1
+end if
+End If
+//End -05112022-  Dinesh - S71358- Google - SIMS - RMA/Harvest Pick Exceptions
 SetNull( ll_method_trace_id )
 //f_method_trace( ll_method_trace_id, this.ClassName(), 'Start ue_Save: ' + is_dono ) //08-Feb-2013  :Madhu commented
 If IsNULL(lsinvoice_no) or lsinvoice_no='' THEN isinvoice_no =idw_main.GetItemString(1,'invoice_no')
@@ -22731,219 +23325,229 @@ f_method_trace_special( gs_project, this.ClassName() + ' - ue_Save', 'Start ue_S
 
 // pvh - 08/24/05 - GMT
 if idw_main.rowcount() > 0 then
-	ldtToday = f_getLocalWorldTime( idw_main.getitemstring(1,'wh_code') ) 
+ldtToday = f_getLocalWorldTime( idw_main.getitemstring(1,'wh_code') )
 else
-	ldtToday = f_getLocalWorldTime( gs_default_wh )
+ldtToday = f_getLocalWorldTime( gs_default_wh )
 end if
 //ldtToday = DateTime(today(), Now())
 // eom
-
 // Acess Rights
 If f_check_access(is_process,"S") = 0 Then return -1
 
 idw_Main.Accepttext()
+//DHIRENDRA DE23785-SIMS PHILIPSCLS SHORT PICK OVERPICK ISSUE- START
+idw_pick.Accepttext()
+//DHIRENDRA DE23785-SIMS PHILIPSCLS SHORT PICK OVERPICK ISSUE- END
 idw_pack.Accepttext()
 idw_other.AcceptText()
 idw_detail.AcceptText()
 idw_mobile.AcceptText() /*09/14 - PCONKL */
-idw_serial.AcceptText()		/* 01/02-GailM*/
+idw_serial.AcceptText() /* 01/02-GailM*/
 
 /* PANDORA - Regenerate the pack list for serial tab only - 01/18 - GailM - S14978 */
 If Upper(gs_project) = 'PANDORA' and ibSerialCartonNoChanged Then
-	lbTempBoolean1 = ibMixedSerialPickRows
-	lbTempBoolean2 = ib_changed
-	lbTempBoolean3 = ibGenerateFromSerial
-	ibMixedSerialPickRows = FALSE
-	ib_changed = FALSE
-	ibGenerateFromSerial = TRUE
-	lldeletedPackcount = 0
-	
-	// Remove serial pack line and regenerate without touching non-serial pack rows
-	for j = idw_pack.rowcount() to 1 step -1
-		If idw_pack.GetItemString( j, 'serialized_ind' ) <> 'N' Then
-			idw_pack.DeleteRow( j )
-			lldeletedPackcount++
-		End If
-	next
-	//16-MAR-2018 :Madhu DE3343 - Avoid to prompt error message while deleting SN record, If No Pack records were present originally!
-	If lldeletedPackcount > 0 Then iw_window.TriggerEvent( "ue_generate_pack" )
-	
-	ibMixedSerialPickRows = lbTempBoolean1
-	//ib_changed = lbTempBoolean2
-	ibGenerateFromSerial = lbTempBoolean3
-	ibSerialCartonNoChanged = FALSE
-	
+lbTempBoolean1 = ibMixedSerialPickRows
+lbTempBoolean2 = ib_changed
+lbTempBoolean3 = ibGenerateFromSerial
+ibMixedSerialPickRows = FALSE
+ib_changed = FALSE
+ibGenerateFromSerial = TRUE
+lldeletedPackcount = 0
+// Remove serial pack line and regenerate without touching non-serial pack rows
+for j = idw_pack.rowcount() to 1 step -1
+If idw_pack.GetItemString( j, 'serialized_ind' ) <> 'N' Then
+idw_pack.DeleteRow( j )
+lldeletedPackcount++
+End If
+next
+//16-MAR-2018 :Madhu DE3343 - Avoid to prompt error message while deleting SN record, If No Pack records were present originally!
+If lldeletedPackcount > 0 Then iw_window.TriggerEvent( "ue_generate_pack" )
+ibMixedSerialPickRows = lbTempBoolean1
+//ib_changed = lbTempBoolean2
+ibGenerateFromSerial = lbTempBoolean3
+ibSerialCartonNoChanged = FALSE
 End If
 /* END - Regenerate the pack list for serial tab only */
 
-tab_main.tabpage_main.tab_address.tabpage_shipto.dw_shipto.AcceptText() 
+tab_main.tabpage_main.tab_address.tabpage_shipto.dw_shipto.AcceptText()
 
 If idw_main.RowCount() > 0 Then
-	
-	//BCR 13-JAN-2012: For PhxBrands. Need to get this way early, for later use at the bottom of script...
-	lsOldCustCode = idw_main.GetItemString(1, "cust_code", Primary!, TRUE)
+//BCR 13-JAN-2012: For PhxBrands. Need to get this way early, for later use at the bottom of script...
+lsOldCustCode = idw_main.GetItemString(1, "cust_code", Primary!, TRUE)
 
-	// LTK 20110721  SIMS Over/Under picking issue.  Refresh here to synch up the picking and detail quantities before any validations are performed.
-	This.Trigger event ue_refresh()
+// LTK 20110721  SIMS Over/Under picking issue.  Refresh here to synch up the picking and detail quantities before any validations are performed.
+This.Trigger event ue_refresh()
 
-	//27-Jul-2016 :Madhu- Added code to don't allow to save, if an Order Status='Z' - START
-	If idw_main.getitemstring(1,'ord_status')='Z' Then
-		SetMicroHelp("Save Failed!")
-		messagebox (is_Title, "Since, an Order was in confirming status, user shouldn't allow to save. Would you please re-retrieve an Order!", StopSign!)
-		return -1
-	End If
-	//27-Jul-2016 :Madhu- Added code to don't allow to save, if an Order Status='Z' - END
+//27-Jul-2016 :Madhu- Added code to don't allow to save, if an Order Status='Z' - START
+If idw_main.getitemstring(1,'ord_status')='Z' Then
+SetMicroHelp("Save Failed!")
+messagebox (is_Title, "Since, an Order was in confirming status, user shouldn't allow to save. Would you please re-retrieve an Order!", StopSign!)
+return -1
+End If
+//27-Jul-2016 :Madhu- Added code to don't allow to save, if an Order Status='Z' - END
+//
+// IF gs_project = "PANDORA" THEN
+//		
+//	If (w_do.idw_main.getitemstring(1,'Carrier')='LSLGFTLSTD' or w_do.idw_main.getitemstring(1,'Carrier')='LSLGFTLTMD') and ((isnull(w_do.idw_main.getitemstring(1,'user_field3'))) or (w_do.idw_main.getitemstring(1,'user_field3') = '')) then
+//			messagebox (w_do.is_title, "Trailer Number can not be left blank, To load the order please enter the Trailer number!", StopSign!)
+//			w_do.tab_main.SelectTab(2)
+//			w_do.idw_other.SetColumn('user_field3')
+//			w_do.idw_Other.SetFocus()
+//			ls_trailer_num=w_do.idw_main.getitemstring(1,'user_field3')
+//			w_do.idw_main.SetItem( 1, "user_field3", ls_trailer_num)
+//		
+//	end if 
+//	If (w_do.idw_main.getitemstring(1,'Carrier')='LSLGFTLSTD' or w_do.idw_main.getitemstring(1,'Carrier')='LSLGFTLTMD' or w_do.idw_main.getitemstring(1,'Carrier')='MLOGSHLSHL') and ((isnull(w_do.idw_main.getitemstring(1,'user_field6'))) or (w_do.idw_main.getitemstring(1,'user_field6') = '')) then
+//			messagebox (w_do.is_title, "Seal Number can not be left blank, To load the order please enter Seal number!", StopSign!)
+//			w_do.tab_main.SelectTab(2)
+//			w_do.idw_other.SetColumn('user_field6')
+//			w_do.idw_Other.SetFocus()
+//			ls_seal_num=w_do.idw_main.getitemstring(1,'user_field6')
+//			w_do.idw_main.SetItem( 1, "user_field6", ls_seal_num)
+//		
+//	End If
+//		
+//End if
+//
 
-	//Make sure the cost center is populated
-	// KZUV.COM - If this is the Pandora Project,
-	IF gs_project = "PANDORA" THEN
-		// Get the cost center.
-		ls_costcenter = trim(idw_main.GetItemString( 1, "user_field10" ))
-		// If the cost center is NULL or blank,
-		If isnull(ls_costcenter) or ls_costcenter = "" then
-			// Get the inventory location.
-			ls_location = idw_main.GetItemString( 1, "user_field2" )
-			// Now retrieve the cost center for this location from the customer table.
-			Select user_field7
-			into :ls_costcenter
-			from customer WITH (NOLOCK)
-			where project_id = 'pandora'
-			and cust_code = :ls_location
-			using sqlca;
-			
-			// Set the cost center.
-			idw_main.SetItem( 1, "user_field10", ls_costcenter)
-		End If  // End If the cost center is NULL or blank.
 
-		//TimA 08/18/2011 Pandora issue #280 - added custom validation for 'Reqd Deliver Date ANYTIME ue_save is called
-		ldt_RequestDate = idw_main.GetItemDateTime(1, 'request_date')		
-		ldt_Original_RDD = idw_main.GetItemDateTime(1, 'edm_generate_datetime')
-		
-		if isnull(ldt_RequestDate) or ldt_RequestDate < datetime('2011-01-01')  then 
-			ls_error = "You must enter the Reqd. Delivery Date." //get the label from datawindow?
-			lb_failed = true
-			tab_main.SelectTab(1)
-			idw_main.SetColumn('request_date')
-		Else
-			//TimA 07/31/12 Pandora issue #460 If the original RDD is null then set it to the Required Delivery date
-			if isnull(ldt_Original_RDD) then
-				idw_main.SetItem( 1, "edm_generate_datetime", ldt_RequestDate)
-			End if			
-		End IF
-		
-		// Quit processing
-		If lb_failed then
-			// Set microhelp.
-			SetMicroHelp("Save Failed!")
-			messagebox (is_Title, ls_error, StopSign!)
-			return -1
-		End If //end if required delivery date
-		
-	End If  // End If this is the Pandora Project.
-	
-	//14-Mar-2017 :Madhu DE3347- Validate given RDD -START
-	ldt_RequestDate = idw_main.GetItemDateTime(1, 'request_date')	
-	If not isnull(ldt_RequestDate) and not IsDate( String( ldt_RequestDate, 'YYYY-MM-DD')) Then
-		MessageBox(is_Title, "Required Delivery Date is Invalid. Please provide valid RDD.")
-		Return -1
-	End If
-	//14-Mar-2017 :Madhu DE3347- Validate given RDD -END
 
-	//11-Mar-2014 :Madhu- Added to remove filter on Packlist. -START
-	//If we're on TRAX tab, remove filter on pack for a while. Getting an error message while saving TRAX records due to pack rowcount > Trax row count
-	IF tab_main.SelectedTab =9 Then
-		wf_set_pack_filter('Remove')
-	End if
-	//11-Mar-2014 :Madhu- Added to remove filter on Packlist. -END
-	
-	// pvh - gmt 11/22/05
-	datetime ldtGMT
-	
-	If idw_main.RowCount() > 0 Then
-		// pvh - gmt 11/22/05
-		ldtGMT = f_getLocalWorldTime( idw_main.object.wh_code[1] ) 
-		idw_main.SetItem(1,'last_update',	ldtGMT  ) // pvh - gmt 11/22/05
-		//idw_main.SetItem(1,'last_update',Today()) 
-		idw_main.SetItem(1,'last_user',gs_userid)
-		If wf_validation() = -1 Then
-			SetMicroHelp("Save failed!")
-			Return -1
-		End If
-		// Jxlim 07/17/2013 SkuSerialHold validation; If Sku/Model is on Hold do not allow packing generation, initiated by Arien	
-		If  Upper(gs_project) = 'ARIENS' Then
-			If wf_validate_skuserialhold() < 0 Then				
-				SetMicroHelp("Save failed!")
-				Return -1
-			End If
-		End If
-	End If
-	
-	//dts - 8/25/05 - Using warehouses as customer for warehouse transfers
-	//						and FROM/TO warehouses must be different...
-	If idw_main.GetItemString(1,'ord_type') = 'Z' then
-		//TAM - 9/29/2010 - Allow Same warehouse for NYCSP -They are using this to rotate stock in kits without having to rebuild the whole kit.
-		if gs_project <> 'NYCSP' then
-			if idw_main.GetItemString(1, "wh_code") = idw_main.GetItemString(1, "cust_code") then
-				messagebox (is_Title, "'FROM' warehouse must be different than 'TO' warehouse.", StopSign!)
-				return -1
-			end if
-		end if
-	end if
-	
-	lsDONO = idw_main.GetItemString(1,'Do_no')  
-	ls_wh_code = idw_main.object.wh_code[1]
+//Make sure the cost center is populated
+// KZUV.COM - If this is the Pandora Project,
+IF gs_project = "PANDORA" THEN
+// Get the cost center.
+ls_costcenter = trim(idw_main.GetItemString( 1, "user_field10" ))
+// If the cost center is NULL or blank,
+If isnull(ls_costcenter) or ls_costcenter = "" then
+// Get the inventory location.
+ls_location = idw_main.GetItemString( 1, "user_field2" )
+// Now retrieve the cost center for this location from the customer table.
+Select user_field7
+into :ls_costcenter
+from customer WITH (NOLOCK)
+where project_id = 'pandora'
+and cust_code = :ls_location
+using sqlca;
+// Set the cost center.
+idw_main.SetItem( 1, "user_field10", ls_costcenter)
+End If  // End If the cost center is NULL or blank.
 
-	//TimA 03/05/12 OTM Project.  Lookup to see it the From contry is included in the OTM Call
-	If isOTMEnabled = 'Y' Then
-		SELECT 	Code_Descript 	INTO :ls_Code_Descript FROM Lookup_Table WITH (NOLOCK)  
-		Where 	project_id = :gs_project and Code_type = 'OTM' and Code_ID = 'global_warhouse';
-	End if
-	
-	Select Country 
-	into :lsOTMFromCountry
-	From Warehouse WITH (NOLOCK)
-	where Wh_Code = :ls_Wh_code;
-	
-	If ls_Code_Descript = 'Y' Then
-		lsProcessOTM = 'Y'
-	Else
-		//We still want to do US warehouses
-		If lsOTMFromCountry = 'US' then 
-			lsProcessOTM = 'Y'
-		else
-			lsProcessOTM = 'N'
-		end if
-	End if
-	
-	// 02/05 - PCONKL - Need to recheck status from DB before saving - if a nother user has confirmed,
-	//	 - We can't save here if current status is different. 08/06 - PCONKL - Also checking last update against current retrieved last update
-	
-	Select ord_status, Last_update Into :lsOrdStat, :ldtlastDBUpdate
-	From Delivery_Master WITH (NOLOCK)
-	Where Project_ID = :gs_Project and Do_no = :lsDONo;
+//TimA 08/18/2011 Pandora issue #280 - added custom validation for 'Reqd Deliver Date ANYTIME ue_save is called
+ldt_RequestDate = idw_main.GetItemDateTime(1, 'request_date')
+ldt_Original_RDD = idw_main.GetItemDateTime(1, 'edm_generate_datetime')
+if isnull(ldt_RequestDate) or ldt_RequestDate < datetime('2011-01-01')  then
+ls_error = "You must enter the Reqd. Delivery Date." //get the label from datawindow?
+lb_failed = true
+tab_main.SelectTab(1)
+idw_main.SetColumn('request_date')
+Else
+//TimA 07/31/12 Pandora issue #460 If the original RDD is null then set it to the Required Delivery date
+if isnull(ldt_Original_RDD) then
+idw_main.SetItem( 1, "edm_generate_datetime", ldt_RequestDate)
+End if
+End IF
+// Quit processing
+If lb_failed then
+// Set microhelp.
+SetMicroHelp("Save Failed!")
+messagebox (is_Title, ls_error, StopSign!)
+return -1
+End If //end if required delivery date
+End If  // End If this is the Pandora Project.
+//14-Mar-2017 :Madhu DE3347- Validate given RDD -START
+ldt_RequestDate = idw_main.GetItemDateTime(1, 'request_date')
+If not isnull(ldt_RequestDate) and not IsDate( String( ldt_RequestDate, 'YYYY-MM-DD')) Then
+MessageBox(is_Title, "Required Delivery Date is Invalid. Please provide valid RDD.")
+Return -1
+End If
+//14-Mar-2017 :Madhu DE3347- Validate given RDD -END
 
-	/* 9/02/2010
-	//ldtm_temptime = idw_main.GetITEmDateTime(1,'last_update')
-		If ldtlastDBUpdate > idw_main.GetITEmDateTime(1,'last_update') and gs_userid <> idw_main.GetITEmString(1,'last_user') Then
-			Messagebox(is_title, 'This order has been updated by another user!~r~rYou will neeed to re-retrieve the order before making any changes',StopSign!)
-				Return -1
-		End If
-	*/	
-	// TAM 2005/03/23 Save original Database status in instant variable to be used in WF_Check_Status.
-	is_Status_Db = lsOrdStat
+//11-Mar-2014 :Madhu- Added to remove filter on Packlist. -START
+//If we're on TRAX tab, remove filter on pack for a while. Getting an error message while saving TRAX records due to pack rowcount > Trax row count
+IF tab_main.SelectedTab =9 Then
+wf_set_pack_filter('Remove')
+End if
+//11-Mar-2014 :Madhu- Added to remove filter on Packlist. -END
+// pvh - gmt 11/22/05
+datetime ldtGMT
+If idw_main.RowCount() > 0 Then
+// pvh - gmt 11/22/05
+ldtGMT = f_getLocalWorldTime( idw_main.object.wh_code[1] )
+idw_main.SetItem(1,'last_update', ldtGMT  ) // pvh - gmt 11/22/05
+//idw_main.SetItem(1,'last_update',Today())
+idw_main.SetItem(1,'last_user',gs_userid)
+If wf_validation() = -1 Then
+SetMicroHelp("Save failed!")
+Return -1
+End If
+// Jxlim 07/17/2013 SkuSerialHold validation; If Sku/Model is on Hold do not allow packing generation, initiated by Arien
+If  Upper(gs_project) = 'ARIENS' Then
+If wf_validate_skuserialhold() < 0 Then
+SetMicroHelp("Save failed!")
+Return -1
+End If
+End If
+End If
+//dts - 8/25/05 - Using warehouses as customer for warehouse transfers
+// and FROM/TO warehouses must be different...
+If idw_main.GetItemString(1,'ord_type') = 'Z' then
+//TAM - 9/29/2010 - Allow Same warehouse for NYCSP -They are using this to rotate stock in kits without having to rebuild the whole kit.
+if gs_project <> 'NYCSP' then
+if idw_main.GetItemString(1, "wh_code") = idw_main.GetItemString(1, "cust_code") then
+messagebox (is_Title, "'FROM' warehouse must be different than 'TO' warehouse.", StopSign!)
+return -1
+end if
+end if
+end if
+lsDONO = idw_main.GetItemString(1,'Do_no')  
+ls_wh_code = idw_main.object.wh_code[1]
 
-	// TAM 2005/03/08  Allow Save from 'R'eady to Ship to 'C'onfirm.  Confirm is being set earlier in ue_confirm prior to this function
-	If (lsOrdStat = 'C' or lsOrdStat = 'D' or lsOrdStat = 'V' or (lsOrdStat = 'R' and idw_main.GetITemString(1,'ord_status') <> 'C')) Then
+//TimA 03/05/12 OTM Project.  Lookup to see it the From contry is included in the OTM Call
+If isOTMEnabled = 'Y' Then
+SELECT Code_Descript INTO :ls_Code_Descript FROM Lookup_Table WITH (NOLOCK)  
+Where project_id = :gs_project and Code_type = 'OTM' and Code_ID = 'global_warhouse';
+End if
+Select Country
+into :lsOTMFromCountry
+From Warehouse WITH (NOLOCK)
+where Wh_Code = :ls_Wh_code;
+If ls_Code_Descript = 'Y' Then
+lsProcessOTM = 'Y'
+Else
+//We still want to do US warehouses
+If lsOTMFromCountry = 'US' then
+lsProcessOTM = 'Y'
+else
+lsProcessOTM = 'N'
+end if
+End if
+// 02/05 - PCONKL - Need to recheck status from DB before saving - if a nother user has confirmed,
+// - We can't save here if current status is different. 08/06 - PCONKL - Also checking last update against current retrieved last update
+Select ord_status, Last_update Into :lsOrdStat, :ldtlastDBUpdate
+From Delivery_Master WITH (NOLOCK)
+Where Project_ID = :gs_Project and Do_no = :lsDONo;
 
-		// 02/08 - PCONKL - Allowing a Super Duper USer to un-confirm - must bypass this validation
-		If Not ibUnconfirmRequested Then
-			If lsOrdStat <> idw_main.GetItemString(1,'ord_status') Then
-				Messagebox(is_title, 'This order has already been confirmed or voided by another user!~r~rYou will neeed to re-retrieve the order before making any changes',StopSign!)
-				Return -1
-			End If
-		End If 
-	End If
-	
+/* 9/02/2010
+//ldtm_temptime = idw_main.GetITEmDateTime(1,'last_update')
+If ldtlastDBUpdate > idw_main.GetITEmDateTime(1,'last_update') and gs_userid <> idw_main.GetITEmString(1,'last_user') Then
+Messagebox(is_title, 'This order has been updated by another user!~r~rYou will neeed to re-retrieve the order before making any changes',StopSign!)
+Return -1
+End If
+*/
+// TAM 2005/03/23 Save original Database status in instant variable to be used in WF_Check_Status.
+is_Status_Db = lsOrdStat
+
+// TAM 2005/03/08  Allow Save from 'R'eady to Ship to 'C'onfirm.  Confirm is being set earlier in ue_confirm prior to this function
+If (lsOrdStat = 'C' or lsOrdStat = 'D' or lsOrdStat = 'V' or (lsOrdStat = 'R' and idw_main.GetITemString(1,'ord_status') <> 'C')) Then
+
+// 02/08 - PCONKL - Allowing a Super Duper USer to un-confirm - must bypass this validation
+If Not ibUnconfirmRequested Then
+If lsOrdStat <> idw_main.GetItemString(1,'ord_status') Then
+Messagebox(is_title, 'This order has already been confirmed or voided by another user!~r~rYou will neeed to re-retrieve the order before making any changes',StopSign!)
+Return -1
+End If
+End If
+End If
 End IF  // idw_main.RowCount()
 
 //MA = 06/08  - Make sure staging location is saved/updated in the other required places.
@@ -22951,586 +23555,510 @@ string ls_staging_location
 boolean lb_check_picking = true
 
 IF Upper(gs_project) = "PHXBRANDS" OR  Upper(gs_project) = "SIKA" THEN
-	l_status = w_do.idw_other.GetItemStatus(1, "user_field13", Primary!)
-		
-	IF l_Status = NewModified!	 OR l_Status = DataModified!	THEN	
-		ls_staging_location = idw_other.GetItemString( 1, "user_field13")
-		integer li_idx
-	
-		for li_idx =  1 to idw_pick.RowCount()
-			idw_pick.SetItem( li_idx, "staging_location", ls_staging_location)
-		next
-	
-		for li_idx =  1 to idw_pick_detail.RowCount()
-			idw_pick_detail.SetItem( li_idx, "staging_location", ls_staging_location)		
-		next	
-		lb_check_picking = false
-		
-	END IF
+l_status = w_do.idw_other.GetItemStatus(1, "user_field13", Primary!)
+IF l_Status = NewModified! OR l_Status = DataModified! THEN
+ls_staging_location = idw_other.GetItemString( 1, "user_field13")
+integer li_idx
+for li_idx =  1 to idw_pick.RowCount()
+idw_pick.SetItem( li_idx, "staging_location", ls_staging_location)
+next
+for li_idx =  1 to idw_pick_detail.RowCount()
+idw_pick_detail.SetItem( li_idx, "staging_location", ls_staging_location)
+next
+lb_check_picking = false
+END IF
 
-	idw_pick.AcceptText()
-	
-	IF lb_check_picking AND idw_pick.RowCount() > 0 then
-		l_status = w_do.idw_pick.GetItemStatus(1, "staging_location", Primary!)
-		IF l_Status = NewModified!	 OR l_Status = DataModified!	THEN	
-			w_do.idw_other.SetItem(1, "user_field13", w_do.idw_pick.GetItemString(1, "staging_location"))
-		END IF		
-	END IF
-	
+idw_pick.AcceptText()
+IF lb_check_picking AND idw_pick.RowCount() > 0 then
+l_status = w_do.idw_pick.GetItemStatus(1, "staging_location", Primary!)
+IF l_Status = NewModified! OR l_Status = DataModified! THEN
+w_do.idw_other.SetItem(1, "user_field13", w_do.idw_pick.GetItemString(1, "staging_location"))
+END IF
+END IF
 END IF
 
 //MEA - 12/11 for NIKE
-//When the users save the Pick List for the first time (DM.Pick_start not populated), 
-//we need to send the DSTxxxx (DST + warehouse code + seq nbr) file. 
+//When the users save the Pick List for the first time (DM.Pick_start not populated),
+//we need to send the DSTxxxx (DST + warehouse code + seq nbr) file.
 
 IF  upper(left(gs_Project,4)) = 'NIKE' THEN
-	IF IsNull(idw_main.GetItemDateTime( 1, "pick_start", Primary!, true)) AND &
-		Not IsNull(idw_main.GetItemDateTime( 1, "pick_start")) THEN
-			 lb_send_nike_dst = true 
-	END IF
+IF IsNull(idw_main.GetItemDateTime( 1, "pick_start", Primary!, true)) AND &
+Not IsNull(idw_main.GetItemDateTime( 1, "pick_start")) THEN
+lb_send_nike_dst = true
+END IF
 END IF
 
 //14-FEB-2019 :Madhu S29511 -PhilipsCLS BlueHeart OutboundDeliveryStatusUpdate -START
 //GailM 8/20/2019 DE11937 Skip if deleting order
 //GailM 11/18/2020 S51441/F26536/I2978 PhilipsDA mimic PHILIPSCLS in Outbound order
-IF (upper(gs_project) ='PHILIPSCLS' OR  upper(gs_project) ='PHILIPS-DA') and idw_main.RowCount() = 1 THEN		
-	//Request Date change
-	If IsNull(idw_main.getItemDateTime( 1, "request_date" ,Primary!, true)) and Not IsNull(idw_main.getItemDateTime(1,"request_date"))	Then 
-		lb_rd_change =TRUE
-		idw_other.setItem( 1, "user_field6", string(idw_main.getItemDateTime(1,"request_date",Primary!, true)))
-	elseIf idw_main.getItemDateTime( 1, "request_date" ,Primary!, true) <> idw_main.getItemDateTime(1,"request_date") Then
-		lb_rd_change =TRUE
-		idw_other.setItem( 1, "user_field6", string(idw_main.getItemDateTime(1,"request_date",Primary!, true)))
-	End If
-	
-	//S38996: F18560 - Philips Blueheart NDD updates - Update Planned Dispatch (Other Info User Field18) Planned Delivery (Other Info User_Field20)
-	//We need SIMS to update the plannedDespatch (other info user field 18) as (NDD – datediff). In this case, datediff is 2 so 9/18/2019 – 2 = 9/16/2019 for the plannedDespatch.
-	
-	If lb_rd_change Then
-			
-		string lsplannedDelivery, lsplannedDispatch
-		date ldplannedDelivery, ldplannedDispatch, ldRequestDate
-		integer ll_date_diff, liHolidayCount
-	
-		//Date("2004/07/04")
-	
-		lsplannedDelivery = idw_other.getItemString(1,"user_field20")
-		lsplannedDispatch = idw_other.getItemString(1,"user_field18")
-	
-		ldRequestDate = DATE(idw_main.getItemDateTime( 1, "request_date"))
-		ldplannedDelivery = date(left(lsplannedDelivery,4) + "/" + mid(lsplannedDelivery,5,2) + "/" + mid(lsplannedDelivery,7,2)) 
-		ldplannedDispatch = date(left(lsplannedDispatch,4) + "/" + mid(lsplannedDispatch,5,2) + "/" + mid(lsplannedDispatch,7,2)) 
-		
-		ll_date_diff = DaysAfter ( ldplannedDelivery, ldplannedDispatch  )
-							
-		ldplannedDispatch = RelativeDate(ldRequestDate, ll_date_diff)
-		
-		//Check Holiday table to see if there are holidays that fall inbetween to two dates. 
-		
-		select count(*) INTO :liHolidayCount from holiday with (nolock) WHERE Project_ID in ('PHILIPSCLS', 'PHILIPS-DA')  
-		AND Holiday_Country = 'MY' AND Holiday_Date >= :ldplannedDispatch and Holiday_Date <= :ldRequestDate 
-		AND (DATEPART(WEEKDAY, Holiday_Date) <> 1 AND DATEPART(WEEKDAY, Holiday_Date) <> 7);
-		
-		IF liHolidayCount > 0 Then
-			
-			ldplannedDispatch =  RelativeDate(ldplannedDispatch, -liHolidayCount)
-			
-		End IF
+IF (upper(gs_project) ='PHILIPSCLS' OR  upper(gs_project) ='PHILIPS-DA') and idw_main.RowCount() = 1 THEN
+//Request Date change
+If IsNull(idw_main.getItemDateTime( 1, "request_date" ,Primary!, true)) and Not IsNull(idw_main.getItemDateTime(1,"request_date")) Then
+lb_rd_change =TRUE
+idw_other.setItem( 1, "user_field6", string(idw_main.getItemDateTime(1,"request_date",Primary!, true)))
+elseIf idw_main.getItemDateTime( 1, "request_date" ,Primary!, true) <> idw_main.getItemDateTime(1,"request_date") Then
+lb_rd_change =TRUE
+idw_other.setItem( 1, "user_field6", string(idw_main.getItemDateTime(1,"request_date",Primary!, true)))
+End If
+//S38996: F18560 - Philips Blueheart NDD updates - Update Planned Dispatch (Other Info User Field18) Planned Delivery (Other Info User_Field20)
+//We need SIMS to update the plannedDespatch (other info user field 18) as (NDD – datediff). In this case, datediff is 2 so 9/18/2019 – 2 = 9/16/2019 for the plannedDespatch.
+If lb_rd_change Then
+string lsplannedDelivery, lsplannedDispatch
+date ldplannedDelivery, ldplannedDispatch, ldRequestDate
+integer ll_date_diff, liHolidayCount
+//Date("2004/07/04")
+lsplannedDelivery = idw_other.getItemString(1,"user_field20")
+lsplannedDispatch = idw_other.getItemString(1,"user_field18")
+ldRequestDate = DATE(idw_main.getItemDateTime( 1, "request_date"))
+ldplannedDelivery = date(left(lsplannedDelivery,4) + "/" + mid(lsplannedDelivery,5,2) + "/" + mid(lsplannedDelivery,7,2))
+ldplannedDispatch = date(left(lsplannedDispatch,4) + "/" + mid(lsplannedDispatch,5,2) + "/" + mid(lsplannedDispatch,7,2))
+ll_date_diff = DaysAfter ( ldplannedDelivery, ldplannedDispatch  )
+ldplannedDispatch = RelativeDate(ldRequestDate, ll_date_diff)
+//Check Holiday table to see if there are holidays that fall inbetween to two dates.
+select count(*) INTO :liHolidayCount from holiday with (nolock) WHERE Project_ID in ('PHILIPSCLS', 'PHILIPS-DA')  
+AND Holiday_Country = 'MY' AND Holiday_Date >= :ldplannedDispatch and Holiday_Date <= :ldRequestDate
+AND (DATEPART(WEEKDAY, Holiday_Date) <> 1 AND DATEPART(WEEKDAY, Holiday_Date) <> 7);
+IF liHolidayCount > 0 Then
+ldplannedDispatch =  RelativeDate(ldplannedDispatch, -liHolidayCount)
+End IF
 
-		//Sunday - Take off two days.
-		IF f_get_DayNumber(ldplannedDispatch) = 1 THEN ldplannedDispatch = RelativeDate(ldplannedDispatch, -2)
-		//Saturday - Take off one day. 
-		IF f_get_DayNumber(ldplannedDispatch) = 7 THEN ldplannedDispatch = RelativeDate(ldplannedDispatch, -1)
-	
+//Sunday - Take off two days.
+IF f_get_DayNumber(ldplannedDispatch) = 1 THEN ldplannedDispatch = RelativeDate(ldplannedDispatch, -2)
+//Saturday - Take off one day.
+IF f_get_DayNumber(ldplannedDispatch) = 7 THEN ldplannedDispatch = RelativeDate(ldplannedDispatch, -1)
 
-		lsplannedDispatch = string(year(ldplannedDispatch)) + string(month(ldplannedDispatch),"00") + string(day(ldplannedDispatch),"00")
-		
-		idw_other.setItem(1,"user_field18",  lsplannedDispatch)
+lsplannedDispatch = string(year(ldplannedDispatch)) + string(month(ldplannedDispatch),"00") + string(day(ldplannedDispatch),"00")
+idw_other.setItem(1,"user_field18",  lsplannedDispatch)
 
-	End If
-	
-	//Schedule Date change
-	If IsNull(idw_main.getItemDateTime( 1, "schedule_date" ,Primary!, true)) and Not IsNull(idw_main.getItemDateTime(1,"schedule_date"))	Then 
-		lb_sd_change =TRUE
-		idw_other.setItem( 1, "user_field7", string(idw_main.getItemDateTime(1,"schedule_date",Primary!, true)))
-	elseIf idw_main.getItemDateTime( 1, "schedule_date" ,Primary!, true) <> idw_main.getItemDateTime(1,"schedule_date") Then
-		lb_sd_change =TRUE
-		idw_other.setItem( 1, "user_field7", string(idw_main.getItemDateTime(1,"schedule_date",Primary!, true)))
-	End If
-	
-	//Delivery Date change
-	If IsNull(idw_main.getItemDateTime( 1, "delivery_date" ,Primary!, true)) and Not IsNull(idw_main.getItemDateTime(1,"delivery_date"))	Then 
-		lb_dd_change =TRUE
-	elseIf idw_main.getItemDateTime( 1, "delivery_date" ,Primary!, true) <> idw_main.getItemDateTime(1,"delivery_date") Then
-		lb_dd_change =TRUE
-	End If
+End If
+//Schedule Date change
+If IsNull(idw_main.getItemDateTime( 1, "schedule_date" ,Primary!, true)) and Not IsNull(idw_main.getItemDateTime(1,"schedule_date")) Then
+lb_sd_change =TRUE
+idw_other.setItem( 1, "user_field7", string(idw_main.getItemDateTime(1,"schedule_date",Primary!, true)))
+elseIf idw_main.getItemDateTime( 1, "schedule_date" ,Primary!, true) <> idw_main.getItemDateTime(1,"schedule_date") Then
+lb_sd_change =TRUE
+idw_other.setItem( 1, "user_field7", string(idw_main.getItemDateTime(1,"schedule_date",Primary!, true)))
+End If
+//Delivery Date change
+If IsNull(idw_main.getItemDateTime( 1, "delivery_date" ,Primary!, true)) and Not IsNull(idw_main.getItemDateTime(1,"delivery_date")) Then
+lb_dd_change =TRUE
+elseIf idw_main.getItemDateTime( 1, "delivery_date" ,Primary!, true) <> idw_main.getItemDateTime(1,"delivery_date") Then
+lb_dd_change =TRUE
+End If
 END IF
 //14-FEB-2019 :Madhu S29511 -PhilipsCLS BlueHeart OutboundDeliveryStatusUpdate -END
 
 //Validate required Detail Fields
 llRowCOunt = w_do.idw_Detail.RowCount()
 FOR llRowPos = 1 to llRowCount
-	
-	IF gs_project = "SATURN" THEN
-		//MA - 02/08 - Added Check
-		//the KNA BAN number delivery_detail.User_Field1 has only been used once for that SKU
-		
-		//search all completed orders  (delivery_Master.ord_status = C or D) for each SKU in the 
-		//order being confirmed, check to see that the KAN BAN/SKU combination does not exist in any of them
-		
-		l_status = w_do.idw_detail.GetItemStatus(llRowPos, "user_field1", Primary!)
-		
-		IF l_Status = NewModified!	 OR l_Status = DataModified!	THEN
+IF gs_project = "SATURN" THEN
+//MA - 02/08 - Added Check
+//the KNA BAN number delivery_detail.User_Field1 has only been used once for that SKU
+//search all completed orders  (delivery_Master.ord_status = C or D) for each SKU in the
+//order being confirmed, check to see that the KAN BAN/SKU combination does not exist in any of them
+l_status = w_do.idw_detail.GetItemStatus(llRowPos, "user_field1", Primary!)
+IF l_Status = NewModified! OR l_Status = DataModified! THEN
 
-			ls_user_field1 = trim(w_do.idw_detail.GetITemString(llRowPos,'user_field1'))
-			ls_SKU = w_do.idw_detail.GetItemString(llRowPos,'SKU')
-	
-			li_line_item_no = w_do.idw_detail.GetItemNumber(llRowPos,'line_item_no')
-			ls_do = w_do.idw_main.GetItemString(1,'do_no')
-			
-			If NOT isnull(ls_user_field1) AND ls_user_field1 <> '' Then
-				SELECT Count(Delivery_Detail.User_Field1) INTO :llcount 
-				FROM Delivery_Detail WITH (NOLOCK)
-					  JOIN Delivery_Master WITH (NOLOCK) ON Delivery_Master.Do_No = Delivery_Detail.Do_No
-				WHERE Delivery_Detail.User_Field1 = :ls_user_field1 
-				AND Delivery_Detail.SKU = :ls_SKU 
-				//AND Delivery_Master.Do_No = Delivery_Detail.Do_No 
-				and Delivery_Master.ord_status <> 'V' 
-				AND NOT ( Delivery_Detail.Do_No = :ls_do AND Delivery_Detail.Line_Item_No = :li_line_item_no );
-	
-				IF SQLCA.SQLCode <> 0 THEN
-					//Jxlim 09/10/2010 Added Rollback to prevent block/lock
-               		Execute Immediate "ROLLBACK" using SQLCA;
-					MessageBox ("Error", SQLCA.SQLErrText )
-				END IF
-			
-				// search all completed orders (delivery_Master.ord_status = C or D) for each SKU in the order being confirmed, 
-				// check to see that the KAN BAN/SKU combination does not exist in any of them
-		
-				If lLCount >= 1 Then
-					MessageBox(w_do.is_title,'The KNA BAN number can only been used once for this SKU.')
-					w_do.tab_main.SelectTab(3)
-					f_setfocus(w_do.idw_detail,llRowPos,"user_field1")
-					SetMicroHelp("Save failed!")
-					Return - 1
-				End IF
-				
-			END IF
-			
-		END IF
-		
-	END IF	/*saturn*/
-	
-	//3/10 JAyres Check to see if Customer is Active
-	If gs_project = 'PANDORA'  then
-				llOwnerID 		= tab_main.tabpage_detail.dw_detail.GetItemNumber( llRowPos,"owner_id")
-				lsOwnername 	= tab_main.tabpage_detail.dw_detail.GetItemString( llRowPos,"cf_owner_name")
-				//Jxlim 12/20/2012 get all sku for this order Pandora BRD # 464
-				ls_sku = tab_main.tabpage_detail.dw_detail.GetItemString(llRowPos,'SKU')
-				is_sku =is_sku + ",'" + ls_sku + "'"		
-				is_sku = Mid(is_sku, 2)
-				//Jxlim 12/20/2012 End all sku for this order Pandora BRD # 464				
-				
-				If Right(Trim(lsOwnername), 3) = '(C)' Then
-					if llOwnerID <> llOwnerID_Prev then //dts 4/9/15 - now only checking customer if the owner changes (and it never should).
-						Select Distinct dbo.Customer.Cust_Name
-						Into :ls_INActiveCustomerName
-						FROM dbo.Owner WITH (NOLOCK)
-							  JOIN dbo.Customer WITH (NOLOCK) 
-								ON dbo.Owner.Project_ID = dbo.Customer.Project_ID
-							  AND dbo.Owner.owner_cd	= dbo.Customer.Cust_Code
-						Where dbo.Owner.Owner_ID 			= :llOwnerID
-						and 	dbo.Customer.Customer_Type = 'IN' 
-						and 	dbo.Owner.Project_ID 		= :gs_project
-						USING SQLCA;
-						
-						If NOT ( ls_INActiveCustomerName = '' or IsNULL(ls_INActiveCustomerName) ) Then
-							If IsNULL(lsOwnername) Then lsOwnername = ''				
-								MessageBox(is_title, "Owner Name: "+  lsOwnername + " is INACTIVE at Row "+string(llRowPos) +" of Order Detail.~r~rPlease Enter an Active Owner then Save." )	
-							Return -1
-						End If	
-						llOwnerID_Prev = llOwnerID
-					end if
-				End If		
-				
-				//GailM 07/13/2017 SIMSPEVS-737 PAN SIMS Soft warning for two separate owner codes on one location
-				//If a pick item is deleted for Pandora, check location to ensure another owner hasn't already taken it.	
-				//Reinitialize llOwnerID   CANNOT PUT THIS INTO PRODUCTION FOR 737 - THERE ARE LOCATIONS THAT ARE ALLOWED MULTIPLE OWNERS THAT DO NOT HAVE A LOC_TYPE 9 OR 6.  SEE BULK64!
-//				If idw_pick.Deletedcount( ) > 0 Then
-//					For i_indx = 1 to idw_pick.DeletedCount()
-//						ls_L_Code = idw_pick.GetItemString( i_indx, 'l_code', Delete!, FALSE )
-//						llOwnerID_Prev = idw_pick.GetItemNumber( i_indx, 'owner_id', Delete!, FALSE )
-//						SetNull( llOwnerID ) 
-//						
-//						Select owner_id into :llOwnerID From Content_Summary 
-//							Where Project_id = 'PANDORA' and wh_code = :ls_wh_code 
-//							And l_code = :ls_L_Code And Owner_Id <> :llOwnerID_Prev using SQLCA;
-//						
-//						If Not IsNull( llOwnerID ) or llOwnerID <> 0 Then
-//							MessageBox(is_title, "Location " + ls_L_Code + " has been reused by another owner~r~r Pick row cannot be un-allocated.", Stopsign!)							
-//							Return -1
-//						End If
-//					Next
-//				End If
-//				/*** End Deleted Pick Row Pandora  *****/					
+ls_user_field1 = trim(w_do.idw_detail.GetITemString(llRowPos,'user_field1'))
+ls_SKU = w_do.idw_detail.GetItemString(llRowPos,'SKU')
+li_line_item_no = w_do.idw_detail.GetItemNumber(llRowPos,'line_item_no')
+ls_do = w_do.idw_main.GetItemString(1,'do_no')
+If NOT isnull(ls_user_field1) AND ls_user_field1 <> '' Then
+SELECT Count(Delivery_Detail.User_Field1) INTO :llcount
+FROM Delivery_Detail WITH (NOLOCK)
+ JOIN Delivery_Master WITH (NOLOCK) ON Delivery_Master.Do_No = Delivery_Detail.Do_No
+WHERE Delivery_Detail.User_Field1 = :ls_user_field1
+AND Delivery_Detail.SKU = :ls_SKU
+//AND Delivery_Master.Do_No = Delivery_Detail.Do_No
+and Delivery_Master.ord_status <> 'V'
+AND NOT ( Delivery_Detail.Do_No = :ls_do AND Delivery_Detail.Line_Item_No = :li_line_item_no );
+IF SQLCA.SQLCode <> 0 THEN
+//Jxlim 09/10/2010 Added Rollback to prevent block/lock
+                Execute Immediate "ROLLBACK" using SQLCA;
+MessageBox ("Error", SQLCA.SQLErrText )
+END IF
+// search all completed orders (delivery_Master.ord_status = C or D) for each SKU in the order being confirmed,
+// check to see that the KAN BAN/SKU combination does not exist in any of them
+If lLCount >= 1 Then
+MessageBox(w_do.is_title,'The KNA BAN number can only been used once for this SKU.')
+w_do.tab_main.SelectTab(3)
+f_setfocus(w_do.idw_detail,llRowPos,"user_field1")
+SetMicroHelp("Save failed!")
+Return - 1
+End IF
+END IF
+END IF
+END IF /*saturn*/
+//3/10 JAyres Check to see if Customer is Active
+If gs_project = 'PANDORA'  then
+llOwnerID = tab_main.tabpage_detail.dw_detail.GetItemNumber( llRowPos,"owner_id")
+lsOwnername = tab_main.tabpage_detail.dw_detail.GetItemString( llRowPos,"cf_owner_name")
+//Jxlim 12/20/2012 get all sku for this order Pandora BRD # 464
+ls_sku = tab_main.tabpage_detail.dw_detail.GetItemString(llRowPos,'SKU')
+is_sku =is_sku + ",'" + ls_sku + "'"
+is_sku = Mid(is_sku, 2)
+//Jxlim 12/20/2012 End all sku for this order Pandora BRD # 464
+If Right(Trim(lsOwnername), 3) = '(C)' Then
+if llOwnerID <> llOwnerID_Prev then //dts 4/9/15 - now only checking customer if the owner changes (and it never should).
+Select Distinct dbo.Customer.Cust_Name
+Into :ls_INActiveCustomerName
+FROM dbo.Owner WITH (NOLOCK)
+ JOIN dbo.Customer WITH (NOLOCK)
+ON dbo.Owner.Project_ID = dbo.Customer.Project_ID
+ AND dbo.Owner.owner_cd = dbo.Customer.Cust_Code
+Where dbo.Owner.Owner_ID = :llOwnerID
+and dbo.Customer.Customer_Type = 'IN'
+and dbo.Owner.Project_ID = :gs_project
+USING SQLCA;
+If NOT ( ls_INActiveCustomerName = '' or IsNULL(ls_INActiveCustomerName) ) Then
+If IsNULL(lsOwnername) Then lsOwnername = ''
+MessageBox(is_title, "Owner Name: "+  lsOwnername + " is INACTIVE at Row "+string(llRowPos) +" of Order Detail.~r~rPlease Enter an Active Owner then Save." )
+Return -1
+End If
+llOwnerID_Prev = llOwnerID
+end if
+End If
+//GailM 07/13/2017 SIMSPEVS-737 PAN SIMS Soft warning for two separate owner codes on one location
+//If a pick item is deleted for Pandora, check location to ensure another owner hasn't already taken it.
+//Reinitialize llOwnerID   CANNOT PUT THIS INTO PRODUCTION FOR 737 - THERE ARE LOCATIONS THAT ARE ALLOWED MULTIPLE OWNERS THAT DO NOT HAVE A LOC_TYPE 9 OR 6.  SEE BULK64!
+// If idw_pick.Deletedcount( ) > 0 Then
+// For i_indx = 1 to idw_pick.DeletedCount()
+// ls_L_Code = idw_pick.GetItemString( i_indx, 'l_code', Delete!, FALSE )
+// llOwnerID_Prev = idw_pick.GetItemNumber( i_indx, 'owner_id', Delete!, FALSE )
+// SetNull( llOwnerID )
+//
+// Select owner_id into :llOwnerID From Content_Summary
+// Where Project_id = 'PANDORA' and wh_code = :ls_wh_code
+// And l_code = :ls_L_Code And Owner_Id <> :llOwnerID_Prev using SQLCA;
+//
+// If Not IsNull( llOwnerID ) or llOwnerID <> 0 Then
+// MessageBox(is_title, "Location " + ls_L_Code + " has been reused by another owner~r~r Pick row cannot be un-allocated.", Stopsign!)
+// Return -1
+// End If
+// Next
+// End If
+// /*** End Deleted Pick Row Pandora  *****/
 
-		End If /* PANDORA */
-		
-	//26-Sep-2014 :Madhu- DD.UF2 shouldn't be null for ANKI -START	
-	IF Upper(gs_project) ='ANKI'  Then
-		lsuf2 = idw_detail.Getitemstring(llRowPos,"user_field2")
-		ll_detaillineno =idw_detail.GetItemNumber(llRowPos,"line_item_no")
-		ls_sku =idw_detail.GetItemString(llRowPos,"sku")
-	
-		If isNull(lsuf2) or lsuf2='' then
-			MessageBox(is_title, 'User Field2 value should not be NULL for SKU = ' +ls_sku + ' and Line Item No= '+string(ll_detaillineno))     
-			return -1 
-		END IF
-	END IF
-	//26-Sep-2014 :Madhu- DD.UF2 shouldn't be null for ANKI -END
-	
+End If /* PANDORA */
+//26-Sep-2014 :Madhu- DD.UF2 shouldn't be null for ANKI -START
+IF Upper(gs_project) ='ANKI'  Then
+lsuf2 = idw_detail.Getitemstring(llRowPos,"user_field2")
+ll_detaillineno =idw_detail.GetItemNumber(llRowPos,"line_item_no")
+ls_sku =idw_detail.GetItemString(llRowPos,"sku")
+If isNull(lsuf2) or lsuf2='' then
+MessageBox(is_title, 'User Field2 value should not be NULL for SKU = ' +ls_sku + ' and Line Item No= '+string(ll_detaillineno))    
+return -1
+END IF
+END IF
+//26-Sep-2014 :Madhu- DD.UF2 shouldn't be null for ANKI -END
 Next /*Next detail Row*/
 
 //DGM 07/2005 Only For '3COM'
 //IF Upper(gs_project) = '3COM_NASH' THEN
-//	
-//	IF idw_pack.Rowcount() > 0 THEN	
-//		
-//			string ls_User_Field15, ls_supp_code
-//		
-//			For ll_row = 1 to idw_pack.Rowcount()
-//		
-//				ls_sku = idw_pack.object.sku[ll_row]
-//				ls_supp_code = idw_pack.object.supp_code[ll_row]
-//			
-//				Select User_Field15 INTO :ls_User_Field15
-//				From Item_Master
-//				Where Project_ID = :gs_Project and Sku = : ls_sku and Supp_Code = :ls_supp_code USING SQLCA;
-//		
-//		
-//				If Upper(ls_User_Field15) = "Y" Then
-//					IF idw_pack.object.quantity[ll_row] <> 1 THEN
-//						messagebox(is_title,"Sku:" + ls_Sku + " is a bundle master with the SN bundle label flag set to 'Y'. The quantity can only be set to 1.")
-//						Return -1
-//					END IF
-//				End IF
-//		
-//			Next
-//			
-//		//For Netherlands assign delivery note to tracking Id & AWB BOL.
-//		// 11/07 - PCONKL - Add NAshville (Revenue and GLS)
-//		
-//		IF ls_wh_code = '3COM-NL' or ls_wh_code = '3CGLSEMEA' or ls_wh_code = '3CGLSAMI' or ls_wh_code = 'NASHVILLE' THEN 
-//			For ll_row = 1 to idw_pack.Rowcount() /* Set Delivery NOte to Tacking ID on packing Rows*/
-//				ls_trac_id=idw_pack.object.shipper_tracking_id[ll_row]
-//				IF isnull(ls_trac_id) or ls_trac_id = '' THEN
-//					idw_pack.object.shipper_tracking_id[ll_row] = idw_other.object.user_field6[1]	
-//				END IF				
-//			Next
-//			
-//			idw_pack.accepttext( )
-//			
-//			IF IsNull(idw_other.object.awb_bol_no[1]) OR idw_other.object.awb_bol_no[1] = '' THEN
-//				idw_other.object.awb_bol_no[1] =idw_pack.object.shipper_tracking_id[1]
-//			END IF	
-//	  	END IF	/*3COM-NL warehouse */
-//		// dts 03/04/08 - moved following 3 lines outside of warehouse condition test (like it was previously, I believe)
-//		idw_other.object.weight[1] =idw_pack.object.c_weight[1] 
-//		idw_other.object.ctn_cnt[1] =idw_pack.object.c_carton_count[1] 
-//		idw_other.AcceptText()
-//		
-//	END IF  /*Packing exists */
-//	
-//	IF ls_wh_code = '3COM-SIN' THEN
-//	//Shipper_Tracking_ID
-//		IF idw_other.GetItemStatus(1, "awb_bol_no", Primary!) = DataModified! OR &
-//			idw_other.GetItemStatus(1, "awb_bol_no", Primary!) = NewModified! THEN
-//			
-//			For ll_row = 1 to idw_pack.Rowcount() 
-//				idw_pack.object.shipper_tracking_id[ll_row] = idw_other.object.awb_bol_no[1]				
-//			NEXT
-//		END IF
-//	END IF
+//
+// IF idw_pack.Rowcount() > 0 THEN
+//
+// string ls_User_Field15, ls_supp_code
+//
+// For ll_row = 1 to idw_pack.Rowcount()
+//
+// ls_sku = idw_pack.object.sku[ll_row]
+// ls_supp_code = idw_pack.object.supp_code[ll_row]
+//
+// Select User_Field15 INTO :ls_User_Field15
+// From Item_Master
+// Where Project_ID = :gs_Project and Sku = : ls_sku and Supp_Code = :ls_supp_code USING SQLCA;
+//
+//
+// If Upper(ls_User_Field15) = "Y" Then
+// IF idw_pack.object.quantity[ll_row] <> 1 THEN
+// messagebox(is_title,"Sku:" + ls_Sku + " is a bundle master with the SN bundle label flag set to 'Y'. The quantity can only be set to 1.")
+// Return -1
+// END IF
+// End IF
+//
+// Next
+//
+// //For Netherlands assign delivery note to tracking Id & AWB BOL.
+// // 11/07 - PCONKL - Add NAshville (Revenue and GLS)
+//
+// IF ls_wh_code = '3COM-NL' or ls_wh_code = '3CGLSEMEA' or ls_wh_code = '3CGLSAMI' or ls_wh_code = 'NASHVILLE' THEN
+// For ll_row = 1 to idw_pack.Rowcount() /* Set Delivery NOte to Tacking ID on packing Rows*/
+// ls_trac_id=idw_pack.object.shipper_tracking_id[ll_row]
+// IF isnull(ls_trac_id) or ls_trac_id = '' THEN
+// idw_pack.object.shipper_tracking_id[ll_row] = idw_other.object.user_field6[1]
+// END IF
+// Next
+//
+// idw_pack.accepttext( )
+//
+// IF IsNull(idw_other.object.awb_bol_no[1]) OR idw_other.object.awb_bol_no[1] = '' THEN
+// idw_other.object.awb_bol_no[1] =idw_pack.object.shipper_tracking_id[1]
+// END IF
+//   END IF /*3COM-NL warehouse */
+// // dts 03/04/08 - moved following 3 lines outside of warehouse condition test (like it was previously, I believe)
+// idw_other.object.weight[1] =idw_pack.object.c_weight[1]
+// idw_other.object.ctn_cnt[1] =idw_pack.object.c_carton_count[1]
+// idw_other.AcceptText()
+//
+// END IF  /*Packing exists */
+//
+// IF ls_wh_code = '3COM-SIN' THEN
+// //Shipper_Tracking_ID
+// IF idw_other.GetItemStatus(1, "awb_bol_no", Primary!) = DataModified! OR &
+// idw_other.GetItemStatus(1, "awb_bol_no", Primary!) = NewModified! THEN
+//
+// For ll_row = 1 to idw_pack.Rowcount()
+// idw_pack.object.shipper_tracking_id[ll_row] = idw_other.object.awb_bol_no[1]
+// NEXT
+// END IF
+// END IF
 //END IF /* 3COM */
 
 //3/10 JAyres Check to see if Customer is Active
 // dts 4/09/15 - skipping this check.  The Picking Owner is the same as the Detail owner (which was checked above.
 //If gs_project = 'PANDORA'  and tab_main.tabpage_pick.dw_pick.RowCount() > 0 then
-//	FOR i_indx = 1 to tab_main.tabpage_pick.dw_pick.RowCount()
-//		llPickCount = tab_main.tabpage_pick.dw_pick.RowCount()
-//		SetMicroHelp("Checking for Active Customers " + String(i_indx) + " of " + String(llPickCount))
-//		llOwnerID 		=  tab_main.tabpage_pick.dw_pick.GetItemNumber(i_indx,"owner_id")
-//		lsOwnername 	=  tab_main.tabpage_pick.dw_pick.GetItemString(i_indx,"cf_owner_name")
-//		
-//		If Right(Trim(lsOwnername), 3) = '(C)' Then
-//			Select Distinct dbo.Customer.Cust_Name
-//			Into  :ls_INActiveCustomerName
-//			FROM 	dbo.Owner WITH (NOLOCK)
-//				JOIN dbo.Customer  WITH (NOLOCK) 
-//					ON dbo.Owner.Project_ID = dbo.Customer.Project_ID
-//				  AND dbo.Owner.owner_cd	= dbo.Customer.Cust_Code
-//			Where dbo.Owner.Owner_ID 			= :llOwnerID
-//	    	and 	dbo.Customer.Customer_Type = 'IN' 
-//			and 	dbo.Owner.Project_ID 		= :gs_project
-//			USING SQLCA;
-//			
-//			If NOT ( ls_INActiveCustomerName = '' or IsNULL(ls_INActiveCustomerName) ) Then
-//				If IsNULL(lsOwnername) Then lsOwnername = ''
-//				
-//				MessageBox(is_title, "Owner Name: "+  lsOwnername + " is INACTIVE at Row "+string(i_indx) +" of Picking List.~r~rPlease Enter an Active Owner then Save." )	
-//				return -1
-//				
-//			End If
-//			
-//		End If
-		
-		//TimA 08/11/11 Pandora issue #261
-		//****************************
-//		If ibpickmodified Then 
-//			ls_Sku2 = tab_main.tabpage_pick.dw_pick.GetItemString(i_indx,"Sku")
-//			lsSuppCode= tab_main.tabpage_pick.dw_pick.GetItemString(i_indx,"Supp_Code")//
-//			ls_Country_of_Origin= tab_main.tabpage_pick.dw_pick.GetItemString(i_indx,"Country_of_Origin")//
-//			ls_WarehouseCode = idw_main.GetItemString(1, "wh_code")
-//			ls_L_Code = tab_main.tabpage_pick.dw_pick.GetItemString(i_indx,"L_Code") //
-//			ls_Inventory_Type= tab_main.tabpage_pick.dw_pick.GetItemString(i_indx,"Inventory_Type") //
-//			ls_Serial_No = tab_main.tabpage_pick.dw_pick.GetItemString(i_indx,"Serial_No")
-//			ls_Lot_No = tab_main.tabpage_pick.dw_pick.GetItemString(i_indx,"Lot_No")//
-//			ls_PO_No = tab_main.tabpage_pick.dw_pick.GetItemString(i_indx,"PO_No")//
-//			ls_PO_No2 = tab_main.tabpage_pick.dw_pick.GetItemString(i_indx,"PO_No2")//
-//			ls_Container_ID = tab_main.tabpage_pick.dw_pick.GetItemString(i_indx,"Container_ID")//
-//			ld_Expiration_Date = tab_main.tabpage_pick.dw_pick.GetItemDateTime(i_indx,"Expiration_Date")//
-//			
-//			
-//			select 
-//			Inventory_Type.Inventory_Shippable_Ind
-//			INTO :ls_ShipType
-//			from Content,Inventory_Type 
-//			where Content.Inventory_Type = Inventory_Type.Inv_Type 
-//			and Content.project_id = Inventory_type.project_id
-//			and content.Project_ID = :gs_project
-//			and Inventory_Type.Project_ID = :gs_project
-//			and Content.SKU = :ls_Sku2
-//			and Content.Supp_Code = :lsSuppCode
-//			and Content.Owner_ID  = :llOwnerID
-//			and Content.Country_of_Origin  = :ls_Country_of_Origin
-//			and Content.WH_Code = :ls_WarehouseCode
-//			and Content.L_Code = :ls_L_Code
-//			and Content.Inventory_Type = :ls_Inventory_Type						
-//			and Serial_No = :ls_Serial_No
-//			and Lot_No = :ls_Lot_No			
-//			and PO_No = :ls_PO_No			
-//			and PO_No2 = :ls_PO_No2						
-//			and Container_ID = :ls_Container_ID
-//			and Expiration_Date = :ld_Expiration_Date			
-//			Using SQLCA;
-//	
-//			If ls_ShipType ="" then
-//				Messagebox(is_title,"'" + ls_Serial_No + "' INVALID SERIAL NUMBER:",StopSign!)
-//				Return -1
-//			End if
-//		
-//			If ls_ShipType <> 'Y' then
-//				Messagebox(is_title,"THIS SERIAL NUMBER '" + ls_Serial_No +"' HAS A NON-SHIPPABLE INVENTORY TYPE",StopSign!)
-//				Return -1
-//			end if		
-//		End if
-		//***************************
-				
-//	Next	
+// FOR i_indx = 1 to tab_main.tabpage_pick.dw_pick.RowCount()
+// llPickCount = tab_main.tabpage_pick.dw_pick.RowCount()
+// SetMicroHelp("Checking for Active Customers " + String(i_indx) + " of " + String(llPickCount))
+// llOwnerID =  tab_main.tabpage_pick.dw_pick.GetItemNumber(i_indx,"owner_id")
+// lsOwnername =  tab_main.tabpage_pick.dw_pick.GetItemString(i_indx,"cf_owner_name")
+//
+// If Right(Trim(lsOwnername), 3) = '(C)' Then
+// Select Distinct dbo.Customer.Cust_Name
+// Into  :ls_INActiveCustomerName
+// FROM dbo.Owner WITH (NOLOCK)
+// JOIN dbo.Customer  WITH (NOLOCK)
+// ON dbo.Owner.Project_ID = dbo.Customer.Project_ID
+//  AND dbo.Owner.owner_cd = dbo.Customer.Cust_Code
+// Where dbo.Owner.Owner_ID = :llOwnerID
+//     and dbo.Customer.Customer_Type = 'IN'
+// and dbo.Owner.Project_ID = :gs_project
+// USING SQLCA;
+//
+// If NOT ( ls_INActiveCustomerName = '' or IsNULL(ls_INActiveCustomerName) ) Then
+// If IsNULL(lsOwnername) Then lsOwnername = ''
+//
+// MessageBox(is_title, "Owner Name: "+  lsOwnername + " is INACTIVE at Row "+string(i_indx) +" of Picking List.~r~rPlease Enter an Active Owner then Save." )
+// return -1
+//
+// End If
+//
+// End If
+//TimA 08/11/11 Pandora issue #261
+//****************************
+// If ibpickmodified Then
+// ls_Sku2 = tab_main.tabpage_pick.dw_pick.GetItemString(i_indx,"Sku")
+// lsSuppCode= tab_main.tabpage_pick.dw_pick.GetItemString(i_indx,"Supp_Code")//
+// ls_Country_of_Origin= tab_main.tabpage_pick.dw_pick.GetItemString(i_indx,"Country_of_Origin")//
+// ls_WarehouseCode = idw_main.GetItemString(1, "wh_code")
+// ls_L_Code = tab_main.tabpage_pick.dw_pick.GetItemString(i_indx,"L_Code") //
+// ls_Inventory_Type= tab_main.tabpage_pick.dw_pick.GetItemString(i_indx,"Inventory_Type") //
+// ls_Serial_No = tab_main.tabpage_pick.dw_pick.GetItemString(i_indx,"Serial_No")
+// ls_Lot_No = tab_main.tabpage_pick.dw_pick.GetItemString(i_indx,"Lot_No")//
+// ls_PO_No = tab_main.tabpage_pick.dw_pick.GetItemString(i_indx,"PO_No")//
+// ls_PO_No2 = tab_main.tabpage_pick.dw_pick.GetItemString(i_indx,"PO_No2")//
+// ls_Container_ID = tab_main.tabpage_pick.dw_pick.GetItemString(i_indx,"Container_ID")//
+// ld_Expiration_Date = tab_main.tabpage_pick.dw_pick.GetItemDateTime(i_indx,"Expiration_Date")//
+//
+//
+// select
+// Inventory_Type.Inventory_Shippable_Ind
+// INTO :ls_ShipType
+// from Content,Inventory_Type
+// where Content.Inventory_Type = Inventory_Type.Inv_Type
+// and Content.project_id = Inventory_type.project_id
+// and content.Project_ID = :gs_project
+// and Inventory_Type.Project_ID = :gs_project
+// and Content.SKU = :ls_Sku2
+// and Content.Supp_Code = :lsSuppCode
+// and Content.Owner_ID  = :llOwnerID
+// and Content.Country_of_Origin  = :ls_Country_of_Origin
+// and Content.WH_Code = :ls_WarehouseCode
+// and Content.L_Code = :ls_L_Code
+// and Content.Inventory_Type = :ls_Inventory_Type
+// and Serial_No = :ls_Serial_No
+// and Lot_No = :ls_Lot_No
+// and PO_No = :ls_PO_No
+// and PO_No2 = :ls_PO_No2
+// and Container_ID = :ls_Container_ID
+// and Expiration_Date = :ld_Expiration_Date
+// Using SQLCA;
+//
+// If ls_ShipType ="" then
+// Messagebox(is_title,"'" + ls_Serial_No + "' INVALID SERIAL NUMBER:",StopSign!)
+// Return -1
+// End if
+//
+// If ls_ShipType <> 'Y' then
+// Messagebox(is_title,"THIS SERIAL NUMBER '" + ls_Serial_No +"' HAS A NON-SHIPPABLE INVENTORY TYPE",StopSign!)
+// Return -1
+// end if
+// End if
+//***************************
+// Next
 //End If  /* PANDORA */
-	
-	
-/* 10/06/2010 ujh: Picking Tab COO Validation:  Coo must be in Country table and not = to 'XX' 
-	Vlidation occurs only if the order is international 
+/* 10/06/2010 ujh: Picking Tab COO Validation:  Coo must be in Country table and not = to 'XX'
+Vlidation occurs only if the order is international
 */
 // 12/15/2010 ujh: Change so COO Validation comes only after there are packing rows.
 //If gs_project = 'PANDORA'  and tab_main.tabpage_pick.dw_pick.RowCount() > 0 then
-If gs_project = 'PANDORA' and idw_pack.RowCount() > 0 then 
-	
-	// ET3 Pandora 496 - force all packing rows to have valid dims
-	DECIMAL llen, lw, lh, lgw 
-	BOOLEAN bFailDimTest = FALSE
-	BOOLEAN bFailScheduleCdTest = FALSE
-	BOOLEAN bFailCarrierTest = FALSE
-	BOOLEAN dFailCoo = FALSE
-	String lsCoo
-	
-	FOR i_indx = 1 to idw_pack.RowCount()
-		llen = idw_pack.getitemnumber( i_indx , "length" )	
-		lw   = idw_pack.getitemnumber( i_indx , "width" )	
-		lh   = idw_pack.getitemnumber( i_indx , "height" )	
-		lgw  = idw_pack.getitemnumber( i_indx , "weight_gross" )	
-		//TimA 04/09/13 Pandora issue #560 Must be valid COO
-		lsCoo = idw_pack.GetItemString(i_indx, "country_of_origin")
-		
-		// ET3 2012-10-30 Pandora 496 - Exception for multiple row cartons - skip the DIM/Weight test
-		llFindRow = idw_pack.Find("Upper(Carton_no) = '" + Upper(idw_pack.GetItemString(i_indx,'carton_no')) + "'",1, (i_indx - 1))
+If gs_project = 'PANDORA' and idw_pack.RowCount() > 0 then
+// ET3 Pandora 496 - force all packing rows to have valid dims
+DECIMAL llen, lw, lh, lgw
+BOOLEAN bFailDimTest = FALSE
+BOOLEAN bFailScheduleCdTest = FALSE
+BOOLEAN bFailCarrierTest = FALSE
+BOOLEAN dFailCoo = FALSE
+String lsCoo
+FOR i_indx = 1 to idw_pack.RowCount()
+llen = idw_pack.getitemnumber( i_indx , "length" )
+lw   = idw_pack.getitemnumber( i_indx , "width" )
+lh   = idw_pack.getitemnumber( i_indx , "height" )
+lgw  = idw_pack.getitemnumber( i_indx , "weight_gross" )
+//TimA 04/09/13 Pandora issue #560 Must be valid COO
+lsCoo = idw_pack.GetItemString(i_indx, "country_of_origin")
+// ET3 2012-10-30 Pandora 496 - Exception for multiple row cartons - skip the DIM/Weight test
+llFindRow = idw_pack.Find("Upper(Carton_no) = '" + Upper(idw_pack.GetItemString(i_indx,'carton_no')) + "'",1, (i_indx - 1))
 
-		IF llFindRow > 0 THEN
-			bFailDimTest = FALSE
-			
-		ELSEIF (llen <= 0 OR lw <= 0 OR lh <= 0 OR lgw <= 0) THEN 
-			bFailDimTest = TRUE
-			
-		ELSE
-			bFailDimTest = FALSE
-			
-		END IF
-		//TimA 05/06/13 added XXX and IsNull to the if condition
-		If (lsCoo = "XX" or lsCoo = 'XXX' or lsCoo = '' or IsNull(lsCoo) ) Then
-		//If lsCoo = "XX"  Then
-			dFailCoo = True
-		End if
-		// ET3 Pandora 532 - Dims don't need to be verified for orders with Schedule Code of DOS/NOS 
-		// and/or Carrier Field of MLOGSHLSHL/VIRTGROSHL
-		
-		ls_user_field1 = UPPER(TRIM(idw_other.getitemstring( 1, 'user_field1' )))
-		IF ls_user_field1 = 'DOS' OR ls_user_field1 = 'NOS' THEN 
-			bFailScheduleCdTest = FALSE
-		ELSE 
-			bFailScheduleCdTest = TRUE
-		END IF
-		
-		ls_carrier = UPPER(TRIM(idw_other.getitemstring( 1, 'carrier' )))
-		IF ls_carrier = 'MLOGSHLSHL' OR ls_carrier = 'VIRTGROSHL' THEN
-			bFailCarrierTest = FALSE
-		ELSE
-			bFailCarrierTest = TRUE
-		END IF
-		
-		IF bFailDimTest AND bFailScheduleCdTest AND bFailCarrierTest THEN
-			ls_error = 'Error in row ' + string(i_indx) + '~r~n' &
-				+ 'All values for length, width, height and ' + '~r~n' &
-				+ 'gross weight must be greater than zero.'
-				
-			SetMicroHelp("Save Interrupted - invalid Dimensions!")
-			messagebox (is_Title, ls_error, StopSign!)
-			return -1
-			
-		END IF
-		If dFailCoo then
-			//TimA 05/06/13 Updated the messagebox
-			messagebox (is_Title, "COO cannot be XX or XXX or Null.  Please update the COO in the Picking tab. ", StopSign!)
-			Return - 1
-		End if
-	NEXT
-	
-	String ls_Country_FROM, ls_country_TO //ls_Wh_Cd, 
-	//already have ls_wh_code....	ls_Wh_cd = idw_main.GetItemString(1, "wh_code")
-	ls_Country_TO = tab_main.tabpage_main.tab_address.tabpage_shipto.dw_shipto.GetItemString(1, "Country")
-	
-	Select Country 
-	into :ls_Country_FROM
-	From Warehouse WITH (NOLOCK)
-	where Wh_Code = :ls_Wh_code;
-	
-	if ls_Country_FROM <> ls_Country_TO then  // this is an international order so validate
-															// Validate COO for all parent (not child) items. -  KZUV.COM 
-															
-		// ET3 2012-10-22 Pandora 470 - International orders must be SOM METRIC
-		IF tab_main.tabpage_pack.rb_eng.checked = TRUE THEN
-			ls_error = "This order is an International Order. ~r~n" &
-						+ "Please change the Standard of Measure to Metric. ~r~n" &
-						+ "   Click 'OK' to make the change or ~r~n " &
-						+ "'Cancel' to cancel the save operation "
-						
-			SetMicroHelp("Save interrupted - Intl Orders must be Metric")
-			CHOOSE CASE messageBox( is_Title, ls_error, StopSign!, OKCancel!)
-				CASE 1 
+IF llFindRow > 0 THEN
+bFailDimTest = FALSE
+ELSEIF (llen <= 0 OR lw <= 0 OR lh <= 0 OR lgw <= 0) THEN
+bFailDimTest = TRUE
+ELSE
+bFailDimTest = FALSE
+END IF
+//TimA 05/06/13 added XXX and IsNull to the if condition
+If (lsCoo = "XX" or lsCoo = 'XXX' or lsCoo = '' or IsNull(lsCoo) ) Then
+//If lsCoo = "XX"  Then
+dFailCoo = True
+End if
+// ET3 Pandora 532 - Dims don't need to be verified for orders with Schedule Code of DOS/NOS
+// and/or Carrier Field of MLOGSHLSHL/VIRTGROSHL
+ls_user_field1 = UPPER(TRIM(idw_other.getitemstring( 1, 'user_field1' )))
+IF ls_user_field1 = 'DOS' OR ls_user_field1 = 'NOS' THEN
+bFailScheduleCdTest = FALSE
+ELSE
+bFailScheduleCdTest = TRUE
+END IF
+ls_carrier = UPPER(TRIM(idw_other.getitemstring( 1, 'carrier' )))
+IF ls_carrier = 'MLOGSHLSHL' OR ls_carrier = 'VIRTGROSHL' THEN
+// Begin -02082022- Dinesh - S66897- Google - SIMS - CBOL Changes
+if inewindex=5 then
+idw_other.SetItem(1,'shipment_id',lsinvoice_no )
+end if
+// End - 02082022- Dinesh - S66897- Google - SIMS - CBOL Changes
+bFailCarrierTest = FALSE
+ELSE
+bFailCarrierTest = TRUE
+END IF
+IF bFailDimTest AND bFailScheduleCdTest AND bFailCarrierTest THEN
+ls_error = 'Error in row ' + string(i_indx) + '~r~n' &
++ 'All values for length, width, height and ' + '~r~n' &
++ 'gross weight must be greater than zero.'
+SetMicroHelp("Save Interrupted - invalid Dimensions!")
+messagebox (is_Title, ls_error, StopSign!)
+return -1
+END IF
+If dFailCoo then
+//TimA 05/06/13 Updated the messagebox
+messagebox (is_Title, "COO cannot be XX or XXX or Null.  Please update the COO in the Picking tab. ", StopSign!)
+Return - 1
+End if
+NEXT
+String ls_Country_FROM, ls_country_TO //ls_Wh_Cd,
+//already have ls_wh_code.... ls_Wh_cd = idw_main.GetItemString(1, "wh_code")
+ls_Country_TO = tab_main.tabpage_main.tab_address.tabpage_shipto.dw_shipto.GetItemString(1, "Country")
+Select Country
+into :ls_Country_FROM
+From Warehouse WITH (NOLOCK)
+where Wh_Code = :ls_Wh_code;
+if ls_Country_FROM <> ls_Country_TO then  // this is an international order so validate
+// Validate COO for all parent (not child) items. -  KZUV.COM
+// ET3 2012-10-22 Pandora 470 - International orders must be SOM METRIC
+IF tab_main.tabpage_pack.rb_eng.checked = TRUE THEN
+ls_error = "This order is an International Order. ~r~n" &
++ "Please change the Standard of Measure to Metric. ~r~n" &
++ "   Click 'OK' to make the change or ~r~n " &
++ "'Cancel' to cancel the save operation "
+SetMicroHelp("Save interrupted - Intl Orders must be Metric")
+CHOOSE CASE messageBox( is_Title, ls_error, StopSign!, OKCancel!)
+CASE 1
 
-					DECIMAL ld_result
-					BOOLEAN b_temp
-					b_temp = ib_changed
-					ib_changed = FALSE
-					
-					ls_Temp = 'M'
-//					ll_result = wf_convert( ls_Temp, 0, 1)   // ET3 This isn't working - going to brute force it
+DECIMAL ld_result
+BOOLEAN b_temp
+b_temp = ib_changed
+ib_changed = FALSE
+ls_Temp = 'M'
+// ll_result = wf_convert( ls_Temp, 0, 1)   // ET3 This isn't working - going to brute force it
 
-					IF idw_pack.AcceptText() = -1 THEN
-						SetMicroHelp("Conversion failed; Save cancelled; Please manually convert and retry the save")
-						ll_result = -1
-						tab_main.tabpage_pack.rb_eng.checked = TRUE
-						tab_main.tabpage_pack.rb_metric.checked = FALSE
-						ib_changed = b_temp
-						return -1
-						
-					ELSE
-						SetMicroHelp("Save interrupted - Making conversions")
-						FOR i_indx = 1 to idw_pack.RowCount()
-							idw_pack.object.standard_of_measure[i_indx] = ls_Temp  // 'M'
-							ld_result = round(i_nwarehouse.of_convert(idw_pack.getItemDecimal(i_indx,"height"),"IN","CM"),2)
-							idw_pack.object.height[i_indx] = ld_result
-							idw_pack.object.width[i_indx] = round(i_nwarehouse.of_convert(idw_pack.getItemDecimal(i_indx,"width"),"IN","CM"),2)
-							idw_pack.object.length[i_indx] = round(i_nwarehouse.of_convert(idw_pack.getItemDecimal(i_indx,"length"),"IN","CM"),2)
-							idw_pack.object.weight_net[i_indx] = round(i_nwarehouse.of_convert(idw_pack.getItemDecimal(i_indx,"weight_net"),"PO","KG"),2)
-							idw_pack.object.weight_gross[i_indx] = round(i_nwarehouse.of_convert(idw_pack.getItemDecimal(i_indx,"weight_gross"),"PO","KG"),2)		
-								
-							idw_pack.object.cbm[i_indx] = round(idw_pack.object.length[i_indx] * idw_pack.object.width[i_indx] * idw_pack.object.height[i_indx],2)
-							
-							tab_main.tabpage_pack.rb_eng.checked = FALSE
-							tab_main.tabpage_pack.rb_metric.checked = TRUE
-							ib_changed = b_temp
-							
-							
-						NEXT
-						idw_pack.Accepttext( )
-						
-					END IF
-					
-				CASE 2
-					// user selected cancel - bail out
-					SetMicroHelp("Save cancelled")
-					return -1
-					
-				CASE ELSE
-					// unknown result - bail out
-					SetMicroHelp("Save cancelled")
-					return -1
-					
-			END CHOOSE
-			
-		END IF
-		
-		// Get the number of picking rows.
-		ll_numpicks = tab_main.tabpage_pick.dw_pick.RowCount()
-		
-		// Loop through the picking rows.
-		FOR i_indx = 1 to ll_numpicks
-			SetMicroHelp("Checking COO's: " + String(i_indx) + " of " + String(ll_numpicks))			
-			// If the component indicator is not '*' (child component),
-			IF trim(idw_pick.GetItemString(i_indx, 'component_ind')) <> "*" then
-				// Get the COO
-				ls_COO =  trim(upper(tab_main.tabpage_pick.dw_pick.GetItemString(i_indx, 'User_Field1')))
-				ll_COO_len = len(ls_COO)
-		
-				If isNull(ls_COO) then ls_COO = 'NULL'
-				
-				if trim(ls_COO) = '' then ls_COO = 'Empty or Blank'
-				
-				Select Designating_Code
-				Into :ls_COO_db
-				From Country WITH (NOLOCK)
-				where Designating_Code = :ls_COO;
-		
-				if not (ls_COO = ls_COO_db and ls_COO <> 'XX' and ls_COO <> 'XXX'  &
-						and ls_COO <> '' and ls_COO <> 'NULL')  then
-					messagebox(is_title, "COO: "+ls_COO + " is incorrect at Row " +string(i_indx) +" of Picking List." )
-					return -1
-				End If
-				
-			End If
-			
-		NEXT	
+IF idw_pack.AcceptText() = -1 THEN
+SetMicroHelp("Conversion failed; Save cancelled; Please manually convert and retry the save")
+ll_result = -1
+tab_main.tabpage_pack.rb_eng.checked = TRUE
+tab_main.tabpage_pack.rb_metric.checked = FALSE
+ib_changed = b_temp
+return -1
+ELSE
+SetMicroHelp("Save interrupted - Making conversions")
+FOR i_indx = 1 to idw_pack.RowCount()
+idw_pack.object.standard_of_measure[i_indx] = ls_Temp  // 'M'
+ld_result = round(i_nwarehouse.of_convert(idw_pack.getItemDecimal(i_indx,"height"),"IN","CM"),2)
+idw_pack.object.height[i_indx] = ld_result
+idw_pack.object.width[i_indx] = round(i_nwarehouse.of_convert(idw_pack.getItemDecimal(i_indx,"width"),"IN","CM"),2)
+idw_pack.object.length[i_indx] = round(i_nwarehouse.of_convert(idw_pack.getItemDecimal(i_indx,"length"),"IN","CM"),2)
+//idw_pack.object.weight_net[i_indx] = round(i_nwarehouse.of_convert(idw_pack.getItemDecimal(i_indx,"weight_net"),"PO","KG"),2)
+idw_pack.object.weight_net[i_indx] = round(i_nwarehouse.of_convert(idw_pack.getItemDecimal(i_indx,"weight_net"),"PO","KG"),4)  // Dinesh - 01/28/2025 - SIMS-648-Development for Google - SIMS Packing list tab and SIMS Printed Packing list missing weights 
+//idw_pack.object.weight_gross[i_indx] = round(i_nwarehouse.of_convert(idw_pack.getItemDecimal(i_indx,"weight_gross"),"PO","KG"),2)
+idw_pack.object.weight_gross[i_indx] = round(i_nwarehouse.of_convert(idw_pack.getItemDecimal(i_indx,"weight_gross"),"PO","KG"),4)  // Dinesh - 01/24/2025 - SIMS-648-Development for Google - SIMS Packing list tab and SIMS Printed Packing list missing weights 
+idw_pack.object.cbm[i_indx] = round(idw_pack.object.length[i_indx] * idw_pack.object.width[i_indx] * idw_pack.object.height[i_indx],2)
+tab_main.tabpage_pack.rb_eng.checked = FALSE
+tab_main.tabpage_pack.rb_metric.checked = TRUE
+ib_changed = b_temp
+NEXT
+idw_pack.Accepttext( )
+END IF
+CASE 2
+// user selected cancel - bail out
+SetMicroHelp("Save cancelled")
+return -1
+CASE ELSE
+// unknown result - bail out
+SetMicroHelp("Save cancelled")
+return -1
+END CHOOSE
+END IF
+// Get the number of picking rows.
+ll_numpicks = tab_main.tabpage_pick.dw_pick.RowCount()
+// Loop through the picking rows.
+FOR i_indx = 1 to ll_numpicks
+SetMicroHelp("Checking COO's: " + String(i_indx) + " of " + String(ll_numpicks))
+// If the component indicator is not '*' (child component),
+IF trim(idw_pick.GetItemString(i_indx, 'component_ind')) <> "*" then
+// Get the COO
+ls_COO =  trim(upper(tab_main.tabpage_pick.dw_pick.GetItemString(i_indx, 'User_Field1')))
+ll_COO_len = len(ls_COO)
+If isNull(ls_COO) then ls_COO = 'NULL'
+if trim(ls_COO) = '' then ls_COO = 'Empty or Blank'
+Select Designating_Code
+Into :ls_COO_db
+From Country WITH (NOLOCK)
+where Designating_Code = :ls_COO;
+if not (ls_COO = ls_COO_db and ls_COO <> 'XX' and ls_COO <> 'XXX'  &
+and ls_COO <> '' and ls_COO <> 'NULL')  then
+messagebox(is_title, "COO: "+ls_COO + " is incorrect at Row " +string(i_indx) +" of Picking List." )
+return -1
+End If
+End If
+NEXT
 
-	end if // international order
-	
+end if // international order
 End If  /* PANDORA */
 
-//BCR 24-JAN-2012: Set Total No of Cartons on Packing into User_Field6 on Other Tab. 
+//BCR 24-JAN-2012: Set Total No of Cartons on Packing into User_Field6 on Other Tab.
 IF gs_project = 'PUMA' THEN
-	w_do.idw_other.SetItem(1, "user_field6", string(w_do.idw_pack.GetItemNumber(1, "c_carton_count")))
+w_do.idw_other.SetItem(1, "user_field6", string(w_do.idw_pack.GetItemNumber(1, "c_carton_count")))
 END IF
-	
 SetPointer(HourGlass!)
 
 idw_pick.SetRedraw(FALSE)
@@ -23539,411 +24067,459 @@ wf_set_pick_filter('Remove')
 wf_set_pack_filter('Remove')
 
 If idw_main.RowCount() > 0 Then
-	
-	This.Trigger event ue_refresh()
-	
-	ls_order = idw_main.GetItemString(1,"do_no")
-	// pvh - 08/24/05 - GMT
-	idw_main.SetItem(1,'last_update', ldtToday ) 
-	idw_main.SetItem(1,'last_user',gs_userid) 
-	
-	// 11/14 - PCONKL - Duplicate call to WF_VALIDATE - commented out
-//	If wf_validation() = -1 Then
-//		idw_pick.SetRedraw(True)
-//		SetMicroHelp("Save failed!")
-//		Return -1
-//	End If
-	
+This.Trigger event ue_refresh()
+ls_order = idw_main.GetItemString(1,"do_no")
+// pvh - 08/24/05 - GMT
+idw_main.SetItem(1,'last_update', ldtToday )
+idw_main.SetItem(1,'last_user',gs_userid)
+// 11/14 - PCONKL - Duplicate call to WF_VALIDATE - commented out
+// If wf_validation() = -1 Then
+// idw_pick.SetRedraw(True)
+// SetMicroHelp("Save failed!")
+// Return -1
+// End If
 End If
 
 idw_pick.SetRedraw(True)
 
 // 02/03 - PCONKL - We should be able to Pick a '-' if it is stored in Content. This will allow us to pick existing
-// 					inventory if we set a trackable field afer we have recieved goods and not convert the DB
+// inventory if we set a trackable field afer we have recieved goods and not convert the DB
 if ib_edit = false then /*New ORder*/
 
-	// Assign order no. for new order
-	ll_no = g.of_next_db_seq(gs_project,'Delivery_Master','DO_No')
-	
-	If ll_no <= 0 Then
-		messagebox(is_title,"Unable to retrieve the next available order Number!")
-		Return -1
-	End If
-	
-	// 3/01 - PCONKL - Can only take first 9 char of Project ID
-	ls_order = Trim(Left(gs_project,9)) + String(ll_no,"0000000")
-	
-	//09/03 - PCONKL - 3COM Nashville needs to have the 'Delivery Note' (User Field 6) set based on order number
-	//04/04 - PCONKL - supporting multiple warehouses
-//	If Upper(gs_Project) = '3COM_NASH' Then
-//		Choose Case Upper(idw_main.GetITemString(1,'wh_Code'))
-//				Case 'NASHVILLE'
-//					idw_main.SetItem(1,'user_field6','MN' + String(ll_no,'0000000'))
-//				Case '3COM-SIN'
-//					idw_main.SetItem(1,'user_field6','MS' + String(ll_no,'0000000'))
-//				Case '3COM-HKG'
-//					idw_main.SetItem(1,'user_field6','MH' + String(ll_no,'0000000'))
-//				Case '3COM-NL'
-//					idw_main.SetItem(1,'user_field6','ME' + String(ll_no,'0000000'))
-//		End Choose
-//	End If
+// Assign order no. for new order
+ll_no = g.of_next_db_seq(gs_project,'Delivery_Master','DO_No')
+If ll_no <= 0 Then
+messagebox(is_title,"Unable to retrieve the next available order Number!")
+Return -1
+End If
+// 3/01 - PCONKL - Can only take first 9 char of Project ID
+ls_order = Trim(Left(gs_project,9)) + String(ll_no,"0000000")
+//09/03 - PCONKL - 3COM Nashville needs to have the 'Delivery Note' (User Field 6) set based on order number
+//04/04 - PCONKL - supporting multiple warehouses
+// If Upper(gs_Project) = '3COM_NASH' Then
+// Choose Case Upper(idw_main.GetITemString(1,'wh_Code'))
+// Case 'NASHVILLE'
+// idw_main.SetItem(1,'user_field6','MN' + String(ll_no,'0000000'))
+// Case '3COM-SIN'
+// idw_main.SetItem(1,'user_field6','MS' + String(ll_no,'0000000'))
+// Case '3COM-HKG'
+// idw_main.SetItem(1,'user_field6','MH' + String(ll_no,'0000000'))
+// Case '3COM-NL'
+// idw_main.SetItem(1,'user_field6','ME' + String(ll_no,'0000000'))
+// End Choose
+// End If
 
-	idw_main.setitem(1,"do_no",ls_order)	
-	idw_main.setitem(1,"project_id",gs_project)	
-	
-	isle_order.Text = idw_main.GetItemString(1,'invoice_no')
-	is_dono = ls_order
+idw_main.setitem(1,"do_no",ls_order)
+idw_main.setitem(1,"project_id",gs_project)
+isle_order.Text = idw_main.GetItemString(1,'invoice_no')
+is_dono = ls_order
 
-	For i = 1 to idw_detail.RowCount()
-		idw_detail.SetItem(i, "do_no", ls_order)
-	Next		
+For i = 1 to idw_detail.RowCount()
+idw_detail.SetItem(i, "do_no", ls_order)
+Next
+//Set the Invoice number
+//02/02 - Invoice number may have been set by creating a back order - don't assign here if it is already present
+If idw_main.GetItemString(1,'invoice_no') > '' Then
+SetMicroHelp( 'Using invoice_no: ' + isle_order.Text )
+Else
+idw_main.SetItem(1, "invoice_no", Right(ls_order, 7))
+isle_order.text = Right(ls_order, 7)
+isle_order2.text = Right(ls_order, 7)
+// KRZ If this is Pandora,
+If gs_project = "PANDORA" then
+// Append the 'invoice number' with 'M'.  Make order no fields readonly.
+idw_main.setitem(1, 'invoice_no', Right(ls_order, 7) + "M")
+tab_main.tabpage_main.sle_order.enabled = false
+tab_main.tabpage_main.sle_order2.enabled = false
+isle_order.text = Right(ls_order, 7) + "M"
+isle_order2.text = Right(ls_order, 7) + "M"
+// End if this is Pandora.
+End If
+
+//TAM - W&S 2011/01  -   Order Number is Formatted.  We will not allow entry into this field.  
+//Format is (WH_CODE(4th and 5TH Char)) + "S" + (Year(2 digit)) + (Month(2 Digit)) + (4 Digit Running number from Lookup table)
+//Left 2 characters = WS for Wine and Spirt.
+If Left(gs_project,3) = 'WS-'  Then
+lsInvoiceNo =  Mid(gs_project,4,2) + '-S' + String(Today,'YYMM') + Right(ls_order, 4)
+idw_main.SetItem(1, "invoice_no", lsInvoiceNo)
+tab_main.tabpage_main.sle_order.enabled = false
+tab_main.tabpage_main.sle_order2.enabled = false
+isle_order.text = lsInvoiceNo
+isle_order2.text = lsInvoiceNo
+End If
+
+End If
+// If idw_pack.RowCount() > 0 Then     //If there are packing rows
+// ls_carrier = UPPER(TRIM(idw_other.getitemstring( 1, 'carrier' )))
+// IF ls_carrier = 'MLOGSHLSHL' OR ls_carrier = 'VIRTGROSHL' THEN
+// idw_other.SetItem(1,'shipment_id',lsinvoice_no ) //  - 02082022- S66897- Google - SIMS - CBOL Changes
+// End if
+// end if
+// 09/04 - PCONKL - For GM DAT, If manually entered Packaging order, make sure it is prefixed with a 'P'
+If upper(gs_project) = 'GM_MI_DAT' and idw_main.GetITemString(1,'ord_Type') = 'P' Then
+If left(idw_main.GetITemString(1,'invoice_no'),1) <> 'P' Then
+idw_Main.SetITem(1,'Invoice_no', 'P' + idw_main.GetITemString(1,'invoice_no'))
+isle_order.text = idw_main.GetITemString(1,'invoice_no')
+isle_order2.text = idw_main.GetITemString(1,'invoice_no')
+end IF
+End iF /* GM */
+is_bolno = Right(idw_main.GetItemString(1,'invoice_no'), 7)
+isle_order.Visible = FALSE
+isle_order2.Visible = TRUE
+else /*existing Order*/
+// Update order status
+
+If idw_main.RowCount() > 0 Then
+If idw_main.GetItemString(1,"ord_status") <> "C" and &
+idw_main.GetItemString(1,"ord_status") <> "D" and &
+idw_main.GetItemString(1,"ord_status") <> "V" and &
+idw_main.GetItemString(1,"ord_status") <> "H" and  /* 11/11 - PCONKL */ &
+idw_main.GetItemString(1,"ord_status") <> "Q" and  /* 11/11 - PCONKL  (exported to scanner but not yet re-imported "QA Check"*/ &
+idw_main.GetItemString(1,"ord_status") <> "R" Then   //6/21/04 - new 'R' -Ready To Ship status for 3COM
+If idw_pick.RowCount() > 0 Then //For existing order if status not listed above if there are picking rows
+If idw_pack.RowCount() > 0 Then     //If there are packing rows
+// Begin - 03/16/2023- Dinesh - SIMS-53- Google - SIMS - Load Lock and New Loading Status
+ if gs_project='PANDORA' then 
 	
-	//Set the Invoice number 
-	
-	//02/02 - Invoice number may have been set by creating a back order - don't assign here if it is already present
-	If idw_main.GetItemString(1,'invoice_no') > '' Then
-		SetMicroHelp( 'Using invoice_no: ' + isle_order.Text )
+	// if gs_project='PANDORA' then // DINESH - 03/16/2023- sims-53- Google - SIMS - Load Lock and New Loading Status
+	tab_main.tabpage_other.cb_lock_load_google.visible = True// DINESH - 03/16/2023- sims-53- Google - SIMS - Load Lock and New Loading Status
+	//end if
+	If (w_do.idw_main.getitemstring(1,'Carrier')='LSLGFTLSTD' or w_do.idw_main.getitemstring(1,'Carrier')='LSLGFTLTMD') and ((isnull(w_do.idw_main.getitemstring(1,'user_field6'))) or (w_do.idw_main.getitemstring(1,'user_field6') = '')) then // DINESH - 05/18/2023- sims-53- Google - SIMS - Load Lock and New Loading Status - Issue on BOL trailer num and Seal number interchange
+			messagebox (w_do.is_title, "Trailer Number can not be left blank, To load the order please enter the Trailer number!", StopSign!)   // DINESH- 05/18/2023 Just switched the fields from user_field3 to user_field6
+			w_do.tab_main.SelectTab(2)
+			w_do.idw_other.SetColumn('user_field6')
+			w_do.idw_Other.SetFocus()
+			ls_trailer_num=w_do.idw_main.getitemstring(1,'user_field6')
+			w_do.idw_main.SetItem( 1, "user_field6", ls_trailer_num)
+			lb_trailer_no = False
+		else
+			lb_trailer_no = True
 		
-	Else
-		idw_main.SetItem(1, "invoice_no", Right(ls_order, 7))
-		isle_order.text = Right(ls_order, 7)
-		isle_order2.text = Right(ls_order, 7)
-	
-		// KRZ If this is Pandora,
-		If gs_project = "PANDORA" then
-			
-			// Append the 'invoice number' with 'M'.  Make order no fields readonly.
-			idw_main.setitem(1, 'invoice_no', Right(ls_order, 7) + "M")
-			tab_main.tabpage_main.sle_order.enabled = false
-			tab_main.tabpage_main.sle_order2.enabled = false
-			isle_order.text = Right(ls_order, 7) + "M"
-			isle_order2.text = Right(ls_order, 7) + "M"
-			
-		// End if this is Pandora.
-		End If
-
-		//TAM - W&S 2011/01  -   Order Number is Formatted.  We will not allow entry into this field.  
-		//Format is (WH_CODE(4th and 5TH Char)) + "S" + (Year(2 digit)) + (Month(2 Digit)) + (4 Digit Running number from Lookup table) 
-		//Left 2 characters = WS for Wine and Spirt.
-		If Left(gs_project,3) = 'WS-'  Then
-			lsInvoiceNo =  Mid(gs_project,4,2) + '-S' + String(Today,'YYMM') + Right(ls_order, 4)
-			idw_main.SetItem(1, "invoice_no", lsInvoiceNo)
-			tab_main.tabpage_main.sle_order.enabled = false
-			tab_main.tabpage_main.sle_order2.enabled = false
-			isle_order.text = lsInvoiceNo
-			isle_order2.text = lsInvoiceNo
-		End If
-
+	end if 
+//	If (w_do.idw_main.getitemstring(1,'Carrier')='LSLGFTLSTD' or w_do.idw_main.getitemstring(1,'Carrier')='LSLGFTLTMD' or w_do.idw_main.getitemstring(1,'Carrier')='MLOGSHLSHL') and ((isnull(w_do.idw_main.getitemstring(1,'user_field3'))) or (w_do.idw_main.getitemstring(1,'user_field3') = '')) then
+//			messagebox (w_do.is_title, "Seal Number can not be left blank, To load the order please enter Seal number!", StopSign!) // DINESH - 05/18/2023- sims-53- Google - SIMS - Load Lock and New Loading Status - Issue on BOL trailer num and Seal number interchange
+	//Akash Baghel......10/13/2023...... SIMS-338.....SIMS PIP/SIP - Re-enable WMS CUTOVER functionality
+         ls_Cust_code = w_do.idw_main.GetItemString(1, 'cust_code')
+	//If (w_do.idw_main.getitemstring(1,'Carrier')='LSLGFTLSTD' or w_do.idw_main.getitemstring(1,'Carrier')='LSLGFTLTMD' or w_do.idw_main.getitemstring(1,'Carrier')='MLOGSHLSHL') and ((isnull(w_do.idw_main.getitemstring(1,'user_field3'))) or (w_do.idw_main.getitemstring(1,'user_field3') = '')) then
+	 If ls_cust_code <> 'WMSCUTOVER' and (w_do.idw_main.getitemstring(1,'Carrier')='LSLGFTLSTD' or w_do.idw_main.getitemstring(1,'Carrier')='LSLGFTLTMD' or w_do.idw_main.getitemstring(1,'Carrier')='MLOGSHLSHL') and ((isnull(w_do.idw_main.getitemstring(1,'user_field3'))) or (w_do.idw_main.getitemstring(1,'user_field3') = '')) then      ////Akash Baghel....10/13/2023...... WMSCUTOVER Condition SIMS-338.....SIMS PIP/SIP - Re-enable WMS CUTOVER functionality
+	          messagebox (w_do.is_title, "Seal Number can not be left blank, To load the order please enter Seal number!", StopSign!) // DINESH - 05/18/2023- sims-53- Google - SIMS - Load Lock and New Loading Status - Issue on BOL trailer num and Seal number interchange
+			w_do.tab_main.SelectTab(2)   // DINESH- 05/18/2023 -Just switched the fields from user_field6 to user_field3
+			w_do.idw_other.SetColumn('user_field3')
+			w_do.idw_Other.SetFocus()
+			ls_seal_num=w_do.idw_main.getitemstring(1,'user_field3')
+			w_do.idw_main.SetItem( 1, "user_field3", ls_seal_num)
+			lb_seal_no = False
+		else
+			lb_seal_no = True
 	End If
-	
-	// 09/04 - PCONKL - For GM DAT, If manually entered Packaging order, make sure it is prefixed with a 'P'
-	If upper(gs_project) = 'GM_MI_DAT' and idw_main.GetITemString(1,'ord_Type') = 'P' Then
-		If left(idw_main.GetITemString(1,'invoice_no'),1) <> 'P' Then
-			idw_Main.SetITem(1,'Invoice_no', 'P' + idw_main.GetITemString(1,'invoice_no'))
-			isle_order.text = idw_main.GetITemString(1,'invoice_no')
-			isle_order2.text = idw_main.GetITemString(1,'invoice_no')
-		end IF
-	End iF /* GM */
-	
-	is_bolno = Right(idw_main.GetItemString(1,'invoice_no'), 7)
-	isle_order.Visible = FALSE
-	isle_order2.Visible = TRUE
-	
-else /*existing Order*/			
-	
-	// Update order status 
-
-	If idw_main.RowCount() > 0 Then
-		If idw_main.GetItemString(1,"ord_status") <> "C" and &
-			idw_main.GetItemString(1,"ord_status") <> "D" and &
-			idw_main.GetItemString(1,"ord_status") <> "V" and &
-			idw_main.GetItemString(1,"ord_status") <> "H" and  /* 11/11 - PCONKL */ & 
-			idw_main.GetItemString(1,"ord_status") <> "Q" and  /* 11/11 - PCONKL  (exported to scanner but not yet re-imported "QA Check"*/ & 
-			idw_main.GetItemString(1,"ord_status") <> "R" Then   //6/21/04 - new 'R' -Ready To Ship status for 3COM
+	 if ((lb_trailer_no= False and lb_seal_no = False)  or (lb_trailer_no= True and lb_seal_no = False) or  (lb_trailer_no= False and lb_seal_no = True)) and idw_pack.rowcount() > 0 then
+			 isLoad_Status = 'UNLOCK_ON_SAVE' 
+			idw_main.SetItem(1,"ord_status","A") //then set status to Packing(A)
+				if w_do.idw_main.getitemstring(1,'Carrier')='MLOGSHLSHL' then
+					tab_main.tabpage_other.cb_lock_load_google.visible = False
+				end if
 			
-			If idw_pick.RowCount() > 0 Then 					//For existing order if status not listed above if there are picking rows
-				If idw_pack.RowCount() > 0 Then     			//If there are packing rows 
-					idw_main.SetItem(1,"ord_status","A")	//then set status to Packing(A)
-					
-					// 09/16 - PCONKL - Set Pack Start Date if not already populated
-					If IsNull(idw_main.GetItemDateTime(1, 'pack_start_time')) Then
-						idw_main.SetItem(1,'pack_start_time',ldtGMT  )
-					End If
-					
-					// 01/27/2010 ujh; Set Pick_Complete 1 of 3:  Due to change to Packing status, 
-					//                             electronically set Pick_complete to current date if and only if it is not now set.
-					IF Upper(gs_project) = 'PANDORA' THEN
-						ldtPickComplete = f_getLocalWorldTime( idw_main.getitemstring(1,'wh_code') ) 
-						If IsNull(idw_main.GetItemDateTime(1, 'pick_complete')) Then
-							idw_main.setitem(1,'pick_complete', ldtPickComplete )
-						End If
+			
+	elseif w_do.idw_main.getitemstring(1,'Carrier')='MLOGSHLSHL' and  (lb_trailer_no= False and lb_seal_no = True) and idw_pack.rowcount() > 0 then	
+			// isLoad_Status = 'UNLOCK_ON_SAVE' 
+			idw_main.SetItem(1,"ord_status","L") //then set status to Loading(L)
+			tab_main.tabpage_other.cb_lock_load_google.visible = False
+			
+			
+	elseif (lb_trailer_no= True and lb_seal_no = True) and idw_pack.rowcount() > 0 then
+			
+		if w_do.idw_main.getitemstring(1,'Carrier')='MLOGSHLSHL' then	
+			//isLoad_Status = 'LOCK_ON_SAVE'
+			idw_main.SetItem(1,"ord_status","L") //then set status to Loading(L)
+			tab_main.tabpage_other.cb_lock_load_google.visible = False
+			
+			else
+				
+				If f_retrieve_parm("PANDORA","FLAG","TMS") = "Y" and  f_retrieve_parm("PANDORA","SKIP_TMS", isWareHouse, "CODE_DESCRIPT")  <> "SKIP_IT"  tHEN // Dinesh - 05/08/2023- SIMS-53- Google - SIMS - Load Lock and New Loading Status
+				//If f_retrieve_parm("PANDORA","FLAG","TMS") = "Y" and  f_retrieve_parm("PANDORA","SKIP_TMS", isWareHouse, "CODE_DESCRIPT")  <> "SKIP_IT"  and ls_Load_Lock <>  'N' tHEN // Dinesh - 05/08/2023- SIMS-53- Google - SIMS - Load Lock and New Loading Status
+				//if 
+					 if ib_lock= True then
+//						lsMsg = 'LOAD ID ' + isloadId + ' will locked when order is placed in to LOADING Status.  Do you want to proceed?' // Dinesh - 03/31/2023- SIMS-53- Google - SIMS - Load Lock and New Loading Status
+//						MessageBox( is_title, lsMsg)
 						
-						//dts 11/12/10 - moved these checks inside IF 'PANDORA' condition, and added Ship_VIA check...
-						// Make sure Carrier, Transport Mode, Freight Terms  are populated.
-						//dts 2011-02-14 - added request_date to this validation...
-						ls_freightterms = tab_main.tabpage_other.dw_other.getitemstring(1, "freight_terms")
-						ls_transmode = tab_main.tabpage_other.dw_other.getitemstring(1, "transport_mode")
-						ls_carrier = tab_main.tabpage_other.dw_other.getitemstring(1, "carrier")
-						//dts 2/15/11 - ls_ShipVIA = tab_main.tabpage_other.dw_other.getitemstring(1, "Ship_VIA")
-						ldt_RequestDate = idw_main.GetItemDateTime(1, 'request_date')
-
-						// Make sure the 'carton type' is populated for all packing rows. - KZUV.COM
-						// Get the number of packing rows.
-						ll_numpackrows = idw_pack.Rowcount()
+						lsMsg = 'LOAD ID ' + isloadId + ' will locked when order is placed in to LOADING Status.  Do you want to proceed?' // Dinesh - 03/24/2023- SIMS-53- Google - SIMS - Load Lock and New Loading Status
+							If MessageBox( is_title, lsMsg, Exclamation!, YesNo!,2 ) <> 1 Then
+								return 0
+							Else 
+								isLoad_Status = 'LOCK_ON_SAVE'
+								idw_main.SetItem(1,"ord_status","L") //then set status to Loading(L)
+							End If 
 						
-						// Loop through the packing rows.					
-						For ll_packrownum = 1 to ll_numpackrows
 						
-							// Get the carton type.
-							ls_cartontype = trim(idw_pack.getitemstring(ll_packrownum, "carton_type"))
-							
-							// If the carton type is null or blank,
-							if isnull(ls_cartontype) or ls_cartontype = "" then
-								
-								// Modify the error message
-								ls_error += "~r~nThe carton type cannot be blank for row #" + string(ll_packrownum) + "."
-								lb_failed = true
-							End If
-					
-						Next // Next packing row.
-
-						// If any are null or blank,
-						if len(trim(ls_freightterms)) = 0 or isnull(ls_freightterms) then 
-							//ls_error = "You must provide the Freight Terms on the 'Other Info' Tab."
-							ls_error = "You must provide the Incoterm on the 'Other Info' Tab."							
-							lb_failed = true
-						Else
-							//TimA 10/08/12 Pandora issue #500
-							String lsDM_Country, lsCustCountry, lsEUCountryInd
-							//Get the From and To countries anlog with the EUCountry Ind
-							//TimA 11/02/12 Per Dave change we chould be using DM.Country not C2.Country
-							Select  DM.Country as DM_Country, C.Country C_Country ,U.EU_country_Ind
-							INTO 	:lsDM_Country, :lsCustCountry, :lsEUCountryInd
-							From delivery_master DM WITH (NOLOCK)
-								JOIN Customer C WITH (NOLOCK) ON DM.project_id = C.Project_ID 
-									And DM.User_Field2 = C.Cust_Code
-								JOIN Customer C2 WITH (NOLOCK) ON DM.project_id = C2.Project_ID
-									And DM.Cust_Code = C2.Cust_Code
-								JOIN Country U  WITH (NOLOCK) ON U.designating_code in (DM.country, C.Country)
-							Where DM.project_id = 'PANDORA' 
-							And Do_no = :lsDONO
-							Group by DM.Country , C.Country ,U.EU_country_Ind;
-							//TimA Don't use EU for now
-							//If lsEUCountryInd = 'N' then
-								//Only give an error if the freight terms is NA and international
-								If lsDM_Country <> lsCustCountry and ls_freightterms = 'NA' then
-									ls_error = "Incoterm can not be ''NA'' on international orders on the 'Other Info' Tab."							
-									lb_failed = true									
-							//	End if
-							End if
-							
-						End IF
-						
-						if len(trim(ls_transmode)) = 0 or isnull(ls_transmode) then 
-							ls_error = "You must provide the Transportation Mode on the 'Other Info' Tab."
-							lb_failed = true
-						End IF
-						
-						if len(trim(ls_carrier)) = 0 or isnull(ls_carrier) then 
-							ls_error = "You must provide the Carrier on the 'Other Info' Tab."
-							lb_failed = true
-						End IF
-						
-						//dts - 2011-02-14 - added custom validation for 'Reqd Deliver Date' (at packing)
-						if isnull(ldt_RequestDate) or ldt_RequestDate < datetime('2011-01-01')  then 
-							ls_error = "You must enter the Reqd. Delivery Date." //get the label from datawindow?
-							lb_failed = true
-							tab_main.SelectTab(1)
-							idw_main.SetColumn('request_date')
-						End IF
-						
-						//dts - 2/15/11 - no longer requiring Ship_Via as we are using customer name on the CI 3B18
-						//if ls_Country_FROM <> ls_Country_TO then   // this is an international order so validate Ship_Via
-						//	if len(trim(ls_ShipVIA)) = 0 or isnull(ls_ShipVIA) then 
-						//		ls_error = "You must provide a value for Ship_VIA on the 'Other Info' Tab."
-						//		lb_failed = true
-						//	End IF
-						//end if
-											
-						// Quit processing
-						If lb_failed then
-							// Set microhelp.
-							SetMicroHelp("Save Failed!")
-							messagebox (is_Title, ls_error, StopSign!)
-							return -1
-						End If
-						
-						// 01/27/2010 ujh: End Pick_complete Reset.
+//						isLoad_Status = 'LOCK_ON_SAVE'
+//						idw_main.SetItem(1,"ord_status","L") //then set status to Loading(L)
+						//ib_lock = False
+					end if
+				
+					if  ib_lock = False then
+						 isLoad_Status = 'UNLOCK_ON_SAVE' 
+						idw_main.SetItem(1,"ord_status","A") //then set status to Loading(L)
 					End if
-					
-					
-					/* dts - 9/16/2010 - Turning the CI batch_transaction back on... */
-					// If we haven't already sent the 3B18 for this order,
-					// 10/06/2010 ujh And it is true that awb_bol_no and Cost center are populated then we send
-					//If (idw_main.getitemstring(1,'vor_shipment_ind')  = 'N' & 
-							//or IsNull(idw_main.getitemstring(1,'vor_shipment_ind'))) &
-							//and ( len(idw_main.GetItemString(1,"awb_bol_no")) > 0 &
-										//and  len(idw_main.GetItemString(1,"user_field10"))  > 0) then
-					//If ( len(idw_main.GetItemString(1,"awb_bol_no")) > 0 &
-										//and  len(idw_main.GetItemString(1,"user_field10"))  > 0) then
+				end if
+			End if
+	end if
 
-//						LTK 20120523  Pandora #370 Moved the CI code from below to CI/LT button on packing tab.
-//
-//						// Begin a new transaction.
-//						//Execute Immediate "Begin Transaction" using SQLCA;
-//				////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////				
-//				//TimA 04/26/11 Pandora issue #211
-//				//Moved the below code to the end of us_save
-//				////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////						
-//						// See if there's an existing CI record. (11/24 dts: added trans_status = 'N' condition)
-//						Select count(*)
-//						into :ll_numexistingci
-//						from batch_Transaction
-//						where project_id = 'PANDORA'
-//						AND trans_type = 'CI'
-//						and trans_status = 'N'
-//						and trans_order_id = :ls_order;
-//						
-//						// If there isn't an existing CI transaction (in New status) for this order number,
-//						If ll_numexistingci = 0 then
-//							lbGenerateCI = True
-//						else
-//							lbGenerateCI = False
-////							// Begin a new transaction.
-////							Execute Immediate "Begin Transaction" using SQLCA;
-////							// Insert a new record into batch_transaction to create the 3B18.
-////							Insert Into batch_Transaction
-////							(project_ID, Trans_Type, Trans_Order_ID, Trans_Status, Trans_Create_Date, Trans_Parm)
-////							Values(:gs_Project, 'CI', :ls_order, 'N', :ldtToday, '');
-////						
-////							// Commit the transaction.
-////							Execute Immediate "COMMIT" using SQLCA;
-//						End If
-						
-						// Set the vor_shipment_ind to indicate we've already sent the 3B1B for this order.
-						idw_main.setitem(1,'vor_shipment_ind', 'Y')
-						
-//						//End IF // End If we haven't already sent the 3B1B for this order.
-//					
-//						//Jxlim 03/31/2011UPS Load Tender requirement. #149
-//						//Each time a delivery order is saved  in Packing status in which Ord_status = ‘A’,
-//						//and wh_code country is US and Carrier is UPS check if the record exists in Batch_tansaction table.		
-//						Select Country 
-//						into :ls_Country
-//						From Warehouse
-//						where Wh_Code = :ls_Wh_code;
-						
-						//Jxlim 06/28/2011 Commented code for country since this is now not limited to US warehouse per Ian
-//						//Jxlim 04/27/2011Ship from location per BRD changed use user_field2 from other infor tab.
-//						ls_Cust_code = idw_other.GetItemString(1, 'User_field2')
-//						Select Country Into :ls_Country
-//						From Customer
-//						Where Cust_Code = :ls_Cust_code
-//						And Customer_type = 'WH'
-//						Using SQLCA;
-
-
-//						LTK 20120523  Pandora #370 Moved the Load Tender code from below to CI/LT button on packing tab.
-//
-//						ls_ups = Mid(ls_carrier,1,3)
-//						
-//						//Jxlim 06/28/2011 Commented code for country since this is now not limited to US warehouse per Ian
-//						//If not exist create one.						
-//						//If idw_main.GetItemString(1,"ord_status") = "A" And ls_Country = 'US'  And ls_ups = 'UPS' Then
-//						If idw_main.GetItemString(1,"ord_status") = "A"  And ls_ups = 'UPS' Then
-//							Select count(*)
-//							into :ll_numexistingup
-//							from batch_Transaction
-//							where project_id = 'PANDORA'
-//							AND trans_type = 'UP'
-//							and trans_status = 'N'
-//							Using SQLCA;
-//							//and trans_order_id = :ls_order;			
-//
-//								// If there isn't an existing UP transaction then create a trans record.
-//								If ll_numexistingup = 0 Then							
-//									lbGenerateUP = True
-//								Else
-//									lbGenerateUP = False
-////									// Begin a new transaction.
-////									Execute Immediate "Begin Transaction" using SQLCA;
-////									// Insert a new record into batch_transaction to create the UP
-////									Insert Into batch_Transaction
-////									(project_ID, Trans_Type, Trans_order_id, Trans_Status, Trans_Create_Date, Trans_Parm)
-////									Values(:gs_Project, 'UP', :ls_order, 'N', :ldtToday, '');
-////								
-////									// Commit the transaction.
-////									Execute Immediate "COMMIT" using SQLCA;
-//								End If	
-//							End If
-//							//Jxlim 03/31/2011 end of code for UPS Load tender 
-				////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////				
-				//TimA 04/26/11 Pandora issue #211
-				//Moved the above code to the end of us_save
-				////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////			
-				Else					//for existing order if there are picking row but not packing row
-					If idw_main.GetItemString(1,"ord_status") <> "I" Then	//and order status is not Picking(I)
-						idw_main.SetItem(1,"ord_status","P")					//then set status to Process(P)
-						// 01/27/2010 ujh; Set Pick_Complete 2 of3: 
-						IF Upper(gs_project) = 'PANDORA' THEN
-							idw_main.setitem(1,'pick_complete',datetime( '00:00:00') )							
-							//JXLIM 11/19/2012 Pandora FWD Pick BRD #464 Prompted message for auto stcok transfer order when the order is pick and save from new status.  Should the message go to after saving .....
-							//If lb_stockTransf_created = True Then
-							If wf_Fwd_TransferOrder() = True Then
-								MessageBox('Auto Stock Transfer', 'SIMS has auto created the FWD Pick stock transfer orders')
-							End If							
-						End if
-						
-					End if
-				End If
-				
-			Else
-				
-				idw_main.SetItem(1,"ord_status","N")						//JXLIM 11/19/2012 Pandora; Process or Picking order status being put back to New.					
-				// 01/27/2010 ujh; Set Pick_Complete 3 of 3: 
-				IF Upper(gs_project) = 'PANDORA'  THEN
-					//idw_main.setitem(1,'pick_complete',datetime( '00:00:00') )
-					idw_main.setitem(1,'pick_complete',datetime( 'null') )					
-					//JXLIM 11/19/2012 Pandora FWD Pick BRD #464 //Provide error message to void stock transfer order when Process(P) or Picking (I) is put back to New and save. 
-					//Should the message go to after saving .....
-					//If  	lb_stockTransf_created = True Then
-					If wf_Fwd_TransferOrder() = True Then
-						MessageBox('Auto Stock Transfer', +&
-						'Please Void/Delete any Transfer orders' +&
-						'~rthat were generated as a a result of Outbound Order',  StopSign!)
-						Return -1
-					End If
-				End if
-				
-			End If
-			
-		// 03/02 - PCONKL - Set Status to Delivered if Complete and Delivery Date Entered
-		Elseif idw_main.GetItemString(1,"ord_status") = 'C' Then
-			If Not IsNull(idw_main.GetItemDateTime(1,"Delivery_Date")) Then
-				idw_main.SetItem(1,"ord_status","D")
-			End If
-		End If
-		
-		// 5/3/00 PCONKL - we must set the true order # to new detail rows added to existing orders
-		//                 since the sle_edit has the invoice # and not the PK
-		// 02/07 			Only set if not present, wasted updates to DB otherwise
-		
-		For i = 1 to idw_detail.RowCount()
-			If isNull(idw_Detail.GetITemString(i,'do_no')) or idw_Detail.GetITemString(i,'do_no') = "" Then
-				idw_detail.SetItem(i, "do_no", ls_order)
-			End If
-		Next	
 	
-	End If
-	
+else
+		idw_main.SetItem(1,"ord_status","A") //then set status to Packing(A) // other than Pandora
+end if
+// End - 03/16/2023- Dinesh - SIMS-53- Google - SIMS - Load Lock and New Loading Status
+// 09/16 - PCONKL - Set Pack Start Date if not already populated
+If IsNull(idw_main.GetItemDateTime(1, 'pack_start_time')) Then
+idw_main.SetItem(1,'pack_start_time',ldtGMT  )
+End If
+// 01/27/2010 ujh; Set Pick_Complete 1 of 3:  Due to change to Packing status,
+//                             electronically set Pick_complete to current date if and only if it is not now set.
+IF Upper(gs_project) = 'PANDORA' THEN
+ldtPickComplete = f_getLocalWorldTime( idw_main.getitemstring(1,'wh_code') )
+If IsNull(idw_main.GetItemDateTime(1, 'pick_complete')) Then
+idw_main.setitem(1,'pick_complete', ldtPickComplete )
+End If
+//dts 11/12/10 - moved these checks inside IF 'PANDORA' condition, and added Ship_VIA check...
+// Make sure Carrier, Transport Mode, Freight Terms  are populated.
+//dts 2011-02-14 - added request_date to this validation...
+ls_freightterms = tab_main.tabpage_other.dw_other.getitemstring(1, "freight_terms")
+ls_transmode = tab_main.tabpage_other.dw_other.getitemstring(1, "transport_mode")
+ls_carrier = tab_main.tabpage_other.dw_other.getitemstring(1, "carrier")
+//dts 2/15/11 - ls_ShipVIA = tab_main.tabpage_other.dw_other.getitemstring(1, "Ship_VIA")
+ldt_RequestDate = idw_main.GetItemDateTime(1, 'request_date')
+
+// Make sure the 'carton type' is populated for all packing rows. - KZUV.COM
+// Get the number of packing rows.
+ll_numpackrows = idw_pack.Rowcount()
+// Loop through the packing rows.
+For ll_packrownum = 1 to ll_numpackrows
+// Get the carton type.
+ls_cartontype = trim(idw_pack.getitemstring(ll_packrownum, "carton_type"))
+// If the carton type is null or blank,
+if isnull(ls_cartontype) or ls_cartontype = "" then
+// Modify the error message
+ls_error += "~r~nThe carton type cannot be blank for row #" + string(ll_packrownum) + "."
+lb_failed = true
+End If
+Next // Next packing row.
+
+// If any are null or blank,
+if len(trim(ls_freightterms)) = 0 or isnull(ls_freightterms) then
+//ls_error = "You must provide the Freight Terms on the 'Other Info' Tab."
+ls_error = "You must provide the Incoterm on the 'Other Info' Tab."
+lb_failed = true
+Else
+//TimA 10/08/12 Pandora issue #500
+String lsDM_Country, lsCustCountry, lsEUCountryInd
+//Get the From and To countries anlog with the EUCountry Ind
+//TimA 11/02/12 Per Dave change we chould be using DM.Country not C2.Country
+Select  DM.Country as DM_Country, C.Country C_Country ,U.EU_country_Ind
+INTO :lsDM_Country, :lsCustCountry, :lsEUCountryInd
+From delivery_master DM WITH (NOLOCK)
+JOIN Customer C WITH (NOLOCK) ON DM.project_id = C.Project_ID
+And DM.User_Field2 = C.Cust_Code
+JOIN Customer C2 WITH (NOLOCK) ON DM.project_id = C2.Project_ID
+And DM.Cust_Code = C2.Cust_Code
+JOIN Country U  WITH (NOLOCK) ON U.designating_code in (DM.country, C.Country)
+Where DM.project_id = 'PANDORA'
+And Do_no = :lsDONO
+Group by DM.Country , C.Country ,U.EU_country_Ind;
+//TimA Don't use EU for now
+//If lsEUCountryInd = 'N' then
+//Only give an error if the freight terms is NA and international
+If lsDM_Country <> lsCustCountry and ls_freightterms = 'NA' then
+ls_error = "Incoterm can not be ''NA'' on international orders on the 'Other Info' Tab."
+lb_failed = true
+// End if
+End if
+End IF
+if len(trim(ls_transmode)) = 0 or isnull(ls_transmode) then
+ls_error = "You must provide the Transportation Mode on the 'Other Info' Tab."
+lb_failed = true
+End IF
+if len(trim(ls_carrier)) = 0 or isnull(ls_carrier) then
+ls_error = "You must provide the Carrier on the 'Other Info' Tab."
+lb_failed = true
+End IF
+//dts - 2011-02-14 - added custom validation for 'Reqd Deliver Date' (at packing)
+if isnull(ldt_RequestDate) or ldt_RequestDate < datetime('2011-01-01')  then
+ls_error = "You must enter the Reqd. Delivery Date." //get the label from datawindow?
+lb_failed = true
+tab_main.SelectTab(1)
+idw_main.SetColumn('request_date')
+End IF
+//dts - 2/15/11 - no longer requiring Ship_Via as we are using customer name on the CI 3B18
+//if ls_Country_FROM <> ls_Country_TO then   // this is an international order so validate Ship_Via
+// if len(trim(ls_ShipVIA)) = 0 or isnull(ls_ShipVIA) then
+// ls_error = "You must provide a value for Ship_VIA on the 'Other Info' Tab."
+// lb_failed = true
+// End IF
+//end if
+// Quit processing
+If lb_failed then
+// Set microhelp.
+SetMicroHelp("Save Failed!")
+messagebox (is_Title, ls_error, StopSign!)
+return -1
+End If
+// 01/27/2010 ujh: End Pick_complete Reset.
+End if
+/* dts - 9/16/2010 - Turning the CI batch_transaction back on... */
+// If we haven't already sent the 3B18 for this order,
+// 10/06/2010 ujh And it is true that awb_bol_no and Cost center are populated then we send
+//If (idw_main.getitemstring(1,'vor_shipment_ind')  = 'N' &
+//or IsNull(idw_main.getitemstring(1,'vor_shipment_ind'))) &
+//and ( len(idw_main.GetItemString(1,"awb_bol_no")) > 0 &
+//and  len(idw_main.GetItemString(1,"user_field10"))  > 0) then
+//If ( len(idw_main.GetItemString(1,"awb_bol_no")) > 0 &
+//and  len(idw_main.GetItemString(1,"user_field10"))  > 0) then
+
+// LTK 20120523  Pandora #370 Moved the CI code from below to CI/LT button on packing tab.
+//
+// // Begin a new transaction.
+// //Execute Immediate "Begin Transaction" using SQLCA;
+// ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// //TimA 04/26/11 Pandora issue #211
+// //Moved the below code to the end of us_save
+// ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// // See if there's an existing CI record. (11/24 dts: added trans_status = 'N' condition)
+// Select count(*)
+// into :ll_numexistingci
+// from batch_Transaction
+// where project_id = 'PANDORA'
+// AND trans_type = 'CI'
+// and trans_status = 'N'
+// and trans_order_id = :ls_order;
+//
+// // If there isn't an existing CI transaction (in New status) for this order number,
+// If ll_numexistingci = 0 then
+// lbGenerateCI = True
+// else
+// lbGenerateCI = False
+//// // Begin a new transaction.
+//// Execute Immediate "Begin Transaction" using SQLCA;
+//// // Insert a new record into batch_transaction to create the 3B18.
+//// Insert Into batch_Transaction
+//// (project_ID, Trans_Type, Trans_Order_ID, Trans_Status, Trans_Create_Date, Trans_Parm)
+//// Values(:gs_Project, 'CI', :ls_order, 'N', :ldtToday, '');
+////
+//// // Commit the transaction.
+//// Execute Immediate "COMMIT" using SQLCA;
+// End If
+// Set the vor_shipment_ind to indicate we've already sent the 3B1B for this order.
+idw_main.setitem(1,'vor_shipment_ind', 'Y')
+// //End IF // End If we haven't already sent the 3B1B for this order.
+//
+// //Jxlim 03/31/2011UPS Load Tender requirement. #149
+// //Each time a delivery order is saved  in Packing status in which Ord_status = ‘A’,
+// //and wh_code country is US and Carrier is UPS check if the record exists in Batch_tansaction table.
+// Select Country
+// into :ls_Country
+// From Warehouse
+// where Wh_Code = :ls_Wh_code;
+//Jxlim 06/28/2011 Commented code for country since this is now not limited to US warehouse per Ian
+// //Jxlim 04/27/2011Ship from location per BRD changed use user_field2 from other infor tab.
+// ls_Cust_code = idw_other.GetItemString(1, 'User_field2')
+// Select Country Into :ls_Country
+// From Customer
+// Where Cust_Code = :ls_Cust_code
+// And Customer_type = 'WH'
+// Using SQLCA;
+
+
+// LTK 20120523  Pandora #370 Moved the Load Tender code from below to CI/LT button on packing tab.
+//
+// ls_ups = Mid(ls_carrier,1,3)
+//
+// //Jxlim 06/28/2011 Commented code for country since this is now not limited to US warehouse per Ian
+// //If not exist create one.
+// //If idw_main.GetItemString(1,"ord_status") = "A" And ls_Country = 'US'  And ls_ups = 'UPS' Then
+// If idw_main.GetItemString(1,"ord_status") = "A"  And ls_ups = 'UPS' Then
+// Select count(*)
+// into :ll_numexistingup
+// from batch_Transaction
+// where project_id = 'PANDORA'
+// AND trans_type = 'UP'
+// and trans_status = 'N'
+// Using SQLCA;
+// //and trans_order_id = :ls_order;
+//
+// // If there isn't an existing UP transaction then create a trans record.
+// If ll_numexistingup = 0 Then
+// lbGenerateUP = True
+// Else
+// lbGenerateUP = False
+//// // Begin a new transaction.
+//// Execute Immediate "Begin Transaction" using SQLCA;
+//// // Insert a new record into batch_transaction to create the UP
+//// Insert Into batch_Transaction
+//// (project_ID, Trans_Type, Trans_order_id, Trans_Status, Trans_Create_Date, Trans_Parm)
+//// Values(:gs_Project, 'UP', :ls_order, 'N', :ldtToday, '');
+////
+//// // Commit the transaction.
+//// Execute Immediate "COMMIT" using SQLCA;
+// End If
+// End If
+// //Jxlim 03/31/2011 end of code for UPS Load tender
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//TimA 04/26/11 Pandora issue #211
+//Moved the above code to the end of us_save
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+Else //for existing order if there are picking row but not packing row
+If idw_main.GetItemString(1,"ord_status") <> "I" Then //and order status is not Picking(I)
+idw_main.SetItem(1,"ord_status","P") //then set status to Process(P)
+// 01/27/2010 ujh; Set Pick_Complete 2 of3:
+IF Upper(gs_project) = 'PANDORA' THEN
+idw_main.setitem(1,'pick_complete',datetime( '00:00:00') )
+//JXLIM 11/19/2012 Pandora FWD Pick BRD #464 Prompted message for auto stcok transfer order when the order is pick and save from new status.  Should the message go to after saving .....
+//If lb_stockTransf_created = True Then
+If wf_Fwd_TransferOrder() = True Then
+MessageBox('Auto Stock Transfer', 'SIMS has auto created the FWD Pick stock transfer orders')
+End If
+End if
+End if
+End If
+Else
+idw_main.SetItem(1,"ord_status","N") //JXLIM 11/19/2012 Pandora; Process or Picking order status being put back to New.
+// 01/27/2010 ujh; Set Pick_Complete 3 of 3:
+IF Upper(gs_project) = 'PANDORA'  THEN
+//idw_main.setitem(1,'pick_complete',datetime( '00:00:00') )
+idw_main.setitem(1,'pick_complete',datetime( 'null') )
+//JXLIM 11/19/2012 Pandora FWD Pick BRD #464 //Provide error message to void stock transfer order when Process(P) or Picking (I) is put back to New and save.
+//Should the message go to after saving .....
+//If   lb_stockTransf_created = True Then
+If wf_Fwd_TransferOrder() = True Then
+MessageBox('Auto Stock Transfer', +&
+'Please Void/Delete any Transfer orders' +&
+'~rthat were generated as a a result of Outbound Order',  StopSign!)
+Return -1
+End If
+End if
+End If
+// 03/02 - PCONKL - Set Status to Delivered if Complete and Delivery Date Entered
+Elseif idw_main.GetItemString(1,"ord_status") = 'C' Then
+If Not IsNull(idw_main.GetItemDateTime(1,"Delivery_Date")) Then
+idw_main.SetItem(1,"ord_status","D")
+End If
+End If
+// 5/3/00 PCONKL - we must set the true order # to new detail rows added to existing orders
+//                 since the sle_edit has the invoice # and not the PK
+// 02/07 Only set if not present, wasted updates to DB otherwise
+For i = 1 to idw_detail.RowCount()
+If isNull(idw_Detail.GetITemString(i,'do_no')) or idw_Detail.GetITemString(i,'do_no') = "" Then
+idw_detail.SetItem(i, "do_no", ls_order)
+End If
+Next
+End If
 end if
 
 
 ////06/05 - PCONKL - Update Carton serials if Voided - must be done before picking detail rows are deleted
 //If idw_main.RowCount() > 0 Then
-//	If idw_main.GetItemString(1,"ord_status") = 'V'  Then
-//		wf_save_carton_serial()
-//	End If
+// If idw_main.GetItemString(1,"ord_status") = 'V'  Then
+// wf_save_carton_serial()
+// End If
 //End If
 
 tab_main.tabpage_pack.dw_packlist_notes.AcceptText()
@@ -23952,70 +24528,67 @@ tab_main.tabpage_pack.dw_packlist_notes.AcceptText()
 
 //08/06 - PCONKL - Moved outside of transaction
 If idw_main.RowCount() > 0 Then
-	If idw_main.GetItemString(1,"ord_status") <> "C" Then
-		
-		f_getprice(idw_main, idw_detail)
-	
-		// *** 12/06 - PCONKL - Hardcoded to ensure bypass for those that are not enabled (akkow for controleld rollout to prod) ****
-		If not ibServerAllocationEnabled Then
-			
-			If wf_update_content() = -1 Then return -1 /* 12/06 - PCONKL - moved to server*/
-			
-		End If
-		
-	End If
-	
+If idw_main.GetItemString(1,"ord_status") <> "C" Then
+f_getprice(idw_main, idw_detail)
+// *** 12/06 - PCONKL - Hardcoded to ensure bypass for those that are not enabled (akkow for controleld rollout to prod) ****
+If not ibServerAllocationEnabled Then
+If wf_update_content() = -1 Then return -1 /* 12/06 - PCONKL - moved to server*/
+End If
+End If
 End If
 
+//Begin - Dinesh - 08/22/2023- SIMS-198- Google read only screen
+
+//if gs_project='PANDORA' then
+//		wf_delivery_order_readonly(lb_readonly)
+//end if
+//End - Dinesh - 08/22/2023- SIMS-198- Google read only screen
 
 Execute Immediate "Begin Transaction" using SQLCA; /* 11/04 - PCONKL - Auto Commit Turned on to eliminate DB locks*/
 
 If idw_main.RowCount() > 0 Then
-	SQLCA.DBParm = "disablebind =0"
-	ll_result  = idw_main.Update(False, False)
-	SQLCA.DBParm = "disablebind =1"
+SQLCA.DBParm = "disablebind =0"
+ll_result  = idw_main.Update(False, False)
+SQLCA.DBParm = "disablebind =1"
 Else
-	ll_result = 1	
+ll_result = 1
 End If
 
 //MEA - 12/11 - Send Nike DST File
 
 IF ll_result = 1 then
-	IF  upper(left(gs_Project,4)) = 'NIKE' THEN
-		IF lb_send_nike_dst THEN
+IF  upper(left(gs_Project,4)) = 'NIKE' THEN
+IF lb_send_nike_dst THEN
                                                
-			Insert Into batch_Transaction (project_ID, Trans_Type, Trans_Order_ID, Trans_Status, Trans_Create_Date, Trans_Parm)
-				Values(:gs_Project, 'PK', :lsDONO,'N', :ldtToday, '');
-		 END IF
-	END IF
-	
-	//14-FEB-2019 :Madhu S29511 -PhilipsCLS BlueHeart OutboundDeliveryStatusUpdate -START
-	//GailM 11/18/2020 S51441/F26536/I2978 PhilipsDA mimic PHILIPSCLS in Outbound order
-	IF upper(gs_project) ='PHILIPSCLS' or upper(gs_project) ='PHILIPS-DA' THEN
-		IF lb_rd_change THEN
-			Insert Into Batch_Transaction (Project_Id, Trans_Type, Trans_Order_Id, Trans_Status, Trans_Create_Date, Trans_Parm)
-			Values(:gs_project, 'RD', :lsDONO,'N', :ldtToday, 'REQUESTEDDATE');
-		END IF
+Insert Into batch_Transaction (project_ID, Trans_Type, Trans_Order_ID, Trans_Status, Trans_Create_Date, Trans_Parm)
+Values(:gs_Project, 'PK', :lsDONO,'N', :ldtToday, '');
+END IF
+END IF
+//14-FEB-2019 :Madhu S29511 -PhilipsCLS BlueHeart OutboundDeliveryStatusUpdate -START
+//GailM 11/18/2020 S51441/F26536/I2978 PhilipsDA mimic PHILIPSCLS in Outbound order
+IF upper(gs_project) ='PHILIPSCLS' or upper(gs_project) ='PHILIPS-DA' THEN
+IF lb_rd_change THEN
+Insert Into Batch_Transaction (Project_Id, Trans_Type, Trans_Order_Id, Trans_Status, Trans_Create_Date, Trans_Parm)
+Values(:gs_project, 'RD', :lsDONO,'N', :ldtToday, 'REQUESTEDDATE');
+END IF
 
-		IF lb_sd_change THEN
-			Insert Into Batch_Transaction (Project_Id, Trans_Type, Trans_Order_Id, Trans_Status, Trans_Create_Date, Trans_Parm)
-			Values(:gs_project, 'SD', :lsDONO,'N', :ldtToday, 'SCHEDULEDDATE');
-		END IF
-		
-		IF lb_dd_change THEN
-			Insert Into Batch_Transaction (Project_Id, Trans_Type, Trans_Order_Id, Trans_Status, Trans_Create_Date, Trans_Parm)
-			Values(:gs_project, 'ES', :lsDONO,'N', :ldtToday, 'DELIVEREDDATE');
-		END IF
-	END IF
-	//14-FEB-2019 :Madhu S29511 -PhilipsCLS BlueHeart OutboundDeliveryStatusUpdate -END
-	
+IF lb_sd_change THEN
+Insert Into Batch_Transaction (Project_Id, Trans_Type, Trans_Order_Id, Trans_Status, Trans_Create_Date, Trans_Parm)
+Values(:gs_project, 'SD', :lsDONO,'N', :ldtToday, 'SCHEDULEDDATE');
+END IF
+IF lb_dd_change THEN
+Insert Into Batch_Transaction (Project_Id, Trans_Type, Trans_Order_Id, Trans_Status, Trans_Create_Date, Trans_Parm)
+Values(:gs_project, 'ES', :lsDONO,'N', :ldtToday, 'DELIVEREDDATE');
+END IF
+END IF
+//14-FEB-2019 :Madhu S29511 -PhilipsCLS BlueHeart OutboundDeliveryStatusUpdate -END
 END IF
 
 
 //dts - 9/2/2010 SQLCA.DBParm = "disablebind =0"
 //mea -10/4/2010 - CHINASIMS currently only in test
 If Upper(gs_project) = 'CHINASIMS'  OR g.ibSupportUnicode = TRUE THEN
-	 SQLCA.DBParm = "disablebind =0"
+SQLCA.DBParm = "disablebind =0"
 End If
 
 If ll_result = 1 Then ll_result = idw_detail.Update(False, False)
@@ -24024,7 +24597,7 @@ If ll_result = 1 Then ll_result = idw_pack.Update(False, False)
 //dts - 9/2/2010 SQLCA.DBParm = "disablebind =1"
 //mea -10/4/2010 - CHINASIMS currently only in test
 If Upper(gs_project) = 'CHINASIMS'  OR g.ibSupportUnicode = TRUE THEN
-	 SQLCA.DBParm = "disablebind =1"
+SQLCA.DBParm = "disablebind =1"
 End If
 
 
@@ -24032,311 +24605,264 @@ End If
 
 // *** 12/06 - PCONKL - Hardcoded to ensure controlled rollout ****
 If not ibServerAllocationEnabled Then
-	//dts - 9/2/2010 	SQLCA.DBParm = "disablebind =0"
-	//mea -10/4/2010 - CHINASIMS currently only in test
-	If Upper(gs_project) = 'CHINASIMS' OR g.ibSupportUnicode = TRUE THEN
-		 SQLCA.DBParm = "disablebind =0"
-	End If
-	
-	If ll_result = 1 Then ll_result = idw_pick_detail.Update(False, False)
-	If ll_result = 1 Then ll_result = idw_pick.Update(False, False)	
-	
-	//dts - 9/2/2010 	SQLCA.DBParm = "disablebind =1"
-	//mea -10/4/2010 - CHINASIMS currently only in test
-	If Upper(gs_project) = 'CHINASIMS' OR g.ibSupportUnicode = TRUE THEN
-		 SQLCA.DBParm = "disablebind =1"
-	End If
+//dts - 9/2/2010 SQLCA.DBParm = "disablebind =0"
+//mea -10/4/2010 - CHINASIMS currently only in test
+If Upper(gs_project) = 'CHINASIMS' OR g.ibSupportUnicode = TRUE THEN
+SQLCA.DBParm = "disablebind =0"
+End If
+If ll_result = 1 Then ll_result = idw_pick_detail.Update(False, False)
+If ll_result = 1 Then ll_result = idw_pick.Update(False, False)
+//dts - 9/2/2010 SQLCA.DBParm = "disablebind =1"
+//mea -10/4/2010 - CHINASIMS currently only in test
+If Upper(gs_project) = 'CHINASIMS' OR g.ibSupportUnicode = TRUE THEN
+SQLCA.DBParm = "disablebind =1"
+End If
 
 End If
 
-If ll_result = 1 Then 
-	
-	//mea -10/4/2010 - CHINASIMS currently only in test
-		If Upper(gs_project) = 'CHINASIMS' OR g.ibSupportUnicode = TRUE THEN
-		 SQLCA.DBParm = "disablebind =0"
-	End If
-	
-	ll_result = tab_main.tabpage_serial.dw_serial.Update(False, False) 
+If ll_result = 1 Then
+//mea -10/4/2010 - CHINASIMS currently only in test
+If Upper(gs_project) = 'CHINASIMS' OR g.ibSupportUnicode = TRUE THEN
+SQLCA.DBParm = "disablebind =0"
+End If
+ll_result = tab_main.tabpage_serial.dw_serial.Update(False, False)
 
-	//mea -10/4/2010 - CHINASIMS currently only in test
-	If Upper(gs_project) = 'CHINASIMS' OR g.ibSupportUnicode = TRUE THEN
-		 SQLCA.DBParm = "disablebind =1"
-	End If
+//mea -10/4/2010 - CHINASIMS currently only in test
+If Upper(gs_project) = 'CHINASIMS' OR g.ibSupportUnicode = TRUE THEN
+SQLCA.DBParm = "disablebind =1"
+End If
 
-	
 END IF
 
 // 02/05 - PCONKL - Content will fail if avail qty has been changed since the bucket was filled on the update - notify user to resave (below)
-//							IF you change the content datastore (d_do_content), MAKE SURE AVVAIL QTY IS ONE OF THE UNIQUE UPDATE COLUMNS
+// IF you change the content datastore (d_do_content), MAKE SURE AVVAIL QTY IS ONE OF THE UNIQUE UPDATE COLUMNS
 //12/06 - PCONKL - Content being updated on the server
 
 // *** 12/06 - PCONKL - Hardcoded to ensure controlled rollout ****
 If not ibServerAllocationEnabled Then
-	
-	If ll_result = 1 Then
-		
-		//mea -10/4/2010 - CHINASIMS currently only in test
-		If Upper(gs_project) = 'CHINASIMS' OR g.ibSupportUnicode = TRUE THEN
-			 SQLCA.DBParm = "disablebind =0"
-		End If
+If ll_result = 1 Then
+//mea -10/4/2010 - CHINASIMS currently only in test
+If Upper(gs_project) = 'CHINASIMS' OR g.ibSupportUnicode = TRUE THEN
+SQLCA.DBParm = "disablebind =0"
+End If
 
-		ll_result = ids_content.Update(False, False)
-		
-		//mea -10/4/2010 - CHINASIMS currently only in test
-		If Upper(gs_project) = 'CHINASIMS' OR g.ibSupportUnicode = TRUE THEN
-			 SQLCA.DBParm = "disablebind =1"
-		End If
-		
-			
-		If ll_Result <> 1 Then 
-			lbContentFailed = True
-			lsContentErrorText = ids_Content.wf_get_db_error_Text() /* 05/06/ PCONKL - get DB error Event information*/
-		End If
-	End If
+ll_result = ids_content.Update(False, False)
+//mea -10/4/2010 - CHINASIMS currently only in test
+If Upper(gs_project) = 'CHINASIMS' OR g.ibSupportUnicode = TRUE THEN
+SQLCA.DBParm = "disablebind =1"
+End If
+If ll_Result <> 1 Then
+lbContentFailed = True
+lsContentErrorText = ids_Content.wf_get_db_error_Text() /* 05/06/ PCONKL - get DB error Event information*/
+End If
+End If
 
 End If
 
-If ll_result = 1 Then ll_result = tab_main.tabpage_main.tab_address.Trigger Event ue_save() 
+If ll_result = 1 Then ll_result = tab_main.tabpage_main.tab_address.Trigger Event ue_save()
 
 // 10/03 - PCONKL - If we created a backorder, we might have copied alt addresses over to the new order, we need to save those new rows
 If ll_Result = 1 Then
-	If isvalid(ids_Alt_addresses) Then
-		//Set the DONO on the new records
-		llRowCount = ids_Alt_addresses.RowCount()
-		For llRowPos = 1 to llRowCOunt
-			If ids_Alt_addresses.GetITemString(llRowPos,'do_no') = '' or isnull(ids_Alt_addresses.GetITemString(llRowPos,'do_no')) Then
-				ids_Alt_addresses.SetItem(llRowPos,'do_no',idw_main.GetITemString(1,'do_no'))
-			End If
-		Next
-		//dts - 9/2/2010 		SQLCA.DBParm = "disablebind =0"
-		//mea -10/4/2010 - CHINASIMS currently only in test
-		If Upper(gs_project) = 'CHINASIMS'  OR g.ibSupportUnicode = TRUE THEN
-			 SQLCA.DBParm = "disablebind =0"
-		End If
+If isvalid(ids_Alt_addresses) Then
+//Set the DONO on the new records
+llRowCount = ids_Alt_addresses.RowCount()
+For llRowPos = 1 to llRowCOunt
+If ids_Alt_addresses.GetITemString(llRowPos,'do_no') = '' or isnull(ids_Alt_addresses.GetITemString(llRowPos,'do_no')) Then
+ids_Alt_addresses.SetItem(llRowPos,'do_no',idw_main.GetITemString(1,'do_no'))
+End If
+Next
+//dts - 9/2/2010 SQLCA.DBParm = "disablebind =0"
+//mea -10/4/2010 - CHINASIMS currently only in test
+If Upper(gs_project) = 'CHINASIMS'  OR g.ibSupportUnicode = TRUE THEN
+SQLCA.DBParm = "disablebind =0"
+End If
 
-		ll_result = ids_Alt_addresses.Update(False, False)
-		
-		//dts - 9/2/2010 		SQLCA.DBParm = "disablebind =1"
-		//mea -10/4/2010 - CHINASIMS currently only in test
-		If Upper(gs_project) = 'CHINASIMS' OR g.ibSupportUnicode = TRUE THEN
-			 SQLCA.DBParm = "disablebind =1"
-		End If
+ll_result = ids_Alt_addresses.Update(False, False)
+//dts - 9/2/2010 SQLCA.DBParm = "disablebind =1"
+//mea -10/4/2010 - CHINASIMS currently only in test
+If Upper(gs_project) = 'CHINASIMS' OR g.ibSupportUnicode = TRUE THEN
+SQLCA.DBParm = "disablebind =1"
+End If
 
-		
-	End If
-End If 
+End If
+End If
 
-//MEA No. of Carton in Other Info tab should be populated by getting the Total Cartons in Packing List tab after the packing list 
+//MEA No. of Carton in Other Info tab should be populated by getting the Total Cartons in Packing List tab after the packing list
 //is being generated
 
 IF Upper(gs_project) = "NIKE-MY" OR Upper(gs_project) = "NIKE-SG" THEN
 
-	IF idw_pack.RowCount() >= 1 THEN
-		idw_main.SetItem(1, "ctn_cnt", idw_pack.GetItemNumber(1,"c_carton_count"))
-	END IF	
-		
-END IF	
+IF idw_pack.RowCount() >= 1 THEN
+idw_main.SetItem(1, "ctn_cnt", idw_pack.GetItemNumber(1,"c_carton_count"))
+END IF
+END IF
 
 
-
-If idw_main.RowCount() = 0 and ll_result = 1 Then 
-	
-	//mea -10/4/2010 - CHINASIMS currently only in test
-	If Upper(gs_project) = 'CHINASIMS' OR g.ibSupportUnicode = TRUE THEN
-		 SQLCA.DBParm = "disablebind =0"
-	End If
-	
-	ll_result  = idw_main.Update(False, False)
-	
-	//mea -10/4/2010 - CHINASIMS currently only in test
-	If Upper(gs_project) = 'CHINASIMS' OR g.ibSupportUnicode = TRUE THEN
-		SQLCA.DBParm = "disablebind =1"
-	End If
-	
+If idw_main.RowCount() = 0 and ll_result = 1 Then
+//mea -10/4/2010 - CHINASIMS currently only in test
+If Upper(gs_project) = 'CHINASIMS' OR g.ibSupportUnicode = TRUE THEN
+SQLCA.DBParm = "disablebind =0"
+End If
+ll_result  = idw_main.Update(False, False)
+//mea -10/4/2010 - CHINASIMS currently only in test
+If Upper(gs_project) = 'CHINASIMS' OR g.ibSupportUnicode = TRUE THEN
+SQLCA.DBParm = "disablebind =1"
+End If
 End If
 
 //// 05/10 - PCONKL - If unconfirming an order for Comcast, we want to flag any carton serial records so we can reconcile back to EIS if we change any pallet ID's
 //If gs_project = 'COMCAST' and  ll_result = 1 and ibUnconfirmRequested Then
-//	
-//		SetMicroHelp("Updating Carton Serial Records for COMCAST....")
-//		
-//		Update Carton_Serial
-//		Set do_no = :lsDONO, status_cd = 'X'
-//		Where project_id = 'COMCAST' and Pallet_id in 
-//			(Select serial_no from delivery_Serial_Detail where id_no in (select id_no from delivery_Picking_detail where do_no = :lsDONO));
-//			
-//		Update Carton_Serial
-//		Set do_no = :lsDONO, status_cd = 'X'
-//		Where project_id = 'COMCAST' and Carton_id in 
-//				(Select serial_no from delivery_Serial_Detail where id_no in (select id_no from delivery_Picking_detail where do_no = :lsDONO));
-//				
-//		Update Carton_Serial
-//		Set do_no = :lsDONO, status_cd = 'X'
-//		Where project_id = 'COMCAST' and serial_no in 
-//				(Select serial_no from delivery_Serial_Detail where id_no in (select id_no from delivery_Picking_detail where do_no = :lsDONO));
-//	
-//		SetMicroHelp("Ready.")
-//	
+//
+// SetMicroHelp("Updating Carton Serial Records for COMCAST....")
+//
+// Update Carton_Serial
+// Set do_no = :lsDONO, status_cd = 'X'
+// Where project_id = 'COMCAST' and Pallet_id in
+// (Select serial_no from delivery_Serial_Detail where id_no in (select id_no from delivery_Picking_detail where do_no = :lsDONO));
+//
+// Update Carton_Serial
+// Set do_no = :lsDONO, status_cd = 'X'
+// Where project_id = 'COMCAST' and Carton_id in
+// (Select serial_no from delivery_Serial_Detail where id_no in (select id_no from delivery_Picking_detail where do_no = :lsDONO));
+//
+// Update Carton_Serial
+// Set do_no = :lsDONO, status_cd = 'X'
+// Where project_id = 'COMCAST' and serial_no in
+// (Select serial_no from delivery_Serial_Detail where id_no in (select id_no from delivery_Picking_detail where do_no = :lsDONO));
+//
+// SetMicroHelp("Ready.")
+//
 //End If /*Comcast unconfirm*/
 
 
 If ll_result = 1 Then
-	
-	Execute Immediate "COMMIT" using SQLCA;
-	
-	If SQLCA.SQLCode = 0 Then
-			
-		idw_main.ResetUpdate()
-   		idw_detail.ResetUpdate()
-		idw_pack.ResetUpdate()
-		tab_main.tabpage_serial.dw_serial.resetupdate()
-		
-		//TimA 04/26/11
-		lbSave = True
-		
-		If isvalid(ids_Alt_addresses) Then /* 10/03 - PCONKL */
-			ids_Alt_addresses.Reset()
-		End If
-		
-		//12/06 - PCONKL - Content being udpated on Server, don't allocate untill everything else saved (Pick and Pick Detail updated on server as well)
-		//Jxlim 03/17/2011 Do not need to rollback serial record if user_field1 in pick list has changed.  Since  it user_field1 ibpickmodified will never set to True at the first place.
-		//Therefore include the ibpickmodified in the condition so it won't delete the serial record per Dave
-		//12/06 - PCONKL - Content being udpated on Server, don't allocate untill everything else saved (Pick and Pick Detail updated on server as well)	
-		If idw_main.RowCount() > 0 and  ibpickmodified  Then
-			//If idw_main.RowCount() > 0 Then	
-					If idw_main.GetItemString(1,"ord_status") <> "C" Then					
-						// *** 12/06 - PCONKL - Hardcoded to ensure controlled rollout ****
-						If ibServerAllocationEnabled Then	
-							If wf_update_content_Server() = -1 Then 																																		
-								//reset the order status that was also already saved and confirmed 
-								If idw_Main.RowCount() > 0 Then																														
-									idw_Main.SetITem(1,'ord_status',lsOrdStat)																													
-									lsDoNO = idw_Main.GetITemString(1,'do_no')	
-									Execute Immediate "Begin Transaction" using SQLCA;
-									
-									UPdate Delivery_master
-									Set Ord_status = :lsOrdStat
-									Where do_no = :lsDONO;
-									
-									Execute Immediate "COMMIT" using SQLCA;																														
-									Return -1
-									
-								End If
-								
-							End If															
-							ibpickmodified = False
-							
-						End If
-						
-					End If
-					
-		//Jxlim 04/11/2011 if user_field1 has been changed then save it.
-		Else  // ibPickModified is false, check UF1
-			If idw_main.RowCount() > 0 and gs_project = 'PANDORA' Then
-				llRowCOunt = idw_pick.RowCount()
-				For llRowPos = 1 to llRowCount
-					l_status = idw_pick.GetItemStatus(llRowPos, "user_field1", Primary!)		
-					IF l_Status = NewModified!	OR l_Status = DataModified! Then	
-						idw_pick.Update()
-						llRowPos = llRowCount
-					End If
-				Next
-				//GailM 06/20/2017 - SIMSPEVS-605 - If any containers scanned, save it.
-				For llRowPos = 1 to llRowCount
-					l_status = idw_pick.GetItemStatus(llRowPos, "container_id_scanned_ind", Primary!)		
-					IF l_Status = NewModified!	OR l_Status = DataModified! Then	
-						idw_pick.Update()
-						llRowPos = llRowCount
-					End If
-					
-				Next
-				
-			End if
-			//Jxlim 04/20/2011 End of code
-			
-		End If
-	
-		idw_pick.ResetUpdate()
-		idw_pick_detail.resetupdate()
-		ids_content.resetupdate()
-						
-		If idw_main.RowCount() > 0 Then
-			This.Title = is_title + " - Edit"
-			ib_changed = False
-			ibUnconfirmRequested = False /* 02/08 - PCONKL */
-			ib_gemini = False //GAP1103
-			ib_edit = True
-			wf_check_status()
-			lsDONO = idw_main.GetItemString(1,'Do_no')  
-			//TimA 02/17/2012 OTM Project.  Get the status becasue if might have changed in the wf_enable_otm_Status function
-			lsOTMStatus= idw_main.getitemstring( 1,'OTM_Status')
-			If isOTMEnabled = 'Y' Then
-				//Get the ord status again for any changes that may have occured for OTM
-				Select ord_status, Last_update Into :lsOrdStat, :ldtlastDBUpdate
-				From Delivery_Master WITH (NOLOCK)
-				Where Project_ID = :gs_Project and Do_no = :lsDONo;
-			End if
-			
-			// tab_main.SelectTab(1) 
-			idw_main.SetFocus()
-		End If
-		SetMicroHelp("Record Saved!")
-		// Return 0 
-		
+Execute Immediate "COMMIT" using SQLCA;
+If SQLCA.SQLCode = 0 Then
+idw_main.ResetUpdate()
+    idw_detail.ResetUpdate()
+idw_pack.ResetUpdate()
+tab_main.tabpage_serial.dw_serial.resetupdate()
+//TimA 04/26/11
+lbSave = True
+If isvalid(ids_Alt_addresses) Then /* 10/03 - PCONKL */
+ids_Alt_addresses.Reset()
+End If
+//12/06 - PCONKL - Content being udpated on Server, don't allocate untill everything else saved (Pick and Pick Detail updated on server as well)
+//Jxlim 03/17/2011 Do not need to rollback serial record if user_field1 in pick list has changed.  Since  it user_field1 ibpickmodified will never set to True at the first place.
+//Therefore include the ibpickmodified in the condition so it won't delete the serial record per Dave
+//12/06 - PCONKL - Content being udpated on Server, don't allocate untill everything else saved (Pick and Pick Detail updated on server as well)
+If idw_main.RowCount() > 0 and  ibpickmodified  Then
+//If idw_main.RowCount() > 0 Then
+If idw_main.GetItemString(1,"ord_status") <> "C" Then
+// *** 12/06 - PCONKL - Hardcoded to ensure controlled rollout ****
+If ibServerAllocationEnabled Then
+If wf_update_content_Server() = -1 Then
+//reset the order status that was also already saved and confirmed
+If idw_Main.RowCount() > 0 Then
+idw_Main.SetITem(1,'ord_status',lsOrdStat)
+lsDoNO = idw_Main.GetITemString(1,'do_no')
+Execute Immediate "Begin Transaction" using SQLCA;
+UPdate Delivery_master
+Set Ord_status = :lsOrdStat
+Where do_no = :lsDONO;
+Execute Immediate "COMMIT" using SQLCA;
+Return -1
+End If
+End If
+ibpickmodified = False
+End If
+End If
+//Jxlim 04/11/2011 if user_field1 has been changed then save it.
+Else  // ibPickModified is false, check UF1
+If idw_main.RowCount() > 0 and gs_project = 'PANDORA' Then
+llRowCOunt = idw_pick.RowCount()
+For llRowPos = 1 to llRowCount
+l_status = idw_pick.GetItemStatus(llRowPos, "user_field1", Primary!)
+IF l_Status = NewModified! OR l_Status = DataModified! Then
+idw_pick.Update()
+llRowPos = llRowCount
+End If
+Next
+//GailM 06/20/2017 - SIMSPEVS-605 - If any containers scanned, save it.
+For llRowPos = 1 to llRowCount
+l_status = idw_pick.GetItemStatus(llRowPos, "container_id_scanned_ind", Primary!)
+IF l_Status = NewModified! OR l_Status = DataModified! Then
+idw_pick.Update()
+llRowPos = llRowCount
+End If
+Next
+End if
+//Jxlim 04/20/2011 End of code
+End If
+idw_pick.ResetUpdate()
+idw_pick_detail.resetupdate()
+ids_content.resetupdate()
+If idw_main.RowCount() > 0 Then
+This.Title = is_title + " - Edit"
+ib_changed = False
+ibUnconfirmRequested = False /* 02/08 - PCONKL */
+ib_gemini = False //GAP1103
+ib_edit = True
+wf_check_status()
+lsDONO = idw_main.GetItemString(1,'Do_no')  
+//TimA 02/17/2012 OTM Project.  Get the status becasue if might have changed in the wf_enable_otm_Status function
+lsOTMStatus= idw_main.getitemstring( 1,'OTM_Status')
+If isOTMEnabled = 'Y' Then
+//Get the ord status again for any changes that may have occured for OTM
+Select ord_status, Last_update Into :lsOrdStat, :ldtlastDBUpdate
+From Delivery_Master WITH (NOLOCK)
+Where Project_ID = :gs_Project and Do_no = :lsDONo;
+End if
+// tab_main.SelectTab(1)
+idw_main.SetFocus()
+End If
+SetMicroHelp("Record Saved!")
+// Return 0
    Else
-		lsErrText = SQLCA.SQLErrText
-		Execute Immediate "ROLLBACK" using SQLCA;
-		lsMsg = "Unable to save Delivery Order Record!~r~r"
-		If lbContentFailed Then
-			lsMsg += "This inventory may have been allocated to another order.~rSee below for more information.~rPlease try saving it again."
-		End If
-		
-		If Not isnull(lsContentErrorText) Then 
-			lsMsg += "~r~r" + lsContentErrorText
-		End If
-		
-     	MessageBox(is_title, lsMsg)
-		SetMicroHelp("Save failed!")
-		//TimA 04/26/11
-		lbSave = False
-		return -1
-		
-	End If
-	
+lsErrText = SQLCA.SQLErrText
+Execute Immediate "ROLLBACK" using SQLCA;
+lsMsg = "Unable to save Delivery Order Record!~r~r"
+If lbContentFailed Then
+lsMsg += "This inventory may have been allocated to another order.~rSee below for more information.~rPlease try saving it again."
+End If
+If Not isnull(lsContentErrorText) Then
+lsMsg += "~r~r" + lsContentErrorText
+End If
+      MessageBox(is_title, lsMsg)
+SetMicroHelp("Save failed!")
+//TimA 04/26/11
+lbSave = False
+return -1
+End If
 Else
-	lsErrText = SQLCA.SQLErrText
+lsErrText = SQLCA.SQLErrText
    Execute Immediate "ROLLBACK" using SQLCA;
-  	lsMsg = "Unable to save Delivery Order Record!~r~r"
-	If lbContentFailed Then
-		lsMsg += "This inventory may have been allocated to another order.~rSee below for more information.~rPlease try saving it again."
-	End If
-	
-	If Not isnull(lsContentErrorText) Then 
-		lsMsg += "~r~r" + lsContentErrorText
-	End If
-	
+  lsMsg = "Unable to save Delivery Order Record!~r~r"
+If lbContentFailed Then
+lsMsg += "This inventory may have been allocated to another order.~rSee below for more information.~rPlease try saving it again."
+End If
+If Not isnull(lsContentErrorText) Then
+lsMsg += "~r~r" + lsContentErrorText
+End If
    MessageBox(is_title, lsMsg)
-	SetMicroHelp("Save Failed!")
-	//TimA 04/26/11
-	lbSave = False	
-	return -1
-	
+SetMicroHelp("Save Failed!")
+//TimA 04/26/11
+lbSave = False
+return -1
 End If
 
 //06-Nov-2014 :Madhu- update Serial_Flag value from P to Y on SNI table -START
 IF upper(gs_project) = 'ARIENS'  and tab_main.tabpage_serial.dw_serial.rowcount( ) > 0 THEN
 
-	ls_wh_code= idw_main.getitemstring(1,'wh_code')
-	
-	//set Serial Flag =Y on SNI table
-	update Serial_Number_Inventory set Serial_Flag='Y' where Project_Id=:gs_project and WH_Code=:ls_wh_code 
-	and Do_No=:is_dono and Serial_No in (
-	select A.Serial_No from Delivery_Serial_Detail A with(nolock), Delivery_Picking_Detail B with (nolock)
-	where A.SKU_Substitute=B.SKU
-	and A.Id_No=B.Id_No
-	and B.DO_No=:is_dono);
-	
-	tab_main.tabpage_serial.dw_serial.Update(False, False)  //Do one more time save, if any SN# is overriden.
+ls_wh_code= idw_main.getitemstring(1,'wh_code')
+//set Serial Flag =Y on SNI table
+update Serial_Number_Inventory set Serial_Flag='Y' where Project_Id=:gs_project and WH_Code=:ls_wh_code
+and Do_No=:is_dono and Serial_No in (
+select A.Serial_No from Delivery_Serial_Detail A with(nolock), Delivery_Picking_Detail B with (nolock)
+where A.SKU_Substitute=B.SKU
+and A.Id_No=B.Id_No
+and B.DO_No=:is_dono);
+tab_main.tabpage_serial.dw_serial.Update(False, False)  //Do one more time save, if any SN# is overriden.
 
 END IF
 //06-Nov-2014 :Madhu- update Serial_Flag value from P to Y on SNI table -END
@@ -24347,15 +24873,15 @@ setCalcAllocated( false )
 
 ////06/05 - PCONKL - Update Carton serials if scanned
 //If idw_main.RowCount() > 0 Then
-//	If ibSerialModified and idw_main.GetItemString(1,"ord_status") <> 'C' and idw_main.GetItemString(1,"ord_status") <> 'D' and idw_main.GetItemString(1,"ord_status") <> 'V' Then
-//		wf_save_carton_serial()		
-//	End If
+// If ibSerialModified and idw_main.GetItemString(1,"ord_status") <> 'C' and idw_main.GetItemString(1,"ord_status") <> 'D' and idw_main.GetItemString(1,"ord_status") <> 'V' Then
+// wf_save_carton_serial()
+// End If
 //End If
 
 // 05/04 - PCONKL - If we we changed Pick Qty and we have outbound serial numbers, we need to re-map the ID numbers
-//							Since we have new Pick Detail records (and new ID_NO's)
+// Since we have new Pick Detail records (and new ID_NO's)
 If ibserialsupdated Then
-	This.TriggerEVent('ue_update_serial_id')
+This.TriggerEVent('ue_update_serial_id')
 End If
 
 // 02/01 PCONKL - Filter Pick list to not show components if box is not checked
@@ -24367,7 +24893,7 @@ idw_pick.SetRedraw(TRUE)
 ibCCCFirstSave = False /* 12/03 - PCONKL - for first time saving of an order - for CCC*/
 
 If Pos(this.Title,"[") = 0 and idw_main.RowCount() > 0 Then
-	This.Title = This.Title + " [" + idw_main.GetITemString(1,'invoice_no') + "]"
+This.Title = This.Title + " [" + idw_main.GetITemString(1,'invoice_no') + "]"
 End If
 
 llRowCOunt = w_do.idw_Detail.RowCount()
@@ -24378,174 +24904,149 @@ String lsWeb
 
 //isShipmentChangedFlag = 'Y'
 
-If 	lbSave = True then
-	If isOTMEnabled = 'Y' Then
+If lbSave = True then
+If isOTMEnabled = 'Y' Then
 
-		// LTK 20120515  Moved this code up from below because we need the ship_no even if the shipment has not changed.  This is for Pandora #417
-		Select max(ship_no)
-		INTO :lsShipNo
-		From shipment_line_item WITH (NOLOCK)
-		Where shipment_line_item.rodo_no = :lsDONO;
+// LTK 20120515  Moved this code up from below because we need the ship_no even if the shipment has not changed.  This is for Pandora #417
+Select max(ship_no)
+INTO :lsShipNo
+From shipment_line_item WITH (NOLOCK)
+Where shipment_line_item.rodo_no = :lsDONO;
 
-		//These are records that are in a 'R' status and someone has changed the order.
-		//We need to set the OTM_Changed flag to 'Y'
-		If isShipmentChangedFlag = 'Y' Then
-//			LTK 20120515  Moved this SQL up above
-//			Select max(ship_no)
-//			INTO :lsShipNo
-//			From shipment_line_item
-//			Where shipment_line_item.rodo_no = :lsDONO;
+//These are records that are in a 'R' status and someone has changed the order.
+//We need to set the OTM_Changed flag to 'Y'
+If isShipmentChangedFlag = 'Y' Then
+// LTK 20120515  Moved this SQL up above
+// Select max(ship_no)
+// INTO :lsShipNo
+// From shipment_line_item
+// Where shipment_line_item.rodo_no = :lsDONO;
 
-//			Update Shipment_Line_Item
-//			Set OTM_Changed = 'Y'
-//			where Ship_No = :lsShipNo;
-			// LTK 20120510  Pandora #395 Added last_user and last_update columns to the SLI update statement.
-			//TimA 11/15/12 Check to see if there is ShipNo is null first
-			//This was causing blocking when the value is Null
-			If lsShipNo <> '' or Not IsNull(lsShipNo) Then
-				Execute Immediate "Begin Transaction" using SQLCA;
-					Update Shipment_Line_Item
-					Set OTM_Changed = 'Y', Last_User = :gs_userid, Last_Update = :ldtGMT
-					where Ship_No = :lsShipNo;
-				Execute Immediate "COMMIT" using SQLCA;		
-				
-				isShipmentChangedFlag = 'N' //Reset the Flag
-				wf_set_otm_message('O')  //Set the OTM message off
-			End if
-		End if
+// Update Shipment_Line_Item
+// Set OTM_Changed = 'Y'
+// where Ship_No = :lsShipNo;
+// LTK 20120510  Pandora #395 Added last_user and last_update columns to the SLI update statement.
+//TimA 11/15/12 Check to see if there is ShipNo is null first
+//This was causing blocking when the value is Null
+If lsShipNo <> '' or Not IsNull(lsShipNo) Then
+Execute Immediate "Begin Transaction" using SQLCA;
+Update Shipment_Line_Item
+Set OTM_Changed = 'Y', Last_User = :gs_userid, Last_Update = :ldtGMT
+where Ship_No = :lsShipNo;
+Execute Immediate "COMMIT" using SQLCA;
+isShipmentChangedFlag = 'N' //Reset the Flag
+wf_set_otm_message('O')  //Set the OTM message off
+End if
+End if
 
-		// LTK 20120515  Pandora #395 Update the shipment table last user and last update
-		//TimA 11/15/12 Check to see if there is ShipNo is null first
-		//This was causing blocking when the value is Null		
-		If lsShipNo <> '' or Not IsNull(lsShipNo) Then
-			Execute Immediate "Begin Transaction" using SQLCA;
-				Update Shipment
-				Set Last_User = :gs_userid, Last_Update = :ldtGMT
-				where Ship_No = :lsShipNo;
-			Execute Immediate "COMMIT" using SQLCA;
-		End if
-		
-		If isFlagDeleteOTM = 'Y' Then
-			If isDoNoDelete <> '' or Not IsNull(isDoNoDelete) Then
-				lsDONO  = isDoNoDelete
-				ls_action = 'D'
-				//Call the OTM if there is an action
-				li_OTM_Return = ln_otm.uf_otm_send_order(ls_action, gs_project, lsDONO, isDeleteSkus, ls_return_cd, ls_error_message)
-				
-				If li_OTM_Return = -1 then
-					//Error OTM
-					Messagebox('OTM Error Call','Unable to delete order from OTM')
-					
-				Else
-					isFlagDeleteOTM = 'N'
-					if idw_main.RowCount() > 0 then
-						If lsOrdStat = 'V' then
-							//If we still have rows and the ord status Voided
-							lsSetOTM = 'V'
-							lbOTMFlag = True
-						End if
-						
-					End if
-					//TimA 11/15/12 Removed because of possible conversion to Appeon
-					//goto OTM_Update
-					
-				End if
-				
-			End if
-			
-		End if
-		
-		//If lsOTMFromCountry = 'US' then  //We are only sending order to OTM if they originate in the US.  (For Now)
-		//TimA 11/15/12 because we had to remove the GO TO command above we needed to change the following If condition 
-		If lsProcessOTM = 'Y' and (isDoNoDelete = '' or IsNull(isDoNoDelete)) then
-		//If lsProcessOTM = 'Y' then  //Lookup in the lookup table to see it the country is using OTM calls.  See comment further up code		
-			If lsDONO = '' or IsNull(lsDONO) Then
-				lsDONO  = ls_order
-			End if
-			
-			If lsOTMStatus = '' or IsNull(lsOTMStatus) Then
-				If llRowCOunt > 0 Then  //Detail Rowcount
-					If Messagebox("Send to OTM" ,"Do you want to send this order to OTM?  If so, this will lock the oder and you will not be able to add more detail records.",Question!,YesNo!,1) = 1 then
-						if idw_main.RowCount() > 0 then
-							If lsOTMStatus = '' or IsNull(lsOTMStatus) Then
-								ls_action = 'I' //New order
-							End if
-							
-							//lsWeb =  ls_action + "," +  gs_project + "," +  lsDONO +"," + "Str of Sku's"  + "," +  ls_return_cd + "," + ls_error_message
-							If ls_action <> '' then
-								//Call the OTM if there is an action
-								li_OTM_Return = ln_otm.uf_otm_send_order(ls_action, gs_project, ls_order, isDeleteSkus, ls_return_cd, ls_error_message)		
-								
-								If li_OTM_Return = -1 then
-									//Error OTM
-									Messagebox('Error','OTM Insert Websphear Error ' + ls_error_message)
-								Else
-									lsOrdStat = 'N' //Set the ord_status back to New per Dave and Roy so that the order can be edited id needed 02/29/12
-									//lsOrdStat = 'H' //Set the ord_status to Hold just like eletronic records Per Roy 02/17/12
-									lsSetOTM = 'H'
-									lbOTMFlag = True
-								End if
-								
-							End if  //No Action Code
-							
-						Else //Detail Rowcount
-							idw_main.SetItem(1,"otm_status",'') 										
-						End If //End DetailRowcount
-						
-					End if //End message box question
-					
-				End if
-				
-			Else
-				//Only allow updates if in New Status and OTM is either a P or and R
-//				If (lsOTMStatus = 'P'  or  lsOTMStatus = 'R') and idw_main.GetItemString(1,"ord_status") = "N" Then
-				//Remove OTM status 'R' per Ian 02/07/12
-				If (lsOTMStatus = 'P'  or  lsOTMStatus = 'H') and idw_main.GetItemString(1,"ord_status") = "N" Then
-					If ilUpdateOTM = 1 then
-						lsDONO  = ls_order
-						ls_action = 'U'  //Update OTM
-						//Call the OTM if there is an action
-						li_OTM_Return = ln_otm.uf_otm_send_order(ls_action, gs_project, ls_order, isDeleteSkus, ls_return_cd, ls_error_message)		
-						If li_OTM_Return = -1 then
-							//Error OTM
-							Messagebox('Error','OTM Websphear Update Error ' + ls_error_message)
-							
-						else
-							lsSetOTM = lsOTMStatus
-							//Set the update flage back to 0
-							ilUpdateOTM = 0
-							wf_set_otm_message('O')  //Set the OTM message off
-							lbOTMFlag = True
-						End if
-						
-					End if //End Update Y/N
-					
-				End if	//End P status	
-				
-			End if  //No Status set
-			
-		Else //Not US
-			lsSetOTM = 'N'
-			lbOTMFlag = True
-			
-		End if	  //Is US
-		
-	End if  //Is OTM
-	
+// LTK 20120515  Pandora #395 Update the shipment table last user and last update
+//TimA 11/15/12 Check to see if there is ShipNo is null first
+//This was causing blocking when the value is Null
+If lsShipNo <> '' or Not IsNull(lsShipNo) Then
+Execute Immediate "Begin Transaction" using SQLCA;
+Update Shipment
+Set Last_User = :gs_userid, Last_Update = :ldtGMT
+where Ship_No = :lsShipNo;
+Execute Immediate "COMMIT" using SQLCA;
+End if
+If isFlagDeleteOTM = 'Y' Then
+If isDoNoDelete <> '' or Not IsNull(isDoNoDelete) Then
+lsDONO  = isDoNoDelete
+ls_action = 'D'
+//Call the OTM if there is an action
+li_OTM_Return = ln_otm.uf_otm_send_order(ls_action, gs_project, lsDONO, isDeleteSkus, ls_return_cd, ls_error_message)
+If li_OTM_Return = -1 then
+//Error OTM
+Messagebox('OTM Error Call','Unable to delete order from OTM')
+Else
+isFlagDeleteOTM = 'N'
+if idw_main.RowCount() > 0 then
+If lsOrdStat = 'V' then
+//If we still have rows and the ord status Voided
+lsSetOTM = 'V'
+lbOTMFlag = True
+End if
+End if
+//TimA 11/15/12 Removed because of possible conversion to Appeon
+//goto OTM_Update
+End if
+End if
+End if
+//If lsOTMFromCountry = 'US' then  //We are only sending order to OTM if they originate in the US.  (For Now)
+//TimA 11/15/12 because we had to remove the GO TO command above we needed to change the following If condition
+If lsProcessOTM = 'Y' and (isDoNoDelete = '' or IsNull(isDoNoDelete)) then
+//If lsProcessOTM = 'Y' then  //Lookup in the lookup table to see it the country is using OTM calls.  See comment further up code
+If lsDONO = '' or IsNull(lsDONO) Then
+lsDONO  = ls_order
+End if
+If lsOTMStatus = '' or IsNull(lsOTMStatus) Then
+If llRowCOunt > 0 Then  //Detail Rowcount
+If Messagebox("Send to OTM" ,"Do you want to send this order to OTM?  If so, this will lock the oder and you will not be able to add more detail records.",Question!,YesNo!,1) = 1 then
+if idw_main.RowCount() > 0 then
+If lsOTMStatus = '' or IsNull(lsOTMStatus) Then
+ls_action = 'I' //New order
+End if
+//lsWeb =  ls_action + "," +  gs_project + "," +  lsDONO +"," + "Str of Sku's"  + "," +  ls_return_cd + "," + ls_error_message
+If ls_action <> '' then
+//Call the OTM if there is an action
+li_OTM_Return = ln_otm.uf_otm_send_order(ls_action, gs_project, ls_order, isDeleteSkus, ls_return_cd, ls_error_message)
+If li_OTM_Return = -1 then
+//Error OTM
+Messagebox('Error','OTM Insert Websphear Error ' + ls_error_message)
+Else
+lsOrdStat = 'N' //Set the ord_status back to New per Dave and Roy so that the order can be edited id needed 02/29/12
+//lsOrdStat = 'H' //Set the ord_status to Hold just like eletronic records Per Roy 02/17/12
+lsSetOTM = 'H'
+lbOTMFlag = True
+End if
+End if  //No Action Code
+Else //Detail Rowcount
+idw_main.SetItem(1,"otm_status",'')
+End If //End DetailRowcount
+End if //End message box question
+End if
+Else
+//Only allow updates if in New Status and OTM is either a P or and R
+// If (lsOTMStatus = 'P'  or  lsOTMStatus = 'R') and idw_main.GetItemString(1,"ord_status") = "N" Then
+//Remove OTM status 'R' per Ian 02/07/12
+If (lsOTMStatus = 'P'  or  lsOTMStatus = 'H') and idw_main.GetItemString(1,"ord_status") = "N" Then
+If ilUpdateOTM = 1 then
+lsDONO  = ls_order
+ls_action = 'U'  //Update OTM
+//Call the OTM if there is an action
+li_OTM_Return = ln_otm.uf_otm_send_order(ls_action, gs_project, ls_order, isDeleteSkus, ls_return_cd, ls_error_message)
+If li_OTM_Return = -1 then
+//Error OTM
+Messagebox('Error','OTM Websphear Update Error ' + ls_error_message)
+else
+lsSetOTM = lsOTMStatus
+//Set the update flage back to 0
+ilUpdateOTM = 0
+wf_set_otm_message('O')  //Set the OTM message off
+lbOTMFlag = True
+End if
+End if //End Update Y/N
+End if //End P status
+End if  //No Status set
+Else //Not US
+lsSetOTM = 'N'
+lbOTMFlag = True
+End if  //Is US
+End if  //Is OTM
 End if //Save
 
 //TimA 11/15/12 Removed because of possible conversion to Appeon
-//OTM_Update: 
+//OTM_Update:
 //TimA 01/21/13 Moved this commit down because I think it was causing a problem when checking for serial numbers.
 //If they failed this would still save the record.
 //If lbOTMFlag = True then
-//	Execute Immediate "Begin Transaction" using SQLCA;
-//	UPdate Delivery_master
-//	Set Ord_Status = :lsOrdStat, OTM_Status = :lsSetOTM, OTM_Call_Date = :ldtGMT
-//	//	Set OTM_Status = :lsSetOTM, OTM_Call_Date = :ldtGMT
-//	Where do_no = :lsDONO;																														
-//	Execute Immediate "COMMIT" using SQLCA;
-//	
+// Execute Immediate "Begin Transaction" using SQLCA;
+// UPdate Delivery_master
+// Set Ord_Status = :lsOrdStat, OTM_Status = :lsSetOTM, OTM_Call_Date = :ldtGMT
+// // Set OTM_Status = :lsSetOTM, OTM_Call_Date = :ldtGMT
+// Where do_no = :lsDONO;
+// Execute Immediate "COMMIT" using SQLCA;
+//
 //End if
 //
 // 08/11/2010 ujhall: 02 of ?? Full Circle Fix: Manage Serial nos in Serial_number_Inventory table
@@ -24556,400 +25057,390 @@ long ll_component_no, ll_return  //01/03/2011 ujh: S/N_P:
 long ll_owner_id
 String ls_Pono2, ls_Carton_No // TAM - 2018/02 - S14838
 // if Pandora and if order status has changed from complete to packing, insert serial numbers back into serial_number_inventory table
-//			if upper(gs_project) = 'PANDORA' and ibUnconfirmFullCircle then
+// if upper(gs_project) = 'PANDORA' and ibUnconfirmFullCircle then
 //BCR 06-DEC-2011: Treat Bluecoat same as Pandora...
 // ET3 2012-06-14: Implement generic test
-//			if (upper(gs_project) = 'PANDORA' OR upper(gs_project) = 'BLUECOAT') and ibUnconfirmFullCircle then
+// if (upper(gs_project) = 'PANDORA' OR upper(gs_project) = 'BLUECOAT') and ibUnconfirmFullCircle then
 // TAM - 2018/02 - S14838 - Need to add Po_No2, carton_No(Container_Id), l_code back into Serial_Inventory_Table
 if g.ibsnchainofcustody and ibUnconfirmFullCircle then
-	lb_Error = false
-	lsWhCode =  Upper(idw_main.getitemstring(1,'wh_code'))
-	Execute Immediate "Begin Transaction" using SQLCA; 
-	FOR i_indx = 1 to tab_main.tabpage_serial.dw_serial.RowCount()
-		lsSKU =  tab_main.tabpage_serial.dw_serial.GetItemString(i_indx,'SKU')
-		lsSerial = tab_main.tabpage_serial.dw_serial.GetItemString(i_indx, 'Serial_no')
-		lsSerializedInd = tab_main.tabpage_serial.dw_serial.GetItemString(i_indx, 'Serialized_ind')
-		ls_component_ind =  tab_main.tabpage_serial.dw_serial.GetItemString(i_indx, 'component_ind')  //01/03/2011 ujh: S/N_P:
-		ll_component_no =  tab_main.tabpage_serial.dw_serial.GetItemNumber(i_indx, 'component_no')   //01/03/2011 ujh: S/N_P:
+lb_Error = false
+lsWhCode =  Upper(idw_main.getitemstring(1,'wh_code'))
+Execute Immediate "Begin Transaction" using SQLCA;
+FOR i_indx = 1 to tab_main.tabpage_serial.dw_serial.RowCount()
+lsSKU =  tab_main.tabpage_serial.dw_serial.GetItemString(i_indx,'SKU')
+lsSerial = tab_main.tabpage_serial.dw_serial.GetItemString(i_indx, 'Serial_no')
+lsSerializedInd = tab_main.tabpage_serial.dw_serial.GetItemString(i_indx, 'Serialized_ind')
+ls_component_ind =  tab_main.tabpage_serial.dw_serial.GetItemString(i_indx, 'component_ind')  //01/03/2011 ujh: S/N_P:
+ll_component_no =  tab_main.tabpage_serial.dw_serial.GetItemNumber(i_indx, 'component_no')   //01/03/2011 ujh: S/N_P:
 /*TODO TAM - we need to rebuild the Serial_Number_Inventory but we don't have all the fields needed
- for example 	ls_pono2 =  tab_main.tabpage_serial.dw_serial.GetItemString(i_indx, 'po_no2')  // TAM - 2018/02 - S14838 */ 
+ for example ls_pono2 =  tab_main.tabpage_serial.dw_serial.GetItemString(i_indx, 'po_no2')  // TAM - 2018/02 - S14838 */
 
-		lsFind = "Upper(SKU) = '" + Upper(lsSKU) + "' and Upper(supp_code) = '" + Upper(tab_main.tabpage_serial.dw_serial.GetItemString(i_indx, 'Supp_Code')) + "'"
-		lsFind += " and Line_Item_no =  " + String(tab_main.tabpage_serial.dw_serial.GetITemNumber(i_indx,'Line_Item_no')) 
-		llFindRow = idw_Pick.Find(lsFind,1,idw_pick.RowCount())
-		If llFindRow > 0 Then
-			ll_owner_id = idw_Pick.GetItemNumber(llfindrow,'owner_id')
-		End if
-		// Get owner_cd
-		Select Owner_cd 
-		Into :ls_owner_cd
-		From Owner WITH (NOLOCK)
-		where Project_id = :gs_project
-		and owner_id = :ll_owner_id;
-							
-		/////////////////////////////////////////////////////////////////////////////////////////////////////////////
-		/* 01/03/2011 ujh: S/N_Pa:  The following requires dw_srial be orderd so Parents precede 
-			children.  This was accomplished by the call to dw_sort() when the serial list was generated */
-		/* If a non-type "B" serialized parent has type "B" serialized children, we will put it in Serialized_Number_Inventory
-			so children can find their parent.  That means we will not want to delete a parent as long as 
-			there are children in the table*/
-		llFindRow = 0   // Make sure no carry over from previous iteration. Don't care where child is, just that it exists
-			IF idw_serial.getitemString(i_indx, 'component_ind') = 'Y' &   
-				and idw_serial.getitemString(i_indx, 'Serialized_ind') <> 'B' then    
-					lsFind = "Component_No = "  + String(idw_serial.getitemnumber(i_indx,'component_no')) 
-					lsFind += " And Serialized_ind = 'B' "
-					lsFind +=  " And Component_ind = '*' " 
-					// Find this part's serialized children if it has any
-					llFindRow = idw_serial.Find(lsFind,1,idw_serial.RowCount())
-					// if a serialized child is found, need to create a FAKE serial number for this non serialized parent
-					If llFindRow > 0 then 
-						sqlca.sp_next_avail_seq_no(gs_project,"Serial_Number_Inventory","Serial_No" ,ld_NxtSeq)//get the next available RO_NO
-						lsSerial = 'NA' + String(Long(ld_NxtSeq),"000000") 
-					End if
+lsFind = "Upper(SKU) = '" + Upper(lsSKU) + "' and Upper(supp_code) = '" + Upper(tab_main.tabpage_serial.dw_serial.GetItemString(i_indx, 'Supp_Code')) + "'"
+lsFind += " and Line_Item_no =  " + String(tab_main.tabpage_serial.dw_serial.GetITemNumber(i_indx,'Line_Item_no'))
+llFindRow = idw_Pick.Find(lsFind,1,idw_pick.RowCount())
+If llFindRow > 0 Then
+ll_owner_id = idw_Pick.GetItemNumber(llfindrow,'owner_id')
+End if
+// Get owner_cd
+Select Owner_cd
+Into :ls_owner_cd
+From Owner WITH (NOLOCK)
+where Project_id = :gs_project
+and owner_id = :ll_owner_id;
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/* 01/03/2011 ujh: S/N_Pa:  The following requires dw_srial be orderd so Parents precede
+children.  This was accomplished by the call to dw_sort() when the serial list was generated */
+/* If a non-type "B" serialized parent has type "B" serialized children, we will put it in Serialized_Number_Inventory
+so children can find their parent.  That means we will not want to delete a parent as long as
+there are children in the table*/
+llFindRow = 0   // Make sure no carry over from previous iteration. Don't care where child is, just that it exists
+IF idw_serial.getitemString(i_indx, 'component_ind') = 'Y' &  
+and idw_serial.getitemString(i_indx, 'Serialized_ind') <> 'B' then    
+lsFind = "Component_No = "  + String(idw_serial.getitemnumber(i_indx,'component_no'))
+lsFind += " And Serialized_ind = 'B' "
+lsFind +=  " And Component_ind = '*' "
+// Find this part's serialized children if it has any
+llFindRow = idw_serial.Find(lsFind,1,idw_serial.RowCount())
+// if a serialized child is found, need to create a FAKE serial number for this non serialized parent
+If llFindRow > 0 then
+sqlca.sp_next_avail_seq_no(gs_project,"Serial_Number_Inventory","Serial_No" ,ld_NxtSeq)//get the next available RO_NO
+lsSerial = 'NA' + String(Long(ld_NxtSeq),"000000")
+End if
 
-			end if //01/03/2011 ujh: S/N_Pa  
-		
-		/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+end if //01/03/2011 ujh: S/N_Pa  
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-			/*Per Trey, if serialnumber is dash (the default) or blank or null, do not write to tabel, otherwise write*/
-			// 01'03/2011 ujh: S/N_Pa: We will write unserialized parents that have serialized children.  llFindrow > 0 means we found a serialized child*/
+/*Per Trey, if serialnumber is dash (the default) or blank or null, do not write to tabel, otherwise write*/
+// 01'03/2011 ujh: S/N_Pa: We will write unserialized parents that have serialized children.  llFindrow > 0 means we found a serialized child*/
 
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-			//01/03/2011 ujh: S/N_Pa:  The following were reversed in order to check the code in 01/31/2011.  Must be reversed for S/N_P
-//						if  not(isnull(lsSerial) or lsSerial = '-' or lsSerial = '') and Upper(lsSerializedInd) = 'B' then	// original code
-			if (not(isnull(lsSerial) or lsSerial = '-' or lsSerial = '') and Upper(lsSerializedInd) = 'B') or llFindRow > 0  then	// new S/N_P	
+//01/03/2011 ujh: S/N_Pa:  The following were reversed in order to check the code in 01/31/2011.  Must be reversed for S/N_P
+// if  not(isnull(lsSerial) or lsSerial = '-' or lsSerial = '') and Upper(lsSerializedInd) = 'B' then // original code
+if (not(isnull(lsSerial) or lsSerial = '-' or lsSerial = '') and Upper(lsSerializedInd) = 'B') or llFindRow > 0  then // new S/N_P
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-				
-				/*01/03/2011 ujh: S/N_P:  The serial number SkU Combo should not be in the table at this point,
-				as the status has changed from Complete to packing.  Error if it is */
-				//ll_return = i_nwarehouse.of_Error_on_serial_no_exists(gs_Project, lsSKU, lsSerial,ls_Owner_cd, ls_component_ind, ll_component_no,true)   // 01/03/2011 ujh: S/N_Pb:   change call to add component_ind and component_no
-				//dts - 2/19/11 - added parameter to skip component number as part of the serial look-up condition (for receipts)
-				
-				//TimA - 04/15/2011 added parameter to capture error message in calling function
-				//ll_return = i_nwarehouse.of_Error_on_serial_no_exists(gs_Project, lsSKU, lsSerial, ls_Owner_cd, ls_component_ind, ll_component_no, true, false)
-				ab_error_message_title = ''
-				ab_error_message = ''
-				//f_method_trace( ll_method_trace_id, this.ClassName(), 'Check if Serial Number exist: ' + is_dono ) //08-Feb-2013  :Madhu commented
-				f_method_trace_special( gs_project, this.ClassName() + ' - ue_save', 'Check if Serial Number exist: ' ,is_dono, ' ',' ',isinvoice_no) //08-Feb-2013  :Madhu added
-				//24-Jul-2014 : Madhu -Added "is_dono,isinvoice_no" to write onto Method Trace Log
-				ll_return = i_nwarehouse.of_Error_on_serial_no_exists(gs_Project, lsSKU, lsSerial, ls_Owner_cd, ls_component_ind, ll_component_no, true, false,ab_error_message_title, ab_error_message,is_dono,isinvoice_no)
-				if ll_return = 1 then
-					lb_Error = true
-				else
-					// 01/03/2011 ujh: S/N_P:  Add Compnent_ind and component_no to table insert
-					//13-Nov-2014 :Madhu- Added Serial_Flag and Do_No values
+/*01/03/2011 ujh: S/N_P:  The serial number SkU Combo should not be in the table at this point,
+as the status has changed from Complete to packing.  Error if it is */
+//ll_return = i_nwarehouse.of_Error_on_serial_no_exists(gs_Project, lsSKU, lsSerial,ls_Owner_cd, ls_component_ind, ll_component_no,true)   // 01/03/2011 ujh: S/N_Pb:   change call to add component_ind and component_no
+//dts - 2/19/11 - added parameter to skip component number as part of the serial look-up condition (for receipts)
+//TimA - 04/15/2011 added parameter to capture error message in calling function
+//ll_return = i_nwarehouse.of_Error_on_serial_no_exists(gs_Project, lsSKU, lsSerial, ls_Owner_cd, ls_component_ind, ll_component_no, true, false)
+ab_error_message_title = ''
+ab_error_message = ''
+//f_method_trace( ll_method_trace_id, this.ClassName(), 'Check if Serial Number exist: ' + is_dono ) //08-Feb-2013  :Madhu commented
+f_method_trace_special( gs_project, this.ClassName() + ' - ue_save', 'Check if Serial Number exist: ' ,is_dono, ' ',' ',isinvoice_no) //08-Feb-2013  :Madhu added
+//24-Jul-2014 : Madhu -Added "is_dono,isinvoice_no" to write onto Method Trace Log
+ll_return = i_nwarehouse.of_Error_on_serial_no_exists(gs_Project, lsSKU, lsSerial, ls_Owner_cd, ls_component_ind, ll_component_no, true, false,ab_error_message_title, ab_error_message,is_dono,isinvoice_no)
+if ll_return = 1 then
+lb_Error = true
+else
+// 01/03/2011 ujh: S/N_P:  Add Compnent_ind and component_no to table insert
+//13-Nov-2014 :Madhu- Added Serial_Flag and Do_No values
 /*TODO TAM - we need to rebuild the Serial_Number_Inventory but we don't have all the fields needed
- for example  	Insert Into Serial_Number_Inventory (project_ID,Wh_code, Owner_id, Owner_cd, SKU, Serial_NO, & 
-							Component_ind, Component_no, Update_date,Update_user,Serial_Flag,Do_No,Po_No2,Carton_ID,l_code)
-						Values(:gs_Project, :lsWhCode, :ll_Owner_id &
-						, :ls_Owner_Cd, :lsSKU  &
-						, :lsSerial
-						, :ls_Component_ind, :ll_Component_no, :ldtToday, :gs_userid,'Y',:is_dono,:ls_pono2,:ls_carton_no,:ls_l_code); */
+ for example   Insert Into Serial_Number_Inventory (project_ID,Wh_code, Owner_id, Owner_cd, SKU, Serial_NO, &
+Component_ind, Component_no, Update_date,Update_user,Serial_Flag,Do_No,Po_No2,Carton_ID,l_code)
+Values(:gs_Project, :lsWhCode, :ll_Owner_id &
+, :ls_Owner_Cd, :lsSKU  &
+, :lsSerial
+, :ls_Component_ind, :ll_Component_no, :ldtToday, :gs_userid,'Y',:is_dono,:ls_pono2,:ls_carton_no,:ls_l_code); */
 
-					//GailM 6/7/2019 S33409 Add serial inventory history audit columns
-					Insert Into Serial_Number_Inventory (project_ID,Wh_code, Owner_id, Owner_cd, SKU, Serial_NO, & 
-							Component_ind, Component_no, Update_date,Update_user,Serial_Flag,Do_No,Transaction_Type,Transaction_Id)
-						Values(:gs_Project, :lsWhCode, :ll_Owner_id &
-						, :ls_Owner_Cd, :lsSKU  &
-						, :lsSerial
-						, :ls_Component_ind, :ll_Component_no, :ldtToday, :gs_userid,'Y',:is_dono,"Rebuild SN from ueSave",:is_dono);
+//GailM 6/7/2019 S33409 Add serial inventory history audit columns
+Insert Into Serial_Number_Inventory (project_ID,Wh_code, Owner_id, Owner_cd, SKU, Serial_NO, &
+Component_ind, Component_no, Update_date,Update_user,Serial_Flag,Do_No,Transaction_Type,Transaction_Id)
+Values(:gs_Project, :lsWhCode, :ll_Owner_id &
+, :ls_Owner_Cd, :lsSKU  &
+, :lsSerial
+, :ls_Component_ind, :ll_Component_no, :ldtToday, :gs_userid,'Y',:is_dono,"Rebuild SN from ueSave",:is_dono);
 
-					//Insert Into Serial_Number_Inventory (project_ID,Wh_code, Owner_id, Owner_cd, SKU, Serial_NO, Update_date,Update_user)
-						//Values(:gs_Project, :lsWhCode, :ll_Owner_id &
-						//, :ls_Owner_Cd, :lsSKU  &
-						//, :lsSerial, :ldtToday, :gs_userid);
+//Insert Into Serial_Number_Inventory (project_ID,Wh_code, Owner_id, Owner_cd, SKU, Serial_NO, Update_date,Update_user)
+//Values(:gs_Project, :lsWhCode, :ll_Owner_id &
+//, :ls_Owner_Cd, :lsSKU  &
+//, :lsSerial, :ldtToday, :gs_userid);
 
-					if sqlca.SQlcode <> 0 then
-						//Jxlim 09/10/2010 Added Rollback to prevent block/lock
-									 Execute Immediate "ROLLBACK" using SQLCA;
-									 MessageBox(ab_error_message_title, ab_error_message)
-						lb_Error = true
-					
-					end if
-				end if // // 01/03/2011 ujh: End checking return code that serial number is not in table
-			end if
+if sqlca.SQlcode <> 0 then
+//Jxlim 09/10/2010 Added Rollback to prevent block/lock
+Execute Immediate "ROLLBACK" using SQLCA;
+MessageBox(ab_error_message_title, ab_error_message)
+lb_Error = true
+end if
+end if // // 01/03/2011 ujh: End checking return code that serial number is not in table
+end if
 
-	next
-	if lb_Error then
-		Execute Immediate "ROLLBACK" using SQLCA;
-			MessageBox(ab_error_message_title, ab_error_message)
-			//TimA 04/26/11
-			lbSave = False
-			//MessageBox("DB Error Inserting Serial Nums", SQLCA.SQLErrText)
-		return -1
-		
-	else
-		Execute Immediate "COMMIT" using SQLCA;
-		//TimA 04/26/11
-		lbSave = True
-		// 01/03/2011 ujh: S/N_Pfx2  populate na_component_no from serial_number_inventory
-		//	if upper(gs_project) = 'PANDORA' then
-		// if upper(gs_project) = 'PANDORA' OR upper(gs_project) = 'BLUECOAT' then
-		// BCR 06-DEC-2011: Treat Bluecoat same as Pandora...
-		// ET3 2012-06-14: Implement generic test
-		//TimA 01/21/13 Moved from above.  Save OTM Information
-		If lbOTMFlag = True then
-			Execute Immediate "Begin Transaction" using SQLCA;
-			UPdate Delivery_master
-			Set Ord_Status = :lsOrdStat, OTM_Status = :lsSetOTM, OTM_Call_Date = :ldtGMT
-			//	Set OTM_Status = :lsSetOTM, OTM_Call_Date = :ldtGMT
-			Where do_no = :lsDONO;																														
-			Execute Immediate "COMMIT" using SQLCA;
-			
-		End if
-		
-		if g.ibSNchainofcustody then
-			// For now do nothing with return code.  either there will be data or there will not
-			ll_return = wf_restore_component_no(tab_main.tabpage_serial.dw_serial)
-		end if
-		
-		ibUnconfirmFullCircle = false
-		
-	end if
-	
+next
+if lb_Error then
+Execute Immediate "ROLLBACK" using SQLCA;
+MessageBox(ab_error_message_title, ab_error_message)
+//TimA 04/26/11
+lbSave = False
+//MessageBox("DB Error Inserting Serial Nums", SQLCA.SQLErrText)
+return -1
+else
+Execute Immediate "COMMIT" using SQLCA;
+//TimA 04/26/11
+lbSave = True
+// 01/03/2011 ujh: S/N_Pfx2  populate na_component_no from serial_number_inventory
+// if upper(gs_project) = 'PANDORA' then
+// if upper(gs_project) = 'PANDORA' OR upper(gs_project) = 'BLUECOAT' then
+// BCR 06-DEC-2011: Treat Bluecoat same as Pandora...
+// ET3 2012-06-14: Implement generic test
+//TimA 01/21/13 Moved from above.  Save OTM Information
+If lbOTMFlag = True then
+Execute Immediate "Begin Transaction" using SQLCA;
+UPdate Delivery_master
+Set Ord_Status = :lsOrdStat, OTM_Status = :lsSetOTM, OTM_Call_Date = :ldtGMT
+// Set OTM_Status = :lsSetOTM, OTM_Call_Date = :ldtGMT
+Where do_no = :lsDONO;
+Execute Immediate "COMMIT" using SQLCA;
+End if
+if g.ibSNchainofcustody then
+// For now do nothing with return code.  either there will be data or there will not
+ll_return = wf_restore_component_no(tab_main.tabpage_serial.dw_serial)
+end if
+ibUnconfirmFullCircle = false
+end if
 end if // ibsnchainofcustody formerly project 'PANDORA' and unconfirm
 
 // LTK 20120523 Pandora #370  Moved the CI/Load Tender code from below to a new CI/Load Tender command button on the Packing Tab
 //
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////				
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////TimA 04/26/11 Pandora issue #211
 ////Confirming the CI transaction before the order is save may be the problem to pick complete date being written to CI 3B18
 ////The below code has been move from above.  About line 602
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //if upper(gs_project) = 'PANDORA' then
-//	//Only create the batch transactions if the above have been saved with no errors
-//	If 	lbSave = True then
-//	// See if there's an existing CI record. (11/24 dts: added trans_status = 'N' condition)
-////		Select count(*)
-////		into :ll_numexistingci
-////		from batch_Transaction
-////		where project_id = 'PANDORA'
-////		AND trans_type = 'CI'
-////		and trans_status = 'N'
-////		and trans_order_id = :ls_order;
+// //Only create the batch transactions if the above have been saved with no errors
+// If lbSave = True then
+// // See if there's an existing CI record. (11/24 dts: added trans_status = 'N' condition)
+//// Select count(*)
+//// into :ll_numexistingci
+//// from batch_Transaction
+//// where project_id = 'PANDORA'
+//// AND trans_type = 'CI'
+//// and trans_status = 'N'
+//// and trans_order_id = :ls_order;
 //
 ////
-////		// If there isn't an existing CI transaction (in New status) for this order number,
-//////		If ll_numexistingci = 0 then							
-////		iF lbGenerateCI = True Then
-////			// Begin a new transaction.
-////			Execute Immediate "Begin Transaction" using SQLCA;
-////			// Insert a new record into batch_transaction to create the 3B18.
-////			Insert Into batch_Transaction
-////			(project_ID, Trans_Type, Trans_Order_ID, Trans_Status, Trans_Create_Date, Trans_Parm)
-////			Values(:gs_Project, 'CI', :ls_order, 'N', :ldtToday, '');
-////			// Commit the transaction.
-////			Execute Immediate "COMMIT" using SQLCA;
-////		End if
-//////		End If
+//// // If there isn't an existing CI transaction (in New status) for this order number,
+////// If ll_numexistingci = 0 then
+//// iF lbGenerateCI = True Then
+//// // Begin a new transaction.
+//// Execute Immediate "Begin Transaction" using SQLCA;
+//// // Insert a new record into batch_transaction to create the 3B18.
+//// Insert Into batch_Transaction
+//// (project_ID, Trans_Type, Trans_Order_ID, Trans_Status, Trans_Create_Date, Trans_Parm)
+//// Values(:gs_Project, 'CI', :ls_order, 'N', :ldtToday, '');
+//// // Commit the transaction.
+//// Execute Immediate "COMMIT" using SQLCA;
+//// End if
+////// End If
 ////
 //
-//		// Set the vor_shipment_ind to indicate we've already sent the 3B1B for this order.
-////		idw_main.setitem(1,'vor_shipment_ind', 'Y')
-//		//End IF // End If we haven't already sent the 3B1B for this order.
-//	
-//		//Jxlim 03/31/2011UPS Load Tender requirement. #149
-//		//Each time a delivery order is saved  in Packing status in which Ord_status = ‘A’,
-//		//and wh_code country is US and Carrier is UPS check if the record exists in Batch_tansaction table.		
-////		Select Country 
-////		into :ls_Country
-////		From Warehouse
-////		where Wh_Code = :ls_Wh_code;
-//		
-//		//Jxlim 04/27/2011Ship from location per BRD changed use user_field2 from other infor tab.
-////		ls_Cust_code = idw_other.GetItemString(1, 'User_field2')
-////		Select Country Into :ls_Country
-////		From Customer
-////		Where Cust_Code = :ls_Cust_code
-////		And Customer_type = 'WH'
-////		Using SQLCA;
-////						
-////		ls_ups = Mid(ls_carrier,1,3)
-////		//For PANDORA order where status is inPacking status(A) and warehouse country = US for UPS carrier.				
-////		If idw_main.GetItemString(1,"ord_status") = "A" And ls_Country = 'US'  And ls_ups = 'UPS' Then
-////				Select count(*)
-////				into :ll_numexistingup
-////				from batch_Transaction
-////				where project_id = 'PANDORA'
-////				AND trans_type = 'UP'
-////				and trans_status = 'N'
-////				Using SQLCA;
-////				//and trans_order_id = :ls_order;															
-////																							
-////				// If there isn't an existing UP transaction then create a trans record.
-////				If ll_numexistingup = 0 Then
-//				If lbGenerateUP = True then
-//					// Begin a new transaction.
-//					Execute Immediate "Begin Transaction" using SQLCA;
-//					// Insert a new record into batch_transaction to create the UP
-//					Insert Into batch_Transaction
-//					(project_ID, Trans_Type, Trans_order_id, Trans_Status, Trans_Create_Date, Trans_Parm)
-//					Values(:gs_Project, 'UP', :ls_order, 'N', :ldtToday, '');
-//				
-//					// Commit the transaction.
-//					Execute Immediate "COMMIT" using SQLCA;
-//				End if
-////				End If	
-////			End If
-//			//Jxlim 03/31/2011 end of code for UPS Load tender 
-//	end if
-//end if		
+// // Set the vor_shipment_ind to indicate we've already sent the 3B1B for this order.
+//// idw_main.setitem(1,'vor_shipment_ind', 'Y')
+// //End IF // End If we haven't already sent the 3B1B for this order.
+//
+// //Jxlim 03/31/2011UPS Load Tender requirement. #149
+// //Each time a delivery order is saved  in Packing status in which Ord_status = ‘A’,
+// //and wh_code country is US and Carrier is UPS check if the record exists in Batch_tansaction table.
+//// Select Country
+//// into :ls_Country
+//// From Warehouse
+//// where Wh_Code = :ls_Wh_code;
+//
+// //Jxlim 04/27/2011Ship from location per BRD changed use user_field2 from other infor tab.
+//// ls_Cust_code = idw_other.GetItemString(1, 'User_field2')
+//// Select Country Into :ls_Country
+//// From Customer
+//// Where Cust_Code = :ls_Cust_code
+//// And Customer_type = 'WH'
+//// Using SQLCA;
+////
+//// ls_ups = Mid(ls_carrier,1,3)
+//// //For PANDORA order where status is inPacking status(A) and warehouse country = US for UPS carrier.
+//// If idw_main.GetItemString(1,"ord_status") = "A" And ls_Country = 'US'  And ls_ups = 'UPS' Then
+//// Select count(*)
+//// into :ll_numexistingup
+//// from batch_Transaction
+//// where project_id = 'PANDORA'
+//// AND trans_type = 'UP'
+//// and trans_status = 'N'
+//// Using SQLCA;
+//// //and trans_order_id = :ls_order;
+////
+//// // If there isn't an existing UP transaction then create a trans record.
+//// If ll_numexistingup = 0 Then
+// If lbGenerateUP = True then
+// // Begin a new transaction.
+// Execute Immediate "Begin Transaction" using SQLCA;
+// // Insert a new record into batch_transaction to create the UP
+// Insert Into batch_Transaction
+// (project_ID, Trans_Type, Trans_order_id, Trans_Status, Trans_Create_Date, Trans_Parm)
+// Values(:gs_Project, 'UP', :ls_order, 'N', :ldtToday, '');
+//
+// // Commit the transaction.
+// Execute Immediate "COMMIT" using SQLCA;
+// End if
+//// End If
+//// End If
+// //Jxlim 03/31/2011 end of code for UPS Load tender
+// end if
+//end if
 //
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 // End of Pandora #370 code move
 
-IF lb_send_nike_dst THEN 
-	MessageBox ("Create DST", "DSTbatch file request created.")
+IF lb_send_nike_dst THEN
+MessageBox ("Create DST", "DSTbatch file request created.")
 End if
 
 //BCR 13-JAN-2012: For PHXBRANDS, after everything else is successfully saved, check to see if Cust_Code value has changed.
 //       If Yes, write the User_Field4 value (if any) for new Customer into Delivery Notes table. This is the NO CHEP Pallet project.
 IF upper(gs_Project) = 'PHXBRANDS' THEN
-	IF idw_main.RowCount() > 0 THEN
-		lsDoNo = idw_main.GetItemString(1, "do_no")
-		llNoteSeqNo = 100 //This is an arbitrary number, but it tallies with what I use in Sweeper for this same process.
-		lsNewCustCode = idw_main.GetItemString(1, "cust_code")
-		
-		IF lsOldCustCode <> lsNewCustCode THEN
-			
-			SELECT user_field4
-			INTO :lsCustText
-			FROM Customer WITH (NOLOCK)
-			WHERE project_id = :gs_Project
-			AND cust_code = :lsNewCustCode
-			USING SQLCA;
-			
-			IF NOT IsNull(lsCustText) AND lsCustText <> '' THEN
-				Execute Immediate "Begin Transaction" using SQLCA; /*PCONKL - Auto Commit Turned on to eliminate DB locks*/
-	
-				//Delete any Notes entries for the old customer...if such was pulled from User_Field4 of Customer table.
-				delete from Delivery_Notes 
-				where Project_ID = :gs_project and DO_NO = :lsDoNo and Note_Seq_No = :llNoteSeqNo
-				Using SQLCA;			
-			
-				//Insert value from Customer table for new Cust_Code
-				insert into Delivery_Notes (Project_ID, DO_NO, Note_Type, Note_Text, note_seq_no)
-				values (:gs_project, :lsDoNo, 'OM', :lsCustText, :llNoteSeqNo)
-				Using SQLCA;			
-					
-				If sqlca.sqlcode <> 0 Then
-					ls_ErrText = sqlca.sqlerrtext /*text will be lost after rollback*/
-					Execute Immediate "Rollback" using SQLCA;
-					Messagebox(is_Title, "Unable to create Delivery Note for newly selected Customer!~r~r" + ls_ErrText)
-					Return -1
-					
-				End If
-				
-				Execute Immediate "Commit" Using Sqlca;
-				If sqlca.sqlcode <> 0 Then
-					MessageBox(is_title,"Unable to Commit Delivery Notes for newly selected Customer!")
-					Return -1
-					
-				End If
-				
-			ELSE//Changed to a Customer who has no Notes data...
-				Execute Immediate "Begin Transaction" using SQLCA; /*PCONKL - Auto Commit Turned on to eliminate DB locks*/
-				
-				//Delete any Notes entries for the old customer...if such was pulled from User_Field4 of Customer table.
-				delete from Delivery_Notes 
-				where Project_ID = :gs_project and DO_NO = :lsDoNo and Note_Seq_No = :llNoteSeqNo
-				Using SQLCA;			
-			
-				If sqlca.sqlcode <> 0 Then
-					ls_ErrText = sqlca.sqlerrtext /*text will be lost after rollback*/
-					Execute Immediate "Rollback" using SQLCA;
-					Messagebox(is_Title, "Unable to delete Delivery Note for original Customer!~r~r" + ls_ErrText)
-					Return -1
-					
-				End If
-			
-				Execute Immediate "Commit" Using Sqlca;
-				If sqlca.sqlcode <> 0 Then
-					MessageBox(is_title,"Unable to Commit delete of Delivery Notes for original Customer!")
-					Return -1
-					
-				End If
-				
-			END IF //Cust notes
-			
-		END IF //Cust Code changed
-		
-	END IF //Rowcount > 0
-	
+IF idw_main.RowCount() > 0 THEN
+lsDoNo = idw_main.GetItemString(1, "do_no")
+llNoteSeqNo = 100 //This is an arbitrary number, but it tallies with what I use in Sweeper for this same process.
+lsNewCustCode = idw_main.GetItemString(1, "cust_code")
+IF lsOldCustCode <> lsNewCustCode THEN
+SELECT user_field4
+INTO :lsCustText
+FROM Customer WITH (NOLOCK)
+WHERE project_id = :gs_Project
+AND cust_code = :lsNewCustCode
+USING SQLCA;
+IF NOT IsNull(lsCustText) AND lsCustText <> '' THEN
+Execute Immediate "Begin Transaction" using SQLCA; /*PCONKL - Auto Commit Turned on to eliminate DB locks*/
+//Delete any Notes entries for the old customer...if such was pulled from User_Field4 of Customer table.
+delete from Delivery_Notes
+where Project_ID = :gs_project and DO_NO = :lsDoNo and Note_Seq_No = :llNoteSeqNo
+Using SQLCA;
+//Insert value from Customer table for new Cust_Code
+insert into Delivery_Notes (Project_ID, DO_NO, Note_Type, Note_Text, note_seq_no)
+values (:gs_project, :lsDoNo, 'OM', :lsCustText, :llNoteSeqNo)
+Using SQLCA;
+If sqlca.sqlcode <> 0 Then
+ls_ErrText = sqlca.sqlerrtext /*text will be lost after rollback*/
+Execute Immediate "Rollback" using SQLCA;
+Messagebox(is_Title, "Unable to create Delivery Note for newly selected Customer!~r~r" + ls_ErrText)
+Return -1
+End If
+Execute Immediate "Commit" Using Sqlca;
+If sqlca.sqlcode <> 0 Then
+MessageBox(is_title,"Unable to Commit Delivery Notes for newly selected Customer!")
+Return -1
+End If
+ELSE//Changed to a Customer who has no Notes data...
+Execute Immediate "Begin Transaction" using SQLCA; /*PCONKL - Auto Commit Turned on to eliminate DB locks*/
+//Delete any Notes entries for the old customer...if such was pulled from User_Field4 of Customer table.
+delete from Delivery_Notes
+where Project_ID = :gs_project and DO_NO = :lsDoNo and Note_Seq_No = :llNoteSeqNo
+Using SQLCA;
+If sqlca.sqlcode <> 0 Then
+ls_ErrText = sqlca.sqlerrtext /*text will be lost after rollback*/
+Execute Immediate "Rollback" using SQLCA;
+Messagebox(is_Title, "Unable to delete Delivery Note for original Customer!~r~r" + ls_ErrText)
+Return -1
+End If
+Execute Immediate "Commit" Using Sqlca;
+If sqlca.sqlcode <> 0 Then
+MessageBox(is_title,"Unable to Commit delete of Delivery Notes for original Customer!")
+Return -1
+End If
+END IF //Cust notes
+END IF //Cust Code changed
+END IF //Rowcount > 0
 END IF
 //End PhxBrands change.
 
 //TimA 02/04/12 OTM Project
 If lbOTMFlag = True then
-	//TimA 01/21/13 Moved from above.  Save OTM Information
-	Execute Immediate "Begin Transaction" using SQLCA;
-	UPdate Delivery_master
-	Set Ord_Status = :lsOrdStat, OTM_Status = :lsSetOTM, OTM_Call_Date = :ldtGMT
-	//	Set OTM_Status = :lsSetOTM, OTM_Call_Date = :ldtGMT
-	Where do_no = :lsDONO;																														
-	Execute Immediate "COMMIT" using SQLCA;
-	
-	isle_order.Trigger Event modified()
+//TimA 01/21/13 Moved from above.  Save OTM Information
+Execute Immediate "Begin Transaction" using SQLCA;
+UPdate Delivery_master
+Set Ord_Status = :lsOrdStat, OTM_Status = :lsSetOTM, OTM_Call_Date = :ldtGMT
+// Set OTM_Status = :lsSetOTM, OTM_Call_Date = :ldtGMT
+Where do_no = :lsDONO;
+Execute Immediate "COMMIT" using SQLCA;
+isle_order.Trigger Event modified()
 End if
 //TAM 2018/08 =S22531 Set Lock Status for the Load ID
 //GailM 10/15/2018 Temporarily use flag to disable this function until other testing is done
 //05-FEB-2019 :Madhu DE8493 - Pass Do_No to Trans Param
+// Begin - Dinesh - 05/11/2023- SIMS-53- Loading status and Load lock
+if lsordstat = 'P' and gs_project='PANDORA' Then 
+	UPdate Delivery_master Set Load_Lock = 'N' Where load_id = :isLoadId;
+end if
+// End - Dinesh - 05/11/2023- SIMS-53- Loading status and Load lock
+	
 If f_retrieve_parm("PANDORA","FLAG","TMS") = "Y" and  f_retrieve_parm("PANDORA","SKIP_TMS", isWareHouse, "CODE_DESCRIPT")  <> "SKIP_IT"tHEN
 
-	If isLoad_Status = 'LOCK_ON_SAVE' then
-		Execute Immediate "Begin Transaction" using SQLCA;
-		UPdate Delivery_master
-		Set Load_Lock = 'Y'
-		Where load_id = :isLoadId;
-	
-		Insert Into batch_Transaction (project_ID, Trans_Type, Trans_Order_ID, Trans_Status, Trans_Create_Date, Trans_Parm)
-			Values(:gs_Project, 'LWON', :isLoadId,'N', :ldtToday, :is_dono);
-	
-		Execute Immediate "COMMIT" using SQLCA;
-		isLoad_Status = 'NOLOCK'
-		icb_lock_load.Text = 'Unlock Load'
-		tab_main.tabpage_pack.cb_lock_load.visible = true
-		icb_lock_load.Enabled = True
-		f_method_trace_special( gs_project, this.ClassName() + ' - ue_Save', 'load locked:' ,is_dono, ' ',' ',isLoadId) 
-	End if
-	
-	If isLoad_Status = 'UNLOCK_ON_SAVE' then
-		Execute Immediate "Begin Transaction" using SQLCA;
-		UPdate Delivery_master
-		Set Load_Lock = 'N'
-		Where load_id = :isLoadId;
-	
-		Insert Into batch_Transaction (project_ID, Trans_Type, Trans_Order_ID, Trans_Status, Trans_Create_Date, Trans_Parm)
-			Values(:gs_Project, 'LLOCK', :isLoadId,'C', :ldtToday, :is_dono);
-	
-		Execute Immediate "COMMIT" using SQLCA;
-		isLoad_Status = 'LOCK'
-		icb_lock_load.Text = 'Lock Load'
-		tab_main.tabpage_pack.cb_lock_load.visible = true
-		icb_lock_load.Enabled = True
-		f_method_trace_special( gs_project, this.ClassName() + ' - ue_Save', 'load unlocked:' ,is_dono, ' ',' ',isLoadId) 
-	End if
+If isLoad_Status = 'LOCK_ON_SAVE' then
+Execute Immediate "Begin Transaction" using SQLCA;
+UPdate Delivery_master
+Set Load_Lock = 'Y'
+Where load_id = :isLoadId;
+Insert Into batch_Transaction (project_ID, Trans_Type, Trans_Order_ID, Trans_Status, Trans_Create_Date, Trans_Parm)
+Values(:gs_Project, 'LWON', :isLoadId,'N', :ldtToday, :is_dono);
+Execute Immediate "COMMIT" using SQLCA;
+isLoad_Status = 'NOLOCK'
+icb_lock_load.Text = 'Unlock Load' 
+icb_lock_load_google.Text = 'Unlock Load'    // Dinesh - 03/17/2023- SIMS-53- Google - SIMS - Load Lock and New Loading Status
+tab_main.tabpage_other.cb_lock_load_google.visible = true 
+if w_do.idw_main.getitemstring(1,'Carrier')='MLOGSHLSHL' then
+	tab_main.tabpage_other.cb_lock_load_google.visible = False
+end if
+//tab_main.tabpage_pack.cb_lock_load.visible = true 
+//if gs_project='PANDORA' then // DINESH - 03/16/2023- sims-53- Google - SIMS - Load Lock and New Loading Status
+//	tab_main.tabpage_pack.cb_lock_load.visible = False
+//end if
+
+icb_lock_load.Enabled = True
+icb_lock_load_google.Enabled = True // DINESH - 03/16/2023- sims-53- Google - SIMS - Load Lock and New Loading Status
+
+f_method_trace_special( gs_project, this.ClassName() + ' - ue_Save', 'load locked:' ,is_dono, ' ',' ',isLoadId)
+End if
+If isLoad_Status = 'UNLOCK_ON_SAVE' then
+Execute Immediate "Begin Transaction" using SQLCA;
+UPdate Delivery_master
+Set Load_Lock = 'N'
+Where load_id = :isLoadId;
+Insert Into batch_Transaction (project_ID, Trans_Type, Trans_Order_ID, Trans_Status, Trans_Create_Date, Trans_Parm)
+Values(:gs_Project, 'LLOCK', :isLoadId,'C', :ldtToday, :is_dono);
+Execute Immediate "COMMIT" using SQLCA;
+isLoad_Status = 'LOCK'
+icb_lock_load.Text = 'Lock Load'
+icb_lock_load_google.Text = 'Lock Load'
+//tab_main.tabpage_pack.cb_lock_load.visible = true
+// Begin -  DINESH - 03/16/2023- sims-53- Google - SIMS - Load Lock and New Loading Status
+tab_main.tabpage_other.cb_lock_load_google.visible = true  
+if w_do.idw_main.getitemstring(1,'Carrier')='MLOGSHLSHL' then
+	tab_main.tabpage_other.cb_lock_load_google.visible = False
+end if
+// End -  DINESH - 03/16/2023- sims-53- Google - SIMS - Load Lock and New Loading Status
+icb_lock_load.Enabled = True
+icb_lock_load_google.Enabled = True
+f_method_trace_special( gs_project, this.ClassName() + ' - ue_Save', 'load unlocked:' ,is_dono, ' ',' ',isLoadId)
+End if
 End If
 
 //GailM 06/20/2017 - Determine if pick rows have container tracked records - Pandora SIMSPEVS-605
 if lsordstat = 'P' Then
-	wf_check_container_scanned()
+wf_check_container_scanned()
 End If
 
 //GailM 08/16/2018 - S20849 - Google Footprint Container Split
 If Upper(gs_project) = 'PANDORA' and f_retrieve_parm("PANDORA","FLAG","CONTAINER MOVEMENT") = "Y" Then
-	If idw_main.GetItemString(1,"ord_status") <> 'C' and idw_main.GetItemString(1,"ord_status") <> 'D' and idw_main.GetItemString(1,"ord_status") <> 'V' Then
-		liRC = wf_check_footprint_containers()
-	End If
+If idw_main.GetItemString(1,"ord_status") <> 'C' and idw_main.GetItemString(1,"ord_status") <> 'D' and idw_main.GetItemString(1,"ord_status") <> 'V' Then
+liRC = wf_check_footprint_containers()
 End If
+End If
+
 
 //f_method_trace( ll_method_trace_id, this.ClassName(), 'End ue_Save: ' + is_dono ) //08-Feb-2013  :Madhu commented
 f_method_trace_special( gs_project, this.ClassName() + ' - ue_Save', 'End ue_Save:' ,is_dono, ' ',' ',isinvoice_no) //08-Feb-2013  :Madhu added
-Return 0 
+Return 0
 
 end event
 
@@ -25508,6 +25999,10 @@ CASE 'NYCSP'
 //TAM 2019/06/26 : S35194 - KENDO Picking List
 CASE 'KENDO'
 	idw_print.dataobject ='d_picking_prt_kendo'
+	// Begin......Akash Baghel.......10/05/2023 : SIMS-330 - HAGER-SG Picking List	
+CASE 'HAGER-SG'
+	idw_print.dataobject ='d_picking_prt_hager_sg'	
+//End........Akash Baghel.......10/05/2023 : SIMS-330 - HAGER-SG Picking List
 End Choose
  
 //*** BASELINE PICK LOGIC ***//
@@ -25633,7 +26128,8 @@ For i = 1 to ll_cnt /*each Pick Row */
 //	If idw_print.dataobject='d_picking_prt' or idw_print.dataobject='d_picking_prt_rema' then //Print values on Baseline pick list
 //TAM 2019/06/26 : S35194 - KENDO Picking List
 //	If idw_print.dataobject='d_picking_prt' or idw_print.dataobject='d_picking_prt_rema' or idw_print.dataobject ='d_picking_prt_nycsp' then //Print values on Baseline pick list
-	If idw_print.dataobject='d_picking_prt' or idw_print.dataobject='d_picking_prt_rema' or idw_print.dataobject ='d_picking_prt_nycsp' or idw_print.dataobject='d_picking_prt_kendo' then //Print values on Baseline pick list
+	//If idw_print.dataobject='d_picking_prt' or idw_print.dataobject='d_picking_prt_rema' or idw_print.dataobject ='d_picking_prt_nycsp' or idw_print.dataobject='d_picking_prt_kendo' then //Print values on Baseline pick list
+	If idw_print.dataobject='d_picking_prt' or idw_print.dataobject ='d_picking_prt_hager_sg' or idw_print.dataobject='d_picking_prt_rema' or idw_print.dataobject ='d_picking_prt_nycsp' or idw_print.dataobject='d_picking_prt_kendo' then //Print values on Baseline pick list.....Hager_sg data window..... added by Akash baghel SIMS-330...10/05/2023
 		idw_print.setitem(j,"dm_user_field3",idw_main.getitemstring(1,"user_field3")) //28-Oct-2016 Madhu Added for Kendo
 		idw_print.setitem(j,"consolidation_no", idw_main.getitemstring(1,"Consolidation_No")) //28-Oct-2016 Madhu Added for Kendo
 	Else
@@ -26163,7 +26659,11 @@ event ue_retrieve;call super::ue_retrieve;isle_order.Trigger Event modified()
 If tab_main.selectedtab = 6 and tab_main.tabpage_serial.dw_serial.rowcount( ) = 0 Then	this.wf_reset_serial_flag( )
 
 If isValid(  tab_main.tabpage_serial.dw_serial ) and tab_main.tabpage_main.dw_main.rowcount( ) > 0 Then
-	If ( tab_main.tabpage_main.dw_main.GetItemString( 1, 'ord_status' ) =  'P' or tab_main.tabpage_main.dw_main.GetItemString( 1, 'ord_status' ) =  'A'  ) and tab_main.tabpage_serial.dw_serial.rowcount( ) > 0 Then	this.wf_refresh_serial_flag( )
+ 	if gs_project = 'PANDORA' then // DINESH - 03/17/2023- sims-73- Google - SIMS - Load Lock and New Loading Status
+		If ( tab_main.tabpage_main.dw_main.GetItemString( 1, 'ord_status' ) =  'P' or tab_main.tabpage_main.dw_main.GetItemString( 1, 'ord_status' ) =  'L'   ) and tab_main.tabpage_serial.dw_serial.rowcount( ) > 0 Then	this.wf_refresh_serial_flag( )
+	else
+		If ( tab_main.tabpage_main.dw_main.GetItemString( 1, 'ord_status' ) =  'P' or tab_main.tabpage_main.dw_main.GetItemString( 1, 'ord_status' ) =  'A'   ) and tab_main.tabpage_serial.dw_serial.rowcount( ) > 0 Then	this.wf_refresh_serial_flag( )
+	End if
 End If
 end event
 
@@ -26174,12 +26674,14 @@ CommandButton lcb_export
 Long ll_cnt,ll_rtn
 String	lsFilter, lsPrintFormat,ls_where,ls_wh_code,lsConnection_Url_Ariens_On_hold_Validation, lsSerialValFlag
 Long llBoxIDCountRowCount,llRowPos,ll_SelectCount
+string ls_order_type,ls_invoice
 
 // GailM 843
 ib_ShortShipUnlocked = false
-
+	
 // pvh - 09/18/06 - created bol print dw column in project to turn on BOL tab
 tab_main.tabpage_bol.visible = false
+
 if g.getBOLPrintDo() > "" then tab_main.tabpage_bol.visible = true
 
 // Initialize instant variables & datawindow object for all datastores 09/19/00 DGM
@@ -26345,6 +26847,8 @@ icb_import_ib = tab_main.tabpage_detail.cb_import_ib //GailM 8/26/2015 Allow but
 icb_pick_unallocate = tab_main.tabpage_pick.cb_pick_unallocate 		//27-SEP-2017 :Madhu PEVS-848 KDO Return to Stock @174
 icb_pick_unallocate.visible = (gs_project ='KENDO') //27-SEP-2017 :Madhu PEVS-848 KDO Return to Stock @175
 icb_lock_load = tab_main.tabpage_pack.cb_lock_load //TAM 2018/08  - S22531
+icb_lock_load_google = tab_main.tabpage_other.cb_lock_load_google // DINESH - 03/16/2023- sims-53- Google - SIMS - Load Lock and New Loading Status
+
 
 
 icb_shipment.Visible= False /* 04/14 - Can't see where it is being set to visible*/
@@ -26377,15 +26881,15 @@ If gs_project = 'PHILIPS-SG' or gs_project ='PHILIPSCLS' or  gs_project = 'PHILI
 	
 	if gs_project = "KENDO" Then
 		tab_main.tabpage_pack.cb_print_dn.Text = "Print CI"
-		tab_main.tabpage_pack.cb_lock_load.visible = False
+		//tab_main.tabpage_pack.cb_lock_load.visible = False
 		tab_main.tabpage_pack.cb_pack_copypaste.visible = True	//GailM 7/29/2019 S35966 F16957 I2457
 	End If
 	
 	if upper(gs_project) ='COTY' Then 	tab_main.tabpage_pack.cb_print_dn.Text = "LeafLet" //20-APR-2018 :Madhu F7945 COTY Printing of personalized Leaflet
 	
-Else
+	Else
 	tab_main.tabpage_pack.cb_print_dn.visible = False
-End If
+	End If
 
 // 08/13 - PCONKL - Batch Print DN button on search results only visible for Philips for Now
 //3-FEB-2019 :Madhu S28945 Added PHILIPSCLS
@@ -26760,6 +27264,7 @@ If Upper ( gs_project ) = "PANDORA" or Upper ( gs_project ) = "ARIENS"  or Upper
 	tab_main.tabpage_bol.gb_letter.visible = True
 	If Upper ( gs_project ) = "PANDORA" Then	
 		tab_main.tabpage_bol.Text='BOL/SLI'
+		tab_main.tabpage_bol.Enabled=False
 		tab_main.tabpage_bol.rb_bol_combined.visible = TRUE	// LTK 20151008
 	end if
 	//tab_main.tabpage_bol.gb_letter.visible = True
@@ -27052,6 +27557,28 @@ if (w_do.width > mainWidth) Then
 	w_do.width = mainWidth
 End If
 
+//Begin - Dinesh - S64720 -Google - SIMS - Buy Sell Project
+If Upper(gs_project) = 'PANDORA' then
+	
+	if gs_role <> '-1' then
+		idw_main.Object.buysell.Protect = TRUE
+		else 
+		idw_main.Object.buysell.Protect = FALSE
+	end if
+End if
+//End - Dinesh - S64720 -Google - SIMS - Buy Sell Project
+
+//Begin - Dinesh - 03/21/2022- S69016-SIMS KENDO  TO Protect consolidation_no
+If Upper(gs_project) = 'KENDO' then
+	
+	if gs_role >= '2' then
+		idw_other.Object.consolidation_no.Protect = TRUE
+	else 
+		idw_other.Object.consolidation_no.Protect = FALSE
+	end if
+End if
+//End - Dinesh - 03/21/2022- S69016-SIMS KENDO  TO Protect consolidation_no
+
 
 
 
@@ -27074,12 +27601,15 @@ end event
 event open;call super::open;// pvh 09/08/05 - modified to remove references to Gemini Tab
 
 i_nwarehouse = Create n_warehouse
-
 tab_main.MoveTab(2, 13)
-
 tab_main.tabpage_main.cb_do_select_customer.visible=false
 tab_main.tabpage_load_plan.visible =false
-
+//Begin -Dinesh -08/01/2024- SIMS-576-Flextronics ( SHW ) Unable to amend the Carton # at the Packing List Tab in SIMS
+If gs_project <> 'PANDORA' Then
+	tab_main.tabpage_pack.dw_pack.dataobject = 'd_do_packing_grid_non_pandora'
+	tab_main.tabpage_pack.dw_pack.SetTransObject(SQLCA)
+End If
+//End -Dinesh -08/01/2024- SIMS-576-Flextronics ( SHW ) Unable to amend the Carton # at the Packing List Tab in SIMS
 // 09/05 - PCONKL - Hide TRAX tab if project not enabled
 If not g.ibTraxEnabled Then
 	tab_main.tabpage_trax.visible = False
@@ -27159,6 +27689,14 @@ If tab_main.selectedtab = 6 and idw_serial.modifiedcount() > 0 and idw_main.geti
 	//End If
 End If
 
+//Begin - dinesh - 06/15/2023- SIMS-198- Google Read only access 
+if gs_project = 'PANDORA' then
+//delete from Screen_Lock where user_id=:gs_userid  and screen_name='Delivery Order'  using sqlca; // Dinesh - 06092023 - SIMS-198- Screen Lock 
+delete from Screen_Lock where user_id=:gs_userid  and screen_name='Delivery Order' and  userspid=:gl_userspid using sqlca; // Dinesh - 06092023 - SIMS-198- Screen Lock 
+commit;
+end if
+//End - dinesh - 06/15/2023 - SIMS-198- Google Read only access
+
 Destroy i_nwarehouse 
 
 Destroy ids_content
@@ -27204,7 +27742,14 @@ ls_status = idw_main.GetItemString(idw_main.rowcount(), 'ord_status')
 		ls_dono = idw_main.GetItemString(idw_main.RowCount(), 'do_no')
 		wf_lock(false)
 		if idw_pack.RowCount() > 0 Then
-			ls_status = 'A'
+			// Begin-DINESH - 03/17/2023- sims-73- Google - SIMS - Load Lock and New Loading Status
+			if gs_project = 'PANDORA' then
+				ls_status = 'L'
+			// End-DINESH - 03/17/2023- sims-73- Google - SIMS - Load Lock and New Loading Status
+			else
+				ls_status = 'A'
+			end if
+				
 		Elseif idw_pick.RowCount() > 0 Then
 			ls_status = 'P'
 		Else
@@ -27281,6 +27826,16 @@ IF gs_project = 'PANDORA' THEN
 	//TimA 06/29/15 Pandora issue 983 remove the F10 unlock for the Original RDD field.
 	//idw_main.Object.edm_generate_datetime.Protect = FALSE
 	//idw_main.Modify("edm_generate_datetime.Background.Color = '" +  string(RGB(255, 255, 255)) + "'")
+	
+	//Begin - Dinesh - 12/14/2021- S65679- Google SIMS TMS change: Ready by date to be read only
+	idw_main.Object.ready_by_date.Protect = FALSE
+	idw_main.Modify("ready_by_date.Background.Color = '" +  string(RGB(255, 255, 255)) + "'")
+	//End - Dinesh - 12/14/2021- S65679- Google SIMS TMS change: Ready by date to be read only
+	
+	//Begin - Dinesh - 02/03/2022- S66897- Google SIMS - part of CBOL changes
+//	idw_other.Object.shipment_id.Protect = FALSE
+//	idw_other.Modify("shipment_id.Background.Color = '" +  string(RGB(255, 255, 255)) + "'")
+	//End - Dinesh - 02/03/2022-  S66897- Google SIMS - part of CBOL changes
 	
 	//TimA 06/07/13 Unlock cust_order_no if F10
 	idw_main.Object.cust_order_no.Protect = FALSE
@@ -27452,17 +28007,22 @@ end on
 event tab_main::selectionchanged;// pvh 09/08/05 - modified to remove references to Gemini Tab
 
 window lwindow
-long ll_return //01/03/2011 ujh: S/N_Pfx2
-String ls_country, ls_carrier_pro, ls_status, ls_color, ls_otm_status
-ilHelpTopicID = 503 /*default help topic ID*/
-wf_check_menu(False,'sort')
+long ll_return,llrow,k //01/03/2011 ujh: S/N_Pfx2
+string ls_Client_Cust_SO_Nbr,ls_invoice,ls_cust_sku,ls_invoice_no,ls_User_IdW,ls_Edit_ModeW
+String ls_country, ls_carrier_pro, ls_status, ls_color, ls_otm_status,ls_LSLG,ls_ZIGL,ls_carrier,ls_carrier_str,ls_shipment_id,ls_load_id
+String ls_Edit_ModeR,ls_User_IdR,ls_Order_NoR,ls_display_name1,ls_display_name,ls_Order,lsinvoice_no,ls_userspid // Dinesh - 06/19/2023- SIMS-198- Google- Read only 
+boolean lb_read=False,lb_readonly
+long ll_userspidr
 
+ilHelpTopicID = 503 /*default help topic ID*/
+datastore lds_screen_lock,lds_screen_lockw
+wf_check_menu(False,'sort')
 Choose Case newIndex
 	Case 1 /*Order Info Tab*/
 		ilHelpTopicID = 553
 		idw_current = idw_main
 		wf_check_menu(False,'find') 
-		
+
 		//MStuart - BabyCare EMC
 		If upper(gs_project) = 'BABYCARE' Then
 			If idw_main.RowCount() > 0 Then
@@ -27472,27 +28032,99 @@ Choose Case newIndex
 		wf_set_pack_filter('Remove') //11-Mar-2014 :Madhu- Added to remove filter on Packlist.
 		
 		// Begin Dinesh S52817- 01/22/21 - Google - SIMS - SAP Conversion - GUI 
-			If gs_project = 'PANDORA' then
-				//string ls_User_field16,ls_User_field18,ls_in_clause
-				//ls_in_clause= tabpage_main.sle_order.text
-				idw_other.object.User_Field16.Protect = TRUE
-				idw_other.object.User_Field18.Protect = TRUE
-//				select User_field16,User_field18 into :ls_User_field16, :ls_User_field18 from delivery_master where invoice_no=:ls_in_clause and project_id=:gs_project;
-//				if   (isnull(ls_User_field16) or ls_User_field16= '') and (isnull(ls_User_field18) or ls_User_field18= '') then
-//						idw_main.SetItem(1, "crossdock_ind",'N')
-//				elseif   (isnull(ls_User_field16) or ls_User_field16= '') and (isnull(ls_User_field18) or ls_User_field18= '') then
-//						idw_main.SetItem(1, "crossdock_ind",'N')
-//				elseif   (not isnull(ls_User_field16) or ls_User_field16 <>'') and (isnull(ls_User_field18) or ls_User_field18= '') then
-//						idw_main.SetItem(1, "crossdock_ind",'Y')
-//				elseif  (not isnull(ls_User_field16) or ls_User_field16 <>'') and (not isnull(ls_User_field18) or ls_User_field18 <> '') then
-//						idw_main.SetItem(1, "crossdock_ind",'Y')
-//				end if
-			end if
+//			If gs_project = 'PANDORA' then
+//				//string ls_User_field16,ls_User_field18,ls_in_clause
+//				//ls_in_clause= tabpage_main.sle_order.text
+//				idw_other.object.User_Field16.Protect = TRUE
+//				idw_other.object.User_Field18.Protect = TRUE
+//				// Begin  - Dinesh - 06/15/2023- SIMS-198- Google - SIMS - Read Only Access
+//				lsinvoice_no = idw_main.GetItemString(1,'invoice_no')
+//				lds_screen_lock = Create datastore
+//				lds_screen_lock.Dataobject = 'd_screen_lock_order_r'
+//				lds_screen_lock.settrans(sqlca)
+//				lds_screen_lock.retrieve(gs_System_No,'R')
+//				
+//				lds_screen_lockw = Create datastore
+//				lds_screen_lockw.Dataobject = 'd_screen_lock_order_w'
+//				lds_screen_lockw.settrans(sqlca)
+//				lds_screen_lockw.retrieve(gs_System_No,'W')
+//				
+//				ls_Edit_ModeW = lds_screen_lockw.getitemstring(k,'edit_Mode')
+//			
+//				
+//				select count(*) into : il_find_matchW from Screen_Lock with(nolock) where Order_No= :gs_System_No and Edit_Mode='W' and screen_name='Delivery Order' using sqlca;
+//				select user_id,UserSPID into :ls_User_IdW,:ls_userspid from Screen_Lock with(nolock) where Order_No= :gs_System_No and Edit_Mode='W' and screen_name='Delivery Order' using sqlca;
+//				for k= 1 to lds_screen_lock.rowcount()
+//					 ls_Edit_ModeR = lds_screen_lock.getitemstring(k,'edit_Mode')
+//					 ls_User_IdR = lds_screen_lock.getitemstring(k,'user_Id')
+//					 ls_Order_NoR =lds_screen_lock.getitemstring(k,'order_No')
+//					 ll_userspidr =lds_screen_lock.getitemnumber(k,'userspid')
+//					 if gs_System_No = ls_Order_NoR and ls_userspid = string(gl_userspid) then 
+//							select display_name into :ls_display_name1 from usertable with (Nolock) where userid=:ls_User_IdR;
+//							 ls_display_name= ls_display_name + ls_display_name1+ '/Session: ' + string(ll_userspidr) + " ,"
+//							 if string(gl_userspid) = ls_userspid then
+//							 	lb_read= True
+//							else
+//								lb_read= False
+//							end if
+//					end if
+//				next
+//				if lb_read= True and  lds_screen_lock.rowcount() > 0 then
+//			
+//							if   il_find_matchW > 0 and ls_Order_NoR=gs_System_No and ll_userspidr <> gl_userspid  then
+//								messagebox(is_title,'User Name: ' + ls_display_name + ' is/are also accessing the same Order Number ' + lsinvoice_no + '.~r~nThe screen is locked by you and others can only access this order in read mode.Please update, save and close this order once you complete.', Stopsign! )
+//								//lb_readonly=True
+//
+//							end if	
+//						end if
+//				if lb_read= False and  lds_screen_lock.rowcount() > 0 then
+//							if  il_find_matchW > 0 and ls_Order_NoR=gs_System_No  and gs_userid = ls_User_IdW and ls_userspid <> string(gl_userspid) and gs_System_No <> '' then
+//								messagebox(is_title,'Hey!! You have already opened another session: ' +string(ls_userspid)+ ' for the same Order Number ' + lsinvoice_no + '.~r~nPlease close all your current/previous session first and then re-open the order.', Stopsign! )
+//								//lb_readonly=True
+//							end if
+//							
+//							if  il_find_matchW > 0 and ls_Order_NoR=gs_System_No  and gs_userid <> ls_User_IdW and ls_userspid <> string(gl_userspid) and gs_System_No <> '' then						
+//								messagebox(is_title,'User Name: ' + is_display_name + ' /Session:' + ls_userspid + '  is already accessing the Order Number ' + lsinvoice_no + '.~r~nThe screen is locked and can be accessible to read mode only.Please contact your Site Manager/Supervisor to unlock the screen or wait for sweeper run to clear the lock automatically.', Stopsign! )
+//								//lb_readonly=True
+//							end if
+//					end if
+//				
+//			End if
+		// End  - Dinesh - 06/15/2023- SIMS-198- Google - SIMS - Read Only Access
+		
 		// End Dinesh S51817 - 01/22/21 - Google - SIMS - SAP Conversion - GUI
 
 	Case 2 /*Order Other Tab*/
 		ilHelpTopicID = 553
 		idw_current = idw_main
+		// Begin - Dinesh - 05/10/2023- SIMS-53- Loading status delivery order
+		if Upper(gs_project) = 'PANDORA' then
+			 if  ((idw_main.GetItemString(1,"ord_status") = "L" or  (idw_main.GetItemString(1,"ord_status") = "A")) and idw_pack.RowCount() >=0)  then	
+				//idw_main.SetItem(1,"ord_status","L") //then set status to Loading(L)
+				tab_main.tabpage_other.cb_lock_load_google.visible = True
+			end if
+			
+			if (w_do.idw_main.getitemstring(1,'Carrier')='MLOGSHLSHL')  then
+				tab_main.tabpage_other.cb_lock_load_google.visible = False
+			end if
+			
+			if  (idw_main.GetItemString(1,"ord_status") = "I" and idw_pack.RowCount() >=0)  then	
+				//idw_main.SetItem(1,"ord_status","L") //then set status to Loading(L)
+				tab_main.tabpage_other.cb_lock_load_google.visible = False
+				
+			end if
+			
+				// Begin - Dinesh - SIMS-198- oogle - SIMS - Read Only Access
+//				if il_find_matchR > 0 and gs_userid <> is_userid then
+//					messagebox(is_title,'User Name ' + is_display_name + '  is also accessing~r~nthe same Order Number ' + is_dono + '.~r~n~r~nThis screen is locked for the other user untill you update, save and close the delivery order screen for this order.', Stopsign! )
+//				else
+//				if il_find_matchW > 0 and  gs_userid <> is_user_id   then 
+//					messagebox(is_title,'User Name ' + is_display_name + '  is already accessing~r~nthe Order Number ' + is_dono + '.~r~n~r~nThe screen is locked and can be accessible to read mode only.Please contact your Site Manager/Supervisor to unlock the screen before the waiting time of 2 hours.', Stopsign! )
+//				end if
+				// End - Dinesh - SIMS-198- oogle - SIMS - Read Only Access
+		End if
+		// End - Dinesh - 05/10/2023- SIMS-53- Loading status delivery order
+		
 		wf_check_menu(False,'find') 
 		/*Sarun2013MAR20 To Enable the EMG user,licence entry option when selection change*/ 
 		ls_country = UPPER(TRIM( tab_main.tabpage_main.tab_address.tabpage_shipto.dw_shipto.GetItemString(1, "Country")))
@@ -27505,6 +28137,36 @@ Choose Case newIndex
 		ls_status = idw_main.GetItemString(1, "Ord_status")	
 		ls_otm_status = idw_main.GetItemString(1, "Otm_status")	
 		ls_carrier_pro = Trim(idw_other.GetItemString(1, "Carrier_Pro_No"))	
+		// BEGIN -  Dinesh - 10/07/2021 -S57453-Google - SIMS - Bill of Lading Changes
+			//idw_other.setitem(1,'awb_bol_no',ls_carrier_pro)
+			//idw_other.setitem(1,'Carrier_Pro_No','')
+			ls_carrier= idw_other.getitemstring(1,'carrier')
+			ls_shipment_id= idw_main.GetItemString(1,'shipment_id')
+			ls_invoice_no= idw_main.GetItemString(1,'invoice_no')
+			//ls_load_id= idw_main.GetItemString(1,'load_id')
+			
+//					select SCAC_Code into : ls_carrier from carrier_master  where project_id = :gs_project and   Carrier_Code =:ls_carrier;
+//					//ls_carrier_str=Left(ls_carrier, 4)
+//					select LU.Code_ID into : ls_LSLG from Lookup_table LU where LU.project_id = :gs_project and LU.Code_Type = 'SHIPMENT_ID'  and LU.Code_ID= 'LSLG';
+//					select LU.Code_ID into : ls_ZIGL from Lookup_table LU where LU.project_id = :gs_project and LU.Code_Type = 'SHIPMENT_ID'  and LU.Code_ID= 'ZIGL';
+					
+			//Begin - Dinesh - S64720 -Google - SIMS - Buy Sell Project
+				//ls_invoice=idw_main.GetItemString(1,'invoice_no')
+				//select Client_Cust_SO_Nbr into :ls_client_cust_so_nbr from EDI_Outbound_Header where project_id = :gs_project and invoice_no = :ls_invoice;
+				//idw_other.setitem(1,'client_cust_so_nbr',ls_client_cust_so_nbr)
+				// Begin - S66897 08022022-  Dinesh -Google - SIMS - CBOL Changes
+				if gs_project = 'PANDORA' then
+				idw_other.setitem(1,'shipment_id',ls_shipment_id)
+			//	idw_other.Object.shipment_id.Protect = True // S66897 02022022-  Dinesh -Google - SIMS - CBOL Changes
+				// End - S66897 08022022-  Dinesh -Google - SIMS - CBOL Changes
+					if gs_role <> '-1' then
+						idw_other.Object.client_cust_so_nbr.Protect = TRUE
+						else 
+						idw_other.Object.client_cust_so_nbr.Protect = FALSE
+					end if
+				//End - Dinesh - S64720 -Google - SIMS - Buy Sell Project
+				end if
+				// END -  Dinesh- 10/07/2021- S57453-Google - SIMS - Bill of Lading Changes
 		//Jxlim 05/01/2014 Lock Carrier_ Pro_No field based on ord_status is ‘C’ , ‘D’, or 'V'			
 		If   ls_status = 'C' or ls_status = 'D'  or ls_status = 'V' Then
 			tab_main.tabpage_other.cb_assign_pro.Enabled=False
@@ -27540,14 +28202,24 @@ Choose Case newIndex
 				idw_other.Modify("Carrier_pro_no.Background.Color = '" + String(RGB(255,255,255)) + "'")	  //White background color	
 			end if
 			// LTK 20150416  End of Pro No protection change
+			
 		End If
 	Case 3 /*Order Detail Tab*/
 		ilHelpTopicID = 554
 		idw_current = idw_Detail
+	   // ls_Client_Cust_SO_Nbr = idw_other.GetItemString(1, "client_cust_so_nbr")	// Dinesh 12/01/2021- S64720- Google - SIMS - Buy Sell Project
 		// Dinesh - Begin-10/06/2020- S50129 -SIMS - Google - Lock To Project Code field in OB Order Detail
 		string ls_stat
 		ls_stat=idw_main.GetItemString(1, "Ord_status")	
+		//ls_invoice=idw_main.GetItemString(1,'invoice_no')
+		//select customer_sku into :ls_cust_sku from EDI_Outbound_Detail where project_id = :gs_project and invoice_no = :ls_invoice;
 		If gs_project = 'PANDORA' Then
+			
+//			for llrow =1 to idw_Detail.rowcount()	
+//				idw_Detail.setitem(llrow,'customer_sku',ls_cust_sku) // Dinesh 12/01/2021- S64720- Google - SIMS - Buy Sell Project	
+//			next
+			idw_detail.Object.customer_sku.Protect = TRUE
+			
 			If ls_stat <> 'C' Or ls_stat <> 'D' then
 			//select access_level into: ll_acess from UserTable where UserID=:gs_userid;
 				if gs_role <> '-1' then
@@ -27556,10 +28228,45 @@ Choose Case newIndex
 					idw_detail.Object.User_field5.Protect = FALSE
 				end if
 			end if
+			
 		end if
+	
 		// Dinesh - End- 10/06/2020- S50129 -SIMS - Google - Lock To Project Code field in OB Order Detail
 		// pvh - 11.10.06
 		//wf_check_menu(TRUE,'sort') 
+		
+		//* Begin .....Akash Baghel - 08/07/2023...- SIMS 243- Match the project code in order detail tab to project code table */
+        String ls_projectcode, lsFind
+		Long  i, llrowcount1, llFindRow1 
+		  
+           If  gs_project='PANDORA' Then
+			  llrowcount1 = idw_detail.rowcount()	
+			  
+			  datastore	ldsProjectCode
+				 ldsProjectCode = Create datastore
+                   ldsProjectCode.dataobject= 'd_project_code'
+                   ldsProjectCode.SetTransobject(SQLCA)
+                   ldsProjectCode.Retrieve()		 
+       
+		 for i = 1 to llrowcount1
+		      ls_projectcode = idw_detail.GetItemString(i,'User_field5')
+		      lsFind = "project_code = '" +ls_projectcode + "'"
+               llFindRow1 = ldsProjectCode.Find(lsFind, 1, ldsProjectCode.rowcount())
+	          
+              If llFindRow1 > 0 Then 
+		        idw_detail.SetItem(1,'User_field5', ls_projectcode)
+			Continue  
+	          Elseif	 llFindRow1 <= 0 Then 
+			          messagebox("Project Code Not Match","This order of PO No "+ls_projectcode+" has an invalid Project Code. Processing of this order is not allowed.")
+                       lb_readonly=True
+					wf_delivery_order_readonly(lb_readonly) // Dinesh - 08/22/2023- SIMS-243 - Match the project code in order detail tab to project code table */
+					 return -1
+			 End if 
+            Next
+       End if	
+
+ //// End............Akash Baghel - 08/07/2023...- SIMS 243 - Match the project code in order detail tab to project code table */
+
 		wf_check_menu(True,'find') 
 		wf_set_pack_filter('Remove') //11-Mar-2014 :Madhu- Added to remove filter on Packlist.
 	Case 4 /*Pick Tab*/
@@ -27582,13 +28289,14 @@ Choose Case newIndex
 		
 		//GailM 06/20/2017 - SIMSPEVS-605 - Check if all container ids have been verified for Pandora BoxID validation
 		if gs_project = 'PANDORA' then
+			
 			wf_check_container_scanned()
 		End If
 
 	Case 5 /*Pack Tab*/
 		ilHelpTopicID = 557
 		idw_Current = idw_Pack
-		
+		ib_pack = False // Dinesh - 02082022- S66897- Google CBOL Changes
 		//DW is shared with TRAX DW which may have reset the filter to remove dup carton rows
 		wf_set_Pack_Filter('SET')
 		// pvh - 11.10.06
@@ -27597,6 +28305,11 @@ Choose Case newIndex
 		
 		wf_check_menu(True,'find') 
 		
+		// Begin - Dinesh -SIMS-53 - Google - SIMS - Load Lock and New Loading Status 
+			if gs_project= 'PANDORA' then
+				tab_main.tabpage_pack.cb_lock_load.visible = False
+			end if
+		// End - Dinesh -SIMS-53 - Google - SIMS - Load Lock and New Loading Status 		
 		if upper(gs_project) = 'PANDORA' then
 			//TimA Pandora issue #192
 			//If order is a MORK order then don't protect the fileds
@@ -27611,13 +28324,15 @@ Choose Case newIndex
 			else
 				ibMorkKitOrder = False
 			end if
+			
 		End if		
 		
 		// LTK 20140228 Added call
 		if upper(gs_project) = 'PANDORA' or upper(gs_project) = 'PHYSIO-MAA' or upper(gs_project) = 'PHYSIO-XD' then
 			wf_set_state_ci_lt_button()
 		end if
-
+		
+	
 	Case 6 /*serial Number Tab*/
 		
 		// 01/03/2011 ujh: S/N_Pfx2  This placed before populating idw_Current just in case.
@@ -27664,6 +28379,12 @@ Choose Case newIndex
 		END IF
 		//21-Apr-2014 :Madhu- KLN Display Total Requested Qty & Total Scanned qty -END
 		
+		// Dhirendra DE23249-PANDORA   Disable the mannual entry on serial tab -Start
+		If gs_Project='PANDORA' THEN
+			tab_main.tabpage_serial.rb_manual.enabled =false
+		END IF 
+		// Dhirendra DE23249-PANDORA   Disable the mannual entry on serial tab -END 
+		
 	Case 7 /*BOL Tab*/
 		ilHelpTopicID = 558
 		
@@ -27679,7 +28400,7 @@ Choose Case newIndex
 	
 	Case 9 /*Trax Tab */
 				
-		// DW is shared with Packing DW bu we only want to show 1 record per carton
+		// DW is shared with Packing DW bu we only want to show 1 record per 
 		idw_trax.SetFilter("c_dup_filter <> 'Y'")
 		idw_trax.Filter()
 		
@@ -27719,6 +28440,8 @@ Choose Case newIndex
 		wf_check_menu(False,'find') 
 End Choose
 
+inewindex=newIndex // Dinesh
+
 
 		
 		
@@ -27730,6 +28453,7 @@ integer width = 4544
 integer height = 2564
 long backcolor = 67108864
 string text = " Order Info "
+cb_readonly cb_readonly
 st_shipment st_shipment
 st_shipment_nbr st_shipment_nbr
 st_validation_msg st_validation_msg
@@ -27753,6 +28477,7 @@ cb_open_ro cb_open_ro
 end type
 
 on tabpage_main.create
+this.cb_readonly=create cb_readonly
 this.st_shipment=create st_shipment
 this.st_shipment_nbr=create st_shipment_nbr
 this.st_validation_msg=create st_validation_msg
@@ -27776,30 +28501,32 @@ this.cb_open_ro=create cb_open_ro
 int iCurrent
 call super::create
 iCurrent=UpperBound(this.Control)
-this.Control[iCurrent+1]=this.st_shipment
-this.Control[iCurrent+2]=this.st_shipment_nbr
-this.Control[iCurrent+3]=this.st_validation_msg
-this.Control[iCurrent+4]=this.cb_custom1
-this.Control[iCurrent+5]=this.cb_emc
-this.Control[iCurrent+6]=this.cb_do_print_docs
-this.Control[iCurrent+7]=this.cb_do_readytoship
-this.Control[iCurrent+8]=this.cb_do_shipment
-this.Control[iCurrent+9]=this.cb_do_void
-this.Control[iCurrent+10]=this.cb_do_select_customer
-this.Control[iCurrent+11]=this.sle_order
-this.Control[iCurrent+12]=this.sle_order2
-this.Control[iCurrent+13]=this.tab_address
-this.Control[iCurrent+14]=this.cb_do_notes
-this.Control[iCurrent+15]=this.cb_do_pod
-this.Control[iCurrent+16]=this.cb_do_hold
-this.Control[iCurrent+17]=this.cb_do_confirm
-this.Control[iCurrent+18]=this.st_order_nbr
-this.Control[iCurrent+19]=this.dw_main
-this.Control[iCurrent+20]=this.cb_open_ro
+this.Control[iCurrent+1]=this.cb_readonly
+this.Control[iCurrent+2]=this.st_shipment
+this.Control[iCurrent+3]=this.st_shipment_nbr
+this.Control[iCurrent+4]=this.st_validation_msg
+this.Control[iCurrent+5]=this.cb_custom1
+this.Control[iCurrent+6]=this.cb_emc
+this.Control[iCurrent+7]=this.cb_do_print_docs
+this.Control[iCurrent+8]=this.cb_do_readytoship
+this.Control[iCurrent+9]=this.cb_do_shipment
+this.Control[iCurrent+10]=this.cb_do_void
+this.Control[iCurrent+11]=this.cb_do_select_customer
+this.Control[iCurrent+12]=this.sle_order
+this.Control[iCurrent+13]=this.sle_order2
+this.Control[iCurrent+14]=this.tab_address
+this.Control[iCurrent+15]=this.cb_do_notes
+this.Control[iCurrent+16]=this.cb_do_pod
+this.Control[iCurrent+17]=this.cb_do_hold
+this.Control[iCurrent+18]=this.cb_do_confirm
+this.Control[iCurrent+19]=this.st_order_nbr
+this.Control[iCurrent+20]=this.dw_main
+this.Control[iCurrent+21]=this.cb_open_ro
 end on
 
 on tabpage_main.destroy
 call super::destroy
+destroy(this.cb_readonly)
 destroy(this.st_shipment)
 destroy(this.st_shipment_nbr)
 destroy(this.st_validation_msg)
@@ -27821,6 +28548,25 @@ destroy(this.st_order_nbr)
 destroy(this.dw_main)
 destroy(this.cb_open_ro)
 end on
+
+event tabpage_main::constructor;call super::constructor;// Begin- Dinesh - 11/06/2023 - SIMS-328- Screen Lock  read only part 2 
+if gs_project= 'PANDORA' then
+	
+	tab_main.tabpage_main.cb_readonly.visible = True
+	
+	if gs_system_no <> '' or not isnull(gs_system_no) then
+		tab_main.tabpage_main.cb_readonly.enabled = False
+	else
+		tab_main.tabpage_main.cb_readonly.enabled = True
+end if
+
+else
+	tab_main.tabpage_main.cb_readonly.visible = False
+end if
+
+
+// End- Dinesh - 11/06/2023 - SIMS-328- Screen Lock  read only part 2 
+end event
 
 type tabpage_search from w_std_master_detail`tabpage_search within tab_main
 integer y = 108
@@ -27898,6 +28644,35 @@ destroy(this.uo_ord_status)
 destroy(this.uo_otm_ord_status)
 destroy(this.dw_search)
 end on
+
+type cb_readonly from commandbutton within tabpage_main
+integer x = 1422
+integer y = 28
+integer width = 503
+integer height = 96
+integer taborder = 20
+boolean bringtotop = true
+integer textsize = -9
+integer weight = 700
+fontcharset fontcharset = ansi!
+fontpitch fontpitch = variable!
+fontfamily fontfamily = swiss!
+string facename = "Arial"
+string text = "&Read Only Access"
+end type
+
+event clicked;// Begin - Dinesh - 11/06/2023 - SIMS-328- Screen Lock  read only part 2 
+boolean lb_readonly
+lb_readonly= True
+If MessageBox( is_title, "Are you sure you want to change this order to read only?", Question!, YesNo!, 1 ) = 1 Then
+	update Screen_Lock set edit_mode='R' where  user_id=:gs_userid  and screen_name='Delivery Order' and  userspid=:gl_userspid using sqlca;
+	tab_main.tabpage_main.cb_readonly.enabled = False
+	wf_delivery_order_readonly(lb_readonly)
+	ib_access= true
+	
+End If
+// End - Dinesh - 11/06/2023 - SIMS-328- Screen Lock  read only part 2 
+end event
 
 type st_shipment from statictext within tabpage_main
 boolean visible = false
@@ -28254,7 +29029,8 @@ If idw_trax.Find("tracking_Id_Type='T'",1,idw_trax.RowCount()) > 0 Then
 	liRC = luTrax.uf_void_shipment(idw_Main,idw_trax)
 
 	If liRC < 0 Then
-		messagebox(is_title, 'Unable to void shipment in TRAX system!')
+		//messagebox(is_title, 'Unable to void shipment in TRAX system!') //Dinesh - 02/06/2025- SIMS-641-Development for Delivery Order screen change for ConnectShip 
+		messagebox(is_title, 'Unable to void shipment in ConnectShip system!') //Dinesh - 02/06/2025- SIMS-641-Development for Delivery Order screen change for ConnectShip 
 	End If
 	
 End If
@@ -28404,16 +29180,26 @@ end event
 event modified;// pvh 09/08/05 - modified to remove references to Gemini Tab
 String ls_order, ls_customer, lssku, lsSupplier, lsFind,ls_wh_code, ls_OrderNbr, lsShipment, ls_load_Id
 String lsSQL1, lsSQL2,ls_User_Field16,ls_User_Field18
-integer i
-Long	llRowPos, llRowCount, llFindRow, llCount
+integer i,k,j
+Long	llRowPos, llRowCount, llFindRow, llCount,llreturnmessage,ll_userspid,ll_spid
 Long ll_return, ll_load_detail // 01/03/2011 ujh: S/N_Pfx2
-Boolean	lbCompExists, lbSerialExists,lb_multiple_ord_search
+Boolean	lbCompExists, lbSerialExists,lb_multiple_ord_search,lb_readonly,lb_selfuser
 dwitemstatus ldis_status
-
-
-
+string ls_User_Id,ls_Order_No,ls_Edit_Mode,ls_display_name, ls_User_Id1,ls_Order_No1,ls_Edit_Mode1,ls_display_name1,ls_edit_moderead
+datetime ldt_Entry_Date, ldt_Out_Date, ldt_Entry_Date1, ldt_Out_Date1,ldt_user_login_Date
+string ls_in_clause,ls_search_string,ls_where,ls_screen_name,ls_order_read,ls_invoice_no,ls_screen_name1
+string  ls_Edit_ModeR,ls_User_IdR, ls_Order_NoR,ls_Edit_ModeW,ls_User_IdW, ls_Order_NoW,ls_spid,ls_userspid
+//02/02 - PCONKL - we may now have multiple orders with same invoice_no (backorder). If so, they must select from Search screen
+long ll_find,flag,ll_find_match
+datastore lds_screen_lockR,lds_screen_lockW
 //GailM 1/2/2018 I357 F5734 S14571 PAN - HRI Alert for High Risk Inventory
 ib_HRI_Ind = False
+lb_readonly=False
+lb_selfuser=False
+//ib_search= False // Dinesh - 11/02/2023- SIMS-328 - Google  - Read only part 2
+//ib_search=True
+
+
 
 //TimA 02/11/2012 OTM Project
 //Reset the OTM Update flag
@@ -28431,7 +29217,6 @@ ibPickModified = False
 //Jxlim 03/18/2011 end of changed
 
 //nxjain Improve the search criteria to trim the invoice value and update the where cluase with like   -20160211
-
 ls_order = trim(This.Text)
 
 //TimA Reset the log trace id
@@ -28465,12 +29250,8 @@ IF  len(ls_order)  > 50  Then
 	RETURN
 end IF
 //Dinesh End - 02/12/2021 - S52817 - Google - SIMS - SAP Conversion - GUI - Multileg Search 
-string ls_in_clause,ls_search_string,ls_where
-//02/02 - PCONKL - we may now have multiple orders with same invoice_no (backorder). If so, they must select from Search screen
-long ll_find,flag
 //Dinesh - 02/11/2021 - S52817 - Google - SIMS - SAP Conversion - GUI - Multileg Search 
 select count(*) into :ll_find from delivery_master where invoice_no= :ls_order and project_id=:gs_project;
-
 //Dhirendra-11 Jan 2021 PANDORA -S52706 - Added if condition for multiple search
 IF   Pos(ls_order, ",") > 0 and Upper(gs_project) ="PANDORA" THEN
 	lb_multiple_ord_search =true
@@ -28492,6 +29273,7 @@ else
 	Select Count(*) Into :llCount
 	From DElivery_MAster
 	WHERE Invoice_No like '%'+:ls_order+'%' and project_id = :gs_project;
+	
 end if 
 
 	IF (llCount=0)  then  //Nxjain 2014-01-02 inculde search to system number.
@@ -28539,6 +29321,277 @@ END IF
 
 IF is_dono = "" THEN RETURN
 
+gs_System_No = is_dono
+
+//Begin - Dinesh - 06/08/2023 - SIMS-198 - Google - SIMS - Google - SIMS - Read Only Access 
+if gs_project='PANDORA' then
+	
+		ls_order_read=ls_order
+		
+		//Begin - Dinesh - 11/06/2023 - SIMS-328 - Google - SIMS - Google - SIMS - Read Only Access part 2
+		if gs_System_No <> '' or not isnull(gs_System_No) then
+			tab_main.tabpage_main.cb_readonly.enabled = True
+		else
+			tab_main.tabpage_main.cb_readonly.enabled = False
+		end if
+		//End - Dinesh - 11/06/2023 - SIMS-328 - Google - SIMS - Google - SIMS - Read Only Access part 2
+		SELECT invoice_no INTO :ls_invoice_no FROM Delivery_Master WHERE do_no = :ls_order_read   and project_id = :gs_project;
+		if ls_invoice_no <> "" and not isnull(ls_invoice_no) then
+			ls_order=ls_invoice_no
+			is_order_new= ls_order
+		end if
+
+			lds_screen_lockW = Create datastore
+			lds_screen_lockW.Dataobject = 'd_screen_lock_order_w'
+			lds_screen_lockW.settrans(sqlca)
+			lds_screen_lockW.retrieve(gs_System_No,'W')
+			
+			//gl_userspid
+			
+			//select top 1 Login_Time into :ldt_user_login_Date  from User_Login_History where UserId=:gs_userid order by Login_Time desc;
+			//select UserSPID into :gl_userspid  from User_Login_History where UserId=:gs_userid and Login_Time=:ldt_user_login_Date;
+			select count(*) into : il_find_matchW from Screen_Lock with(nolock) where Order_No= :gs_System_No and Edit_Mode='W' and screen_name='Delivery Order' using sqlca;
+			lds_screen_lockR = Create datastore
+			lds_screen_lockR.Dataobject = 'd_screen_lock_order_r'
+			lds_screen_lockR.settrans(sqlca)
+			lds_screen_lockR.retrieve(gs_System_No,'R')
+		
+			for j= 1 to lds_screen_lockR.rowcount()
+					ls_Edit_ModeR = lds_screen_lockR.getitemstring(j,'edit_Mode')
+				 	ls_User_IdR = lds_screen_lockR.getitemstring(j,'user_Id')
+					ls_Order_NoR =lds_screen_lockR.getitemstring(j,'order_No')
+			NEXT
+			
+			select count(*) into : il_find_matchR from Screen_Lock with(nolock) where Order_No= :gs_System_No and Edit_Mode='R' and screen_name='Delivery Order' using sqlca;
+			
+			if (il_find_matchR > 0 and il_find_matchW=0) then
+				select User_Id,Order_No,screen_name,Entry_Date,Out_Date,Edit_Mode,UserSPID into :ls_User_Id,:gs_System_No,:ls_screen_name,:ldt_Entry_Date,:ldt_Out_Date,:ls_Edit_Mode,:ll_spid from Screen_Lock with(nolock) where Order_No= :gs_System_No and Edit_Mode='R' and screen_name='Delivery Order' using sqlca;
+			end if
+			if (il_find_matchW > 0 and il_find_matchR= 0) then
+				select User_Id,Order_No,screen_name,Entry_Date,Out_Date,Edit_Mode,UserSPID into :ls_User_Id,:gs_System_No,:ls_screen_name,:ldt_Entry_Date,:ldt_Out_Date,:ls_Edit_Mode,:ll_spid from Screen_Lock with(nolock) where Order_No= :gs_System_No and Edit_Mode='W' and screen_name='Delivery Order' using sqlca;	
+			end if
+			if (il_find_matchR > 0 and  il_find_matchW > 0) then
+				select User_Id,Order_No,screen_name,Entry_Date,Out_Date,Edit_Mode,UserSPID into :ls_User_Id,:gs_System_No,:ls_screen_name,:ldt_Entry_Date,:ldt_Out_Date,:ls_Edit_Mode,:ll_spid from Screen_Lock with(nolock) where Order_No= :gs_System_No and Edit_Mode='W' and screen_name='Delivery Order' using sqlca;
+			end if
+			
+			lds_screen_lockW.retrieve(gs_System_No,'W')
+				for k= 1 to lds_screen_lockW.rowcount()
+					 ls_Edit_ModeW = lds_screen_lockW.getitemstring(k,'edit_Mode')
+					 ls_User_IdW = lds_screen_lockW.getitemstring(k,'user_Id')
+					 ls_Order_NoW =lds_screen_lockW.getitemstring(k,'order_No')
+					 ll_userspid =lds_screen_lockW.getitemnumber(k,'userspid')
+				next
+				
+					select Display_Name into :is_display_name from UserTable with(nolock) where UserId=:ls_User_IdW;
+				
+			//if  ib_search= True then
+				if  gs_System_No = ls_Order_NoW and gs_userid <> ls_User_IdW and gs_System_No <> ''  then
+						messagebox(is_title,'User Name: ' + is_display_name + '/Session: ' + string(ll_userspid) +  ' is already accessing the Order Number ' + ls_order + '.~r~nThe screen is locked and can be accessible to read mode only.Please contact your Site Manager/Supervisor to unlock the screen or wait for sweeper run to clear the lock automatically.', Stopsign! )
+						lb_readonly=True
+						lb_selfuser= False
+				
+				elseif gs_System_No=ls_Order_NoW and gs_userid = ls_User_IdW and ll_spid <>gl_userspid and gs_System_No <> '' then
+						
+						messagebox(is_title,'Hey!! You have already opened another session: ' +string(ll_userspid)+ ' for~r~nthe same Order Number ' + ls_order + '.~r~n~r~nPlease close all your current/previous session first and then re-open the order.', Stopsign! )
+						lb_readonly=True
+						lb_selfuser= False
+				
+				elseif gs_System_No=ls_Order_NoW and gs_userid = ls_User_IdW and  ll_spid = gl_userspid and gs_System_No <> '' then
+						//messagebox(is_title,'Hey!! You have already opened the same order in the same session with SPID ID: ' +string(ll_userspid)+ ' for~r for the Order number ' + ls_order + '.~r~n~r~n', Stopsign! )
+						lb_readonly=False
+						lb_selfuser= True	
+			
+				end if
+			//end if
+			if lb_selfuser= False  then
+			
+				if (il_find_matchW =  0 and il_find_matchR = 0 )  then
+					delete from screen_lock where User_Id=:gs_userid and screen_name='Delivery Order' and UserSPID=:gl_userspid using sqlca; // Dinesh - 09/20/2023- Read only
+					insert into Screen_Lock (User_Id,Order_No,Screen_Name,Entry_Date,Out_Date,Edit_Mode,UserSPID) values(:gs_userid,:gs_System_No,:is_title,getdate(),NULL,'W',:gl_userspid) using sqlca;
+					commit;
+					lb_readonly=false
+					
+				elseif (il_find_matchW = 0 and il_find_matchR = 0) and (gs_userid= ls_User_IdW and gs_System_No = ls_Order_NoW and ll_spid <> gl_userspid) then
+						insert into Screen_Lock (User_Id,Order_No,Screen_Name,Entry_Date,Out_Date,Edit_Mode,UserSPID) values(:gs_userid,:gs_System_No,:is_title,getdate(),NULL,'W',:gl_userspid) using sqlca;
+						commit;
+						lb_readonly=false
+				elseif (il_find_matchW > 0 and il_find_matchR > 0) and (gs_userid= ls_User_IdW and gs_System_No = ls_Order_NoW and ll_spid <> gl_userspid) then
+						delete from screen_lock where User_Id=:gs_userid and screen_name='Delivery Order' and UserSPID=:gl_userspid and Edit_Mode='R' using sqlca; //09/21/2023- Dinesh - Read only
+						insert into Screen_Lock (User_Id,Order_No,Screen_Name,Entry_Date,Out_Date,Edit_Mode,UserSPID) values(:gs_userid,:gs_System_No,:is_title,getdate(),NULL,'R',:gl_userspid) using sqlca;
+						commit;
+						lb_readonly=true
+				elseif (il_find_matchW > 0 and il_find_matchR = 0) and (gs_userid= ls_User_IdW and gs_System_No = ls_Order_NoW and ll_spid <> gl_userspid) then
+						delete from screen_lock where User_Id=:gs_userid and screen_name='Delivery Order' and UserSPID=:gl_userspid using sqlca; //09/21/2023- Dinesh - Read only
+						insert into Screen_Lock (User_Id,Order_No,Screen_Name,Entry_Date,Out_Date,Edit_Mode,UserSPID) values(:gs_userid,:gs_System_No,:is_title,getdate(),NULL,'R',:gl_userspid) using sqlca;
+						commit;
+						lb_readonly=True
+				elseif (il_find_matchW = 0 and il_find_matchR > 0) and (gs_userid= ls_User_IdW and gs_System_No = ls_Order_NoW and ll_spid <> gl_userspid ) then
+						delete from screen_lock where User_Id=:gs_userid and screen_name='Delivery Order' and UserSPID=:gl_userspid using sqlca; //09/21/2023- Dinesh - Read only
+						insert into Screen_Lock (User_Id,Order_No,Screen_Name,Entry_Date,Out_Date,Edit_Mode,UserSPID) values(:gs_userid,:gs_System_No,:is_title,getdate(),NULL,'W',:gl_userspid) using sqlca;
+						commit;
+						lb_readonly=false
+				//Begin - Dinesh - 09/20/2023- SIMS-328-  Google  - Read Only Access Part 2
+				elseif (il_find_matchW = 0 and il_find_matchR = 0) and (gs_userid= ls_User_IdW and gs_System_No <> ls_Order_NoW and ll_spid <> gl_userspid) then
+						insert into Screen_Lock (User_Id,Order_No,Screen_Name,Entry_Date,Out_Date,Edit_Mode,UserSPID) values(:gs_userid,:gs_System_No,:is_title,getdate(),NULL,'W',:gl_userspid) using sqlca;
+						commit;
+						lb_readonly=false
+				elseif (il_find_matchW > 0 and il_find_matchR > 0) and (gs_userid= ls_User_IdW and gs_System_No <> ls_Order_NoW and ll_spid <> gl_userspid) then
+						delete from screen_lock where User_Id=:gs_userid and screen_name='Delivery Order' and Edit_Mode='R' and UserSPID=:gl_userspid using sqlca; // Dinesh - 09/20/2023- SIMS-328-  Google  - Read Only Access Part 2
+						insert into Screen_Lock (User_Id,Order_No,Screen_Name,Entry_Date,Out_Date,Edit_Mode,UserSPID) values(:gs_userid,:gs_System_No,:is_title,getdate(),NULL,'R',:gl_userspid) using sqlca;
+						commit;
+						lb_readonly=true
+				elseif (il_find_matchW > 0 and il_find_matchR = 0) and (gs_userid= ls_User_IdW and gs_System_No <> ls_Order_NoW and ll_spid <> gl_userspid) then
+						//delete from screen_lock where User_Id=:gs_userid and screen_name='Delivery Order' using sqlca;
+						insert into Screen_Lock (User_Id,Order_No,Screen_Name,Entry_Date,Out_Date,Edit_Mode,UserSPID) values(:gs_userid,:gs_System_No,:is_title,getdate(),NULL,'R',:gl_userspid) using sqlca;
+						commit;
+						lb_readonly=True
+				elseif (il_find_matchW = 0 and il_find_matchR > 0) and (gs_userid= ls_User_IdW and gs_System_No <> ls_Order_NoW and ll_spid <> gl_userspid ) then
+						delete from screen_lock where User_Id=:gs_userid and screen_name='Delivery Order' and Edit_Mode='R' and UserSPID=:gl_userspid using sqlca; // Dinesh - 09/20/2023- SIMS-328-  Google  - Read Only Access Part 2
+						insert into Screen_Lock (User_Id,Order_No,Screen_Name,Entry_Date,Out_Date,Edit_Mode,UserSPID) values(:gs_userid,:gs_System_No,:is_title,getdate(),NULL,'W',:gl_userspid) using sqlca;
+						commit;
+						lb_readonly=false
+				//End - Dinesh - 09/20/2023- SIMS-328-  Google  - Read Only Access Part 2
+						
+				elseif (il_find_matchW = 0 and il_find_matchR = 0) and (gs_userid = ls_User_IdW and gs_System_No = ls_Order_NoW and ll_spid = gl_userspid) then
+					delete from screen_lock where User_Id=:gs_userid and screen_name='Delivery Order' and UserSPID=:gl_userspid using sqlca; //09/21/2023- Dinesh - SIMS-328-  Google  - Read Only Access Part 2
+					insert into Screen_Lock (User_Id,Order_No,Screen_Name,Entry_Date,Out_Date,Edit_Mode,UserSPID) values(:gs_userid,:gs_System_No,:is_title,getdate(),NULL,'W',:gl_userspid) using sqlca;
+					commit;
+					lb_readonly=false
+				elseif (il_find_matchW > 0 and il_find_matchR = 0) and (gs_userid = ls_User_IdW and gs_System_No = ls_Order_NoW and ll_spid = gl_userspid) then
+					delete from screen_lock where User_Id=:gs_userid and screen_name='Delivery Order' and UserSPID=:gl_userspid using sqlca; //09/21/2023- Dinesh - SIMS-328-  Google  - Read Only Access Part 2
+					insert into Screen_Lock (User_Id,Order_No,Screen_Name,Entry_Date,Out_Date,Edit_Mode,UserSPID) values(:gs_userid,:gs_System_No,:is_title,getdate(),NULL,'W',:gl_userspid) using sqlca;
+					commit;
+					lb_readonly=false
+				elseif (il_find_matchW > 0 and il_find_matchR > 0) and (gs_userid = ls_User_IdW and gs_System_No = ls_Order_NoW and ll_spid = gl_userspid) then
+					delete from screen_lock where User_Id=:gs_userid and screen_name='Delivery Order' and Edit_Mode='R' and UserSPID=:gl_userspid using sqlca; //09/21/2023- Dinesh - SIMS-328-  Google  - Read Only Access Part 2
+					insert into Screen_Lock (User_Id,Order_No,Screen_Name,Entry_Date,Out_Date,Edit_Mode,UserSPID) values(:gs_userid,:gs_System_No,:is_title,getdate(),NULL,'W',:gl_userspid) using sqlca;
+					commit;
+					lb_readonly=false
+				elseif (il_find_matchW = 0 and il_find_matchR > 0) and (gs_userid = ls_User_IdW and gs_System_No = ls_Order_NoW and ll_spid = gl_userspid) then
+					delete from screen_lock where User_Id=:gs_userid and screen_name='Delivery Order' and UserSPID=:gl_userspid using sqlca; //09/21/2023- Dinesh - SIMS-328-  Google  - Read Only Access Part 2
+					insert into Screen_Lock (User_Id,Order_No,Screen_Name,Entry_Date,Out_Date,Edit_Mode,UserSPID) values(:gs_userid,:gs_System_No,:is_title,getdate(),NULL,'W',:gl_userspid) using sqlca;
+					commit;
+					lb_readonly=false
+					
+				elseif (il_find_matchW = 0 and il_find_matchR = 0) and (gs_userid = ls_User_IdW and gs_System_No <> ls_Order_NoW and ll_spid = gl_userspid) then
+					//delete from screen_lock where User_Id=:gs_userid and screen_name='Delivery Order' using sqlca;
+					insert into Screen_Lock (User_Id,Order_No,Screen_Name,Entry_Date,Out_Date,Edit_Mode,UserSPID) values(:gs_userid,:gs_System_No,:is_title,getdate(),NULL,'W',:gl_userspid) using sqlca;
+					commit;
+					lb_readonly=false
+				elseif (il_find_matchW > 0 and il_find_matchR = 0) and (gs_userid = ls_User_IdW and gs_System_No <> ls_Order_NoW and ll_spid = gl_userspid) then
+					delete from screen_lock where User_Id=:gs_userid and screen_name='Delivery Order' and UserSPID=:gl_userspid using sqlca; //09/21/2023- Dinesh - SIMS-328-  Google  - Read Only Access Part 2
+					insert into Screen_Lock (User_Id,Order_No,Screen_Name,Entry_Date,Out_Date,Edit_Mode,UserSPID) values(:gs_userid,:gs_System_No,:is_title,getdate(),NULL,'W',:gl_userspid) using sqlca;
+					commit;
+					lb_readonly=false
+				elseif (il_find_matchW > 0 and il_find_matchR > 0) and (gs_userid = ls_User_IdW and gs_System_No <> ls_Order_NoW and ll_spid = gl_userspid) then
+					delete from screen_lock where User_Id=:gs_userid and screen_name='Delivery Order'  and UserSPID=:gl_userspid using sqlca;//09/21/2023- Dinesh - SIMS-328-  Google  - Read Only Access Part 2
+					insert into Screen_Lock (User_Id,Order_No,Screen_Name,Entry_Date,Out_Date,Edit_Mode,UserSPID) values(:gs_userid,:gs_System_No,:is_title,getdate(),NULL,'W',:gl_userspid) using sqlca;
+					commit;
+					lb_readonly=false
+				elseif (il_find_matchW = 0 and il_find_matchR > 0) and (gs_userid = ls_User_IdW and gs_System_No <> ls_Order_NoW and ll_spid = gl_userspid) then
+					delete from screen_lock where User_Id=:gs_userid and screen_name='Delivery Order' and UserSPID=:gl_userspid using sqlca; //09/21/2023- Dinesh - SIMS-328-  Google  - Read Only Access Part 2
+					insert into Screen_Lock (User_Id,Order_No,Screen_Name,Entry_Date,Out_Date,Edit_Mode,UserSPID) values(:gs_userid,:gs_System_No,:is_title,getdate(),NULL,'W',:gl_userspid) using sqlca;
+					commit;
+					lb_readonly=false
+
+				elseif (il_find_matchW = 0 and il_find_matchR = 0) and (gs_userid <> ls_User_IdW and gs_System_No <> ls_Order_NoW and  ll_spid = gl_userspid) then
+					//delete from screen_lock where User_Id=:gs_userid and screen_name='Delivery Order' using sqlca;
+					insert into Screen_Lock (User_Id,Order_No,Screen_Name,Entry_Date,Out_Date,Edit_Mode,UserSPID) values(:gs_userid,:gs_System_No,:is_title,getdate(),NULL,'W',:gl_userspid) using sqlca;
+					commit;	
+					lb_readonly=false
+				elseif (il_find_matchW > 0 and il_find_matchR = 0) and (gs_userid <> ls_User_IdW and gs_System_No <> ls_Order_NoW and  ll_spid = gl_userspid) then
+					delete from screen_lock where User_Id=:gs_userid and screen_name='Delivery Order' and UserSPID=:gl_userspid using sqlca; //09/21/2023- Dinesh - SIMS-328-  Google  - Read Only Access Part 2
+					insert into Screen_Lock (User_Id,Order_No,Screen_Name,Entry_Date,Out_Date,Edit_Mode,UserSPID) values(:gs_userid,:gs_System_No,:is_title,getdate(),NULL,'W',:gl_userspid) using sqlca;
+					commit;	
+					lb_readonly=false
+				elseif (il_find_matchW > 0 and il_find_matchR > 0) and (gs_userid <> ls_User_IdW and gs_System_No <> ls_Order_NoW and  ll_spid = gl_userspid) then
+					delete from screen_lock where User_Id=:gs_userid and screen_name='Delivery Order' and UserSPID=:gl_userspid using sqlca; //09/21/2023- Dinesh - SIMS-328-  Google  - Read Only Access Part 2
+					insert into Screen_Lock (User_Id,Order_No,Screen_Name,Entry_Date,Out_Date,Edit_Mode,UserSPID) values(:gs_userid,:gs_System_No,:is_title,getdate(),NULL,'W',:gl_userspid) using sqlca;
+					commit;	
+					lb_readonly=false
+				elseif (il_find_matchW = 0 and il_find_matchR > 0) and (gs_userid <> ls_User_IdW and gs_System_No <> ls_Order_NoW and  ll_spid = gl_userspid) then
+					delete from screen_lock where User_Id=:gs_userid and screen_name='Delivery Order' and UserSPID=:gl_userspid using sqlca; //09/21/2023- Dinesh - SIMS-328-  Google  - Read Only Access Part 2
+					insert into Screen_Lock (User_Id,Order_No,Screen_Name,Entry_Date,Out_Date,Edit_Mode,UserSPID) values(:gs_userid,:gs_System_No,:is_title,getdate(),NULL,'W',:gl_userspid) using sqlca;
+					commit;		
+					lb_readonly=false
+				elseif (il_find_matchW = 0 and il_find_matchR = 0) and (gs_userid <> ls_User_IdW and gs_System_No = ls_Order_NoW and  ll_spid <> gl_userspid) then
+					//delete from screen_lock where User_Id=:gs_userid and screen_name='Delivery Order' using sqlca;
+					insert into Screen_Lock (User_Id,Order_No,Screen_Name,Entry_Date,Out_Date,Edit_Mode,UserSPID) values(:gs_userid,:gs_System_No,:is_title,getdate(),NULL,'W',:gl_userspid) using sqlca;
+					commit;	
+					lb_readonly=false
+				elseif (il_find_matchW > 0 and il_find_matchR = 0) and (gs_userid <> ls_User_IdW and gs_System_No = ls_Order_NoW and  ll_spid <> gl_userspid) then
+					delete from screen_lock where User_Id=:gs_userid and screen_name='Delivery Order' and UserSPID=:gl_userspid using sqlca; //09/21/2023- Dinesh - SIMS-328-  Google  - Read Only Access Part 2
+					insert into Screen_Lock (User_Id,Order_No,Screen_Name,Entry_Date,Out_Date,Edit_Mode,UserSPID) values(:gs_userid,:gs_System_No,:is_title,getdate(),NULL,'R',:gl_userspid) using sqlca;
+					commit;	
+					lb_readonly=true
+				elseif (il_find_matchW > 0 and il_find_matchR > 0) and (gs_userid <> ls_User_IdW and gs_System_No = ls_Order_NoW and  ll_spid <> gl_userspid) then
+					delete from screen_lock where User_Id=:gs_userid and screen_name='Delivery Order' and Edit_Mode in('R','W') and UserSPID=:gl_userspid using sqlca; //09/21/2023- Dinesh - SIMS-328-  Google  - Read Only Access Part 2
+					insert into Screen_Lock (User_Id,Order_No,Screen_Name,Entry_Date,Out_Date,Edit_Mode,UserSPID) values(:gs_userid,:gs_System_No,:is_title,getdate(),NULL,'R',:gl_userspid) using sqlca;
+					commit;	
+					lb_readonly=True
+				elseif (il_find_matchW = 0 and il_find_matchR > 0) and ((gs_userid <> ls_User_IdW) or (ls_User_IdW='')  and gs_System_No = ls_Order_NoW and  ll_spid <> gl_userspid) then
+					delete from screen_lock where User_Id=:gs_userid and screen_name='Delivery Order' and UserSPID=:gl_userspid using sqlca; //09/21/2023- Dinesh - SIMS-328-  Google  - Read Only Access Part 2
+					insert into Screen_Lock (User_Id,Order_No,Screen_Name,Entry_Date,Out_Date,Edit_Mode,UserSPID) values(:gs_userid,:gs_System_No,:is_title,getdate(),NULL,'W',:gl_userspid) using sqlca;
+					commit;	
+					lb_readonly=false
+				elseif (il_find_matchW = 0 and il_find_matchR > 0) and (gs_userid<> ls_User_IdR and gs_System_No = ls_Order_NoR and ll_spid <> gl_userspid) then
+					delete from screen_lock where User_Id=:gs_userid and screen_name='Delivery Order' and UserSPID=:gl_userspid using sqlca;//09/21/2023- Dinesh - SIMS-328-  Google  - Read Only Access Part 2
+					insert into Screen_Lock (User_Id,Order_No,Screen_Name,Entry_Date,Out_Date,Edit_Mode,UserSPID) values(:gs_userid,:gs_System_No,:is_title,getdate(),NULL,'W',:gl_userspid) using sqlca;
+					commit;
+					lb_readonly=false
+					
+				elseif (il_find_matchW = 0 and il_find_matchR = 0) and (gs_userid <> ls_User_IdW and gs_System_No <> ls_Order_NoW and  ll_spid <> gl_userspid) then
+					//delete from screen_lock where User_Id=:gs_userid and screen_name='Delivery Order' using sqlca;
+					insert into Screen_Lock (User_Id,Order_No,Screen_Name,Entry_Date,Out_Date,Edit_Mode,UserSPID) values(:gs_userid,:gs_System_No,:is_title,getdate(),NULL,'W',:gl_userspid) using sqlca;
+					commit;	
+					lb_readonly=false
+				elseif (il_find_matchW > 0 and il_find_matchR = 0) and (gs_userid <> ls_User_IdW and gs_System_No = ls_Order_NoW and  ll_spid <> gl_userspid) then
+					delete from screen_lock where User_Id=:gs_userid and screen_name='Delivery Order' and Edit_Mode='R' and UserSPID=:gl_userspid using sqlca; //09/21/2023- Dinesh - SIMS-328-  Google  - Read Only Access Part 2
+					insert into Screen_Lock (User_Id,Order_No,Screen_Name,Entry_Date,Out_Date,Edit_Mode,UserSPID) values(:gs_userid,:gs_System_No,:is_title,getdate(),NULL,'R',:gl_userspid) using sqlca;
+					commit;	
+					lb_readonly=True
+					
+				elseif (il_find_matchW > 0 and il_find_matchR > 0) and (gs_userid <> ls_User_IdW and gs_System_No = ls_Order_NoW and  ll_spid <> gl_userspid) then
+						lds_screen_lockW.retrieve(gs_System_No,'W')
+					 for k= 1 to lds_screen_lockW.rowcount()
+						 ls_Edit_ModeW = lds_screen_lockW.getitemstring(k,'edit_Mode')
+						 ls_User_IdW = lds_screen_lockW.getitemstring(k,'user_Id')
+						 ls_Order_NoW =lds_screen_lockW.getitemstring(k,'order_No')
+						 ll_userspid =lds_screen_lockW.getitemnumber(k,'userspid')
+					next
+					delete from screen_lock where User_Id=:gs_userid and screen_name='Delivery Order' and UserSPID=:gl_userspid using sqlca;//09/21/2023- Dinesh - SIMS-328-  Google  - Read Only Access Part 2
+					insert into Screen_Lock (User_Id,Order_No,Screen_Name,Entry_Date,Out_Date,Edit_Mode,UserSPID) values(:gs_userid,:gs_System_No,:is_title,getdate(),NULL,'W',:gl_userspid) using sqlca;
+					commit;	
+					lb_readonly=false
+				elseif (il_find_matchW = 0 and il_find_matchR > 0) and (gs_userid <> ls_User_IdW and gs_System_No = ls_Order_NoW and  ll_spid <> gl_userspid) then
+					delete from screen_lock where User_Id=:gs_userid and screen_name='Delivery Order' and UserSPID=:gl_userspid using sqlca; //09/21/2023- Dinesh - SIMS-328-  Google  - Read Only Access Part 2
+					insert into Screen_Lock (User_Id,Order_No,Screen_Name,Entry_Date,Out_Date,Edit_Mode,UserSPID) values(:gs_userid,:gs_System_No,:is_title,getdate(),NULL,'W',:gl_userspid) using sqlca;
+					commit;	
+					lb_readonly=false
+					
+				
+				else
+					lb_readonly=false
+					//insert into Screen_Lock (User_Id,Order_No,Screen_Name,Entry_Date,Out_Date,Edit_Mode,UserSPID) values(:gs_userid,:gs_System_No,:is_title,getdate(),NULL,'R',:gl_userspid) using sqlca;
+				end if	
+			else
+				
+			end if
+			
+			//Begin - Dinesh - 11/06/2023 - SIMS-328 - Google - SIMS - Google - SIMS - Read Only Access part 2
+			select edit_mode into :ls_edit_moderead from Screen_Lock with(nolock) where Order_No= :gs_System_No and user_id = :gs_userid and screen_name='Delivery Order' and userspid=:gl_userspid using sqlca;
+			
+			if ls_edit_moderead= 'W' then
+				
+				tab_main.tabpage_main.cb_readonly.enabled = True
+			else
+				tab_main.tabpage_main.cb_readonly.enabled = False
+			end if
+			//End - Dinesh - 11/06/2023 - SIMS-328 - Google - SIMS - Google - SIMS - Read Only Access part 2
+	 End if
+//End - Dinesh - 07/25/2023 - SIMS-198 - Google - SIMS - Google - SIMS - Read Only Access 
+
+			
 idw_main.Retrieve(is_dono)
 //if  Upper(gs_project) ="PANDORA" THEN 
 //	f_crossdock() // Dinesh - 02/01/2021 - S52817- Google -SAP Conversion - GUI - Multileg set in other info
@@ -28613,6 +29666,12 @@ If idw_main.RowCount() > 0 Then
 	f_method_trace_special( gs_project, this.ClassName() + ' - Modified', 'Modified - Start wf_check_status1  ',gs_system_no, ' ',' ',gs_system_no) //2/7/2020  :Gail added
 	wf_check_status()
 	f_method_trace_special( gs_project, this.ClassName() + ' - Modified', 'Modified - End wf_check_status1  ',gs_system_no, ' ',' ',gs_system_no) //2/7/2020  :Gail added
+	
+	//Begin -08/22/2023- SIMS-198- Google- Read only for the multiple users
+	if gs_project='PANDORA' then
+			wf_delivery_order_readonly(lb_readonly)
+	end if
+	//End -08/22/2023- SIMS-198- Google- Read only for the multiple users
 	
 	tab_main.tabpage_Serial.dw_serial.Reset() /* 1/01 Pconkl - Retrieve any outbound serial info - only when tab selected*/
 	tab_main.tabpage_serial.sle_barcodes.Text = "" // pvh - 10/28/05
@@ -28750,6 +29809,8 @@ If idw_main.RowCount() > 0 Then
 	// 02/01 PCONKL - Filter Pick list to not show components if box is not checked
 	wf_set_pick_Filter('Set')
 	wf_set_pack_Filter('Set')
+	
+	
 	
 			
 	//wf_check_status()
@@ -29474,7 +30535,7 @@ integer y = 108
 integer width = 3520
 integer height = 736
 long backcolor = 79741120
-string text = "Trax 3rd Party"
+string text = "ConnectShip 3rd Party"
 long tabtextcolor = 33554432
 long tabbackcolor = 79741120
 long picturemaskcolor = 536870912
@@ -29676,8 +30737,8 @@ If idw_main.RowCount() = 0 Then return
 lsStatus = idw_Main.GetItemString(1,'ord_status')
 
 Choose Case Upper(lsStatus)
-		
-	Case 'N', 'P','I','A' /* Not currently on hold and not voided/complete*/
+	// DINESH - 03/17/2023- sims-73- Google - SIMS - Load Lock and New Loading Status added 'L' in the case
+	Case 'N', 'P', 'I', 'A', 'L' /* Not currently on hold and not voided/complete*/
 		
 		If Messagebox('HOLD','Are you sure you want to place this order on HOLD?',Question!,YesNo!,1) = 1 Then
 			idw_main.SetITem(1,'ord_status','H')
@@ -29686,13 +30747,17 @@ Choose Case Upper(lsStatus)
 		
 	Case 'H' /*currently on hold, restore previous status based on which records exist*/
 		
-		If idw_Pack.RowCount() > 0 Then
-			idw_main.SetItem(1,'Ord_status','A')
-		ElseIf idw_Pick.RowCount() > 0 Then
-			idw_main.SetItem(1,'Ord_status','P')
-		Else
-			idw_main.SetItem(1,'Ord_status','N')
-		End If
+			If idw_Pack.RowCount() > 0 Then
+				if gs_project = 'PANDORA' then
+					idw_main.SetItem(1,'Ord_status','L') // Begin-DINESH - 03/17/2023- sims-73- Google - SIMS - Load Lock and New Loading Status
+				else
+					idw_main.SetItem(1,'Ord_status','A')
+				end if
+				ElseIf idw_Pick.RowCount() > 0 Then
+					idw_main.SetItem(1,'Ord_status','P')
+				Else
+					idw_main.SetItem(1,'Ord_status','N')
+				End If
 			
 		iw_window.TriggerEvent('ue_save')
 		
@@ -29718,8 +30783,10 @@ end type
 event clicked;datetime ldComDate 
 String lsStat
 Integer liReturnCode,liRC
+string ls_invoice,ls_order_type
 
 //MEA - 04/12 Added to check credentials
+
 
 if f_check_access(is_process , "C") = 0 then Return -1
 
@@ -30340,7 +31407,8 @@ Case "ORD_STATUS" /* 02/08 - PCONKL - allowing a Super Duper user to un-confirm 
 			//BCR 06-DEC-2011: Treat Bluecoat same as Pandora...
 //			if (upper(gs_project) = 'PANDORA'  OR upper(gs_project) = 'BLUECOAT') and THis.GetITemString(1,'ord_status') = 'C' and data = 'A'  Then
 			// ET3 2012-06-14: Implement generic test
-			if g.ibSNchainofcustody and THis.GetITemString(1,'ord_status') = 'C' and data = 'A'  then
+			// if g.ibSNchainofcustody and THis.GetITemString(1,'ord_status') = 'C'  and data = 'A' then // DINESH - 03/17/2023- sims-73- Google - SIMS - Load Lock and New Loading Status
+			if g.ibSNchainofcustody and THis.GetITemString(1,'ord_status') = 'C' and (data = 'A' or data = 'L')  then // DINESH - 03/17/2023- sims-73- Google - SIMS - Load Lock and New Loading Status
 				FOR ll_row = 1 to tab_main.tabpage_serial.dw_serial.RowCount()
 					ls_serial_no = tab_main.tabpage_serial.dw_serial.GetItemString(ll_row, 'serial_no')
 					ls_sku =  tab_main.tabpage_serial.dw_serial.GetItemString(ll_row, 'SKU')
@@ -30363,18 +31431,31 @@ Case "ORD_STATUS" /* 02/08 - PCONKL - allowing a Super Duper user to un-confirm 
 				next
 				ibUnconfirmFullCircle = true
 			end if
-			
-			If data = 'A' or data = 'I' Then
-				If Data = 'I' and idw_PAck.RowCount() > 0 Then
-					MessageBox(is_title,"A COMPLETED order can only be reset to PICKING if there is no Pack List)")
-					return 1
+			// Begin-DINESH - 03/17/2023- sims-73- Google - SIMS - Load Lock and New Loading Status
+			If gs_project = 'PANDORA' then
+				If data = 'L' or data = 'I' Then
+						If Data = 'I' and idw_PAck.RowCount() > 0 Then
+							MessageBox(is_title,"A COMPLETED order can only be reset to PICKING if there is no Pack List)")
+							return 1
+						End If
+				Else
+						MessageBox(is_title,"A COMPLETED order can only be reset to 'LOADING' (or 'PICKING' if no Pack List)")
+						return 1
 				End If
-			Else
-				MessageBox(is_title,"A COMPLETED order can only be reset to 'PACKING' (or 'PICKING' if no Pack List)")
-				return 1
+				// End -DINESH - 03/17/2023- sims-73- Google - SIMS - Load Lock and New Loading Status
+			else
+					If data = 'A' or data = 'I' Then
+							If Data = 'I' and idw_PAck.RowCount() > 0 Then
+								MessageBox(is_title,"A COMPLETED order can only be reset to PICKING if there is no Pack List)")
+								return 1
+							End If
+					Else
+							MessageBox(is_title,"A COMPLETED order can only be reset to 'PACKING' (or 'PICKING' if no Pack List)")
+							return 1
+					End If
+				End if
+					
 			End If
-			
-		End If
 		
 		ibUnconfirmRequested = True /*will bypass check for confirmation by another user */
 		
@@ -30469,29 +31550,50 @@ event constructor;call super::constructor;// 10/08/2010 - added cross-dock check
 	If upper(gs_project) <> 'PANDORA' Then
 	  this.Modify("CrossDock_Ind.Visible=0")
 	end if
+	
+// Begin - Dinesh -12/10/2021 - S64720- Google - SIMS - Buy Sell Project
+If gs_project <> 'PANDORA'  Then
+	This.Modify("user_field21.visible=0")
+End If
+// End - Dinesh -12/10/2021 - S64720- Google - SIMS - Buy Sell Project
 
 end event
 
 event retrieveend;call super::retrieveend;/*GailM 5/12/2020 - S45954 F22932 I2621 Google DA Kitting move to Spoke Warehouse 																				*/
 /*GailM 7/14/2020 - DE16760 Google DA Kitting - use not only cust order no but also client cust po nbr (plus added invoice no)								*/
 /*Using a Named Field to set the DA Kitting checkbox.  The FOB named field is not being used and probably won't be in the forseeable future by Google */
-string ls_cust, ls_invoice, ls_client_cust_po_nbr
+string ls_cust, ls_invoice, ls_client_cust_po_nbr,ls_buysell
 
 ls_cust = This.GetItemString(1,'cust_order_no')
+ls_buysell = This.GetItemString(1,'user_field21') // 01/31/2022- S64720- Dinesh - Buy Sell Proje
 ls_invoice = This.GetItemString(1,'invoice_no')
 ls_client_cust_po_nbr = This.GetItemString(1,'client_cust_po_nbr')
 
+// Begin - 01/31/2022- DE24764- PhilipsCLS - Ready to Ship button issue
 If upper(gs_project) <> 'PANDORA' Then
 	this.Modify("computekitting.Visible=0")
+	this.Modify("buysell.Visible=0")
 Else
 	this.Modify("computekitting.Visible=1")
 	this.Modify("computekitting.Protect=1")
+	this.Modify("buysell.Visible=1")
+	this.Modify("buysell.Protect=1")
 	If Left(ls_cust,8) = 'MORSCKIT' Or Left(ls_invoice,8) = 'MORSCKIT' Or Left(ls_client_cust_po_nbr,8) = 'MORSCKIT' Then
 		this.SetItem(1,"FOB","Y")
 	Else
 		this.SetItem(1,"FOB","N")
 	End If
+	
+	If ls_buysell= 'BUYSELLSALESORDER' Then
+		this.SetItem(1,"User_Field21","Y")
+	Else
+		this.SetItem(1,"User_Field21","N")
+	End If
 End If
+
+// End - 01/31/2022- DE24764- PhilipsCLS - Ready to Ship button issue
+
+
 end event
 
 type cb_open_ro from commandbutton within tabpage_main
@@ -30531,7 +31633,7 @@ end event
 
 type cb_print_passout_note from commandbutton within tabpage_search
 integer x = 2971
-integer y = 876
+integer y = 904
 integer width = 462
 integer height = 96
 integer taborder = 70
@@ -30566,14 +31668,27 @@ llRowCount = w_do.idw_result.RowCount()
 For llRowPos = 1 to llRowCount
 	if w_do.idw_result.getITemString(llRowPos,'c_select_ind') = 'Y' Then
 		ls_ord_status = w_do.idw_result.getITemString(llRowPos,'ord_status')
-		if ls_ord_status = 'A' or ls_ord_status = 'C'  or ls_ord_status = 'D' then
-			llCheckedCount = llCheckedCount + 1
-			lstrparmsOrd.String_arg[llRowPos] = w_do.idw_result.getITemString(llRowPos,'do_no')
-			lsWhCode = w_do.idw_result.getITemString(llRowPos,'wh_code')
+		// Begin-  DINESH - 03/17/2023- sims-73- Google - SIMS - Load Lock and New Loading Status
+		if gs_project= 'PANDORA' then
+					if ls_ord_status = 'L' or ls_ord_status = 'A' or ls_ord_status = 'C'  or ls_ord_status = 'D' then //  DINESH - 04/17/2023- sims-73- Google - SIMS - Load Lock and New Loading Status - added -   ls_ord_status = 'A'
+					llCheckedCount = llCheckedCount + 1
+					lstrparmsOrd.String_arg[llRowPos] = w_do.idw_result.getITemString(llRowPos,'do_no')
+					lsWhCode = w_do.idw_result.getITemString(llRowPos,'wh_code')
+				else
+					llIneligbleCount = llIneligbleCount + 1
+					w_do.idw_result.setItem(llRowPos,'c_select_ind','N')
+				end if
+			// End - DINESH - 03/17/2023- sims-73- Google - SIMS - Load Lock and New Loading Status
 		else
-			llIneligbleCount = llIneligbleCount + 1
-			w_do.idw_result.setItem(llRowPos,'c_select_ind','N')
-		end if
+				if ls_ord_status = 'A' or ls_ord_status = 'C'  or ls_ord_status = 'D' then
+					llCheckedCount = llCheckedCount + 1
+					lstrparmsOrd.String_arg[llRowPos] = w_do.idw_result.getITemString(llRowPos,'do_no')
+					lsWhCode = w_do.idw_result.getITemString(llRowPos,'wh_code')
+				else
+					llIneligbleCount = llIneligbleCount + 1
+					w_do.idw_result.setItem(llRowPos,'c_select_ind','N')
+				end if
+			End if
 	End If
 Next
 
@@ -30753,11 +31868,22 @@ llCheckedCount = 0
 llRowCount = w_do.idw_result.RowCount()
 For llRowPos = 1 to llRowCount
 	if w_do.idw_result.getITemString(llRowPos,'c_select_ind') = 'Y' Then
-		if w_do.idw_result.getITemString(llRowPos,'ord_status') <> 'A' then
-			 Messagebox(is_title, "Only Delivery Orders in Packing status can be selected for 'Multi-Ready to Ship'")																			
-			 Return 0
+		 // Begin - Dinesh - 03/17/2023- SIMS-53- Google - SIMS - Load Lock and New Loading Status
+		if gs_project = 'PANDORA' then
+			if w_do.idw_result.getITemString(llRowPos,'ord_status') <> 'L' then
+			 	Messagebox(is_title, "Only Delivery Orders in Loading status can be selected for 'Multi-Ready to Ship'")																			
+				 Return 0
+			else
+					llCheckedCount = llCheckedCount + 1
+			end if
+		 // End - Dinesh - 03/17/2023- SIMS-53- Google - SIMS - Load Lock and New Loading Status
 		else
-			llCheckedCount = llCheckedCount + 1
+			if w_do.idw_result.getITemString(llRowPos,'ord_status') <> 'A' then
+			 	Messagebox(is_title, "Only Delivery Orders in Packing status can be selected for 'Multi-Ready to Ship'")																			
+				 Return 0
+			else
+					llCheckedCount = llCheckedCount + 1
+			end if
 		end if
 
 	End If
@@ -31098,6 +32224,11 @@ for ll_row = 1 to idw_result.RowCount()
 				wf_display_message("Order must be in Ready Status.")
 				Continue
 			end if
+		ElseIf gs_project = 'PANDORA' Then // Begin-DINESH - 03/17/2023- sims-73- Google - SIMS - Load Lock and New Loading Status
+			if ls_ord_status <> "R" and ls_ord_status <> "A"  and ls_ord_status <> "I"  and ls_ord_status <> "P" and  ls_ord_status <> "L" then				//SARUN2013NOV07
+				wf_display_message("Order must be in Loading , Packing or Ready Status.")
+				Continue
+			end if
 			
 		Else /*BAseline*/
 			
@@ -31211,7 +32342,8 @@ IF row > 0 THEN
 END IF
 end event
 
-event doubleclicked;If row > 0 Then
+event doubleclicked;ib_search= False // Dinesh - 11/02/2023- SIMS-328 - Google  - Read only part 2
+If row > 0 Then
 	If isVAlid(w_order_details) Then
 			Close (w_order_details)
 		End if	
@@ -31426,6 +32558,13 @@ if not isNull(ls_string) then
 	ls_where += " and delivery_master.cust_order_no Like '" + ls_string + "%' "
 	lb_where = TRUE
 end if
+// S62674-  Dhirendra Added load_seq filed on search tab for PANDORA-Start
+ls_string = idw_search.GetItemString(1,"load_seq")
+If not isNull(ls_string)  then
+	ls_where += " and delivery_master.Load_Sequence = '" + ls_string + "'"
+	lb_where = TRUE
+end if
+// S62674-  Dhirendra Added load_seq filed on search tab for PANDORA-END
 
 ls_string = idw_search.GetItemString(1,"sku")
 if not isNull(ls_string) then
@@ -31812,6 +32951,7 @@ If g.ids_Custom_dw.RowCOunt() > 0 Then
 End If
 
 If Len(lsLateClause) > 0 then
+	lsLateClause += ','
 	ls_sql = Replace(ls_sql,pos(ls_sql,"'                      ' as change_color_ind"),45, lsLateClause  )	
 End if
 //Replaced this code with the code found in the table above.
@@ -31993,7 +33133,7 @@ event ue_nozoom pbm_other
 integer x = 14
 integer y = 12
 integer width = 3703
-integer height = 864
+integer height = 872
 integer taborder = 20
 boolean bringtotop = true
 string dataobject = "d_do_search"
@@ -32122,6 +33262,13 @@ ib_complete_to_first 	= TRUE
 If not g.ibMobileEnabled THen
 	This.Modify("mobile_status.visible=false mobile_status_t.visible=false")
 End If
+
+// S62674-  Dhirendra Added load_seq filed on search tab for PANDORA-Start
+If gs_project = 'PANDORA'  Then
+	This.Modify("load_seq.visible=1")
+	This.Modify("t_3.visible=1")
+End If
+// S63601-  Dhirendra Added load_seq filed on search tab for PANDORA-END
 end event
 
 event process_enter;Send(Handle(This),256,9,Long(0,0))
@@ -32213,21 +33360,79 @@ string text = " Other Info "
 long tabtextcolor = 33554432
 long tabbackcolor = 79741120
 long picturemaskcolor = 536870912
+cb_lock_load_google cb_lock_load_google
 cb_assign_pro cb_assign_pro
 dw_other dw_other
 end type
 
 on tabpage_other.create
+this.cb_lock_load_google=create cb_lock_load_google
 this.cb_assign_pro=create cb_assign_pro
 this.dw_other=create dw_other
-this.Control[]={this.cb_assign_pro,&
+this.Control[]={this.cb_lock_load_google,&
+this.cb_assign_pro,&
 this.dw_other}
 end on
 
 on tabpage_other.destroy
+destroy(this.cb_lock_load_google)
 destroy(this.cb_assign_pro)
 destroy(this.dw_other)
 end on
+
+type cb_lock_load_google from commandbutton within tabpage_other
+integer x = 3026
+integer y = 1884
+integer width = 402
+integer height = 104
+integer taborder = 30
+integer textsize = -9
+integer weight = 700
+fontcharset fontcharset = ansi!
+fontpitch fontpitch = variable!
+fontfamily fontfamily = swiss!
+string facename = "Arial"
+string text = "Lock"
+end type
+
+event clicked;// Begin - Dinesh - 03/16/2023- SIMS-53 - Google - SIMS - Load Lock and New Loading Status
+long ll_count
+If ib_changed Then
+	messagebox(is_title,'Please save Packing list first!')
+	return
+End If
+
+if isLoad_Status = 'LOCK' then 
+	isLoad_Status = 'LOCK_ON_SAVE'	
+	ib_lock = True
+		messagebox(is_title,'Order will be Locked on Save !')
+		return
+ElseIf isLoad_Status = 'NOLOCK' then 
+	isLoad_Status = 'UNLOCK_ON_SAVE'	
+	ib_lock = False
+		messagebox(is_title,'Order will be Unlocked on Save !')
+		return
+End If
+
+//g.of_check_label_button(this)
+
+// End - Dinesh - 05/08/2023- SIMS-53 - Google - SIMS - Load Lock and New Loading Status
+
+
+end event
+
+event constructor;// Begin - Dinesh -SIMS-53 - Google - SIMS - Load Lock and New Loading Status 
+if gs_project= 'PANDORA' then
+	
+	tab_main.tabpage_other.cb_lock_load_google.visible = True
+else
+	tab_main.tabpage_other.cb_lock_load_google.visible = False
+end if
+// End - Dinesh -SIMS-53 - Google - SIMS - Load Lock and New Loading Status 
+
+g.of_check_label_button(this)
+
+end event
 
 type cb_assign_pro from commandbutton within tabpage_other
 integer x = 2085
@@ -32671,14 +33876,32 @@ if Upper(gs_project) = 'PHYSIO-MAA' or Upper(gs_project) = 'PHYSIO-XD' then
 	this.Modify("user_field20.Background.Color = '" +  ls_dw_color + "'")
 	this.Modify("user_field20.protect=1")
 end if
+
+// Begin - Dinesh -12/10/2021 - S64720- Google - SIMS - Buy Sell Project
+If gs_project <> 'PANDORA'  Then
+	This.Modify("client_cust_so_nbr.visible=0")
+	This.Modify("t_8.visible=0")
+	This.Modify("shipment_id.visible=0")
+	This.Modify("t_7.visible=0")
+End If
+// End - Dinesh -12/10/2021 - S64720- Google - SIMS - Buy Sell Project
  
 end event
 
 event clicked;call super::clicked;DatawindowChild	ldwc
+string ls_shipment_id
 
 // 02/02 PCONKL - Retrieve dropdowns when clicked on
 
 Choose Case Upper(dwo.Name)
+		
+	// Begin - 02092022- Dinesh - S66897- Google - SIMS - CBOL Changes
+		
+	Case  'SHIPMENT_ID' 
+	
+	idw_other.Object.shipment_id.Protect = True
+
+ 	// End 02082022- Dinesh - S66897- Google - SIMS - CBOL Changes
 		
 	Case 'TRANSPORT_MODE' 
 		This.GetChild('Transport_mode',ldwc)
@@ -32714,6 +33937,35 @@ event getfocus;call super::getfocus;//GAP 1-03 Enable Scanner ID and Status boxe
 //	end if
 //	
 //End If
+end event
+
+event rbuttondown;call super::rbuttondown;
+//
+//if dwo.name= 'shipment_id' then
+//		
+//is_shipment_id= this.getitemstring(row,'shipment_id')
+//this.Clipboard(is_shipment_id) // Dinesh - 02082022
+//
+//end if
+end event
+
+event doubleclicked;call super::doubleclicked; // Begin - 02092022- Dinesh - S66897- Google - SIMS - CBOL Changes
+string ls_shipment_id,ls_color
+Choose Case Upper(dwo.Name)
+		
+	Case  'SHIPMENT_ID' 
+	//idw_other.Object.shipment_id.Protect = False
+	ls_shipment_id= this.getitemstring(row,'shipment_id')
+	this.Object.shipment_id.Protect = FALSE
+	this.Object.shipment_id.Edit.DisplayOnly = False
+	ls_color =String(67108864 ) //ButtonFace
+	this.Modify("shipment_id.Background.Color = '" +  ls_color + "'")
+	::Clipboard(ls_shipment_id)
+	//idw_other.Object.shipment_id.Protect = True
+
+END Choose
+
+ // End 02082022- Dinesh - S66897- Google - SIMS - CBOL Changes
 end event
 
 type tabpage_detail from userobject within tab_main
@@ -33232,7 +34484,11 @@ End If
 If gs_project <> 'PANDORA' Then
 	This.Modify("description.width=0 description_t.width=0")
 End If
-
+// Begin Dinesh - 05122022- S71358- Google - SIMS - RMA/Harvest Pick Exceptions
+If gs_project = 'PANDORA' Then
+	This.Modify("user_field7.protect=1")
+End If
+// End Dinesh - 05122022- S71358- Google - SIMS - RMA/Harvest Pick Exceptions
 // TAM W&S 2011/01 -  Make User field2 a DDDW for UOM
 
 if Left(gs_project,3) = "WS-" then
@@ -35349,7 +36605,7 @@ String		lsFind,	lsSku, lsSupplier,lsLoc,lsSerial,lsLot, lsWareHouse,		&
 				lsPO,	lsPO2,lsCont,lsWork,	lsCompInd,lsCOO,	lsSKUPARent,	&
 				lsOwner, lsInvType, lsOwnerCode, lsOwnerType, lslength, lswidth, lsheight, lsweight, lsCompNo
 
-string		lsUOM1
+string		lsUOM1,ls_comp
 int 		li_shelf,li_days //29-Jul-2013 :Madhu added for shelf life validation
 datetime ldexpdate	   //29-Jul-2013 :Madhu added for shelf life validation
 
@@ -35391,6 +36647,11 @@ Choose Case Upperbound(lstrparms.String_arg)
 		lsCOO = Left(lsWork,(pos(lsWork,'|')-1))
 		lsWork = Right(lsWork,len(lsWork) - (len(lsCOO)+1))
 		lsInvType = Left(lsWork,(pos(lsWork,'|')-1))
+		// Begin SIMS 227 - Akash for adding component no........05/23/2023
+		lsWork = Right(lsWork,len(lsWork) - (len(lsInvType)+1))
+		ls_comp = Left(lsWork,(pos(lsWork,'|')-1))
+		lswork = Right(lsWork,len(lsWork) - (len(ls_comp)+1)) // 
+		// End SIMS 227 - Akash.....05/23/2023
 		
 		//8/04 - PCONKL - add cntnr dims/weight
 		lsWork = Right(lsWork,len(lsWork) - (len(lsInvType)+1))
@@ -35437,7 +36698,10 @@ Choose Case Upperbound(lstrparms.String_arg)
 // TAM 2012/10/03 - Save current Component For NYCSP.  they need to delete all rows for the specific component number.  		
 		lsCompNo = String(This.GetItemNumber(llCurrentPickRow,"component_no" ))
 		
-		This.SetItem(llCurrentPickRow,"component_no",lstrparms.Integer_arg[1])
+		//This.SetItem(llCurrentPickRow,"component_no",lstrparms.Integer_arg[1])
+		//This.SetItem(llCurrentPickRow,"component_no",lstrparms.Long_arg[1])  // Interger to Change Long Value By Akash...05/May/2023//
+		// 08/18/2023 - Dinesh 
+		This.SetItem(llCurrentPickRow,"component_no",long(ls_comp))  /* SIMS 227 - 05/24/2023 adding the component No. ...by Akash */
 		This.SetItem(llCurrentPickRow,"expiration_date",lstrparms.dateTime_arg[1])
 		
 		This.SetItem(llCurrentPickRow,"cntnr_Length",dec(lsLength)) //8/04 - PCONKL - add cntnr dims/weight
@@ -35472,7 +36736,8 @@ Choose Case Upperbound(lstrparms.String_arg)
 			llFindrow = llCurrentPickRow + 1 /*don't delete the current parent row*/
 			
 // TAM 2012/10/03 - For NYCSP they need to delete all children rows for the specific component number.  
-			If upper(gs_project) = 'NYCSP'  Then
+               // Added Geistlich project_id with OR condition by Dhirendra for SIMS-66
+			If upper(gs_project) = 'NYCSP' or  upper(gs_project) = 'GEISTLICH'   Then
 				lsFind = "sku_parent = '" + This.GetItemString(llCurrentPickRow,"sku") + "' and component_no = " + lsCompNo /*sku from current putaway row*/
 			Else
 				lsFind = "line_item_no = " + String(This.GetItemNumber(llCurrentPickRow,'line_Item_no'))
@@ -35614,7 +36879,9 @@ Choose Case Upperbound(lstrparms.String_arg)
 			//dts - 04/08 - now looking up Level-one UOM (above)...
 			This.SetItem(llNewRow,"user_field2",string(lstrparms.Decimal_arg[llArrayPos],'#####.##') + ' ' + lsUOM1)
 			
-			This.SetItem(llNewRow,"component_no",lstrparms.Integer_arg[llArrayPos])
+			//This.SetItem(llNewRow,"component_no",lstrparms.Integer_arg[llArrayPos]) - /*Dinesh - SIMS-274 - 08/18/2023 - Google - System Error when trying to change a pick
+			This.SetItem(llNewRow,"component_no",long(ls_comp))  //*Dinesh - SIMS-274 - 08/18/2023 - Google - System Error when trying to change a pick
+			
 			This.SetItem(llNewRow,"expiration_date",lstrparms.DateTime_arg[llArrayPos]) /* 11/02 - PCONKL */
 			// TAM 2006/03/14 - Use Inventory Type returned from location selection screen instead of Main			
 			//This.SetItem(llNewRow,"inventory_type", idw_main.GetItemString(1, "inventory_type"))
@@ -35681,7 +36948,6 @@ This.SetRedraw(True)
 llFindRow = This.GetRowFromRowID(llRowID)
 This.SetRow(llFindRow)
 This.ScrollToRow(llFindRow)
-
 end event
 
 event ue_set_column;This.SetColumn(isColumn)
@@ -36316,6 +37582,11 @@ Choose Case dwo.name
 	Case 'quantity'
 		//GailM 2/18/2019 S29552 F13773 I1745 Philips BlueHeart  - SIMS - Product Picked - Client Changes
 		//GailM 11/18/2020 S51441/F26536/I2978 PhilipsDA mimic PHILIPSCLS in Outbound order
+		
+		//DHIRENDRA DE23785-SIMS PHILIPSCLS SHORT PICK OVERPICK ISSUE- START
+               setCalcAllocated( true)
+               //DHIRENDRA DE23785-SIMS PHILIPSCLS SHORT PICK OVERPICK ISSUE- END
+					
 		If Upper(gs_project)='PHILIPSCLS' OR Upper(gs_project)='PHILIPS-DA' Then
 			ldQty = Dec(data)
 			ldPrevQty = This.GetItemNumber( row, "quantity" )
@@ -37339,6 +38610,7 @@ string text = " Packing List"
 long tabtextcolor = 33554432
 long tabbackcolor = 79741120
 long picturemaskcolor = 536870912
+cb_print_sscc_label cb_print_sscc_label
 cb_pack_copypaste cb_pack_copypaste
 cb_lock_load cb_lock_load
 sle_carton_scan_t sle_carton_scan_t
@@ -37367,6 +38639,7 @@ cb_pack_delete cb_pack_delete
 end type
 
 on tabpage_pack.create
+this.cb_print_sscc_label=create cb_print_sscc_label
 this.cb_pack_copypaste=create cb_pack_copypaste
 this.cb_lock_load=create cb_lock_load
 this.sle_carton_scan_t=create sle_carton_scan_t
@@ -37392,7 +38665,8 @@ this.cb_import_pack=create cb_import_pack
 this.cbx_sel=create cbx_sel
 this.cb_pack_select=create cb_pack_select
 this.cb_pack_delete=create cb_pack_delete
-this.Control[]={this.cb_pack_copypaste,&
+this.Control[]={this.cb_print_sscc_label,&
+this.cb_pack_copypaste,&
 this.cb_lock_load,&
 this.sle_carton_scan_t,&
 this.sle_carton_scan,&
@@ -37420,6 +38694,7 @@ this.cb_pack_delete}
 end on
 
 on tabpage_pack.destroy
+destroy(this.cb_print_sscc_label)
 destroy(this.cb_pack_copypaste)
 destroy(this.cb_lock_load)
 destroy(this.sle_carton_scan_t)
@@ -37446,6 +38721,127 @@ destroy(this.cbx_sel)
 destroy(this.cb_pack_select)
 destroy(this.cb_pack_delete)
 end on
+
+type cb_print_sscc_label from commandbutton within tabpage_pack
+integer x = 1861
+integer y = 512
+integer width = 430
+integer height = 104
+integer taborder = 120
+integer textsize = -9
+integer weight = 400
+fontcharset fontcharset = ansi!
+fontpitch fontpitch = variable!
+fontfamily fontfamily = swiss!
+string facename = "Arial"
+string text = "Print sscc label"
+end type
+
+event clicked;Long	llRowPos, llRowCount, llFindRow, llPrintCount
+String	lsFind, lsDONO
+Boolean lbLabelsPrinted
+
+//MikeA 8/2019 S36892 F16645 - I2432 - KDO - Kendo - Supervisor Only to Reprint Carton Labels
+//Added check here if printing from window. If I didn't, it would look thru each label and give error. 
+
+lsDONO = idw_Main.GetITEmString(1,'do_no')
+
+//Only ad Admin or Super can re-print if already printed once
+Select carton_label_Print_Count Into :llPrintCount From delivery_master with (NOLOCK) Where do_no = :lsDONO;
+
+//If IsNull(llPrintCount) Then llPrintCount = 0
+//
+//If llPrintCount > 0 Then
+//	If gs_role = "2" Then
+//		MessageBox("Labels", "Only an ADMIN or SUPER can re-print labels!",StopSign!)
+//		Return
+//	End If
+//End If
+
+
+//If idw_Main.GetITemNumber(1,'ctn_cnt') = 0 Then
+//	Messagebox(is_title, "Carton Count must be entered before printing labels",StopSign!)
+//	REturn
+//End If
+
+idw_pack.AcceptText()
+
+Execute Immediate "Begin Transaction" using SQLCA; /* 11/04 - PCONKL - Auto Commit Turned on to eliminate DB locks*/
+	If idw_pack.Update() = 1 Then
+		Execute Immediate "COMMIT" using SQLCA;
+   			If SQLCA.SQLCode = 0 Then
+   			Else /*commit failed*/
+				Execute Immediate "ROLLBACK" using SQLCA;
+     			MessageBox(is_title, "Unable to save Packing List - No label to print " + SQLCA.SQLErrText)
+				  return 
+			End If
+End If
+
+idw_pack.REsetUpdate()
+
+	
+llRowCOunt = idw_Pack.RowCount()
+
+//For llRowPos = 1 to llRowCount
+
+	//If idw_Pack.GetITemString(llRowPos,'c_select_ind') <> 'Y' Then Continue
+	if llRowCount > 0 then					
+	//quick and dirty - open kendo label windo invisibly, check the carton row and execute print logic and then close
+
+	
+	//OpenSheet(w_generic_uccs_labels,w_main, gi_menu_pos, Original!)
+	
+	//w_bosch_sscc_label_print.visible = false
+					
+
+	//Check the correct box for carton/SKU
+	//lsFind = "Upper(Delivery_Packing_carton_No) = '" + Upper(idw_Pack.GetITemString(llRowPos,'carton_no')) + "' and upper(sku) = '" + Upper(idw_Pack.GetITemString(llRowPos,'sku')) + "'"
+//	llFindRow = w_generic_uccs_labels.dw_label.Find(lsFind,1,w_generic_uccs_labels.dw_label.RowCount())
+	//If llFindRow > 0 Then
+						
+			//w_bosch_sscc_label_print.dw_label.SetItem(llFindRow,'c_print_ind','Y')
+//			w_generic_uccs_labels.ibUserSecurityChecked = True /*MikeA 8/2019 S36892 F16645 - I2432 - KDO - Kendo - Supervisor Only to Reprint Carton Labels */
+		//	w_generic_uccs_labels.ibUseCalculatedCartonCount = True /* will use calculated Carton Qty instead of what's already been generated*/
+			
+			if Upper(idw_main.GetITemString(1,'User_Field22'))='SSCC' then
+					//OpenSheet(w_bosch_sscc_label_print, w_main,gi_menu_pos,Original!)
+					OpenSheet(w_bosch_sscc_label_print,w_main,gi_menu_pos,Original!)
+				lbLabelsPrinted = true
+			else
+				Messagebox(is_title, 'Not applicable to print the Labels')
+				lbLabelsPrinted = false
+			end if
+				
+	Else
+	
+			Messagebox(is_title, 'No label to print')
+			lbLabelsPrinted = false
+	End If
+					
+//	Close(w_bosch_sscc_label_print)
+	
+	//idw_pack.SetItem(llRowPos,'c_select_ind','N')
+	
+//Next
+
+if lbLabelsPrinted then
+	//MikeA 8/2019 S36892 F16645 - I2432 - KDO - Kendo - Supervisor Only to Reprint Carton Labels
+	
+	Execute Immediate "Begin Transaction" using SQLCA; 
+	
+	Update Delivery_master
+	Set carton_label_Print_Count = ( :llPrintCount + 1 ) where Do_no = :lsDONO;
+	
+	Execute Immediate "COMMIT" using SQLCA;
+
+end if
+end event
+
+event constructor;
+If  gs_project <> 'BOSCH'   Then // Dinesh SIMS-107 - 10/13/2022- SIMS BOSCH SSCC LABEL
+	This.visible = false
+End If
+end event
 
 type cb_pack_copypaste from commandbutton within tabpage_pack
 boolean visible = false
@@ -37537,7 +38933,15 @@ End If
 end event
 
 event constructor;
+// Begin - Dinesh -SIMS-53 - Google - SIMS - Load Lock and New Loading Status 
+if gs_project= 'PANDORA' then
+	tab_main.tabpage_pack.cb_lock_load.visible = False
+end if
+// End - Dinesh -SIMS-53 - Google - SIMS - Load Lock and New Loading Status 
+
 g.of_check_label_button(this)
+
+
 end event
 
 type sle_carton_scan_t from statictext within tabpage_pack
@@ -37594,7 +38998,7 @@ End If
 end event
 
 type cb_print_ship_label from commandbutton within tabpage_pack
-integer x = 1435
+integer x = 1440
 integer y = 524
 integer width = 393
 integer height = 92
@@ -37624,22 +39028,22 @@ Boolean lbLabelsPrinted
 lsDONO = idw_Main.GetITEmString(1,'do_no')
 
 //Only ad Admin or Super can re-print if already printed once
-Select carton_label_Print_Count Into :llPrintCount From delivery_master with (NOLOCK) Where do_no = :lsDONO;
-
-If IsNull(llPrintCount) Then llPrintCount = 0
-
-If llPrintCount > 0 Then
-	If gs_role = "2" Then
-		MessageBox("Labels", "Only an ADMIN or SUPER can re-print labels!",StopSign!)
-		Return
-	End If
-End If
-
-
-If idw_Main.GetITemNumber(1,'ctn_cnt') = 0 Then
-	Messagebox(is_title, "Carton Count must be entered before printing labels",StopSign!)
-	REturn
-End If
+//Select carton_label_Print_Count Into :llPrintCount From delivery_master with (NOLOCK) Where do_no = :lsDONO;
+//
+//If IsNull(llPrintCount) Then llPrintCount = 0
+//
+//If llPrintCount > 0 Then
+//	If gs_role = "2" Then
+//		MessageBox("Labels", "Only an ADMIN or SUPER can re-print labels!",StopSign!)
+//		Return
+//	End If
+//End If
+//
+//
+//If idw_Main.GetITemNumber(1,'ctn_cnt') = 0 Then
+//	Messagebox(is_title, "Carton Count must be entered before printing labels",StopSign!)
+//	REturn
+//End If
 
 idw_pack.AcceptText()
 
@@ -37769,7 +39173,10 @@ event constructor;// LTK Pandora #370  Pandora only button
 this.visible = ( (Upper(gs_project) = 'PANDORA')	or (Upper(gs_project) = 'PHYSIO-MAA') or (Upper(gs_project) = 'PHYSIO-XD' ) )	// LTK 20140202
 end event
 
-event clicked;if Upper(gs_project) = 'PANDORA' then
+event clicked;int i_indx
+Decimal llen,lw,lh,lgw
+string ls_error
+if Upper(gs_project) = 'PANDORA' then
 
 	// LTK 20120523	Pandora #370 Added this button/event so that CI's and Load Tenders can be sent manually.
 	//						Moved the CI and Load Tender logic from ue_save to here.
@@ -37781,6 +39188,24 @@ event clicked;if Upper(gs_project) = 'PANDORA' then
 		Messagebox(is_title,'Please save your changes first.')		// LTK 20120622  Pandora #438  Added change check because updating DM.UF22 below with AWB/BOL Nbr value from datawindow
 		Return
 	End if
+	//Begin - Dinesh - 08/29/2023 - SIMS-311- Google - Not able to send a CI when weights are in below 1
+	FOR i_indx = 1 to idw_pack.RowCount()
+		llen = idw_pack.getitemdecimal( i_indx , "length" )
+		lw   = idw_pack.getitemdecimal( i_indx , "width" )
+		lh   = idw_pack.getitemdecimal( i_indx , "height" )
+		lgw  = idw_pack.getitemdecimal( i_indx , "weight_gross" )
+		
+		if (llen <= 0 OR lw <= 0 OR lh <= 0 OR lgw <= 0) THEN
+			ls_error = 'Error in row ' + string(i_indx) + '~r~n' &
+		+ 'All values for length, width, height and ' + '~r~n' &
+		+ 'gross weight must be greater than zero.'
+			SetMicroHelp("Save Interrupted - invalid Dimensions!")
+			messagebox (is_Title, ls_error, StopSign!)
+			return -1
+		end if
+	next
+	//End - Dinesh - 08/29/2023 - SIMS-311- Google - Not able to send a CI when weights are in below 1
+	
 	If ibEUFlag = True then //TimA This flag is set in ue_confirm
 		lbCallCI = True
 	else
@@ -38409,9 +39834,16 @@ end type
 
 event clicked;string ls_data
 ls_data='M'
+is_metric=ls_data
 //IF wf_convert(ls_data,0) <> 1 THEN rb_eng.checked = TRUE
 //added parameter to convert a particular row (as P/L is being generated) or all rows
 IF wf_convert(ls_data, 0, 0) <> 1 THEN rb_eng.checked = TRUE
+
+// Begin - Dinesh -09/01/2023- SIMS-293- Google- DIMS and Weights are missing in the 945CI we send to customer
+ if rb_metric.checked = TRUE then
+	 tab_main.tabpage_pack.cb_ci_load_tender.enabled= True
+end if
+// End -Dinesh -09/01/2023- SIMS-293- Google- DIMS and Weights are missing in the 945CI we send to customer
 end event
 
 type rb_eng from radiobutton within tabpage_pack
@@ -38432,9 +39864,16 @@ end type
 
 event clicked;string ls_data
 ls_data='E'
+is_eng = ls_data
+
 //IF wf_convert(ls_data,0) <> 1 THEN rb_metric.checked = TRUE
 //added parameter to convert a particular row (as P/L is being generated) or all rows
 IF wf_convert(ls_data, 0, 0) <> 1 THEN rb_metric.checked = TRUE
+// Begin -  Dinesh -09/01/2023- SIMS-293- Google- DIMS and Weights are missing in the 945CI we send to customer
+ if rb_eng.checked = TRUE then
+	 tab_main.tabpage_pack.cb_ci_load_tender.enabled= False
+end if
+// End - Dinesh -09/01/2023- SIMS-293- Google- DIMS and Weights are missing in the 945CI we send to customer
 end event
 
 type cb_pack_insert from commandbutton within tabpage_pack
@@ -38554,7 +39993,10 @@ event clicked;//Jxlim 08/12/2013 Ariens; validate serial No
 
 String ls_uf22,ls_uf2,ls_sku, ls_uf1,lsMsg
 int li_scanned = 0
-long lldetailCount,k,ll_lineno
+long lldetailCount,k,ll_lineno,ll_count
+string ls_code_type,ls_code_id,ls_count,lsDONO,ls_country,lswhcode
+string ls_pack_po_no2,ls_trailer_num,ls_seal_num
+long j	
 
 //31-May-2016 :Madhu- added to prevent AIR carrier for Dangerous goods -START
 	If g.ibpreventaircarrierforhazardous Then
@@ -38599,6 +40041,28 @@ elseif Upper (gs_project) = 'PHYSIO-MAA' then /* 01/14 - PCONKL - Physio needs o
 	
 elseif Upper (gs_project) = 'PANDORA' then /* 06/14 - GAILML - Pandora Issue 861 - Capture SN prior to generate packinng list */
 	
+	// Begin - Dinesh -01/05/2022- DE24075- Google - SIMS Production - Outbound order completed without Serial Numbers
+//	int j
+	//long llLineNum
+	//string llserialno
+	//If tab_main.tabpage_serial.dw_serial.RowCount() > 0 then
+		//FOR j = 1 to tab_main.tabpage_serial.dw_serial.RowCount()
+		//	llserialno = tab_main.tabpage_serial.dw_serial.GetItemString(j,"serial_no")
+			//llLineNum = tab_main.tabpage_serial.dw_serial.GetItemNumber(j,"line_item_no")
+			//if llserialno = '' or Isnull(llserialno) then
+				//	wf_display_message("Serial Number is required on line item no: " +  String (llLineNum)) 
+				//	tab_main.selecttab(6)
+					//tab_main.tabpage_serial.dw_serial.scrolltorow(j)
+				//	f_setfocus(idw_serial, j, "serial_no")
+//					tab_main.tabpage_serial.dw_serial.Protect = TRUE
+					
+				//	Return -1
+			//end if
+		//NEXT
+	//end if
+	
+	// End - Dinesh 01/05/2022- DE24075- Google - SIMS Production - Outbound order completed without Serial Numbers
+	
 	li_scanned = wf_check_serials_scanned()
 	Choose Case li_scanned
 		Case 0
@@ -38631,11 +40095,15 @@ elseif Upper (gs_project) = 'PANDORA' then /* 06/14 - GAILML - Pandora Issue 861
 	
 		//GailM 10/15/2018 Temporarily use flag to disable this function until other testing is done
 	If f_retrieve_parm("PANDORA","FLAG","TMS") = "Y" and  f_retrieve_parm("PANDORA","SKIP_TMS", isWareHouse, "CODE_DESCRIPT")  <> "SKIP_IT"tHEN
+	ls_trailer_num=w_do.idw_main.getitemstring(1,'user_field3')
+	ls_seal_num=w_do.idw_main.getitemstring(1,'user_field6')
 //TAM 2018/12/10 - S25773 Skip Load ID = 'NA'
 // 11/19 - PCONKL - F19222/DE13597 - add 'GND'
 //		If ls_uf1 <> 'DOS' and  ls_uf1 <> 'PIU' and ls_uf1 <> 'NOS' and isloadId > ''  then 
-		If ls_uf1 <> 'DOS' and  ls_uf1 <> 'PIU' and ls_uf1 <> 'NOS' and ls_uf1 <> 'GND' and isloadId > '' and isloadID <> 'NA' then 
-			lsMsg = 'LOAD ID ' + isloadId + ' will be locked on Save. Do you want to proceed?'
+		//If ls_uf1 <> 'DOS' and  ls_uf1 <> 'PIU' and ls_uf1 <> 'NOS' and ls_uf1 <> 'GND' and isloadId > '' and isloadID <> 'NA' then 
+		If ls_uf1 <> 'DOS' and  ls_uf1 <> 'PIU' and ls_uf1 <> 'NOS' and ls_uf1 <> 'GND' and isloadId > '' and isloadID <> 'NA' and (ls_trailer_num <> '' or not isnull(ls_trailer_num)) and (ls_seal_num <> '' or not isnull(ls_seal_num))   then // Dinesh - 03/24/2023- SIMS-53- Google - SIMS - Load Lock and New Loading Status
+			//lsMsg = 'LOAD ID ' + isloadId + ' will be locked on Save. Do you want to proceed?'
+			lsMsg = 'LOAD ID ' + isloadId + ' will locked when order is placed in to LOADING Status.  Do you want to proceed?' // Dinesh - 03/24/2023- SIMS-53- Google - SIMS - Load Lock and New Loading Status
 			If MessageBox( is_title, lsMsg, Exclamation!, YesNo!,2 ) <> 1 Then
 				return
 			Else 
@@ -39093,6 +40561,10 @@ LONG   ll_Count, ll_Length, ll_Width, ll_Height,   llFindRow,ll_rtn,ll_find
 decimal ld_null,ld_result, ld_quantity, ld_qty, ld_Weight
 BOOLEAN lb_UpdatePackListUser
 String lsOrigVal
+String  lssku,lsSUpplier,ls_ContainerTrackingInd,ls_cntr_type
+long ll_find_cntr_type
+string ls_pack_po_no2
+long i
 
 setnull(ld_null)
 
@@ -39235,23 +40707,60 @@ Case "country_of_origin" /* 09/00 PCONKL - validate Country of Origin*/
 			Return 1
 		End If
 
-
-
 Case 'carton_no'
+	//START  Dhirendra S59788 - ADDED VALIDATION TO PREVENT THE CARTON NO CHANGE IN CASE OF OVER PACKING 
+	IF UPPER(gs_Project) = 'PANDORA' THEN
+		ll_find =this.Find(" upper(carton_no) = '" + data + "' and upper(carton_type)= 'CARTON'",1,this.Rowcount())
+		//ls_cntr_type= this.getitemstring(ll_find_cntr_type,'carton_type')
+		IF ll_find > 0  THEN 
+			Messagebox("ALERT","Carton Type of 'Carton' not allowed when over-packing (must be 'Pallet' or 'OVERPACK').")
+			Return 1
+		END IF 
+	END IF 
+	//END  Dhirendra S59788 - ADDED VALIDATION TO PREVENT THE CARTON NO CHANGE IN CASE OF OVER PACKING 	
+	
 	//GailM 1/22/2018 S14978 F5724 I350 PAN SIMS Pint to generate Pack list based on serial tab
 	lsOrigVal = this.GetItemString(row, 'carton_no', Primary!, FALSE )
 	If wf_validate_pack_carton(data) < 0 Then
 		this.SetItem( row, "carton_no", lsOrigVal )
 		Return 1
 	End If
+	
+//		If upper( gs_project ) = 'PANDORA' and g.is_unique_pack_cartonnumbers = "Y" and idw_serial.rowcount() > 0 and this.GetItemString( row, 'serialized_ind' ) <> 'N' Then
+//		If ibFootprint = True or ibCntrSerial = True Then
+//			MessageBox("Carton Number Change Error", "This carton nbr cannot be changed.~n~n  Pallet and container numbers are set by inventory ." ,StopSign!)
+//		Else
+//			MessageBox("Carton Number Change Error", "This carton nbr can only be changed from the Serial# tab.~n~n    Please return to the Serial Nbr tab, change~ncarton numbers of relevant serial numbers and Save~n~n    The serial tracked rows will be regenerated." ,StopSign!)
+//		End If
+//		this.SetItem( row, "carton_no", lsOrigVal )
+//		Return 1
 	If upper( gs_project ) = 'PANDORA' and g.is_unique_pack_cartonnumbers = "Y" and idw_serial.rowcount() > 0 and this.GetItemString( row, 'serialized_ind' ) <> 'N' Then
-		If ibFootprint = True or ibCntrSerial = True Then
+     		
+	 lssku = idw_pack.GetITemString(row,'SkU')
+	 lsSUpplier= idw_pack.GetITemString(row,'Supp_Code')
+	
+	Select Container_Tracking_Ind 
+	 Into :ls_ContainerTrackingInd
+	 From Item_Master
+	 Where project_id = :gs_project and sku = :lssku and supp_code = :lsSUpplier;
+
+	If ibFootprint = True then  //or ibCntrSerial = True Then
 			MessageBox("Carton Number Change Error", "This carton nbr cannot be changed.~n~n  Pallet and container numbers are set by inventory ." ,StopSign!)
-		Else
-			MessageBox("Carton Number Change Error", "This carton nbr can only be changed from the Serial# tab.~n~n    Please return to the Serial Nbr tab, change~ncarton numbers of relevant serial numbers and Save~n~n    The serial tracked rows will be regenerated." ,StopSign!)
-		End If
+	//Dhirendra -S59788 -Pandora -start
+     Elseif upper( gs_project ) = 'PANDORA' then// then and ls_ContainerTrackingInd<> 'Y' then
+			// allow them to edit the corton no 
+	//Dhirendra -S59788 -Pandora -END
+	Else
+		MessageBox("Carton Number Change Error", "This carton nbr can only be changed from the Serial# tab.~n~n    Please return to the Serial Nbr tab, change~ncarton numbers of relevant serial numbers and Save~n~n    The serial tracked rows will be regenerated." ,StopSign!)
+	End If
+		//Dhirendra -S59788 -Pandora -END
+	IF upper( gs_project ) = 'PANDORA' then //and ls_ContainerTrackingInd <> 'Y' then
+		// allow them to edit the corton no 
+	//Dhirendra -S59788 -Pandora -END
+	else 
 		this.SetItem( row, "carton_no", lsOrigVal )
 		Return 1
+	end if 
 	ElseIf g.is_unique_pack_cartonnumbers = "Y" Then		// GailM DE3703 03/18 Only of project has elected to force unique carton numbers
 		If Len(data) <> 9 Then		// Length of unique carton numbers must be 9 digits - Throw an error.
 		//TAM - S32153 - Relax Pack carton ID validation for Footprints items - For Pandora, If a user wishes to combine a non footprint Item on to a footprint container then allow them to do so. 
@@ -39309,9 +40818,19 @@ Case "shipper_tracking_id"
 Case "outerpack_id" /* 04/16 - PCONKL */
 	
 	uf_update_carton_rows(row,'outerpack_id',dec(data))
-	
+	//Dhirendra
 Case 'carton_type'
 	
+	IF UPPER(gs_Project) = 'PANDORA' THEN
+		ll_find =this.Find(" upper(carton_no) = '" + upper(this.getitemstring(row,'carton_no')) + "'  and Upper(SKU) <> '" + Upper(This.GetITemString(row,'SKU')) + "'",1,this.Rowcount())
+	END IF
+	
+	if ll_find > 0 then 
+		IF Upper(data) = 'CARTON' then 
+			Messagebox("ALERT","Carton Type of 'Carton' not allowed when over-packing (must be 'Pallet' or 'OVERPACK').")
+			Return 1
+		end if
+	end if 
 	//DGM July 2005 forAll Project populate the dimention except *ALL
 	ll_find = idwc_carton_type.Find(" upper(carton_type) = '" + upper(data) + "'" &
 		,1,idwc_carton_type.Rowcount())
@@ -39390,6 +40909,42 @@ Case 'carton_type'
 			This.PostEvent("ue_kendo_ship_label")
 				
 		End If /* Kendo*/
+//Begin -Dinesh - 06242022- S72575- Google - SIMS - Outbound Processing Changes (Carton_Type / Pack_PO_NO2 portion)	
+//	case "pack_po_no2"
+//
+//		for i= 1 to this.rowcount()
+//			
+//		accepttext()
+//		ls_pack_po_no2= this.getitemstring(i,'pack_po_no2')
+//		
+//		if ls_pack_po_no2= "" then
+//			
+//			setnull(ls_pack_po_no2)
+//			
+//		end if
+//		
+//			//if (ls_pack_po_no2 <> "" or not isnull(ls_pack_po_no2))  // Dinesh - 05/31/2024- SIMS-478- Google SIMS - Blank Container type Unable to save packing list
+//			if (ls_pack_po_no2 <> "" or not isnull(ls_pack_po_no2) and  (ls_Pack_Po_No2 <> '-') )   then // Dinesh - 05/31/2024- SIMS-478- Google SIMS - Blank Container type Unable to save packing list
+//				
+//				wf_set_carton_type()
+//			end if
+//			
+//			if  (ls_Pack_Po_No2 = '-') then
+//			
+//			idw_Pack.object.carton_type[i]=''
+//			end if
+//			//idw_Pack.object.carton_type[i].protect=0
+//				
+//			IF ls_pack_po_no2="" or isnull(ls_pack_po_no2) then // Dinesh - 05/31/2024- SIMS-478- Google SIMS - Blank Container type Unable to save packing list
+//				
+//				idw_Pack.object.carton_type[i]=''
+//			end if
+//			//idw_Pack.object.carton_type[i].protect=0
+//				
+//			
+//		next
+//
+////End -Dinesh -  06242022- S72575- Google - SIMS - Outbound Processing Changes (Carton_Type / Pack_PO_NO2 portion)	
 		
 END CHOOSE
 
@@ -39684,7 +41239,7 @@ return 1
 end event
 
 event clicked;call super::clicked;DatawindowChild	ldwc
-String	lsColumn, lsInd
+String	lsColumn, lsInd,ls_pack_po_no2,ls_carton_type
 Long	llRow, llRowCount, llRowPos
 Int liCnt = 0
 Int liAccept
@@ -39723,7 +41278,15 @@ CHOOSE CASE lsColumn
 			cb_pack_delete.visible = False
 			cb_pack_select.visible = True
 		End If
-		
+		//Begin - Dinesh - 06/03/2024- SIMS-478- Google SIMS - Blank Container type Unable to save packing list
+		Case "carton_type"
+			ls_carton_type= idw_pack.GetItemString(row,'carton_type')
+			if ls_carton_type='Pallet' then
+
+				//idw_Pack.object.carton_type[row].protect=1
+
+			end if
+		//End - Dinesh - 06/03/2024- SIMS-478- Google SIMS - Blank Container type Unable to save packing list
 End Choose
 end event
 
@@ -39738,6 +41301,7 @@ If gs_project <> 'KENDO' Then
 	//Need to hide the select all if not Kendo.
 	cbx_sel.visible = false
 End If
+
 end event
 
 type gb_etom from groupbox within tabpage_pack
@@ -40100,6 +41664,9 @@ String ab_error_message_title, ab_error_message, ls_Serial_no_short
 
 Long ld_Qty2, ld_Qty3, ld_Qty4 //TAM 2015/06
 Long llPickFindRow, ll_method_trace_id, llPackFind //TAM 2014/09/26
+String ls_corton_no
+long j,llrowfind
+
 
 setNull(lsNull)
 SetNull( ll_method_trace_id )
@@ -40890,8 +42457,47 @@ FOR ll_index =1 to UPPERBOUND(lstrparms.string_arg[]) //06-Nov-2017 :Madhu - PEV
 					// 10/03 - PCONKL - add carton number if scanned
 					If sle_carton_no.text > '' and gs_project <> 'ARIENS' Then //06-Mar-2014 :Madhu- Added for Ariens SSCC- we're already setting carton# above
 					//scanned serial_no, carton no combination should be same as in pack & serial tab.
-						dw_serial.SetITem(llFindRow,'carton_no',sle_carton_no.text)
-					End If
+					  //Dhirendra S59788- PANDORA -START
+					  IF Upper(gs_project) = 'PANDORA' and dw_serial.getitemstring(llFindRow,'Container_Tracking_Ind') <> 'Y' THEN
+						ls_corton_no='T'+sle_carton_no.text
+						lsFind = "Upper(sku) <>'" + Upper(ls_Sku) + "'" + " and Upper(carton_no) = '" + Upper(ls_corton_no) + "'" 
+							llrowfind = dw_serial.Find(lsFind,1,dw_serial.RowCount())
+							IF llrowfind > 0 then 
+						         messagebox('Alert Info','Not allow different GPNs to have the same carton number')
+								dw_serial.SetITem(llFindRow,'serial_no',lsNull)
+								RETURN
+							else
+							  dw_serial.SetITem(llFindRow,'carton_no',ls_corton_no)
+						end if
+					else 
+						dw_serial.SetITem(llFindRow,'carton_no',sle_carton_no.text)	
+					end if 
+					 //Dhirendra S59788- PANDORA -END 
+					 
+					 // Begin - Dinesh - 09/11/2024- SIMS-548-Google – SIMS-Prevent movement of FP Tracked GPN movement without valid info
+					IF Upper(gs_project) = 'PANDORA' and dw_serial.getitemstring(llFindRow,'Container_Tracking_Ind') <> 'Y' THEN 
+						long ll_LineItemNo,llrowfindlineitem,llFindlineitem
+						int liMessage
+						string lsFindlineitem,lsLineItemNo,lscartonNo
+						lsLineItemNo = string(idw_serial.GetItemNumber(llFindRow, "line_item_no"))
+						lsFindlineitem=  "line_item_no <>" + lsLineItemNo + "" + " and Upper(carton_no) = '" + Upper(ls_corton_no) + "'" 
+							llrowfindlineitem = dw_serial.Find(lsFindlineitem,1,idw_serial.RowCount())
+							IF llrowfindlineitem > 0  then
+							if Messagebox("Warning" ,"The same Carton Number " + ls_corton_no +  " may not be used on different Line Number " + lsLineItemNo + " .Would you like to generate a new Carton Number?",Question!,YesNo!,1) =1 then
+								tab_main.tabpage_serial.cb_new_carton.TriggerEvent("clicked")
+								ls_corton_no='T'+sle_carton_no.text
+								dw_serial.SetITem(llFindRow,'carton_no',ls_corton_no)
+								dw_serial.SetITem(llFindRow,'serial_no',sle_barcodes.text)
+							else
+								dw_serial.SetITem(llFindRow,'carton_no',lsNull)
+								dw_serial.SetITem(llFindRow,'serial_no',lsNull)
+								return
+							end if
+							end if	
+					end if
+					//End  - Dinesh - 09/11/2024- SIMS-548-Google – SIMS-Prevent movement of FP Tracked GPN movement without valid info
+	 
+				End If
 					
 					ib_changed = True
 					ilUndoRow = llFindRow /*so we can undo last scan if desired*/
@@ -41723,16 +43329,22 @@ end type
 
 event clicked;
 Long	llCarton
+//IF LEFT(sle_carton_no.text,len(sle_carton_no.text)-1) = 'T'
 
-If isnumber(sle_carton_no.text) Then
-	
+//If isnumber(right(sle_carton_no.text,len(sle_carton_no.text)-1) Then 
+//IF LEFT(sle_carton_no.text,len(sle_carton_no.text)-1) = 'T' then 
+If isnumber(sle_carton_no.text) then
 	// 04/01 - PCONKL - we need allow for System Generated unique numbers if necessary
 	If g.is_unique_pack_cartonNumbers = 'Y' Then
-		
+	//	IF	upper(gs_project) <> 'PANDORA' then 
 		llCarton = Long(Right(sle_carton_no.text,3))
 		llCarton ++
 		sle_carton_no.text = String(Long(Right(Mid(idw_main.GetITemString(1,'do_no'),(len(gs_project) + 1),7),6)),'000000') + String(llCarton,'000')
-		
+//	else 
+//		llCarton = Long(Right(sle_carton_no.text,3))
+//		llCarton ++
+//		sle_carton_no.text = "T"+String(Long(Right(Mid(idw_main.GetITemString(1,'do_no'),(len(gs_project) + 1),7),6)),'000000') + String(llCarton,'000')
+//	end if 
 	Else
 		
 		llCarton = Long(sle_carton_no.text)
@@ -41747,9 +43359,11 @@ ElseIf sle_carton_No.Text = '' Then
 
 	// 04/01 - PCONKL - we need allow for System Generated unique numbers if necessary
 	If g.is_unique_pack_cartonNumbers = 'Y' Then
-		
+		//IF	upper(gs_project) <> 'PANDORA' then
 		sle_carton_no.Text  = String(Long(Right(Mid(idw_main.GetITemString(1,'do_no'),(len(gs_project) + 1),7),6)),'000000') + '001'
-		
+//	else 
+//		sle_carton_no.Text  = "T"+String(Long(Right(Mid(idw_main.GetITemString(1,'do_no'),(len(gs_project) + 1),7),6)),'000000') + '001'
+//	end if 
 	Else /*just sequential within order */
 		
 		sle_carton_no.Text = '1'
@@ -42062,11 +43676,11 @@ END IF
 return 0
 end event
 
-event modified;string lsSerial = '', lsOrigVal, lsCartonNo
+event modified;string lsSerial = '', lsOrigVal, lsCartonNo,lsFindserial
 string lsfullserialno, lsMessage
 int liRtn
 string lsFind, lsSerialType, lsSelectedSku
-long llFindRow, llSelectedRow, llPickRow, llLineItemNo
+long llFindRow, llSelectedRow, llPickRow, llLineItemNo,ll_LineItemNo,ll_LineItemNo_temp,ll_LineItemNo_prev,ll_LineItemNo_next
 boolean lbMixedFootprint
 
 timer(0) //22-Sep-2015 :Madhu Added for PressKeyVs SNScan
@@ -42164,11 +43778,14 @@ IF upper(gs_project) = 'PANDORA' and g.is_unique_pack_cartonnumbers  = 'Y' THEN
 			End If
 		End If
 	End If
+	
+	
 END IF
 
 // TAM - 2014/10/27 Bosch only has max 18 digit serial numbers.  Trim leading charaters
 IF upper(gs_project) = 'BOSCH' THEN
-	lsSerial = Right(this.text,18)
+	//lsSerial = Right(this.text,18) // Dinesh - 02/28/2025 - SIMS-642-Development for IFB-SIMS-Bosch Serial field updates to accept 20 characters
+	lsSerial = Right(this.text,20) // Dinesh - 02/28/2025 - SIMS-642-Development for IFB-SIMS-Bosch Serial field updates to accept 20 characters
 	this.text = lsSerial
 END IF
 
@@ -43319,8 +44936,9 @@ Choose Case Upper(dwo.Name)
 			END IF
 			
 			// 2014/10/27 - TAM - Validate length - shouldn't be > 18 characters for BOSCH
-			If Len(data) > 18 and Upper(gs_Project) = 'BOSCH' Then
-				messagebox(is_title,'Serial Number can not be greater than 18 characters!',Stopsign!)
+			//02/10/2025......Akash Baghel......Change length > 18 TO > 20 characters for BOSCH......SIMS-642.....Development for IFB-SIMS-Bosch Serial field updates to accept 20 characters
+			If Len(data) > 20 and Upper(gs_Project) = 'BOSCH' Then
+				messagebox(is_title,'Serial Number can not be greater than 20 characters!',Stopsign!)
 				Return 1
 			End If
 				  
@@ -44428,7 +46046,7 @@ type dw_bol_prt from u_dw_ancestor within tabpage_bol
 integer x = 9
 integer y = 284
 integer width = 3493
-integer height = 1468
+integer height = 1532
 integer taborder = 20
 boolean hscrollbar = true
 boolean vscrollbar = true
@@ -44754,7 +46372,7 @@ integer y = 108
 integer width = 4544
 integer height = 2564
 long backcolor = 79741120
-string text = "TRAX"
+string text = "ConnectShip"
 long tabtextcolor = 33554432
 long tabbackcolor = 79741120
 long picturemaskcolor = 536870912
@@ -45046,7 +46664,8 @@ if gs_project = 'H2O' then
    				If SQLCA.SQLCode = 0 Then
    				Else /*commit failed*/
 					Execute Immediate "ROLLBACK" using SQLCA;
-     				MessageBox(is_title, "Unable to save Trax Pack Location for Shipping Method: " + lsUF5 + " : "  + SQLCA.SQLErrText)
+     				//MessageBox(is_title, "Unable to save Trax Pack Location for Shipping Method: " + lsUF5 + " : "  + SQLCA.SQLErrText)
+					MessageBox(is_title, "Unable to save ConnectShip Pack Location for Shipping Method: " + lsUF5 + " : "  + SQLCA.SQLErrText)// Dinesh - 02/06/2025- SIMS-641- Development for Delivery Order screen change for ConnectShip 
 				  	return 
 				End If
 			End If
@@ -45153,9 +46772,11 @@ If This.Find("C_select_Ind='Y' and tracking_ID_Type = 'T'",1,This.RowCount()) > 
 	Where project_id = :gs_Project and wh_code = :lsWarehouse;
 	
 	If lsLocale <> 'QPSL' Then
-		Messagebox("TRAX call Successful",'TRAX Labels(s) sent to printer')				
+		//Messagebox("TRAX call Successful",'TRAX Labels(s) sent to printer')	// Dinesh - 02/05/2025- SIMS-641- Development for Delivery Order screen change for ConnectShip 	
+		Messagebox("ConnectShip call Successful",'ConnectShip Labels(s) sent to printer') // Dinesh - 02/05/2025- SIMS-641- Development for Delivery Order screen change for ConnectShip 
 	Else	
-		If Messagebox("TRAX call Successful" ,"Would you like to print the TRAX Shipping Labels?",Question!,YesNo!,1) = 1 then
+		//If Messagebox("TRAX call Successful" ,"Would you like to print the TRAX Shipping Labels?",Question!,YesNo!,1) = 1 then // Dinesh - 02/05/2025- SIMS-641- Development for Delivery Order screen change for ConnectShip 
+		If Messagebox("ConnectShip call Successful" ,"Would you like to print the ConnectShip Shipping Labels?",Question!,YesNo!,1) = 1 then // Dinesh - 02/05/2025- SIMS-641- Development for Delivery Order screen change for ConnectShip 
 			This.TriggerEvent('ue_Print_labels')
 		End If			
 	End If		
@@ -45207,8 +46828,11 @@ Int		i
 
 Str_parms lstrparms
 u_nvo_trax	luTrax
+string lsDoNo
 
 luTrax = Create u_nvo_Trax
+
+lsDoNo = idw_main.GetItemString(1,'do_no') // Akash - 01/30/2025- SIMS-640-Development for ConnectShip Label Re-print in SIMS
 
 llRowCount = This.RowCount()
 For llRowPos = 1 to llRowCount
@@ -45219,13 +46843,15 @@ For llRowPos = 1 to llRowCount
 	//							If Printing at the Ship Ref level, we only need to print once since all labels for a ship ref are in the same file
 	If This.GetITemString(llRowPos,'trax_Ship_ref_nbr') > "" Then
 		lsTrackID = This.GetITemString(llRowPos,'trax_Ship_ref_nbr')
+		
 	Else
 		lsTrackID = This.GetITemString(llRowPos,'carton_no')
 	End If
 	
 	If lsTrackID = '' or lsTrackID = lsTrackIDSave Then Continue
 	
-	lsLabels += luTrax.uf_retrieve_label(lsTrackID, 'CS') /* CS= Create Shipment label type */
+	//lsLabels += luTrax.uf_retrieve_label(lsTrackID, 'CS') /* CS= Create Shipment label type */
+	lsLabels += luTrax.uf_retrieve_label_dp(lsTrackID,lsDoNo) /* CS= Create Shipment label type */// Akash - 01/30/2025- SIMS-640-Development for ConnectShip Label Re-print in SIMS
 	
 	lsTrackIDSave = lsTrackID
 

@@ -273,11 +273,20 @@ dw_adjust.object.t_or.visible=false
 dw_adjust.object.t_serial_number.visible=false
 dw_adjust.object.serialno.visible=false
 
+// Begin  - Dinesh - 10/06/2022 - SIMS-89- Geistlich Serialization - Updates (Part II)
+if upper(gs_project)='GEISTLICH' then // Dinesh 10/06/2022
+	dw_adjust.object.t_serial_number.visible=True
+	dw_adjust.object.serialno.visible=True
+end if
+// End  - Dinesh - 10/06/2022 - SIMS-89- Geistlich Serialization - Updates (Part II)
+
 // TAM - 2018/02 -S14838 - Added Carton to Serial DW
 //lsModify = "c_select.protect=1 l_Code.Protect=1 serial_no.Protect=1 lot_no.Protect=1 po_no.protect=1 po_no2.protect=1 inventory_type.protect=1 exp_dt.protect=1"
 lsModify = "c_select.protect=1 l_Code.Protect=1 serial_no.Protect=1 lot_no.Protect=1 po_no.protect=1 po_no2.protect=1 inventory_type.protect=1 exp_dt.protect=1 carton_id.protect=1"
 
 dw_serial.Modify(lsModify)
+
+
 
 
 lsModify = "Avail_Qty.Protect=0 Inventory_Type.Protect=0 serial_no.Protect=0 Lot_no.Protect=0 po_no.Protect=0 po_no2.Protect=0 Country_of_Origin.Protect=0 "
@@ -418,6 +427,33 @@ ElseIf rb_serial_reconcile.Checked Then /*Serial Reconcile change*/
 ElseIf rb_adjust_other.Checked Then /*Other change - Protect po_no2*/
 	lsModify = "l_code.Protect=0 Serial_No.Protect=0 lot_no.Protect=0 po_no.protect=0 po_no2.protect=1  exp_dt.protect=0 carton_id.protect=1"
 	dw_serial.Modify(lsModify)
+	
+	// Begin .....Akash Baghel - 07/18/2023...- SIMS 243- added dddw for po_no drop down column (project code)
+
+  If upper(gs_project) = 'PANDORA' then	
+	  dw_content.Modify("po_no.Visible='1'")
+	  dw_content.Modify("po_no.Edit.Style='dddw'")
+	
+	  dw_content.Modify("po_no.dddw.Case='Any'")
+	  dw_content.Modify("po_no.dddw.Name='dddw_project_code'")
+	  dw_content.Modify("po_no.dddw.DataColumn='project_code'")
+	  dw_content.Modify("po_no.dddw.DisplayColumn='project_code'")
+	  dw_content.Modify("po_no.dddw.Limit=30")
+	
+	  dw_content.Modify("po_no.dddw.PercentWidth=100")
+	  dw_content.Modify("po_no.dddw.UseAsBorder= Yes")
+	  dw_content.Modify("po_no.dddw.VScrollBar=Yes")
+	
+   End if
+
+      datawindowchild ldw_childother
+
+      dw_content.GetChild ( "po_no", ldw_childother )
+      ldw_childother.SetTransObject ( SQLCA )
+      ldw_childother.Retrieve ()
+		
+//End ... .....Akash Baghel - 07/19/2023...- SIMS 243- added dddw for po_no drop down column (project code)
+
 
 Else /* Other*/
 	
@@ -1289,9 +1325,9 @@ This.PostEvent("ue_postOpen")
 end event
 
 event closequery;Long llRowCount,	llRowPos, llRC, ll_owner, ll_orig_OWner, llAdjustID, llModCount , ll_Component_No, llFindRow, ll_Id_No, llCartonRowCount
-Long llContentRow
-boolean lb_suppress_947
-String ls_cc_class_Code
+Long llContentRow,ll_qty,ll_comp_qty,llcomp_qty,llRowCount1,ll_comp_no,ll_qty_diff,k,ll_rtn
+boolean lb_suppress_947,lb_check
+String ls_cc_class_Code,lsRONO1,ls_owner_cd
 
 Str_parms	lstrparms
 		
@@ -1302,6 +1338,8 @@ String	lsType,	lsOldType, lsSerial,	lsLot, lsPO, lsWarehouse, lsSku, lsRef, lsRe
 			lsTransParm, lsMsg, lsTitle, lsoldlot, lsRemarks, lsFind, lsoldpo, lsSerialSwapFlag, lsPrevSerial
 			
 DateTime	ldtToday, ldt_expiration_date, ldtOldExpDT //GAP 11/02 added exp.date
+datastore lds_adjust_qty
+lds_adjust_qty = create datastore
 
 //Get out if canceled
 If ibCancel Then
@@ -1645,7 +1683,15 @@ For llRowPos = 1 to llRowCount
 	ldAvailQty = dw_content.getItemNumber(llRowPos,"orig_qty") /*original value before update!*/
 	ldNewQty = dw_content.getItemNumber(llRowPos,"avail_qty")
 	
+	//lsRONO1 =  dw_content.getItemString(llRowPos,"ro_no")
+	ll_qty_diff= ldAvailQty - ldNewQty // Dinesh
+	
 	lsTransParm = dw_content.getItemString(llRowPos,"c_Parm")
+	
+	
+	lssku= dw_content.getItemString(llRowPos,"sku") // Dinesh
+	ll_comp_no= dw_content.getItemnumber(llRowPos,"component_no") // Dinesh
+	
 	
 	//MEA - 7/12 - Disable for Stryker per BoonHee
 	
@@ -1683,12 +1729,13 @@ For llRowPos = 1 to llRowCount
 									:lsoldlot,:lsremarks, :ldtOldExpDT)  //GAP 11/02 Added cont/exp.date here  --// TAM 2005/04/18  Added Adjustment type from radio button selected., 11/11 - PCONKL -Added remarks, 04/16 - PCONKL - Added Old Expiration Date
 	Using SQLCA;
 	//SQLCA.DBParm = "disablebind =1"	 /* 08/16 - PCONKL - Commented out due to SQL 2016 issues with driver*/
-		
+	
 	If Sqlca.sqlcode <> 0  Then
 		Execute Immediate "ROLLBACK" using SQLCA;
 		MessageBox("Stock Adjustment_Create","Unable to create new stock adjustment: ~r~r" + sqlca.sqlerrtext)
 		Return 1	
-	End IF
+	End IF 
+	 
 
 //TAM 10/01/04 truncate rono to 20 (from "receive_master_supp_invoice_no" above)
 	lsRONO20 = MID(lsRoNo,1,20)
@@ -2098,18 +2145,19 @@ If llRowCount > 0 Then
 
 				//MikeA - 1/9/2020 - Added as per Roy
 	
-				IF dw_Serial.getItemStatus(llRowPos,"po_no",Primary!) = DataModified! Then
+				IF dw_Serial.getItemStatus(llRowPos,"po_no",Primary!) = DataModified! Then    
 		
 					lspo =  dw_Serial.getItemString(llRowPos,"po_no")
 					lsoldpo =  dw_Serial.getItemString(llRowPos,"po_no", primary!, true)
-		
+					ls_owner_cd = Upper(dw_serial.getItemString(llRowPos,'serial_number_inventory_owner_cd')) // Dinesh - 10/04/2023 - SIMS-317- Google - Stock Adjustment for Class A GPNs
 					select  CC_Class_Code into :ls_cc_class_Code from Item_Master with(nolock) 
-					where Project_Id =:gs_project and sku =:lsSku  and Supp_code =:ls_supp
+					where Project_Id =:gs_project and sku =:lsSku  and Supp_code =:ls_supp         
 					using sqlca;				
 				
-					IF rb_adjust_other.checked = true AND (upper(ls_cc_class_Code) ='A') AND (Upper(trim(lspo)) = 'RESEARCH' AND Upper(trim(lsoldpo)) <> 'RESEARCH' )  THEN
-			
-						lsMsg += 'Inventory will be moved to Project Code: RESEARCH.  Deletion of Inventory and Serial number must be processed in a separate Stock Adjustment session after Google has approved in IMS.' + "~r"
+					//IF rb_adjust_other.checked = true AND (upper(ls_cc_class_Code) ='A') AND (Upper(trim(lspo)) = 'RESEARCH' AND Upper(trim(lsoldpo)) <> 'RESEARCH' )  THEN 
+					IF rb_adjust_other.checked = true AND (upper(ls_cc_class_Code) ='A') AND ((Upper(trim(lspo)) = 'MAIN' and Right(ls_owner_cd,2) = 'PR')  AND (Upper(trim(lsoldpo)) <> 'RESEARCH' and Right(ls_owner_cd,2) <> 'PR')) THEN  // Dinesh -10/19/2023 -  SIMS-317- Google - Stock Adjustment for Class A GPNs
+						//lsMsg += 'Inventory will be moved to Project Code: RESEARCH.  Deletion of Inventory and Serial number must be processed in a separate Stock Adjustment session after Google has approved in IMS.' + "~r" // Dinesh -10/19/2023 -  SIMS-317- Google - Stock Adjustment for Class A GPNs
+						lsMsg += 'Inventory will be moved to Project Code: MAIN with WH*PR.  Deletion of Inventory and Serial number must be processed in a separate Stock Adjustment session after Google has approved in IMS.' + "~r" // Dinesh -10/19/2023 -  SIMS-317- Google - Stock Adjustment for Class A GPNs
 	
 						ll_Id_No = this.wf_create_item_serial_change_record( gs_project, lsSku, lsWarehouse, ls_supp, ll_owner, lspo, lsoldpo, lsSerial, lsSerial, false)
 						lsTransParm =string(ll_Id_No)
@@ -2175,6 +2223,68 @@ If Sqlca.sqldbcode < 0 Then
 	MessageBox("Stock Adjustment_Create","Unable to create new stock adjustment: ~r~r" + sqlca.sqlerrtext)
 	Return 1
 End IF
+
+
+// Begin - Dinesh  - 07082022- S70298- SIMS PIP/SIP- Work order refractories - Stock adjustment
+	if (gs_project='GEISTLICH' or gs_project='NYCSP')  and ll_comp_no > 0 then
+		
+		//Execute Immediate "Begin Transaction" using SQLCA;
+	
+				lds_adjust_qty.dataobject='d_adjustment_qty'
+				lds_adjust_qty.SetTransobject(sqlca)
+				
+				llRowCount1 = lds_adjust_qty.Retrieve(ll_comp_no,lsloc)
+				
+			for k= 1 to lds_adjust_qty.rowcount()
+					
+					lsSku= lds_adjust_qty.getitemstring(k,"sku") 
+
+						
+					if lsSku <> '' or not isnull(lsSku)  then
+					
+							select child_qty into :ll_qty from Item_component where SKU_child=:lsSku;
+							
+							ll_comp_qty= ll_qty* ll_qty_diff
+						
+							llcomp_qty= lds_adjust_qty.getItemnumber(k,"component_qty") 
+							
+							if llcomp_qty <> 0 then
+							
+									ll_comp_qty=llcomp_qty - ll_comp_qty 
+									
+									lds_adjust_qty.setitem(k,'component_qty',ll_comp_qty)
+									ll_rtn= lds_adjust_qty.update()
+									
+									IF ll_rtn = 1 THEN
+	
+										Execute Immediate "COMMIT" using SQLCA;
+									
+										
+									End if
+									
+							end if
+							
+					end if
+				
+				next
+		
+			IF llRowCount1 <=0 THEN 
+				MessageBox('', "No records Generated!")
+				Return
+					 
+			End if
+			
+			If Sqlca.sqldbcode < 0 Then 
+				Execute Immediate "ROLLBACK" using SQLCA;
+				MessageBox("Stock Adjustment_Create","Unable to create new stock adjustment: ~r~r" + sqlca.sqlerrtext)
+				Return 1	
+			End IF 
+			
+				
+		End if
+	
+	// End - Dinesh  - 07082022- S70298- SIMS PIP/SIP- Work order refractories - Stock adjustment
+	 
 
 SetPointer(arrow!)
 
@@ -2542,9 +2652,9 @@ string text = "Delete Serials"
 end type
 
 event clicked;Long 	i, llRowCount, llFindRow
-long	ll_content_qty, ll_serial_count, ll_serial_un_count
+long	ll_content_qty, ll_serial_count, ll_serial_un_count,ll_Owner_Id
 String	lsFind, lsSerialFind, lsSelectFind, lsUnSelectFind, lsInventory_Type
-string ls_sku, ls_supp_code
+string ls_sku, ls_supp_code,ls_owner_cd,lsToWarehouse,ls_custcode,ls_Owner_code
 
 string lsSelectedSerialFind, ls_msg
 long ll_serial_find_row, ll_selected_find_row, ll_selected_serial_count, ll_content_find_row
@@ -2708,14 +2818,17 @@ For i = llRowCount to 1 step - 1
 				ls_supp_code = Upper(dw_Content.GetItemString(ll_content_find_row, "supp_code"))
 				
 				ls_po_no = Upper(dw_serial.getItemString(i,'po_no'))
+				ls_owner_cd = Upper(dw_serial.getItemString(i,'serial_number_inventory_owner_cd')) // Dinesh - 10/04/2023 - SIMS-317- Google - Stock Adjustment for Class A GPNs
 								
 				select  CC_Class_Code into :ls_cc_class_Code from Item_Master with(nolock) 
 				where Project_Id =:gs_project and sku =:ls_sku  and Supp_code =:ls_supp_code
 				using sqlca;				
 				
-				IF upper(ls_cc_class_Code) ='A' and trim(upper(ls_po_no)) <> 'RESEARCH' then
+				//IF upper(ls_cc_class_Code) ='A' and trim(upper(ls_po_no)) <> 'RESEARCH' then // Dinesh -10/19/2023 -  SIMS-317- Google - Stock Adjustment for Class A GPNs
+				IF upper(ls_cc_class_Code) ='A' and (trim(upper(ls_po_no)) <> 'RESEARCH' and Right(ls_owner_cd,2) <> 'PR')   then  // Dinesh -10/19/2023 -  SIMS-317- Google - Stock Adjustment for Class A GPNs
 				
-					Messagebox("Adjust", "A down count for a Class A item is not allowed unless the project (PO_NO) = ‘RESEARCH’ ",Stopsign!)
+					//Messagebox("Adjust", "A down count for a Class A item is not allowed unless the project (PO_NO) = ‘RESEARCH’ ",Stopsign!)
+					Messagebox("Adjust", "A down count for a Class A item is not allowed unless the Owner Code is like  ‘WH*PR’ ",Stopsign!) // Dinesh -10/19/2023 - SIMS-317- Google - Stock Adjustment for Class A GPNs
 					Return
 					
 				End If
@@ -4001,13 +4114,20 @@ ElseIf Not IsNull(ls_lotno) AND Trim(ls_lotno) <> '' THEN
 ElseIf Not IsNull(ls_serialno) AND Trim(ls_serialno) <> '' THEN		
 	
 		this.Modify("sku.visible='1'")
-
-		ls_where = ls_where + "  (Serial_Number_Inventory.serial_no = '" + ls_serialno + "'))" 
-	
-							 
+	// Begin - Dinesh - 10/06/2022 - SIMS-89- Geistlich Serialization - Updates (Part II)
+		if upper(gs_project)='GEISTLICH' then
+			
+			ls_OrigSQL = isOrigSQL
+		
+			ls_where = ls_where + " ( Content.serial_no = '" + ls_serialno + "'" + " and Item_Master.Serialized_Ind ='Y'))"
+		
+		
+		else // End  - Dinesh - 10/06/2022 - SIMS-89- Geistlich Serialization - Updates (Part II)
+			
+			ls_where = ls_where + "  (Serial_Number_Inventory.serial_no = '" + ls_serialno + "'))" 
 	
 	//Get a local copy of the original sql instance variable now that we've modified the original dw select statement
-	ls_OrigSQL = isOrigSQL
+			ls_OrigSQL = isOrigSQL
 	
 	//Replace INNER JOIN b/w Content and Receive_Master in original SQL with LEFT JOIN, and eliminate it from the WHERE clause...
 	ls_OrigSQL = Replace(ls_OrigSQL,LastPos(ls_OrigSQL,'INNER'),5,'LEFT')
@@ -4026,7 +4146,7 @@ ElseIf Not IsNull(ls_serialno) AND Trim(ls_serialno) <> '' THEN
 		mid(  ls_OrigSQL, li_LastPos + 5)	
 
 	//********************************************************
-
+	end if // Dinesh
 	 dw_content.Post Function SetRow(1)
 	ii_row = 1
 	

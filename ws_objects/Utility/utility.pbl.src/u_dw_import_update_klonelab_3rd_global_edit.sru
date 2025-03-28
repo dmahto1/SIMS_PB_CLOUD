@@ -171,7 +171,8 @@ For llRow = 1 to this.RowCount()
 						Set tel = :lsTraxTelephone Where Do_No = :lsDoNo and Address_Type = '3P' USING SQLCA;
 					
 					If sqlca.sqlcode <> 0 Then
-						MessageBox("Import","Unable to Update Trax Telephone - " + SQLCA.SQLErrText)
+						MessageBox("Import","Unable to Update Trax Telephone - " + SQLCA.SQLErrText) // Dinesh - 02/10/2025- SIMS-641-Development for Delivery Order screen change for ConnectShip
+						// MessageBox("Import","Unable to Update Trax Telephone - " + SQLCA.SQLErrText)
 						Return -1
 					End If		
 				
@@ -186,7 +187,8 @@ For llRow = 1 to this.RowCount()
 				values (:lsDoNo, :gs_project, '3P', :lsTraxName, :lsTraxAddress, :lsTraxCity, :lsTraxZip, :lsTraxState, :lsTraxCountry,	:lsTraxTelephone) USING SQLCA;
 				
 				If sqlca.sqlcode <> 0 Then
-					MessageBox("Import","Unable to Insert Trax Address - " + SQLCA.SQLErrText)
+					//MessageBox("Import","Unable to Insert Trax Address - " + SQLCA.SQLErrText)
+					MessageBox("Import","Unable to Insert ConnectShip Address - " + SQLCA.SQLErrText) // Dinesh - 02/10/2025- SIMS-641-Development for Delivery Order screen change for ConnectShip
 					Return -1
 				End If		
 
@@ -234,7 +236,8 @@ For llRow = 1 to this.RowCount()
 				Set trax_acct_no = :lsTraxAccountNumber Where Do_No = :lsDoNo USING SQLCA;
 			
 			If sqlca.sqlcode <> 0 Then
-				MessageBox("Import","Unable to Update Trax Acct No - " + SQLCA.SQLErrText)
+				MessageBox("Import","Unable to Update ConnectShip Acct No - " + SQLCA.SQLErrText) // Dinesh - 02/10/2025- SIMS-641-Development for Delivery Order screen change for ConnectShip
+				//MessageBox("Import","Unable to Update Trax Acct No - " + SQLCA.SQLErrTe
 				Return -1
 			End If		
 	

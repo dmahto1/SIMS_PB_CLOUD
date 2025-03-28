@@ -3,6 +3,8 @@ $PBExportComments$*+receiving order
 forward
 global type w_ro from w_std_master_detail
 end type
+type cb_readonly from commandbutton within tabpage_main
+end type
 type cb_custom2 from commandbutton within tabpage_main
 end type
 type cb_custom1 from commandbutton within tabpage_main
@@ -77,6 +79,8 @@ dw_list_sku dw_list_sku
 end type
 type tabpage_putaway from userobject within tab_main
 end type
+type cb_final_put_away from commandbutton within tabpage_putaway
+end type
 type cbx_autofill from checkbox within tabpage_putaway
 end type
 type dw_putaway_mobile from u_dw_ancestor within tabpage_putaway
@@ -110,6 +114,7 @@ end type
 type dw_putaway from u_dw_ancestor within tabpage_putaway
 end type
 type tabpage_putaway from userobject within tab_main
+cb_final_put_away cb_final_put_away
 cbx_autofill cbx_autofill
 dw_putaway_mobile dw_putaway_mobile
 cb_emc cb_emc
@@ -169,8 +174,8 @@ end type
 end forward
 
 global type w_ro from w_std_master_detail
-integer width = 3977
-integer height = 2188
+integer width = 3986
+integer height = 2308
 string title = "Receiving Order"
 event ue_confirm ( )
 event ue_generate_putaway ( )
@@ -201,21 +206,24 @@ Datawindowchild idwc_uom
 Datawindowchild idwc_detail_uf2
 //TimA Pandora issue #560
 Datawindowchild idwc_IM_Coo_Detail,idwc_IM_Coo_Putaway,idwc_currency
-
+boolean ib_access=False
 w_ro iw_window
 Integer ii_return
 SingleLineEdit isle_whcode,isle_code, isle_order2
 string is_sql,isSetColumn
-string is_rono, isCurrentSKU 
+string is_rono, isCurrentSKU,is_bol
 String is_bolno, isOrigSQLSerial, isCarton
 string is_project_uf1
 String is_bonded // TAM W&S 2012/12
-string is_Inbound_ord_Ind
+string is_Inbound_ord_Ind,is_order_new,isinvoice_no,is_display_name
+boolean ib_search=True
+boolean ib_adj = False
+
 
 String	isScanColumn
  
 Boolean ib_import, ibConfirmRequested, ibManualScan, ibWORequested, ibMultipleSKU, ibSkuScanned
-long	ilCurrPutawayRow,ilComprow, ilCompNumber
+long	ilCurrPutawayRow,ilComprow, ilCompNumber,il_userspid,il_find_matchW,il_find_matchR
 //string is_Serialized_Ind,is_po_indicator,is_lot_indicator
 
 n_warehouse i_nwarehouse
@@ -248,7 +256,7 @@ datastore	idsItemMaster
 datastore	idsRLScan
 datastore	idsMarlAdjustment
 datastore 	idsDOPicking
-
+datastore     idsputawaytracelog,ids_trace_loc_changel//SIMS-55 Dhirendra
 string 		isRLSkuList[]
 string		isQualityHoldFlag[]
   string		isRLSkuMARL[]
@@ -331,7 +339,8 @@ Boolean ib_serialized_present	//GailM 7/23/2019 Related to S31781 F14974 Putaway
 
 Boolean ib_AutoFill_Putaway_Pallet = FALSE
 Boolean ib_AutoFill_Putaway_Container = FALSE
-
+Boolean ib_delete_putawayrow = FALSE// SIMS-55 -Dhirendra for trace log for putaway generate and delete  
+Boolean ib_puaway_gen =FALSE// SIMS-55 -Dhirendra for trace log for putaway generate and delete 
 Boolean ib_AutoFill_Shift_Select = false
 Long 	   il_AutoFill_Start_Row = 0
 end variables
@@ -435,6 +444,7 @@ public function boolean f_is_pandora_pharmacy_location (string aswarehouse, stri
 public function string f_is_kitting_location_occupied (string aswhcode, string aslocation, string assku)
 public function string getloctype (string aswhcode, string aslocation)
 public subroutine f_crossdock ()
+public subroutine wf_receive_order_readonly (boolean ab_read)
 end prototypes
 
 event ue_confirm();boolean	lb_gotserial, lb_error_dup_sn, lbCreateBackorder, lb_Error, lbReconfirm
@@ -1570,23 +1580,31 @@ If lbReconfirm = False Then
 		
 		// Begin - Dinesh - 03/22/2021- S54935- Google - SIMS – 947 change needed for Google SAP
 		
-		if gs_Project='PANDORA' and liAdj > 0 then
-				Execute Immediate "Begin Transaction" using SQLCA; /* 11/04 - PCONKL - Auto Commit Turned on to eliminate DB locks*/
-				
-				Insert Into batch_Transaction (project_ID, Trans_Type, Trans_Order_ID, Trans_Status, Trans_Create_Date, Trans_Parm)
-					Values(:gs_Project, 'MM', :lsRONO,'N', :ldtToday, 'Inbound');
-				Execute Immediate "COMMIT" using SQLCA;
+		if gs_Project='PANDORA' and liAdj > 0 then 
+				ib_adj= false //10/21/2024 Dinesh -SIMS-572- Google - Completed Inbound orders and GR transactions not sent
+			// Begin - 10/21/2024 Dinesh -SIMS-572- commented the below insert statement and placed in the ue_Save event
+			//  - 10/21/2024 - Dinesh - SIMS-572- Google - Completed Inbound orders and GR transactions not sent - 
+//				Execute Immediate "Begin Transaction" using SQLCA; /* 11/04 - PCONKL - Auto Commit Turned on to eliminate DB locks*/
+//				
+//				Insert Into batch_Transaction (project_ID, Trans_Type, Trans_Order_ID, Trans_Status, Trans_Create_Date, Trans_Parm)
+//					Values(:gs_Project, 'MM', :lsRONO,'N', :ldtToday, 'Inbound');
+//				Execute Immediate "COMMIT" using SQLCA;
+			//End - 10/21/2024 - Dinesh - 572- Google - Completed Inbound orders and GR transactions not sent - commented the below insert statement and placed in the ue_Save event
 			
 		else
-		// End - Dinesh - 03/22/2021- S54935- Google - SIMS – 947 change needed for Google SAP
-				// 12/08 - PCONKL - Want to write the record before we show confirmation msgbox
-				Execute Immediate "Begin Transaction" using SQLCA; /* 11/04 - PCONKL - Auto Commit Turned on to eliminate DB locks*/
+				ib_adj= true //10/21/2024 Dinesh -SIMS-572- Google - Completed Inbound orders and GR transactions not sent
+				if gs_Project <> 'PANDORA'  then // 10/21/2024 - Dinesh - 572- Google - Completed Inbound orders and GR transactions not sent - It will remain for non Pandora.
+					// End - Dinesh - 03/22/2021- S54935- Google - SIMS – 947 change needed for Google SAP
+					// 12/08 - PCONKL - Want to write the record before we show confirmation msgbox
+					Execute Immediate "Begin Transaction" using SQLCA; /* 11/04 - PCONKL - Auto Commit Turned on to eliminate DB locks*/
+					
+					Insert Into batch_Transaction (project_ID, Trans_Type, Trans_Order_ID, Trans_Status, Trans_Create_Date, Trans_Parm)
+						Values(:gs_Project, 'GR', :lsRONO,'N', :ldtToday, '');
+					Execute Immediate "COMMIT" using SQLCA;
 				
-				Insert Into batch_Transaction (project_ID, Trans_Type, Trans_Order_ID, Trans_Status, Trans_Create_Date, Trans_Parm)
-					Values(:gs_Project, 'GR', :lsRONO,'N', :ldtToday, '');
-				Execute Immediate "COMMIT" using SQLCA;
+				End if
 				
-				//17-Feb-2014 :Madhu- C13-135 - PHC - Split re-trigger interface files (SIMS- MARC GT) -START
+//				17-Feb-2014 :Madhu- C13-135 - PHC - Split re-trigger interface files (SIMS- MARC GT) -START
 				//inserting a record with GT into Batch Transaction table
 				Execute Immediate "Begin Transaction" using SQLCA;
 				
@@ -1704,6 +1722,7 @@ If lbReconfirm = False Then
 	If lbCreateBackorder Then
 		This.TriggerEvent("ue_backOrder")
 		//TimA 02/12/14 Added new Method Trace calls
+		
 		f_method_trace_special( gs_project,this.ClassName() + ' -ue_confirm','Back order created: ',is_rono,' ', ' ' ,is_suppinvoiceno) 
 	End If
 
@@ -2408,7 +2427,7 @@ String ls_ShipmentDistributionNo, lsErrorText
 
 DataStore	ldsDetail, ldsEDIDetail, ldsNotes, ldsAddress
 
-Datetime ldt_exp_date,ldt_NeedByDate
+Datetime ldt_exp_date,ldt_NeedByDate,ld_arrival_date
 
 //Create a back Order for the current Order
 
@@ -2456,6 +2475,8 @@ lsFromWHLoc =  idw_main.GetItemString(1,"from_wh_loc")
 ll_om_change_req_nbr =idw_main.getitemnumber( 1, 'OM_CHANGE_REQUEST_NBR') //08-Aug-2017 :Madhu PINT-856
 ls_order_type =idw_main.getitemstring( 1, 'OM_Order_Type') //28-Aug-2017 :Madhu PINT-856
 ls_om_conf_type =idw_main.getitemstring( 1, 'OM_Confirmation_Type') //28-Aug-2017 :Madhu PINT-856
+ld_arrival_date =idw_main.getitemdatetime( 1, 'arrival_date')//  SIMS-55 Added By Dhirendra
+
 
 
 //Capture Detail info where received qty < shipped qty
@@ -2548,7 +2569,13 @@ If NOT gs_project = "FLEX-SIN" THEN
 END IF
 Idw_Main.SetITem(1,"customs_doc",lsCustomsDoc)
 Idw_Main.SetITem(1,"do_no",lsDONO)
-
+//SIMS-55 Added by Dhirendra -Start
+IF UPPER(gs_project)= 'PANDORA' Then
+	Idw_Main.SetITem(1,"arrival_date",ld_arrival_date)
+	Idw_Main.modify('arrival_date.enabled =0')
+	Idw_Main.modify('arrival_date_t.enabled =0')
+End if 
+//SIMS -55 Added by Dhirendra -End
 // 01/08 - MEA - Do not copy supp_order_no if Project is "PHXBRANDS"
 //					  Copy it for all other projects.
 
@@ -4125,7 +4152,9 @@ END IF
 // cawikholm 07/05/11 End Tracing 
 //f_method_trace( ll_method_trace_id, this.ClassName(), 'End ue_generate_putaway_server' ) //08-Feb-2013  :Madhu commented
 f_method_trace_special( gs_project,this.ClassName() + ' -ue_generate_putaway_server','End ue_generate_putaway_server: ',ls_order,' ',' ',is_suppinvoiceno ) //08-Feb-2013  :Madhu added
-
+IF UPPER(gs_project) ='PANDORA' then
+   ib_puaway_gen = true
+end if 
 end event
 
 event ue_assign_locations_server();// 11/12 - PCONKL - Process Location assignment on Server - In case Putaway List was not originally generated on Server (scanning to build, etc.)
@@ -5224,6 +5253,13 @@ If Upper(gs_Project) = 'PANDORA' Then
 		
 		idsEdiContainers.SetSqlSelect(lsNewSQL)
 		idsEdiContainers.Retrieve()
+		
+//		IF  isnull(idw_main.getitemdatetime(1,'arrival_date')) then
+//			idw_main.modify('arrival_date_t.enabled =0') 
+//			idw_main.object.arrival_date.protect = false
+//		End If
+			
+			
 	END IF
 	//29-APR-2019 :Madhu S32505 F15371 - Add Container Level validations. - END
 	
@@ -5448,7 +5484,10 @@ Choose Case idw_main.GetItemString(1,"ord_status")
 		
 		IF gs_project = "PANDORA" THEN
 			tab_main.Tabpage_putaway.cbx_autofill.enabled = true
-			tab_main.Tabpage_putaway.cbx_autofill.checked = false			
+			tab_main.Tabpage_putaway.cbx_autofill.checked = false	
+			tab_main.tabpage_putaway.cb_final_put_away.visible= True //SIMS-55 Added by Dhirendra
+			tab_main.tabpage_putaway.cb_final_put_away.Enabled= FALSE//SIMS-55 Added by Dhirendra
+			idw_main.settaborder('arrival_date',0)//SIMS-55 Added by Dhirendra
 		END IF
 
 		
@@ -5611,7 +5650,10 @@ Case "P"
 		
 		IF gs_project = "PANDORA" THEN
 			tab_main.Tabpage_putaway.cbx_autofill.enabled = true
-			tab_main.Tabpage_putaway.cbx_autofill.checked = false			
+			tab_main.Tabpage_putaway.cbx_autofill.checked = FALSE
+			tab_main.tabpage_putaway.cb_final_put_away.visible= TRUE//SIMS-55 Added by Dhirendra
+			tab_main.tabpage_putaway.cb_final_put_away.Enabled= TRUE//SIMS-55 Added by Dhirendra	
+			idw_main.settaborder('arrival_date',0)//SIMS-55 Added by Dhirendra
 		END IF
 		
 		
@@ -5723,8 +5765,12 @@ Case "P"
 
 		IF gs_project = "PANDORA" THEN
 			tab_main.Tabpage_putaway.cbx_autofill.enabled = false
-			tab_main.Tabpage_putaway.cbx_autofill.checked = false			
+			tab_main.Tabpage_putaway.cbx_autofill.checked = false
+			tab_main.tabpage_putaway.cb_final_put_away.visible= TRUE
+			tab_main.tabpage_putaway.cb_final_put_away.Enabled= FALSE
+			
 		END IF
+	
 
 
 	CASE "V" 
@@ -5818,9 +5864,175 @@ Case "P"
 		
 		IF gs_project = "PANDORA" THEN
 			tab_main.Tabpage_putaway.cbx_autofill.enabled = false
-			tab_main.Tabpage_putaway.cbx_autofill.checked = false			
+			tab_main.Tabpage_putaway.cbx_autofill.checked = false
+			tab_main.tabpage_putaway.cb_final_put_away.visible= TRUE//SIMS-55 Added by Dhirendra 
+			tab_main.tabpage_putaway.cb_final_put_away.Enabled= FALSE//SIMS-55 Added by Dhirendra 
+			idw_main.settaborder('arrival_date',0)//SIMS-55 Added by Dhirendra
 		END IF
+		
+	CASE "F"
+		 //  Added by Dhirendra -SIMS-55,  19/10/2022 -Stat
+		 im_menu.m_file.m_save.Enabled = True
+		 tab_main.tabpage_main.cb_confirm.enabled = true
+		 tab_main.tabpage_putaway.cb_final_put_away.visible= TRUE  //SIMS-55 Added by Dhirendra
+		 tab_main.tabpage_putaway.cb_final_put_away.Enabled= False //SIMS-55 Added by Dhirendra
+		 idw_putaway.SetTabOrder("l_code", 0) //SIMS-55 Added by Dhirendra
+		 idw_main.settaborder('arrival_date',0)//SIMS-55 Added by Dhirendra
+		 tab_main.tabpage_other_info.enabled = True //SIMS-55 Added by Dhirendra
+        
+		 im_menu.m_file.m_retrieve.Enabled = True
+//		im_menu.m_file.m_print.Enabled = True
+		im_menu.m_file.m_refresh.Enabled = True
+		im_menu.m_record.m_delete.Enabled = True
+		tab_main.tabpage_putaway.Enabled = True
+		tab_main.tabpage_orderdetail.cb_insert.enabled = True
+		tab_main.tabpage_orderdetail.cb_delete.enabled = True	
+		tab_main.tabpage_OrderDetail.cb_IQC.Enabled = True
+		tab_main.tabpage_putaway.cb_deleterow.enabled = True	
+		tab_main.tabpage_putaway.cb_insertrow.enabled = True	
+		tab_main.tabpage_putaway.cb_copyrow.enabled = True
+		tab_main.tabpage_putaway.cb_generate.enabled = True
+		tab_main.tabpage_putaway.cb_print.enabled = True
+		tab_main.tabpage_putaway.cb_putaway_pallets.enabled = True /* 12/01 - GMOR */
+		tab_main.tabpage_main.cb_confirm.enabled = True
+		tab_main.tabpage_main.cb_void.enabled = True
+		tab_main.tabpage_other_info.enabled = True
+			
+		// GailM 6/12/15 - allow edit named fields
+		idw_main.SetTaborder( "container_nbr", 210)
+		idw_main.SetTaborder( "client_cust_po_nbr", 220)
+		idw_main.SetTaborder( "container_type", 230)
+		idw_main.SetTaborder( "client_order_type", 240)
+		idw_main.SetTaborder( "from_wh_loc", 250)
+		idw_main.SetTaborder( "client_invoice_nbr", 260)
+		idw_main.SetTaborder( "seal_nbr", 270)
+		idw_main.SetTaborder( "vendor_invoice_nbr", 280)
+				
+		//Added By DGM
+      i_nwarehouse.of_settab(idw_main,lstr_parms,1)
+		idw_main.SetTabOrder("supp_code", 0)
+		idw_main.SetTabOrder("complete_date", 0)
+		///
+		
+		idw_detail.SetTabOrder("line_item_no", 5)
+		idw_detail.SetTabOrder("sku", 10)
+		idw_detail.SetTabOrder("supp_code", 15)
+		idw_detail.SetTabOrder("alternate_sku", 20)
+		// pvh - 09/09/05
+		//idw_detail.SetTabOrder("country_of_origin", 25)
+		idw_detail.SetTabOrder("req_qty", 30)
+		idw_detail.SetTabOrder("uom", 40)
+		idw_detail.SetTabOrder("cost", 50)
+		idw_detail.SetTabOrder("user_field1",60)
+		idw_detail.SetTabOrder("user_field2",70)
+		idw_detail.SetTabOrder("user_field3",80)
+		idw_detail.SetTabOrder("user_field4",90)
+		
 
+		idw_putaway.SetTabOrder("line_item_no", 5)
+		idw_putaway.SetTabOrder("sku", 10)
+		idw_putaway.SetTabOrder("supp_code", 12)
+		idw_putaway.SetTabOrder("country_of_Origin", 15)
+		idw_putaway.SetTabOrder("inventory_type",30)
+		idw_putaway.SetTabOrder("quantity", 35)
+		idw_putaway.SetTabOrder("serial_no", 40)
+
+		idw_putaway.SetTabOrder("lot_no", 50)
+		idw_putaway.SetTabOrder("po_no", 60)
+		idw_putaway.SetTabOrder("po_no2", 70)
+		idw_putaway.SetTabOrder("container_ID", 75)
+		idw_putaway.SetTabOrder("expiration_date", 80)
+		idw_putaway.SetTabOrder("length", 85)
+		idw_putaway.SetTabOrder("width", 90)
+		idw_putaway.SetTabOrder("height", 100)
+		idw_putaway.SetTabOrder("weight_Gross", 110)
+		idw_putaway.SetTabOrder("user_field1",120)
+		idw_putaway.SetTabOrder("user_field2",130)
+		idw_putaway.SetTabOrder("user_field3",140)
+		idw_putaway.SetTabOrder("user_field4",150)	
+		idw_putaway.SetTabOrder("user_field5",160)
+		idw_putaway.SetTabOrder("user_field6",170)
+		idw_putaway.SetTabOrder("user_field7",180)
+		idw_putaway.SetTabOrder("user_field8",190)
+		idw_putaway.SetTabOrder("user_field8", 200)
+		idw_putaway.SetTabOrder("user_field9",210)
+		idw_putaway.SetTabOrder("user_field10",220)
+		idw_putaway.SetTabOrder("user_field11",230)		
+		idw_putaway.SetTabOrder("user_field12",240)	
+		
+		
+		// 08/07 - PCONKL - Only enabling RMA Serial Tab for 3COM Order Types 'M' and 'R' And any serialized part
+		If idw_main.RowCount() > 0 and gs_project = '3COM_NASH' Then
+			
+			If  idw_Main.GetITemString(1,'Ord_type') = 'M' or idw_Main.GetITemString(1,'Ord_type') = 'R' Then 
+				
+				//Check for Serialized parts - normally tracked at Outbound but will track at Inbound for RMA side of house (As opposed to Revenue)
+				If idw_rma_serial.Find("serialized_ind <> 'N'",1,idw_rma_serial.RowCount()) > 0   Then				
+					
+//					OR &
+//				   (idw_putaway.Find("serialized_ind <> 'N'",1,idw_putaway.RowCount()) > 0) 
+					
+					tab_main.tabpage_rma_serial.Enabled = True /* 05/05 - PCONKL*/
+					idw_rma_Serial.Object.datawindow.ReadOnly = 'No'
+					
+					tab_main.tabpage_rma_serial.rb_auto.Checked = True
+					tab_main.tabpage_rma_serial.rb_auto.triggerEvent('clicked')
+					
+				Else
+					tab_main.tabpage_rma_serial.Enabled = False
+				End If
+			Else
+				tab_main.tabpage_rma_serial.Enabled = False
+			End If
+			
+		End If /* 3COM ONly */
+		
+		If g.ib_receive_putaway_serial_rollup_ind Then tab_main.tabpage_rma_serial.Enabled = True
+		
+		IF gs_project = "PANDORA" THEN
+			idw_main.SetTabOrder("wh_code",0)
+			idw_other.SetTabOrder("user_field2",0)
+		END IF
+		
+	// TAM W&S 2010/12 Lock Down Fields for Wine and Spirit
+		If left(gs_project,3) = 'WS-'   then
+			idw_detail.SetTabOrder("req_qty", 0)
+			idw_detail.SetTabOrder("uom", 0)
+			idw_detail.object.user_field3.protect = true    
+			idw_putaway.object.po_no.protect = true    
+			idw_detail.SetTabOrder("user_field3", 0)
+			idw_putaway.SetTabOrder("po_no", 0)
+		END IF
+		
+		If left(upper(gs_project), 2) =  'WS' then
+			tab_main.tabpage_main.cb_custom1.enabled = false
+		End IF 		
+		
+
+		IF Left(gs_project,4) = "NIKE" THEN 
+			tab_main.tabpage_main.cb_custom1.enabled = false
+			
+			if idw_main.getitemnumber(1, "edi_batch_seq_no") > 0 then
+				idw_detail.object.req_qty.protect = true
+				
+				tab_main.tabpage_orderdetail.cb_insert.enabled = False
+				tab_main.tabpage_orderdetail.cb_delete.enabled = False					
+			
+				
+			else
+				idw_detail.object.req_qty.protect = false
+			end if
+			
+		END IF
+		
+		If left(gs_project,6) = 'PHYSIO' Then
+			
+			tab_main.tabpage_putaway.cb_putaway_locs.Enabled = False
+			tab_main.tabpage_putaway.cb_putaway_locs.Text = "Assign Locs..."
+			
+		End If
+
+      //  Added by Dhirendra -SIMS-55,  19/10/2022 -END 
 End Choose
 
 // 10/16 - For Kendo, Don;t allow any changes to the detail tab for Kendo regardless of order status if an electronic order
@@ -11001,6 +11213,43 @@ select count(*) into : User_field15 from Receive_Master where project_id=:gs_pro
 	end if
 end subroutine
 
+public subroutine wf_receive_order_readonly (boolean ab_read);
+if ab_read=True then
+	idw_other.object.datawindow.readonly = 'yes'
+	idw_main.object.datawindow.readonly = 'yes'
+	idw_detail.object.datawindow.readonly = 'yes'
+	idw_putaway.object.datawindow.readonly = 'yes'
+ 	tab_main.tabpage_putaway.dw_putaway_mobile.object.datawindow.readonly='yes'
+	tab_main.tabpage_main.cb_shipment.enabled=False
+	tab_main.tabpage_main.cb_confirm.enabled=False
+	tab_main.tabpage_main.cb_void.enabled=False
+	tab_main.tabpage_main.cb_backorder.enabled=False
+	tab_main.tabpage_main.cb_address.enabled=False
+	tab_main.tabpage_orderdetail.sle_verify.enabled=False
+	tab_main.tabpage_putaway.cb_generate.enabled = False
+	tab_main.tabpage_orderdetail.cb_insert.enabled = False
+	tab_main.tabpage_orderdetail.cb_delete.enabled = False	
+	tab_main.tabpage_OrderDetail.cb_IQC.Enabled = False
+	tab_main.tabpage_putaway.cb_deleterow.enabled = False	
+	tab_main.tabpage_putaway.cb_insertrow.enabled = False		
+	tab_main.tabpage_putaway.cb_copyrow.enabled = False	
+	tab_main.tabpage_putaway.cb_putaway_pallets.enabled = False  
+	tab_main.tabpage_putaway.cb_print.enabled = False
+	tab_main.tabpage_putaway.cb_putaway_pallets.enabled = False 
+	tab_main.tabpage_putaway.cb_final_put_away.enabled = False 
+	tab_main.tabpage_main.cb_confirm.enabled = False
+	tab_main.tabpage_main.cb_void.enabled = False
+	//tab_main.tabpage_other_info.enabled = False
+	//tab_main.tabpage_rma_serial.Enabled = False
+	tab_main.tabpage_rma_serial.cb_copy_row.enabled = False
+	tab_main.tabpage_rma_serial.cb_delete_row.enabled = False
+	tab_main.Tabpage_putaway.cbx_autofill.enabled = False
+	tab_main.Tabpage_putaway.cb_putaway_locs.enabled= False
+	tab_main.Tabpage_putaway.cb_print_cn.enabled= False
+
+end if
+end subroutine
+
 on w_ro.create
 int iCurrent
 call super::create
@@ -11261,19 +11510,36 @@ event ue_retrieve;call super::ue_retrieve;isle_code.TriggerEvent(Modified!)
 
 end event
 
-event ue_save;Integer li_ret,li_ret_l,li_ret_ll,li_return, i_indx
+event ue_save;Integer li_ret,li_ret_l,li_ret_ll,li_return, i_indx,li_Find
 long i,ll_totalrows, ll_no,llOwnerID, ll_Owner_Id
 long llFindRow, ll_return  // 02/21/201\1 ujh: I-135:
 String	ls_Order, lsRONO, lsOrdStat, lsOwnerName, ls_INActiveCustomerName, ls_Sub_Inventory_Type, ls_CustCode, lsSuppOrdNo
 string ls_costcenter, ls_location
 string lsFind // 02/21/2011 ujh: I-135:
-Long ll_rowCount, p,p2, ll_PutawayCount, li_count, li_ItemChecked,li_inadequate_sku_count
-string lsWarehouse 
+Long ll_rowCount, p,p2, ll_PutawayCount, li_count, li_ItemChecked,li_inadequate_sku_count,k,ll_spidR,ll_spid,ll_row_insert
+string lsWarehouse
+String ls_invoice_no,ls_User_IdW,ls_spid,ls_Edit_Mode,ls_Order_No,lsinvoice_no,ls_display_name1,ls_display_name,ls_User_Id,ls_userspid,ls_Edit_modeW
+datetime ld_entry_dateW,ld_entry_dateR
+string ls_ord_status, ls_trans_order
+long ll_find,ll_row_count, ll_trans_id
+//SIMS-55 Added by Dhirendra-start
+dwitemstatus l_status
+boolean lb_read,lb_readonly
+string ll_original_lcode,ll_modified_lcode,ls_loc
+lb_readonly=False
+long putaway_delete_row,ll_line_item_no,ll_max,ll_i, ll_method_trace_id
+datastore lds_screen_lock,lds_gr_transaction
+setnull(ll_method_trace_id)
+datetime ldtToday
+long ll_trans,liAdj
+string ls_uf6
 
+//SIMS-55 Added by Dhirendra-END 
 integer li_save_Failed
 //TimA 04/07/13 Pandora issue #560
 Long llCooCount,c
 String lsCoo
+
 //TimA 02/12/14 Added new Method Trace calls
 is_suppinvoiceno= idw_main.getitemstring(1,'supp_invoice_no')
 f_method_trace_special( gs_project,this.ClassName() + ' -ue_save','start ue_save: ',is_rono,' ',' ' ,is_suppinvoiceno) 
@@ -11287,6 +11553,43 @@ If idw_putaway.RowCount() > 0 then
 		ibFootprint = false
 	End If
 End if
+
+	// Begin  - Dinesh - 07/25/2023- SIMS-198- Google - SIMS - Read Only Access
+	If upper(gs_project) = 'PANDORA' then
+				ls_invoice_no= idw_main.GetItemString(1,'supp_invoice_no')
+				lds_screen_lock = Create datastore
+				lds_screen_lock.Dataobject = 'd_screen_lock_order_r'
+				lds_screen_lock.settrans(sqlca)
+				lds_screen_lock.retrieve(gs_System_No,'R')
+				select count(*) into : il_find_matchW from Screen_Lock with(nolock) where Order_No= :gs_System_No and Edit_Mode='W' and screen_name='Receiving Order' using sqlca;
+				select user_id,UserSPID,Edit_Mode,Entry_Date into :ls_User_IdW,:ll_spid,:ls_Edit_modeW,:ld_entry_dateW from Screen_Lock with(nolock) where Order_No= :gs_System_No and Edit_Mode='W' and screen_name='Receiving Order' using sqlca;
+				select count(*) into : il_find_matchR from Screen_Lock with(nolock) where Order_No= :gs_System_No and Edit_Mode='R' and screen_name='Receiving Order' using sqlca;
+				select user_id,UserSPID,Edit_Mode,Entry_Date,order_no into :ls_User_Id,:ll_spidR,:ls_Edit_Mode,:ld_entry_dateR,:ls_Order_No from Screen_Lock with(nolock) where Order_No= :gs_System_No and Edit_Mode='R' and userspid = :gl_userspid and screen_name='Receiving Order' using sqlca;
+				select display_name into :ls_display_name from usertable with (Nolock) where userid=:ls_User_IdW;
+
+				if  (il_find_matchW > 0 and il_find_matchR > 0) and (ls_Order_No=gs_System_No and gs_userid <> ls_User_IdW  and ll_spidR = gl_userspid ) then
+						messagebox(is_title,'User Name: ' + ls_display_name + '/Session: ' + string(ll_spid) + ' is already accessing the Order Number ' + ls_invoice_no + '.~r~n~r~nThe screen is locked and can be accessible to read mode only.Please contact your Site Manager/Supervisor to unlock the screen or wait for sweeper to run for clearing the locked order.', Stopsign! )
+						lb_readonly=True
+						wf_receive_order_readonly(lb_readonly)
+						Return -1
+					
+				elseif (il_find_matchW > 0 and  il_find_matchR > 0) and (ls_Order_No=gs_System_No and gs_userid = ls_User_IdW and ls_Edit_mode='R' and  ll_spidR = gl_userspid) then
+						messagebox(is_title,'Hey!! You have already opened another session: ' +string(ll_spid)+ ' for the same Order Number ' + ls_invoice_no + '.~r~nPlease close all your current/previous session first and then re-open the order.', Stopsign! )
+						lb_readonly=True
+						wf_receive_order_readonly(lb_readonly)
+						Return -1
+				elseif  ib_access= True and (il_find_matchW = 0 and  il_find_matchR > 0) and (ls_Order_No=gs_System_No and gs_userid = ls_User_Id and ls_Edit_mode='R' and  ll_spidR = gl_userspid) then
+						messagebox(is_title,'Hey!! You have changed this order to READ ONLY ACCESS, session: ' +string(ll_spidR)+ '. Please close all your current session and re- open the order again to make any change for this order. ', Stopsign! )
+						lb_readonly= True
+						wf_receive_order_readonly(lb_readonly)
+						Return -1
+				else
+
+					//end if
+				End if
+		End if
+		// End - Dinesh-  07/25/2023- SIMS-198- Google - SIMS - Read Only Access
+
 
 //MEA - 4/13 - OTM
 IF g.is_OTM_Enable_Ind = 'Y' AND g.isOTMSendInboundOrder = 'Y' Then
@@ -11386,13 +11689,20 @@ Else /*updating existing record*/
 	
 	If idw_main.RowCount() > 0 Then
 		If idw_main.GetItemString(1, "ord_status") <> "C" and &
-			idw_main.GetItemString(1, "ord_status") <> "Q" and /* 07/02 - PCONKL - Leave QA Hold if set */ & 
-			idw_main.GetItemString(1, "ord_status") <> "V" Then
-			If idw_putaway.RowCount() > 0 Then
+			idw_main.GetItemString(1, "ord_status") <> "Q" and  /* 07/02 - PCONKL - Leave QA Hold if set */ & 
+		    idw_main.GetItemString(1, "ord_status") <> "V" Then
+			 //SIMS-55 Added by Dhirendra - added elseif condition for Final Futaway Status -Start
+			If idw_putaway.RowCount() > 0 and idw_main.GetItemString(1, "ord_status") <> "F"  Then
 				idw_main.SetItem(1, "ord_status", "P")
-			Else
-				idw_main.SetItem(1, "ord_status", "N")			
+			elseif  idw_putaway.RowCount() > 0 and idw_main.GetItemString(1, "ord_status") = "F"  Then
+				idw_main.SetItem(1, "ord_status", "F")
+			elseif  idw_putaway.RowCount() = 0 and idw_main.GetItemString(1, "ord_status") = "F"  Then
+				idw_main.SetItem(1, "ord_status", "N")
+			else
+				idw_main.SetItem(1, "ord_status", "N")
+				
 			End If
+			 //SIMS-55 Added by Dhirendra - added elseif condition for Final Futaway Status -END
 		End If
 		This.Trigger event ue_refresh() 
 	End If
@@ -11542,6 +11852,11 @@ select Inbound_ord_Ind into :is_Inbound_ord_Ind from Warehouse where wh_code=:ls
 END IF
 //2019/03 - TAM S30669 Are putaway attributes match phyical stock - END
 
+//Begin - Dinesh - 08/09/2023- SIMS-198- Google read only 
+if gs_project='PANDORA' and lb_readonly = True then
+		wf_receive_order_readonly(lb_readonly)
+end if
+//End - Dinesh - 08/09/2023- SIMS-198- Google read only 
 // Updating the Datawindow
 
 Execute Immediate "Begin Transaction" using SQLCA; /* 11/04 - PCONKL - Auto Commit Turned on to eliminate DB locks*/
@@ -11564,7 +11879,25 @@ If li_ret = 1  Then li_ret = idw_detail.Update()
 If Upper(gs_project) = 'PULSE' THEN
 	 SQLCA.DBParm = "disablebind =0"
 End If
-
+//SIMS-55 Added by Dhirendra -Start
+If idw_putaway.RowCount() > 0 and gs_project = 'PANDORA' Then
+	 FOR ll_i = 1 TO idw_putaway.rowcount() 
+		l_status = idw_putaway.GetItemStatus(ll_i, "l_code", Primary!)
+		IF  l_Status = DataModified! Then	
+			ids_trace_loc_changel.Retrieve(gs_project, idw_main.GetItemString(1, "wh_code"),idw_putaway.getItemString(ll_i,"sku"),idw_putaway.GetItemNumber(ll_i,"owner_id"),idw_putaway.GetItemString(ll_i,"inventory_type"), idw_putaway.GetItemString(ll_i,"po_no"))
+			IF  ids_trace_loc_changel.rowcount() >0 then
+				 ls_loc = idw_putaway.GetITemString(ll_i,"l_code")
+				li_Find = ids_trace_loc_changel.Find("content_l_code= '" + ls_loc + "'",  1, ids_trace_loc_changel.RowCount())
+				IF li_Find = 0 then
+					ll_original_lcode=idw_putaway.getitemstring(ll_i,'l_code',Primary!,false) 
+					ll_modified_lcode=idw_putaway.getitemstring(ll_i,'l_code',Primary!,true) 
+					f_method_trace( ll_method_trace_id, this.ClassName(), 'Location Change from '+ll_original_lcode+ ' to '+ll_modified_lcode+' for System No : '+ (idw_Main.GetITemString(1,'RO_NO')) )
+				END IF 
+			End If
+		END IF 
+	NEXT
+end if 
+//SIMS-55 Added by Dhirendra-END
 //cawikholm 07/26/11 Added check for SupportUnicode set disablebind so Chinese characters can be saved.
 If g.ibSupportUnicode = TRUE THEN
 	 SQLCA.DBParm = "disablebind =0"
@@ -11614,6 +11947,38 @@ if li_ret = 1 then li_ret = idw_content.Update()
 If li_ret = 1 then
 	f_method_trace_special( gs_project,this.ClassName() + ' -ue_save','end - update content datawindow ',is_rono,' ',' ' ,is_suppinvoiceno) //08-Feb-2013 : Madhu added
 End if
+// Begin 10/18/2024 - Dinesh - SIMS-572- Google - Completed Inbound orders and GR transactions not sent 
+if idw_main.rowcount() > 0 then
+	ldtToday = f_getLocalWorldTime( idw_main.object.wh_code[1] ) 
+else
+	ldtToday = f_getLocalWorldTime( gs_default_wh  ) 
+end if
+
+ls_uf6 = idw_main.GetItemString( 1,"user_Field6")
+select count(*) into :liAdj from lookup_table with(nolock) where code_type='ORDER_CONFIRM_ADJ' and code_id=:ls_uf6;
+	
+	ls_ord_status=idw_main.GetItemString(1,'ord_status')
+	
+	select count(*) into :ll_trans from batch_transaction where trans_order_id= :is_rono and trans_type='GR' using sqlca;
+	
+	IF  li_ret = 1 and gs_Project = 'PANDORA'  and ls_ord_status='C'  and ll_trans < 1 then
+		
+		 if ib_adj= false and liAdj > 0 then
+			Execute Immediate "Begin Transaction" using SQLCA;
+				Insert Into batch_Transaction (project_ID, Trans_Type, Trans_Order_ID, Trans_Status, Trans_Create_Date, Trans_Parm)
+				Values(:gs_Project, 'MM', :lsRONO,'N', :ldtToday, '');
+			Execute Immediate "COMMIT" using SQLCA;
+		elseif  ib_adj= True then
+			Execute Immediate "Begin Transaction" using SQLCA;
+				Insert Into batch_Transaction (project_ID, Trans_Type, Trans_Order_ID, Trans_Status, Trans_Create_Date, Trans_Parm)
+				Values(:gs_Project, 'GR', :lsRONO,'N', :ldtToday, '');
+			Execute Immediate "COMMIT" using SQLCA;
+		end if
+		
+		//ib_adj= False
+				
+		End if
+// End 10/18/2024 - Dinesh - SIMS-572- Google - Completed Inbound orders and GR transactions not sent 	
 
 //if li_ret = 1 then li_ret = idw_rma_serial.Update() /* 05/05 - PCONKL */  GailM 9/17/2019 Replace with call to function.  DE11788
 if li_ret = 1 then 
@@ -11627,8 +11992,14 @@ if li_ret = 1 then
 			f_method_trace_special( gs_project,this.ClassName() + ' -ue_save','Save ue_save ' + "Unable to update Receive Putaway Serial record.! ",lsRONO,' ',' ',is_suppinvoiceno ) 
 		End If
 	Else
-		idw_rma_serial.Reset()
-		idw_rma_serial.Retrieve(is_rono, gs_project)
+		if gs_project='GEISTLICH' then // SIMS-66 dinesh - 08/19/2022 
+			
+			idw_rma_serial.Reset() // SIMS-66 dinesh - 08/19/2022 
+			//idw_rma_serial.Retrieve(is_rono, gs_project)  // SIMS-66 - dinesh - 08/19/2022
+		else
+			idw_rma_serial.Reset()
+			idw_rma_serial.Retrieve(is_rono, gs_project)  
+		end if
 		f_method_trace_special( gs_project,this.ClassName() + ' -ue_save','Save ue_save ' + "Receive Putaway Serial record saved.! ",lsRONO,' ',' ',is_suppinvoiceno ) 
 	End If
 End If
@@ -11643,7 +12014,22 @@ If idw_main.RowCount() > 0 Then
 		if li_ret = 1 then 	li_ret = idsmarladjustment.update()
 	end if
 End If
+//SIMS-55 Added by Dhirendra-Start
+ IF li_ret  = 1 and ib_puaway_gen = TRUE then
+	f_method_trace( ll_method_trace_id, this.ClassName(), 'Generate Putaway Row of System No : '+ lsRONO)
+	ib_puaway_gen= FALSE
+end if
 
+IF li_ret  = 1 and ib_delete_putawayrow = TRUE THEN
+	IF idsputawaytracelog.rowcount() > 0 then  
+		for putaway_delete_row = 1 to idsputawaytracelog.rowcount()
+			ll_line_item_no =  idsputawaytracelog.getitemnumber(1,'line_no')
+			f_method_trace( ll_method_trace_id, this.ClassName(), 'Delete Putaway Row -'+String(ll_line_item_no)+' for System No : '+ lsRONO )
+		next
+			ib_delete_putawayrow= FALSE
+		end if 
+	end if  
+	//SIMS-55 Added by Dhirendra-END IF 	
 IF (li_ret = 1) THEN
 	Execute Immediate "COMMIT" using SQLCA;
 	IF Sqlca.Sqlcode = 0 THEN
@@ -11655,7 +12041,6 @@ IF (li_ret = 1) THEN
 			SetMicroHelp("Record Saved!")
 		End If
 	//	Return 0
-	
 	
 	//OTM - MEA - 4/12
 
@@ -11976,7 +12361,7 @@ end if
 
 end event
 
-event ue_postopen;DatawindowChild	ldwc, ldwc2,ldwc_inv
+event ue_postopen;datawindowChild	ldwc, ldwc2,ldwc_inv
 String				lsFilter
 int liResult
 long llCount
@@ -12053,6 +12438,8 @@ end if
 	idsItemMaster = f_datastoreFactory( "d_3com_ro_item_master_marl" )
 	idsMarlAdjustment = f_datastoreFactory( "d_adjustment_sweeper" ) // copy of d_adjustment used in sweeper
 	idsRLScan = f_datastoreFactory( "d_3com_rl_scan_ext" )
+	ids_trace_loc_changel = f_datastoreFactory( "d_putaway_recommend_pandora_gpn" ) //SIMS-55 Added by Dhirendra
+	idsputawaytracelog = f_datastoreFactory( "d_gen_del_putaway_trace" )// SIMS-55 Added by Dhirendra
 //end if
 
 // Storing into variables
@@ -12341,7 +12728,7 @@ liFindRow = 0
 for liIdx = 1 to 8
 
 	liFindRow = g.ids_columnlabel.Find(" datawindows = 'd_ro_search_con' and column_name= 'search_field"+string(liIdx)+"' and ((Not IsNull(Column_Name_Value)) AND trim(Column_Name_Value) <> '')", liFindRow, g.ids_columnlabel.RowCount())
-
+  
 	if liFindRow > 0 then
 		
 		idw_condition.Modify( "search_field"+string(liIdx)+"_t.text='"+g.ids_columnlabel.GetItemString(liFindRow,"Column_Label" )+":'" )
@@ -12374,6 +12761,10 @@ if gs_project = 'PANDORA' then
 	idw_search.object.receive_master_client_cust_po_nbr_t.visible = true
 	idw_search.object.receive_master_vendor_invoice_nbr.visible = true
 	idw_search.object.receive_master_vendor_invoice_nbr_t.visible = true
+	idw_main.Modify("arrival_date.EditMask.DDCalendar='NO'") //SIMS-55 Added By Dhirendra
+	idw_main.SetValue("ord_status", 6, "Final Putaway~tF")//SIMS-55 Added By Dhirendra
+	idw_search.SetValue("ord_status", 6, "Final Putaway~tF")//SIMS-55 Added By Dhirendra
+	idw_condition.SetValue("ord_status", 6, "Final Putaway~tF")//SIMS-55 Added By Dhirendra
 	
 end if
 
@@ -12460,12 +12851,21 @@ If isValid(w_diebold_Container_Generate) Then Close(w_diebold_Container_Generate
 If gs_ActiveWindow = 'IN' then
 	gs_ActiveWindow = ''
 End if
+
+//Begin - dinesh - 06/15/2023- SIMS-198- Google Read only access 
+if gs_project = 'PANDORA' then
+	delete from Screen_Lock where user_id=:gs_userid  and screen_name='Receiving Order' and  userspid=:gl_userspid using sqlca; // Dinesh - 06092023 - SIMS-198- Screen Lock 
+commit;
+end if
+//End - dinesh - 06/15/2023 - SIMS-198- Google Read only access
 end event
 
 event ue_unlock;call super::ue_unlock;
 IF gs_project = 'PANDORA' THEN
 	//TimA 06/10/13 Added this method trace to see who is pressing F10
-	f_method_trace_special( gs_project, this.ClassName() , 'F10 Unlock pressed for Inbound order: ' ,is_rono, '','',is_suppinvoiceno) 		
+	f_method_trace_special( gs_project, this.ClassName() , 'F10 Unlock pressed for Inbound order: ' ,is_rono, '','',is_suppinvoiceno)
+	idw_main.settaborder('arrival_date',10)//SIMS-55 Added by Dhirendra
+	f_setfocus(idw_main, 1, "Arrival_Date")//SIMS-55 Added by Dhirendra
 
 	wf_lock(false)
 
@@ -12554,10 +12954,10 @@ gs_System_No = ''
 end event
 
 type tab_main from w_std_master_detail`tab_main within w_ro
-integer x = 23
+integer x = 0
 integer y = 0
-integer width = 3895
-integer height = 1980
+integer width = 3931
+integer height = 2096
 integer textsize = -9
 tabpage_other_info tabpage_other_info
 tabpage_orderdetail tabpage_orderdetail
@@ -12594,8 +12994,13 @@ end on
 event tab_main::selectionchanged;// 10/00 PCONKL - set sort if Search Tab
 
 // 04/01 PCONKL - Set help keyword
-		
+String ls_Edit_ModeR,ls_User_IdR,ls_Order_NoR,ls_display_name1,ls_display_name,ls_Order,lsinvoice_no,ls_userspid,ls_User_IdW // Dinesh - 06/19/2023- SIMS-198- Google- Read only 
+datastore lds_screen_lock,lds_screen_lockw
+string ls_Edit_ModeW
+long k,ll_userspidr
+Boolean lb_read
 IlHelpTopicID = 0
+//Boolean lb_readonly
 			
 Choose Case NewIndex
 	Case 1 /*order Info*/
@@ -12603,6 +13008,70 @@ Choose Case NewIndex
 		wf_check_menu(False,'sort')
 		wf_check_menu(False,'find')
 		idw_current = idw_main
+		// Begin  - Dinesh - 07/25/2023- SIMS-198- Google - SIMS - Read Only Access
+//		If gs_project = 'PANDORA' then
+//				//lsinvoice_no = idw_main.GetItemString(1,'supp_invoice_no')
+//				//is_bol = trim(tab_main.tabpage_main.sle_orderno.Text)
+//				lsinvoice_no= is_order_new
+//				// Begin  - Dinesh - 06/15/2023- SIMS-198- Google - SIMS - Read Only Access
+//				//lsinvoice_no = idw_main.GetItemString(1,'invoice_no')
+//				lds_screen_lock = Create datastore
+//				lds_screen_lock.Dataobject = 'd_screen_lock_order_r'
+//				lds_screen_lock.settrans(sqlca)
+//				lds_screen_lock.retrieve(gs_System_No,'R')
+//				
+//				lds_screen_lockw = Create datastore
+//				lds_screen_lockw.Dataobject = 'd_screen_lock_order_w'
+//				lds_screen_lockw.settrans(sqlca)
+//				lds_screen_lockw.retrieve(gs_System_No,'W')
+//				
+//				ls_Edit_ModeW = lds_screen_lockw.getitemstring(k,'edit_Mode')
+//			
+//				
+//				select count(*) into : il_find_matchW from Screen_Lock with(nolock) where Order_No= :gs_System_No and Edit_Mode='W' and screen_name='Receiving Order' using sqlca;
+//				select user_id,UserSPID into :ls_User_IdW,:ls_userspid from Screen_Lock with(nolock) where Order_No= :gs_System_No and Edit_Mode='W' and screen_name='Receiving Order' using sqlca;
+//				for k= 1 to lds_screen_lock.rowcount()
+//					 ls_Edit_ModeR = lds_screen_lock.getitemstring(k,'edit_Mode')
+//					 ls_User_IdR = lds_screen_lock.getitemstring(k,'user_Id')
+//					 ls_Order_NoR =lds_screen_lock.getitemstring(k,'order_No')
+//					 ll_userspidr =lds_screen_lock.getitemnumber(k,'userspid')
+//					 if gs_System_No = ls_Order_NoR and ls_userspid = string(gl_userspid) then 
+//							select display_name into :ls_display_name1 from usertable with (Nolock) where userid=:ls_User_IdR;
+//							 ls_display_name= ls_display_name + ls_display_name1+ '/Session: ' + string(ll_userspidr) + " ,"
+//							 if string(gl_userspid) = ls_userspid then
+//							 	lb_read= True
+//							else
+//								lb_read= False
+//							end if
+//					end if
+//				next
+//			
+//				if lb_read= True and  lds_screen_lock.rowcount() > 0 then
+//			
+//							if   il_find_matchW > 0 and ls_Order_NoR=gs_System_No and ll_userspidr <> gl_userspid  then
+//								messagebox(is_title,'User Name: ' + ls_display_name + ' is/are also accessing the same Order Number ' + lsinvoice_no + '.~r~nThe screen is locked by you and others can only access this order in read mode.Please update, save and close this order once you complete.', Stopsign! )
+//								//lb_readonly=True
+//
+//							end if	
+//						end if
+//				if lb_read= False and  lds_screen_lock.rowcount() > 0 then
+//							if  il_find_matchW > 0 and ls_Order_NoR=gs_System_No  and gs_userid = ls_User_IdW and ls_userspid <> string(gl_userspid) and gs_System_No <> '' then
+//								messagebox(is_title,'Hey!! You have already opened another session: ' +string(ls_userspid)+ ' for the same Order Number ' + lsinvoice_no + '.~r~nPlease close all your current/previous session first and then re-open the order.', Stopsign! )
+//								//lb_readonly=True
+//							end if
+//							
+//							if  il_find_matchW > 0 and ls_Order_NoR=gs_System_No  and gs_userid <> ls_User_IdW and ls_userspid <> string(gl_userspid) and gs_System_No <> '' then						
+//								messagebox(is_title,'User Name: ' + is_display_name + ' /Session:' + ls_userspid + '  is already accessing the Order Number ' + lsinvoice_no + '.~r~nThe screen is locked and can be accessible to read mode only.Please contact your Site Manager/Supervisor to unlock the screen or wait for sweeper run to clear the lock automatically.', Stopsign! )
+//								//lb_readonly=True
+//							end if
+//					end if
+//				
+//			End if
+//		
+//		// End  - Dinesh - 06/15/2023- SIMS-198- Google - SIMS - Read Only Access
+//		
+//		// End Dinesh S51817 - 01/22/21 - Google - SIMS - SAP Conversion - GUI
+//
 	Case 2 /*Other Info*/
 		//IlHelpTopicID = 547
 		wf_check_menu(TRUE,'sort') 
@@ -12686,9 +13155,10 @@ end event
 
 type tabpage_main from w_std_master_detail`tabpage_main within tab_main
 integer y = 108
-integer width = 3858
-integer height = 1856
+integer width = 3895
+integer height = 1972
 string text = " Order Information "
+cb_readonly cb_readonly
 cb_custom2 cb_custom2
 cb_custom1 cb_custom1
 cb_backorder cb_backorder
@@ -12704,6 +13174,7 @@ st_ro_order_no st_ro_order_no
 end type
 
 on tabpage_main.create
+this.cb_readonly=create cb_readonly
 this.cb_custom2=create cb_custom2
 this.cb_custom1=create cb_custom1
 this.cb_backorder=create cb_backorder
@@ -12719,22 +13190,24 @@ this.st_ro_order_no=create st_ro_order_no
 int iCurrent
 call super::create
 iCurrent=UpperBound(this.Control)
-this.Control[iCurrent+1]=this.cb_custom2
-this.Control[iCurrent+2]=this.cb_custom1
-this.Control[iCurrent+3]=this.cb_backorder
-this.Control[iCurrent+4]=this.cb_address
-this.Control[iCurrent+5]=this.cb_shipment
-this.Control[iCurrent+6]=this.cb_confirm
-this.Control[iCurrent+7]=this.cb_void
-this.Control[iCurrent+8]=this.sle_orderno
-this.Control[iCurrent+9]=this.sle_order2
-this.Control[iCurrent+10]=this.cb_open_do
-this.Control[iCurrent+11]=this.dw_main
-this.Control[iCurrent+12]=this.st_ro_order_no
+this.Control[iCurrent+1]=this.cb_readonly
+this.Control[iCurrent+2]=this.cb_custom2
+this.Control[iCurrent+3]=this.cb_custom1
+this.Control[iCurrent+4]=this.cb_backorder
+this.Control[iCurrent+5]=this.cb_address
+this.Control[iCurrent+6]=this.cb_shipment
+this.Control[iCurrent+7]=this.cb_confirm
+this.Control[iCurrent+8]=this.cb_void
+this.Control[iCurrent+9]=this.sle_orderno
+this.Control[iCurrent+10]=this.sle_order2
+this.Control[iCurrent+11]=this.cb_open_do
+this.Control[iCurrent+12]=this.dw_main
+this.Control[iCurrent+13]=this.st_ro_order_no
 end on
 
 on tabpage_main.destroy
 call super::destroy
+destroy(this.cb_readonly)
 destroy(this.cb_custom2)
 destroy(this.cb_custom1)
 destroy(this.cb_backorder)
@@ -12749,10 +13222,29 @@ destroy(this.dw_main)
 destroy(this.st_ro_order_no)
 end on
 
+event tabpage_main::constructor;call super::constructor;// Begin- Dinesh - 11/06/2023 - SIMS-328- Screen Lock  read only part 2 
+if gs_project= 'PANDORA' then
+	
+	tab_main.tabpage_main.cb_readonly.visible = True
+	
+		if gs_system_no <> '' or not isnull(gs_system_no) then
+			tab_main.tabpage_main.cb_readonly.enabled = False
+		else
+			tab_main.tabpage_main.cb_readonly.enabled = True
+		end if
+
+else
+	tab_main.tabpage_main.cb_readonly.visible = False
+end if
+
+
+// End- Dinesh - 11/06/2023 - SIMS-328- Screen Lock  read only part 2 
+end event
+
 type tabpage_search from w_std_master_detail`tabpage_search within tab_main
 integer y = 108
-integer width = 3858
-integer height = 1856
+integer width = 3895
+integer height = 1972
 cb_ro_search cb_ro_search
 cb_ro_clear cb_ro_clear
 dw_search dw_search
@@ -12784,6 +13276,35 @@ destroy(this.dw_search)
 destroy(this.uo_mobile_status)
 destroy(this.dw_condition)
 end on
+
+type cb_readonly from commandbutton within tabpage_main
+integer x = 2574
+integer y = 1616
+integer width = 526
+integer height = 96
+integer taborder = 100
+boolean bringtotop = true
+integer textsize = -9
+integer weight = 700
+fontcharset fontcharset = ansi!
+fontpitch fontpitch = variable!
+fontfamily fontfamily = swiss!
+string facename = "Arial"
+string text = "Read Only Access"
+end type
+
+event clicked;// Begin - Dinesh - 11/06/2023 - SIMS-328- Screen Lock  read only part 2 
+boolean lb_readonly
+lb_readonly= True
+If MessageBox( is_title, "Are you sure you want to change this order to read only?", Question!, YesNo!, 1 ) = 1 Then
+	update Screen_Lock set edit_mode='R' where  user_id=:gs_userid  and screen_name='Receiving Order' and  userspid=:gl_userspid using sqlca;
+	tab_main.tabpage_main.cb_readonly.enabled = False
+	wf_receive_order_readonly(lb_readonly)
+	ib_access= True
+	
+End If
+// End - Dinesh - 11/06/2023 - SIMS-328- Screen Lock  read only part 2 
+end event
 
 type cb_custom2 from commandbutton within tabpage_main
 boolean visible = false
@@ -12859,7 +13380,7 @@ End Choose
 end event
 
 type cb_backorder from commandbutton within tabpage_main
-integer x = 2341
+integer x = 1975
 integer y = 1616
 integer width = 567
 integer height = 96
@@ -12970,7 +13491,7 @@ End If
 end event
 
 type cb_confirm from commandbutton within tabpage_main
-integer x = 1330
+integer x = 1225
 integer y = 1616
 integer width = 334
 integer height = 96
@@ -12989,8 +13510,16 @@ event clicked;//MEA - 04/12 Added to check credentials
 string lsWarehouse
 if f_check_access( is_process, "C")  = 0 Then Return
 
-
+IF Upper(gs_project)  ='PANDORA' THEN
+	IF idw_main.getitemstring(1,'ord_status') ='F' THEN 
 iw_window.triggerEvent("ue_confirm")
+ELSE 
+	Messagebox('Info', 'Order is not in FInal Put Away Status , so could not be confirm the order')
+	RETURN 
+END IF 
+ELSE 
+	iw_window.triggerEvent("ue_confirm")
+END IF 
 
 // Begin - 03/01/2021 - Dinesh - S54346 - Google - SIMS -  Footprints Inbound Warning Enhancement
 lsWarehouse = idw_main.GetItemString(1,"wh_code")
@@ -13025,7 +13554,7 @@ g.of_check_label_button(this)
 end event
 
 type cb_void from commandbutton within tabpage_main
-integer x = 1847
+integer x = 1623
 integer y = 1616
 integer width = 306
 integer height = 96
@@ -13138,7 +13667,7 @@ integer width = 992
 integer height = 92
 integer taborder = 10
 integer textsize = -10
-integer weight = 400
+integer weight = 700
 fontcharset fontcharset = ansi!
 fontpitch fontpitch = variable!
 fontfamily fontfamily = swiss!
@@ -13149,12 +13678,21 @@ integer limit = 50
 borderstyle borderstyle = stylelowered!
 end type
 
-event modified;String ls_bol,	lsOrder, lsModify, lsRC, ls_wh_code, ls_ordertype, ls_OrderNbr, ls_WghDim, ls_missing_dims
-String ls_wh_type // TAM W&S
-Long	llCount, ll_rownum, ll_numrows, ll_edibatchseqno
+event modified;String ls_bol,	lsOrder, lsModify, lsRC, ls_wh_code, ls_ordertype, ls_OrderNbr, ls_WghDim, ls_missing_dims,ls_order_read,ls_invoice_no,ls_Edit_ModeR,ls_User_IdR,ls_Order_NoR
+String ls_wh_type // TAM W&S,
+String ls_User_Id,ls_Order_No,ls_screen_name,ls_Edit_Mode,ls_Edit_ModeW,ls_User_IdW,ls_Order_NoW,lsFind,ls_edit_moderead
+Long	llCount, ll_rownum, ll_numrows, ll_edibatchseqno,j,ll_spid,k,ll_userspid,ll_userspidR,llFindRow
 DatawindowChild ldwc
 boolean lb_multi_ord_search
 String ls_User_Field13,ls_User_Field15
+datetime  ldt_arrival_dt // Added by Dhirendra SIMS-55
+setnull(ldt_arrival_dt) // Added by Dhirendra SIMS-55
+Datastore lds_screen_lockW,lds_screen_lockR
+Datetime ldt_user_login_Date,ldt_Entry_Date,ldt_Out_Date
+boolean lb_readonly=False,lb_selfuser=False
+ String  ls_projectcode
+ Long   i, ll_EDIBatch, llfindrow1, llcount1
+ int      rowcount1
 //Nxjain Trim the Bol value and udpate the where clause with like function. -20160211
 
 //Set bol = current text
@@ -13200,10 +13738,11 @@ select count(*) into :ll_find from Receive_Master where Supp_Invoice_No= :ls_bol
 	lb_multi_ord_search =true
 // Begin-  Dinesh -01/22/2021 - S52817 - Google - SIMS - SAP Conversion - GUI
   Elseif not isnull(ls_bol) and ll_find=1 and  Upper(gs_project) ="PANDORA" THEN 
+	
 	Select User_Field13,User_Field15 into :ls_User_Field13,:ls_User_Field15 from Receive_Master  with(nolock)
 	where Supp_Invoice_No=:ls_bol and project_id = :gs_project;
 	
-		if (not ISNULL(ls_User_Field13) or ls_User_Field13<> '') or (not ISNULL(ls_User_Field15) or ls_User_Field15<>'') then
+		IF (not ISNULL(ls_User_Field13) or ls_User_Field13<> '') or (not ISNULL(ls_User_Field15) or ls_User_Field15<>'') THEN
 			lb_multi_ord_search =True
 		else
 			Select Count(*) into :llCount
@@ -13287,6 +13826,283 @@ idsMarlAdjustment.reset()
 long ll_result = 0
 //TimA 08/13/15 added gs_system_No and method trace call
 gs_System_No = is_rono
+
+//Begin - Dinesh - 07/25/2023 - SIMS-198 - Google - SIMS - Google - SIMS - Read Only Access 
+if gs_project='PANDORA' then
+	
+	ls_order_read=ls_bol
+		//Begin - Dinesh - 11/06/2023 - SIMS-328 - Google - SIMS - Google - SIMS - Read Only Access part 2
+			if gs_System_No <> '' or not isnull(gs_System_No) then
+				tab_main.tabpage_main.cb_readonly.enabled = True
+			else
+				tab_main.tabpage_main.cb_readonly.enabled = False
+			end if
+		//End - Dinesh - 11/06/2023 - SIMS-328 - Google - SIMS - Google - SIMS - Read Only Access part 2
+		SELECT Supp_Invoice_No INTO :ls_invoice_no FROM Receive_Master WHERE ro_no = :ls_order_read   and project_id = :gs_project;
+		if ls_invoice_no <> "" and not isnull(ls_invoice_no) then
+			ls_bol=ls_invoice_no
+			is_order_new= ls_bol
+		else
+			is_order_new=ls_order_read
+			
+		end if
+	
+			lds_screen_lockW = Create datastore
+			lds_screen_lockW.Dataobject = 'd_screen_lock_order_w'
+			lds_screen_lockW.settrans(sqlca)
+			lds_screen_lockW.retrieve(gs_System_No,'W')
+			
+			//gl_userspid
+			
+			//select top 1 Login_Time into :ldt_user_login_Date  from User_Login_History where UserId=:gs_userid order by Login_Time desc;
+			//select UserSPID into :gl_userspid  from User_Login_History where UserId=:gs_userid and Login_Time=:ldt_user_login_Date;
+			select count(*) into : il_find_matchW from Screen_Lock with(nolock) where Order_No= :gs_System_No and Edit_Mode='W' and screen_name='Receiving Order'  using sqlca;
+			
+			lds_screen_lockR = Create datastore
+			lds_screen_lockR.Dataobject = 'd_screen_lock_order_r'
+			lds_screen_lockR.settrans(sqlca)
+			lds_screen_lockR.retrieve(gs_System_No,'R')
+		
+			for j= 1 to lds_screen_lockR.rowcount()
+					ls_Edit_ModeR = lds_screen_lockR.getitemstring(j,'edit_Mode')
+				 	ls_User_IdR = lds_screen_lockR.getitemstring(j,'user_Id')
+					ls_Order_NoR =lds_screen_lockR.getitemstring(j,'order_No')
+			NEXT
+			
+			select count(*) into : il_find_matchR from Screen_Lock with(nolock) where Order_No= :gs_System_No and Edit_Mode='R' and screen_name='Receiving Order' using sqlca;
+			
+			if (il_find_matchR > 0 and il_find_matchW=0) then
+				select User_Id,Order_No,screen_name,Entry_Date,Out_Date,Edit_Mode,UserSPID into :ls_User_Id,:gs_System_No,:ls_screen_name,:ldt_Entry_Date,:ldt_Out_Date,:ls_Edit_Mode,:ll_spid from Screen_Lock with(nolock) where Order_No= :gs_System_No and Edit_Mode='R' and screen_name='Receiving Order' using sqlca;
+			end if
+			if (il_find_matchW > 0 and il_find_matchR= 0) then
+				select User_Id,Order_No,screen_name,Entry_Date,Out_Date,Edit_Mode,UserSPID into :ls_User_Id,:gs_System_No,:ls_screen_name,:ldt_Entry_Date,:ldt_Out_Date,:ls_Edit_Mode,:ll_spid from Screen_Lock with(nolock) where Order_No= :gs_System_No and Edit_Mode='W' and screen_name='Receiving Order' using sqlca;	
+			end if
+			if (il_find_matchR > 0 and  il_find_matchW > 0) then
+				select User_Id,Order_No,screen_name,Entry_Date,Out_Date,Edit_Mode,UserSPID into :ls_User_Id,:gs_System_No,:ls_screen_name,:ldt_Entry_Date,:ldt_Out_Date,:ls_Edit_Mode,:ll_spid from Screen_Lock with(nolock) where Order_No= :gs_System_No and Edit_Mode='W' and screen_name='Receiving Order' using sqlca;
+			end if
+			
+			lds_screen_lockW.retrieve(gs_System_No,'W')
+				for k= 1 to lds_screen_lockW.rowcount()
+					 ls_Edit_ModeW = lds_screen_lockW.getitemstring(k,'edit_Mode')
+					 ls_User_IdW = lds_screen_lockW.getitemstring(k,'user_Id')
+					 ls_Order_NoW =lds_screen_lockW.getitemstring(k,'order_No')
+					 ll_userspid =lds_screen_lockW.getitemnumber(k,'userspid')
+				next
+				
+					select Display_Name into :is_display_name from UserTable with(nolock) where UserId=:ls_User_IdW;
+				
+		//	if  ib_search= True then
+				if  gs_System_No = ls_Order_NoW and gs_userid <> ls_User_IdW and gs_System_No <> ''  then
+						messagebox(is_title,'User Name: ' + is_display_name + '/Session: ' + string(ll_userspid) +  ' is already accessing the Order Number ' + is_order_new + '.~r~nThe screen is locked and can be accessible to read mode only.Please contact your Site Manager/Supervisor to unlock the screen or wait for sweeper run to clear the lock automatically.', Stopsign! )
+						lb_readonly=True
+						lb_selfuser= False
+				
+				elseif gs_System_No=ls_Order_NoW and gs_userid = ls_User_IdW and ll_spid <>gl_userspid and gs_System_No <> '' then
+						
+						messagebox(is_title,'Hey!! You have already opened another session: ' +string(ll_userspid)+ ' for~r~nthe same Order Number ' + is_order_new + '.~r~n~r~nPlease close all your current/previous session first and then re-open the order.', Stopsign! )
+						lb_readonly=True
+						lb_selfuser= False
+				
+				elseif gs_System_No=ls_Order_NoW and gs_userid = ls_User_IdW and  ll_spid = gl_userspid and gs_System_No <> '' then
+						//messagebox(is_title,'Hey!! You have already opened the same order in the same session with SPID ID: ' +string(ll_userspid)+ ' for~r for the Order number ' + ls_order + '.~r~n~r~n', Stopsign! )
+						lb_readonly=False
+						lb_selfuser= True	
+			
+				end if
+			//end if
+			
+		if lb_selfuser= False  then
+			
+				if (il_find_matchW =  0 and il_find_matchR = 0 )  then
+					delete from screen_lock where User_Id=:gs_userid and screen_name='Receiving Order' and UserSPID=:gl_userspid using sqlca; // Dinesh - 09/20/2023- Read only
+					insert into Screen_Lock (User_Id,Order_No,Screen_Name,Entry_Date,Out_Date,Edit_Mode,UserSPID) values(:gs_userid,:gs_System_No,:is_title,getdate(),NULL,'W',:gl_userspid) using sqlca;
+					commit;
+					lb_readonly=false
+					
+				elseif (il_find_matchW = 0 and il_find_matchR = 0) and (gs_userid= ls_User_IdW and gs_System_No = ls_Order_NoW and ll_spid <> gl_userspid) then
+						insert into Screen_Lock (User_Id,Order_No,Screen_Name,Entry_Date,Out_Date,Edit_Mode,UserSPID) values(:gs_userid,:gs_System_No,:is_title,getdate(),NULL,'W',:gl_userspid) using sqlca;
+						commit;
+						lb_readonly=false
+				elseif (il_find_matchW > 0 and il_find_matchR > 0) and (gs_userid= ls_User_IdW and gs_System_No = ls_Order_NoW and ll_spid <> gl_userspid) then
+						delete from screen_lock where User_Id=:gs_userid and screen_name='Receiving Order' and UserSPID=:gl_userspid and Edit_Mode='R' using sqlca; //09/21/2023- Dinesh - Read only
+						insert into Screen_Lock (User_Id,Order_No,Screen_Name,Entry_Date,Out_Date,Edit_Mode,UserSPID) values(:gs_userid,:gs_System_No,:is_title,getdate(),NULL,'R',:gl_userspid) using sqlca;
+						commit;
+						lb_readonly=true
+				elseif (il_find_matchW > 0 and il_find_matchR = 0) and (gs_userid= ls_User_IdW and gs_System_No = ls_Order_NoW and ll_spid <> gl_userspid) then
+						delete from screen_lock where User_Id=:gs_userid and screen_name='Receiving Order' and UserSPID=:gl_userspid using sqlca; //09/21/2023- Dinesh - Read only
+						insert into Screen_Lock (User_Id,Order_No,Screen_Name,Entry_Date,Out_Date,Edit_Mode,UserSPID) values(:gs_userid,:gs_System_No,:is_title,getdate(),NULL,'R',:gl_userspid) using sqlca;
+						commit;
+						lb_readonly=True
+				elseif (il_find_matchW = 0 and il_find_matchR > 0) and (gs_userid= ls_User_IdW and gs_System_No = ls_Order_NoW and ll_spid <> gl_userspid ) then
+						delete from screen_lock where User_Id=:gs_userid and screen_name='Receiving Order' and UserSPID=:gl_userspid using sqlca; //09/21/2023- Dinesh - Read only
+						insert into Screen_Lock (User_Id,Order_No,Screen_Name,Entry_Date,Out_Date,Edit_Mode,UserSPID) values(:gs_userid,:gs_System_No,:is_title,getdate(),NULL,'W',:gl_userspid) using sqlca;
+						commit;
+						lb_readonly=false
+				//Begin - Dinesh - 09/20/2023- SIMS-328-  Google  - Read Only Access Part 2
+				elseif (il_find_matchW = 0 and il_find_matchR = 0) and (gs_userid= ls_User_IdW and gs_System_No <> ls_Order_NoW and ll_spid <> gl_userspid) then
+						insert into Screen_Lock (User_Id,Order_No,Screen_Name,Entry_Date,Out_Date,Edit_Mode,UserSPID) values(:gs_userid,:gs_System_No,:is_title,getdate(),NULL,'W',:gl_userspid) using sqlca;
+						commit;
+						lb_readonly=false
+				elseif (il_find_matchW > 0 and il_find_matchR > 0) and (gs_userid= ls_User_IdW and gs_System_No <> ls_Order_NoW and ll_spid <> gl_userspid) then
+						delete from screen_lock where User_Id=:gs_userid and screen_name='Receiving Order' and Edit_Mode='R' and UserSPID=:gl_userspid using sqlca; // Dinesh - 09/20/2023- SIMS-328-  Google  - Read Only Access Part 2
+						insert into Screen_Lock (User_Id,Order_No,Screen_Name,Entry_Date,Out_Date,Edit_Mode,UserSPID) values(:gs_userid,:gs_System_No,:is_title,getdate(),NULL,'R',:gl_userspid) using sqlca;
+						commit;
+						lb_readonly=true
+				elseif (il_find_matchW > 0 and il_find_matchR = 0) and (gs_userid= ls_User_IdW and gs_System_No <> ls_Order_NoW and ll_spid <> gl_userspid) then
+						//delete from screen_lock where User_Id=:gs_userid and screen_name='Receiving Order' using sqlca;
+						insert into Screen_Lock (User_Id,Order_No,Screen_Name,Entry_Date,Out_Date,Edit_Mode,UserSPID) values(:gs_userid,:gs_System_No,:is_title,getdate(),NULL,'R',:gl_userspid) using sqlca;
+						commit;
+						lb_readonly=True
+				elseif (il_find_matchW = 0 and il_find_matchR > 0) and (gs_userid= ls_User_IdW and gs_System_No <> ls_Order_NoW and ll_spid <> gl_userspid ) then
+						delete from screen_lock where User_Id=:gs_userid and screen_name='Receiving Order' and Edit_Mode='R' and UserSPID=:gl_userspid using sqlca; // Dinesh - 09/20/2023- SIMS-328-  Google  - Read Only Access Part 2
+						insert into Screen_Lock (User_Id,Order_No,Screen_Name,Entry_Date,Out_Date,Edit_Mode,UserSPID) values(:gs_userid,:gs_System_No,:is_title,getdate(),NULL,'W',:gl_userspid) using sqlca;
+						commit;
+						lb_readonly=false
+				//End - Dinesh - 09/20/2023- SIMS-328-  Google  - Read Only Access Part 2
+						
+				elseif (il_find_matchW = 0 and il_find_matchR = 0) and (gs_userid = ls_User_IdW and gs_System_No = ls_Order_NoW and ll_spid = gl_userspid) then
+					delete from screen_lock where User_Id=:gs_userid and screen_name='Receiving Order' and UserSPID=:gl_userspid using sqlca; //09/21/2023- Dinesh - SIMS-328-  Google  - Read Only Access Part 2
+					insert into Screen_Lock (User_Id,Order_No,Screen_Name,Entry_Date,Out_Date,Edit_Mode,UserSPID) values(:gs_userid,:gs_System_No,:is_title,getdate(),NULL,'W',:gl_userspid) using sqlca;
+					commit;
+					lb_readonly=false
+				elseif (il_find_matchW > 0 and il_find_matchR = 0) and (gs_userid = ls_User_IdW and gs_System_No = ls_Order_NoW and ll_spid = gl_userspid) then
+					delete from screen_lock where User_Id=:gs_userid and screen_name='Receiving Order' and UserSPID=:gl_userspid using sqlca; //09/21/2023- Dinesh - SIMS-328-  Google  - Read Only Access Part 2
+					insert into Screen_Lock (User_Id,Order_No,Screen_Name,Entry_Date,Out_Date,Edit_Mode,UserSPID) values(:gs_userid,:gs_System_No,:is_title,getdate(),NULL,'W',:gl_userspid) using sqlca;
+					commit;
+					lb_readonly=false
+				elseif (il_find_matchW > 0 and il_find_matchR > 0) and (gs_userid = ls_User_IdW and gs_System_No = ls_Order_NoW and ll_spid = gl_userspid) then
+					delete from screen_lock where User_Id=:gs_userid and screen_name='Receiving Order' and Edit_Mode='R' and UserSPID=:gl_userspid using sqlca; //09/21/2023- Dinesh - SIMS-328-  Google  - Read Only Access Part 2
+					insert into Screen_Lock (User_Id,Order_No,Screen_Name,Entry_Date,Out_Date,Edit_Mode,UserSPID) values(:gs_userid,:gs_System_No,:is_title,getdate(),NULL,'W',:gl_userspid) using sqlca;
+					commit;
+				elseif (il_find_matchW > 0 and il_find_matchR > 0) and (gs_userid = ls_User_IdW and gs_System_No = ls_Order_NoW and ll_spid = gl_userspid) then
+					delete from screen_lock where User_Id=:gs_userid and screen_name='Receiving Order' and Edit_Mode='R' and UserSPID=:gl_userspid using sqlca; //09/21/2023- Dinesh - SIMS-328-  Google  - Read Only Access Part 2
+					insert into Screen_Lock (User_Id,Order_No,Screen_Name,Entry_Date,Out_Date,Edit_Mode,UserSPID) values(:gs_userid,:gs_System_No,:is_title,getdate(),NULL,'W',:gl_userspid) using sqlca;
+					commit;
+					lb_readonly=true
+				elseif (il_find_matchW = 0 and il_find_matchR > 0) and (gs_userid = ls_User_IdW and gs_System_No = ls_Order_NoW and ll_spid = gl_userspid) then
+					delete from screen_lock where User_Id=:gs_userid and screen_name='Receiving Order' and UserSPID=:gl_userspid using sqlca; //09/21/2023- Dinesh - SIMS-328-  Google  - Read Only Access Part 2
+					insert into Screen_Lock (User_Id,Order_No,Screen_Name,Entry_Date,Out_Date,Edit_Mode,UserSPID) values(:gs_userid,:gs_System_No,:is_title,getdate(),NULL,'W',:gl_userspid) using sqlca;
+					commit;
+					lb_readonly=false
+					
+				elseif (il_find_matchW = 0 and il_find_matchR = 0) and (gs_userid = ls_User_IdW and gs_System_No <> ls_Order_NoW and ll_spid = gl_userspid) then
+					//delete from screen_lock where User_Id=:gs_userid and screen_name='Receiving Order' using sqlca;
+					insert into Screen_Lock (User_Id,Order_No,Screen_Name,Entry_Date,Out_Date,Edit_Mode,UserSPID) values(:gs_userid,:gs_System_No,:is_title,getdate(),NULL,'W',:gl_userspid) using sqlca;
+					commit;
+					lb_readonly=false
+				elseif (il_find_matchW > 0 and il_find_matchR = 0) and (gs_userid = ls_User_IdW and gs_System_No <> ls_Order_NoW and ll_spid = gl_userspid) then
+					delete from screen_lock where User_Id=:gs_userid and screen_name='Receiving Order' and UserSPID=:gl_userspid using sqlca; //09/21/2023- Dinesh - SIMS-328-  Google  - Read Only Access Part 2
+					insert into Screen_Lock (User_Id,Order_No,Screen_Name,Entry_Date,Out_Date,Edit_Mode,UserSPID) values(:gs_userid,:gs_System_No,:is_title,getdate(),NULL,'R',:gl_userspid) using sqlca;
+					commit;
+					lb_readonly=false
+				elseif (il_find_matchW > 0 and il_find_matchR > 0) and (gs_userid = ls_User_IdW and gs_System_No <> ls_Order_NoW and ll_spid = gl_userspid) then
+					delete from screen_lock where User_Id=:gs_userid and screen_name='Receiving Order'  and UserSPID=:gl_userspid using sqlca;//09/21/2023- Dinesh - SIMS-328-  Google  - Read Only Access Part 2
+					insert into Screen_Lock (User_Id,Order_No,Screen_Name,Entry_Date,Out_Date,Edit_Mode,UserSPID) values(:gs_userid,:gs_System_No,:is_title,getdate(),NULL,'W',:gl_userspid) using sqlca;
+					commit;
+					lb_readonly=false
+				elseif (il_find_matchW = 0 and il_find_matchR > 0) and (gs_userid = ls_User_IdW and gs_System_No <> ls_Order_NoW and ll_spid = gl_userspid) then
+					delete from screen_lock where User_Id=:gs_userid and screen_name='Receiving Order' and UserSPID=:gl_userspid using sqlca; //09/21/2023- Dinesh - SIMS-328-  Google  - Read Only Access Part 2
+					insert into Screen_Lock (User_Id,Order_No,Screen_Name,Entry_Date,Out_Date,Edit_Mode,UserSPID) values(:gs_userid,:gs_System_No,:is_title,getdate(),NULL,'W',:gl_userspid) using sqlca;
+					commit;
+					lb_readonly=false
+
+				elseif (il_find_matchW = 0 and il_find_matchR = 0) and (gs_userid <> ls_User_IdW and gs_System_No <> ls_Order_NoW and  ll_spid = gl_userspid) then
+					//delete from screen_lock where User_Id=:gs_userid and screen_name='Receiving Order' using sqlca;
+					insert into Screen_Lock (User_Id,Order_No,Screen_Name,Entry_Date,Out_Date,Edit_Mode,UserSPID) values(:gs_userid,:gs_System_No,:is_title,getdate(),NULL,'W',:gl_userspid) using sqlca;
+					commit;	
+					lb_readonly=false
+				elseif (il_find_matchW > 0 and il_find_matchR = 0) and (gs_userid <> ls_User_IdW and gs_System_No <> ls_Order_NoW and  ll_spid = gl_userspid) then
+					delete from screen_lock where User_Id=:gs_userid and screen_name='Receiving Order' and UserSPID=:gl_userspid using sqlca; //09/21/2023- Dinesh - SIMS-328-  Google  - Read Only Access Part 2
+					insert into Screen_Lock (User_Id,Order_No,Screen_Name,Entry_Date,Out_Date,Edit_Mode,UserSPID) values(:gs_userid,:gs_System_No,:is_title,getdate(),NULL,'W',:gl_userspid) using sqlca;
+					commit;	
+					lb_readonly=false
+				elseif (il_find_matchW > 0 and il_find_matchR > 0) and (gs_userid <> ls_User_IdW and gs_System_No <> ls_Order_NoW and  ll_spid = gl_userspid) then
+					delete from screen_lock where User_Id=:gs_userid and screen_name='Receiving Order' and UserSPID=:gl_userspid using sqlca; //09/21/2023- Dinesh - SIMS-328-  Google  - Read Only Access Part 2
+					insert into Screen_Lock (User_Id,Order_No,Screen_Name,Entry_Date,Out_Date,Edit_Mode,UserSPID) values(:gs_userid,:gs_System_No,:is_title,getdate(),NULL,'W',:gl_userspid) using sqlca;
+					commit;	
+					lb_readonly=false
+				elseif (il_find_matchW = 0 and il_find_matchR > 0) and (gs_userid <> ls_User_IdW and gs_System_No <> ls_Order_NoW and  ll_spid = gl_userspid) then
+					delete from screen_lock where User_Id=:gs_userid and screen_name='Receiving Order' and UserSPID=:gl_userspid using sqlca; //09/21/2023- Dinesh - SIMS-328-  Google  - Read Only Access Part 2
+					insert into Screen_Lock (User_Id,Order_No,Screen_Name,Entry_Date,Out_Date,Edit_Mode,UserSPID) values(:gs_userid,:gs_System_No,:is_title,getdate(),NULL,'W',:gl_userspid) using sqlca;
+					commit;		
+					lb_readonly=false
+				elseif (il_find_matchW = 0 and il_find_matchR = 0) and (gs_userid <> ls_User_IdW and gs_System_No = ls_Order_NoW and  ll_spid <> gl_userspid) then
+					//delete from screen_lock where User_Id=:gs_userid and screen_name='Receiving Order' using sqlca;
+					insert into Screen_Lock (User_Id,Order_No,Screen_Name,Entry_Date,Out_Date,Edit_Mode,UserSPID) values(:gs_userid,:gs_System_No,:is_title,getdate(),NULL,'W',:gl_userspid) using sqlca;
+					commit;	
+					lb_readonly=false
+				elseif (il_find_matchW > 0 and il_find_matchR = 0) and (gs_userid <> ls_User_IdW and gs_System_No = ls_Order_NoW and  ll_spid <> gl_userspid) then
+					delete from screen_lock where User_Id=:gs_userid and screen_name='Receiving Order' and UserSPID=:gl_userspid using sqlca; //09/21/2023- Dinesh - SIMS-328-  Google  - Read Only Access Part 2
+					insert into Screen_Lock (User_Id,Order_No,Screen_Name,Entry_Date,Out_Date,Edit_Mode,UserSPID) values(:gs_userid,:gs_System_No,:is_title,getdate(),NULL,'R',:gl_userspid) using sqlca;
+					commit;	
+					lb_readonly=true
+				elseif (il_find_matchW > 0 and il_find_matchR > 0) and (gs_userid <> ls_User_IdW and gs_System_No = ls_Order_NoW and  ll_spid <> gl_userspid) then
+					delete from screen_lock where User_Id=:gs_userid and screen_name='Receiving Order' and Edit_Mode in('R','W') and UserSPID=:gl_userspid using sqlca; //09/21/2023- Dinesh - SIMS-328-  Google  - Read Only Access Part 2
+					insert into Screen_Lock (User_Id,Order_No,Screen_Name,Entry_Date,Out_Date,Edit_Mode,UserSPID) values(:gs_userid,:gs_System_No,:is_title,getdate(),NULL,'R',:gl_userspid) using sqlca;
+					commit;	
+					lb_readonly=True
+				elseif (il_find_matchW = 0 and il_find_matchR > 0) and ((gs_userid <> ls_User_IdW) or (ls_User_IdW='')  and gs_System_No = ls_Order_NoW and  ll_spid <> gl_userspid) then
+					delete from screen_lock where User_Id=:gs_userid and screen_name='Receiving Order' and UserSPID=:gl_userspid using sqlca; //09/21/2023- Dinesh - SIMS-328-  Google  - Read Only Access Part 2
+					insert into Screen_Lock (User_Id,Order_No,Screen_Name,Entry_Date,Out_Date,Edit_Mode,UserSPID) values(:gs_userid,:gs_System_No,:is_title,getdate(),NULL,'W',:gl_userspid) using sqlca;
+					commit;	
+					lb_readonly=false
+				elseif (il_find_matchW = 0 and il_find_matchR > 0) and (gs_userid<> ls_User_IdR and gs_System_No = ls_Order_NoR and ll_spid <> gl_userspid) then
+					delete from screen_lock where User_Id=:gs_userid and screen_name='Receiving Order' and UserSPID=:gl_userspid using sqlca;//09/21/2023- Dinesh - SIMS-328-  Google  - Read Only Access Part 2
+					insert into Screen_Lock (User_Id,Order_No,Screen_Name,Entry_Date,Out_Date,Edit_Mode,UserSPID) values(:gs_userid,:gs_System_No,:is_title,getdate(),NULL,'W',:gl_userspid) using sqlca;
+					commit;
+					lb_readonly=false
+					
+				elseif (il_find_matchW = 0 and il_find_matchR = 0) and (gs_userid <> ls_User_IdW and gs_System_No <> ls_Order_NoW and  ll_spid <> gl_userspid) then
+					//delete from screen_lock where User_Id=:gs_userid and screen_name='Receiving Order' using sqlca;
+					insert into Screen_Lock (User_Id,Order_No,Screen_Name,Entry_Date,Out_Date,Edit_Mode,UserSPID) values(:gs_userid,:gs_System_No,:is_title,getdate(),NULL,'W',:gl_userspid) using sqlca;
+					commit;	
+					lb_readonly=true
+				elseif (il_find_matchW > 0 and il_find_matchR = 0) and (gs_userid <> ls_User_IdW and gs_System_No = ls_Order_NoW and  ll_spid <> gl_userspid) then
+					delete from screen_lock where User_Id=:gs_userid and screen_name='Receiving Order' and Edit_Mode='R' and UserSPID=:gl_userspid using sqlca; //09/21/2023- Dinesh - SIMS-328-  Google  - Read Only Access Part 2
+					insert into Screen_Lock (User_Id,Order_No,Screen_Name,Entry_Date,Out_Date,Edit_Mode,UserSPID) values(:gs_userid,:gs_System_No,:is_title,getdate(),NULL,'R',:gl_userspid) using sqlca;
+					commit;
+					lb_readonly=True
+					
+				elseif (il_find_matchW > 0 and il_find_matchR > 0) and (gs_userid <> ls_User_IdW and gs_System_No = ls_Order_NoW and  ll_spid <> gl_userspid) then
+						lds_screen_lockW.retrieve(gs_System_No,'W')
+					 for k= 1 to lds_screen_lockW.rowcount()
+						 ls_Edit_ModeW = lds_screen_lockW.getitemstring(k,'edit_Mode')
+						 ls_User_IdW = lds_screen_lockW.getitemstring(k,'user_Id')
+						 ls_Order_NoW =lds_screen_lockW.getitemstring(k,'order_No')
+						 ll_userspid =lds_screen_lockW.getitemnumber(k,'userspid')
+					next
+					delete from screen_lock where User_Id=:gs_userid and screen_name='Receiving Order' and UserSPID=:gl_userspid using sqlca;//09/21/2023- Dinesh - SIMS-328-  Google  - Read Only Access Part 2
+					insert into Screen_Lock (User_Id,Order_No,Screen_Name,Entry_Date,Out_Date,Edit_Mode,UserSPID) values(:gs_userid,:gs_System_No,:is_title,getdate(),NULL,'W',:gl_userspid) using sqlca;
+					commit;	
+					lb_readonly=false
+				elseif (il_find_matchW = 0 and il_find_matchR > 0) and (gs_userid <> ls_User_IdW and gs_System_No = ls_Order_NoW and  ll_spid <> gl_userspid) then
+					delete from screen_lock where User_Id=:gs_userid and screen_name='Receiving Order' and UserSPID=:gl_userspid using sqlca; //09/21/2023- Dinesh - SIMS-328-  Google  - Read Only Access Part 2
+					insert into Screen_Lock (User_Id,Order_No,Screen_Name,Entry_Date,Out_Date,Edit_Mode,UserSPID) values(:gs_userid,:gs_System_No,:is_title,getdate(),NULL,'W',:gl_userspid) using sqlca;
+					commit;	
+					lb_readonly=false
+					
+				
+				else
+					lb_readonly=false
+					//insert into Screen_Lock (User_Id,Order_No,Screen_Name,Entry_Date,Out_Date,Edit_Mode,UserSPID) values(:gs_userid,:gs_System_No,:is_title,getdate(),NULL,'R',:gl_userspid) using sqlca;
+				end if	
+			else
+				
+			end if
+			
+		//Begin - Dinesh - 11/06/2023 - SIMS-328 - Google - SIMS - Google - SIMS - Read Only Access part 2
+			select edit_mode into :ls_edit_moderead from Screen_Lock with(nolock) where Order_No= :gs_System_No and user_id = :gs_userid and screen_name='Receiving Order' and userspid=:gl_userspid using sqlca;
+			
+			if ls_edit_moderead= 'W' then
+				
+				tab_main.tabpage_main.cb_readonly.enabled = True
+			else
+				tab_main.tabpage_main.cb_readonly.enabled = False
+			end if
+			//End - Dinesh - 11/06/2023 - SIMS-328 - Google - SIMS - Google - SIMS - Read Only Access part 2
+	 End if
+//End - Dinesh - 07/25/2023 - SIMS-198 - Google - SIMS - Google - SIMS - Read Only Access 
+
 ll_result = idw_main.Retrieve(is_rono)
 if  Upper(gs_project) ="PANDORA" THEN 
 		f_crossdock() // Dinesh - 28/06/2021 - S52817- Google - SIMS QA - Last leg of a multileg is flagged as crossdock
@@ -13310,6 +14126,11 @@ IF idw_main.RowCount() > 0 Then
 		ls_wh_code = idw_main.GetItemString(1, "wh_code")
 		Select User_Updateable_Ind INTO :ls_WghDim FROM lookup_table with (NoLock) 
 		Where Project_ID = :gs_project AND Code_Type = 'CUBE_SCAN' and Code_Id = :ls_wh_code  USING SQLCA;
+		// Added by Dhirendra SIMS-55-start
+		IF idw_main.GetItemString(1,"create_user") = idw_main.GetItemString(1, "last_user") and idw_main.GetItemString(1,"source_type") = 'WEB' THEN
+			idw_main.setitem(1,'arrival_date',ldt_arrival_dt) 
+		END IF 
+		// Added by Dhirendra SIMS-55-END
 	End if
 	
 	// Loop through the rows,
@@ -13351,7 +14172,11 @@ IF idw_main.RowCount() > 0 Then
 	End If
 
 	wf_checkstatus()
-	
+	//Begin -08/09/2023- SIMS-198- Google- Read only for the multiple users
+	if gs_project='PANDORA' then
+			wf_receive_order_readonly(lb_readonly)
+	end if
+	//End -08/09/2023- SIMS-198- Google- Read only for the multiple users
 	If idw_main.GetItemString(1, "ord_status") <> "C" and &
 		idw_main.GetItemString(1, "ord_status") <> "V" Then
 		iw_window.TriggerEvent("ue_refresh")
@@ -13424,6 +14249,38 @@ IF idw_main.RowCount() > 0 Then
 		End if
 			
 	END IF
+	
+	 //* Begin.........Akash Baghel - 08/08/2023...- SIMS 243- Match the project code in order detail tab to project code table */
+	
+          If upper(gs_project) ='PANDORA' Then		     
+	        ll_EDIBatch = idw_main.GetItemNumber(1,"edi_batch_seq_no")
+            
+		  datastore	ldsProjectCode, ldsponocode
+		    ldsponocode = Create datastore
+             ldsponocode.dataobject= 'd_po_no_find'
+             ldsponocode.SetTransobject(SQLCA)
+             rowcount1= ldsponocode.Retrieve(gs_project, ll_EDIBatch)
+				 
+		    ldsProjectCode = Create datastore
+             ldsProjectCode.dataobject= 'd_project_code'
+             ldsProjectCode.SetTransobject(SQLCA)
+             llcount1=ldsProjectCode.Retrieve()		 
+       
+		 for i = 1 to rowcount1
+		      ls_projectcode= ldsponocode.GetItemString(i,'po_no')
+		      lsFind = "project_code = '" +ls_projectcode + "'"
+               llFindRow1 = ldsProjectCode.Find(lsFind, 1, llcount1)
+					
+	           If  llFindRow1 > 0 then 
+		       Elseif llFindRow1 <= 0  Then 
+	               messagebox("Project Code Not Match","This order of PO No "+ls_projectcode+" has an invalid Project Code. Processing of this order is not allowed.")		
+	              	lb_readonly=True
+					  wf_receive_order_readonly(lb_readonly) // Dinesh - 08/22/2023- SIMS-243 - Match the project code in order detail tab to project code table */
+				       Return -1  
+			 End if
+		  Next			 
+   End if 	 
+   //* End.........Akash Baghel - 08/07/2023...- SIMS 243- Match the project code in order detail tab to project code table */
 	
 	//30-Jan-2019 :Madhu S28685 PHILIPSCLS BlueHeart Minimum Shelf Life Inbound Validation
 	//dts 11/17/2020 - S51442 - add PHILIPS-DA to PHILIPSCLS Logic
@@ -13997,7 +14854,7 @@ end event
 event clicked;call super::clicked;DatawindowChild	ldwc
 
 // 02/02 PCONKL - Retrieve dropdowns when clicked on
-
+str_parms	lstrparms
 Choose Case Upper(dwo.Name)
 		
 	Case 'TRANSPORT_MODE' 
@@ -14011,8 +14868,23 @@ Choose Case Upper(dwo.Name)
 //		ldwc.SetTransObject(SQLCA)
 //		ldwc.Retrieve(gs_project)
 //		If ldwc.RowCount() = 0 Then ldwc.InsertRow(0)
-		
+
+//SIMS-55 Added by Dhirendra -start
+Case 'ARRIVAL_DATE_T'
+	If Upper(gs_project) = 'PANDORA' and  isnull(idw_main.getitemdatetime(1,'arrival_date'))Then
+		Open(w_arrival_date_scan)
+		lstrparms = Message.PowerObjectParm
+		IF isdate(string(date(lstrparms.string_arg[1]))) and string(date(lstrparms.string_arg[1]))<>'1/1/1900' then
+		this.setitem(1,'arrival_date',datetime(lstrparms.string_arg[1]))
+		this.Object.arrival_date.Protect = true
+		//this.modify('arrival_date_t.enabled =0')
+		this.object.arrival_date.Background.color=this.object.datawindow.color
+		this.object.arrival_date_t.Background.color=this.object.datawindow.color
+	end if
+End if
+//SIMS-55 Added by Dhirendra -end
 End Choose
+
 end event
 
 event constructor;DatawindowChild	ldwc
@@ -14613,6 +15485,7 @@ end type
 
 event doubleclicked;// Pasting the record to the main entry datawindow
 string ls_code
+ib_search= False //11/03/2023-  Dinesh - SIMS-328- Google- Read only part 2
 If isVAlid(w_order_details) Then
 Close (w_order_details)
 End if
@@ -14923,8 +15796,8 @@ end event
 type tabpage_other_info from userobject within tab_main
 integer x = 18
 integer y = 108
-integer width = 3858
-integer height = 1856
+integer width = 3895
+integer height = 1972
 long backcolor = 79741120
 string text = "Other Info"
 long tabtextcolor = 33554432
@@ -14979,8 +15852,8 @@ end event
 type tabpage_orderdetail from userobject within tab_main
 integer x = 18
 integer y = 108
-integer width = 3858
-integer height = 1856
+integer width = 3895
+integer height = 1972
 long backcolor = 79741120
 string text = "Order Detail"
 long tabtextcolor = 33554432
@@ -16166,13 +17039,14 @@ end event
 type tabpage_putaway from userobject within tab_main
 integer x = 18
 integer y = 108
-integer width = 3858
-integer height = 1856
+integer width = 3895
+integer height = 1972
 long backcolor = 79741120
 string text = " Put Away List "
 long tabtextcolor = 33554432
 long tabbackcolor = 79741120
 long picturemaskcolor = 536870912
+cb_final_put_away cb_final_put_away
 cbx_autofill cbx_autofill
 dw_putaway_mobile dw_putaway_mobile
 cb_emc cb_emc
@@ -16192,6 +17066,7 @@ dw_putaway dw_putaway
 end type
 
 on tabpage_putaway.create
+this.cb_final_put_away=create cb_final_put_away
 this.cbx_autofill=create cbx_autofill
 this.dw_putaway_mobile=create dw_putaway_mobile
 this.cb_emc=create cb_emc
@@ -16208,7 +17083,8 @@ this.dw_print=create dw_print
 this.dw_content=create dw_content
 this.dw_carton_serial=create dw_carton_serial
 this.dw_putaway=create dw_putaway
-this.Control[]={this.cbx_autofill,&
+this.Control[]={this.cb_final_put_away,&
+this.cbx_autofill,&
 this.dw_putaway_mobile,&
 this.cb_emc,&
 this.cb_putaway_pallets,&
@@ -16227,6 +17103,7 @@ this.dw_putaway}
 end on
 
 on tabpage_putaway.destroy
+destroy(this.cb_final_put_away)
 destroy(this.cbx_autofill)
 destroy(this.dw_putaway_mobile)
 destroy(this.cb_emc)
@@ -16244,6 +17121,61 @@ destroy(this.dw_content)
 destroy(this.dw_carton_serial)
 destroy(this.dw_putaway)
 end on
+
+type cb_final_put_away from commandbutton within tabpage_putaway
+boolean visible = false
+integer x = 1641
+integer y = 4
+integer width = 366
+integer height = 84
+integer taborder = 40
+integer textsize = -8
+integer weight = 400
+fontcharset fontcharset = ansi!
+fontpitch fontpitch = variable!
+fontfamily fontfamily = swiss!
+string facename = "Arial"
+boolean enabled = false
+string text = "& Final Put Away "
+end type
+
+event clicked;long ll_foundrow
+String	lsRoNo,	&
+			lsOrdStat
+
+DateTime	ldtToday 
+
+if f_check_access( is_process, "C")  = 0 Then Return
+
+//03/03 - PCONKL - Make sure the order was not confirmed by another user 
+lsRONO = idw_main.GetITemString(1,'Ro_no')
+ldtToday = f_getLocalWorldTime( idw_main.getitemstring(1,'wh_code') ) 
+
+Select ord_status Into :lsOrdStat
+From Receive_MAster
+Where Project_ID = :gs_Project and ro_no = :lsRONo using sqlca;
+
+ll_foundrow = idw_putaway.Find(  "l_code = '*' or l_code='' ", 1, idw_putaway.RowCount())
+		
+IF ll_foundrow > 0 then
+	Messagebox('Location',"Location required for '"+string(ll_foundrow)+"'row")
+	idw_putaway.ScrollToRow(ll_foundrow)
+	idw_putaway.setcolumn('l_code')
+	return
+end if 
+	
+If lsordStat = 'P' Then 
+	idw_main.setitem(1,'ord_status','F')
+	If iw_window.Trigger Event ue_save() = 0 Then
+		cb_putaway_locs.Enabled = False 
+		idw_putaway.modify("l_code.enabled = 1")
+		return
+	end if 
+return
+End If
+
+ 
+end event
 
 type cbx_autofill from checkbox within tabpage_putaway
 integer x = 2423
@@ -16293,6 +17225,7 @@ integer width = 3826
 integer height = 176
 integer taborder = 20
 string dataobject = "d_ro_master_mobile"
+boolean minbox = true
 boolean border = false
 borderstyle borderstyle = stylebox!
 end type
@@ -16945,9 +17878,11 @@ string facename = "Arial"
 string text = "&Delete Row"
 end type
 
-event clicked;Long	 llRow, llFindRow, ll_line_item_no, ll_id_no
+event clicked;Long	 llRow, llFindRow, ll_line_item_no, ll_id_no,ll_insert_row//SIMS-55 ll_row variable added by Dhirendra
 String	 lsFind, ls_order, ls_sku
+long ll_method_trace_id
 
+setnull(ll_method_trace_id)
 If cbx_show_comp.Enabled and cbx_show_comp.Checked = False Then
 	Messagebox(is_title,'You must show components before deleting rows.')
 	Return
@@ -16977,8 +17912,18 @@ IF  llRow > 0 THEN
 	End If
 	
 	ib_changed = True /* 06/15 - PCONKL - moved from above*/
+	//SIMS-55 Added by Dhirendra-Start
+	IF UPPER(gs_project)='PANDORA' then
+		ib_delete_putawayrow = TRUE
+		IF idsputawaytracelog.rowcount() =0 then
+	    ll_insert_row=	idsputawaytracelog.insertrow(0)
+	END IF 
+	idsputawaytracelog.setitem(ll_insert_row,'line_no',ll_line_item_no)
+	idsputawaytracelog.setitem(ll_insert_row,'order_no',is_suppinvoiceno)
+END IF  
+	//SIMS-55 Added by Dhirendra-END
 	
-	//TimA 02/12/14 added more Method Trace calls
+//TimA 02/12/14 added more Method Trace calls
 	f_method_trace_special( gs_project,this.ClassName() + ' -cb_deleterow','Delete Putaway Row: ' + String(lLRow ) ,ls_order,' ',' ',is_suppinvoiceno )
 	
 	// pvh - 01/11/07 MARL
@@ -17033,9 +17978,9 @@ g.of_check_label_button(this)
 end event
 
 type cb_putaway_locs from commandbutton within tabpage_putaway
-integer x = 1947
+integer x = 2021
 integer y = 4
-integer width = 389
+integer width = 352
 integer height = 84
 integer taborder = 20
 boolean bringtotop = true
@@ -17855,8 +18800,8 @@ If gs_Project = 'PANDORA' then
 		CASE KeyEnter!
 			which_control = this //GetFocus()
 				Choose Case which_control.ClassName()
-					CASE "dw_putaway"
-						IF which_control.FUNCTION DYNAMIC GetColumn() = 8 and ilErrorRow = 0  THEN // Quantity field
+					CASE "dw_1"
+						IF which_control.FUNCTION DYNAMIC GetColumn() = 1 and ilErrorRow = 0  THEN // Quantity field
 							send(Handle(this), 256,9, long(0,0))
 							 This.ScrollToRow(This.GetRow() + 1)
 							 This.SetColumn(7)
@@ -18342,7 +19287,7 @@ String ab_error_message_title,ab_error_message,  ls_serial_ind, ls_po_no, ls_err
 string oldInvType, lsPalletId, ls_invt, ls_lot, ls_sku, lsInactiveSKU, ls_LocType, ls_ctype,lsFilter  //GailM 7/31/2013 608 - GailM 11/22/2013 - Pallet Rollup
 string sql_syntax, ls_cc_lock_ind, ls_old_containerId, ls_old_pono2, lsLocRoNo  //S45954
 
-long row_num_main, ll_Component_no, ll_initialized_qty, ll_req_qty, i_ndx, ll_cs_rows, ll_found_row
+long row_num_main, ll_Component_no, ll_initialized_qty, ll_req_qty, i_ndx, ll_cs_rows, ll_found_row,ll_chk_count
 Long	llFindRow, llNextContainer, llWeekNo, llOwnerID, llReturn, ll_qty, ll_pallet_qty, ll_exist, llPalletQty
 Long ll_wh_row, llAvail, llLocOwnerId1, llLocAvail1, llLocAlloc1, llLocOwnerId2, llLocAvail2, llLocAlloc2, llLocCnt		//GailM 07/13/2017 SIMSPEVS-737 PAN SIMS Soft warning for two separate owner codes on one location
 Long llLocSit, llLocTfr_in, llLocTfr_out, ll_old_qty
@@ -19500,14 +20445,29 @@ Choose Case dwo.name
 
 END Choose
 
+
 IF dwo.name = "serial_no" or dwo.name = "po_no" or dwo.name = "lot_no" or  dwo.name = "po_no2" THEN
-	if not(upper(gs_project) = 'PANDORA' and dwo.name = "serial_no") then  // 01/03/2011 ujh: S/N_P: dash ok for serial nos
+	IF not(upper(gs_project) = 'PANDORA' and dwo.name = "serial_no") then  // 01/03/2011 ujh: S/N_P: dash ok for serial nos
 	  IF mid(trim(data),1,1) = '-' THEN 
 		  data = mid(trim(data),2)
 		  idw_putaway.setitem(row,dwo.name,data)
 		  return 1
-	   END IF  
-	End if // 01/03/2011 ujh: S/N_P: dash ok for serial nos
+	   END IF
+		// Dhirendra -SIMS-54 - Geistlich Duplicate Serial Check -Start
+	Elseif (upper(gs_project) = 'GEISTLICH' and dwo.name = "serial_no") then
+		ls_sku=idw_putaway.getitemstring(row,'sku')
+	    Select count(*) into :ll_chk_count
+		From content 
+		Where project_id = :gs_project 
+         and sku = :ls_sku
+		and serial_no = :data using sqlca;
+		
+		IF ll_chk_count > 0  then
+			Messagebox('SIMS Alert',"This Serial No is already exists in system inventory")
+			Return 1
+			//SIMS-54 - Geistlich Duplicate Serial Check  END
+		END IF 
+	End IF  // 01/03/2011 ujh: S/N_P: dash ok for serial nos
 END IF
 
 //F18447 - I2576 - Google - SIMS - Receiving Enhancement
@@ -19518,7 +20478,6 @@ if upper(gs_project) = 'PANDORA' and (dwo.name = "quantity" or dwo.name = "count
 	wf_autofill_putaway_container_pallet(dwo.name, row, data)
 	
 end if
-
 
 
 
@@ -19882,8 +20841,8 @@ end event
 type tabpage_notes from userobject within tab_main
 integer x = 18
 integer y = 108
-integer width = 3858
-integer height = 1856
+integer width = 3895
+integer height = 1972
 long backcolor = 79741120
 string text = "Notes"
 long tabtextcolor = 33554432
@@ -19918,8 +20877,8 @@ event ue_mode_switch ( )
 event ue_process_barcodes ( )
 integer x = 18
 integer y = 108
-integer width = 3858
-integer height = 1856
+integer width = 3895
+integer height = 1972
 long backcolor = 79741120
 string text = "Serial #"
 long tabtextcolor = 33554432

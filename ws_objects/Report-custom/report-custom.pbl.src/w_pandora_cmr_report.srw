@@ -137,18 +137,18 @@ llNewRow = dw_report.InsertRow(0)
 	Choose Case Upper(w_do.idw_Detail.GetITemString(1,'supp_Code'))
 			
 		Case 'AMD'
-			dw_report.SetITem(llNewRow,'ship_from_name','Amdiss C/O XPO Logistics')
+			dw_report.SetITem(llNewRow,'ship_from_name','Amdiss C/O GXO Logistics')
 		Case 'SPANSION'
-			dw_report.SetITem(llNewRow,'ship_from_name','Spansion C/O XPO Logistics')
+			dw_report.SetITem(llNewRow,'ship_from_name','Spansion C/O GXO Logistics')
 		Case 'LAM'
-			dw_report.SetITem(llNewRow,'ship_from_name','Lam C/O XPO Logistics')
+			dw_report.SetITem(llNewRow,'ship_from_name','Lam C/O GXO Logistics')
 		Case 'BLUECOAT'
-			dw_report.SetITem(llNewRow,'ship_from_name','Blue Coat C/O XPO Logistics')
+			dw_report.SetITem(llNewRow,'ship_from_name','Blue Coat C/O GXO Logistics')
 		Case 'PANDORA'
 			ls_ship_from_name = g.ids_project_warehouse.GetITemString(llWarehouseRow,'wh_name')			
 			dw_report.SetITem(llNewRow,'ship_from_name',ls_ship_from_name)			
 		Case Else
-			dw_report.SetITem(llNewRow,'ship_from_name','C/O XPO Logistics')
+			dw_report.SetITem(llNewRow,'ship_from_name','C/O GXO Logistics')
 	End Choose
 	//17-Nov-2015 :Madhu- Replaced MenloWorldWide by XPO -END
 	If llWarehouseRow > 0 Then
@@ -182,7 +182,7 @@ llNewRow = dw_report.InsertRow(0)
 		If Upper(gs_project) = 'PANDORA' then		
 			dw_report.Modify("t_shipfromname.text =  '" + ls_ship_from_name + "'")
 		Else
-			dw_report.Modify("t_shipfromname.text = 'C/O XPO Logistics'")
+			dw_report.Modify("t_shipfromname.text = 'C/O GXO Logistics'")
 		End if
 
 		dw_report.Modify("t_shipfromaddress.text = '" + ls_addr_1 + "'")

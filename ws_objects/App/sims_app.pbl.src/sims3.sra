@@ -25,12 +25,16 @@ String gs_reportpath
 String gs_pdfpath
 String gs_project = 'TEST'
 String gs_tier_desc = 'CLIENT' //TimA 02/12/15 for the f_Functionality_Manager function
+String gs_login // Dinesh - 05/22/2024- Dinesh - SIMS-473-Google - SIMS – SIMS Timer Enhancement
 Date today
 m_main main_menu
 Integer gi_menu_pos = 8
 String	gsTitle
 n_cst_appmanager g
 boolean gb_sqlca_connected, gb_replication_sqlca_connected
+boolean gb_saudi_arabia
+long gl_userspid //09/21/2023- Dinesh - SIMS-328-  Google  - Read Only Access Part 2
+string gsSql // Dinesh - 05/28/2024 - SIMS-376
 
 //TimA 11/05/12
 //Global flag to turn on or off method log tracing

@@ -1449,7 +1449,7 @@ Else /*Inv Type Change*/
 			end if
 			
 			//End Dinesh - 05/18/21- DE21469 - SIMS - PHILIPSCLS GOODSMOVEMENT MISSING DATA
-			lsOldInvType = Right(Trim(lsTransParm),1)
+			//lsOldInvType = Right(Trim(lsTransParm),1) // Dinesh - 08/18/2021- DE22739 -SIMS - PHILIPSCLS GOODSMOVEMENT MISSING DATA
 //			lsOldDispCode =  iuo_proc_philips_cls.getphilipsdisposition(lsOldInvType)
 			lstr_Parms = iuo_proc_philips_cls.getphilipssuppliertranslations( asProject, lsSupplier, lsOldInvType)
 

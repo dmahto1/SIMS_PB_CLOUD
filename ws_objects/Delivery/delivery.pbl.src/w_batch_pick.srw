@@ -224,7 +224,7 @@ datastore idsDeliveryMaster
 
 inet	linit
 u_nvo_websphere_post	iuoWebsphere
-string isShipRef
+string isShipRef,is_invoiceno
 Long	ilSetRow
 String	isTraxWarehouse
 
@@ -5598,6 +5598,10 @@ If idw_MASter.Retrieve(gs_project,llBatchID) > 0 Then
 	//Retrieve the Pack Records if they exist 
 	idw_pack.REset()
 	idw_pack.Retrieve(gs_Project,llBatchID)
+	
+	//Retrieve the Pack Records if they exist 
+	//idw_trax.Reset()  // Dinesh - 02/27/2025 - SIMS-672-CS Migration - Label Print and Re-print not working for container with multiple Packing records
+	//idw_trax.Retrieve(gs_Project,llBatchID)  // Dinesh - 02/27/2025 - SIMS-672-CS Migration - Label Print and Re-print not working for container with multiple Packing records
 		
 	uf_enable_first_carton_row(0,"",'')
 	
@@ -6889,8 +6893,8 @@ if llRowCount = -1 then
 	MessageBox("Batch Picking Confirmations Error", lsMsg, StopSign!)
 elseif llRowCount = -2 then
 	lsMsg =  "        Could not continue with confirmations.~r~r" + &
-				"Not all welcome letters and/or Trax labels have been printed.~r~r" + &
-				"     Please complete this step before confirming batches"
+				"Not all welcome letters and/or ConnectShip  labels have been printed.~r~r" + &
+				"     Please complete this step before confirming batches" // Dinesh - 02/10/2025- SIMS-641-Development for Delivery Order screen change for ConnectShip 
 	MessageBox("Batch Picking Confirmation Stopped", lsMsg, StopSign!)
 elseif llRowCount = -3 then
 	lsMsg =  "        Could not continue with confirmations~r~r" + &
@@ -9475,7 +9479,8 @@ If llRow > 0 Then
 
 	//09/05 - PCONKL - Can't delete a row that was shipped by TRAX until it is voided
 	If This.GetITemString(llrow,'tracking_id_Type') = 'T' Then
-		Messagebox(is_title,'This Carton has been shipped by TRAX.~rYou must Void the carton before you can delete it.',StopSign!)
+		Messagebox(is_title,'This Carton has been shipped by ConnectShip.~rYou must Void the carton before you can delete it.',StopSign!) // Dinesh - 02/10/2025- SIMS-641-Development for Delivery Order screen change for ConnectShip 
+		//Messagebox(is_title,'This Carton has been shipped by TRAX.~rYou must Void the carton before you can delete it.',StopSign!)
 		Return
 	End If
 	
@@ -9797,7 +9802,7 @@ integer y = 112
 integer width = 3854
 integer height = 2204
 long backcolor = 79741120
-string text = "TRAX"
+string text = "ConnectShip"
 long tabtextcolor = 33554432
 long tabbackcolor = 79741120
 long picturemaskcolor = 536870912
@@ -10045,11 +10050,13 @@ If This.Find("C_select_Ind='Y' and shipper_tracking_ID > ''",1,This.RowCount()) 
 	
 	If lsLocale <> 'QPSL' Then
 
-		Messagebox("TRAX call Successful",'TRAX Labels(s) sent to printer')
+		Messagebox("ConnectShip call Successful",'ConnectShip Labels(s) sent to printer') // Dinesh - 02/10/2025- SIMS-641-Development for Delivery Order screen change for ConnectShip
+		//Messagebox("TRAX call Successful",'TRAX Labels(s) sent to printer')
 		
 	Else
 
-		If Messagebox("TRAX call Successful" ,"Would you like to print the TRAX Shipping Labels?",Question!,YesNo!,1) = 1 then
+		//If Messagebox("TRAX call Successful" ,"Would you like to print the TRAX Shipping Labels?",Question!,YesNo!,1) = 1 then
+		If Messagebox("TRAX call Successful" ,"Would you like to print the ConnectShip Shipping Labels?",Question!,YesNo!,1) = 1 then//Dinesh - 02/06/2025- SIMS-641- Development for Delivery Order screen change for ConnectShip 
 			This.TriggerEvent('ue_Print_labels')
 		End If
 		
@@ -10079,7 +10086,7 @@ event ue_print_labels();////Print Shipping labels returned from TRAX
 //Print Shipping labels returned from TRAX
 
 Long	llRowCount, llRowPos, llPrintJob, llLen, llstartPos, llRow
-String	lsCurrentLabel, lsLabels,  lsTrackID, lsTrackIDSave, lsPrinter, lsProject, lsWarehouse
+String	lsCurrentLabel, lsLabels,  lsTrackID, lsTrackIDSave, lsPrinter, lsProject, lsWarehouse,lsDoNo,lsinvoice
 Dec 		ldLoop
 Int		i
 
@@ -10095,6 +10102,10 @@ For llRowPos = 1 to llRowCount
 
 	// 01/08 - PCONKL - We should be printing at the Ship Ref level instead of carton level now, check both for back ass compatability
 	//							If Printing at the Ship Ref level, we only need to print once since all labels for a ship ref are in the same file
+	//lsinvoice = This.GetITemString(llRowPos,'invoice_no') // Dinesh - 02/27/2025- SIMS-672-CS Migration - Label Print and Re-print not working for container with multiple Packing records
+	
+	//select do_no into :lsDoNo from delivery_master where Project_Id=:gs_project and invoice_no=:lsinvoice using sqlca; // Dinesh - 02/27/2025- SIMS-672-CS Migration - Label Print and Re-print not working for container with multiple Packing records
+	
 	If This.GetITemString(llRowPos,'trax_Ship_ref_nbr') > "" Then
 		lsTrackID = This.GetITemString(llRowPos,'trax_Ship_ref_nbr')
 	Else
@@ -10104,6 +10115,7 @@ For llRowPos = 1 to llRowCount
 	If lsTrackID = '' or lsTrackID = lsTrackIDSave Then Continue
 	
 	lsLabels += luTrax.uf_retrieve_label(lsTrackID, 'CS') /* CS= Create Shipment label type */
+	//lsLabels += luTrax.uf_retrieve_labels(lsTrackID,lsDoNo) /* CS= Create Shipment label type */// Dinesh - 02/27/2025- SIMS-672-CS Migration - Label Print and Re-print not working for container with multiple Packing records
 	
 	lsTrackIDSave = lsTrackID
 

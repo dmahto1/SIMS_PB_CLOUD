@@ -1,6 +1,6 @@
 ﻿$PBExportHeader$d_cc_daily_inv_snapshot.srd
 $PBExportComments$+3PL Daily Inventory SnapShot
-release 11.5;
+release 19;
 datawindow(units=0 timer_interval=0 color=67108864 brushmode=0 transparency=0 gradient.angle=0 gradient.color=8421504 gradient.focus=0 gradient.repetition.count=0 gradient.repetition.length=100 gradient.repetition.mode=0 gradient.scale=100 gradient.spread=100 gradient.transparency=0 picture.blur=0 picture.clip.bottom=0 picture.clip.left=0 picture.clip.right=0 picture.clip.top=0 picture.mode=0 picture.scale.x=100 picture.scale.y=100 picture.transparency=0 processing=1 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes print.background=no print.preview.background=no print.preview.outline=yes hidegrayline=no showbackcoloronxp=no picture.file="" grid.lines=0 )
 header(height=80 color="536870912" transparency="0" gradient.color="8421504" gradient.transparency="0" gradient.angle="0" brushmode="0" gradient.repetition.mode="0" gradient.repetition.count="0" gradient.repetition.length="100" gradient.focus="0" gradient.scale="100" gradient.spread="100" )
 summary(height=0 color="536870912" transparency="0" gradient.color="8421504" gradient.transparency="0" gradient.angle="0" brushmode="0" gradient.repetition.mode="0" gradient.repetition.count="0" gradient.repetition.length="100" gradient.focus="0" gradient.scale="100" gradient.spread="100" )
@@ -34,6 +34,7 @@ FROM  Content B with(nolock)
 LEFT JOIN Item_Master E with(nolock) on B.SKU = E.SKU AND B.Supp_Code =E.Supp_Code
 LEFT JOIN Owner F with(nolock) ON  B.Owner_Id =F.Owner_Id
 LEFT JOIN Receive_Master D with(nolock) on  B.Project_Id =D.Project_Id and B.wh_code =D.wh_code and B.RO_No =D.RO_No
+INNER JOIN project_warehouse pw with(nolock) on b.project_id=pw.project_id and b.wh_code=pw.wh_code
 WHERE B.Project_Id = :as_project
 AND F.Owner_Cd NOT LIKE 'DC%' AND F.Owner_Cd NOT LIKE 'GU%'
 GROUP BY  B.Last_Cycle_Count, B.l_code, B.sku, E.CC_Class_Code,F.Owner_cd, B.Po_No
@@ -71,5 +72,6 @@ xsltgen()
 jsgen()
 export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
 import.xml()
-export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" nativepdf.customsize=0 nativepdf.customorientation=0 nativepdf.pdfstandard=0 nativepdf.useprintspec=no )
 export.xhtml()
+ 

@@ -184,8 +184,8 @@ global w_workorder w_workorder
 type variables
 Datawindow idw_main, idw_Detail, idw_instructions, idw_Pick, idw_Serial, & 
 				idw_Putaway, idw_putaway_print, idw_search_result, idw_search, idw_pick_detail, idw_pick_Print, idw_putaway_Content, idw_component_parent//TAM 2014/05	
-				
 datastore ids_pick_detail	
+datastore ids_pick_detail_geistlich //dts 09/18/2021				
 				
 Datastore	ids_Content, ids_Pick_alloc, ids_inv_type
 n_warehouse i_nwarehouse
@@ -212,6 +212,11 @@ u_nvo_carton_serial_scanning iuo_carton_serial_scanning
 boolean ibmultiplesku
 
 long ilParent_rowno, ilParent_maxrow, ilComponent_no
+
+//dts - Geistlich...
+string is_FirstLot, is_SecondLot, is_FirstExpDate, is_SecondExpDate
+date id_EarliestExpDate
+
 end variables
 
 forward prototypes
@@ -233,6 +238,7 @@ public subroutine dodisplaymessage (string _title, string _message)
 public function integer wf_component_sku_visible (boolean as_visible, string as_order_type)
 public function string getronocompletedate (string asrono)
 public function integer wf_reset_putaway ()
+public function integer wf_geistlich_putaway (long alrow)
 end prototypes
 
 event ue_generate_pick();Long	llDetailCount,	llDetailPos, llPickCount, llPickPos, llNewPickRow,	llChildCount,	&
@@ -249,6 +255,10 @@ Integer	liRC
 DatawindowChild	ldwc
 
 u_ds	lds_item_component
+
+//dts - 2/22/22 - testing bringing picking logic back to PowerBuilder (for component Add/Delete)...
+boolean lbAddDelete
+long llCompCount
 
 ////GAP 12/02 -  retrieving inventory types and shipping indicators. 
 //IF IsValid(ids_inv_type) = FALSE THEN
@@ -372,13 +382,23 @@ For llDEtailPos = 1 to llDetailCount
 			lds_item_component.SetItem(llChildCount,"sku_child",idw_Detail.GetITemString(llDetailPos,'sku'))
 			lds_item_component.SetItem(llChildCount,"supp_code_child",idw_Detail.GetITemString(llDetailPos,'supp_Code'))
 		End If
-		
+
+		//dts - 2/22/22 - testing bringing picking logic back to PowerBuilder (for component Add/Delete)...
+		If idw_main.GetItemString(1,'ord_type') = 'A' or idw_main.GetItemString(1,'ord_type') = 'D' Then
+			lbAddDelete = true
+		end if
+
 		//Build a pick row for each of the children
 		For llChildPos = 1 to llChildCount
 			
 			lsChildSku = lds_item_component.GetItemString(llChildPos,"sku_child")
 			lsChildSupplier = lds_item_component.GetItemString(llChildPos,"supp_code_child")
 						
+		//dts - 2/22/22 - testing bringing picking logic back to PowerBuilder...
+		select count(*) into :llCompCount from workorder_component_sku
+		where wo_no=:lsWONO and Component_Sku=:lsChildSku;
+		if llCompCount>0 then
+		
 			//We need the component ind for this child sku (It may also be a parent)
 			Select Component_ind Into :lsCompInd
 			From Item_master
@@ -400,7 +420,7 @@ For llDEtailPos = 1 to llDetailCount
 			
 			//This original row being created will be deleted (we are combining pick rows and these rows will never be updated)
 			idw_pick.SetItem(llNewPickRow,'deliver_to_location','XXXXXXXXXXX')
-			
+		end if //dts - test of PB Picking for Add/Delete	
 		Next /*Child*/
 		
 	Else /*Not a component, build a straight Pick Row*/
@@ -521,6 +541,11 @@ luo_Pick= Create u_nvo_custom_wo_picklists
 	
 		luo_pick.uf_wo_pickprint_riverbed()
 		return
+
+
+	Case 'GEISTLICH'		//Dinesh - 08/24/2022 - Geistlich picking print increasing length of description field.	
+	
+		idw_pick_Print.dataobject='d_workorder_picking_prt_geistlich'
 	
 End Choose
  
@@ -598,7 +623,9 @@ Long	llRowPos,		&
 		llSubLine,		&
 		llFindRow,		&
 		llfindPickRow,	&
-		llDiebold100Owner
+		llDiebold100Owner, &
+		ll_cnt, &
+		ll_row 
 		
 decimal ldReqQty //GAP 11/02 convert to decimal 
 String	lsSKU,		&
@@ -617,6 +644,9 @@ String	lsSKU,		&
 			lsContainer, &
 			lsUF1,	 		&
 			lsGroup, lsExpiration //GAP 11/02 added container and expirtaion indicators 
+//dts 04/12/2022 - S70279 - WIP/SIT QTY Fix - need ro_no in pick_detail datastore for geistlich so using SyntaxFromSQL instead of d_workorder_picking
+String		lsSqlSyntax, ERRORS
+Long		llResult
 			
 If ib_changed Then //GAP 11/02
 	messagebox(is_title,'Please save changes before generating Putaway List!')
@@ -628,6 +658,29 @@ If idw_Pick.RowCount() <= 0 Then
 	MessageBox(is_title,'You must generate the Pick List before generating the Putaway List!')	
 	Return
 End If /*No Pick list */
+//Date-24-08-2022***Added by Dhirendra to fix the Geistlich Bugs which are reported by Nitin-Start
+IF  idw_putaway.rowcount() > 0 then 
+Choose Case MessageBox(is_title, "Delete existing records?", Question!, YesNo!,2)
+		Case 2
+			Return
+		Case 1
+			SetPointer(HourGlass!)
+			idw_putaway.SetRedraw(False)
+			
+			idw_putaway.SetFilter('')
+			idw_putaway.Filter()
+
+			ll_cnt = idw_putaway.RowCount()
+			For ll_row = ll_cnt to 1 Step -1
+				idw_putaway.DeleteRow(ll_row)
+			Next
+			ib_changed = True
+			idw_putaway.SetRedraw(True)
+			
+			If this.Trigger Event ue_save() = -1 Then Return
+	End Choose
+End If
+//Date-24-08-2022*** Added by Dhirendra to fix the Geistlich Bugs which are reported by Nitin-END
 
 ib_changed = True
 
@@ -646,6 +699,20 @@ End If
 idwc_supplier_Putaway.InsertRow(0)
 			
 llRowCount = idw_Detail.RowCount()
+
+is_WONO = idw_main.GetITemString(1,'wo_no')
+//dts 04/12/2022 - S70279 - WIP/SIT QTY Fix - need ro_no in pick_detail datastore for geistlich so using SyntaxFromSQL instead of d_workorder_picking
+//ids_pick_detail_geistlich.retrieve(is_WONO) //dts
+If gs_project = 'GEISTLICH' Then
+	if not isvalid(ids_pick_detail_geistlich) then
+		ids_pick_detail_geistlich = create DataStore
+		//lsSqlSyntax = "Select wo_no, line_item_no, ro_no, container_id, lot_no, Expiration_date, Serial_no from workorder_picking_detail with (nolock) where wo_no = '" + is_WONO + "' "
+		lsSqlSyntax = "Select * from workorder_picking_detail with (nolock) where wo_no = '" + is_WONO + "' "
+		llResult = ids_pick_detail_geistlich.Create(SQLCA.SyntaxFromSQL(lsSqlSyntax,"", ERRORS))
+		llResult = ids_pick_detail_geistlich.SetTransObject(SQLCA)
+	end if
+	llResult = ids_pick_detail_geistlich.Retrieve()
+end if
 			
 For llRowPos = 1 to llRowCount /*For each Detail Record*/
 	
@@ -674,9 +741,14 @@ For llRowPos = 1 to llRowCount /*For each Detail Record*/
 	//Get default Putaway Location based on Item, owner and Inv Type	
 	//lsLoc = i_nwarehouse.of_assignlocation(lssku,lsSUpplier, lswarehouse, lsInvType,llOwnerID, ldReqQty)
 	
+	If Upper(gs_Project) = 'GEISTLICH' Then
+		lsInvType='N' //dts - default Inventory_Type to 'N'
+	end if
+	
 	llNewRow = idw_putaway.InsertRow(0)
 	
 	idw_putaway.setitem(llNewRow,'wo_no', lsorder)
+	idw_putaway.setitem(llNewRow,'ro_no', lsorder) //dts - 04/15/22 - S70279 - WIP/SIT QTY Fix - So the trigger inserting into Content Summary has ro_no=wo_no for the Parent (but ro_no=ro_no for the Children)
 	idw_putaway.SetItem(llNewRow,"sku", lssku)	
 	idw_putaway.SetItem(llNewRow,"sku_parent", lssku)	
 	idw_putaway.SetItem(llNewRow,"supp_code", lsSupplier)
@@ -748,13 +820,24 @@ For llRowPos = 1 to llRowCount /*For each Detail Record*/
 	If gs_project = 'NYCSP' Then
 		If idw_putaway.GetItemString(llNewRow,"component_ind") = 'Y' Then
 			ilCompNumber =  g.of_next_db_seq(gs_project,'Content','Component_no')
-			idw_putaway.setitem(llNewrow,'component_no', ilCompnumber)
+			idw_putaway.setitem(llNewrow,'component_no', ilCompNumber)
 			wf_create_comp_child(llNewrow)
 		Else /* not a component*/
 			idw_putaway.setitem(llNewrow,'component_no',0)
 		End If /*component*/
 	End If	
 	
+	If gs_project = 'GEISTLICH' Then
+		If idw_putaway.GetItemString(llNewRow,"component_ind") = 'Y' Then
+			//dts - 10/12/21 - going back to unique Component_No per KIT
+			ilCompNumber =  g.of_next_db_seq(gs_project,'Content','Component_no')
+			idw_putaway.setitem(llNewrow,'component_no', ilCompNumber)
+			wf_geistlich_putaway(llNewRow)
+		Else /* not a component*/
+			idw_putaway.setitem(llNewrow,'component_no',0)
+		End If /*component*/
+	End If	
+
 Next /*Next Detail Row*/
 
 // 07/04 - PCONKL - For Logitech, we need to copy Lot, PO and Exp Date from Picking to Putaway and make sure the qty's match
@@ -769,6 +852,14 @@ idw_putaway.SetRedraw(True)
 
 //GAP 11/02 - Hide any unused lottable fields
 i_nwarehouse.of_hide_unused(idw_putaway)
+//Date-24-08-2022***Added by Dhirendra to fix the Geistlich Bugs which are reported by Nitin-Start
+If gs_project = 'GEISTLICH' Then
+idw_putaway.Modify("container_id.width=0 container_Id_t.width=0")
+idw_putaway.Modify("lot_no.protect=1")
+idw_putaway.Modify("container_id.protect=1")
+idw_putaway.Modify("expiration_date.protect=1")
+END IF 
+//Date-24-08-2022***Added by Dhirendra to fix the Geistlich Bugs which are reported by Nitin-END
 
 end event
 
@@ -953,6 +1044,28 @@ If This.Trigger Event ue_save() = 0 Then
 	// 09/08 - PCONKL - We may be posting a transaction to Websphere as well (i.e. Diebold)
 	This.TriggerEvent("ue_websphere_Confirm")
 
+	//dts - 09/16/2021 - Implementing work-around to clean up SIT/WIP Quantities after Work Order confirmation.
+	//        -  could probably get away with updating offsetting SIT/WIP to 0, but if multiple Work Orders are being processed and grabbing the same inventory bucket, then that could cause problems
+	//           - so, scrolling through putaway and updating SIT/WIP to clean up the orphaned quantities.
+	/*if gs_Project='NYCSP' or gs_Project='GEISTLICH' then
+		ls_sql_syntax = "select * from WorkOrder_Putaway where wo_no ='" + lsWONO + "'"
+		ldsPutaway.Create(SQLCA.SyntaxFromSQL(ls_sql_syntax, "", lsError))
+		IF Len(lsError) > 0 THEN
+			messagebox("ERROR", "*** Unable to create datastore for put-away Records.~r~r" + lsError)
+			continue
+		END IF
+		ldsPutaway.SetTransObject(SQLCA)
+		llPutaway = ldsPutaway.Retrieve()
+	/**********/
+		for i = 1 to llPutaway
+			//add to SIT and subtract from WIP
+			ldQty=ldsPutaway.GetItemNumber(i, 'Quantity')
+			update content_summary set SIT_Qty = SIT_Qty + 
+		next
+	end if // NYCSP/GEISTLICH
+	//dts - end SIT/WIP clean-up.
+	*/
+	
 	w_main.SetMicrohelp("Record Confirmed!")
 	Messagebox(is_title,'Order Confirmed!')	
 Else
@@ -1280,12 +1393,14 @@ idw_putaway.SetRedraw(False)
 idwc_supplier_Putaway.InsertRow(0)
 			
 llRowCount = idw_Detail.RowCount()
-			
+
+is_WONO = idw_main.GetITemString(1,'wo_no')
+
 For llRowPos = 1 to llRowCount /*For each Detail Record*/
 	
 	w_main.SetMicrohelp('generating Putaway for Detail Line: ' + String(llRowPos) + ' of ' + String(llRowCount))
 
-	is_WONO = idw_main.GetITemString(1,'wo_no')
+	//dts is_WONO = idw_main.GetITemString(1,'wo_no')
 	lssku = idw_detail.GetItemString(llRowPos,"sku")
 	llOwnerID = idw_detail.GetItemNumber(llRowPos,"owner_id")
 	lsOwnername = idw_detail.GetItemString(llRowPos,"cf_owner_name")
@@ -1320,6 +1435,7 @@ For llRowPos = 1 to llRowCount /*For each Detail Record*/
 		llNewRow = idw_putaway.InsertRow(0)
 	
 		idw_putaway.setitem(llNewRow,'wo_no', is_WONO)
+		idw_putaway.setitem(llNewRow,'ro_no', is_WONO) //dts - 4/27/22 - S70279 - WIP/SIT QTY Fix - setting putaway.ro_no for Parent part here....
 		idw_putaway.SetItem(llNewRow,"sku", lssku)	
 		idw_putaway.SetItem(llNewRow,"sku_parent", lssku)	
 		idw_putaway.SetItem(llNewRow,"supp_code", lsSupplier)
@@ -1645,7 +1761,10 @@ lds_pick_detail = Create datastore
 
 //GailM 11/20 DE17335 Multiple changes in this event to sync with 5 trigger changes  for Add and Delete components
 //Only PickDetail rows have ro_no - a special DS was created to pull the ro_no field
-lsSqlSyntax = "Select wo_no, line_item_no, ro_no, container_id from workorder_picking_detail with (nolock) where wo_no = '" + idw_main.GetITemString(1,'wo_no') + "' "
+/*dts - 06/12/22 - S70279 - SIMS PIP/SIP - Work Order Refactoring - WIP/SIT QTY Fix - Need to get ro_no for the SKU
+    - TODO - Need to handle multiple RO_NO's for same SKU (consume qty as we loop through)*/
+//dts lsSqlSyntax = "Select wo_no, line_item_no, ro_no, container_id from workorder_picking_detail with (nolock) where wo_no = '" + idw_main.GetITemString(1,'wo_no') + "' "
+lsSqlSyntax = "Select wo_no, line_item_no, ro_no, container_id, sku from workorder_picking_detail with (nolock) where wo_no = '" + idw_main.GetITemString(1,'wo_no') + "' "
 llResult = lds_pick_detail.Create(SQLCA.SyntaxFromSQL(lsSqlSyntax,"", ERRORS))
 llResult = lds_pick_detail.SetTransObject(SQLCA)
 llResult = lds_pick_detail.Retrieve()
@@ -1780,7 +1899,12 @@ For llRowPos = 1 to llRowCount /*For each Picking Record*/
 			idw_putaway.SetItem(llNewRow,"old_container_id",idw_pick.GetItemString(llFindRow,"container_id"))
 			idw_putaway.SetItem(llNewRow,"old_l_code",idw_pick.GetItemString(llFindRow,"l_code"))
 			
-			lsFind = "line_item_no = " + String(idw_pick.GetItemNumber(llRowPos,"line_item_no")) + " and container_id = '" + idw_pick.GetItemString(llRowPos,"container_id") + "' "
+			/*dts - 06/12/22 - S70279 - SIMS PIP/SIP - Work Order Refactoring - WIP/SIT QTY Fix
+				- need to get the pick row for the sku in question to get the correct pick.ro_no.... */
+//this is the parent!!!			lsFind = "line_item_no = " + String(idw_pick.GetItemNumber(llRowPos,"line_item_no")) + " and container_id = '" + idw_pick.GetItemString(llRowPos,"container_id") + "' "
+//need to find the pick row for the component.  and... consume picking_detail records.  ??  what if Component qty is 2, and they're picked from two different RO_NO's?  Two rows in Putaway?  Probably overkill....
+			lsFind = "line_item_no = " + String(idw_pick.GetItemNumber(llFindRow,"line_item_no")) //+ " and container_id = '" + idw_pick.GetItemString(llRowPos,"container_id") + "' "
+			lsFind += " and sku = '" + lsComponentSku + "' " //dts - 06/12/22  ... 6/15 - redundant (now that we're 'Find'ing based on component line no?
 			llFindPickRow = lds_pick_detail.Find(lsFind, 1, lds_pick_detail.RowCount())
 			If llFindPickRow > 0 Then
 				idw_putaway.SetItem(llNewRow,"ro_no",lds_pick_detail.GetItemString(llFindPickRow,"ro_no"))	//GailM 11/13/2020
@@ -1828,7 +1952,9 @@ lds_pick_detail = Create datastore
 
 //GailM 11/20 DE17335 Multiple changes in this event to sync with 5 trigger changes  for Add and Delete components
 //Only PickDetail rows have ro_no - a special DS was created to pull the ro_no field
-lsSqlSyntax = "Select wo_no, line_item_no, ro_no, container_id from workorder_picking_detail with (nolock) where wo_no = '" + idw_main.GetITemString(1,'wo_no') + "' "
+/*dts - 06/12/22 - S70279 - SIMS PIP/SIP - Work Order Refactoring - WIP/SIT QTY Fix - Need to get ro_no for the SKU*/
+//dts lsSqlSyntax = "Select wo_no, line_item_no, ro_no, container_id from workorder_picking_detail with (nolock) where wo_no = '" + idw_main.GetITemString(1,'wo_no') + "' "
+lsSqlSyntax = "Select wo_no, line_item_no, ro_no, container_id, sku from workorder_picking_detail with (nolock) where wo_no = '" + idw_main.GetITemString(1,'wo_no') + "' "
 llResult = lds_pick_detail.Create(SQLCA.SyntaxFromSQL(lsSqlSyntax,"", ERRORS))
 llResult = lds_pick_detail.SetTransObject(SQLCA)
 llResult = lds_pick_detail.Retrieve()
@@ -1925,7 +2051,10 @@ For llRowPos = 1 to llRowCount /*For each Picking Record*/
 		lsWhCode =  idw_detail.getITemString(llFindRow,"user_field1")
 		idw_putaway.SetItem(llNewRow,"User_Field1", lsWhCode)
 		
+		/*dts - 06/12/22 - S70279 - SIMS PIP/SIP - Work Order Refactoring - WIP/SIT QTY Fix
+		   - need to get the pick row for the sku in question to get the correct pick.ro_no.... */
 		lsFind = "line_item_no = " + String(idw_pick.GetItemNumber(llRowPos,"line_item_no")) + " and container_id = '" + idw_pick.GetItemString(llRowPos,"container_id") + "' "
+		lsFind += " and sku = '" + idw_pick.GetItemString(llRowPos,"sku") + "' "
 		llFindPickRow = lds_pick_detail.Find(lsFind, 1, lds_pick_detail.RowCount())
 		If llFindPickRow > 0 Then
 			idw_putaway.SetItem(llNewRow,"ro_no",lds_pick_detail.GetItemString(llFindPickRow,"ro_no"))	//GailM 11/13/2020
@@ -2000,8 +2129,7 @@ If Messagebox(is_title,'Are you sure you want to confirm Putaway of the selected
 //							not knowing when the pick list is stable, we will generate it the firt time a putaway is confirmed
 //							and update file_transmit_ind so we don't send it again.
 
-If idw_main.GetITemString(1,'file_transmit_Ind') <> 'Y' or  isnull(idw_main.GetITemString(1,'file_transmit_Ind')) Then
-	
+If idw_main.GetITemString(1,'file_transmit_Ind') <> 'Y' or  isnull(idw_main.GetITemString(1,'file_transmit_Ind')) Then	
 	Execute Immediate "Begin Transaction" using SQLCA; /* 11/04 - PCONKL - Auto Commit Turned on to eliminate DB locks*/
 
 	Insert Into batch_Transaction (project_ID, Trans_Type, Trans_Order_ID, Trans_Status, Trans_Create_Date, Trans_Parm)
@@ -2009,17 +2137,16 @@ If idw_main.GetITemString(1,'file_transmit_Ind') <> 'Y' or  isnull(idw_main.GetI
 	Execute Immediate "COMMIT" using SQLCA;
 	
 	idw_Main.SetITem(1,'file_transmit_Ind','Y') /* we only want to send once */
-		
 End If
 
-
-
+/*dts - 06/23/22 - S70279 - SIMS PIP/SIP - Work Order Refactoring - WIP/SIT QTY Fix
+    - putaway rows now have a mixture of ro_no (not all wo_no!). Changed idw_putaway_content (d_ro_content) grabbing all ro_no's from putaway.*/
 idw_putaway_Content.Retrieve(idw_main.GetITemString(1,'wo_no')) /*Retieve any existing Putaway Rows*/
 
 ll_totalrows = idw_putaway.rowcount()
 
 for i = 1 to ll_totalrows
-	
+	//w_main.SetMicroHelp('Processing row ' + string(i) + ' of ' + string(ll_totalrows)) //dts -todo (just testing... not sure why it doesn't always update)
 	//If row not checked then Don't process
 	If idw_putaway.GetITemString(i,'c_confirm_putaway_ind') <> 'Y' or isnull(idw_putaway.GetITemString(i,'c_confirm_putaway_ind')) Then Continue
 	
@@ -2066,7 +2193,8 @@ for i = 1 to ll_totalrows
 //	lsFind += " and Upper(inventory_type) = '" + Upper(idw_putaway.getitemstring(i,'inventory_type')) + "' and upper(serial_no) = '" + Upper(idw_putaway.getitemstring(i,'serial_no')) + "'"
 	lsFind += " and Upper(inventory_type) = '" + Upper(idw_putaway.getitemstring(i,'inventory_type'))  + "'"
 	lsFind += " and Upper(lot_no) = '" + Upper(idw_putaway.getitemstring(i,'lot_no')) + "' and Upper(po_no) = '" + upper(idw_putaway.getitemstring(i,'po_no')) + "'"
-	lsFind += " and Upper(po_no2) = '" + Upper(idw_putaway.getitemstring(i,'po_no2')) + "' and Upper(ro_no) = '" + Upper(idw_putaway.getitemstring(i,'wo_no')) + "'"
+//dts 06/23/22 now using RO_NO	lsFind += " and Upper(po_no2) = '" + Upper(idw_putaway.getitemstring(i,'po_no2')) + "' and Upper(ro_no) = '" + Upper(idw_putaway.getitemstring(i,'wo_no')) + "'"
+	lsFind += " and Upper(po_no2) = '" + Upper(idw_putaway.getitemstring(i,'po_no2')) + "' and Upper(ro_no) = '" + Upper(idw_putaway.getitemstring(i,'Ro_no')) + "'"
 	lsFind += " and String(expiration_date,'mm/dd/yyyy hh:mm') = '" + String(idw_putaway.getitemDateTime(i,'expiration_date'),'mm/dd/yyyy hh:mm') + "'"
 // TAM 2010/10/13 Added container Id
 	lsFind += " and Upper(container_id) = '" + Upper(idw_putaway.getitemString(i,'container_id')) + "'"
@@ -2083,7 +2211,8 @@ for i = 1 to ll_totalrows
 		End If
 						
 	//TAM 2010/09 Added components to match receive order component processing (NYCSP only but could be for All)	
-		If Upper(gs_Project) = 'NYCSP' Then
+		//dts If Upper(gs_Project) = 'NYCSP' Then
+		If Upper(gs_Project) = 'NYCSP' or Upper(gs_Project) = 'GEISTLICH' Then
 			If idw_putaway.GetITemString(i,"component_ind") = '*' or idw_putaway.GetITemString(i,"component_ind") = 'B' Then /* 09/02 - Pconkl - 'B' = Both (child and parent) */
 				idw_putaway_Content.setitem(llFindRow,'component_qty',(idw_putaway_Content.GetItemNumber(llFindRow,'component_qty') + idw_putaway.getitemnumber(i,'quantity')))
 			Else
@@ -2106,7 +2235,8 @@ for i = 1 to ll_totalrows
 		ll_Component_No =  idw_putaway.getitemnumber(i,'component_no')
 		// TAM 03/29/2012 Added this back in for Riverbed.  It was messed up on delivery order being a kit within a kit
 		// GXMOR 05/03/2012 Added NYCSP for if statement as directed by TAM
-		If Upper(gs_Project) = 'RIVERBED' or Upper(gs_Project) = 'NYCSP' Then 
+		//dts If Upper(gs_Project) = 'RIVERBED' or Upper(gs_Project) = 'NYCSP' Then 
+		If Upper(gs_Project) = 'RIVERBED' or Upper(gs_Project) = 'NYCSP' or Upper(gs_Project) = 'GEISTLICH' Then 
 			idw_putaway_Content.setitem(ll_new,'component_no',idw_putaway.getitemnumber(i,'component_no')) /*Finished goods are no longer components, don't want to link any children at picking!! */
 		End If
 		//
@@ -2136,16 +2266,24 @@ for i = 1 to ll_totalrows
 		idw_putaway_Content.setitem(ll_new,'last_update',g.of_getWorldTime() )
 
 		//TAM 2010/09 Added components to match receive order component processing (NYCSP only but could be for All)	
-		If Upper(gs_Project) = 'NYCSP' Then
+		//dts If Upper(gs_Project) = 'NYCSP' Then
+		If Upper(gs_Project) = 'NYCSP' or Upper(gs_Project) = 'GEISTLICH' Then
 			If idw_putaway.GetITemString(i,"component_ind") = '*' or idw_putaway.GetITemString(i,"component_ind") = 'B' Then /* 09/02 - Pconkl - 'B' = Both (child and parent) */
 				idw_putaway_Content.setitem(ll_new,'avail_qty',0)
 				idw_putaway_Content.setitem(ll_new,'component_qty',idw_putaway.getitemnumber(i,'quantity'))
-				idw_putaway_Content.setitem(ll_new,'ro_no',idw_putaway.getitemstring(i,'wo_no')) 	//GailM DE17335 - Throwing a DB error if coming from picking
+				//dts - 06/12/22 - S70279 - Work Order Refactoring - WIP/SIT QTY Fix, setting wo_no to ro_no for components...
+				//dts - 06/12/22 idw_putaway_Content.setitem(ll_new,'ro_no',idw_putaway.getitemstring(i,'wo_no')) 	//GailM DE17335 - Throwing a DB error if coming from picking
+				idw_putaway_Content.setitem(ll_new,'ro_no',idw_putaway.getitemstring(i,'RO_NO')) 	//GailM DE17335 - Throwing a DB error if coming from picking
 				idw_putaway.SetITem(i,'user_field2',String(today(),'MM/DD/YYYY HH:MM'))	   //GailM  7/10/2020 S47693 F20484 I2896 - For component SKU - cancelled
 			Else
 				idw_putaway_Content.setitem(ll_new,'avail_qty',idw_putaway.getitemnumber(i,'quantity'))
 				idw_putaway_Content.setitem(ll_new,'component_qty',0)
 				idw_putaway_Content.setitem(ll_new,'ro_no',idw_putaway.getitemstring(i,'wo_no')) 	//GailM DE17335 - Throwing a DB error if coming from picking
+				//dts - 12/22/22 - SIMS-161 - NYC Crashing trying to insert duplicate back into 'BULK' (FIND is using ro_no but INSERT is using wo_no)
+				// -  Parent ro_no is set to wo_no (as it always has been).
+				If idw_putaway.GetItemString(i,"component_ind") = 'N' Then
+					idw_putaway_Content.setitem(ll_new,'ro_no',idw_putaway.getitemstring(i,'ro_no'))
+				end if				
 				idw_putaway.SetITem(i,'user_field2',String(today(),'MM/DD/YYYY HH:MM'))		//GailM  7/10/2020 S47693 F20484 I2896 - For parent SKU
 			End If
 		Else
@@ -2667,13 +2805,22 @@ For llrowPos = 1 to llRowCount
 			//Jxlim 01/27/2010 Validate Serialized, Serialized Type of 'B' = capturing both Inbound and Outbound but not writing to Content
 			If idw_putaway.GetITemString(llRowPos,'serialized_ind') = 'Y' or idw_putaway.GetITemString(llRowPos,'serialized_ind') = 'B' Then
 				If idw_putaway.GetItemString(llRowPos,'serial_no') = '-' or isnull(idw_putaway.GetItemString(llRowPos,'serial_no')) or Trim(idw_putaway.GetItemString(llRowPos,'serial_no')) = '' Then
+//					idw_putaway.accepttext()
+//					idw_putaway.SetFocus()
+//					idw_putaway.SetRow(llrowPos)
 					MessageBox(is_title, "Serial Numbers must be entered for serialized parts!", StopSign!)	
+					
+						//Date-24-08-2022***Added by Dhirendra to fix the Geistlich Bugs which are reported by Nitin-Start
+					IF upper(gs_project) <> 'GEISTLICH' then
 					tab_main.SelectTab(5) 
+				END IF 
+					//Date-24-08-2022***Added by Dhirendra to fix the Geistlich Bugs which are reported by Nitin-END 
 					f_setfocus(idw_putaway, llRowPos, "serial_no")
 					Return -1
 				ElseIf idw_putaway.GetITemNumber(llRowPos,'quantity') <> 1 Then
 					MessageBox(is_title, "Quantity must be 1 for serialized parts!", StopSign!)	
 					tab_main.SelectTab(5)
+				
 					f_setfocus(idw_putaway, llRowPos, "quantity")
 					Return -1
 				End If
@@ -4425,7 +4572,7 @@ String	lsSku,				&
 			lsFind,				&
 			lsLoc,					&
 			lsWoNo
-			
+
 SetPointer(HourGlass!)
 
 lu_ds = Create u_ds
@@ -4441,7 +4588,7 @@ lu_ds.Retrieve(gs_project,lssku,lsSupplier, "C") /*retrieve children for Master 
 llRowCount = lu_ds.RowCount()
 llCompRow = alRow
 
-For llRowPos = 1 to llRowCount
+For llRowPos = 1 to llRowCount //look up each SKU_Child record for given SKU_Parent (from Item_Component), and build put-away records from Pick records.
 	
 	//09/02 - Pconkl - We may need to update combine child putaway rows if we are multiple componenet levels deep and mid level components have the same children
 	lsFind = "Upper(sku) = '" + Upper(lu_ds.GetItemString(llRowPos,"sku_child")) + "' and Upper(Supp_code) = '" +  Upper(lu_ds.GetItemString(llRowPos,"supp_code_child"))
@@ -4481,6 +4628,10 @@ For llRowPos = 1 to llRowCount
 			llFindPickRow = idw_pick.Find(lsFind,llFindPickRow+1,idw_pick.RowCount())
 
 			If llFindPickRow > 0 Then 
+				//dts if gs_project = 'GEISTLICH' then
+					//dts - 10/05/2021 - I think this has always been an issue for NYCSP as well so now doing the .reset for all (really, NYCSP and GEISTLICH)
+					idw_pick_detail.reset() //dts - Added for Geistlich (not sure why necessary now but not before so executing only for Geistlich).
+				//dts end if
 				idw_pick_detail.retrieve(is_WONO, lsChildSku, lsChildSupplier,idw_pick.GetItemNumber(llFindPickRow,'owner_id'), &
 					idw_pick.GetItemString(llFindPickRow,'country_of_origin'), idw_pick.GetItemString(llFindPickRow,'l_code'), &
 					idw_pick.GetItemString(llFindPickRow,'inventory_type'), idw_pick.GetItemString(llFindPickRow,'serial_no'), &
@@ -4504,6 +4655,7 @@ For llRowPos = 1 to llRowCount
 				idw_putaway.SetItem(llComprow,"owner_id", idw_putaway.GetItemNumber(alRow,"owner_id"))	
 				idw_putaway.SetItem(llComprow,"cf_owner_name", idw_putaway.GetItemString(alRow,"cf_owner_name"))	
 				idw_putaway.SetItem(llComprow,"l_code", idw_putaway.GetItemString(alRow,"l_code"))
+				idw_putaway.SetItem(llComprow,"old_l_code", idw_pick_detail.GetItemString(llPickDetailRow,"l_code")) //dts 4/27/22 - S70279 (WIP/SIT QTY Fix) - need pick-from l_code for trigger to update correct Content_Summary record
 				idw_putaway.SetItem(llComprow,"country_of_origin", idw_putaway.GetItemString(alRow,"country_of_origin"))
 				idw_putaway.SetItem(llComprow,"Expiration_date",(idw_pick_detail.GetItemDateTime(llPickDetailRow,'Expiration_date')))
 //*					idw_putaway.SetItem(llComprow,"Expiration_date",'2999/12/31') //will be set at the end based on the picklist
@@ -4512,17 +4664,19 @@ For llRowPos = 1 to llRowCount
 				idw_putaway.SetItem(llComprow,"component_ind", '*')	/*it's only a child*/
 				idw_putaway.SetItem(llComprow,"container_id",idw_putaway.GetITemString(alRow,"Container_Id"))
 				idw_putaway.SetItem(llComprow,"ro_no",idw_pick_detail.GetItemString(llPickDetailRow,'ro_no'))
+				//dts - 4/9/22 - S70494 enable Serial No (for Components) for Geistlich and NYC Tablet project
+				idw_Putaway.SetItem(llCompRow,'serial_no', idw_Pick_Detail.GetItemString(llPickDetailRow,'Serial_No')) 
 
 //				idw_putaway.SetItem(llCompRow,"quantity",(idw_pick.GetItemNumber(llFindPickRow,'quantity') * lu_ds.GetItemNumber(llRowPos,"child_qty")))
 
 //TAM 10/13/2010 For NYCSP we are seting the Parent Quantity to 1 so we use the BOM quantity for the Children
-//				If gs_project = 'NYCSP' Then
-//					idw_putaway.SetItem(llCompRow,"quantity",(lu_ds.GetItemNumber(llRowPos,"child_qty")))
-//					ldqty = ldqty - lu_ds.GetItemNumber(llRowPos,"child_qty")
-//				Else
+				If gs_project = 'NYCSP' Then
+					idw_putaway.SetItem(llCompRow,"quantity",(lu_ds.GetItemNumber(llRowPos,"child_qty")))
+					ldqty = ldqty - lu_ds.GetItemNumber(llRowPos,"child_qty")
+				Else
 					idw_putaway.SetItem(llCompRow,"quantity",(idw_pick_detail.GetItemNumber(llPickDetailRow,'quantity')))
 					ldqty = ldqty - idw_pick_detail.GetItemNumber(llPickDetailRow,'quantity')
-//				End If
+				End If
 			
 			//Set Child Sku Values
 				idw_putaway.SetItem(llCompRow,"sku",lu_ds.GetItemString(llRowPos,"sku_child"))
@@ -4595,6 +4749,7 @@ String	lsSKU, lsLot, lsPO, lsFind, lsLoc, lsOrder, lsSupplier, lsWarehouse, lsIn
 			lsSerialInd, lspo2Ind, lsContainerInD, lsLocation
 dateTIme	ldtExpDt
 Decimal	ldPickQTY, ldPutQty
+string lsExpDt //dts - 4/17/2022 - S70279 (WIP/SIT QTY Fix)
 
 //For each Picking Row, we should have a Multiple matching Putaway Row with the same Lot # , PO  and Exp Date 
 // We may have multiple putaway records to have the correct QTY
@@ -4609,6 +4764,7 @@ For llRowPos = 1 to llRowCount
 	llLineITem = idw_Pick.GetITemNumber(llRowPos,'Line_Item_No')
 	ldPickQty = idw_Pick.GetITemNumber(llRowPos,'Quantity')
 	ldtExpDt = idw_Pick.GetITemdateTime(llRowPos,'Expiration_Date')
+	lsExpDt = String(ldtExpDt,'yyyy/mm/dd') //dts - 4/17/2022 - S70279 (WIP/SIT QTY Fix)
 	lsOrder = idw_main.GetITemString(1,'wo_no')
 	llOwnerID = idw_Pick.GetItemNumber(llRowPos,"owner_id")
 	lsOwnername = idw_Pick.GetItemString(llRowPos,"cf_owner_name")
@@ -4653,7 +4809,8 @@ For llRowPos = 1 to llRowCount
 /// TAM 2011/01/18 Added location.  You could have same inventory in 2 locations and it wasn't finding for the second location.
 //		lsFind = "Line_Item_No = " + String(llLineItem) + " and Upper(sku) = '" + upper(lsSKU) + "' and lot_no = '-' and  po_no = '-' and  String(Expiration_Date,'yyyy/mm/dd') = '2999/12/31'" //looking for unchanged putaway records
 // TAM 2012/06 Added Supplier.  You could have inventory with 2 supplier.
-		lsFind = "Line_Item_No = " + String(llLineItem) + " and Upper(sku) = '" + upper(lsSKU) + "' and lot_no = '-' and  po_no = '-' and  String(Expiration_Date,'yyyy/mm/dd') = '2999/12/31' and  l_code = '' "  //looking for unchanged putaway records
+//dts - 4/17/2022 - S70279 (WIP/SIT QTY Fix)		lsFind = "Line_Item_No = " + String(llLineItem) + " and Upper(sku) = '" + upper(lsSKU) + "' and lot_no = '-' and  po_no = '-' and  String(Expiration_Date,'yyyy/mm/dd') = '2999/12/31' and  l_code = '' "  //looking for unchanged putaway records
+		lsFind = "Line_Item_No = " + String(llLineItem) + " and Upper(sku) = '" + upper(lsSKU) + "' and lot_no = '-' and  po_no = '-' and  String(Expiration_Date,'yyyy/mm/dd') = '" +lsExpDt + "' and  l_code = '' "  //looking for unchanged putaway records
 //		lsFind = "Line_Item_No = " + String(llLineItem) + " and Upper(sku) = '" + upper(lsSKU) + "' and lot_no = '-' and  po_no = '-' and  String(Expiration_Date,'yyyy/mm/dd') = '2999/12/31' and  l_code = '' " +  " and Upper(supp_code) = '" + upper(lsSupplier) + "'"//looking for unchanged putaway records
 		llFindRow = idw_Putaway.Find(lsFind,1,idw_putaway.RowCount())
 		If llFindRow > 0 Then /*update existing Putaway*/
@@ -4663,7 +4820,9 @@ For llRowPos = 1 to llRowCount
 			ldPutQty += idw_putaway.GetITemNumber(llFindRow,'Quantity')
 			idw_Putaway.SetItem(llFindRow,'l_code', lsLocation)
 			idw_Putaway.SetItem(llFindRow,'supp_code', lsSupplier) 
-			Else /*Exit*/
+			//dts - 4/9/22 - S70279 (WIP/SIT QTY Fix) -  (need to address Exp date in the 'Find' above)
+			idw_Putaway.SetItem(llFindRow,'serial_no', idw_Pick.GetItemString(llRowPos,'Serial_No')) 
+		Else /*Exit*/
 			ldPutQty = ldPickQty 
 		End If
 	Loop
@@ -4884,13 +5043,205 @@ If liCount > 0 Then
 		llSqlNRows = SQLCA.SqlNRows
 		liRows = llSqlNRows
 		
-		insert into gailm ( mycount, sku1, sku2, sku3, sku4, sku5 ) values (:liRows, :lsSKU, :lsCtnrId, :lsInvType, :lsOldCtnrId, :lsOldInvType) using sqlca;
+		//dts 09/16/2021 insert into gailm ( mycount, sku1, sku2, sku3, sku4, sku5 ) values (:liRows, :lsSKU, :lsCtnrId, :lsInvType, :lsOldCtnrId, :lsOldInvType) using sqlca;
 		
 	Next
 	Execute Immediate "Commit " using SQLCA;
 End If
 
 Return liRtn
+end function
+
+public function integer wf_geistlich_putaway (long alrow);//copied wf_create_comp_child and modified for Geistlich.
+decimal ldKitQty, ldKitBuiltQty, ldChildQty //figure out what this qty is supposed to be
+
+//dts - S60202/S60203 - 08/10/2021 - GEISTLICH EXP_Date and LOT
+string lsFindChildren, lsFindPicking, lsFindPutaway, lsLot
+string lsKitSKU, lsKitSupplier, lsFirstLOT, lsSecondLOT, lsKitLOT, lsLoc
+string lsChildSku, lsChildSupplier, lsSerialIND, lsCompIND, lsLotIND, lsPOInd, lsPO2IND, lsExpireIND
+//dts - 20220412 - S70279 (WIP/SIT QTY Fix) - we Need to set ro_no on putaway...
+string lsRONO
+//dts - 4/9/22 - S70494 enable Serial No (for Components) for Geistlich and NYC Tablet project
+string lsSerialNo
+
+date ldExpDate
+integer liFirstComponent
+long ldPickDetailQty, llRowPos, llComponentCount, llFindRow, llFindPickRow, llPickDetailCount, llPickDetailRow, llNewRow, llKitRow
+
+u_ds lu_dsItemComponent
+
+ldKitQty = idw_putaway.GetItemNumber(alRow,"quantity")
+
+ldKitBuiltQty = 0
+
+SetPointer(HourGlass!)
+
+	lsKitSKU = upper(idw_putaway.GetItemString(alRow, "sku"))
+	lsKitSupplier = upper(idw_putaway.GetItemString(alRow, "supp_code"))
+	lsLoc = idw_putaway.GetItemString(alRow, "l_code")
+	ldKitQty = idw_putaway.GetItemNumber(alRow, "quantity")
+
+	lu_dsItemComponent = Create u_ds
+	lu_dsItemComponent.dataobject = 'd_item_component_parent'
+	lu_dsItemComponent.SetTransObject(SQLCA)
+	
+	lu_dsItemComponent.Retrieve(gs_project, lsKitSku, lsKitSupplier, "C") /*retrieve children for Master - 08/02 - PCONKL - Include component type = 'C' (DW/DB table also being used for packaging)*/
+	//dts - 09/20/22 - SIMS-78 - now determining 'First Component' by the order as set up in Item Master (so need to sort on bom_sort_order)
+	lu_dsItemComponent.setsort("bom_sort_order")
+	lu_dsItemComponent.sort()
+	
+	llComponentCount = lu_dsItemComponent.RowCount()
+
+for ldKitBuiltQty = 1 to ldKitQty
+	
+	lsFirstLot='' //dts - S60202/S60203 - 08/10/2021 - Geistlich is Setting the EXP date of the KIT to the earliest EXP Date of the Components, and Concatenating Components' LOTs to make the LOT of the KIT.
+	lsSecondLot=''
+	id_EarliestExpDate = date('2999-12-31')
+	
+	if ldKitBuiltQty = 1 then 
+		llKitRow=alRow  //for use later (to set LOT/ExpDate)
+	else //need to insert KIT row for all but the first one...
+		llKitRow=idw_putaway.InsertRow(0)
+		ilCompNumber =  g.of_next_db_seq(gs_project,'Content','Component_no')
+		idw_putaway.setitem(llKitRow,'component_no', ilCompnumber)
+		idw_putaway.SetItem(llKitRow, "line_item_no",idw_putaway.GetITemNumber(alRow, "line_item_no"))
+		idw_putaway.SetItem(llKitRow, "sku", idw_putaway.GetItemString(alRow, "sku"))
+		idw_putaway.SetItem(llKitRow, "sku_parent", idw_putaway.GetItemString(alRow, "sku_parent"))
+		idw_putaway.SetItem(llKitRow, "supp_code", idw_putaway.GetItemString(alRow, "supp_code"))
+		idw_putaway.setitem(llKitRow, "wo_no", idw_putaway.GetItemString(alRow, "wo_no"))
+		idw_putaway.setitem(llKitRow, "ro_no", idw_putaway.GetItemString(alRow, "wo_no")) //parent part will have ro_no=wo_no.
+		idw_putaway.SetItem(llKitRow, "inventory_type",idw_putaway.GetItemString(alRow, "inventory_type"))
+		idw_putaway.SetItem(llKitRow, "sub_line_item_no", llKitRow) //TODO - need to investigate use of sub_line...
+		idw_putaway.SetItem(llKitRow,"component_ind", "Y")
+		idw_putaway.SetItem(llKitRow, "owner_id", idw_putaway.GetItemNumber(alRow, "owner_id"))
+		idw_putaway.SetItem(llKitRow, "cf_owner_name", idw_putaway.GetItemString(alRow, "cf_owner_name"))
+		idw_putaway.SetItem(llKitRow, "l_code", idw_putaway.GetItemString(alRow, "l_code"))
+		idw_putaway.SetItem(llKitRow, "country_of_origin", idw_putaway.GetItemString(alRow, "country_of_origin"))
+		idw_putaway.SetItem(llKitRow, "quantity", 1)
+	end if
+
+	For llRowPos = 1 to llComponentCount //look up each SKU_Child record for given SKU_Parent (from Item_Component), and build put-away records from Pick records.
+	
+			//Consume the Picking_detail rows to satisfy the child quantities
+			
+			//ldQty = ldQty *lu_dsItemComponent.GetItemNumber(llRowPos,"child_qty") //dts 
+			ldChildQty = lu_dsItemComponent.GetItemNumber(llRowPos,"child_qty") //dts - parent qty is always one as each parent will have its own Component_No
+			
+			// GailM 7/10/2020 S47693 F20484 I2896 KNY - NYCSP: Use RO_NO Date vs. WO_NO Date When Creating WOs
+			// TAM 2010/09 Get the Expiration date and QTY from the component Picklist.
+			//Get serialized ind -
+			lsChildSku = lu_dsItemComponent.GetItemString(llRowPos,"sku_child")
+			lsChildSupplier = lu_dsItemComponent.GetItemString(llRowPos,"supp_code_child")
+			Select serialized_ind, component_ind, lot_controlled_Ind, po_controlled_ind, po_no2_controlled_Ind, expiration_controlled_ind 
+			Into :lsSerialInd, :lsCompInd, :lsLotInd, :lsPOInd, :lsPO2Ind, :lsExpireInd
+			From Item_master
+			Where project_id = :gs_project and sku = :lsChildSku and supp_code = :lsChildSupplier
+			Using SQLCA;
+			
+			//Get Pick Detail records
+			lsFindPicking = "Upper(sku) = '" + Upper(lu_dsItemComponent.GetItemString(llRowPos,"sku_child")) + "' and Upper(Supp_code) = '" +  Upper(lu_dsItemComponent.GetItemString(llRowPos,"supp_code_child")) +"'"
+			lsFindPicking += " and line_item_no = " + String(idw_putaway.GetItemNumber(alRow,"Line_Item_no"))
+//??	//dts - 20220412 - S70279 (WIP/SIT QTY Fix) - do we Need to set ro_no and add ro_no to the FIND?
+//	lsFindPicking += " and ro_no = '" + idw_putaway.GetItemString(alRow,"ro_no") +"'"
+			//dts - 09182021 - we Need to subtract the qty from pick_detail (after consuming it) and add 'quantity>0' to the FIND
+			lsFindPicking += " and quantity>0"
+			//llFindPickRow = 0
+			//llFindPickRow = idw_pick.Find(lsFind,llFindPickRow+1,idw_pick.RowCount())
+			llFindPickRow = ids_pick_detail_geistlich.Find(lsFindPicking,1,ids_pick_detail_geistlich.RowCount())
+			
+			If llFindPickRow > 0 Then //TODO - probably need to use this for the code below...
+				//retrieving pick_detail_gestlich once and then doing FIND (and subracting qty)
+				//if gs_project = 'GEISTLICH' then
+				//idw_pick_detail.reset() //dts - Added for Geistlich (not sure why necessary now but not before so executing only for Geistlich).
+				//end if
+				//idw_pick_detail.retrieve(is_WONO, lsChildSku, lsChildSupplier,idw_pick.GetItemNumber(llFindPickRow,'owner_id'), &
+				//idw_pick.GetItemString(llFindPickRow,'country_of_origin'), idw_pick.GetItemString(llFindPickRow,'l_code'), &
+				//idw_pick.GetItemString(llFindPickRow,'inventory_type'), idw_pick.GetItemString(llFindPickRow,'serial_no'), &
+				//idw_pick.GetItemString(llFindPickRow,'lot_no'), idw_pick.GetItemString(llFindPickRow,'po_no'), &
+				//idw_pick.GetItemString(llFindPickRow,'po_no2'),idw_pick.GetItemNumber(llFindPickRow,'line_item_no'), &
+				//idw_pick.GetItemString(llFindPickRow,'container_id'), idw_pick.GetItemDatetime(llFindPickRow,'expiration_date')) 
+			End If
+			//dts llPickDetailCount = idw_pick_detail.RowCount()
+			llPickDetailCount = 1 //dts TODO - will need to loop if child qty will be >1
+			llPickDetailRow = 1
+		
+			//idw_putaway.SetItem(llComprow,"sub_line_item_no", idw_putaway.GetItemNumber(alRow,"Component_no")) //TODO - needs more investigation.
+			//idw_putaway.SetItem(llComprow,"inventory_type",'8') //dts - 08/26/21 - Components to '8' (Kit is being set to 'N' elsewhere)
+	
+			//build KIT's Lot_No (concatenation of components' Lot_No) and find Earliest Exp Date
+			lsLot=ids_pick_detail_geistlich.GetItemString(llFindPickRow, 'lot_no')
+			//dts - 20220412 - S70279 (WIP/SIT QTY Fix) - we Need to set ro_no on putaway...
+			lsRONO=ids_pick_detail_geistlich.GetItemString(llFindPickRow, 'ro_no')
+
+			//dts - 4/9/22 - S70494 enable Serial No (for Components) for Geistlich and NYC Tablet project
+			lsSerialNo=ids_pick_detail_geistlich.GetItemString(llFindPickRow, 'serial_no')
+			//idw_putaway.SetItem(llComprow,"lot_no",lsLot)
+			//dts... if SKU is in the list of 'FIRST_COMPONENT' (in lookup_table), set is_FirstLot. Otherwise, set is_SecondLot (what if Both are None are 'FIRST_COMPONENT'? Perhaps just concatenate is_FirstLot/is_SecondLot as required?)
+
+			//dts - 09/20/22 - SIMS-78 - now determining 'First Component' by the order as set up in Item Master (so no longer need FIRST_COMPONENT lookup_table records)
+			//select count(*) into :liFirstComponent from lookup_table WITH (NOLOCK)
+			//where project_id = 'GEISTLICH'
+			//and code_type = 'FIRST_COMPONENT'
+			//and code_id = :lsChildSku;
+			
+			//if liFirstComponent > 0 then
+			if llRowPos = 1 then //'First Component' (based on bom_sort_order)
+				//is_LotCombo = lsLot + '-' + is_LotCombo
+				lsFirstLot = lsLot
+				is_FirstExpDate = lsChildSku +': ' + string(ldExpDate)
+			else
+				//is_LotCombo = is_LotCombo + '-' + lsLot
+				lsSecondLot = lsLot
+				is_SecondExpDate = lsChildSku +': ' + string(ldExpDate)
+			end if
+			//set earliest Exp Date...
+			ldExpDate=date(ids_pick_detail_geistlich.GetItemDateTime(llFindPickRow, 'Expiration_date'))
+			if ldExpDate<id_EarliestExpDate then
+				id_EarliestExpDate = ldExpDate
+			end if
+			
+			//insert Component into Putaway...
+			llNewRow=idw_putaway.InsertRow(0)
+			idw_putaway.setitem(llNewrow,'component_no', ilCompNumber)
+			idw_putaway.SetItem(llNewRow, "line_item_no",idw_putaway.GetITemNumber(alRow, "line_item_no"))
+			idw_putaway.SetItem(llNewRow, "sku", lsChildSKU)
+			idw_putaway.SetItem(llNewRow, "sku_parent", lsKitSKU)
+			idw_putaway.SetItem(llNewRow, "supp_code", lsChildSupplier)
+			idw_putaway.setitem(llNewRow, "wo_no", idw_putaway.GetItemString(alRow, "wo_no"))
+			idw_putaway.SetItem(llNewRow, "inventory_type","8")
+			idw_putaway.SetItem(llNewRow,"component_ind", "*")
+		idw_putaway.SetItem(llNewRow, "sub_line_item_no", llNewRow) //TODO - need to investigate use of sub_line...
+			idw_putaway.SetItem(llNewRow, "owner_id", idw_putaway.GetItemNumber(alRow, "owner_id"))
+			idw_putaway.SetItem(llNewRow, "cf_owner_name", idw_putaway.GetItemString(alRow, "cf_owner_name"))
+			//idw_putaway.SetItem(llNewRow, "l_code", idw_putaway.GetItemString(alRow, "l_code"))
+			idw_putaway.SetItem(llNewRow, "l_code", ids_pick_detail_geistlich.GetItemString(llFindPickRow, 'l_code'))
+			idw_putaway.SetItem(llNewRow, "old_l_code", ids_pick_detail_geistlich.GetItemString(llFindPickRow, 'l_code')) //dts 4/27/22 - S70279 (WIP/SIT QTY Fix) - need pick-from l_code for trigger to update correct Content_Summary record
+			idw_putaway.SetItem(llNewRow, "country_of_origin", idw_putaway.GetItemString(alRow, "country_of_origin"))
+			idw_putaway.SetItem(llNewRow, "Expiration_date", ldExpDate) 
+			idw_putaway.SetItem(llNewRow, "lot_no", lsLot)
+			//dts - 20220412 - S70279 (WIP/SIT QTY Fix) - we Need to set ro_no on putaway...
+			idw_putaway.SetItem(llNewRow, "ro_no", lsRONO)
+
+			//dts - 4/9/22 - S70494 enable Serial No (for Components) for Geistlich and NYC Tablet project
+			idw_putaway.SetItem(llNewRow, "serial_no", lsSerialNo)
+
+			idw_putaway.SetItem(llNewRow, "quantity", 1) //for now for Geistlich, assuming QTY 1 for each Component
+			idw_putaway.Setitem(llNewRow, 'container_id', string(ilCompNumber))  //Component_No is not part of Primary key so for now, storing it in Container_ID.
+			
+			//subtract the qty from the pick_detail row we're consuming
+			ids_pick_detail_geistlich.SetItem(llFindPickRow,"quantity", ids_pick_detail_geistlich.GetItemNumber(llFindPickRow, 'Quantity') - 1) //TODO - hard-coding for 1 for now (as each Parent has 1 each of tghe children)
+	next //next Component Row
+
+	//10/12/21 - back to inserting Component records into Putaway.  Now always setting LOT/ExpDate here but moving the insert of KIT above.
+	lsKitLOT = lsFirstLot + "-" + lsSecondLot
+	idw_putaway.setitem(llKitRow, 'lot_no', lsKitLOT)
+	idw_putaway.setitem(llKitRow, 'expiration_date', id_EarliestExpDate)
+	idw_putaway.setitem(llKitRow, 'quantity', 1)
+	idw_putaway.setitem(llKitRow, 'container_id', string(ilCompNumber))  //Component_No is not part of Primary key so for now, storing it in Container_ID.
+
+next // ldKitQty - keep building Kits ... ignore rest of comment as now inserting components as well...(inserting new (Parent) putaway record or adding to existing one
+
+return 0
 end function
 
 on w_workorder.create
@@ -4920,6 +5271,15 @@ idw_main = tab_main.tabpage_main.dw_main
 idw_instructions = tab_main.tabpage_instructions.dw_instructions
 idw_Detail = tab_main.tabpage_detail.dw_Detail
 idw_pick = tab_main.tabpage_picking.dw_Picking
+//idw_pick_detail_geistlich = tab_main.tabpage_picking.dw_PickDetail //dts - 09/18/2021 - use this dw to consume pick detail rows to build putaway.
+//idw_pick_detail_geistlich = tab_main.tabpage_picking.dw_Picking //dts - 09/18/2021 - use this dw to consume pick detail rows to build putaway.
+/* dts - 04/12/22 - S70279 (WIP/SIT QTY Fix) - now using SyntaxFromSQL to create geistlich datastore.
+if not isvalid(ids_pick_detail_geistlich) then
+	ids_pick_detail_geistlich = create DataStore
+	ids_pick_detail_geistlich.dataobject = 'd_workorder_picking' //dts - 09/18/2021 - use this dw to consume pick detail rows to build putaway.
+	ids_pick_detail_geistlich.SetTransObject(SQLCA)
+end if
+*/
 
 idw_Serial = tab_main.tabpage_cto_process.dw_Serial
 
@@ -5143,7 +5503,6 @@ If idw_Main.RowCount() > 0 Then /*Order Found*/
 	
 	idwc_supplier_Putaway.InsertRow(0)
 	idw_putaway.Retrieve(lsWONO)
-	
 	isle_Order.Visible = FALse
 	
 	Tab_main.SelectTab(1)
@@ -5257,7 +5616,7 @@ idw_main.SetColumn("delivery_invoice_no")
 end event
 
 event ue_save;Integer liRC, liRet
-long i,ll_totalrows, llWONO, ll_Idx
+long i,ll_totalrows, llWONO, ll_Idx, llRowCount
 String	lsOrder, lsWONO
 
 long ldOwnerId,   ldAvailQty, ll_row,ll_count
@@ -5413,6 +5772,11 @@ IF (liRC = 1) THEN
 		idw_Putaway_Content.ResetUpdate()
 		idw_component_parent.ResetUpdate()//TAM 2014 - Kit CHange functionality
 		idw_Serial.ResetUpdate()
+		//dts - 10/14/2021 - adding to Dhirendra's .retrieve change to prevent being prompted to enter retrieval parameters
+		llRowCount = idw_Putaway.RowCount()
+		if llRowCount>0 then
+			idw_putaway.retrieve(idw_main.GetITemString(1,'wo_no'))  //dhirendra
+		end if
 		tab_main.tabpage_main.dw_workorder_component_sku.ResetUpdate()
 		ib_changed = False
 		ib_edit = True
@@ -5685,7 +6049,7 @@ end on
 type dw_workorder_component_sku from u_dw_ancestor within tabpage_main
 boolean visible = false
 integer x = 562
-integer y = 696
+integer y = 700
 integer width = 1947
 integer height = 404
 integer taborder = 30
@@ -6889,9 +7253,9 @@ end event
 
 type cb_generate_pick from commandbutton within tabpage_picking
 integer x = 923
-integer y = 16
+integer y = 20
 integer width = 402
-integer height = 92
+integer height = 100
 integer taborder = 40
 integer textsize = -9
 integer weight = 700
@@ -6903,8 +7267,12 @@ string text = "&Generate"
 end type
 
 event clicked;// 08/08 - PCONKL - Moved picking functionality to Websphere
-//iw_window.TriggerEvent('ue_generate_Pick')
-iw_window.TriggerEvent('ue_generate_Pick_Server')
+//dts 04/2022 - testing bringing the picking back to PB...
+//if messagebox(is_title, "Use PB Version of ue_generate_pick?", Question!,YesNo!)=1 then
+//	iw_window.TriggerEvent('ue_generate_Pick')
+//else
+	iw_window.TriggerEvent('ue_generate_Pick_Server')
+//end if
 end event
 
 type dw_picking from u_dw_ancestor within tabpage_picking
@@ -8503,7 +8871,7 @@ integer x = 2999
 integer y = 468
 integer height = 364
 integer taborder = 20
-string dataobject = "d_ro_content"
+string dataobject = "d_ro_content_wo"
 end type
 
 type dw_putaway_print from datawindow within tabpage_putaway
@@ -8570,6 +8938,7 @@ lstrparms.Decimal_arg[1] = idw_putaway.getItemNumber(llRow,"quantity")
 lstrparms.Decimal_arg[2] = idw_putaway.getItemNumber(llRow,"owner_id") //BCR 21-DEC-2011: Issue raised by Jeff
 OpenWithparm(w_putaway_recommend,lstrparms)
 
+idw_putaway.AcceptText()
 idw_putaway.TriggerEvent("ue_process_putaway")
 
 end event
@@ -8698,6 +9067,7 @@ String		lsFind,	&
 				lsCOO,	&
 				lsOwner,	&
 				lsInvType
+long  ll_component_no,ll_line_item_no,ll_rowno
 
 This.SetRedraw(False)
 
@@ -8712,7 +9082,16 @@ Choose Case Upperbound(lstrparms.String_arg)
 		
 		This.SetItem(llCurrRow,"l_code",lstrparms.String_arg[1])
 		This.SetItem(llCurrRow,"quantity",lstrparms.decimal_arg[1])
-		
+//		  Start -Dhirendra 
+		ll_component_no =idw_putaway.GetitemNumber(llCurrRow,"component_no")
+         ll_line_item_no = idw_putaway.GetitemNumber(llCurrRow,"line_item_no")
+			
+   For ll_rowno = 1 to idw_Putaway.RowCount()
+		If idw_Putaway.GetItemNumber(ll_rowno,'component_no') = ll_component_no and idw_Putaway.GetItemstring(ll_rowno,'component_ind') = '*' Then
+			idw_Putaway.object.l_code[ ll_rowno ] = idw_putaway.GetITemString(llCurrRow,"l_code")
+		End If
+	Next
+//	  END - Dhirendra 
 		This.SetFocus()
 		This.SetRow(llCurrRow)
 				
@@ -8876,6 +9255,16 @@ Choose Case Upper(dwo.name)
 			Return 1
 		End If
 	
+		//dts - 10/17/2021 - adding block to populate l_code for whole order
+		//If first row, ask to apply to whole order
+		If row = 1  and this.RowCount() > 1 Then
+			If messagebox(is_title,'Would you like to apply this location to the entire Order?',Question!,YesNo!,1) = 1 Then
+				For llRowPos = 1 to This.RowCount()
+					This.SetItem(llRowPos,'l_code',data)
+				Next
+			End If
+		end if
+		
 	//TAM 2010/09 Set L_Code Same as Parent	
 		ll_component_no = this.GetitemNumber(row,"component_no")
 		ll_line_item_no = this.GetitemNumber(row,"line_item_no")
@@ -8886,7 +9275,6 @@ Choose Case Upper(dwo.name)
 				this.object.l_code[ ll_row ] = data
 			End If
 		Next
-		
 	isColumn = "l_code"
 	This.PostEvent("ue_set_column")
 
@@ -8959,7 +9347,12 @@ Case 'INVENTORY_TYPE'
 
 		For ll_row = 1 to this.RowCount()
 			If this.GetItemNumber(ll_Row,'component_no') = ll_component_no and this.GetItemstring(ll_Row,'component_ind') = '*' Then
-				this.object.inventory_type[ ll_row ] = data
+				//dts - Geistlich S60202/S60203 - set Component Inventory Type to '8'
+				if gs_project = 'GEISTLICH' and data = 'N' then
+					this.object.inventory_type[ ll_row ] = '8'
+				else
+					this.object.inventory_type[ ll_row ] = data
+				end if
 			End If
 		Next
 		

@@ -42,7 +42,9 @@ msg =gs_buildVersion
 
 
 rev = trim( rev + " " + msg )
-version = trim( "Version: " + release + "." + rev + " ( " + updatedate +  " ) " )
+//version = trim( "Version: " + release + "." + rev + " ( " + updatedate +  " ) " ) // Dinesh 09/28/2023 - SIMS-305 - PIP/SIP - Include Release # in Version Stamp
+
+version = trim( "Version:" + msg + " ( " + updatedate +  " ) " ) // Dinesh 09/28/2023 - SIMS-305 - PIP/SIP - Include Release # in Version Stamp
 
 return version
 

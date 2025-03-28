@@ -1020,10 +1020,10 @@ public function integer uf_process_inv_type_update (string asproject);
 //    Dhirendra-  S57452  KDO - Kendo:  SIMS New Inventory Type, update process and messages -Start
 Datastore	ldsImport, ldsContent
 String	lsLogOut, lsTONO, lsWarehouse, lsWarehousePrev, lsSKU, lsSKUPrev, lsLot, lsOldInvType,  lsNewInvType,lsSuppCode, lsFilter,	&
-		lsType, lsSerial, lsPO, lsPO2,ls_Container_ID, lsLoc, lsRefType, lsRefLineNumber, lsRefID, lsErrText
+		lsType, lsSerial, lsPO, lsPO2,ls_Container_ID, lsLoc, lsRefType, lsRefLineNumber, lsRefID, lsErrText,ls_sku_check
 Integer	liRC, liRtnImp
 Long	llRowPos, llRowCount, llCount, llContentCount, llContentPos, ll_Owner,ll_currentrow,ll_adjust_no
-Decimal ldQtyToAdjust
+Decimal ldQtyToAdjust,ld_avail_qty,ld_qty =0.0000
 Boolean	lbError
 DateTime	ldtToday, ldt_Expiration_Date
 String ls_project,ls_sku,ls_suppcode,ls_coo,ls_whcode,ls_lcode,ls_serial,ls_lot,ls_rono, & 
@@ -1036,51 +1036,94 @@ ldsContent.SetTransObject(SQLCA)
 	lsLogOut = '     -  Processing for kendo inventory type update' 
 	FileWrite(giLogFileNo,lsLogOut)
 	gu_nvo_process_files.uf_write_log(lsLogOut) /*write to Screen*/
-	
-IF Upper(asproject) = 'KENDO' Then
-llRowCount = ldsContent.retrieve()
 
-If llRowCount = 0 Then
-	lsLogOut = '      - No records loaded for processing for kendo inventory type update' 
-	FileWrite(giLogFileNo,lsLogOut)
-	gu_nvo_process_files.uf_write_log(lsLogOut) /*write to Screen*/
-	Return 0
-End If
+       IF Upper(asproject) = 'KENDO' Then
+          llRowCount = ldsContent.retrieve()
+			 If llRowCount = 0 Then
+				lsLogOut = '      - No records loaded for processing for kendo inventory type update' 
+				FileWrite(giLogFileNo,lsLogOut)
+				gu_nvo_process_files.uf_write_log(lsLogOut) /*write to Screen*/
+				Return 0
+			End If
 
 
-For ll_currentrow = 1 to llRowCount
+   For ll_currentrow = 1 to llRowCount
     
-	ls_invtype = ldsContent.getitemstring(ll_currentrow,'Content_inventory_type')
-	ldtToday =ldsContent.getitemdatetime(ll_currentrow,'date_1')
-	ldt_Expiration_Date= ldsContent.getitemdatetime(ll_currentrow,'Content_Expiration_Date')
-	
-	IF ldt_Expiration_Date <  ldtToday    Then 
-		ls_oldinvt_type = ls_invtype
-		ls_invtype ='E'
-           ldsContent.setitem(ll_currentrow,'Content_inventory_type' ,ls_invtype)
-	     else 
-			ls_oldinvt_type = ls_invtype
-			ls_invtype ='6'
-			ldsContent.setitem(ll_currentrow,'Content_inventory_type' ,ls_invtype)
-		end if 
-
-            
-
-	         ls_project =ldsContent.getitemstring(ll_currentrow,'Content_Project_Id')	 
-			ls_sku=ldsContent.getitemstring(ll_currentrow,'Content_SKU')	
-			ls_suppcode=ldsContent.getitemstring(ll_currentrow,'Content_Supp_Code')	
-			ll_ownerid=ldsContent.getitemnumber(ll_currentrow,'Content_Owner_Id')	
-			ls_coo=ldsContent.getitemstring(ll_currentrow,'Content_Country_of_origin')	
-			ls_whcode=ldsContent.getitemstring(ll_currentrow,'Content_WH_Code')	
-			ls_lcode=ldsContent.getitemstring(ll_currentrow,'Content_L_code')	
-			ls_serial=ldsContent.getitemstring(ll_currentrow,'Content_Serial_No')	
-			ls_lot=ldsContent.getitemstring(ll_currentrow,'Content_Lot_No')	
-			ls_rono=ldsContent.getitemstring(ll_currentrow,'Content_Ro_No')	
-			ls_pono=ldsContent.getitemstring(ll_currentrow,'Content_Po_No')	
-			ls_pono2=ldsContent.getitemstring(ll_currentrow,'Content_Po_No2')	
-			ldQtyToAdjust=ldsContent.getitemdecimal(ll_currentrow,'Content_Avail_Qty')	
-			ls_container=ldsContent.getitemstring(ll_currentrow,'Content_Container_id')
-			
+	    ls_invtype = ldsContent.getitemstring(ll_currentrow,'Content_inventory_type')
+	    ldtToday =ldsContent.getitemdatetime(ll_currentrow,'date_1')
+	    ldt_Expiration_Date= ldsContent.getitemdatetime(ll_currentrow,'Content_Expiration_Date')
+	    ls_project =ldsContent.getitemstring(ll_currentrow,'Content_Project_Id')	 
+		ls_sku=ldsContent.getitemstring(ll_currentrow,'Content_SKU')	
+		ls_suppcode=ldsContent.getitemstring(ll_currentrow,'Content_Supp_Code')	
+		ll_ownerid=ldsContent.getitemnumber(ll_currentrow,'Content_Owner_Id')	
+		ls_coo=ldsContent.getitemstring(ll_currentrow,'Content_Country_of_origin')	
+		ls_whcode=ldsContent.getitemstring(ll_currentrow,'Content_WH_Code')	
+		ls_lcode=ldsContent.getitemstring(ll_currentrow,'Content_L_code')	
+		ls_serial=ldsContent.getitemstring(ll_currentrow,'Content_Serial_No')	
+		ls_lot=ldsContent.getitemstring(ll_currentrow,'Content_Lot_No')	
+		ls_rono=ldsContent.getitemstring(ll_currentrow,'Content_Ro_No')	
+		ls_pono=ldsContent.getitemstring(ll_currentrow,'Content_Po_No')	
+		ls_pono2=ldsContent.getitemstring(ll_currentrow,'Content_Po_No2')	
+		ldQtyToAdjust=ldsContent.getitemdecimal(ll_currentrow,'Content_Avail_Qty')	
+		ls_container=ldsContent.getitemstring(ll_currentrow,'Content_Container_id')
+		
+		
+		// Modified existing code by Dhirendra to prevent inserting duplicate row in content table -Start 
+		
+		IF ldt_Expiration_Date <  ldtToday    Then 
+				
+				ls_oldinvt_type = ls_invtype
+				ls_invtype ='E'
+				
+				 Select Avail_Qty, sku into :ld_Avail_qty , :ls_sku_check
+			      from content with(nolock)
+			      where project_id = :ls_project and sku =:ls_sku and supp_code = :ls_suppcode 
+	     		 and owner_id= :ll_ownerid and Country_of_origin =:ls_coo and wh_code=:ls_whcode 
+			      and L_code= :ls_lcode and inventory_type =:ls_invtype and serial_no = :ls_serial and lot_no = :ls_lot and ro_no= :ls_rono 
+			      and po_no= :ls_pono and po_no2= :ls_pono2 and Container_id = :ls_container and Expiration_Date= :ldt_Expiration_Date 
+	               using sqlca;
+				
+				 IF isnull(ls_sku_check) or ls_sku_check = '' then
+				     ldsContent.setitem(ll_currentrow,'Content_inventory_type' ,ls_invtype)
+				else  
+					ldsContent.setitem(ll_currentrow,'Content_Avail_qty' ,0.0000)
+					
+					update content
+					Set   Avail_Qty = :ldQtyToAdjust + :ld_Avail_qty 
+				     Where project_id = :ls_project and sku =:ls_sku and supp_code = :ls_suppcode 
+			          and owner_id= :ll_ownerid and Country_of_origin =:ls_coo and wh_code=:ls_whcode 
+			          and L_code= :ls_lcode and inventory_type =:ls_invtype and serial_no = :ls_serial and lot_no = :ls_lot and ro_no= :ls_rono 
+			          and po_no= :ls_pono and po_no2= :ls_pono2 and Container_id = :ls_container and Expiration_Date= :ldt_Expiration_Date 
+	                   using sqlca;
+					
+				end if 
+			else
+				
+				ls_oldinvt_type = ls_invtype
+				ls_invtype ='6'
+				Select Avail_Qty, sku into :ld_Avail_qty , :ls_sku_check
+			      from content with(nolock)
+			      where project_id = :ls_project and sku =:ls_sku and supp_code = :ls_suppcode 
+	     		 and owner_id= :ll_ownerid and Country_of_origin =:ls_coo and wh_code=:ls_whcode 
+			      and L_code= :ls_lcode and inventory_type =:ls_invtype and serial_no = :ls_serial and lot_no = :ls_lot and ro_no= :ls_rono 
+			      and po_no= :ls_pono and po_no2= :ls_pono2 and Container_id = :ls_container and Expiration_Date= :ldt_Expiration_Date 
+	               using sqlca;
+				
+				IF  isnull(ls_sku_check) or ls_sku_check = '' then
+						ldsContent.setitem(ll_currentrow,'Content_inventory_type' ,ls_invtype)
+					else  
+							ldsContent.setitem(ll_currentrow,'Content_Avail_qty' ,0.0000)
+							update content
+							Set   Avail_Qty = :ldQtyToAdjust + :ld_Avail_qty
+				             Where project_id = :ls_project and sku =:ls_sku and supp_code = :ls_suppcode 
+			                  and owner_id= :ll_ownerid and Country_of_origin =:ls_coo and wh_code=:ls_whcode 
+			                 and L_code= :ls_lcode and inventory_type =:ls_invtype and serial_no = :ls_serial and lot_no = :ls_lot and ro_no= :ls_rono 
+			                 and po_no= :ls_pono and po_no2= :ls_pono2 and Container_id = :ls_container and Expiration_Date= :ldt_Expiration_Date 
+	                       using sqlca;
+						end if 
+					end if 
+								// Dhirendra - END 
+						 
 	 INSERT INTO Adjustment  
          (  Project_Id,   
            SKU,   
@@ -1103,8 +1146,7 @@ For ll_currentrow = 1 to llRowCount
 		 old_po_No2,
            Old_Quantity,   
            Quantity,   
-            
-           Container_Id,    
+          Container_Id,    
            Adjustment_Type,
 		 Last_Update,
 		 Last_User,
@@ -1145,10 +1187,12 @@ For ll_currentrow = 1 to llRowCount
 			lsErrText = sqlca.SqlErrText
 			Rollback;
 			lsLogOut = "-       ***Unable to create Adjustment record for kendo inventory type update : " + lsErrText
-			FileWrite(giLogFileNo,lsLogOut)
-			gu_nvo_process_files.uf_write_log(lsLogOut) /*write to Screen*/
+		//	FileWrite(giLogFileNo,lsLogOut)
+//			gu_nvo_process_files.uf_write_log(lsLogOut) /*write to Screen*/
 		    Return -1
 		End If
+		
+		
 
     Select Max(Adjust_no) into :ll_adjust_no
 	 From Adjustment
@@ -1181,29 +1225,31 @@ If sqlca.SqlCode < 0 Then
             )  using sqlca ;
     
 
-	 
+	 setnull(ld_Avail_qty)
+	 setnull(ls_invtype)
+	 setnull(ldQtyToAdjust)
+	
 If sqlca.SqlCode < 0 Then
 			
 			lsErrText = sqlca.SqlErrText
 			Rollback;
 			lsLogOut = "-       ***Unable to create Btach Transaction record for kendo inventory type update: " + lsErrText
 			FileWrite(giLogFileNo,lsLogOut)
-			gu_nvo_process_files.uf_write_log(lsLogOut) /*write to Screen*/
+	     	gu_nvo_process_files.uf_write_log(lsLogOut) /*write to Screen*/
 			Return -1
 			
 		End If
- 
-       rtn = ldsContent.update() 
-      IF rtn <> 1 THEN
-        ROLLBACK ;
-		  lsLogOut = "-       ***Unable to update Content record for kendo inventory type update: " + lsErrText
+		
+		rtn = ldsContent.update() 
+		IF rtn <> 1 Then
+			ROLLBACK ;
+			lsLogOut = "-       ***Unable to update Content record for kendo inventory type update: " + lsErrText
 			FileWrite(giLogFileNo,lsLogOut)
 			gu_nvo_process_files.uf_write_log(lsLogOut) /*write to Screen*/
 			Return -1
 		END IF
 	next
 end if 
-
 return  0
 
 //    Dhirendra-  S57452  KDO - Kendo:  SIMS New Inventory Type, update process and messages -End 

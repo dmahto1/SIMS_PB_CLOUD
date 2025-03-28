@@ -481,11 +481,11 @@ SetPointer(Arrow!) */
 end event
 
 type p_2 from picture within w_login
-integer x = 219
+integer x = 530
 integer y = 172
-integer width = 1294
-integer height = 156
-string picturename = "XPOLogin.png"
+integer width = 741
+integer height = 236
+string picturename = "GXOlogin.png"
 boolean focusrectangle = false
 end type
 
@@ -604,7 +604,7 @@ end type
 
 event clicked;String ls_userid, ls_pwd, ls_pwd2, ls_role,ls_project, lsNewSql, lsVersion, lsDatabase, lsServer, lsDB, lsXML, lsXMLResponse, lsAttributes, lsReturnCode, lsReturnDesc, lsURL, lsDatasource,ls_showAllProject
 Long ls_status,	llRowCOunt,	llCount
-integer li_row, liPort
+integer li_row, liPort,j
 ulong lul_name_size = 32
 String	ls_machine_name = Space (32)
 //TimA 07/23/15
@@ -613,7 +613,8 @@ Date ldGetSIMSFileDate,ldGetPBDDate
 String lsPbdListFiles, lsPbdFile,lsGoodPBD, lsBadPBD
 Long llCountDates
 String ls_commodity_authorized_user //01-Jun-2016 Madhu Added
-
+datastore lds_sims_notification,lds_sims_notification_filter
+long i,ll_count,li_time_interval
 DatawindowChild	ldwc_project
 
 If dw_main.AcceptText() = -1 Then Return
@@ -803,18 +804,120 @@ End Choose
 doVersionTest()
 
 IF ib_dbValidation =TRUE THEN RETURN //29-Jun-2015 :Madhu- Don't allow whoever has role of 1 or 2 against PROD db by using SIMS QA build.
+// Begin- Dinesh - 05/22/2024- Dinesh - SIMS-473-Google - SIMS – SIMS Timer Enhancement
 
 //07-Apr-2014 Madhu- SIMS Timer Notification Alert Functionality -START
-SELECT Project_Id,User_Id,Notification_Flag,Shutdown_Flag,Notes,Time_Interval 
-	into :gs_Projectlist,:gs_Userlist,:gs_NotificationFlag,:gs_ShutdownFlag,:gs_AlertNotes,:gi_time_interval 
-FROM SIMS_Notification with(nolock); 
+//SELECT Project_Id,User_Id,Notification_Flag,Shutdown_Flag,Notes,Time_Interval 
+//	into :gs_Projectlist,:gs_Userlist,:gs_NotificationFlag,:gs_ShutdownFlag,:gs_AlertNotes,:gi_time_interval 
+//FROM SIMS_Notification with(nolock);  // This block of lines commenetd out against below lines// Dinesh
+// Begin- Dinesh - 05/31/2024- Dinesh - SIMS-473-Google - SIMS – SIMS Timer Enhancement
+//SELECT Project_Id,User_Id,Notification_Flag,Shutdown_Flag,Notes,Time_Interval,login 
+//	into :gs_Projectlist,:gs_Userlist,:gs_NotificationFlag,:gs_ShutdownFlag,:gs_AlertNotes,:gi_time_interval,:gs_login 
+//FROM SIMS_Notification_user with(nolock);
 
-IF gs_ShutdownFlag ='Y'  and gs_role <> '-1' THEN 
-	g.of_sims_notification_process( )
-	
-	IF gbLogin =TRUE THEN RETURN
-	
-END IF
+lds_sims_notification = create datastore 
+lds_sims_notification_filter = create datastore
+long ll_count_all
+lds_sims_notification.dataobject='d_sims_notification_search_all'
+lds_sims_notification.settrans(sqlca)
+lds_sims_notification.retrieve()
+ll_count_all= lds_sims_notification.rowcount()
+	for j=1 to ll_count_all
+		gs_Projectlist= lds_sims_notification.getitemstring(j,'Project_Id')
+		gs_Userlist= lds_sims_notification.getitemstring(j,'User_Id')
+		gs_NotificationFlag= lds_sims_notification.getitemstring(j,'Notification_Flag')
+		gs_ShutdownFlag= lds_sims_notification.getitemstring(j,'Shutdown_Flag')
+		gs_AlertNotes= lds_sims_notification.getitemstring(j,'Notes')
+		gi_time_interval= lds_sims_notification.getitemnumber(j,'Time_Interval')
+		gs_login= lds_sims_notification.getitemstring(j,'login')
+		
+		if gs_Userlist <> '*ALL' and gs_projectlist = '*ALL' then
+			lds_sims_notification_filter.dataobject='d_sims_notification_search_all'
+				lds_sims_notification_filter.settrans(sqlca)
+				lds_sims_notification_filter.retrieve()
+				lds_sims_notification_filter.SetFilter("user_id = '"+ gs_Userlist +"'")
+			end if
+			if gs_Userlist='*ALL' and gs_projectlist <> '*ALL' then
+				lds_sims_notification_filter.dataobject='d_sims_notification_search_all'
+				lds_sims_notification_filter.settrans(sqlca)
+				lds_sims_notification_filter.retrieve()
+				lds_sims_notification_filter.SetFilter("project_id = '"+ gs_Projectlist +"'")
+			end if
+			if gs_Userlist<> '*ALL' and gs_projectlist <> '*ALL' then
+				lds_sims_notification_filter.dataobject='d_sims_notification_search_all'
+				lds_sims_notification_filter.settrans(sqlca)
+				lds_sims_notification_filter.retrieve()
+				lds_sims_notification_filter.SetFilter("project_id = '"+ gs_Projectlist +"' and user_id = '"+ gs_Userlist +"'")
+				lds_sims_notification_filter.filter()
+			end if
+			ll_count= lds_sims_notification_filter.rowcount()
+			
+			for i =1 to ll_count
+				gs_Projectlist= lds_sims_notification_filter.getitemstring(i,'Project_Id')
+				gs_Userlist= lds_sims_notification_filter.getitemstring(i,'User_Id')
+				gs_NotificationFlag= lds_sims_notification_filter.getitemstring(i,'Notification_Flag')
+				gs_ShutdownFlag= lds_sims_notification_filter.getitemstring(i,'Shutdown_Flag')
+				gs_AlertNotes= lds_sims_notification_filter.getitemstring(i,'Notes')
+				gi_time_interval= lds_sims_notification_filter.getitemnumber(i,'Time_Interval')
+				gs_login= lds_sims_notification_filter.getitemstring(i,'login')
+			//next
+			//SELECT Project_Id,User_Id,Notification_Flag,Shutdown_Flag,Notes,Time_Interval,login 
+			//	into :gs_Projectlist,:gs_Userlist,:gs_NotificationFlag,:gs_ShutdownFlag,:gs_AlertNotes,:gi_time_interval,:gs_login 
+			//FROM SIMS_Notification_user with(nolock); 
+			// End- Dinesh - 05/22/2024- Dinesh - SIMS-473-Google - SIMS – SIMS Timer Enhancement
+			//IF gs_ShutdownFlag ='Y'  and gs_role <> '-1' THEN // Commented this line - Dinesh - 05/22/2024- Dinesh - SIMS-473-Google - SIMS – SIMS Timer Enhancement
+			////IF  gs_ShutdownFlag ='Y'   and gs_login ='Y' THEN
+			//IF  gs_Userlist =gs_userid and 
+			//and gs_login ='Y'
+			if upper(gs_Userlist)= upper(gs_userid) then
+				If gs_login ='Y'   THEN // Dinesh - 05/22/2024- Dinesh - SIMS-473-Google - SIMS – SIMS Timer Enhancement
+					g.of_sims_notification_process( )
+					//IF gbLogin =TRUE THEN RETURN
+				END IF
+			END IF
+		Next 
+		
+// Begin -Dinesh -06/05/2024-  SIMS-473-Google - SIMS – SIMS Timer Enhancement
+if gs_Userlist='*ALL' and gs_projectlist='*ALL' then
+	lds_sims_notification_filter.dataobject='d_sims_notification_search_all'
+	lds_sims_notification_filter.settrans(sqlca)
+	lds_sims_notification_filter.retrieve()
+	gs_Projectlist= lds_sims_notification_filter.getitemstring(1,'Project_Id')
+	gs_Userlist= lds_sims_notification_filter.getitemstring(1,'User_Id')
+	gs_NotificationFlag= lds_sims_notification_filter.getitemstring(1,'Notification_Flag')
+	gs_ShutdownFlag= lds_sims_notification_filter.getitemstring(1,'Shutdown_Flag')
+	gs_AlertNotes= lds_sims_notification_filter.getitemstring(1,'Notes')
+	li_time_interval= lds_sims_notification_filter.getitemnumber(1,'Time_Interval')
+	gs_login= lds_sims_notification_filter.getitemstring(1,'login')
+	if upper(gs_Userlist)= upper(gs_userid) then
+		If gs_login ='Y'   THEN // Dinesh - 05/22/2024- Dinesh - SIMS-473-Google - SIMS – SIMS Timer Enhancement
+			g.of_sims_notification_process( )
+		//IF gbLogin =TRUE THEN RETURN
+		END IF
+	End if
+  END IF
+  //Dinesh -06/11/2024 - SIMS-473- Google - SIMS – SIMS Timer Enhancement
+  if gs_projectlist ='PANDORA'  and (upper(gs_Userlist)= upper(gs_userid)) then
+			exit;
+end if
+IF gs_projectlist <> '*ALL' and gs_Userlist <>'*ALL' then
+	if (upper(gs_Userlist)= upper(gs_userid)) and (upper(gs_projectlist)=upper(gs_project)) then
+			exit;
+	end if
+End if
+if upper(gs_projectlist)  = '*ALL' and gs_Userlist = '*ALL' then
+	exit;
+end if
+if upper(gs_projectlist)  = '*ALL' and (UPPER(gs_Userlist) = UPPER(gs_userid)) then
+	exit;
+end if
+if upper(gs_projectlist)  = upper(gs_project) and (UPPER(gs_Userlist) = '*ALL') then
+	exit;
+end if
+NEXT
+// End -Dinesh - 05/22/2024- Dinesh - SIMS-473-Google - SIMS – SIMS Timer Enhancement
+
+
 //07-Apr-2014 Madhu- SIMS Timer Notification Alert Functionality -END
 
 //10-Sep-2015 :Madhu-  PressKey vs SNScan - START
@@ -843,8 +946,9 @@ IDLE( g.getprojectIdleTime() )
 	
 //Update the Title - include version
 // pvh - 04/25/06 - version
-w_main.Title = gsTitle + ', Project: ' + gs_project + ', ' + f_getFormattedVersion()
-//w_main.Title = gsTitle + ', Project: ' + gs_project + ', Version: ' + f_get_version() 
+// To include Machine name and SPID - /w_main.Title is shifted down // Dinesh - 09/26/2023- SIMS-305- SIMS PIP/SIP - Include Release # in Version Stamp
+//w_main.Title = gsTitle + ', Project: ' + gs_project + ', ' + f_getFormattedVersion() // Dinesh - 09/26/2023- SIMS-305- SIMS PIP/SIP - Include Release # in Version Stamp
+//w_main.Title = gsTitle + ', Project: ' + gs_project + ', Version: ' + f_get_version()  
 
 // for 3com and the shipments logon issue
 if Upper( gs_project ) = '3COM_NASH' then	w_main.Title += ' As: ' + gs_userid
@@ -931,6 +1035,17 @@ Insert Into User_login_History (Project_ID, UserID, Login_Time, Machine_Name, Si
 Using	SQLCA;
 
 Execute Immediate "COMMIT" using SQLCA;
+
+//Begin - 09/21/2023- Dinesh - SIMS-328-  Google  - Read Only Access Part 2
+datetime ldt_user_login_Date
+long ll_userspid
+select top 1 Login_Time into :ldt_user_login_Date  from User_Login_History where UserId=:gs_userid order by Login_Time desc;
+select UserSPID into :ll_userspid  from User_Login_History where UserId=:gs_userid and Login_Time=:ldt_user_login_Date;
+gl_userspid=ll_userspid
+//End - 09/21/2023- Dinesh - SIMS-328-  Google  - Read Only Access Part 2	
+
+w_main.Title = gsTitle + ',Project: ' + gs_project + ',' + f_getFormattedVersion() + ',UserID: ' + ls_userid + ',Machine: ' + ls_machine_name + ',Session : ' + string(gl_userspid) // Dinesh - 09/26/2023- SIMS-305- SIMS PIP/SIP - Include Release # in Version Stamp
+
  Opensheet (w_sims_banner, w_main,gi_menu_pos,Original! ) //sarun2014apr09 -Madhu turned off until next cycle
 close(parent)
 end event

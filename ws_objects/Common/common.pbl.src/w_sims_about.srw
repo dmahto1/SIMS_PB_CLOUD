@@ -140,11 +140,11 @@ boolean focusrectangle = false
 end type
 
 type p_plash from picture within w_sims_about
-integer x = 233
+integer x = 288
 integer y = 352
-integer width = 987
+integer width = 795
 integer height = 152
-string picturename = "XPOLogo.png"
+string picturename = "GXOLogo.png"
 boolean focusrectangle = false
 end type
 

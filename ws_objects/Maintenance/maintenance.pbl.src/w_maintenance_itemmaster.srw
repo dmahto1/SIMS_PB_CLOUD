@@ -881,6 +881,21 @@ Long llCooCount,i
 
 IF f_check_access(is_process,"S") = 0 THEN Return -1
 
+//If upper(gs_project) ='GEISTLICH' then // Dinesh - SIMS-76 - 09/26/2022- Geistlich Serialization - Updates
+//
+//messagebox('',string(idw_main.GetItemString(1,"uom_3")))
+//messagebox('',string(idw_main.GetItemString(1,"uom_4")))
+//	
+//	If (isnull(idw_main.GetItemString(1,"uom_4")) or idw_main.GetItemString(1,"uom_4") = '') Then
+//		messagebox(is_title,"Unit of measure is required, You must enter a UOM!")
+//		tab_main.SelectTab(1)
+//		idw_main.SetFocus()
+//		idw_main.SetColumn("uom_4")
+//		Return -1
+//	End If
+//	
+//end if
+
 SetPointer(Hourglass!)
 
 If idw_main.AcceptText() = -1 Then 
@@ -1176,6 +1191,20 @@ IF IsValid( w_ro ) AND idw_main.RowCount() > 0 THEN
 											  idw_main.GetItemNumber( 1, 'owner_id' ) )
 	
 END IF
+
+// Begin - Dinesh - SIMS-74 - 09/26/2022- Geistlich Serialization - Updates
+If upper(gs_project) ='GEISTLICH' then 
+	
+	If (isnull(idw_main.GetItemString(1,"uom_1")) or idw_main.GetItemString(1,"uom_1") = '') Then
+		messagebox(is_title,"Unit of measure is required, You must enter a UOM Level 1!")
+		tab_main.SelectTab(1)
+		idw_main.SetFocus()
+		idw_main.SetColumn("uom_1")
+		Return -1
+	End If
+	
+end if
+// End - Dinesh - SIMS-74 - 09/26/2022- Geistlich Serialization - Updates
 
 SetPointer(Arrow!)
 Return 0
@@ -1812,6 +1841,38 @@ if upper(gs_project) = 'PANDORA' then
 
 End if
 
+// Begin - Dinesh - 06/13/2022- S72531- Google - SIMS - Item Master Lockdown
+
+if upper(gs_Project) = 'PANDORA' then
+	If gs_role = "0"  OR gs_role = "-1" Then
+			idw_main.object.lot_controlled_ind.protect=0
+			idw_main.object.po_no2_controlled_ind.protect = 0
+			idw_main.object.po_controlled_ind.protect = 0
+			idw_main.object.serialized_ind.protect = 0
+			idw_main.object.container_tracking_ind.protect=0
+			idw_main.object.expiration_controlled_ind.protect=0
+			idw_main.object.qa_check_ind.protect=0
+			idw_main.object.cc_group_code.protect=0
+			idw_main.object.cc_class_code.protect=0
+			idw_main.object.cc_freq.protect=0
+			idw_main.object.cc_trigger_qty.protect=0
+			
+		else
+			idw_main.object.lot_controlled_ind.protect=1
+			idw_main.object.po_no2_controlled_ind.protect = 1
+			idw_main.object.po_controlled_ind.protect = 1
+			idw_main.object.serialized_ind.protect = 1
+			idw_main.object.container_tracking_ind.protect=1
+			idw_main.object.expiration_controlled_ind.protect=1
+			idw_main.object.qa_check_ind.protect=1	
+			idw_main.object.cc_group_code.protect=1
+			idw_main.object.cc_class_code.protect=1
+			idw_main.object.cc_freq.protect=1
+			idw_main.object.cc_trigger_qty.protect=1
+	end if
+	
+end if
+// End - Dinesh - 06/13/2022- S72531- Google - SIMS - Item Master Lockdown
 
 // 05/06/2010 ujh:  1 of 3 changes to allow SKU_Substitutes tab to ADMIN and above (PANDORA only).
 If gs_role = '1' or gs_role = '0' or gs_role = '-1' Then
@@ -1900,9 +1961,11 @@ If UpperBound(Istrparms.String_arg) > 1 Then
 	End if
 End If
 
+
 end event
 
 event close;call super::close;Destroy i_nwarehouse
+
 end event
 
 event open;call super::open;
@@ -2359,6 +2422,10 @@ end event
 event itemchanged;ib_changed = True
 nvo_country lnvo_country
 string ls_codeexchange, ls_countrycode, ls_temp
+string ls_lot_controlled_ind, ls_container_tracked_ind,ls_comp_ind
+dwItemStatus l_status
+
+
 
 // 02/07 - PCONKL - Set 'Interface_Upd_Req_Ind' to note record has changed for triggered update (batch_Transaction written in ue_save)
 //							Sweeper will procee all records for project where indicator is set, not just record written in Transaction file
@@ -2461,8 +2528,20 @@ Choose case dwo.name
 			tab_main.tabpage_component.st_component_parent.visible=True
 			tab_main.tabpage_component.cb_add_component_parent.visible=True
 			tab_main.tabpage_component.cb_delete_component_parent.visible=True
+			// Dinesh -Begin -  09/26/2022- SIMS-74- Geistlich Serialization - Updates
+			if Upper ( gs_project ) = "GEISTLICH" then
 			
-			This.SetItem(row,'component_Type','D') /* 08/04 - PCONKL Default component type to 'Delivery Order' */
+				This.SetItem(row,'component_Type','W') /* 08/04 - PCONKL Default component type to 'Delivery Order' */
+				This.SetItem(row,'lot_controlled_ind','Y')
+				This.SetItem(row,'container_tracking_ind','Y')
+				This.update()
+				
+			else
+
+			// Dinesh -End -  09/26/2022- SIMS-74- Geistlich Serialization - Updates
+				This.SetItem(row,'component_Type','D') /* 08/04 - PCONKL Default component type to 'Delivery Order' */
+			
+			end if
 			
 			// 2/10/2011; David C; Do not allow user to set this item as a component master if item is being tracked at inbound for Pandora only
 			if Upper ( gs_project ) = "PANDORA" then
@@ -2481,6 +2560,15 @@ Choose case dwo.name
 			// 10/03 - PConkl - make sure we don't have any content for the parent - can't remove components if so, will fu*k everything up later
 			lsSku = idw_Main.GetITemString(1,'sku')
 			lsSupplier = idw_Main.GetITemString(1,'supp_code')
+//			// Begin -Dinesh - 09/26/2022- SIMS-74- Geistlich Serialization - Updates
+//			This.SetItem(row,'lot_controlled_ind','N') 
+//		     This.SetItem(row,'container_tracking_ind','N') 
+//			This.update()
+//			// End - Dinesh - 09/26/2022- SIMS-74- Geistlich Serialization - Updates
+				
+				ls_comp_ind = this.GetITemString(row,'component_ind')
+				ls_lot_controlled_ind = this.GetITemString(row,'lot_controlled_ind') 
+				ls_container_tracked_ind = this.GetITemString(row,'container_tracking_ind')
 			
 			Select Count(*) into :llCount
 			FRom Content with(nolock)
@@ -2573,9 +2661,8 @@ Choose case dwo.name
 	
 	case "serialized_ind"
 		// 2/10/2011; David C; Do not allow the serialized indicator to be changed if inventory already exists for this SKU for Pandora only
-		if Upper ( gs_project ) = "PANDORA" then
+		if Upper ( gs_project ) = "PANDORA" or Upper( gs_project ) = "GEISTLICH" then // Dinesh - Added Geistlich- 09/27/2022- SIMS-74- Geistlich Serialization - Updates
 			ldws_Status = idw_main.GetItemStatus ( 1, 0, Primary! )
-			
 			// Don't bother performing this check if this is a brand new item
 			if ldws_Status = NotModified! or ldws_Status = DataModified! then
 				lsSku = this.Object.sku[1]
@@ -2603,7 +2690,7 @@ Choose case dwo.name
 				Return 2
 			end if
 		end if
-		
+
 	case 'pick_cart_status' /* 10/13 - PCONKL - DOn't allow to be set if level 1 DIMs or weight not populated*/
 		
 		if data = 'Y' or data = 'U' Then
@@ -2700,6 +2787,21 @@ else
 idw_main.object.allow_receipt.visible = 0
 END IF
 // End Dinesh- 11/23/2020 - S51444- PHILIPS-DA
+
+// Begin Dinesh - SIMS-74 - 09/26/2022- Geistlich Serialization - Updates
+If upper(gs_project) ='GEISTLICH' then 
+
+	If (isnull(idw_main.GetItemString(1,"uom_1")) or idw_main.GetItemString(1,"uom_1") = '') Then
+		messagebox(is_title,"Unit of measure is required, You must enter a UOM Level 1!")
+		tab_main.SelectTab(1)
+		idw_main.SetFocus()
+		idw_main.SetColumn("uom_1")
+		Return -1
+	End If
+	
+end if
+// End - Dinesh - SIMS-74 - 09/26/2022- Geistlich Serialization - Updates
+
 
 
 end event

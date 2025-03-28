@@ -387,6 +387,8 @@ type m_41subwaylabels from menu within m_utilities
 end type
 type m_42footprint from menu within m_utilities
 end type
+type m_43screenunlockfortheorders from menu within m_utilities
+end type
 type m_utilities from menu within m_main
 m_1shippinglabel m_1shippinglabel
 m_2partlabel m_2partlabel
@@ -429,6 +431,7 @@ m_16 m_16
 m_40genericcartonlabel m_40genericcartonlabel
 m_41subwaylabels m_41subwaylabels
 m_42footprint m_42footprint
+m_43screenunlockfortheorders m_43screenunlockfortheorders
 end type
 type m_window from menu within m_main
 end type
@@ -721,6 +724,7 @@ type m_save from menu within m_file
 end type
 
 event clicked;ParentWindow.TriggerEvent("ue_save")
+
 end event
 
 on m_save.create
@@ -2091,7 +2095,7 @@ end event
 
 on m_shipmentsoutbound.create
 call super::create
-this.text = "&5. Shipments"
+this.text = "&5. Shuttle Shipments"
 this.menutextcolor = 134217735
 this.menubackcolor = 134217732
 this.menuhighlightcolor = 134217741
@@ -4851,6 +4855,7 @@ m_16 m_16
 m_40genericcartonlabel m_40genericcartonlabel
 m_41subwaylabels m_41subwaylabels
 m_42footprint m_42footprint
+m_43screenunlockfortheorders m_43screenunlockfortheorders
 end type
 
 on m_utilities.create
@@ -4912,6 +4917,7 @@ this.m_16=create m_16
 this.m_40genericcartonlabel=create m_40genericcartonlabel
 this.m_41subwaylabels=create m_41subwaylabels
 this.m_42footprint=create m_42footprint
+this.m_43screenunlockfortheorders=create m_43screenunlockfortheorders
 this.Item[UpperBound(this.Item)+1]=this.m_1shippinglabel
 this.Item[UpperBound(this.Item)+1]=this.m_2partlabel
 this.Item[UpperBound(this.Item)+1]=this.m_2eupartlabel
@@ -4953,6 +4959,7 @@ this.Item[UpperBound(this.Item)+1]=this.m_16
 this.Item[UpperBound(this.Item)+1]=this.m_40genericcartonlabel
 this.Item[UpperBound(this.Item)+1]=this.m_41subwaylabels
 this.Item[UpperBound(this.Item)+1]=this.m_42footprint
+this.Item[UpperBound(this.Item)+1]=this.m_43screenunlockfortheorders
 end on
 
 on m_utilities.destroy
@@ -4998,6 +5005,7 @@ destroy(this.m_16)
 destroy(this.m_40genericcartonlabel)
 destroy(this.m_41subwaylabels)
 destroy(this.m_42footprint)
+destroy(this.m_43screenunlockfortheorders)
 end on
 
 event clicked;// 12/00 - PCONKL - Close the reports menu if another tab is selected
@@ -5008,8 +5016,8 @@ End If
 //This.m_7receivinglabels.Visible=False
 
   //TAM 08/30/2007 -Added Ironport
-If gs_project = 'GM_MI_DAT' or gs_project = 'MAQUET' or gs_project = 'PANDORA' or gs_project = 'KLONELAB'Then
-	This.m_2PartLabel.Visible=True
+If gs_project = 'GM_MI_DAT' or gs_project = 'MAQUET' or gs_project = 'PANDORA' or gs_project = 'KLONELAB' or gs_project = 'GEISTLICH' Then //Dinesh - 09/09/2021 -S61867- Geistlich kitting labels
+This.m_2PartLabel.Visible=True
 Else
 	This.m_2PartLabel.Visible=False
 End If
@@ -5319,7 +5327,9 @@ event clicked;//If f_check_access ("B3","") = 1 Then
 			OpenSheetWithParm(w_pandora_part_label_print, "  ", w_main,gi_menu_pos, Original!)
 		Case "KLONELAB"
 			OpenSheetWithParm(w_klonelab_part_label, "  ", w_main,gi_menu_pos, Original!)			//MEA - 8/12 - KloneLab
-		End Choose
+ 		 Case "GEISTLICH" //Dinesh - 09/09/2021- S61867- Geistlich kitting labels
+			OpenSheetWithParm(w_geistlich_part_label_print, "  ", w_main,gi_menu_pos, Original!)			
+End Choose
 //End If
 
 gs_menuitem = Parent.classname( ) //05-MAy-2014 :Madhu- Added for open up User Manual upon F1 key.
@@ -6808,6 +6818,42 @@ this.bitmapgradient = true
 end on
 
 on m_42footprint.destroy
+call super::destroy
+end on
+
+type m_43screenunlockfortheorders from menu within m_utilities
+end type
+
+event clicked;//06/26/2023 :Dinesh  SIMS-198- Google- Read only
+
+If upper(gs_project) ='PANDORA' Then
+	// OpenSheet(w_screen_unlock_orders, w_main,gi_menu_pos,Original!)
+	open(w_screen_unlock_orders)
+End If
+
+end event
+
+on m_43screenunlockfortheorders.create
+call super::create
+this.text = "43. Screen Unlock for the Orders"
+this.menutextcolor = 134217735
+this.menubackcolor = 134217732
+this.menuhighlightcolor = 134217741
+this.textsize = 8
+this.weight = 400
+this.facename = "Tahoma"
+this.titlebackcolor = 134217730
+this.bitmapbackcolor = 12632256
+this.menubitmaps = true
+this.titlegradient = true
+this.toolbartextcolor = 134217746
+this.toolbarbackcolor = 67108864
+this.toolbarhighlightcolor = 134217741
+this.toolbargradient = true
+this.bitmapgradient = true
+end on
+
+on m_43screenunlockfortheorders.destroy
 call super::destroy
 end on
 

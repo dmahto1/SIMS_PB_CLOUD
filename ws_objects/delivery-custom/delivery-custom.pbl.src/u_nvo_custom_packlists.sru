@@ -5372,7 +5372,7 @@ IF lsShipToCountry = "AU" THEN
 
 	lsShip_from_address1 = "Riverbed Technology Australia Pty Ltd"
 	lsShip_from_address2 = "c/o Riverbed Technology Pte. Ltd"
-	lsShip_from_address3 = "C/O XPO SG LOGISTICS"
+	lsShip_from_address3 = "C/O GXO SG LOGISTICS"
 	lsShip_from_address4 = "60 ALPS AVE"
 	
 ELSE
@@ -5696,8 +5696,8 @@ String ls_address,lsfind,ls_text[], lscusttype, lscustcode, lsSerial, lsNotes
 String ls_sku ,lsSKUHold,  ls_description,ls_alt_sku, ls_supplier, lsHazCode, lsHazText, lsTransportMode
 String ls_inventory_type_desc,ls_etom, lsSupplierName, lsDONO
 String lsWHCode,lsaddr1,lsaddr2,lsaddr3,lsaddr4,lscity,lsstate,lszip,lscountry,lsname,lsVAT, lsUPC, lsPrinter, lsVol, lsNativeDesc, lsGrp
-String ls_d_packing_prt, lsim_uf11, ls_dono
-Long llim_qty2, llRowCount, llRowPOs, llNewRow
+String ls_d_packing_prt, lsim_uf11, ls_dono,ls_Serialized_Ind
+Long llim_qty2, llRowCount, llRowPOs, llNewRow,llRowserial
 
 Datastore       ldsHazmat, ld_packprint
 
@@ -5827,6 +5827,11 @@ For llRowPOs = 1 to llRowCount
         ld_packprint.setitem(llNewRow,"country_of_origin",w_do.idw_pack.getitemstring(llRowPOs,"country_of_origin")) 
         ld_packprint.setitem(llNewRow,"supp_code",w_do.idw_pack.getitemstring(llRowPOs,"supp_code")) 
         
+		  
+		//select Serialized_Ind into :ls_Serialized_Ind from Item_Master where Project_Id=:gs_project and SKU=:ls_sku;
+		
+	//if ls_Serialized_Ind= 'B' then 
+		
         // 10/07 - PCONKL - Get Serial Numbers from serial tab(Outbound)
         If w_do.idw_serial.RowCount() > 0 Then
                 
@@ -5850,7 +5855,43 @@ For llRowPOs = 1 to llRowCount
                 ld_packprint.setitem(llNewRow,"serial_no",lsSerial)
         
         End If /*serial numbers exist*/
+		  
+	//elseif ls_Serialized_Ind= 'Y' then
+
+		// Begin - 07/27/2022 - Dinesh - SIMS-34- Get Serial Numbers from pick tab(Outbound)
+		
+		
+        //  Get Serial Numbers from inbound tab(Outbound)
+        If w_do.idw_pick.RowCount() > 0 Then
                 
+                lsSerial = ""
+                lsFind = "line_item_No = " + String(w_do.idw_Pack.GetITemNumber(llRowPOs,'line_item_No'))
+                llFindRow = w_do.idw_pick.Find(lsFind,1,w_do.idw_pick.RowCOunt())
+                Do While llFindRow > 0
+                
+                        lsSerial += ", " + w_do.idw_pick.GetItemString(llFindRow,'serial_no')
+                
+                        llFindRow ++
+                        If llFindRow > w_do.idw_pick.RowCount() Then
+                                lLFindRow = 0
+                        Else
+                                llFindRow = w_do.idw_pick.Find(lsFind,llFindRow,w_do.idw_pick.RowCOunt())
+                        End If
+                
+                Loop
+                
+                If Left(lsSerial,2) = ', ' Then lsSerial = mid(lsSerial,3,999999999)
+                ld_packprint.setitem(llNewRow,"serial_no",lsSerial)
+        
+        End If /*serial numbers exist*/
+		  
+	//End if
+							
+//			 lsSerial =  w_do.idw_pick.GetItemString(llRowPOs,'serial_no')               
+//			 ld_packprint.setitem(llNewRow,"serial_no",lsSerial)  
+
+		// End - 07/27/2022 - Dinesh -SIMS-34- Get Serial Numbers from pick tab(Outbound)
+       
         ld_packprint.setitem(llNewRow,"component_ind",w_do.idw_pack.getitemstring(llRowPOs,"component_ind")) /* 02/01 - PCONKL - sort component master to top*/
                 
         ld_packprint.setitem(llNewRow,"cust_name",w_do.idw_main.getitemstring(1,"cust_name"))
@@ -5872,6 +5913,8 @@ For llRowPOs = 1 to llRowCount
         ld_packprint.setitem(llNewRow,"ship_from_state",lsstate)
         ld_packprint.setitem(llNewRow,"ship_from_zip",lszip)
         ld_packprint.setitem(llNewRow,"ship_from_country",lscountry)
+		  
+		
  	         
 Next /*PAcking Row */
  
@@ -6863,7 +6906,8 @@ Datastore	ldsImport
 
 // 09/05 - PCONKL - If there are packages shipped by TRAX, they must be voided before regenerating (can't delete shipped rows)
 If w_do.idw_Pack.Find("Tracking_Id_type='T'",1, w_do.idw_Pack.RowCount()) > 0 Then
-	messagebox(w_do.is_title,'One or more cartons on the current Packing List were shipped by TRAX.~rThese cartons must be voided before you can re-generate the Packing List.',StopSign!)
+	messagebox(w_do.is_title,'One or more cartons on the current Packing List were shipped by ConnectShip.~rThese cartons must be voided before you can re-generate the Packing List.',StopSign!) // Dinesh - 02/10/2025- SIMS-641-Development for Delivery Order screen change for ConnectShip
+	//messagebox(w_do.is_title,'One or more cartons on the current Packing List were shipped by TRAX.~rThese cartons must be voided before you can re-generate the Packing List.',StopSign!)
 	return - 1
 End If
 
@@ -7125,7 +7169,8 @@ Integer	liRC
 
 // 09/05 - PCONKL - If there are packages shipped by TRAX, they must be voided before regenerating (can't delete shipped rows)
 If w_do.idw_Pack.Find("Tracking_Id_type='T'",1, w_do.idw_Pack.RowCount()) > 0 Then
-	messagebox(w_do.is_title,'One or more cartons on the current Packing List were shipped by TRAX.~rThese cartons must be voided before you can re-generate the Packing List.',StopSign!)
+	messagebox(w_do.is_title,'One or more cartons on the current Packing List were shipped by ConnectShip.~rThese cartons must be voided before you can re-generate the Packing List.',StopSign!) // Dinesh - 02/10/2025- SIMS-641-Development for Delivery Order screen change for ConnectShip
+	//messagebox(w_do.is_title,'One or more cartons on the current Packing List were shipped by TRAX.~rThese cartons must be voided before you can re-generate the Packing List.',StopSign!)
 	return - 1
 End If
 

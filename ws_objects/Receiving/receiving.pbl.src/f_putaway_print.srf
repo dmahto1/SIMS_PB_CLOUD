@@ -29,6 +29,7 @@ Int iiCopies, liRmaSerialRows, liRmaRow
 //GailM 4/13/2020 - S44744/F19843 -  Google - Print 2nd copy of Pick List without qty (audit sheet)
 String lsAllowAuditSheet, lsAllowInboundAuditSheet, lsAllowOutboundAuditSheet
 Str_parms       lstrParms
+string ls_serial_no
 
 ls_last_sku = ""
 ls_last_Supplier = ""
@@ -69,6 +70,7 @@ For i = 1 to ll_rowcnt
 	ls_location = adw_putaway.getitemstring(i,"l_code")
 	lsPoNo2 = adw_putaway.GetItemString(i,"po_no2")
 	lsContainerId = adw_putaway.GetItemString(i,"container_id")
+//	ls_serial_no = adw_putaway.GetItemString(i,"serial_no") // Dinesh - 08/22/2022
 	If gs_project ='PANDORA' Then
 		ls_pono2_ind = adw_putaway.getItemString(liRmaRow, 'PO_NO2_Controlled_Ind')
 		ls_container_ind = adw_putaway.getItemString(liRmaRow, 'container_tracking_Ind')
@@ -80,7 +82,8 @@ For i = 1 to ll_rowcnt
 	End If
 	liRmaSerialRows = adw_rma_serial.Find("sku = '" + ls_sku + "' ", 1, adw_rma_serial.RowCount())
 	
-	
+	//liRmaSerialRows = adw_rma_serial.Find("sku = '" + ls_sku + "' and serial_no ='" + ls_serial_no +"' ", 1, adw_rma_serial.RowCount()) // Dinesh - 08/22/2022
+
 	If liRmaSerialRows > 0 Then
 //		lsFind ="sku ='"+ls_sku+"' and l_code ='"+ls_location+"' and po_no='"+ls_po+"' and po_no2 = '" + lsPoNo2 + "' and container_id = '" + lsContainerId + "' "
 //		llFindRow = adw_rma_serial.Find(lsFind, 1, adw_rma_serial.RowCount())
@@ -106,8 +109,10 @@ For i = 1 to ll_rowcnt
 					adw_print.setItem(llFindRow, 'quantity', ld_fp_qty +ldquantity)
 					continue		
 				End If		
+	
 				
 				ll_row = adw_print.InsertRow(0)
+				
 				
 				adw_print.setitem(ll_row,"ro_no",ls_order)
 				adw_print.setitem(ll_row,"real_ro_no", lsRoNo) 
@@ -171,7 +176,7 @@ For i = 1 to ll_rowcnt
 				adw_print.setitem(ll_row,"component_ind",adw_rma_serial.getitemstring(liRmaRow,"component_ind")) 
 				adw_print.setitem(ll_row,"component_no",adw_rma_serial.getitemNumber(liRmaRow,"component_no")) 
 				
-			Next
+			Next 
 		Else
 			// pvh 01/12/2006 - ams-muser
 			if gs_project = 'AMS-MUSER' then

@@ -36,9 +36,8 @@ end forward
 
 global type w_pandora_part_label_print from w_main_ancestor
 boolean visible = false
-integer y = 360
-integer width = 4831
-integer height = 1939
+integer width = 4832
+integer height = 1940
 string title = "Pandora Part Labels"
 string menuname = ""
 event ue_print ( )
@@ -1821,7 +1820,7 @@ end event
 type cb_selectall from commandbutton within w_pandora_part_label_print
 integer x = 37
 integer y = 32
-integer width = 336
+integer width = 338
 integer height = 80
 integer taborder = 20
 boolean bringtotop = true
@@ -1839,9 +1838,9 @@ event clicked;Parent.Event ue_selectall()
 end event
 
 type cb_clear from commandbutton within w_pandora_part_label_print
-integer x = 391
+integer x = 393
 integer y = 32
-integer width = 336
+integer width = 338
 integer height = 80
 integer taborder = 30
 boolean bringtotop = true
@@ -1858,10 +1857,10 @@ event clicked;Parent.Event ue_unselectall()
 end event
 
 type cbx_show_comp from checkbox within w_pandora_part_label_print
-integer x = 3983
-integer y = 29
-integer width = 647
-integer height = 77
+integer x = 3982
+integer y = 28
+integer width = 649
+integer height = 76
 boolean bringtotop = true
 integer textsize = -9
 integer weight = 400
@@ -1890,7 +1889,7 @@ end event
 type cbx_part_label from checkbox within w_pandora_part_label_print
 integer x = 2194
 integer y = 32
-integer width = 406
+integer width = 407
 integer height = 80
 boolean bringtotop = true
 integer textsize = -10
@@ -1925,7 +1924,7 @@ end type
 type gb_1 from groupbox within w_pandora_part_label_print
 integer x = 1573
 integer width = 549
-integer height = 173
+integer height = 172
 integer taborder = 10
 integer textsize = -8
 integer weight = 700
@@ -1939,10 +1938,10 @@ string text = "Label Resolution"
 end type
 
 type dw_label from u_dw_ancestor within w_pandora_part_label_print
-integer x = 7
+integer x = 9
 integer y = 224
-integer width = 4729
-integer height = 1613
+integer width = 4727
+integer height = 1612
 string dataobject = "d_pandora_part_labels_nolock"
 boolean hscrollbar = true
 boolean vscrollbar = true
@@ -1983,10 +1982,10 @@ Send(Handle(This),256,9,Long(0,0))
 end event
 
 type rb_200 from radiobutton within w_pandora_part_label_print
-integer x = 1660
+integer x = 1659
 integer y = 48
 integer width = 402
-integer height = 51
+integer height = 52
 boolean bringtotop = true
 integer textsize = -8
 integer weight = 700
@@ -2000,10 +1999,10 @@ string text = "200dpi"
 end type
 
 type rb_300 from radiobutton within w_pandora_part_label_print
-integer x = 1660
+integer x = 1659
 integer y = 96
-integer width = 344
-integer height = 77
+integer width = 343
+integer height = 76
 boolean bringtotop = true
 integer textsize = -8
 integer weight = 700
@@ -2018,8 +2017,8 @@ end type
 
 type cbx_delta_label from checkbox within w_pandora_part_label_print
 integer x = 2194
-integer y = 125
-integer width = 406
+integer y = 124
+integer width = 407
 integer height = 80
 boolean bringtotop = true
 integer textsize = -10
@@ -2034,10 +2033,10 @@ string text = "&Delta Label"
 end type
 
 type cbx_pallet_label from checkbox within w_pandora_part_label_print
-integer x = 2754
-integer y = 77
-integer width = 424
-integer height = 77
+integer x = 2752
+integer y = 76
+integer width = 425
+integer height = 76
 boolean bringtotop = true
 integer textsize = -9
 integer weight = 700
@@ -2051,10 +2050,10 @@ string text = "&Pallet Label"
 end type
 
 type cbx_carton_label from checkbox within w_pandora_part_label_print
-integer x = 3354
-integer y = 77
+integer x = 3355
+integer y = 76
 integer width = 453
-integer height = 77
+integer height = 76
 boolean bringtotop = true
 integer textsize = -9
 integer weight = 700
@@ -2068,10 +2067,10 @@ string text = "&Carton Label"
 end type
 
 type cbx_nested_label from checkbox within w_pandora_part_label_print
-integer x = 2754
-integer y = 141
-integer width = 1050
-integer height = 77
+integer x = 2752
+integer y = 140
+integer width = 1051
+integer height = 76
 boolean bringtotop = true
 integer textsize = -9
 integer weight = 700
@@ -2086,7 +2085,7 @@ end type
 
 type gb_2d_barcode from groupbox within w_pandora_part_label_print
 integer x = 2670
-integer width = 1287
+integer width = 1289
 integer height = 224
 integer taborder = 20
 integer textsize = -9

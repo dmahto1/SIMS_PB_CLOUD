@@ -140,8 +140,9 @@ If lsAdjustmentType <> 'OTHER' Then
 		lsOutString += lsSku + Space(50 - len(lsSKU))
 		lsOutString += lsUOM
 		lsOutString += lsqty + Space(15 - len(lsqty))
-		lsOutString += lsOldInvCode + Space(2 - Len(lsOldInvCode))
-		lsOutString += lsNewInvCode + Space(2 - Len(lsNewInvCode))
+		//dts 11/07/2021 - S64229 - we will now be getting 3-char Logitech Inv Type
+		lsOutString += lsOldInvCode + Space(3 - Len(lsOldInvCode))
+		lsOutString += lsNewInvCode + Space(3 - Len(lsNewInvCode))
 
 		llNewRow = idsOut.insertRow(0)
 	
@@ -192,7 +193,9 @@ If lsAdjustmentType <> 'OTHER' Then
 		lsOutString += lsSku + Space(50 - len(lsSKU))
 		lsOutString += lsqty + Space(15 - len(lsqty))
 		lsOutString += lsUOM
- 		lsOutString += lsNewInvCode + Space(2 - Len(lsNewInvCode))
+		//dts 11/07/2021 - S64229 - we will now be getting 3-char Logitech Inv Type
+ 		//lsOutString += lsNewInvCode + Space(2 - Len(lsNewInvCode))
+		 lsOutString += lsNewInvCode + Space(3 - Len(lsNewInvCode))
 		lsOutString += lsadjustmentind 
 		lsOutString += lsAcctAlias + Space(30 - Len(lsAcctAlias))
 		lsOutString += lsAdjustmentType + Space(2 - Len(lsAdjustmentType))
@@ -380,7 +383,9 @@ For llRowPos = 1 to lLRowCount /* For each Putaway Row */
 	lsOutString += LsSku  + Space(50 - Len(LsSku))
 	lsOutString += lsQty 
 	lsOutString += lsUOM
-	lsOutString += lsInvTypeDescript + Space(2 - Len(lsInvTypeDescript))
+	//dts 11/07/2021 - S64229 - we will now be getting 3-char Logitech Inv Type
+	//lsOutString += lsInvTypeDescript + Space(2 - Len(lsInvTypeDescript))
+	lsOutString += lsInvTypeDescript + Space(3 - Len(lsInvTypeDescript))
 	lsOutString += lsSkuDescript + space(70 - len(lsSkuDescript))
 	
 	llNewRow = idsOut.insertRow(0)
@@ -418,6 +423,7 @@ Integer		liRC
 
 String	lsLogOut
 long llAllocQty
+long llQtySUM //dts - S64984
 
 If Not isvalid(idsOut) Then
 	idsOut = Create Datastore
@@ -511,7 +517,7 @@ lsID = 'DO' + Right(Trim(asDoNo),6)
 lsOutString += lsID + space(16 - len(lsID))	
 
 lsOrdType = idsDOMain.GetITemString(1,'Ord_Type')										//Order Type
-If lsordType <> 'S' and lsordType <> 'P' Then
+If lsordType <> 'S' and lsordType <> 'P' and lsordType <> 'M' and lsordType <> 'W' Then  //dts 11/07/2021 - S64229 Added 'M' and 'W' order types.
 	If lsordType <> 'X' and lsordType <> 'E' and lsordType <> 'I' Then
 		lsLogOut = "        *** Order Type does not get a File sent for type : " + lsOrdType
 		FileWrite(gilogFileNo,lsLogOut)
@@ -603,15 +609,16 @@ INTO :lsSCAC, :lsCarriername
 FROM Carrier_Master  
 WHERE ( Carrier_Code = :lsCarrier ) AND  
   	   ( Project_ID = :AsProject )   ;
-
-If not isnull(lsCarriername) Then						
+// Dhirendra -Logitech--S66466 Taken left-most characters based on the length of Field-Start
+If not isnull(lsCarriername) Then
+	lsCarriername=left(lsCarriername,50)
 	lsOutString +=  lsCarriername + space(50 - len(lsCarriername))										
 else
 	lsOutString += space(50) 
 End If
 
 If not isnull(idsDOMain.GetITemString(1,'freight_terms')) Then						//Freight Terms
-	lsTemp = idsDOMain.GetITemString(1,'freight_terms')
+	lsTemp = left(idsDOMain.GetITemString(1,'freight_terms'),20)
 	lsOutString += lsTemp + space(20 - len(lsTemp))	
 else
 	lsOutString += space(20) 
@@ -627,7 +634,7 @@ End If
 lsOutString += string(ldFreight, "000000.000") 
 
 If not isnull(idsDOMain.GetITemString(1,'User_Field10')) Then 						
-	lsTemp = idsDOMain.GetITemString(1,'User_Field10')								//User Field 10
+	lsTemp = left(idsDOMain.GetITemString(1,'User_Field10'),50)								//User Field 10
 	lsOutString += lsTemp + space(50 - len(lsTemp))	
 else
 	lsOutString += space(50) 
@@ -635,32 +642,90 @@ End If
 
 
 If not isnull(idsDOMain.GetITemString(1,'Ship_Ref')) Then 					// Shipper Ref
-	lsTemp = idsDOMain.GetITemString(1,'Ship_Ref')
+	lsTemp = left(idsDOMain.GetITemString(1,'Ship_Ref'),40)
 	lsOutString += lsTemp + space(40 - len(lsTemp))	
 Else
 	lsOutString += space(40)	
 End If
 
 
-If not isnull(lsSCAC) Then 															// Scac
-	lsOutString += lsScac + space(4 - len(lsScac))
+If not isnull(lsSCAC) Then// Scac
+   lsScac = left(lsScac,4) 
+	lsOutString +=  lsScac + space(4 - len(lsScac)) 
 Else
 	lsOutString += space(4)
 End If
 
 If not isnull(idsDOMain.GetITemString(1,'User_Field9')) Then 				// User Field 9
-	lsTemp = idsDOMain.GetITemString(1,'User_Field9')
+	lsTemp = left(idsDOMain.GetITemString(1,'User_Field9'),50)
 	lsOutString += lsTemp + space(50 - len(lsTemp))	
 Else
 	lsOutString += space(50)	
 End If
 
 If not isnull(idsDOMain.GetITemString(1,'Cust_Name')) Then 				// Customer Name
-	lsTemp = idsDOMain.GetITemString(1,'Cust_Name')
+	lsTemp = left(idsDOMain.GetITemString(1,'Cust_Name'),40)
 	lsOutString += lsTemp + space(40 - len(lsTemp))	
 Else
 	lsOutString += space(40)	
 End If
+
+//dts 11/25/2021 - S64984 - Additional Requrements - new order types have additional fields on SH line.
+//dts 12/03/2021 - S65297 - Adding Ship-to Address fields to SH Record
+If lsordType = 'M' or lsordType = 'W' Then  
+	If not isnull(idsDOMain.GetItemString(1,'Address_1')) Then 				// SH24 - Address_1
+		lsTemp = left(idsDOMain.GetItemString(1,'Address_1'),50)
+		lsOutString += lsTemp + space(50 - len(lsTemp))	
+	Else
+		lsOutString += space(50)	
+	End If
+	If not isnull(idsDOMain.GetItemString(1,'Address_2')) Then 				// SH25 - Address_2
+		lsTemp = left(idsDOMain.GetItemString(1,'Address_2'),40)
+		lsOutString += lsTemp + space(40 - len(lsTemp))	
+	Else
+		lsOutString += space(40)	
+	End If
+	If not isnull(idsDOMain.GetItemString(1,'city')) Then 				// SH26 - City
+		lsTemp = left(idsDOMain.GetItemString(1,'city'), 20)
+		lsOutString += lsTemp + space(20 - len(lsTemp))	
+	Else
+		lsOutString += space(20)	
+	End If
+	If not isnull(idsDOMain.GetItemString(1,'State')) Then 				// SH27 - State
+		lsTemp = left(idsDOMain.GetItemString(1,'State'),20)
+		lsOutString += lsTemp + space(20 - len(lsTemp))	
+	Else
+		lsOutString += space(20)	
+	End If
+	If not isnull(idsDOMain.GetItemString(1,'zip')) Then 				// SH28 - Zip
+		lsTemp = left(idsDOMain.GetItemString(1,'zip'),5)
+		lsOutString += lsTemp + space(5 - len(lsTemp))	
+	Else
+		lsOutString += space(5)	
+	End If
+	If not isnull(idsDOMain.GetItemString(1,'country')) Then 				// SH29 - Country
+		lsTemp = left(idsDOMain.GetItemString(1,'country'),10)
+		lsOutString += lsTemp + space(10 - len(lsTemp))	
+	Else
+		lsOutString += space(10)	
+	End If
+	If not isnull(idsDOMain.GetItemString(1,'cust_order_no')) Then 				// SH30 - Customer_PO_Number
+		lsTemp = left(idsDOMain.GetItemString(1,'cust_order_no'),20)
+		lsOutString += lsTemp + space(20 - len(lsTemp))	
+	Else
+		lsOutString += space(20)	
+	End If
+	 // Dhirendra -Logitech--S66466 Taken left-most characters based on the length of Field-END
+	lsOutString += 'Y '		//SH31 - asn_flag
+	If lsordType = 'M' Then    //SH32 - asn_compliance_code
+		lsOutString += 'RTNW '
+	else
+		lsOutString += 'SFMX '
+	end if
+else //lsordType = 'M' or lsordType = 'W'
+	//lsOutString += space(27)	
+	lsOutString += space(172) //S65297 - added ship-to Address for Order Type 'M' or 'W'. Otherwise, spaces
+end if
 
 //Get The AWB BOL from the Header to use at the end
 	lsAWBBOL = idsDOMain.GetITemString(1,'AWB_BOL_No')
@@ -716,19 +781,28 @@ For llRowPos = 1 to llRowCount
 			lsOutString += space(4) 
 		End If
 
-		lsOutString += string(llAllocQTY,"000000000.00000") 							//alloc_Qty 
+		//dts 11/14/2021 - S64229 - New requirement for alloc_qty for no leading 0's and no decimal.
+		//dts 11/25/2021 - S64984 - Additional Requrements - new format is only for new order types.
+		If lsordType <> 'M' and lsordType <> 'W' Then  
+			lsOutString += string(llAllocQTY,"000000000.00000") 							//alloc_Qty 
+		else
+			lsOutString += string(llAllocQTY) + space(15 - len(string(llAllocQTY)))				//alloc_Qty 
+		end if
 		
 		lsInvType = trim(idsDoDetail.GetITemString(llRowPos,'User_Field5'))		//UF5 = Inventory Type
 		SELECT Code_Descript  
-   	INTO :lsInvTypeDescript  
-   	FROM Lookup_Table  
-   	WHERE Code_Type = 'SI' AND Code_ID = :lsInvType ;
+		INTO :lsInvTypeDescript  
+		FROM Lookup_Table  
+		WHERE Code_Type = 'SI' AND Code_ID = :lsInvType ;
 
 		If not isnull(lsInvTypeDescript) Then 				
 			lsTemp =  lsInvTypeDescript			   											//Inv Type 
-			lsOutString +=  lsTemp + space(2 - len(lsTemp))
+			//dts 11/07/2021 - S64229 - we will now be getting 3-char Logitech Inv Type
+			//lsOutString +=  lsTemp + space(2 - len(lsTemp))
+			lsOutString +=  lsTemp + space(3 - len(lsTemp))
 		else
-			lsOutString += space(2) 
+			//lsOutString += space(2) 
+			lsOutString += space(3) 
 		End If
 	
 		If not isnull(idsDODetail.GetITemString(llRowPos,'User_Field6')) Then 				
@@ -738,6 +812,8 @@ For llRowPos = 1 to llRowCount
 			lsOutString += space(3) 
 		End If
 
+		//dts 11/25/2021 - S64984 - Additional Requrements - DMA says UF2 (plus, mapping says 'split_flag_passthru' and UF2 is aliased to 'Split Flag')
+		//  Rafael says to use as is.
 		If not isnull(idsDODetail.GetITemString(llRowPos,'User_Field4')) Then 			// User Field 2
 		 	lsTemp = idsDODetail.GetITemString(llRowPos,'user_field4')						// User Field 2
 			lsOutString += lsTemp + space(20 - len(lsTemp)) 
@@ -745,6 +821,52 @@ For llRowPos = 1 to llRowCount
 			lsOutString += space(20) 
 		End If
 		
+		//dts 11/25/2021 - S64984 - Additional Requrements - part_upc_code from item_master
+		If not isnull(idsDODetail.GetItemNumber(llRowPos,'Part_UPC_Code')) Then
+		 	lsTemp = string(idsDODetail.GetItemNumber(llRowPos,'Part_UPC_Code'))
+			lsOutString += lsTemp + space(15 - len(lsTemp)) //SD10 - upc_code_primary
+			lsOutString += lsTemp + space(15 - len(lsTemp)) //SD11 - upc_code_intermediate
+		else
+			lsOutString += space(15) //SD10 - upc_code_primary 
+			lsOutString += space(15) //SD11 - upc_code_intermediate 
+		End If
+
+		//dts 12/03/2021 - S65297 - Adding description, PO line, qty and price to 'SD' Record.
+		If lsordType = 'M' or lsordType = 'W' Then  
+			If not isnull(idsDODetail.GetItemString(llRowPos,'description')) Then 			//SD12 description
+				lsTemp = left(idsDODetail.GetItemString(llRowPos,'description'),50)
+				lsOutString += lsTemp + space(50 - len(lsTemp)) 
+			else
+				lsOutString += space(50) 
+			End If
+
+			If not isnull(idsDODetail.GetItemString(llRowPos,'User_Field2')) Then 			//SD13 purchase_order_line_number (User Field 2)
+				lsTemp = left(idsDODetail.GetItemString(llRowPos,'user_field2'),6)
+				lsOutString += lsTemp + space(6 - len(lsTemp)) 
+			else
+				lsOutString += space(6) 
+			End If
+
+			If not isnull(idsDODetail.GetItemNumber(llRowPos,'req_qty')) Then 			//SD14 req_qty
+				lsTemp = string(idsDODetail.GetItemNumber(llRowPos,'req_qty'),'0000000')
+				lsOutString += lsTemp + space(10 - len(lsTemp))
+			else
+				lsOutString += space(10)
+			End If
+
+			If not isnull(idsDODetail.GetItemNumber(llRowPos,'price')) Then 			//SD15 Price
+				lsTemp = string(idsDODetail.GetItemNumber(llRowPos,'price'),'00000.00')
+				lsOutString += lsTemp + space(10 - len(lsTemp)) 
+			else
+				lsOutString += space(10) 
+			End If
+		else //OrdType not 'M' or 'W'...
+			lsOutString += space(50) //SD12 - description
+			lsOutString += space(6)  //SD13 - purchase_order_line_number (UF2)
+			lsOutString += space(10) //SD14 - req_qty 
+			lsOutString += space(10) //SD15 - price 
+		end if
+
 		//write to DB for sweeper to pick up
 		idsOut.SetItem(llNewRow,'Project_id',Asproject) /* hardcoded to match entry in .ini file for file destination*/
 		idsOut.SetItem(llNewRow,'edi_batch_seq_no', Long(ldBatchSeq))
@@ -803,7 +925,17 @@ For llRowPos = 1 to llRowCount
 				lsOutString +=  space(8)
 			End If
 
-			lsOutString += String(idsDOPickDTL.GetITemNumber(llSSRowPos,'QTY_SUM'),'000000000.00000')	// Quantity
+			//dts 11/25/2021 - S64984 - Additional Requrements -  no leading 0's and no decimal for new order types.
+			//lsOutString += String(idsDOPickDTL.GetITemNumber(llSSRowPos,'QTY_SUM'),'000000000.00000')	// Quantity
+			llQtySUM =	idsDOPickDTL.GetITemNumber(llSSRowPos,'QTY_SUM')
+			If isNull(llQtySUM)  Then
+				llQtySUM = 0
+			End If
+			If lsordType <> 'M' and lsordType <> 'W' Then  
+				lsOutString += String(llQtySUM,'000000000.00000')	// Quantity
+			else
+				lsOutString += string(llQTYSUM) + space(15 - len(string(llQTYSUM)))				//Quantity 
+			end if
 
 			//write to DB for sweeper to pick up
 			idsOut.SetItem(llNewRow,'Project_id',Asproject) /* hardcoded to match entry in .ini file for file destination*/
@@ -818,61 +950,160 @@ Next /* Next Detail record */
 
 		//Get Picking Details to get Pedimento Number From RONO
 
-llRowCOunt = idsDoTracking.Retrieve(asDoNo) /*Picking Detail Records Grouped by Track ID*/
-// No Tracking IDs Entered then llrowcount = 0
-If llRowCount < 1 Then
-		llNewRow = idsOut.insertRow(0)
-		lsOutString = 'ST' 																		//Detail ID
-		lsOutString +=  space(50)			//Tracking Id not there
-		If not isnull(lsAWBBOL)	Then
-			lsOutString +=  lsAWBBOL + space(20 - len(lsAWBBOL))							// (AWBBOL)
-		Else
-			lsOutString +=  space(20)
-		End If
+/* //dts 11/28/2021 - S64984 - 'ST' record type is different.  Per DMA:
+	'ST'
+	AWB_BOL_No (50), only for WR (W) and WB (M) order types this field contains tracking No.
+	ucc_128_label_code (20), only for WR (W) and WB (M) order types, hardcode 00000000000000
+	Weight (12), 999999.99999, From Header SH08
+	Ctn_Cnt (7), 9999999, From Header SH17
+*/
+	llNewRow = idsOut.insertRow(0)
+	lsOutString = 'ST' 																		//Detail I
+	//dts 12/20/21 - S65927 - Now writing AWBBOL for all orders (DMA spec'd WR/WB orders only)
+	//If lsordType = 'M' or lsordType = 'W' Then  
+	If not isnull(lsAWBBOL)	Then
+		lsOutString +=  lsAWBBOL + space(20 - len(lsAWBBOL))				// (AWBBOL) (note that pre 11/2021 AWB was 20 chars (not 50)...  Using 20 (per Rafael)
+	Else
+		lsOutString +=  space(20)													//AWB
+	End If
+	If lsordType = 'M' or lsordType = 'W' Then  
+		lsOutString +=  '00000000000000' + space(6) 								//ucc_128_label_code
+		lsOutString += String(idsDOMain.GetItemNumber(1,'Weight'),'000000.00000')	//Weight
+		lsOutString += String(idsDOMain.GetItemNumber(1,'ctn_cnt'),'0000000')			// Carton Count
+	else
+	//dts 12/20/21		lsOutString +=  space(50)   														//AWB, dts note 12/20/21: should have been space(20) under S65927
+		lsOutString +=  space(20)   														//ucc_128_label_code
+		lsOutString +=  space(12)   														//Weight
+		lsOutString +=  space(7)   														//Carton Count
+	end if
+	//lsOutString += String(idsDOMain.GetITemNumber(1,'Weight'),'000000.00000')	//Weight
+	//lsOutString += String(idsDOMain.GetITemNumber(1,'ctn_cnt'),'0000000')			// Carton Count
+	
+		//write to DB for sweeper to pick up
+	idsOut.SetItem(llNewRow,'Project_id',Asproject) /* hardcoded to match entry in .ini file for file destination*/
+	idsOut.SetItem(llNewRow,'edi_batch_seq_no', Long(ldBatchSeq))
+	idsOut.SetItem(llNewRow,'line_seq_no', llNewRow)
+	idsOut.SetItem(llNewRow,'batch_data', lsOutString)
+	idsOut.SetItem(llNewRow,'file_name', lsFileName)
 
-			//write to DB for sweeper to pick up
-		idsOut.SetItem(llNewRow,'Project_id',Asproject) /* hardcoded to match entry in .ini file for file destination*/
-		idsOut.SetItem(llNewRow,'edi_batch_seq_no', Long(ldBatchSeq))
-		idsOut.SetItem(llNewRow,'line_seq_no', llNewRow)
-		idsOut.SetItem(llNewRow,'batch_data', lsOutString)
-		idsOut.SetItem(llNewRow,'file_name', lsFileName)
-
-Else
-
-
-	For llRowPos = 1 to llRowCount
-
-		llNewRow = idsOut.insertRow(0)
-		lsOutString = 'ST' 																		//Detail ID
-
-		If not isnull(idsDOTracking.GetITemString(llRowPos,'Shipper_Tracking_ID'))	Then
-				lsTemp = idsDOTracking.GetITemString(llRowPos,'Shipper_Tracking_ID')		// (Tracking ID)
-				lsOutString +=  lsTemp + space(50 - len(lsTemp))	
-		Else
-			lsOutString +=  space(50)
-		End If
-
-		If not isnull(lsAWBBOL)	Then
-			//we only want AWB on the first ST record
-			If llRowPos = 1 Then
-				lsOutString +=  lsAWBBOL + space(20 - len(lsAWBBOL))							// (AWBBOL)
+			/* dts 11/25/2021 - S64984 - Additional Requrements - 'ST' record type has changed (see immediately above). This is the old 'ST' record...
+			llRowCOunt = idsDoTracking.Retrieve(asDoNo) /*Picking Detail Records Grouped by Track ID*/
+			// No Tracking IDs Entered then llrowcount = 0
+			If llRowCount < 1 Then
+					llNewRow = idsOut.insertRow(0)
+					lsOutString = 'ST' 																		//Detail ID
+					lsOutString +=  space(50)			//Tracking Id not there
+					If not isnull(lsAWBBOL)	Then
+						lsOutString +=  lsAWBBOL + space(20 - len(lsAWBBOL))							// (AWBBOL)
+					Else
+						lsOutString +=  space(20)
+					End If
+			
+						//write to DB for sweeper to pick up
+					idsOut.SetItem(llNewRow,'Project_id',Asproject) /* hardcoded to match entry in .ini file for file destination*/
+					idsOut.SetItem(llNewRow,'edi_batch_seq_no', Long(ldBatchSeq))
+					idsOut.SetItem(llNewRow,'line_seq_no', llNewRow)
+					idsOut.SetItem(llNewRow,'batch_data', lsOutString)
+					idsOut.SetItem(llNewRow,'file_name', lsFileName)
+			
 			Else
-				lsOutString +=  space(20)
-			End If
-		Else
-			lsOutString +=  space(20)
-		End If
+			
+			
+				For llRowPos = 1 to llRowCount
+			
+					llNewRow = idsOut.insertRow(0)
+					lsOutString = 'ST' 																		//Detail ID
+			
+					If not isnull(idsDOTracking.GetITemString(llRowPos,'Shipper_Tracking_ID'))	Then
+							lsTemp = idsDOTracking.GetITemString(llRowPos,'Shipper_Tracking_ID')		// (Tracking ID)
+							lsOutString +=  lsTemp + space(50 - len(lsTemp))	
+					Else
+						lsOutString +=  space(50)
+					End If
+			
+					If not isnull(lsAWBBOL)	Then
+						//we only want AWB on the first ST record
+						If llRowPos = 1 Then
+							lsOutString +=  lsAWBBOL + space(20 - len(lsAWBBOL))							// (AWBBOL)
+						Else
+							lsOutString +=  space(20)
+						End If
+					Else
+						lsOutString +=  space(20)
+					End If
+			
+			
+						//write to DB for sweeper to pick up
+					idsOut.SetItem(llNewRow,'Project_id',Asproject) /* hardcoded to match entry in .ini file for file destination*/
+					idsOut.SetItem(llNewRow,'edi_batch_seq_no', Long(ldBatchSeq))
+					idsOut.SetItem(llNewRow,'line_seq_no', llNewRow)
+					idsOut.SetItem(llNewRow,'batch_data', lsOutString)
+					idsOut.SetItem(llNewRow,'file_name', lsFileName)
+			
+				Next
+			End If */
 
-
-			//write to DB for sweeper to pick up
+/* //dts 11/28/2021 - S64984 - New Ship_From_Information record (SI) - only for WR and WB order types. 
+	'SI'
+	Name (20), Hardcode: "LOGITECH MEXICO CITY"
+	address (24), Hardcode: "KM 30 Aut MexQro Nave 5B"
+	address (9),  Hardcode: "Suite 100"
+	city (26),  Hardcode: "San Martin Obispo Park III"
+	state_province (2),  Hardcode: "MX"
+	postal_code (5),  Hardcode: "54763"
+	country (2), Hardcode: "MX"
+*/
+	If lsordType = 'M' or lsordType = 'W' Then  
+		llNewRow = idsOut.insertRow(0)
+		lsOutString = 'SI' 																//Detail ID
+		lsOutString +=  'LOGITECH MEXICO CITY'  								//Name
+		lsOutString +=  'KM 30 Aut MexQro Nave 5B'  							//Address
+		lsOutString +=  'Suite 100'						  							//Address
+		//dts 12/22/21 - removing leading SPACE from City
+		//lsOutString +=  ' San Martin Obispo Park III'	  							//City
+		lsOutString +=  'San Martin Obispo Park III'	  							//City
+		lsOutString +=  'MX'								  							//State
+		lsOutString +=  '54763'							  							//Postal Code
+		lsOutString +=  'MX'								  							//Countr
+	
+		//write to DB for sweeper to pick up
 		idsOut.SetItem(llNewRow,'Project_id',Asproject) /* hardcoded to match entry in .ini file for file destination*/
 		idsOut.SetItem(llNewRow,'edi_batch_seq_no', Long(ldBatchSeq))
 		idsOut.SetItem(llNewRow,'line_seq_no', llNewRow)
 		idsOut.SetItem(llNewRow,'batch_data', lsOutString)
 		idsOut.SetItem(llNewRow,'file_name', lsFileName)
+	end if
 
-	Next
-End If
+/* //dts 11/28/2021 - S64984 - New Shipping_Lines record (SL) - only for WR (W) and WB (M) order types. 
+	'SL'
+	SKU(50)
+	Weight(12)
+	Ctn_Cnt(7)
+	barcode(11), Hardcode 00000000001
+*/
+	If lsordType = 'M' or lsordType = 'W' Then  
+		llRowCount = idsDODetail.RowCount()
+		For llRowPos = 1 to llRowCount  //Scrolling through the detail records (again)
+			llNewRow = idsOut.insertRow(0)
+			lsOutString = 'SL' 																				//Detail ID
+			If not isnull(idsDODetail.GetItemString(llRowPos,'SKU')) Then 				
+				lsTemp = idsDODetail.GetItemString(llRowPos,'SKU')								//SKU 
+				lsOutString +=  lsTemp + space(50 - len(lsTemp))	
+			else
+				lsOutString += space(50) 
+			End If
+			lsOutString += String(idsDOMain.GetITemNumber(1,'Weight'),'000000.00000')	//Weight
+			lsOutString += String(idsDOMain.GetITemNumber(1,'ctn_cnt'),'0000000')			// Carton Count
+			lsOutString +=  '00000000001'								  								//barcode
+		
+			//write to DB for sweeper to pick up
+			idsOut.SetItem(llNewRow,'Project_id',Asproject) /* hardcoded to match entry in .ini file for file destination*/
+			idsOut.SetItem(llNewRow,'edi_batch_seq_no', Long(ldBatchSeq))
+			idsOut.SetItem(llNewRow,'line_seq_no', llNewRow)
+			idsOut.SetItem(llNewRow,'batch_data', lsOutString)
+			idsOut.SetItem(llNewRow,'file_name', lsFileName)
+		next //next detail record
+	end if
 
 //Write the Outbound File - no need to save and re-retrieve - just use the currently loaded DS
 gu_nvo_process_files.uf_process_flatfile_outbound(idsOut,asProject)
@@ -1030,7 +1261,9 @@ For llRowPos = 1 to lLRowCount /* For each Putaway Row */
 	lsOutString += LsSku  + Space(50 - Len(LsSku))
 	lsOutString += lsQty  
 	lsOutString += lsUOM
-	lsOutString += lsInvTypeDescript + Space(2 - Len(lsInvTypeDescript))
+	//dts 11/07/2021 - S64229 - we will now be getting 3-char Logitech Inv Type
+	//lsOutString += lsInvTypeDescript + Space(2 - Len(lsInvTypeDescript))
+	lsOutString += lsInvTypeDescript + Space(3 - Len(lsInvTypeDescript))
 	lsOutString += lsSkuDescript + space(70 - len(lsSkuDescript))
 	
 	llNewRow = idsOut.insertRow(0)

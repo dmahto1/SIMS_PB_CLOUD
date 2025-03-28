@@ -12,6 +12,11 @@ global function string f_get_version ();// string = getVersion()
 //
 // just use the digits here, the format method, f_getFormattedVersion() makes it pretty.
 //
-Return '6020210723-QA 21.5 C01'
+Return '6020211102-PRD 21.7' 
+// This is obsolete and moved into Ancestor // 11/09/2021 - Dinesh
+
+
+
+
 end function
 

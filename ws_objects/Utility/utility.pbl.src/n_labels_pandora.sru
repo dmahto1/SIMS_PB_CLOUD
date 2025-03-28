@@ -95,6 +95,7 @@ End If
 
 FileRead(lifileNo, lsFormatData)
 FileClose(liFileNo)
+sleep(5)
 
 //Messagebox('before',lsFormatData)
 
@@ -767,7 +768,8 @@ End If
 
 lsFormat = uf_Replace(lsFormat,"~~serial_tracked~~",left(lstrparms.String_Arg[15],1))
 lsFormat = uf_Replace(lsFormat,"~~dt_print~~", string(today(),'MM/DD/YYYY'))
-lsFormat = uf_Replace(lsFormat,"~~sku~~", lstrparms.String_Arg[17])
+//lsFormat = uf_Replace(lsFormat,"~~sku~~", lstrparms.String_Arg[17])
+lsFormat = uf_Replace(lsFormat,"~~sku~~", left(lstrparms.String_Arg[17],30)) // Dinesh S64720- Google - SIMS - Buy Sell Project
 lsFormat = uf_Replace(lsFormat,"~~dt_expire~~", string(lstrparms.datetime_arg[1]))
 lsFormat = uf_Replace(lsFormat,"~~alt_sku~~",left(lstrparms.String_Arg[18],30))
 lsFormat = uf_Replace(lsFormat,"~~coo~~", left(lstrparms.String_Arg[19],30))
@@ -783,9 +785,11 @@ else
 	lsFormat = uf_Replace(lsFormat,"~~qty~~", string(lstrparms.Long_arg[2]))
 End If
 
-lsFormat = uf_Replace(lsFormat,"~~cust_order_no~~",left(lstrparms.String_Arg[25],30))
+//lsFormat = uf_Replace(lsFormat,"~~cust_order_no~~",left(lstrparms.String_Arg[25],30))
+lsFormat = uf_Replace(lsFormat,"~~client_cust_so_nbr~~",left(lstrparms.String_Arg[25],30)) // Dinesh 02/14/2022- DE24740-Google - SIMS Prod - Not able to print shipping Labels at Picking Status
 lsFormat = uf_Replace(lsFormat,"~~line_item_no~~", string(lstrparms.Long_arg[3]))
-lsFormat = uf_Replace(lsFormat,"~~client_cust_po_no~~",left(lstrparms.String_Arg[26],30))
+//lsFormat = uf_Replace(lsFormat,"~~client_cust_po_no~~",left(lstrparms.String_Arg[26],30))
+lsFormat = uf_Replace(lsFormat,"~~cust_order_no~~",left(lstrparms.String_Arg[26],30)) // Dinesh 02/14/2022 - DE24740-Google - SIMS Prod - Not able to print shipping Labels at Picking Status
 lsFormat = uf_Replace(lsFormat,"~~pack_sscc_no~~",left(lstrparms.String_Arg[27],30))
 	
 	
@@ -1217,12 +1221,12 @@ lsFormat = uf_Replace(lsFormat,"~~Do_No~~",left( lstrparms.String_Arg[20],30)) /
 lsFormat = uf_Replace(lsFormat,"~~tracker_id~~",left(lstrparms.String_Arg[21],30)) //Tracking shipper No
 lsFormat = uf_Replace(lsFormat,"~~Client_Cust_Po_Nbr~~",Left(lstrparms.String_Arg[22],20)) //Vendor Order Nbr
 lsFormat = uf_Replace(lsFormat,"~~Ship_Date~~",string(today(),"mmm dd, yyyy")) //Ship Date (//Today's date )
-
 ls_weight = String(lstrparms.Long_Arg[5]) + "/" + String(lstrparms.Long_Arg[6])
+//ls_weight = String(lstrparms.Long_Arg[5]) + " Lbs" + "/" + String(lstrparms.Long_Arg[6]) + " Kgs" // Dinesh - 03/20/2025- SIMS-680- Google - SIMS - Shipping Label
 lsFormat = uf_Replace(lsFormat,"~~Weight~~",ls_weight )
 lsFormat = uf_Replace(lsFormat,"~~Weight_lbs_no~~",String(lstrparms.Long_Arg[5]))
 lsFormat = uf_Replace(lsFormat,"~~Weight_kgs_no~~",String(lstrparms.Long_Arg[6]))
-lsFormat = uf_Replace(lsFormat,"~~Weight~~",String(lstrparms.Long_Arg[5]) + "LBs / " + String(lstrparms.Long_Arg[6]) + "KGs") //Weight
+lsFormat = uf_Replace(lsFormat,"~~Weight~~",String(lstrparms.Long_Arg[5]) + " LBs / " + String(lstrparms.Long_Arg[6]) + " KGs") //Weight
 	
 lsFormat = uf_Replace(lsFormat,"~~carton_nbr_barcode~~",lstrparms.String_Arg[23])
 lsFormat = uf_Replace(lsFormat,"~~carton_nbr~~",Right(lstrparms.String_Arg[23],18))

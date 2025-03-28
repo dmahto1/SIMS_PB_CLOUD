@@ -24,10 +24,10 @@ end type
 end forward
 
 global type w_main from window
-integer width = 2867
-integer height = 2026
+integer width = 3026
+integer height = 832
 boolean titlebar = true
-string title = "SIMS Electronic File Processing - V20100510"
+string title = "SIMS Sweeper -"
 string menuname = "m_main"
 boolean controlmenu = true
 boolean minbox = true
@@ -277,10 +277,10 @@ long BackColor=268435456
 end type
 
 type cb_go from commandbutton within w_main
-integer x = 848
-integer y = 163
+integer x = 850
+integer y = 164
 integer width = 366
-integer height = 83
+integer height = 84
 integer taborder = 10
 integer textsize = -10
 integer weight = 700
@@ -300,7 +300,7 @@ end event
 type st_4 from statictext within w_main
 integer x = 1957
 integer y = 128
-integer width = 472
+integer width = 471
 integer height = 64
 integer textsize = -10
 integer weight = 700
@@ -318,7 +318,7 @@ end type
 type st_3 from statictext within w_main
 integer x = 1957
 integer y = 192
-integer width = 472
+integer width = 471
 integer height = 64
 integer textsize = -10
 integer weight = 700
@@ -334,8 +334,8 @@ boolean focusrectangle = false
 end type
 
 type st_2 from statictext within w_main
-integer y = 195
-integer width = 472
+integer y = 196
+integer width = 471
 integer height = 64
 integer textsize = -10
 integer weight = 700
@@ -351,9 +351,9 @@ boolean focusrectangle = false
 end type
 
 type st_1 from statictext within w_main
-integer x = 4
-integer y = 138
-integer width = 472
+integer x = 5
+integer y = 140
+integer width = 471
 integer height = 64
 integer textsize = -10
 integer weight = 700
@@ -369,10 +369,10 @@ boolean focusrectangle = false
 end type
 
 type sle_sweep_interval from singlelineedit within w_main
-integer x = 490
+integer x = 489
 integer y = 160
-integer width = 344
-integer height = 83
+integer width = 343
+integer height = 84
 integer taborder = 20
 integer textsize = -10
 integer weight = 400
@@ -414,10 +414,10 @@ gu_nvo_process_files.uf_write_Log(lsOutput)
 end event
 
 type dw_log from datawindow within w_main
-integer x = 4
-integer y = 266
-integer width = 2783
-integer height = 1555
+integer x = 5
+integer y = 268
+integer width = 2784
+integer height = 1556
 integer taborder = 10
 string title = "none"
 string dataobject = "d_log"

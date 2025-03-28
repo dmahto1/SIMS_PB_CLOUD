@@ -135,7 +135,7 @@ int li_pos
 li_pos = Pos(ls_sql, "WHERE")
 ls_sql = Left(ls_sql, li_pos -1)
 
-ls_sql += " WHERE project_id = '" + gs_project + "' and ord_status in ('N', 'P', 'I', 'A', 'R') " + " and (otm_status is null " + " or otm_status in ('', 'N') ) "
+ls_sql += " WHERE project_id = '" + gs_project + "' and ord_status in ('N', 'P', 'I', 'A', 'R','L') " + " and (otm_status is null " + " or otm_status in ('', 'N') ) " // Dinesh - 05/08/2023- SIMS-53- Google - SIMS - Load Lock and New Loading Status - Added 'L' - Loading
 
 if cbx_candidates_only.checked then
 	// The following criteria are checked upon shipment consolidation

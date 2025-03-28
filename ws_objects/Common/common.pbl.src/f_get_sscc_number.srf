@@ -7,9 +7,10 @@ forward prototypes
 global function string f_get_sscc_number (string asproject, string assupplier)
 end prototypes
 
-global function string f_get_sscc_number (string asproject, string assupplier);String lsSSCC, lsPrefix, lsSupplier
+global function string f_get_sscc_number (string asproject, string assupplier);String lsSSCC, lsPrefix, lsSupplier,lsUCCCompanyPrefix,lsDelimitChar
 Decimal 	ld_NxtSeq
 Int liCheck
+lsDelimitChar = char(9)
 //Dinesh - 11/23/2020- S51444- Philips-DA
 If asProject = "PHILIPSCLS" or asProject = "PHILIPS-DA" Then
 	select gs1_sscc_company_cd into :lsPrefix from supplier where project_id = :asProject and supp_code = :asSupplier using sqlca;
@@ -20,13 +21,42 @@ If asProject = "PHILIPSCLS" or asProject = "PHILIPS-DA" Then
 	
 End If
 
+// Begin - Dinesh - 10/25/2022 - SIMS-107 - SIMS BOSCH SSCC LABEL
+If asProject = "BOSCH" Then
+	
+SELECT Project.UCC_Company_Prefix INTO :lsUCCCompanyPrefix FROM Project WHERE Project_ID = :gs_project USING SQLCA;
 
-sqlca.sp_next_avail_seq_no(asProject, asSupplier, "SSCC" , ld_NxtSeq)			//get the next available GSIN seq no
-lsSSCC = lsPrefix + String(Long(ld_NxtSeq),"0000000") 
+	
+	If IsNull(lsUCCCompanyPrefix) or lsUCCCompanyPrefix = '' Then 
+		return "-1"
+	End If
+	
+End If
 
-liCheck = f_calc_uccs_check_Digit( lsSSCC )
- 
-lsSSCC = lsSSCC + string(liCheck)
+
+if asProject = "BOSCH" then
+	
+	sqlca.sp_next_avail_seq_no(asProject, 'NOT_APPLICABLE', "SSCC_No" , ld_NxtSeq)			//get the next available GSIN seq no
+	lsSSCC = "0" + lsUCCCompanyPrefix + String(Long(ld_NxtSeq),"000000000") 
+	
+	//From BaseLine
+	liCheck = f_calc_uccs_check_Digit(lsSSCC) 
+	If liCheck >=0 Then
+		lsSSCC =  lsSSCC + String(liCheck) /* add 00 at beginning (not part of check digit calculation but included as tag */
+	Else
+		lsSSCC =  lsSSCC + "0"
+		lsSSCC = lsSSCC  + lsDelimitChar
+	End IF
+else
+	
+	// End - Dinesh - 10/25/2022 - SIMS-107 - SIMS BOSCH SSCC LABEL
+	sqlca.sp_next_avail_seq_no(asProject, asSupplier, "SSCC" , ld_NxtSeq)			//get the next available GSIN seq no
+	lsSSCC = lsPrefix + String(Long(ld_NxtSeq),"0000000") 
+	liCheck = f_calc_uccs_check_Digit( lsSSCC )
+ 	lsSSCC = lsSSCC + string(liCheck)
+	
+end if
+
  
 return lsSSCC
 end function

@@ -96,7 +96,7 @@ type variables
 string is_owner_ind, isCommandParms[]
 string is_coo_ind
 String	isEmailLogFile ,is_warehouse
-long	ilDBConnectAttempts, ilFTPUploadAttempts
+long	ilDBConnectAttempts, ilFTPUploadAttempts,il_count_alert
 u_ds_datastore	ids_reports, idsXML, idsPOHeader, idsPODetail, idsReceiveMaster, idsReceiveDetail, &
 				idsDOHeader, idsDODetail, idsDeliveryMaster, idsDeliveryDetail
 ulong	il_hConnection, Il_hopen
@@ -197,6 +197,7 @@ public function integer uf_schedule_sweeper_restart ()
 public function integer uf_process_om_item_master_update (str_parms astr_item_parm)
 public function integer uf_process_load_plan_outbound_update (string asproject)
 public function integer uf_create_system_serial_reconciliation (string asproject, string aswhcode, string aslocation, string assku)
+public subroutine uf_position ()
 end prototypes
 
 public function integer uf_writeerror (string aserrormsg);
@@ -521,14 +522,17 @@ For llDirPos = 1 to Upperbound(lsDir)
 
 Next /*Process next Project*/
 
+ setnull(gsErrorFileName)  // Set the value empty....Akash Baghel.....SIMS-558 Google SIMS - TMS error files created in error.....10/28/24
+
 Return 0
 end function
 
-public function integer uf_close ();String	lsOutPut, lsservice,ls_machine_name
+public function integer uf_close ();String	lsOutPut, lsservice,ls_machine_name,ls_exe_name
 Integer	liRC, li_rc
-ulong lul_name_size =25 
+ulong lul_name_size =25
  
 ls_machine_name = space(lul_name_size)
+ls_exe_name  = ProfileString(gsinifile,"sims3FP","Exename","NOTFOUND")   //Added by ..SIMS-303....Akash Baghel.....12/05/2023....the exe for name in the ini 
 
 Disconnect;
 
@@ -539,8 +543,12 @@ FileWrite(giLogFileNo,lsOutput)
 
 // 05/08 - PCONKL - Include Server Name in email
 GetComputerNameA (ls_machine_name, lul_name_size)
-	
-lsOutput = String(Today(), "mm/dd/yyyy hh:mm") + " (Server: " + ls_machine_Name +  ')  - SIMSFP.EXE processing complete (Normal shutdown).'
+
+//Begin..........added by..... Akash Baghel.....12/05/2023.....SIMS 303........Exe name is a Variable	
+//lsOutput = String(Today(), "mm/dd/yyyy hh:mm") + " (Server: " + ls_machine_Name +  ')  - SIMSFP.EXE processing complete (Normal shutdown).'
+lsOutput = String(Today(), "mm/dd/yyyy hh:mm") + " (Server: " + ls_machine_Name +  ')  -  ' + ls_exe_name + '  processing complete (Normal shutdown).'
+//End..........added by..... Akash Baghel.....12/05/2023.....SIMS 303........Exe name is a Variable	
+
 FileWrite(giLogFileNo,lsOutput)
 uf_write_Log(lsOutPut) /*display msg to screen*/
 
@@ -566,6 +574,7 @@ End If
 
 SetPointer(Arrow!)
 Close(w_main)
+//ls_exe_name  = ProfileString(gsinifile,"sims3FP","Exename","NOTFOUND")   //This is moved in up ..SIMS-303....Akash Baghel.....12/05/2023....the exe for name in the ini 
 
 //If a restart requested, start another instance of Sweeper
 // 08/05 - PCONKL - If running as a service, just stop. Service manager will kick off another instance.
@@ -575,18 +584,21 @@ If lbrestartrequested Then
 		lsOutput = String(Today(), "mm/dd/yyyy hh:mm") + ' - Running as as service. Service Control Manager will restart.'
 		FileWrite(giLogFileNo,lsOutput)
 	Else
-		Run("sims3fp.exe")
+		//Run("sims3fp.exe")
+		Run(ls_exe_name)   //Added by ..SIMS-303....Akash Baghel.....10/16/2023
 	End If
 End If
 
 FileClose(giLogFileNO)
 
 // If we are closing because another instance is already running then do not update the ini file
-IF ibAlreadyRunning = FALSE THEN
-	
-	li_rc = SetProfileString(gsIniFile,'SIMS3FP','STATUS','STOPPED')
-	
-END IF
+//Begin - Dinesh - SIMS-19- Sweeper auto run on shut down
+//IF ibAlreadyRunning = FALSE THEN
+//	
+//	li_rc = SetProfileString(gsIniFile,'SIMS3FP','STATUS','STOPPED')
+//	
+//END IF
+//End - Dinesh - SIMS-19- Sweeper auto run on shut down
 
 Halt
 Return 0
@@ -1650,6 +1662,8 @@ For llDirPos = 1 to Upperbound(lsDir)
 	Next /*Process next path within project*/
 
 Next /*Process next Project*/
+
+setnull(gsErrorFileName)    // Set the value empty....Akash Baghel.....SIMS-558 Google SIMS - TMS error files created in error.....10/28/24
 
 Destroy ldw_datesort;
 // GXMOR - 6/23 - Destroy Comcast object 
@@ -4797,6 +4811,7 @@ Long		llRC,	&
 String   ls_ConnectRetries ,ls_dbConnectWait //   Added by Dhirendra 
 Long i,ll_loopcount =1                      //   Added by Dhirendra 
 Integer	liRC
+String  ls_exe_name  //Added by ..SIMS-303....Akash Baghel.....12/06/2023....the exe for name in the ini
 
 ulong lul_name_size =25 
  
@@ -4804,6 +4819,7 @@ ls_machine_name = space(lul_name_size)
 mailMessage lmMailMsg
 MailFileDescription	mAttach
 //gsIniFile = 'c:\SIMS31FP\Sims3FP.ini'
+ls_exe_name  = ProfileString(gsinifile,"sims3FP","Exename","NOTFOUND")   //Added by...SIMS-303....Akash Baghel.....12/06/2023....the exe for name in the ini
 
 gsIniFile = 'Sims3FP.ini'
 
@@ -4812,38 +4828,29 @@ ilFTPUploadAttempts = 0 /* 04/04 - PCONKL - If we have a certain amount of bad u
 
 SetPointer (HourGlass!)
 
+
 Open(w_main)
+//uf_position() // Dinesh - 09/08/2023 - SIMS-303 - Changing the position of sweeper
+
+// // Begin......Akash Baghel.....09/08/2023.....SIMS 303- SIMS Sweeper position window changes.....
+
+string			ls_poistionx,ls_poistiony
+long ll_positionx,ll_positiony
+
+ls_poistionx = ProfileString(gsinifile,"sims3FP","POSITIONX",'')
+ls_poistiony = ProfileString(gsinifile,"sims3FP","POSITIONY",'')
+
+ll_positionx= long(ls_poistionx)
+ll_positiony= long(ls_poistiony)
+
+w_main.Move (ll_positionx,ll_positiony)
+
+// // Begin......Akash Baghel.....09/08/2023.....SIMS 303- SIMS Sweeper position window changes.....
 
 uf_Change_log()
 
 //// 09/05 - PCONKL - Check to see if already running
-//liRC = uf_check_running()
-//If liRC < 0 Then
-//	
-//	lsOutput = '**** Another instance of the Sweeper is already running ****'
-//	FileWrite(gilogFileNo,lsOutput)
-//	uf_write_Log(lsOutput) /*display msg to screen*/
-//	
-//	//Wait for 30 seconds to see if another instance was just shutting down (scheduled restart)
-//	lsOutput = '**** Delaying for 30 seconds to see if other instance is shutting down (Scheduled restart) ****'
-//	FileWrite(gilogFileNo,lsOutput)
-//	uf_write_Log(lsOutput) /*display msg to screen*/
-//	Sleep(30)
-//	
-//	liRC = uf_check_running()
-//	If liRC < 0 Then /*still running...*/
-//		lsOutput = '**** Still running, shutting down ****'
-//		FileWrite(gilogFileNo,lsOutput)
-//		uf_write_Log(lsOutput) /*display msg to screen*/
-//		Sleep(3)
-//		ibAlreadyRunning = True /*don't send email notification when stopping*/
-//		Halt close
-//		Return -1
-//	End If
-//End If
-//
-// 06/28/11 cawikholm - -Put check for another sweeper already running back in - Use code from above
-liRC = uf_check_running_ini()   // Check entry on ini for running sweeper -
+liRC = uf_check_running()
 If liRC < 0 Then
 	
 	lsOutput = '**** Another instance of the Sweeper is already running ****'
@@ -4851,16 +4858,14 @@ If liRC < 0 Then
 	uf_write_Log(lsOutput) /*display msg to screen*/
 	
 	//Wait for 30 seconds to see if another instance was just shutting down (scheduled restart)
-	lsOutput = '**** Delaying for 30 seconds to see if other instance is shutting down ****'
+	lsOutput = '**** Delaying for 30 seconds to see if other instance is shutting down (Scheduled restart) ****'
 	FileWrite(gilogFileNo,lsOutput)
 	uf_write_Log(lsOutput) /*display msg to screen*/
 	Sleep(30)
 	
-	liRC = uf_check_running_ini()
+	liRC = uf_check_running()
 	If liRC < 0 Then /*still running...*/
-		// Open Messagebox and force user to Acknowledge
 		lsOutput = '**** Still running, shutting down ****'
-		MessageBox( 'WARNING','Another instance of the Sweeper is already running.  This instance will shut down once you press ok!',stopsign!,ok! )
 		FileWrite(gilogFileNo,lsOutput)
 		uf_write_Log(lsOutput) /*display msg to screen*/
 		Sleep(3)
@@ -4868,13 +4873,42 @@ If liRC < 0 Then
 		Halt close
 		Return -1
 	End If
-	
 End If
+
+// 06/28/11 cawikholm - -Put check for another sweeper already running back in - Use code from above
+//liRC = uf_check_running_ini()   // Check entry on ini for running sweeper - // Dinesh - 08/29/2023- Sweeper auto start
+//If liRC < 0 Then
+//	
+//	lsOutput = '**** Another instance of the Sweeper is already running ****'
+//	FileWrite(gilogFileNo,lsOutput)
+//	uf_write_Log(lsOutput) /*display msg to screen*/
+//	
+//	//Wait for 30 seconds to see if another instance was just shutting down (scheduled restart)
+//	lsOutput = '**** Delaying for 30 seconds to see if other instance is shutting down ****'
+//	FileWrite(gilogFileNo,lsOutput)
+//	uf_write_Log(lsOutput) /*display msg to screen*/
+//	Sleep(30)
+	
+	//liRC = uf_check_running_ini()  // Dinesh - 08/29/2023- Sweeper auto start
+//	If liRC < 0 Then /*still running...*/
+//		// Open Messagebox and force user to Acknowledge
+//		lsOutput = '**** Still running, shutting down ****'
+//		MessageBox( 'WARNING','Another instance of the Sweeper is already running.  This instance will shut down once you press ok!',stopsign!,ok! )
+//		FileWrite(gilogFileNo,lsOutput)
+//		uf_write_Log(lsOutput) /*display msg to screen*/
+//		Sleep(3)
+//		ibAlreadyRunning = True /*don't send email notification when stopping*/
+//		Halt close
+//		Return -1
+//	End If
+	
+//End If
 
 lsOutput = Space(40)
 FileWrite(gilogFileNo,lsOutput)
 
-lsOutput = String(Today(), "mm/dd/yyyy hh:mm") + ' - Starting SIMSFP.EXE'
+//lsOutput = String(Today(), "mm/dd/yyyy hh:mm") + ' - Starting SIMSFP.EXE'
+lsOutput = String(Today(), "mm/dd/yyyy hh:mm") + ' - Starting ' + ls_exe_name + ''   // added by... Akash Baghel.....12/06/2023.....SIMS 303....Exe name is a Variable
 FileWrite(gilogFileNo,lsOutput)
 FileWrite(giLogFileNo,'')
 uf_write_Log(lsOutput) /*display msg to screen*/
@@ -4949,7 +4983,10 @@ If isnull(lsFunctionality) then lsFunctionality = ''
 
 //Reflect Server/database and environment in Window name
 //w_main.Title = w_main.Title + ' ' +  ProfileString(gsinifile,"sims3FP","servername","") + '/' + ProfileString(gsinifile,"sims3FP","database","") + '  (' + gsEnvironment + ')'
-w_main.Title = w_main.Title + ' ' +  ProfileString(gsinifile,"sims3FP","servername","") + '/' + ProfileString(gsinifile,"sims3FP","database","") + '  (' + gsEnvironment + ')' + " - " + lsFunctionality
+//w_main.Title = w_main.Title + ' ' +  ProfileString(gsinifile,"sims3FP","servername","") + '/' + ProfileString(gsinifile,"sims3FP","database","") + '  (' + gsEnvironment + ')' + " - " + lsFunctionality //  Modified the original size - 09/11/2023........SIMS 303 - Sweeper window changes....//
+// Added by Akash Baghel.............09/11/2023........SIMS-303 - Sweeper window changes....//
+w_main.Title = w_main.Title + '' +' (' + gsEnvironment + ')'  +" - "+ ProfileString(gsinifile,"sims3FP","servername","")+ '/' + ProfileString(gsinifile,"sims3FP","database","")   
+//......END
 
 //Set Sweep interval and start sweeping
 If isNumber(ProfileString(gsinifile,"sims3FP","SWEEPTIME","")) Then
@@ -5449,14 +5486,22 @@ public function integer uf_process_transaction_file ();
 
 u_nvo_edi_confirmations	lu_edi_confirm
 Datastore	ldsTransFile
-Long	llTranCount, llTranPos, llRC, llOrderID, llTransID
-String	lsOrderID, lsProject, lsTranType, lsLogOut, lsStatus, lsTrans_parm
+Long	llTranCount, llTranPos, llRC, llOrderID, llTransID,i,k
+String	lsOrderID, lsProject, lsTranType, lsLogOut, lsStatus, lsTrans_parm,ls_rono
 DateTime	ldtNow, ldtRecordCreateDate
 Integer	liErrCount
 String lsProcessBatch = ''
 Boolean lbProcessBatch, lbError
 String ls_WhCode, ls_LCode, ls_Sku
 Long ll_Bosch_GI_Count
+Datetime ldt_EndRetrieve,dtrecordcreatedate
+String ls_CodeDesc
+String ls_AdjustID
+int DateDiffInMinutes,TimeDiffInMinutes,ElapsedTimeInMinutes //Dinesh - 06/21/2023 - SIMS-198- Google- read only
+datastore lds_screen_lock, lds_gr_transaction
+ string ls_user_id,ls_order_no ,ls_entry_date_new
+ Datetime ldt_entry_date
+ long ll_ret,ll_count
 
 lsLogOut = ''
 FileWrite(giLogFileNo,lsLogOut)
@@ -5502,15 +5547,67 @@ IF Trim(lsProcessBatch) = 'Y' THEN  /* Process was run last sweeper cycle, so do
 ELSE
 
 	SetProfileString(gsIniFile, 'WARNER', 'ProcessBatch', 'Y')
-
 	lbProcessBatch = true
 
 END IF
-	
 
+// Begin- Dinesh-  06/21/2023- SIMS-198- Google Read only 
+	//	IF lsProject = 'PANDORA' then
+				select code_descript
+				into :ls_CodeDesc  //This should be a value of minutes to delay the processing
+				from lookup_table
+				where project_id = 'PANDORA'
+				and code_type = 'Read_Only'
+				and code_ID = 'Minutes'
+				and User_Updateable_Ind = 'N';
+				
+				select TOP 1 current_timestamp into :ldt_EndRetrieve from sysobjects using sqlca; //get Server time instead local machine time
+			
+				lds_screen_lock = Create datastore
+				lds_screen_lock.Dataobject = 'd_pandora_read_only'
+				lds_screen_lock.settrans(sqlca)
+				lds_screen_lock.retrieve()
+				
+				for i=1 to lds_screen_lock.rowcount()
+						  ls_user_id = lds_screen_lock.getitemstring(i,'user_id')
+						  ls_order_no = lds_screen_lock.getitemstring(i,'order_no')
+						  ldt_entry_date = lds_screen_lock.getitemdatetime(i,'entry_date')
+						  DateDiffInMinutes = DaysAfter ( Date(ldt_entry_date), Date(ldt_EndRetrieve)  ) * 24 * 60
+					      TimeDiffInMinutes = SecondsAfter ( Time(ldt_entry_date), Time (ldt_EndRetrieve ) ) / 60
+					      ElapsedTimeInMinutes = DateDiffInMinutes + TimeDiffInMinutes
+					      ls_entry_date_new= string(ldt_entry_date)
+					If  (ls_CodeDesc <> '' and Not IsNull ( ls_CodeDesc )) and (ElapsedTimeInMinutes > Long ( ls_CodeDesc )) then //Compair the minutes with the theashold found in the lookup table.2
+							delete from Screen_Lock where user_id= :ls_user_id and order_no=:ls_order_no  using sqlca;
+							commit;
+							lsLogOut = " Deleting the records of the User: " + ls_user_id + "  whose session remained open for more than 2 hours for the Order No: " + ls_order_no + " waiting time: " + ls_CodeDesc + " Min"
+							FileWrite(gilogFileNo,lsLogOut)		
+					end If
+				next
+		// End- Dinesh - 06/21/2023- SIMS-198- Google Read only 	
 
 //Process each Transaction Record - only records with non complete status will be retrieved
 llTranCount = ldsTransFile.Retrieve()
+
+//// Begin - Dinesh- SIMS-572- Google - Completed Inbound orders and GR transactions not sent
+//	//IF lsProject = 'PANDORA' then
+//		lds_gr_transaction = Create datastore
+//		lds_gr_transaction.dataobject = "d_gr_transaction"
+//		lds_gr_transaction.SetTransObject(SQLCA)
+//		lds_gr_transaction.retrieve()
+//		for k= 1 to lds_gr_transaction.rowcount()
+//			ls_rono= lds_gr_transaction.getitemstring(k,'ro_no')
+//			Execute Immediate "Begin Transaction" using SQLCA; /* 11/04 - PCONKL - Auto Commit Turned on to eliminate DB locks*/
+//			Insert Into batch_Transaction (project_ID, Trans_Type, Trans_Order_ID, Trans_Status, Trans_Create_Date, Trans_Parm )
+//			Values(:lsProject, 'GR', :ls_rono,'N', getdate(),'' );
+//			Execute Immediate "COMMIT" using SQLCA;
+//		next
+//
+////		select r.RO_No from Batch_Transaction b
+////		inner join Receive_Master r on r.RO_No=b.Trans_Order_Id  
+////		where r.Complete_Date > getdate() and r.Ord_Status='C' and b.Trans_Type='GR' using sqlca;
+//	//End if
+//	// End - Dinesh- SIMS-572- Google - Completed Inbound orders and GR transactions not sent
+//
 
 If lltranCount < 0 Then
 	lsLogOut = " ***System Error!  Unable to Retrieve transaction records!"
@@ -5554,14 +5651,17 @@ For llTranPos = 1 to llTranCount
 	lsLogOut = '- PROCESSING FUNCTION - uf_process_transaction_file() . - Trans_Id: ' + string(llTransID) + ' - Trans_Type: ' +lsTranType+ ' - SQLCA Code: '+string(sqlca.sqlcode)
 	FileWrite(giLogFileNo,lsLogOut)
 	uf_write_log(lsLogOut) /*write to Screen*/
-
+	
+	
 	//09/05 - PCONKL - Re-retrieve the status from the DB to make damn sure it hasn't already been processed.
 	Select trans_status into :lsStatus
 	from Batch_Transaction with(nolock)
 	Where trans_id = :llTransID
 	using sqlca;
 	
-	If lsStatus <> 'N' Then Continue
+//	If lsStatus <> 'N' Then Continue
+	
+	If lsStatus <> 'N' Then Continue // Dinesh - 08/29/2022
 
 
 	//SEPT 2019 - MikeA : S38259 Feature F18585: Change Sweeper to Limit 945s from Site to 10 per Cycle  (Bosch only)
@@ -6027,18 +6127,19 @@ Long		llRC,	&
 			llArrayPos,	&
 			llLogRow,	&
 			llSweepTime
-Long 		ll_WaitTime
+Long 		ll_WaitTime,llSweeperAlertThreshold,ll_flag,ll_threshold
 DateTime ldtLastRunTime
 
 //14-May-2014 :Madhu- Added code for Auto-Start/Shutoff sweepers -START
 Datastore ldssweeper 
-string sql_syntax,lsErrors
-long llrowcount
+string sql_syntax,lsErrors,ls_sweeper_status
+long llrowcount,ll_alert_time,ll_diff
 //14-May-2014 :Madhu- Added code for Auto-Start/Shutoff sweepers -END
 //dts 2021-06-23 - Having each Sweeper check on the other Sweepers.
 datastore ldsSweeperCheck
 long llRowPos, llMinutes, llSweeperThreshold
 string lsSweeperName, lsEmailSubjectPrefix
+datetime ld_alert
 
 Yield() /*check for any stop commands*/
 If gbhalt Then /*set in log window*/
@@ -6071,17 +6172,103 @@ If llRC < 0 Then
 	uf_close()
 End If
 
+// Begin.....SIMS-346..SIMS PIP/SIP - Sweeper Alert when it is 'Unstuck'...Akash Baghel added..................11/09/2023
+
+ldsSweeperCheck = CREATE Datastore 
+//sql_syntax ="SELECT Sweeper_name,DATEDIFF (MI, Last_Update, getdate()) Minutes ,Last_update,getdate() CurrentTime from Sweeper_Running_Status  with(nolock);"
+sql_syntax ="SELECT Sweeper_name,DATEDIFF (MI, Last_Update, getdate()) Minutes ,DATEDIFF (MI, alert_sent, getdate()) alert_time,threshold,alert_sent, Last_update,getdate() CurrentTime,sweeper_status from Sweeper_Running_Status  with(nolock);"  // Dinesh - 07/04/2024- SIMS-502- CORE Sweeper System Alert Modification
+ldsSweeperCheck.Create(SQLCA.syntaxfromsql(sql_syntax ,"", lsErrors) )
+
+If len(lsErrors) > 0 Then
+	return -1
+else
+	ldsSweeperCheck.setTransobject( SQLCA);
+	llrowcount=ldsSweeperCheck.retrieve( );
+end if
+	llSweeperAlertThreshold = long(ProfileString(gsinifile,"sims3FP","SweeperAlertThreshold","30")) // Dinesh - 07/04/2024- SIMS-502- CORE Sweeper System Alert Modification
+    // Begin..added llSweeperThreshold value...SIMS-346..SIMS PIP/SIP - Sweeper Alert when it is 'Unstuck'...Akash Baghel added..................12/01/2023  
+	llSweeperThreshold = long(ProfileString(gsinifile,"sims3FP","SweeperThreshold","30"))
+     lsEmailSubjectPrefix= ProfileString(gsinifile,"sims3FP","EmailSubjectPrefix","")
+	  
+   // END...added llSweeperThreshold value..SIMS-346..SIMS PIP/SIP - Sweeper Alert when it is 'Unstuck'...Akash Baghel added..................12/01/2023
+	//Update Sweeper_Running_Status set Threshold= :llSweeperAlertThreshold using sqlca; // added- alert_sent field - Dinesh - 07/04/2024- SIMS-502- CORE Sweeper System Alert Modification
+	for llRowPos = 1 to llRowCount
+		lsSweeperName = ldsSweeperCheck.GetItemString(llRowPos, 'Sweeper_Name')
+		llMinutes = ldsSweeperCheck.GetItemNumber(llRowPos, 'Minutes')
+		ll_alert_time = ldsSweeperCheck.GetItemNumber(llRowPos, 'alert_time')
+		ld_alert = ldsSweeperCheck.GetItemdatetime(llRowPos, 'Alert_Sent')
+		//Update Sweeper_Running_Status set Threshold= 0 where Sweeper_Name = :lsSweeperName; // added- alert_sent field - Dinesh - 07/04/2024- SIMS-502- CORE Sweeper System Alert Modification
+		ll_threshold = ldsSweeperCheck.GetItemNumber(llRowPos, 'threshold')
+		ls_sweeper_status = ldsSweeperCheck.GetItemString(llRowPos, 'sweeper_status')  // Dinesh - 07/08/2024- SIMS-502- CORE Sweeper System Alert Modification
+		
+		//write to Log
+		lsOutput ='  -  Sweeper ' +lsSweeperName + ': Last Time stamp was ' + string(llMinutes) + ' minutes ago (as of ' + String(Today(), "mm/dd/yyyy hh:mm:ss") +')'
+		FileWrite(gilogFileNo,lsOutput)
+		uf_write_Log(lsOutput)
+		if llMinutes > llSweeperThreshold then
+			lsOutput ='  -***  Sweeper ' +lsSweeperName + ' has exceeded Sweep Time Threshold!!! Last Time stamp was ' + string(llMinutes) + ' minutes ago (as of ' + String(Today(), "mm/dd/yyyy hh:mm:ss") +')'
+			FileWrite(gilogFileNo,lsOutput)
+			uf_write_Log(lsOutput)
+//			if ls_sweeper_status= 'R' then
+//				Update Sweeper_Running_Status set Alert_sent='' where sweeper_name= :lsSweeperName using sqlca ; // added- alert_sent field -Dinesh - 07/04/2024- SIMS-502- CORE Sweeper System Alert Modification
+//			end if
+			if string(ld_alert) = '' or isnull(string(ld_alert)) then
+				 uf_send_email('XX','System',lsEmailSubjectPrefix + ' ***SIMSFP - System Error***',lsOutput,'') /*send an email msg to the systems distribution list*/ 
+				  Update Sweeper_Running_Status set Alert_sent= GETDATE() using sqlca; // added- alert_sent field -Dinesh - 08/21/2024- SIMS-502- CORE Sweeper System Alert Modification
+			else
+				if ll_alert_time = ll_threshold  then
+				 	uf_send_email('XX','System_NoHelp',lsEmailSubjectPrefix + ' ****SIMSFP - System Error****',lsOutput,'') /*send an email msg to the systems distribution list*/ 
+				  Update Sweeper_Running_Status set Alert_sent= GETDATE() using sqlca; // added- alert_sent field -Dinesh - 08/21/2024- SIMS-502- CORE Sweeper System Alert Modification
+				end if
+			end if
+			// Update Sweeper_Running_Status set Alert_sent= GETDATE() using sqlca; // added- alert_sent field -Dinesh - 07/04/2024- SIMS-502- CORE Sweeper System Alert Modification
+//			Choose Case gsEnvironment
+//                Case "Inbound/PROD","Inbound/PANDORA"
+//                                Update Sweeper_Running_Status set Alert_sent= GETDATE() where Sweeper_Name = 'INBOUND'; // added- alert_sent field -Dinesh - 07/04/2024- SIMS-502- CORE Sweeper System Alert Modification
+//                Case "Out-PROD","Out-PANDORA"
+//                                Update Sweeper_Running_Status set Alert_sent= GETDATE() where Sweeper_Name = 'OUTBOUND';// added- alert_sent field Dinesh - 07/04/2024- SIMS-502- CORE Sweeper System Alert Modification
+//                Case "Sch-PROD","SCHD-PANDORA"
+//                                Update Sweeper_Running_Status set Alert_sent= GETDATE() where Sweeper_Name = 'SCHEDULAR';// added- alert_sent field - Dinesh - 07/04/2024- SIMS-502- CORE Sweeper System Alert Modification
+////                Case "*QA PAN/TSGVM00641 Sweeper server*"
+////                                Update Sweeper_Running_Status set Last_Update = GETDATE() where Sweeper_Name = 'QA-PAN';
+//			   Case "*QA-PAN*"
+//                                Update Sweeper_Running_Status set Alert_sent= GETDATE() where Sweeper_Name = 'QA-PAN'; // added- alert_sent field - Dinesh - 07/04/2024- SIMS-502- CORE Sweeper System Alert Modification
+//                Case "*QA-NON-PAN*"
+//                                Update Sweeper_Running_Status set Alert_sent= GETDATE() where Sweeper_Name = 'QA-NON-PAN'; // added- alert_sent field - Dinesh - 07/04/2024- SIMS-502- CORE Sweeper System Alert Modification
+//		 // End - 10/11/2023- Dinesh - SIMS-303- Window Title bar change
+               //Case else
+                //                Update Sweeper_Running_Status set Last_Update = GETDATE(); //06-Jun-2014 :Madhu- As suggested by Pete/Dave -commented 
+//End Choose                                                         
+
+//			if ll_alert_time = 30  then
+// 				uf_send_email('XX','System_',lsEmailSubjectPrefix + ' ***SIMSFP - System Error***',lsOutput,'') /*send an email msg to the systems distribution list*/ 
+//			end if
+		end if
+		//il_count_alert++
+		
+	Next
+
+destroy ldsSweeperCheck
+
+//End......SIMS-346....SIMS PIP/SIP - Sweeper Alert when it is 'Unstuck'.....Akash baghel added.............11/09/2023
+
 //SARUN2013Feb07: Updating Sweeper_Running_Status table to latest date and time.
 //SARUN2013Nov26: Modified the case statement to catch the new pandora sweeper too 
 Choose Case gsEnvironment
                 Case "Inbound/PROD","Inbound/PANDORA"
-                                Update Sweeper_Running_Status set Last_Update = GETDATE() where Sweeper_Name = 'INBOUND';
+                                Update Sweeper_Running_Status set Last_Update = GETDATE(),Alert_sent= NULL where Sweeper_Name = 'INBOUND'; // added- alert_sent field -Dinesh - 07/04/2024- SIMS-502- CORE Sweeper System Alert Modification
                 Case "Out-PROD","Out-PANDORA"
-                                Update Sweeper_Running_Status set Last_Update = GETDATE() where Sweeper_Name = 'OUTBOUND';
+                                Update Sweeper_Running_Status set Last_Update = GETDATE(),Alert_sent= NULL where Sweeper_Name = 'OUTBOUND';// added- alert_sent field Dinesh - 07/04/2024- SIMS-502- CORE Sweeper System Alert Modification
                 Case "Sch-PROD","SCHD-PANDORA"
-                                Update Sweeper_Running_Status set Last_Update = GETDATE() where Sweeper_Name = 'SCHEDULAR';
-                Case "*QA PAN/TSGVM00641 Sweeper server*"
-                                Update Sweeper_Running_Status set Last_Update = GETDATE() where Sweeper_Name = 'QA-PAN';
+                                Update Sweeper_Running_Status set Last_Update = GETDATE(),Alert_sent= NULL  where Sweeper_Name = 'SCHEDULAR';// added- alert_sent field - Dinesh - 07/04/2024- SIMS-502- CORE Sweeper System Alert Modification
+//                Case "*QA PAN/TSGVM00641 Sweeper server*"
+//                                Update Sweeper_Running_Status set Last_Update = GETDATE() where Sweeper_Name = 'QA-PAN';
+		// Begin - 10/11/2023- Dinesh - SIMS-303- Window Title bar change
+			   Case "*QA-PAN*"
+                                Update Sweeper_Running_Status set Last_Update = GETDATE(),Alert_sent= NULL  where Sweeper_Name = 'QA-PAN'; // added- alert_sent field - Dinesh - 07/04/2024- SIMS-502- CORE Sweeper System Alert Modification
+                Case "*QA-NON-PAN*"
+                                Update Sweeper_Running_Status set Last_Update = GETDATE(),Alert_sent= NULL where Sweeper_Name = 'QA-NON-PAN'; // added- alert_sent field - Dinesh - 07/04/2024- SIMS-502- CORE Sweeper System Alert Modification
+		 // End - 10/11/2023- Dinesh - SIMS-303- Window Title bar change
                //Case else
                 //                Update Sweeper_Running_Status set Last_Update = GETDATE(); //06-Jun-2014 :Madhu- As suggested by Pete/Dave -commented 
 End Choose                                                         
@@ -6121,16 +6308,19 @@ end if
 
 destroy ldssweeper
 //14-May-2014 :Madhu- Added code for Auto-Start/Shutoff sweepers -END
-
 //dts - 2021-06-23 Check Other Sweepers....  --START
-llSweeperThreshold = long(ProfileString(gsinifile,"sims3FP","SweeperThreshold","30"))
-lsEmailSubjectPrefix= ProfileString(gsinifile,"sims3FP","EmailSubjectPrefix","")
+
+// Begin........moved this condition before updating the Sweeper_Running_Status....12/012023....By Akash baghel....SIMS-346......SIMS PIP/SIP - Sweeper Alert when it is 'Unstuck'
+//llSweeperThreshold = long(ProfileString(gsinifile,"sims3FP","SweeperThreshold","30"))
+//lsEmailSubjectPrefix= ProfileString(gsinifile,"sims3FP","EmailSubjectPrefix","")
+// End........moved this condition before updating the Sweeper_Running_Status....12/012023....By Akash baghel....SIMS-346......SIMS PIP/SIP - Sweeper Alert when it is 'Unstuck'
 
 //write to Log
 lsOutput ='Checking Sweeper Health (running from Sweeper: ' +gsEnvironment+ ')...'
 FileWrite(gilogFileNo,lsOutput)
 uf_write_Log(lsOutput)
 
+/* Begin........moved this condition before updating the Sweeper_Running_Status........By Akash baghel....SIMS-346......SIMS PIP/SIP - Sweeper Alert when it is 'Unstuck'........11/09/2023
 ldsSweeperCheck = CREATE Datastore
 sql_syntax ="SELECT Sweeper_name,DATEDIFF (MI, Last_Update, getdate()) Minutes ,Last_update,getdate() CurrentTime from Sweeper_Running_Status  with(nolock);"
 ldsSweeperCheck.Create(SQLCA.syntaxfromsql(sql_syntax ,"", lsErrors) )
@@ -6160,6 +6350,8 @@ end if
 	Next
 
 destroy ldsSweeperCheck
+*///End........moved this condition before updating the Sweeper_Running_Status...SIMS-346..SIMS PIP/SIP - Sweeper Alert when it is 'Unstuck'.....By Akash baghel...........11/09/2023
+
 //dts - 2021-06-23 Check Other Sweepers....   --END
 
 
@@ -8067,7 +8259,9 @@ CONSTANT boolean WAIT = TRUE
 Choose Case Upper(AsDistriblist)
 		
 	Case 'SYSTEM' /*send message to the system distribution List*/
-		lsDistribList = ProfileString(gsinifile,"sims3FP","SYSEMAIL","")
+			lsDistribList = ProfileString(gsinifile,"sims3FP","SYSEMAIL","")
+	Case 'SYSTEM_NOHELP' 	 // Dinesh - 06/27/2024- SIMS-502- CORE Sweeper System Alert Modification	
+			lsDistribList = ProfileString(gsinifile,"sims3FP","SYSEMAIL_NOHELPDESK","") // Dinesh - 06/27/2024- SIMS-502- CORE Sweeper System Alert Modification		
 	Case 'CUSTVAL' /*Send a customer validation message - including error files*/
 		lsDistribList = ProfileString(gsinifile,asProject,"CUSTEMAIL","")
 	Case 'FILEXFER' /*Send a msg to file transfer error list*/
@@ -8101,7 +8295,7 @@ lsCommand = "blat -"
 
 //Add From
 //dts S58062 - making 'From address' configurable...
-lsFromAddress=ProfileString(gsinifile, "SIMS3FP","FromAddress","SIMS Sweeper SA <simssweeperSA@xpo.com>")
+lsFromAddress=ProfileString(gsinifile, "SIMS3FP","FromAddress","SIMS Sweeper SA <simssweeperSA@gxo.com>")
 //lsCommand += ' -f "SIMS Sweeper SA <simssweeperSA@xpo.com>" '
 lsCommand += ' -f "' + lsFromAddress +'" '
 
@@ -8199,35 +8393,79 @@ sleep(10)
 Return 0
 end function
 
-public function integer uf_check_running ();
-ulong ll_mutex, ll_err 
-string ls_mutex_name 
-Long ll_handle 
+public function integer uf_check_running ();//Begin -  SIMS-19 - 05/04/22 - Dhirendra - Automatic Sweeper Run Code Change
+LONG liRC
+String ls_exe_name,ls_query,lsOutput
+OleObject locator,service,props
+ int num, ret
+ // Begin - Dinesh - SIMS-19 - 01/15/2024 - Automatic Sweeper Run Code Change
+//Wait for 15 seconds to see if another instance was just shutting down (and restart)
+lsOutput = '**** Delaying for 15 seconds to see if other instance is shutting down ****' 
+FileWrite(gilogFileNo,lsOutput)
+uf_write_Log(lsOutput) /*display msg to screen*/
+sleep(15) // Dinesh - SIMS-19 - 01/12/2024 - Automatic Sweeper Run Code Change
+ // End - Dinesh - SIMS-19 - 01/15/2024 - Automatic Sweeper Run Code Change
+ls_exe_name  = ProfileString(gsinifile,"sims3FP","Exename","NOTFOUND")  //SIMS19....01/30/23.... Akash....Automatic Sweeper Run Code Change.....*//
+ls_query="select name , description from Win32_Process where name = '"+ls_exe_name+"'"
+//ls_query="select name , description from Win32_Process where name = 'sims3fp.exe'
+locator = CREATE OleObject
+ret = locator.ConnectToNewObject("WbemScripting.SWbemLocator");
+service = locator.ConnectServer();
+props = service.ExecQuery(ls_query);
+num = props.count()
+ // Begin - Dinesh - SIMS-19 - 01/15/2024 - Automatic Sweeper Run Code Change
+ lsOutput = '****Return value of Win32_Process  **** ' + string(num)
+ FileWrite(gilogFileNo,lsOutput)
+uf_write_Log(lsOutput) /*display msg to screen*/	
+ // End - Dinesh - SIMS-19 - 01/15/2024 - Automatic Sweeper Run Code Change
+IF num > 1 THEN //*****SIMS19....01/30/23.... Akash....Automatic Sweeper Run Code Change.....*//
+ //MessageBox("Process","Another instance of this application is already running..")
+ //uf_close() // Dinesh - 01/12/2024- Automatic Sweeper Run Code Chang	
+ Halt close
+//gbhalt= True
+//// IF the user wants to cancel,
+//If gbhalt Then
+//	
+//	// Quit processing and close the sweeper.
+//	gu_nvo_process_files.uf_close()
+//End If
 
-ll_handle = handle (GetApplication(), false) 
+END IF
 
-if ll_handle <> 0 then 
-	
-    ls_mutex_name =  "simsfp" + char (0)        //Application name = DisplayName from app object 
+return 0
 
-
-   // Create the mutex. Since we're not going to do anything with 
-   // it, ignore the first two arguments 
-      ll_mutex = CreateMutexA (0, 0, ls_mutex_name) 
-      ll_err = GetLastError () 
-
-	if ll_err = 183 then 
-      return -1 
-   end if 
-	
-end if 
-	//TimA 12/22/11
-	yield()
-
-return 0 
+//End -  SIMS-19 - 05/04/22 - Dhirendra - Automatic Sweeper Run Code Change
 
 
-
+//
+//ulong ll_mutex, ll_err 
+//string ls_mutex_name 
+//Long ll_handle 
+//
+//ll_handle = handle (GetApplication(), false) 
+//
+//if ll_handle <> 0 then 
+//	
+//    ls_mutex_name =  "simsfp" + char (0)        //Application name = DisplayName from app object 
+//
+//
+//    Create the mutex. Since we're not going to do anything with 
+//    it, ignore the first two arguments 
+//      ll_mutex = CreateMutexA (0, 0, ls_mutex_name) 
+//      ll_err = GetLastError () 
+//
+//	if ll_err = 183 then 
+//      return -1 
+//   end if 
+//	
+//end if 
+//	TimA 12/22/11
+//	yield()
+//
+//return 0 
+//
+//
+//
 end function
 
 public function integer uf_zipper (string asfilelist, string aszipfile);string lsCommand, lsOutput
@@ -8870,7 +9108,7 @@ If llRowCount > 0 Then
 	//Archive the last/only file
 	lsOrigFileName = lsPathOut + lsFileOut
 	//MA 12/08 - Added .txt to file
-	IF ( asproject = 'PANDORA_DECOM' ) Then
+	IF ( asproject = 'PANDORA_DECOM' )  Then
 		lsNewFileName = ProfileString(gsinifile,lsProject,"archivedirectory","") + '\' + lsFileOut
 	Else 
 		lsNewFileName = ProfileString(gsinifile,lsProject,"archivedirectory","") + '\' + lsFileOut + ".txt"
@@ -11292,14 +11530,14 @@ For llHeaderPos = 1 to llHeaderCount
 			If Isdate(left(lsScheduleDateTime, 10)) Then
 				if len(lsScheduleDateTime) > 10 then
         //Dhirendra -S55342    Default ESD to original RDD from 940
-					IF  idsDOHeader.GetItemString(llHeaderPos,'Agent_Info') = 'SHUTTLE'  Then
+					IF  Upper(idsDOHeader.GetItemString(llHeaderPos,'Agent_Info')) = 'SHUTTLE'  Then  ////Dhirendra -DE25285     Pandora-03-23-2022
 						idsDeliveryMaster.SetItem(idsDeliveryMaster.RowCount(),'schedule_date',Datetime(idsDOHeader.GetITemString(llHeaderPos,'request_date')))
 					else 
 					//Validate the time portion?...
 					idsDeliveryMaster.SetItem(idsDeliveryMaster.RowCount(),'schedule_date', datetime(lsScheduleDateTime))
 				end if 
 				else
-					IF  idsDOHeader.GetItemString(llHeaderPos,'Agent_Info') = 'SHUTTLE'  Then
+					IF  Upper(idsDOHeader.GetItemString(llHeaderPos,'Agent_Info')) = 'SHUTTLE'  Then  //Dhirendra -DE25285     Pandora-03-23-2022
 						idsDeliveryMaster.SetItem(idsDeliveryMaster.RowCount(),'schedule_date',Date(idsDOHeader.GetITemString(llHeaderPos,'request_date')))
 					else 
 					idsDeliveryMaster.SetItem(idsDeliveryMaster.RowCount(),'schedule_date', date(lsScheduleDateTime))
@@ -12958,9 +13196,15 @@ For ll_Row = 1 to ll_Row_Count
 		lds_delivery.setItem( ll_FindRow, 'Otm_Status', 'T') //TAM 2019/04/10 DE9565 - Set OTM status to 'T' for TMS
  		lds_delivery.setItem( ll_FindRow, 'Shipment_Id', trim(lds_load_plan.getItemString( ll_Row, 'Shipment_Id')))
 		lds_delivery.setItem( ll_FindRow, 'Master_BOL', trim(lds_load_plan.getItemString( ll_Row, 'Master_BOL')))
-		lds_delivery.setItem( ll_FindRow, 'Awb_Bol_No', trim(lds_load_plan.getItemString( ll_Row, 'Child_BOL')))
+		lds_delivery.setItem( ll_FindRow, 'Awb_Bol_No', trim(lds_load_plan.getItemString( ll_Row, 'Child_BOL'))) 
 		lds_delivery.setItem( ll_FindRow, 'Carrier', ls_carrier)
-		lds_delivery.setItem( ll_FindRow, 'Carrier_Pro_No', ls_carrier_pro_no)	 //06-FEB-2019 :Madhu DE8506 Added Probill
+		lds_delivery.setItem( ll_FindRow, 'Carrier_Pro_No', ls_carrier_pro_no)
+		// Begin -10/29/2021  - Dinesh - S57453-Google - SIMS - Bill of Lading Changes 
+		if asproject = 'PANDORA' then
+			lds_delivery.setItem( ll_FindRow, 'Carrier_Pro_No', '') // 10/10/2021  - Dinesh - S57453-Google - SIMS - Bill of Lading Changes  //06-FEB-2019 :Madhu DE8506 Added Probill
+			lds_delivery.setItem( ll_FindRow, 'Awb_Bol_No', ls_carrier_pro_no)	// 10/10/2021  - Dinesh - S57453-Google - SIMS - Bill of Lading Changes 
+		end if
+		// End - 10/29/2021  - Dinesh - S57453-Google - SIMS - Bill of Lading Changes 
 		lds_delivery.setItem( ll_FindRow, 'Transport_Mode', ls_transport_mode)		//DE6934
 		lds_delivery.setItem( ll_FindRow, 'Stop_Id', lds_load_plan.getItemNumber( ll_Row, 'Delivery_Stop'))
 		lds_delivery.setItem( ll_FindRow, 'Load_Lock', 'N')
@@ -12972,7 +13216,8 @@ For ll_Row = 1 to ll_Row_Count
 	END IF
 Next
 
-//7. Save Delivery Master changes to Database.
+
+//7. Save Delivery Master changes t9o Database.
 ll_RC = lds_delivery.update()
 If ll_RC = 1 then
 	Commit;
@@ -13131,6 +13376,19 @@ End If
 
 Return 0
 end function
+
+public subroutine uf_position ();//Dinesh -09/08/2023 - SIMS-303- Sweeper Window postion change
+string			ls_poistionx,ls_poistiony
+long ll_positionx,ll_positiony
+
+ls_poistionx = ProfileString(gsinifile,"sims3FP","POSITIONX",'')
+ls_poistiony = ProfileString(gsinifile,"sims3FP","POSITIONY",'') 
+
+ll_positionx= long(ls_poistionx)
+ll_positiony= long(ls_poistiony)
+
+w_main.Move (ll_positionx,ll_positiony) 
+end subroutine
 
 on u_nvo_process_files.create
 call super::create

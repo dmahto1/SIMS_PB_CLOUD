@@ -32,7 +32,8 @@ call super::destroy
 if IsValid(MenuID) then destroy(MenuID)
 end on
 
-event ue_retrieve;String ls_whcode, ls_sku, ls_supp,ls_floc,ls_tloc,ls_cont
+event ue_retrieve;// Begin - Dinesh - 31/08/2021- S53676-NYCSP -SIMS - NYCSP License Plate Report – BULK
+String ls_whcode, ls_sku, ls_supp,ls_floc,ls_tloc,ls_cont
 long ll_cnt
 
 
@@ -80,6 +81,8 @@ If ll_cnt > 0 Then
 	
 	dw_report.SetRedraw(True)
 end if
+
+// End - Dinesh - 31/08/2021- S53676-NYCSP -SIMS - NYCSP License Plate Report – BULK
 end event
 
 event ue_clear;dw_select.Reset()
@@ -94,7 +97,8 @@ end event
 event resize;dw_report.Resize(workspacewidth() - 30,workspaceHeight()-200)
 end event
 
-event ue_postopen;call super::ue_postopen;string	lsFilter
+event ue_postopen;call super::ue_postopen;// Begin - Dinesh - 31/08/2021- S53676-NYCSP -SIMS - NYCSP License Plate Report – BULK
+string	lsFilter
 DatawindowCHild	ldwc
 
 dw_select.GetChild('supp_code', idwc_supp)
@@ -131,7 +135,7 @@ string lsddsql
 		idwc_supp.SetSqlSelect(lsDDSQL)
 		idwc_supp.Retrieve()
 	END IF	
-
+// End - Dinesh - 31/08/2021- S53676-NYCSP -SIMS - NYCSP License Plate Report – BULK
 end event
 
 type dw_select from w_std_report`dw_select within w_license_plate_report_nycsp_bulk
@@ -149,7 +153,8 @@ ib_select_date_start 	= FALSE
 ib_select_date_end   	= FALSE
 end event
 
-event dw_select::clicked;string 	ls_column
+event dw_select::clicked;// Begin - Dinesh - 31/08/2021- S53676-NYCSP -SIMS - NYCSP License Plate Report – BULK
+string 	ls_column
 
 long		ll_row
 
@@ -187,6 +192,7 @@ CHOOSE CASE ls_column
 	CASE ELSE
 		
 END CHOOSE
+// End - Dinesh - 31/08/2021- S53676-NYCSP -SIMS - NYCSP License Plate Report – BULK
 
 end event
 

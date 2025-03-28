@@ -96,6 +96,7 @@ public function integer uf_pandora_generic_shipping_label (any as_array)
 public function integer uf_kendo_customer_ucc (any as_any)
 public function any uf_bosch_ucc_128_zebra_ship (any as_any)
 public function integer uf_rema_ship (any as_any)
+public function integer uf_bosch_sscc_zebra (any as_any)
 end prototypes
 
 public function integer uf_nike_zebra_serial (ref any as_array);//This function will print  Nike serial Number labels for Zebra 
@@ -600,6 +601,9 @@ End If
 
 FileRead(lifileNo, lsFormatData)
 FileClose(liFileNo)
+	if gs_project='GEISTLICH' then
+		sleep(2)  
+	end if // Dinesh - 11/23/2021 - DE24054- BOSH KENDO PRINTER ISSUE
 
 //Messagebox('before',lsFormatData)
 
@@ -9289,6 +9293,467 @@ PrintSend(llPrintJob, lsFormatUCC_128)
 PrintClose(llPrintJob)
 
 Return 0
+
+
+
+end function
+
+public function integer uf_bosch_sscc_zebra (any as_any);
+
+
+Str_parms	lStrparms
+String	lsFormat_sscc_label,	&
+			lsFormat_Toys_R_US_UCC_128, &
+			lsFormat_Toys_R_US_UCC_128_EU, &
+			lsPrintText,		&
+			lsAddr, &
+			ls_custname,lsSSCCCarton
+
+Long	llPrintJob,	&
+		llAddrPos,i,j,ll_no_of_copies
+		
+int liCheck
+		
+
+//lstrparms = getparms()
+lstrparms = as_any
+// Begin Dinesh - 03/28/2023- SIMS-168 - SIMS - BOSCH COSTCO SSCC LABEL
+
+if  isnull(lstrparms.String_Arg[38]) or  lstrparms.String_Arg[38]='' then
+	messagebox('Label print SSCC',"This customer does not exists, Please add this customer first to print the SSCC Labels")
+	return 0
+end if
+	
+if lstrparms.String_Arg[38]='5010010306' or lstrparms.String_Arg[38]='5010011702' or lstrparms.String_Arg[38]='5010010424' or  lstrparms.String_Arg[38]='5010014084' or lstrparms.String_Arg[38]='5010011598'  then // Dinesh - 04/19/2023- SIMS-216 - SIMS - BOSCH SSCC LABEL
+	
+	lsFormat_sscc_label = uf_read_label_Format('bosch_sscc_ship_label_print_lowes.txt')
+	
+//elseif  lstrparms.String_Arg[38]='5010142573' then // Dinesh - 04/13/2023 -SIMS-168 - SIMS - BOSCH COSTCO SSCC LABEL
+	//lsFormat_sscc_label = uf_read_label_Format('bosch_sscc_ship_label_print_costco.txt') // Dinesh - 04/13/2023 -SIMS-168 - SIMS - BOSCH COSTCO SSCC LABEL
+else
+	lsFormat_sscc_label = uf_read_label_Format('bosch_sscc_ship_label_print_costco.txt') // Dinesh - 04/13/2023 -SIMS-168 - SIMS - BOSCH COSTCO SSCC LABEL
+end if// Dinesh - 07/19/2023 -SIMS-168 - SIMS - BOSCH COSTCO SSCC LABEL// Need to make this available for all customers
+
+// End Dinesh - 03/28/2023- SIMS-168 - SIMS - BOSCH COSTCO SSCC LABEL
+//lsFormat_Toys_R_US_UCC_128 = uf_read_label_Format('Anki_Toys_R_US_SSCC18_Label.txt')
+
+//TAM 08/2015 - Added European TRU label.  Cloned below fro existing TRU label. TRU EU label needs 2 additional fields not on TRU label. 
+//lsFormat_Toys_R_US_UCC_128_EU = uf_read_label_Format('Anki_Toys_R_US_SSCC18_EU_Label.txt') 
+
+
+//Open Printer File 
+llPrintJob = PrintOpen(lsPrintText)
+	
+If llPrintJob <0 Then 
+	Messagebox('Labels', 'Unable to open Printer file. Labels will not be printed')
+	Return -1
+End If
+
+
+//From Address - Roll up addresses if not all present
+llAddrPos = 0
+
+If lstrparms.String_Arg[2] > ' ' Then
+	llAddrPos ++
+	lsAddr = "~~from_addr" + String(llAddrPos) + "~~"
+	lsFormat_sscc_label = uf_Replace(lsFormat_sscc_label,lsAddr,Left(lstrparms.String_Arg[2],30))
+//	lsFormat_Toys_R_US_UCC_128 = uf_Replace(lsFormat_Toys_R_US_UCC_128,lsAddr,Left(lstrparms.String_Arg[2],30))
+//	lsFormat_Toys_R_US_UCC_128_EU = uf_Replace(lsFormat_Toys_R_US_UCC_128_EU,lsAddr,Left(lstrparms.String_Arg[2],30))
+End If
+	
+If lstrparms.String_Arg[3] > ' ' Then
+	llAddrPos ++
+	lsAddr = "~~from_addr" + String(llAddrPos) + "~~"
+	lsFormat_sscc_label = uf_Replace(lsFormat_sscc_label,lsAddr,Left(lstrparms.String_Arg[3],30))
+//	lsFormat_Toys_R_US_UCC_128 = uf_Replace(lsFormat_Toys_R_US_UCC_128,lsAddr,Left(lstrparms.String_Arg[3],30))
+//	lsFormat_Toys_R_US_UCC_128_EU = uf_Replace(lsFormat_Toys_R_US_UCC_128_EU,lsAddr,Left(lstrparms.String_Arg[3],30))
+End If
+
+If lstrparms.String_Arg[4] > ' ' Then
+	llAddrPos ++
+	lsAddr = "~~from_addr" + String(llAddrPos) + "~~"
+	lsFormat_sscc_label = uf_Replace(lsFormat_sscc_label,lsAddr,Left(lstrparms.String_Arg[4],30))
+//	lsFormat_Toys_R_US_UCC_128 = uf_Replace(lsFormat_Toys_R_US_UCC_128,lsAddr,Left(lstrparms.String_Arg[4],30))
+//	lsFormat_Toys_R_US_UCC_128_EU = uf_Replace(lsFormat_Toys_R_US_UCC_128_EU,lsAddr,Left(lstrparms.String_Arg[4],30))
+End If
+
+If lstrparms.String_Arg[5] > ' ' Then
+	llAddrPos ++
+	lsAddr = "~~from_addr" + String(llAddrPos) + "~~"
+	lsFormat_sscc_label = uf_Replace(lsFormat_sscc_label,lsAddr,Left(lstrparms.String_Arg[5],30))
+//	lsFormat_Toys_R_US_UCC_128 = uf_Replace(lsFormat_Toys_R_US_UCC_128,lsAddr,Left(lstrparms.String_Arg[5],30))
+//	lsFormat_Toys_R_US_UCC_128_EU = uf_Replace(lsFormat_Toys_R_US_UCC_128_EU,lsAddr,Left(lstrparms.String_Arg[5],30))
+End If
+
+If lstrparms.String_Arg[6] > ' ' Then
+	llAddrPos ++
+	lsAddr = "~~from_addr" + String(llAddrPos) + "~~"
+	lsFormat_sscc_label = uf_Replace(lsFormat_sscc_label,lsAddr,Left(lstrparms.String_Arg[6],30))
+//	lsFormat_Toys_R_US_UCC_128 = uf_Replace(lsFormat_Toys_R_US_UCC_128,lsAddr,Left(lstrparms.String_Arg[6],30))
+//	lsFormat_Toys_R_US_UCC_128_EU = uf_Replace(lsFormat_Toys_R_US_UCC_128_EU,lsAddr,Left(lstrparms.String_Arg[6],30))
+End If
+
+If lstrparms.String_Arg[7] > ' ' Then
+	llAddrPos ++
+	lsAddr = "~~from_addr" + String(llAddrPos) + "~~"
+	lsFormat_sscc_label = uf_Replace(lsFormat_sscc_label,lsAddr,Left(lstrparms.String_Arg[7],30))
+//	lsFormat_Toys_R_US_UCC_128 = uf_Replace(lsFormat_Toys_R_US_UCC_128,lsAddr,Left(lstrparms.String_Arg[7],30))
+//	lsFormat_Toys_R_US_UCC_128_EU = uf_Replace(lsFormat_Toys_R_US_UCC_128_EU,lsAddr,Left(lstrparms.String_Arg[7],30))
+End If
+
+lsFormat_sscc_label = uf_Replace(lsFormat_sscc_label,"~~carrier_pro_no~~",left(lstrparms.String_Arg[11],30))	
+lsFormat_sscc_label = uf_Replace(lsFormat_sscc_label,">;>=carrier_pro_no_bc>=", left(Lstrparms.String_arg[11],30))  
+
+//lsFormat_Toys_R_US_UCC_128 = uf_Replace(lsFormat_Toys_R_US_UCC_128,"~~carrier_pro_no~~",left(lstrparms.String_Arg[11],30))	
+//lsFormat_Toys_R_US_UCC_128_EU = uf_Replace(lsFormat_Toys_R_US_UCC_128_EU,"~~carrier_pro_no~~",left(lstrparms.String_Arg[11],30))	
+//
+//To Address - Roll up addresses if not all present
+llAddrPos = 0
+
+If lstrparms.String_Arg[13] > ' ' Then
+	llAddrPos ++
+	lsAddr = "~~to_addr" + String(llAddrPos) + "~~" //Warehouse Name
+	lsFormat_sscc_label = uf_Replace(lsFormat_sscc_label,lsAddr,Left(lstrparms.String_Arg[13],45))
+//	lsFormat_Toys_R_US_UCC_128 = uf_Replace(lsFormat_Toys_R_US_UCC_128,lsAddr,Left(lstrparms.String_Arg[13],45))
+//	lsFormat_Toys_R_US_UCC_128_EU = uf_Replace(lsFormat_Toys_R_US_UCC_128_EU,lsAddr,Left(lstrparms.String_Arg[13],45))
+End If
+
+If lstrparms.String_Arg[14] > ' ' Then
+	llAddrPos ++
+	lsAddr = "~~to_addr" + String(llAddrPos) + "~~" //Address1
+	lsFormat_sscc_label = uf_Replace(lsFormat_sscc_label,lsAddr,Left(lstrparms.String_Arg[14],45))
+//	lsFormat_Toys_R_US_UCC_128 = uf_Replace(lsFormat_Toys_R_US_UCC_128,lsAddr,Left(lstrparms.String_Arg[14],45))
+//	lsFormat_Toys_R_US_UCC_128_EU = uf_Replace(lsFormat_Toys_R_US_UCC_128_EU,lsAddr,Left(lstrparms.String_Arg[14],45))
+End If
+
+If lstrparms.String_Arg[15] > ' ' Then
+	llAddrPos ++
+	lsAddr = "~~to_addr" + String(llAddrPos) + "~~" //Address2
+	lsFormat_sscc_label = uf_Replace(lsFormat_sscc_label,lsAddr,left(lstrparms.String_Arg[15],45))
+//	lsFormat_Toys_R_US_UCC_128 = uf_Replace(lsFormat_Toys_R_US_UCC_128,lsAddr,left(lstrparms.String_Arg[15],45))
+//	lsFormat_Toys_R_US_UCC_128_EU = uf_Replace(lsFormat_Toys_R_US_UCC_128_EU,lsAddr,left(lstrparms.String_Arg[15],45))
+End If
+
+If lstrparms.String_Arg[16] > ' ' Then
+	llAddrPos ++
+	lsAddr = "~~to_addr" + String(llAddrPos) + "~~" //Address3
+	lsFormat_sscc_label = uf_Replace(lsFormat_sscc_label,lsAddr,Left(lstrparms.String_Arg[16],45))
+//	lsFormat_Toys_R_US_UCC_128 = uf_Replace(lsFormat_Toys_R_US_UCC_128,lsAddr,Left(lstrparms.String_Arg[16],45))
+//	lsFormat_Toys_R_US_UCC_128_EU = uf_Replace(lsFormat_Toys_R_US_UCC_128_EU,lsAddr,Left(lstrparms.String_Arg[16],45))
+End If
+
+If lstrparms.String_Arg[17] > ' ' Then //Address4
+	llAddrPos ++
+	lsAddr = "~~to_addr" + String(llAddrPos) + "~~"
+	lsFormat_sscc_label = uf_Replace(lsFormat_sscc_label,lsAddr,left(lstrparms.String_Arg[17],45))
+//	lsFormat_Toys_R_US_UCC_128 = uf_Replace(lsFormat_Toys_R_US_UCC_128,lsAddr,left(lstrparms.String_Arg[17],45))
+//	lsFormat_Toys_R_US_UCC_128_EU = uf_Replace(lsFormat_Toys_R_US_UCC_128_EU,lsAddr,left(lstrparms.String_Arg[17],45))
+End If
+
+If lstrparms.String_Arg[18] > ' ' Then //Address5
+	llAddrPos ++
+	lsAddr = "~~to_addr" + String(llAddrPos) + "~~"
+	lsFormat_sscc_label = uf_Replace(lsFormat_sscc_label,lsAddr,left(lstrparms.String_Arg[18],45))
+//	lsFormat_Toys_R_US_UCC_128 = uf_Replace(lsFormat_Toys_R_US_UCC_128,lsAddr,left(lstrparms.String_Arg[18],45))
+//	lsFormat_Toys_R_US_UCC_128_EU = uf_Replace(lsFormat_Toys_R_US_UCC_128_EU,lsAddr,left(lstrparms.String_Arg[18],45))
+End If
+	
+//Carrier ,bol, prono, pono related information
+lsFormat_sscc_label = uf_Replace(lsFormat_sscc_label,"~~Carrier_name~~",left(lstrparms.String_Arg[24],30))
+lsFormat_sscc_label = uf_Replace(lsFormat_sscc_label,"~~pro~~",left(lstrparms.String_Arg[11],30))
+lsFormat_sscc_label = uf_Replace(lsFormat_sscc_label,"~~bol_nbr~~",left( lstrparms.String_Arg[10],30))
+lsFormat_sscc_label = uf_Replace(lsFormat_sscc_label,">;>=bol_nbr_bc>=", left(Lstrparms.String_arg[10],30)) 
+lsFormat_sscc_label = uf_Replace(lsFormat_sscc_label,"~~invoice_no~~",left(lstrparms.String_Arg[23],30))
+lsFormat_sscc_label = uf_Replace(lsFormat_sscc_label,"~~alloc_qty~~",left(lstrparms.String_Arg[31],30))
+
+//SSCC related information
+lsFormat_sscc_label = uf_Replace(lsFormat_sscc_label,"~~carton_no_readable~~", left(Lstrparms.String_arg[30],20))
+lsFormat_sscc_label = uf_Replace(lsFormat_sscc_label,">;>=carton_no_bc>=", left(Lstrparms.String_arg[30],20)) 
+
+
+//lsFormat_Toys_R_US_UCC_128 = uf_Replace(lsFormat_Toys_R_US_UCC_128,"~~carton_no_readable~~", left(Lstrparms.String_arg[30],20))
+//lsFormat_Toys_R_US_UCC_128 = uf_Replace(lsFormat_Toys_R_US_UCC_128,">;>=carton_no_bc>=", left(Lstrparms.String_arg[30],20)) 
+//
+//lsFormat_Toys_R_US_UCC_128_EU = uf_Replace(lsFormat_Toys_R_US_UCC_128_EU,"~~carton_no_readable~~", left(Lstrparms.String_arg[30],20))
+//lsFormat_Toys_R_US_UCC_128_EU = uf_Replace(lsFormat_Toys_R_US_UCC_128_EU,">;>=carton_no_bc>=", left(Lstrparms.String_arg[30],20)) 
+
+//ship To zip and barcode related information
+lsFormat_sscc_label = uf_Replace(lsFormat_sscc_label,"~~ship_to_Zip~~", left(Lstrparms.String_arg[33],20))
+lsFormat_sscc_label = uf_Replace(lsFormat_sscc_label,">;>=ship_to_zip_bc>=", left(Lstrparms.String_arg[33],20)) 
+
+
+	lsFormat_sscc_label = uf_Replace(lsFormat_sscc_label,"~~upc~~",left(lstrparms.String_Arg[20],30)) //print SKU value
+
+
+
+//lsFormat_sscc_label = uf_Replace(lsFormat_sscc_label,"~~carton_count~~",left( lstrparms.String_Arg[34],30))
+//lsFormat_sscc_label = uf_Replace(lsFormat_sscc_label,"~~carton_total~~",left( lstrparms.String_Arg[35],30))
+lsFormat_sscc_label = uf_Replace(lsFormat_sscc_label,"~~qty_count~~",left( lstrparms.String_Arg[34],30))
+lsFormat_sscc_label = uf_Replace(lsFormat_sscc_label,"~~qty_total~~",left( lstrparms.String_Arg[35],30))
+lsFormat_sscc_label = uf_Replace(lsFormat_sscc_label,"~~alternate_sku~~",left(lstrparms.String_Arg[25],45)) // Dinesh - 07/24/2023- SIMS-168-SIMS BOSCH SSCC LABEL
+lsFormat_sscc_label = uf_Replace(lsFormat_sscc_label,"~~user_field21~~",left(lstrparms.String_Arg[26],45)) // Dinesh - 07/24/2023- SIMS-168-SIMS BOSCH SSCC LABEL
+
+
+// TAM 08/2015 - Added 2 new Fields
+lsFormat_sscc_label = uf_Replace(lsFormat_sscc_label,"~~cust_code~~",Right(lstrparms.String_Arg[60],5)) // Dinesh - 10/25/2022- SIMS-107-SIMS BOSCH SSCC LABEL
+lsFormat_sscc_label = uf_Replace(lsFormat_sscc_label,">;>=cust_code_no>=",left( lstrparms.String_Arg[38],30)) // - 10/25/2022 - SIMS-107-SIMS BOSCH SSCC LABEL
+//alternate SKU - Costco customer
+lsFormat_sscc_label = uf_Replace(lsFormat_sscc_label,"~~user_field1~~",left( lstrparms.String_Arg[37],30))  // Dinesh - 03/28/2023- SIMS-168- SIMS - BOSCH COSTCO SSCC LABEL
+lsFormat_sscc_label = uf_Replace(lsFormat_sscc_label,">;>=alternate_sku_ddetail>=",left(lstrparms.String_Arg[25],45))    // Dinesh - 03/28/2023- SIMS-168- SIMS - BOSCH COSTCO SSCC LABEL
+//lsFormat_sscc_label = uf_Replace(lsFormat_sscc_label,"~~cust_name~~",left( lstrparms.String_Arg[60],30)) 
+lsFormat_sscc_label = uf_Replace(lsFormat_sscc_label,"~~cust_name~~",Right(lstrparms.String_Arg[60],5)) 
+//left(w_do.idw_Main.GetITemString(1,'Cust_Code'),7)
+//lsFormat_sscc_label = uf_Replace(lsFormat_sscc_label,"~~mfg_part~~",left( lstrparms.String_Arg[37],30))
+//lsFormat_sscc_label = uf_Replace(lsFormat_sscc_label,"~~stock_keep_nbr~~",left( lstrparms.String_Arg[38],30))
+
+
+//lsFormat_Toys_R_US_UCC_128 = uf_Replace(lsFormat_Toys_R_US_UCC_128,"~~mfg_part~~",left( lstrparms.String_Arg[37],30))
+//lsFormat_Toys_R_US_UCC_128 = uf_Replace(lsFormat_Toys_R_US_UCC_128,"~~stock_keep_nbr~~",left( lstrparms.String_Arg[38],30))
+//
+//lsFormat_Toys_R_US_UCC_128_EU = uf_Replace(lsFormat_Toys_R_US_UCC_128_EU,"~~mfg_part~~",left(lstrparms.String_Arg[37],30))
+//lsFormat_Toys_R_US_UCC_128_EU = uf_Replace(lsFormat_Toys_R_US_UCC_128_EU,"~~stock_keep_nbr~~",left(lstrparms.String_Arg[38],30))
+
+//Carton no (SSCC Label) - 
+//If  lstrparms.String_Arg[35] > '' Then
+//	lsSSCCCarton = "0" + lstrparms.String_Arg[35] + Right(String(Long(lstrparms.String_Arg[12]),'000000000'),9) /*Prepend UCCS Info - 0 (futire use) + Warehouse Prefix + Company Prefix) */		
+//	liCheck = f_calc_uccs_check_Digit(lsSSCCCarton) /*calculate the check digit*/
+//	If liCheck >=0 Then
+//		lsSSCCCarton = "00" + lsSSCCCarton + String(liCheck) /* add 00 at beginning (not part of check digit calculation but included as tag */
+//	Else
+//		lsSSCCCarton = String(Long(lstrparms.String_Arg[12]),'00000000000000000000')
+//	End If
+//Else
+//	lsSSCCCarton = String(Long(lstrparms.String_Arg[12]),'00000000000000000000')
+//End If
+
+//print no of copies
+ll_no_of_copies = lstrparms.Long_Arg[1]
+FOR i= 1 TO ll_no_of_copies
+
+		PrintSend(llPrintJob, lsFormat_sscc_label)
+	//END IF
+//END IF
+NEXT
+PrintClose(llPrintJob)
+
+Return 0
+
+
+//14-Oct-2014 : Madhu- comented for ANKI- We designed a new custom label for ANKI
+//This function will print  Anki UCCS Shipping label
+
+/*Str_parms	lStrparms
+String	lsFormat,	&
+			lsCartonBarcode,	&
+			lsTemp,				&
+			lsPrintText,		&
+			lsAddr,ls_weight,ls_temp,	&
+			lsUCCCarton
+
+Long	llPrintJob,	&
+		llPos,		&
+		llPrintQty,	&
+		llPrintPos,	&
+		llCartonNo,	&
+		llAddrPos,i,j,ll_no_of_copies
+		
+Integer	liFileNo, liCheck
+
+
+lstrparms = as_array
+
+lsFormat = uf_read_label_Format('anki_zebra_ship_UCC.DWN') 
+		
+	
+lsPrintText = 'UCCS Ship - Zebra'
+
+
+//Open Printer File 
+llPrintJob = PrintOpen(lsPrintText)
+	
+If llPrintJob <0 Then 
+	Messagebox('Labels', 'Unable to open Printer file. Labels will not be printed')
+	Return -1
+End If
+
+//We are looping once for each Qty of label being printed - The carton number is changing so we need to bump after each one.
+//Replace placeholders in Format with Field Values
+
+//From Address - Roll up addresses if not all present
+	
+llAddrPos = 0
+
+If lstrparms.String_Arg[2] > ' ' Then
+	llAddrPos ++
+	lsAddr = "~~from_addr" + String(llAddrPos) + ",0030~~"
+	lsFormat = uf_Replace(lsFormat,lsAddr,Left(lstrparms.String_Arg[2],30))
+End If
+	
+If lstrparms.String_Arg[3] > ' ' Then
+	llAddrPos ++
+	lsAddr = "~~from_addr" + String(llAddrPos) + ",0030~~"
+	lsFormat = uf_Replace(lsFormat,lsAddr,Left(lstrparms.String_Arg[3],30))
+End If
+
+If lstrparms.String_Arg[4] > ' ' Then
+	llAddrPos ++
+	lsAddr = "~~from_addr" + String(llAddrPos) + ",0030~~"
+	lsFormat = uf_Replace(lsFormat,lsAddr,Left(lstrparms.String_Arg[4],30))
+End If
+
+If lstrparms.String_Arg[5] > ' ' Then
+	llAddrPos ++
+	lsAddr = "~~from_addr" + String(llAddrPos) + ",0030~~"
+	lsFormat = uf_Replace(lsFormat,lsAddr,Left(lstrparms.String_Arg[5],30))
+End If
+	
+If lstrparms.String_Arg[31] > ' ' Then
+	llAddrPos ++
+	lsAddr = "~~from_addr" + String(llAddrPos) + ",0030~~"
+	lsFormat = uf_Replace(lsFormat,lsAddr,left(lstrparms.String_Arg[31],45))
+End If
+	
+If lstrparms.String_Arg[6] > ' ' Then
+	llAddrPos ++
+	lsAddr = "~~from_addr" + String(llAddrPos) + ",0030~~"
+	lsFormat = uf_Replace(lsFormat,lsAddr,left(lstrparms.String_Arg[6],30))
+End If
+
+If lstrparms.String_Arg[29] > ' ' Then 
+	llAddrPos ++
+	lsAddr = "~~from_addr" + String(llAddrPos) + ",0030~~"
+	lsFormat = uf_Replace(lsFormat,lsAddr,left(lstrparms.String_Arg[29],45))
+End If
+
+//To Address - Roll up addresses if not all present
+
+llAddrPos = 0
+
+If lstrparms.String_Arg[7] > ' ' Then
+	llAddrPos ++
+	lsAddr = "~~to_addr" + String(llAddrPos) + ",0045~~" //Customer Name
+	lsFormat = uf_Replace(lsFormat,lsAddr,Left(lstrparms.String_Arg[7],45))
+End If
+
+If lstrparms.String_Arg[8] > ' ' Then
+	llAddrPos ++
+	lsAddr = "~~to_addr" + String(llAddrPos) + ",0045~~" //Address1
+	lsFormat = uf_Replace(lsFormat,lsAddr,Left(lstrparms.String_Arg[8],45))
+End If
+
+If lstrparms.String_Arg[9] > ' ' Then
+	llAddrPos ++
+	lsAddr = "~~to_addr" + String(llAddrPos) + ",0045~~" //Address2
+	lsFormat = uf_Replace(lsFormat,lsAddr,left(lstrparms.String_Arg[9],45))
+End If
+
+If lstrparms.String_Arg[10] > ' ' Then
+	llAddrPos ++
+	lsAddr = "~~to_addr" + String(llAddrPos) + ",0045~~" //Address3
+	lsFormat = uf_Replace(lsFormat,lsAddr,Left(lstrparms.String_Arg[10],45))
+End If
+
+If lstrparms.String_Arg[32] > ' ' Then //Address4
+	llAddrPos ++
+	lsAddr = "~~to_addr" + String(llAddrPos) + ",0045~~"
+	lsFormat = uf_Replace(lsFormat,lsAddr,left(lstrparms.String_Arg[32],45))
+End If
+
+If lstrparms.String_Arg[11] > ' ' Then //City,state,zip
+	llAddrPos ++
+	lsAddr = "~~to_addr" + String(llAddrPos) + ",0045~~"
+	lsFormat = uf_Replace(lsFormat,lsAddr,left(lstrparms.String_Arg[11],45))
+End If
+
+If lstrparms.String_Arg[30] > ' ' Then //To Country
+	llAddrPos ++
+	lsAddr = "~~to_addr" + String(llAddrPos) + ",0045~~"
+	lsFormat = uf_Replace(lsFormat,lsAddr,left(lstrparms.String_Arg[30],45))
+End If
+
+//Ship To Post Code
+lsFormat = uf_Replace(lsFormat,"~~ship_to_zip,0012~~",left(lstrparms.String_Arg[33],12)) /* 12/03 - PCONKL - For UCCS Label */
+	
+//Ship To Post Code (BARCODE)	
+lsFormat = uf_Replace(lsFormat,"~~ship_to_zip_BC,0008~~",left(lstrparms.String_Arg[33],8)) /* 12/03 - PCONKL - For UCCS Label */
+	
+//Jxlim 05/25/2012 Jira SIM-705 for Riverbed
+If gs_project ='RIVERBED' Then
+	//AWB
+	lsFormat = uf_Replace(lsFormat,"~~bol_nbr,0020~~",lstrparms.String_Arg[34]) /* 12/03 - PCONKL - For UCCS Label */
+Else
+	//AWB
+	lsFormat = uf_Replace(lsFormat,"~~bol_nbr,0020~~",left(lstrparms.String_Arg[34],12)) /* 12/03 - PCONKL - For UCCS Label */
+End If
+		
+//Carton no (UCCS Label) - 
+If  lstrparms.String_Arg[35] > '' Then
+	lsUCCCarton = "0" + lstrparms.String_Arg[35] + Right(String(Long(lstrparms.String_Arg[12]),'000000000'),9) /*Prepend UCCS Info - 0 (futire use) + Warehouse Prefix + Company Prefix) */		
+	liCheck = f_calc_uccs_check_Digit(lsUCCCarton) /*calculate the check digit*/
+	If liCheck >=0 Then
+		lsuccCarton = "00" + lsUccCarton + String(liCheck) /* add 00 at beginning (not part of check digit calculation but included as tag */
+	Else
+		lsUccCarton = String(Long(lstrparms.String_Arg[12]),'00000000000000000000')
+	End If
+Else
+	lsUccCarton = String(Long(lstrparms.String_Arg[12]),'00000000000000000000')
+End If
+
+IF gs_project = "MAQUET" THEN
+
+	lsFormat = uf_Replace(lsFormat,"(00)","")
+	lsFormat = uf_Replace(lsFormat,"~~carton_no_BC,0019~~",left(lstrparms.String_Arg[27],30))
+	lsFormat = uf_Replace(lsFormat,"~~carton_no_readable,0018~~",left(lstrparms.String_Arg[27],30)) /* 00 already on label as text field but included in barcode*/
+
+	
+ELSE
+	
+	lsFormat = uf_Replace(lsFormat,"~~carton_no_BC,0019~~",lsUCCCarton)
+	lsFormat = uf_Replace(lsFormat,"~~carton_no_readable,0018~~",Right(lsUCCCarton,18)) /* 00 already on label as text field but included in barcode*/
+	
+END IF
+	
+//Po No
+//Jxlim 09/10/2014 Anki use dm.user_field14 instead of cust_ord_no for Ecommerce ID as non unique Anki cust order nbr
+lsFormat = uf_Replace(lsFormat,"~~po_nbr,0030~~",lstrparms.String_Arg[36])
+
+//Cust No
+lsFormat = uf_Replace(lsFormat,"~~sku_no,0030~~",left(lstrparms.String_Arg[14],30))//Alternate sku
+
+//Weight	
+ls_weight = String(lstrparms.Long_Arg[5]) + "/" + String(lstrparms.Long_Arg[6])
+lsFormat = uf_Replace(lsFormat,"~~weight,0008~~",ls_weight )
+lsFormat = uf_Replace(lsFormat,"~~weight_lbs_no,0030~~",String(lstrparms.Long_Arg[5]))
+lsFormat = uf_Replace(lsFormat,"~~weight_kgs_no,0030~~",String(lstrparms.Long_Arg[6]))
+lsFormat = uf_Replace(lsFormat,"~~weight,0030~~",String(lstrparms.Long_Arg[5]) + "LBs / " + String(lstrparms.Long_Arg[6]) + "KGs") /* 12/03 - PCONKL - Weight for UCCS */
+	
+
+//Invoice NO
+lsFormat = uf_Replace(lsFormat,"~~invoice_no,0030~~",Left(lstrparms.String_Arg[17],20))	
+
+//Today's date 
+lsFormat = uf_Replace(lsFormat,"~~today,0030~~",string(today(),"mmm dd, yyyy"))
+	
+//Carrier Name
+lsFormat = uf_Replace(lsFormat,"~~carrier_name,0030~~",left(lstrparms.String_Arg[25],30))
+	
+//Tracking shipper No
+lsFormat = uf_Replace(lsFormat,"~~tracker_id,0030~~",left(lstrparms.String_Arg[27],30))
+	
+//No of copies
+ll_no_of_copies = lstrparms.Long_Arg[1]
+FOR i= 1 TO ll_no_of_copies
+	lsFormat = uf_Replace(lsFormat,"~~tot_off,0030~~",left(lstrparms.String_Arg[28],30))
+	PrintSend(llPrintJob, lsformat)	
+	ls_temp= lstrparms.String_Arg[28]
+NEXT
+	
+PrintClose(llPrintJob)
+	
+
+Return 0
+
+*/
 
 
 

@@ -220,20 +220,251 @@ event timer;//07-Apr-2015 Madhu- SIMS Timer Notification Alert Functionality
 //Don't send msg alert to Developer.
 
 integer li_time_interval
+string ls_sql_syntax
+////Re-trieve values from DB
+//SELECT Project_Id,User_Id,Notification_Flag,Shutdown_Flag,Notes,Time_Interval 
+//	into :gs_Projectlist,:gs_Userlist,:gs_NotificationFlag,:gs_ShutdownFlag,:gs_AlertNotes,:li_time_interval 
+//FROM SIMS_Notification with(nolock);  // commented this line - Dinesh -05/31/2024-  SIMS-473-Google - SIMS – SIMS Timer Enhancement
+//
+long ll_count,i,j
+datastore lds_sims_notification,lds_sims_notification_filter
+//SELECT Project_Id,User_Id,Notification_Flag,Shutdown_Flag,Notes,Time_Interval ,login
+//into :gs_Projectlist,:gs_Userlist,:gs_NotificationFlag,:gs_ShutdownFlag,:gs_AlertNotes,:li_time_interval,:gs_login
+//FROM SIMS_Notification_user with(nolock); // Dinesh -05/31/2024-  SIMS-473-Google - SIMS – SIMS Timer Enhancement
+//Begin -Dinesh -05/31/2024-  SIMS-473-Google - SIMS – SIMS Timer Enhancement
+lds_sims_notification = create datastore 
+lds_sims_notification_filter = create datastore
+//connect using sqlca;
+long ll_count_all
+lds_sims_notification.dataobject='d_sims_notification_search_all'
+lds_sims_notification.settrans(sqlca)
+lds_sims_notification.retrieve()
 
-//Re-trieve values from DB
-SELECT Project_Id,User_Id,Notification_Flag,Shutdown_Flag,Notes,Time_Interval 
-	into :gs_Projectlist,:gs_Userlist,:gs_NotificationFlag,:gs_ShutdownFlag,:gs_AlertNotes,:li_time_interval 
-FROM SIMS_Notification with(nolock); 
+ls_sql_syntax= lds_sims_notification.getsqlselect()
+lds_sims_notification.setsqlselect(ls_sql_syntax)
+lds_sims_notification.retrieve()
+ll_count_all= lds_sims_notification.rowcount()
+	for j=1 to ll_count_all
+		gs_Projectlist= lds_sims_notification.getitemstring(j,'Project_Id')
+		gs_Userlist= lds_sims_notification.getitemstring(j,'User_Id')
+		gs_NotificationFlag= lds_sims_notification.getitemstring(j,'Notification_Flag')
+		gs_ShutdownFlag= lds_sims_notification.getitemstring(j,'Shutdown_Flag')
+		gs_AlertNotes= lds_sims_notification.getitemstring(j,'Notes')
+		gi_time_interval= lds_sims_notification.getitemnumber(j,'Time_Interval')
+		gs_login= lds_sims_notification.getitemstring(j,'login')
+		gs_Projectlist= lds_sims_notification.getitemstring(j,'Project_Id')
+		gs_Userlist= lds_sims_notification.getitemstring(j,'User_Id')
+		gs_NotificationFlag= lds_sims_notification.getitemstring(j,'Notification_Flag')
+		gs_ShutdownFlag= lds_sims_notification.getitemstring(j,'Shutdown_Flag')
+		gs_AlertNotes= lds_sims_notification.getitemstring(j,'Notes')
+		gi_time_interval= lds_sims_notification.getitemnumber(j,'Time_Interval')
+		gs_login= lds_sims_notification.getitemstring(j,'login')
+if gs_Userlist <> '*ALL' and gs_projectlist = '*ALL' then
+	lds_sims_notification_filter.dataobject='d_sims_notification_search_all'
+		lds_sims_notification_filter.settrans(sqlca)
+		lds_sims_notification_filter.retrieve()
+		lds_sims_notification_filter.SetFilter("user_id = '"+ gs_Userlist +"'")
+		lds_sims_notification_filter.filter()
+end if
+if gs_Userlist='*ALL' and gs_projectlist <> '*ALL' then
+	lds_sims_notification_filter.dataobject='d_sims_notification_search_all'
+	lds_sims_notification_filter.settrans(sqlca)
+	lds_sims_notification_filter.retrieve()
+	lds_sims_notification_filter.SetFilter("project_id = '"+ gs_Projectlist +"'")
+	lds_sims_notification_filter.filter()
+end if
+if gs_Userlist<> '*ALL' and gs_projectlist <> '*ALL' then
+	lds_sims_notification_filter.dataobject='d_sims_notification_search_all'
+	lds_sims_notification_filter.settrans(sqlca)
+	lds_sims_notification_filter.retrieve()
+	lds_sims_notification_filter.SetFilter("project_id = '"+ gs_Projectlist +"' and user_id = '"+ gs_Userlist +"'")
+	lds_sims_notification_filter.filter()
+	//lds_sims_notification_filter.setfilter(project_id= )
+end if
+lds_sims_notification_filter.retrieve()
+ll_count= lds_sims_notification_filter.rowcount()
+// End- Dinesh -06/05/2024-  SIMS-473-Google - SIMS – SIMS Timer Enhancement
+for i =1 to ll_count
+	gs_Projectlist= lds_sims_notification_filter.getitemstring(i,'Project_Id')
+	gs_Userlist= lds_sims_notification_filter.getitemstring(i,'User_Id')
+	gs_NotificationFlag= lds_sims_notification_filter.getitemstring(i,'Notification_Flag')
+	gs_ShutdownFlag= lds_sims_notification_filter.getitemstring(i,'Shutdown_Flag')
+	gs_AlertNotes= lds_sims_notification_filter.getitemstring(i,'Notes')
+	li_time_interval= lds_sims_notification_filter.getitemnumber(i,'Time_Interval')
+	gs_login= lds_sims_notification_filter.getitemstring(i,'login')
 
-//If Interval is changed, re-call timer 
-IF li_time_interval <> gi_time_interval THEN
-	gi_time_interval = li_time_interval
-	timer(gi_time_interval)
-ELSE
-	IF gs_role <> '-1' THEN g.of_sims_notification( gi_time_interval)
-END IF
+//SELECT Project_Id,User_Id,Notification_Flag,Shutdown_Flag,Notes,Time_Interval ,login
+//	into :gs_Projectlist,:gs_Userlist,:gs_NotificationFlag,:gs_ShutdownFlag,:gs_AlertNotes,:li_time_interval,:gs_login
+//FROM SIMS_Notification_user with(nolock); // Dinesh -05/31/2024-  SIMS-473-Google - SIMS – SIMS Timer Enhancement
+	//Dinesh -06/11/2024 - SIMS-473- Google - SIMS – SIMS Timer Enhancement
+  if gs_projectlist ='PANDORA'  and (upper(gs_Userlist)= upper(gs_userid)) then
+			//If Interval is changed, re-call timer 
+		IF li_time_interval <> gi_time_interval THEN
+			gi_time_interval = li_time_interval
+			timer(gi_time_interval)
+		ELSE
+			//IF gs_role <> '-1' THEN // Dinesh -05/31/2024-  SIMS-473-Google - SIMS – SIMS Timer Enhancement
+				 
+					g.of_sims_notification( gi_time_interval)
+				
+			
+		END IF
+		exit;
+end if
+IF gs_projectlist <> '*ALL' and gs_Userlist <>'*ALL' then
+	if (upper(gs_Userlist)= upper(gs_userid)) and (upper(gs_projectlist)=upper(gs_project)) then
+			//If Interval is changed, re-call timer 
+		IF li_time_interval <> gi_time_interval THEN
+			gi_time_interval = li_time_interval
+			timer(gi_time_interval)
+		ELSE
+			//IF gs_role <> '-1' THEN // Dinesh -05/31/2024-  SIMS-473-Google - SIMS – SIMS Timer Enhancement
+				 
+					g.of_sims_notification( gi_time_interval)
+				
+			
+		END IF
+		exit;
+	end if
+End if
+if upper(gs_projectlist)  = '*ALL' and gs_Userlist = '*ALL' then
+	//If Interval is changed, re-call timer 
+		IF li_time_interval <> gi_time_interval THEN
+			gi_time_interval = li_time_interval
+			timer(gi_time_interval)
+		ELSE
+			//IF gs_role <> '-1' THEN // Dinesh -05/31/2024-  SIMS-473-Google - SIMS – SIMS Timer Enhancement
+				 
+					g.of_sims_notification( gi_time_interval)
+				
+			
+		END IF
+		exit;
+end if
+if upper(gs_projectlist)  = '*ALL' and (UPPER(gs_Userlist) = UPPER(gs_userid)) then
+	//If Interval is changed, re-call timer 
+		IF li_time_interval <> gi_time_interval THEN
+			gi_time_interval = li_time_interval
+			timer(gi_time_interval)
+		ELSE
+			//IF gs_role <> '-1' THEN // Dinesh -05/31/2024-  SIMS-473-Google - SIMS – SIMS Timer Enhancement
+				 
+					g.of_sims_notification( gi_time_interval)
+				
+			
+		END IF
+		exit;
+end if
+if upper(gs_projectlist)  = upper(gs_project) and (UPPER(gs_Userlist) = '*ALL') then
+	//If Interval is changed, re-call timer 
+		IF li_time_interval <> gi_time_interval THEN
+			gi_time_interval = li_time_interval
+			timer(gi_time_interval)
+		ELSE
+			//IF gs_role <> '-1' THEN // Dinesh -05/31/2024-  SIMS-473-Google - SIMS – SIMS Timer Enhancement
+				 
+					g.of_sims_notification( gi_time_interval)
+				
+			
+		END IF
+		exit;
+end if
+		
+next
 
+// Begin -Dinesh -06/05/2024-  SIMS-473-Google - SIMS – SIMS Timer Enhancement
+if gs_Userlist='*ALL' and gs_projectlist='*ALL' then
+	lds_sims_notification_filter.dataobject='d_sims_notification_search_all'
+	lds_sims_notification_filter.settrans(sqlca)
+	lds_sims_notification_filter.retrieve()
+	gs_Projectlist= lds_sims_notification_filter.getitemstring(1,'Project_Id')
+	gs_Userlist= lds_sims_notification_filter.getitemstring(1,'User_Id')
+	gs_NotificationFlag= lds_sims_notification_filter.getitemstring(1,'Notification_Flag')
+	gs_ShutdownFlag= lds_sims_notification_filter.getitemstring(1,'Shutdown_Flag')
+	gs_AlertNotes= lds_sims_notification_filter.getitemstring(1,'Notes')
+	li_time_interval= lds_sims_notification_filter.getitemnumber(1,'Time_Interval')
+	gs_login= lds_sims_notification_filter.getitemstring(1,'login')
+	
+	//Dinesh -06/11/2024 - SIMS-473- Google - SIMS – SIMS Timer Enhancement
+	if gs_projectlist ='PANDORA'  and (upper(gs_Userlist)= upper(gs_userid)) then
+			//If Interval is changed, re-call timer 
+		IF li_time_interval <> gi_time_interval THEN
+			gi_time_interval = li_time_interval
+			timer(gi_time_interval)
+		ELSE
+			//IF gs_role <> '-1' THEN // Dinesh -05/31/2024-  SIMS-473-Google - SIMS – SIMS Timer Enhancement
+				 
+					g.of_sims_notification( gi_time_interval)
+				
+			
+		END IF
+		exit;
+end if
+IF gs_projectlist <> '*ALL' and gs_Userlist <>'*ALL' then
+	if (upper(gs_Userlist)= upper(gs_userid)) and (upper(gs_projectlist)=upper(gs_project)) then
+		//If Interval is changed, re-call timer 
+		IF li_time_interval <> gi_time_interval THEN
+			gi_time_interval = li_time_interval
+			timer(gi_time_interval)
+		ELSE
+			//IF gs_role <> '-1' THEN // Dinesh -05/31/2024-  SIMS-473-Google - SIMS – SIMS Timer Enhancement
+				 
+					g.of_sims_notification( gi_time_interval)
+				
+			
+		END IF
+		exit;
+	end if
+End if
+if upper(gs_projectlist)  = '*ALL' and gs_Userlist = '*ALL' then
+	//If Interval is changed, re-call timer 
+		IF li_time_interval <> gi_time_interval THEN
+			gi_time_interval = li_time_interval
+			timer(gi_time_interval)
+		ELSE
+			//IF gs_role <> '-1' THEN // Dinesh -05/31/2024-  SIMS-473-Google - SIMS – SIMS Timer Enhancement
+				 
+					g.of_sims_notification( gi_time_interval)
+				
+			
+		END IF
+		exit;
+end if
+if upper(gs_projectlist)  = '*ALL' and (UPPER(gs_Userlist) = UPPER(gs_userid)) then
+	//If Interval is changed, re-call timer 
+		IF li_time_interval <> gi_time_interval THEN
+			gi_time_interval = li_time_interval
+			timer(gi_time_interval)
+		ELSE
+			//IF gs_role <> '-1' THEN // Dinesh -05/31/2024-  SIMS-473-Google - SIMS – SIMS Timer Enhancement
+				 
+					g.of_sims_notification( gi_time_interval)
+				
+			
+		END IF
+		exit;
+end if
+if upper(gs_projectlist)  = upper(gs_project) and (UPPER(gs_Userlist) = '*ALL') then
+	
+		//If Interval is changed, re-call timer 
+		IF li_time_interval <> gi_time_interval THEN
+			gi_time_interval = li_time_interval
+			timer(gi_time_interval)
+		ELSE
+			//IF gs_role <> '-1' THEN // Dinesh -05/31/2024-  SIMS-473-Google - SIMS – SIMS Timer Enhancement
+				 
+					g.of_sims_notification( gi_time_interval)
+				
+			
+		END IF
+		exit;
+	end if
+end if
+ 
+next
+//End -Dinesh -05/31/2024-  SIMS-473-Google - SIMS – SIMS Timer Enhancement
+//destroy lds_sims_notification
+//destroy lds_sims_notification_filter
 end event
 
 type dw_1 from datawindow within w_sims_banner

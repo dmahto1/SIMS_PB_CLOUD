@@ -20,6 +20,7 @@ END IF
 
 ls_coltype = adw_control.Describe(ls_colname+".Edit.Style")
 
+//adw_control.modify(ls_colname+".Edit.Style"=)
 
 IF ll_row <> 0 THEN
 

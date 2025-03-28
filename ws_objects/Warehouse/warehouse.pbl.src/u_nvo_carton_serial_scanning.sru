@@ -4390,20 +4390,24 @@ Else
 		Else
 			If lsSerialNo = asScan Then		//This is a serial number.  
 			//	lsSKU = ldw_serial.getItemString(i, 'Sku')
-				lsFind =  "Upper(sku) = '" + Upper(lsSKU) + "' and (isnull(serial_no) or serial_no = '')"
+				//dts - S59788 - 08/21/2021 lsFind =  "Upper(sku) = '" + Upper(lsSKU) + "' and (isnull(serial_no) or serial_no = '')"
+				lsFind =  "Upper(sku) = '" + Upper(lsSKU) + "' and (isnull(serial_no) or serial_no = '') and container_id = '" + lsContainer + "'"
 				llFindRow = w_do.tab_main.tabpage_serial.dw_serial.Find(lsFind,1,w_do.tab_main.tabpage_serial.dw_serial.RowCount())
 					
 				If llFindRow > 0 Then
 						
 					w_do.tab_main.tabpage_serial.dw_serial.ScrollToRow(llFindRow)
-					w_do.tab_main.tabpage_serial.dw_serial.setItem(llFindRow,'carton_no',lsContainer)
+					//dts - S59788 - 08/21/2021 - Now setting carton_no to the generated Carton_no instead of Container ID
+					//dts - S59788 - 08/21/2021 w_do.tab_main.tabpage_serial.dw_serial.setItem(llFindRow,'carton_no',lsContainer)
+					w_do.tab_main.tabpage_serial.dw_serial.setItem(llFindRow,'carton_no',w_do.tab_main.tabpage_serial.sle_carton_no.text)
 					w_do.tab_main.tabpage_serial.dw_serial.setItem(llFindRow,'serial_no', lsSerialNo )
 					w_do.tab_main.tabpage_serial.dw_serial.setItem(llFindRow,'quantity',1)
 					//liRtn = 0		//Completed
 					Return -1
 				Else
 					// Do you need to generate rows?
-					doDisplayMessage('Serial Number Scanning', "No more rows for this SKU." )
+					//dts - S59788 - 08/21/2021 doDisplayMessage('Serial Number Scanning', "No more rows for this SKU." )
+					doDisplayMessage('Serial Number Scanning', "No more rows for this SKU/Container Combination." )
 					Return -1
 				End If
 			End If

@@ -845,6 +845,7 @@ Integer		liRC
 Boolean		lbFound
 
 Long llDetailFind, llPackFind
+//lsDelimitChar='|'
 
 If Not isvalid(idsOut) Then
 	idsOut = Create Datastore
@@ -915,8 +916,8 @@ llRowCount = idsDoPick.RowCount()
 
 For llRowPos = 1 to llRowCOunt
 
-	llNewRow = idsOut.insertRow(0)
 
+	//llNewRow = idsOut.insertRow(0)  
 
 	lsSku = idsdoPick.GetITEmString(llRowPos,'sku')
 	lsSuppCode =  Upper(idsdoPick.GetITEmString(llRowPos,'supp_code'))
@@ -926,11 +927,19 @@ For llRowPos = 1 to llRowCOunt
 	llDetailFind = idsDoDetail.Find("sku='"+lsSku+"' and Upper(supp_code) = '"+lsSuppCode+"' and line_item_no = " + string(lsLineItemNo), 1, idsDoDetail.RowCount())
 
 
-	//Can't Find Detail
-	IF llDetailFind <= 0 then 
-		continue
-		
-	End If
+	//Can't Find Detail  /// Dinesh 09/02/2022 - For including components in GI files for Geistlich
+//	IF llDetailFind <= 0 then 
+//		continue
+//		
+//	End If
+	
+	// Begin - Dinesh 08/29/2022 
+	if llDetailFind > 0 then 
+         llNewRow = idsOut.insertRow(0)
+	end if
+	// End - Dinesh 08/29/2022 
+	
+	
 
 	llPackFind = idsDoPack.Find("sku='"+lsSku+"' and Upper(supp_code) = '"+lsSuppCode+"' and line_item_no=" + string(lsLineItemNo), 1, idsDoPack.RowCount())
 
@@ -1029,6 +1038,11 @@ For llRowPos = 1 to llRowCOunt
 	//Serial Number	C(50)	No	N/A	Qty must be 1 if present
 
 	lsTemp = idsdoPick.GetITemString(llRowPos,'Serial_No')
+//	Added By Dhirendra for the SIMS-58 - Geistlich-Get serial_no from delivery_picking_detail if lsTemp is null 
+	If asproject ='GEISTLICH' and ( isnull(lsTemp) or lsTemp = '') Then
+		lsTemp  = idsdoPick.GetITemString(llRowPos,'PickSerial')
+	end if 
+		
 	
 	If IsNull(lsTemp) then lsTemp = ''
 	

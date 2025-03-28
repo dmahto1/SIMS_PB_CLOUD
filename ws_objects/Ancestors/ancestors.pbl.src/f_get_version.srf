@@ -1,0 +1,21 @@
+﻿$PBExportHeader$f_get_version.srf
+global type f_get_version from function_object
+end type
+
+forward prototypes
+global function string f_get_version ()
+end prototypes
+
+global function string f_get_version ();// string = getVersion()
+
+// pvh - 04/25/2006 - version
+//
+// just use the digits here, the format method, f_getFormattedVersion() makes it pretty.
+//
+
+//Return '6020230907-QA 23.8 C02'
+//Return '20250227-PRD 25.01'
+Return '20250320-QA 25.01 C06'
+//Return '6020230927-PRD 23.9'
+end function
+

@@ -46,8 +46,7 @@ end type
 end forward
 
 global type w_pick_pallet from w_response_ancestor
-integer y = 360
-integer height = 1466
+integer height = 1468
 string title = "Partial Pallet/Container Selection"
 boolean center = true
 event ue_container_adjust ( )
@@ -1483,6 +1482,7 @@ String lsInvType, lsFind, lsPreview, lsSNChainOfCustody, lsChainOfCustodyEnforce
 Long llOwnerId
 Decimal ldComponentNo
 datetime ldtExpDate, ldtToday
+string ls_ExpDate
 DWItemStatus istItemStatus
 isMessage = "empty"
 lsSerialNo =  ids2.GetItemString(liSerialValidateRow, 'serial_no')
@@ -1566,10 +1566,8 @@ If ibSNChanged or ibSerialChanged Then
 		idsSerialValidate.SetItem(liSerialValidateRow,'Lot_No', lsLotNo)
 		idsSerialValidate.SetItem(liSerialValidateRow,'Po_No', lsPoNo)
 		idsSerialValidate.SetItem(liSerialValidateRow,'Po_No2', isPoNo2)
-		idsSerialValidate.SetItem(liSerialValidateRow,'Exp_DT', ldtExpDate)
-
-		idsSerialValidate.SetItem(liSerialValidateRow,'RO_NO', isRono)
-			
+		idsSerialValidate.SetItem(liSerialValidateRow,'Exp_DT',ldtExpDate)
+		idsSerialValidate.SetItem(liSerialValidateRow,'RO_NO', isRono)		
 		idsSerialValidate.SetItem(liSerialValidateRow,'Inventory_Type', lsInvType)
 		idsSerialValidate.SetItem(liSerialValidateRow,'Serial_Flag', 'L')
 		idsSerialValidate.SetItem(liSerialValidateRow,'Do_No', isDoNo)
@@ -3485,7 +3483,7 @@ END IF
 end event
 
 type cb_cancel from w_response_ancestor`cb_cancel within w_pick_pallet
-integer x = 1690
+integer x = 1691
 integer y = 1152
 end type
 
@@ -3495,7 +3493,7 @@ end event
 type cb_ok from w_response_ancestor`cb_ok within w_pick_pallet
 boolean visible = false
 integer x = 1339
-integer y = 1139
+integer y = 1140
 integer height = 48
 boolean enabled = false
 boolean default = false
@@ -3517,10 +3515,10 @@ type dw_1 from u_dw_ancestor within w_pick_pallet
 event selectionchanged pbm_tvnselchanged
 event ue_keydown pbm_dwnkey
 string tag = "Holds pre-selected serial numbers"
-integer x = 22
-integer y = 19
+integer x = 23
+integer y = 20
 integer width = 827
-integer height = 883
+integer height = 884
 boolean bringtotop = true
 string dataobject = "d_pick_pallet"
 end type
@@ -3645,10 +3643,10 @@ end event
 type dw_2 from u_dw_ancestor within w_pick_pallet
 event ue_keydown2 pbm_dwnkey
 string tag = "Holds selected serial numbers"
-integer x = 1145
-integer y = 19
+integer x = 1143
+integer y = 20
 integer width = 827
-integer height = 883
+integer height = 884
 integer taborder = 20
 boolean bringtotop = true
 string dataobject = "d_pick_pallet"
@@ -3733,10 +3731,10 @@ event losefocus;call super::losefocus;sle_2.Text = ""
 end event
 
 type st_1 from statictext within w_pick_pallet
-integer x = 40
+integer x = 41
 integer y = 1200
-integer width = 194
-integer height = 61
+integer width = 192
+integer height = 60
 boolean bringtotop = true
 integer textsize = -8
 integer weight = 700
@@ -3754,10 +3752,10 @@ type sle_1 from singlelineedit within w_pick_pallet
 event add_serial_number ( )
 event add_2dbarcode_sn ( )
 string tag = "Scan Serial Numbers"
-integer x = 260
+integer x = 261
 integer y = 1168
-integer width = 900
-integer height = 93
+integer width = 901
+integer height = 92
 integer taborder = 20
 boolean bringtotop = true
 integer textsize = -8
@@ -3964,8 +3962,8 @@ end event
 
 type cb_1 from commandbutton within w_pick_pallet
 string tag = "Move selectted serial numbers to the right"
-integer x = 889
-integer y = 301
+integer x = 887
+integer y = 300
 integer width = 201
 integer height = 144
 integer taborder = 20
@@ -4009,7 +4007,7 @@ end event
 
 type cb_2 from commandbutton within w_pick_pallet
 string tag = "Move all serial numbers for this container"
-integer x = 889
+integer x = 887
 integer y = 96
 integer width = 201
 integer height = 144
@@ -4071,7 +4069,7 @@ end event
 
 type cb_3 from commandbutton within w_pick_pallet
 string tag = "Move selected serial numbers to the left"
-integer x = 889
+integer x = 887
 integer y = 464
 integer width = 201
 integer height = 144
@@ -4121,8 +4119,8 @@ end event
 
 type cb_4 from commandbutton within w_pick_pallet
 string tag = "Remove container from selected"
-integer x = 889
-integer y = 675
+integer x = 887
+integer y = 676
 integer width = 201
 integer height = 144
 integer taborder = 40
@@ -4160,8 +4158,8 @@ end event
 
 type st_msg from statictext within w_pick_pallet
 integer y = 1056
-integer width = 1295
-integer height = 83
+integer width = 1294
+integer height = 84
 boolean bringtotop = true
 integer textsize = -8
 integer weight = 700
@@ -4176,10 +4174,10 @@ boolean focusrectangle = false
 end type
 
 type cb_5 from commandbutton within w_pick_pallet
-integer x = 1342
+integer x = 1344
 integer y = 1152
-integer width = 271
-integer height = 109
+integer width = 270
+integer height = 108
 integer taborder = 30
 boolean bringtotop = true
 integer textsize = -10
@@ -4216,10 +4214,10 @@ End If
 end event
 
 type st_msg2 from statictext within w_pick_pallet
-integer x = 1287
+integer x = 1289
 integer y = 1056
-integer width = 691
-integer height = 83
+integer width = 690
+integer height = 84
 boolean bringtotop = true
 integer textsize = -8
 integer weight = 700
@@ -4235,10 +4233,10 @@ end type
 
 type lb_carton_list from listbox within w_pick_pallet
 boolean visible = false
-integer x = 1185
-integer y = 1146
-integer width = 121
-integer height = 115
+integer x = 1184
+integer y = 1148
+integer width = 119
+integer height = 116
 integer taborder = 50
 boolean bringtotop = true
 integer textsize = -10
@@ -4256,10 +4254,10 @@ end type
 
 type sle_palletid from singlelineedit within w_pick_pallet
 string tag = "Scan Pallet ID or Generate"
-integer x = 22
-integer y = 982
-integer width = 644
-integer height = 74
+integer x = 23
+integer y = 984
+integer width = 645
+integer height = 76
 integer taborder = 50
 boolean bringtotop = true
 integer textsize = -7
@@ -4348,10 +4346,10 @@ end event
 
 type sle_containerid from singlelineedit within w_pick_pallet
 string tag = "Scan Container ID or Generate"
-integer x = 1145
-integer y = 982
-integer width = 644
-integer height = 74
+integer x = 1143
+integer y = 984
+integer width = 645
+integer height = 76
 integer taborder = 60
 boolean bringtotop = true
 integer textsize = -7
@@ -4436,10 +4434,10 @@ String lsContainerId, ls_old_containerId
 end event
 
 type cb_genpallet from commandbutton within w_pick_pallet
-integer x = 673
-integer y = 982
-integer width = 172
-integer height = 74
+integer x = 672
+integer y = 984
+integer width = 174
+integer height = 76
 integer taborder = 60
 boolean bringtotop = true
 integer textsize = -7
@@ -4462,10 +4460,10 @@ event clicked;//Generaate a new pallet id
 end event
 
 type cb_gencon from commandbutton within w_pick_pallet
-integer x = 1803
-integer y = 982
-integer width = 172
-integer height = 74
+integer x = 1801
+integer y = 984
+integer width = 174
+integer height = 76
 integer taborder = 60
 boolean bringtotop = true
 integer textsize = -7
@@ -4489,18 +4487,18 @@ end event
 type dw_3 from u_dw within w_pick_pallet
 string tag = "This is the tag for dw3"
 boolean visible = false
-integer x = 40
-integer y = 1491
-integer height = 362
+integer x = 41
+integer y = 1492
+integer height = 364
 integer taborder = 20
 boolean bringtotop = true
 end type
 
 type sle_2 from u_dw_microhelp within w_pick_pallet
-integer x = 44
-integer y = 1283
+integer x = 46
+integer y = 1284
 integer width = 1938
-integer height = 102
+integer height = 104
 integer taborder = 30
 boolean bringtotop = true
 long backcolor = 553648127
@@ -4508,10 +4506,10 @@ string text = ""
 end type
 
 type st_2 from statictext within w_pick_pallet
-integer x = 22
-integer y = 918
-integer width = 947
-integer height = 67
+integer x = 23
+integer y = 920
+integer width = 946
+integer height = 68
 boolean bringtotop = true
 integer textsize = -9
 integer weight = 700
@@ -4526,10 +4524,10 @@ boolean focusrectangle = false
 end type
 
 type st_3 from statictext within w_pick_pallet
-integer x = 1145
-integer y = 918
+integer x = 1143
+integer y = 920
 integer width = 827
-integer height = 67
+integer height = 68
 boolean bringtotop = true
 integer textsize = -9
 integer weight = 700

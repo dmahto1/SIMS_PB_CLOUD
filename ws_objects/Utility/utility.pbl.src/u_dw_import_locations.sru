@@ -27,7 +27,8 @@ Decimal	ldLength,	&
 			ldHeight,	&
 			ldCapacity,	&
 			ldPriority, &
-			ld_picking_seq
+			ld_picking_seq, &
+			ldcbm // Dinesh - 04262022- DE25678-SIMS - Locations' CBM not updated after upload
 		
 String	lsWarehouse,	&
 			lsLocation,		&
@@ -84,6 +85,7 @@ For llRowPos = 1 to llRowCOunt
 	ldLength = dec(left(trim(This.GetItemString(llRowPos,"length")),6))
 	ldwidth = dec(left(trim(This.GetItemString(llRowPos,"width")),6))
 	ldheight = dec(left(trim(This.GetItemString(llRowPos,"height")),6))
+	ldcbm= dec(ldLength*ldwidth*ldheight)               // Dinesh - 04262022- DE25678- added CBM SIMS - Locations' CBM not updated after upload
 	ldcapacity = dec(left(trim(This.GetItemString(llRowPos,"capacity")),11))
 	ldPriority = dec(left(trim(This.GetItemString(llRowPos,"priority")),2))
 	ld_picking_seq = dec(left(trim(This.GetItemString(llRowPos,"picking_seq")),6))
@@ -118,6 +120,7 @@ For llRowPos = 1 to llRowCOunt
 	If ldLength > 0 Then lsSql += " length = " + String(ldLength) + ", "
 	If ldWidth > 0 Then lsSql += " Width = " + String(ldWidth) + ", "
 	If ldHeight > 0 Then lsSql += " Height = " + String(ldHeight) + ", "
+	If ldcbm > 0 Then lsSql += " CBM = " + String(ldcbm) + ", "  // Dinesh - 04262022- DE25678-SIMS - Locations' CBM not updated after upload
 	If ldCapacity > 0 Then lsSql += " weight_capacity = " + String(ldCapacity) + ", "
 	If ldpriority > 0 Then lsSql += " priority = " + String(ldpriority) + ", "
 	If ld_picking_seq > 0 Then lsSql += " picking_seq = " + String(ld_picking_seq) + ", "
@@ -152,8 +155,8 @@ For llRowPos = 1 to llRowCOunt
 	//22-Dec-2014 :Madhu Added UF1,UF2 and UF3.
 	
 		Insert Into location (wh_code,l_code,l_type,length,width,height,weight_capacity,priority,picking_seq,sku_reserved,Location_Available_Ind,&
-		last_user,last_update,Standard_Of_Measure,zone_id,user_field1,user_field2,user_field3, Unique_SKU_Ind) values (:lsWarehouse,:lsLocation,:lsType,:ldLength,:ldWidth,&
-		:ldHeight,:ldCapacity,:ldPriority,:ld_picking_seq,:lssku_reserved,:lsloc_available_ind,:gs_userid,:ldtToday,:ls_som,:ls_zone_id,:ls_uf1,:ls_uf2,:ls_uf3,:ls_unique_sku_ind)
+		last_user,last_update,Standard_Of_Measure,zone_id,user_field1,user_field2,user_field3, Unique_SKU_Ind,CBM) values (:lsWarehouse,:lsLocation,:lsType,:ldLength,:ldWidth,&
+		:ldHeight,:ldCapacity,:ldPriority,:ld_picking_seq,:lssku_reserved,:lsloc_available_ind,:gs_userid,:ldtToday,:ls_som,:ls_zone_id,:ls_uf1,:ls_uf2,:ls_uf3,:ls_unique_sku_ind,:ldcbm) // Dinesh - 04262022- DE25678- added CBM SIMS - Locations' CBM not updated after upload
 		Using SQLCA;
 	
 			If sqlca.sqlcode <> 0 Then

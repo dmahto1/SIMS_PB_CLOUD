@@ -1,0 +1,2 @@
+﻿$PBExportHeader$w.srq
+PBSELECT( VERSION(400) TABLE(NAME="dbo.Screen_Lock" ) COLUMN(NAME="dbo.Screen_Lock.User_Id") COLUMN(NAME="dbo.Screen_Lock.Order_No") COLUMN(NAME="dbo.Screen_Lock.Screen_Name") COLUMN(NAME="dbo.Screen_Lock.Entry_Date") COLUMN(NAME="dbo.Screen_Lock.Out_Date") COLUMN(NAME="dbo.Screen_Lock.Edit_Mode")) ARG(NAME = "edit_mode" TYPE = string) 

@@ -1,0 +1,2 @@
+﻿$PBExportHeader$q.srq
+PBSELECT( VERSION(400) TABLE(NAME="ops$omauth.omc_warehouse_orderattr" ) COLUMN(NAME="ops$omauth.omc_warehouse_orderattr.attr_id") COLUMN(NAME="ops$omauth.omc_warehouse_orderattr.attr_type") COLUMN(NAME="ops$omauth.omc_warehouse_orderattr.change_request_nbr") COLUMN(NAME="ops$omauth.omc_warehouse_orderattr.refchar1")) ARG(NAME = "attr_type" TYPE = string) 

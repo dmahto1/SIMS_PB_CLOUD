@@ -67,6 +67,9 @@ public function integer uf_process_bol_cree_combined (string as_dono, ref datawi
 public function integer uf_process_master_bol_pandora (string as_load_id, ref datawindow adw_bol)
 public function integer uf_process_child_bol_pandora (string as_shipment_id, ref datawindow adw_bol)
 public function integer uf_process_bol_kendo (string as_dono, ref datawindow adw_bol)
+public function integer uf_process_cbol_combine_pandora (string as_shipment_id, ref datawindow adw_bol)
+public function integer uf_process_cbol_greater5_combine_pandora (string as_shipment_id, ref datawindow adw_bol)
+public function integer uf_process_cbol_combine_pandora_single (string as_shipment_id, ref datawindow adw_bol)
 end prototypes
 
 public function integer uf_print_bol_3com ();String	lsPrinter
@@ -7969,7 +7972,8 @@ For ll_page=1 to liNbrPages //29-Aug-2015 :Madhu- Loop through each BOL to Print
 						adw_bol.SetItem(ll_page,"invoice_no3",ls_invoice_no3)		
 						
 						ls_nmfcdescription3=lds_bol_detail.GetitemString(i,"nmfc_description")
-						adw_bol.SetItem(ll_page,"nmfcdescription3",ls_nmfcdescription1)
+						//adw_bol.SetItem(ll_page,"nmfcdescription3",ls_nmfcdescription1)
+						adw_bol.SetItem(ll_page,"nmfcdescription3",ls_nmfcdescription3) // Dinesh - 02/20/2023- SIMS-116-Incorrect SKU Descrpition  MBOL 
 					
 						ls_nmfc3= lds_bol_detail.GetitemString(i,"nmfc"  )
 						adw_bol.SetItem(ll_page,"nmfc3",ls_nmfc3)
@@ -8195,7 +8199,8 @@ For ll_page=1 to liNbrPages //29-Aug-2015 :Madhu- Loop through each BOL to Print
 						adw_bol.SetItem(ll_page,"invoice_no9",ls_invoice_no9)		
 						
 						ls_nmfcdescription9=lds_bol_detail.GetitemString(i,"nmfc_description")
-						adw_bol.SetItem(ll_page,"nmfcdescription9",ls_nmfcdescription1)
+						//adw_bol.SetItem(ll_page,"nmfcdescription9",ls_nmfcdescription1)
+						adw_bol.SetItem(ll_page,"nmfcdescription9",ls_nmfcdescription9)// Dinesh - 02/20/2023- SIMS-116-Incorrect SKU Descrpition  MBOL 
 					
 						ls_nmfc9= lds_bol_detail.GetitemString(i,"nmfc"  )
 						adw_bol.SetItem(ll_page,"nmfc9",ls_nmfc9)
@@ -8347,8 +8352,8 @@ For ll_page=1 to liNbrPages //29-Aug-2015 :Madhu- Loop through each BOL to Print
 						adw_bol.SetItem(ll_page,"invoice_no13",ls_invoice_no13)		
 						
 						ls_nmfcdescription13=lds_bol_detail.GetitemString(i,"nmfc_description")
-						adw_bol.SetItem(ll_page,"nmfcdescription13",ls_nmfcdescription1)
-					
+						//adw_bol.SetItem(ll_page,"nmfcdescription13",ls_nmfcdescription1)
+						adw_bol.SetItem(ll_page,"nmfcdescription13",ls_nmfcdescription13) // Dinesh - 02/20/2023- SIMS-116-Incorrect SKU Descrpition  MBOL 
 						ls_nmfc13= lds_bol_detail.GetitemString(i,"nmfc"  )
 						adw_bol.SetItem(ll_page,"nmfc13",ls_nmfc13)
 					
@@ -12374,7 +12379,7 @@ ls_sql +=	 " substring(DM.Carrier, 1, 4) as scac, DM.Freight_Terms, DM.Master_Bo
 ls_sql += " FROM	Delivery_Master DM with(nolock) INNER JOIN Project with(nolock) ON DM.Project_Id = Project.Project_Id "
 ls_sql += " INNER JOIN Warehouse W with(nolock) ON DM.WH_Code = W.WH_Code "
 ls_sql += " WHERE DM.Project_Id ='"+gs_project+"' AND DM.Load_Id = '"+as_load_id+"'"
-ls_sql += " AND DM.Ord_Status in ('I', 'A', 'C', 'D') "
+ls_sql += " AND DM.Ord_Status in ('I', 'A', 'C', 'D','L') " // Dinesh - 05/08/2023- SIMS-53- Google - SIMS - Load Lock and New Loading Status- Added Loading 
 ls_sql += " ORDER BY DM.Stop_Id "
 
 lds_ShipAddress.create( SQLCA.syntaxfromsql( ls_sql, presentation_str, ls_error))
@@ -12552,7 +12557,7 @@ ls_sql += " DM.Load_Sequence, DM.User_Field10 as Cost_Center, DM.Request_Date "
 ls_sql += " FROM	Delivery_Master DM with(nolock) INNER JOIN Project with(nolock) ON DM.Project_Id = Project.Project_Id "
 ls_sql += " INNER JOIN Warehouse W with(nolock) ON DM.WH_Code = W.WH_Code "
 ls_sql += " WHERE DM.Project_Id ='"+gs_project+"' AND DM.Shipment_Id = '"+as_shipment_id+"'"
-ls_sql += " AND DM.Ord_Status in ('I', 'A', 'C', 'D') "
+ls_sql += " AND DM.Ord_Status in ('I', 'A', 'C', 'D','L') " // Dinesh - 05/08/2023- SIMS-53- Google - SIMS - Load Lock and New Loading Status- Added Loading 
 ls_sql += " ORDER BY DM.Stop_Id "
 
 lds_ShipAddress.create( SQLCA.syntaxfromsql( ls_sql, presentation_str, ls_error))
@@ -13049,6 +13054,1983 @@ adw_bol.SetRedraw(true)
 
 
 RETURN 1
+end function
+
+public function integer uf_process_cbol_combine_pandora (string as_shipment_id, ref datawindow adw_bol);// LTK 20151008  This method was modeled after uf_process_vics_bol_combine, all comments, etc. were copied below
+
+//Jxlim 12/10/2013 Freidrich Vics BOL up to 5 orders
+//This is an external datawindow useb by manipulating datastores to produce a combine Vics BOL up to 5 detail/NMFC rows
+//to fit into one single page of International standard Vics BOL.  (Strickly no extra page).  
+//In the event that the order exist 5 rows, a supplement page will be created to handle this and it will be a separate code from this.
+//This Vics BOL is officially name a Single page Vics BOL requested by Friedrich.
+//This report contains:
+//1. Header warehouse and order master, carrier from delivery_master and warehouse and Carrier_Master
+//2. Third party address from Delivery_alt_address where address_type ='BT'
+//Created a new datawindow for delivery alt address based on consolidation_no since we may have multiple do_no. 
+//Baseline should be able to fulfill this however, 
+//since we already have the consolidation_no variable within this code it is easier to just retrieve based on consolidation_no.
+//The existing baseline third party address datawindow is based on do_no
+//Customer Order Information and Carrier Information have to separate into 2 different query although they are source from the same table.
+//This is because Customer detail required to group by order and Carrier information required to group by item.
+//3. group by order: Order information detail from Delivery Master and Packing; and the weight is getting from item_master.weight_1
+//--Total Packing Weight = Sum(Delivery_Packing.Qty * Item_Master.Weight_1)	
+//4. group by NMFC: Carrier Information from Item_Master and Number of carton_no (count of carton_no) from delivery_packing 
+//--Total item Weight = Sum(Delivery_Packing.Qty * Item_Master.Weight_1)	
+//This is done through group by NMFC not carton_no
+//If an order with 2 different NMFC code (2 Items) pack into one pallet together
+//then the carton_no should show only 1 pallet this is done through group by carton_no
+//supplmental detail and nmfc datawindow will be used regradless 5 or less orders in a shipment
+
+//Begin -09/03/2021- Dinesh - S57453-Google - SIMS - Bill of Lading Changes
+
+Long   i, ll_consl_rowcount,	ll_detail_suplm_rowcount, ll_nmfc_suplm_rowcount, ll_detail_rowcount, ll_nmfc_rowcount, ll_alt_address_rowcount, ll_nmfc_carton_rowcount
+Long   ll_carton_count1, ll_carton_count2,ll_carton_count3,ll_carton_count4,ll_carton_count5,ll_total_carton_count,ll_bol_suplm
+String ls_custcode,ls_custname, ls_carton_type
+Decimal ld_Pack_qty1,ld_Pack_qty2,ld_Pack_qty3,ld_Pack_qty4,ld_Pack_qty5
+Decimal ld_total_item_qty, ld_total_pack_qty
+Decimal ld_weight1,ld_weight2,ld_weight3,ld_weight4,ld_weight5, ld_total_net_w, ld_total_pack_weight
+Decimal ld_totalw1, ld_totalw2,ld_totalw3,ld_totalw4,ld_totalw5
+String ls_carton_type1,ls_carton_type2,ls_carton_type3,ls_carton_type4,ls_carton_type5
+String ls_nmfcdescription1, ls_nmfcdescription2,ls_nmfcdescription3,ls_nmfcdescription4,ls_nmfcdescription5, ls_nmfc1,ls_nmfc2,ls_nmfc3,ls_nmfc4,ls_nmfc5
+String ls_class1,ls_class2,ls_class3,ls_class4,ls_class5
+String ls_cust_ord_nbr1,ls_cust_ord_nbr2,ls_cust_ord_nbr3,ls_cust_ord_nbr4,ls_cust_ord_nbr5
+String ls_invoice_no1, ls_invoice_no2,  ls_invoice_no3, ls_invoice_no4, ls_invoice_no5
+Decimal ld_item_qty1,ld_item_qty2,ld_item_qty3,ld_item_qty4,ld_item_qty5
+Datawindowchild ldwc_detail_suplm,ldwc_nmfcitem_suplm
+Boolean lb_suplm
+string ls_seal_nbr,ls_trailer_no
+
+n_warehouse l_nwarehouse  //Jxlim 07/08/2013 SSCC fo BOL and VICS
+l_nwarehouse		= Create n_warehouse
+
+lb_suplm=False
+
+//03-Jan-2014 :Madhu -Added code to verify whether all serial no's are scanned? -START
+Long 	llpackqty,llscannedqty ,llserialcnt,lleligiblecnt
+
+//14-Aug-2015 :Madhu- Added code to print Carton and Pallet count separetly on BOL
+int row
+string lscarton_type
+long ll_total_pallet_count
+
+
+// LTK 20151113  Configurable hard stop if HazMat is found on order, message displayed in method
+if uf_is_pandora_hazmat_turned_on( "", as_shipment_id ) < 0 then	// NOTE: as_dono is consolidation_no in this case
+	Return 0
+end if
+
+
+//get eligible records for scanning
+// TAM 2014/01/15 - Changed from Count to Sum.  Not all items are scannable and we only want to compare the number of Scannable with the number of serials
+//select count(*) into :lleligiblecnt from Delivery_Packing,Item_Master
+// Dinesh - 08/28/2021
+//select sum(Quantity) into :lleligiblecnt from Delivery_Packing,Item_Master
+//where Delivery_Packing.SKU = Item_Master.SKU
+//and Delivery_Packing.DO_No= :as_dono
+//and Item_Master.Project_Id=:gs_project
+//and Item_Master.Serialized_Ind in ('Y','B')
+//using SQLCA;
+
+//If lleligiblecnt >0 Then
+////TAM	Select sum(Quantity) into :llpackqty from Delivery_Packing where Do_No =:as_dono using SQLCA;
+////Dinesh - 08/25/2021
+////	Select Sum(quantity) into :llScannedQty from delivery_serial_detail Where Id_no in (select id_no from delivery_picking_detail where do_no = :as_dono) using SQLCA;
+//	
+//	If IsNull(llScannedQty) then 
+//		llScannedQty =0 
+//	end if
+//	
+////TAM 	If llpackqty <> llScannedQty Then
+//	If lleligiblecnt <> llScannedQty Then
+//		MessageBox(w_do.is_title,"All Serial no's are not being scanned. Please check.",Stopsign!)
+//		Return 0
+//	End if 
+//End if 
+
+//03-Jan-2014 :Madhu - Added code to verify whether all serial no's are scanned? -END
+
+
+// LTK 20151102  When IM.hazard_cd is set, validate IM.proper_shipping_name is also set or halt BOL generation
+long ll_hazmat_description_errors
+String ls_erroneous_sku
+
+//Dinesh- 08/25/2021
+//
+//select count(*), Max(SKU)
+//into :ll_hazmat_description_errors, :ls_erroneous_sku 
+//from Item_Master
+//where project_id = :gs_project
+//and hazard_cd is not null 
+//and Len( LTRIM(RTRIM( hazard_cd )) ) > 0 
+//and ( proper_shipping_name is null or LTRIM(RTRIM( proper_shipping_name ))  = '' ) 
+//and SKU in
+//	(select SKU
+//	from Delivery_Detail
+//	where do_no in
+//		(select do_no
+//		from delivery_master
+//		where project_id = :gs_project
+//		and consolidation_no = :as_dono) );		// as_dono is actually consolidation_no
+
+//if ll_hazmat_description_errors > 0 then
+//	MessageBox(w_do.is_title, "GPN(s) exist marked as hazardous without proper shipping names, such as GPN:  "  + ls_erroneous_sku + &
+//										"~r~rPlease set the proper shipping name in the Item Master Maintenance.")
+//	return 0
+//end if
+
+
+//Jxlim; Created data store to Retrieve report contains, then get the value from this datastore to set it to ext dw
+Datastore  lds_bol_suplm,lds_bol_combine_header, lds_bol_combine_alt_address
+Datastore  lds_nmfc_carton_count, ldwc_detail_suplm_suplm
+string ls_stop_id,ls_load_seq,ls_pro_no,ls_hazard_cd,ls_hazard_class,ls_proper_shipping_name,ls_com_desc
+
+SELECT Load_Sequence, Stop_Id,Carrier_pro_no into :ls_load_seq,:ls_stop_id,:ls_pro_no from Delivery_Master where project_id=:gs_project and shipment_id=:as_shipment_id;
+select Item_Master.hazard_cd,Item_Master.hazard_class,Item_Master.proper_shipping_name into :ls_hazard_cd,:ls_hazard_class,:ls_proper_shipping_name from Delivery_Packing,Item_Master,delivery_master
+where Delivery_Packing.SKU = Item_Master.SKU and Delivery_Packing.do_no=delivery_master.do_no
+and Delivery_master.shipment_id= :as_shipment_id
+and Item_Master.Project_Id= 'PANDORA';
+ls_com_desc= ls_hazard_cd +" " + ls_hazard_class +" "+ ls_proper_shipping_name
+//Jxlim; may not need this datastore but for now 
+//Datastore for Report header section
+lds_bol_combine_header = create datastore
+lds_bol_combine_header.dataobject = 'd_vics_cbol_prt_combined_pandora_header'
+lds_bol_combine_header.SetTransObject(SQLCA)
+
+lds_bol_combine_header.Retrieve(gs_project, as_shipment_id)	// Consolidation is being passed in
+ll_consl_rowcount = lds_bol_combine_header.Rowcount()
+
+//Header Third Party alt address(DropShip) from Alt_Delivery_Addresss
+lds_bol_combine_alt_address = create datastore
+lds_bol_combine_alt_address.dataobject = 'd_vics_cbol_prt_combined_alt_address'
+lds_bol_combine_alt_address.SetTransObject(SQLCA)
+lds_bol_combine_alt_address.Retrieve(gs_project, as_shipment_id, 'BT')  //as_dono(consolidation No) asType=BT (Bill To for BOL) --3P is for Trax/Third Party
+ll_alt_address_rowcount=lds_bol_combine_alt_address.Rowcount()
+
+lds_bol_suplm = Create datastore
+//lds_bol_suplm.dataobject = 'd_vics_bol_prt_combined_suplm_composite_rpt'
+//lds_bol_suplm.dataobject ='d_vics_bol_prt_combined_suplm_composite_rpt_pandora'		// LTK 20151008 // Dinesh - 08/25/2021- S57453- Google - SIMS - Bill of Lading Changes
+lds_bol_suplm.dataobject ='d_vics_cbol_prt_combined_composite_rpt_pandora'		// LTK 20151008  // Dinesh - 08/25/2021- S57453- Google - SIMS - Bill of Lading Changes
+
+lds_bol_suplm.GetChild('dw_order_detail_cbol', ldwc_detail_suplm)
+ldwc_detail_suplm.SetTransObject(SQLCA)	
+ldwc_detail_suplm.Retrieve(gs_project, as_shipment_id)
+ll_detail_suplm_rowcount=ldwc_detail_suplm.RowCount()
+
+lds_bol_suplm.GetChild('dw_nmfcitem_suplm', ldwc_nmfcitem_suplm)
+ldwc_nmfcitem_suplm.SetTransObject(SQLCA)	
+ldwc_nmfcitem_suplm.Retrieve(gs_project, as_shipment_id)
+ll_nmfc_suplm_rowcount=ldwc_nmfcitem_suplm.Rowcount()
+// Set carrier information from w_do fields
+uf_set_carrier_information( ldwc_nmfcitem_suplm )
+
+// LTK 20151120  Calculate the sort column and sort the item DW appropriately given we sort hazardous materials to the top
+uf_set_sort( ldwc_nmfcitem_suplm )
+
+//Jxlim Insert row to begin for external dw
+adw_bol.InsertRow(0)
+//Header Info
+		//Using  lds_bol_combine_header datastore for Header section
+		//Ship From address from Warehouse Table
+	
+		//adw_bol.SetItem(1,"wh_code",  lds_bol_combine_header.GetitemString(1, "wh_code"))
+		adw_bol.SetItem(1,"wh_name", lds_bol_combine_header.GetitemString(1, "wh_name"))
+		adw_bol.SetItem(1,"wh_addr1", lds_bol_combine_header.GetitemString(1,"wh_addr1" ))  
+		adw_bol.SetItem(1,"wh_addr2", lds_bol_combine_header.GetitemString(1,"wh_addr2" ))   
+		adw_bol.SetItem(1,"wh_addr3", lds_bol_combine_header.GetitemString(1,"wh_Addr3"))    
+		adw_bol.SetItem(1,"wh_addr4", lds_bol_combine_header.GetitemString(1,"wh_Addr4" ))   
+		adw_bol.SetItem(1,"wh_city", lds_bol_combine_header.GetitemString(1,"wh_City" ))  
+		adw_bol.SetItem(1,"wh_state", lds_bol_combine_header.GetitemString(1,"wh_State" ))     
+		adw_bol.SetItem(1,"wh_zip", lds_bol_combine_header.GetitemString(1,"wh_Zip" ))    
+		
+		//Ship To from Delivery_Master Table
+		adw_bol.SetItem(1,"cust_code",  lds_bol_combine_header.GetitemString(1, "Cust_code"))
+		adw_bol.SetItem(1,"cust_name", lds_bol_combine_header.GetitemString(1, "Cust_Name"))
+		adw_bol.SetItem(1,"cust_addr1", lds_bol_combine_header.GetitemString(1,"Address_1" ))  
+		adw_bol.SetItem(1,"cust_addr2", lds_bol_combine_header.GetitemString(1,"Address_2" ))   
+		adw_bol.SetItem(1,"cust_addr3", lds_bol_combine_header.GetitemString(1,"Address_3"))    
+		adw_bol.SetItem(1,"cust_addr4", lds_bol_combine_header.GetitemString(1,"Address_4" ))   
+		adw_bol.SetItem(1,"cust_city", lds_bol_combine_header.GetitemString(1,"City" ))  
+		adw_bol.SetItem(1,"cust_state", lds_bol_combine_header.GetitemString(1,"State" ))     
+		adw_bol.SetItem(1,"cust_zip", lds_bol_combine_header.GetitemString(1,"Zip" ))    
+		adw_bol.SetItem(1,"contact_person", lds_bol_combine_header.GetitemString(1,"Contact_person"  ))  
+		adw_bol.SetItem(1,"tel", lds_bol_combine_header.GetitemString(1,"Tel"  )) 
+		adw_bol.SetItem(1,"cust_country", lds_bol_combine_header.GetitemString(1,"Country"  ))  //13-Aug-2015 Madhu Added customer Country
+		
+		//adw_bol.SetItem(1,"shipping_instr", lds_bol_combine_header.GetitemString(1,"shipping_instr"))  
+		adw_bol.SetItem(1,"awb_bol_no", lds_bol_combine_header.GetitemString(1,"awb_bol_no"  ))  
+		adw_bol.SetItem(1,"load_id", lds_bol_combine_header.GetitemString(1,"load_id"  ))  
+		//adw_bol.SetItem(1,"seal_nbr", lds_bol_combine_header.GetitemString(1,"seal_nbr"  )) 
+		adw_bol.SetItem(1,"request_date", lds_bol_combine_header.GetitemString(1,"request_date"  )) 
+		adw_bol.SetItem(1,"master_bol", lds_bol_combine_header.GetitemString(1,"master_bol"  ))
+		adw_bol.SetItem(1,"load_sequence", string(ls_load_seq) )
+		//adw_bol.SetItem(1,"trailer_no", lds_bol_combine_header.GetitemString(1,"trailer_no"  ))
+		adw_bol.SetItem(1,"pro_no", lds_bol_combine_header.GetitemString(1,"Carrier_pro_no" )) 	//DM.user_field7  Jxlim 04/02/2014 Replaced with carrier_pro_no name field
+		adw_bol.SetItem(1,"scac_1", lds_bol_combine_header.GetitemString(1,"scac"  ))  					// Carrier_Master.Carrier_code first 4 digits
+		adw_bol.SetItem(1,"carrier", lds_bol_combine_header.GetitemString(1,"carrier" )) 
+		adw_bol.SetItem(1,"stop_id", string(ls_stop_id))	
+		adw_bol.SetItem(1,"pro_no", string(ls_pro_no))
+		adw_bol.SetItem(1,"Freight_Terms", lds_bol_combine_header.GetitemString(1,"Freight_Terms"  )) //Frieght_terms, X mark visible based on frieght_terms 		
+		//adw_bol.SetItem(1,"ord_date", lds_bol_combine_header.GetitemDateTime(1,"ord_date"  )) 
+		adw_bol.SetItem(1,"user_field10", lds_bol_combine_header.GetitemString(1,"user_field10"  )) 
+		//adw_bol.SetItem(1,"special_instr_invoice_no", lds_bol_combine_header.GetitemString(1,"invoice_no"  )) 
+		
+		if lds_bol_combine_header.GetitemString(1,"load_id"  ) <> '' OR not isnull(lds_bol_combine_header.GetitemString(1,"load_id"  )) then			
+		adw_bol.Object.t_49.text = 'X'
+		end if
+
+		//Header Third Party alt address(DropShip) from Alt_Delivery_Addresss --BOL third party address uses Bill TO ('BT') address type			
+		If	ll_alt_address_rowcount > 0 Then	
+			adw_bol.SetItem(1, "alt_name", lds_bol_combine_alt_address.GetItemString(1, "name"))		
+			adw_bol.SetItem(1, "alt_addr1", lds_bol_combine_alt_address.GetItemString(1, "address_1"))
+			adw_bol.SetItem(1, "alt_addr2", lds_bol_combine_alt_address.GetItemString(1, "address_2"))
+			adw_bol.SetItem(1, "alt_addr3", lds_bol_combine_alt_address.GetItemString(1, "address_3"))
+			adw_bol.SetItem(1, "alt_addr4", lds_bol_combine_alt_address.GetItemString(1, "address_4"))
+			adw_bol.SetItem(1, "alt_city",    lds_bol_combine_alt_address.GetItemString(1, "city"))
+			adw_bol.SetItem(1, "alt_state",  lds_bol_combine_alt_address.GetItemString(1, "state"))
+			adw_bol.SetItem(1, "alt_zip",     lds_bol_combine_alt_address.GetItemString(1, "zip"))
+		End If
+
+
+//Print supplementan page if more than 5 orders or more than 5 items
+lb_suplm= FALSE
+
+If ll_consl_rowcount  > 5 Then //Print supplementan page
+	adw_bol.SetItem(1, "order_count",  ll_detail_suplm_rowcount)
+	lb_suplm= True
+End If
+
+If ll_nmfc_suplm_rowcount > 5 Then
+	adw_bol.SetItem(1, "nmfc_count",  ll_nmfc_suplm_rowcount)
+	lb_suplm = True		
+end if
+
+if lb_suplm = FALSE then
+	//Detail order Information--------------------------------------------------------------------------------------------------------------	
+	If	ll_detail_suplm_rowcount <=5 Then
+			//For i = 1 to ll_detail_rowcount	
+			For i = 1 to 	ll_detail_suplm_rowcount
+				If i = 1 Then
+						ls_cust_ord_nbr1= ldwc_detail_suplm.GetitemString(i,"cust_order_no")
+						adw_bol.SetItem(1,"cust_ord_nbr1",ls_cust_ord_nbr1)
+						
+						ld_pack_qty1=ldwc_detail_suplm.GetitemDecimal(i, "pack_qty")
+						adw_bol.SetItem(1,"pack_qty1",ld_pack_qty1)
+						
+						ld_totalw1=ldwc_detail_suplm.GetitemDecimal(i, "total_weight")
+						adw_bol.SetItem(1,"total_weight1",ld_totalw1)
+							
+						ls_invoice_no1=ldwc_detail_suplm.GetitemString(i, "invoice_no")
+						adw_bol.SetItem(1,"invoice_no1",ls_invoice_no1)
+						
+						ls_seal_nbr=ldwc_detail_suplm.GetitemString(i, "seal_nbr")
+						adw_bol.SetItem(1,"seal_nbr1",ls_seal_nbr)
+						
+						ls_trailer_no=ldwc_detail_suplm.GetitemString(i, "trailer_no")
+						adw_bol.SetItem(1,"trailer_no1",ls_trailer_no)
+						
+				ElseIf i = 2 Then
+						ls_cust_ord_nbr2= ldwc_detail_suplm.GetitemString(i,"cust_order_no")
+						adw_bol.SetItem(1,"cust_ord_nbr2",ls_cust_ord_nbr2)
+						
+						ld_pack_qty2=ldwc_detail_suplm.GetitemDecimal(i, "pack_qty")
+						adw_bol.SetItem(1,"pack_qty2",ld_pack_qty2)
+						
+						ld_totalw2=ldwc_detail_suplm.GetitemDecimal(i, "total_weight")
+						adw_bol.SetItem(1,"total_weight2",ld_totalw2)
+							
+						ls_invoice_no2=ldwc_detail_suplm.GetitemString(i, "invoice_no")
+						adw_bol.SetItem(1,"invoice_no2",ls_invoice_no2)
+						
+						ls_seal_nbr=ldwc_detail_suplm.GetitemString(i, "seal_nbr")
+						adw_bol.SetItem(1,"seal_nbr2",ls_seal_nbr)
+						
+						ls_trailer_no=ldwc_detail_suplm.GetitemString(i, "trailer_no")
+						adw_bol.SetItem(1,"trailer_no2",ls_trailer_no)
+						
+				ElseIf i = 3 Then
+						ls_cust_ord_nbr3= ldwc_detail_suplm.GetitemString(i,"cust_order_no")
+						adw_bol.SetItem(1,"cust_ord_nbr3",ls_cust_ord_nbr3)
+							
+						ld_pack_qty3=ldwc_detail_suplm.GetitemDecimal(i, "pack_qty")
+						adw_bol.SetItem(1,"pack_qty3",ld_pack_qty3)
+						
+						ld_totalw3=ldwc_detail_suplm.GetitemDecimal(i, "total_weight")
+						adw_bol.SetItem(1,"total_weight3",ld_totalw3)
+						
+						ls_invoice_no3=ldwc_detail_suplm.GetitemString(i, "invoice_no")
+						adw_bol.SetItem(1,"invoice_no3",ls_invoice_no3)	
+						
+						ls_seal_nbr=ldwc_detail_suplm.GetitemString(i, "seal_nbr")
+						adw_bol.SetItem(1,"seal_nbr3",ls_seal_nbr)
+						
+						ls_trailer_no=ldwc_detail_suplm.GetitemString(i, "trailer_no")
+						adw_bol.SetItem(1,"trailer_no3",ls_trailer_no)
+						  
+				ElseIf i = 4 Then
+						ls_cust_ord_nbr4= ldwc_detail_suplm.GetitemString(i,"cust_order_no")
+						adw_bol.SetItem(1,"cust_ord_nbr4",ls_cust_ord_nbr4)
+						
+						ld_pack_qty4=ldwc_detail_suplm.GetitemDecimal(i, "pack_qty")
+						adw_bol.SetItem(1,"pack_qty4",ld_pack_qty4)
+						
+						ld_totalw4=ldwc_detail_suplm.GetitemDecimal(i, "total_weight")
+						adw_bol.SetItem(1,"total_weight4",ld_totalw4)
+						
+						ls_invoice_no4=ldwc_detail_suplm.GetitemString(i, "invoice_no")
+						adw_bol.SetItem(1,"invoice_no4",ls_invoice_no4)
+						
+						ls_seal_nbr=ldwc_detail_suplm.GetitemString(i, "seal_nbr")
+						adw_bol.SetItem(1,"seal_nbr4",ls_seal_nbr)
+						
+						ls_trailer_no=ldwc_detail_suplm.GetitemString(i, "trailer_no")
+						adw_bol.SetItem(1,"trailer_no4",ls_trailer_no)
+						
+				ElseIf i = 5 Then	
+						ls_cust_ord_nbr5= ldwc_detail_suplm.GetitemString(i,"cust_order_no")
+						adw_bol.SetItem(1,"cust_ord_nbr5",ls_cust_ord_nbr2)
+							
+						ld_pack_qty5=ldwc_detail_suplm.GetitemDecimal(i, "pack_qty")
+						adw_bol.SetItem(1,"pack_qty5",ld_pack_qty5)
+						
+						ld_totalw5=ldwc_detail_suplm.GetitemDecimal(i, "total_weight")
+						adw_bol.SetItem(1,"total_weight5",ld_totalw5)
+						
+						ls_invoice_no5=ldwc_detail_suplm.GetitemString(i, "invoice_no")
+						adw_bol.SetItem(1,"invoice_no5",ls_invoice_no5)		
+						
+						ls_seal_nbr=ldwc_detail_suplm.GetitemString(i, "seal_nbr")
+						adw_bol.SetItem(1,"seal_nbr5",ls_seal_nbr)
+						
+						ls_trailer_no=ldwc_detail_suplm.GetitemString(i, "trailer_no")
+						adw_bol.SetItem(1,"trailer_no5",ls_trailer_no)
+				End if
+			Next	
+			//Total Qty and total Weight by Order number
+			ld_total_pack_qty=  ldwc_detail_suplm.GetitemDecimal(1,"total_pack_qty")  //sum of total pack qty
+			ld_total_pack_weight= ldwc_detail_suplm.GetitemDecimal(1,"total_pack_weight")  //sum of total weight
+			
+			//The Net Weight for the Carrier Information section should always match the Total weight of the Customer Order Information.
+			//always row 1 for ext dw assuming 1Master treating detail as child
+			adw_bol.SetItem(1,"total_pack_qty",ld_total_pack_qty)
+			adw_bol.SetItem(1,"total_pack_Weight",ld_total_pack_Weight)	
+		End If
+
+		//Carrier Information --NMFC--------------------------------------------------------------------------------------------------------------		
+		If ll_nmfc_suplm_rowcount <=5  Then
+			For i = 1 to ll_nmfc_suplm_rowcount	
+			If i = 1 Then					
+					ld_Item_qty1= ldwc_nmfcitem_suplm.GetitemDecimal(i, "item_qty")
+					adw_bol.SetItem(1,"item_qty1",ld_item_qty1)
+					
+					ld_Weight1= ldwc_nmfcitem_suplm.GetitemDecimal(i,"total_item_w")
+					adw_bol.SetItem(1,"Item_Weight1",ld_Weight1)
+					
+//					if ldwc_nmfcitem_suplm.GetitemString(i,"hazard_tag") = 'HAZARDOUS' then
+//						adw_bol.SetItem(1,"hazmat_1",'X')
+//					end if
+
+//					ls_nmfcdescription1= ldwc_nmfcitem_suplm.GetitemString(i,"nmfcdescription")
+//					ls_nmfcdescription1= ldwc_nmfcitem_suplm.GetitemString(i,"item_master_hazard_cd_commodity_cd")			// LTK 20151008
+					ls_nmfcdescription1= ldwc_nmfcitem_suplm.GetitemString(i,"compute_commodity_description")			// LTK 20151008
+					adw_bol.SetItem(1,"nmfcdescription1",ls_com_desc)
+//					
+					//ls_nmfc1= ldwc_nmfcitem_suplm.GetitemString(i,"nmfc"  )
+					adw_bol.SetItem(1,"nmfc1",'E')
+					
+					//ls_class1= ldwc_nmfcitem_suplm.GetitemString(i,"class" )
+					adw_bol.SetItem(1,"class1",'92.5')						
+				
+//					//Handling unit Type from delivery_packing carton_type; one for all either all pallet or all Carton, only print once
+					//ll_carton_count1= ldwc_nmfcitem_suplm.GetitemNumber(i, "carton_count")
+					//ll_carton_count1= ldwc_nmfcitem_suplm.GetitemNumber(i, "cf_carton_countvisible")
+					ll_carton_count1= Long( ldwc_nmfcitem_suplm.GetitemString(i, "carton_count") )
+					adw_bol.SetItem(1,"carton_count1",ll_carton_count1)
+					ls_carton_type1= ldwc_nmfcitem_suplm.GetitemString(i, "cf_carton_type")	
+					adw_bol.SetItem(1,"carton_type1",ls_carton_type1)			
+					
+			ElseIf i = 2 Then		
+					//ll_carton_count2= ldwc_nmfcitem_suplm.GetitemNumber(i, "carton_count")
+//					//Handling unit Type from delivery_packing carton_type; one for all either all pallet or all Carton, only print once
+					//ll_carton_count2= ldwc_nmfcitem_suplm.GetitemNumber(i, "carton_count")
+					//ll_carton_count2= ldwc_nmfcitem_suplm.GetitemNumber(i, "cf_carton_countvisible")
+					ll_carton_count2= Long( ldwc_nmfcitem_suplm.GetitemString(i, "cf_carton_countvisible") )
+					adw_bol.SetItem(1,"carton_count2",ll_carton_count2)
+					ls_carton_type2= ldwc_nmfcitem_suplm.GetitemString(i, "cf_carton_type")
+					adw_bol.SetItem(1,"carton_type2",ls_carton_type2)
+					
+					ld_Item_qty2= ldwc_nmfcitem_suplm.GetitemDecimal(i, "item_qty")
+					adw_bol.SetItem(1,"item_qty2",ld_item_qty2)
+					
+					ld_Weight2= ldwc_nmfcitem_suplm.GetitemDecimal(i,"total_item_w")
+					adw_bol.SetItem(1,"Item_Weight2",ld_Weight2)
+
+//					if ldwc_nmfcitem_suplm.GetitemString(i,"hazard_tag") = 'HAZARDOUS' then
+//						adw_bol.SetItem(1,"hazmat_2",'X')
+//					end if
+
+//					ls_nmfcdescription2= ldwc_nmfcitem_suplm.GetitemString(i,"nmfcdescription")
+//					ls_nmfcdescription2= ldwc_nmfcitem_suplm.GetitemString(i,"item_master_hazard_cd_commodity_cd")			// LTK 20151008
+					ls_nmfcdescription2= ldwc_nmfcitem_suplm.GetitemString(i,"compute_commodity_description")			// LTK 20151008
+					adw_bol.SetItem(1,"nmfcdescription2",ls_com_desc)
+//					
+//					ls_nmfc2= ldwc_nmfcitem_suplm.GetitemString(i,"nmfc"  )
+					adw_bol.SetItem(1,"nmfc2",'E')
+//					
+//					ls_class2= ldwc_nmfcitem_suplm.GetitemString(i,"class" )
+					adw_bol.SetItem(1,"class2","92.5")
+					
+			ElseIf i = 3 Then
+					//ll_carton_count3= ldwc_nmfcitem_suplm.GetitemNumber(i, "carton_count")
+					//Handling unit Type from delivery_packing carton_type; one for all either all pallet or all Carton, only print once
+					//ll_carton_count3= ldwc_nmfcitem_suplm.GetitemNumber(i, "carton_count")
+					//ll_carton_count3= ldwc_nmfcitem_suplm.GetitemNumber(i, "cf_carton_countvisible")
+					ll_carton_count3= Long( ldwc_nmfcitem_suplm.GetitemString(i, "cf_carton_countvisible") )
+					adw_bol.SetItem(1,"carton_count3",ll_carton_count3)
+					ls_carton_type3= ldwc_nmfcitem_suplm.GetitemString(i, "cf_carton_type")
+					adw_bol.SetItem(1,"carton_type3",ls_carton_type3)
+					
+					ld_Item_qty3= ldwc_nmfcitem_suplm.GetitemDecimal(i, "item_qty")
+					adw_bol.SetItem(1,"item_qty3",ld_item_qty3)
+					
+					ld_Weight3= ldwc_nmfcitem_suplm.GetitemDecimal(i,"total_item_w")
+					adw_bol.SetItem(1,"Item_Weight3",ld_Weight3)
+					
+//					if ldwc_nmfcitem_suplm.GetitemString(i,"hazard_tag") = 'HAZARDOUS' then
+//						adw_bol.SetItem(1,"hazmat_3",'X')
+//					end if
+
+//					ls_nmfcdescription3= ldwc_nmfcitem_suplm.GetitemString(i,"nmfcdescription")
+//					ls_nmfcdescription3= ldwc_nmfcitem_suplm.GetitemString(i,"item_master_hazard_cd_commodity_cd")			// LTK 20151008
+					ls_nmfcdescription3= ldwc_nmfcitem_suplm.GetitemString(i,"compute_commodity_description")			// LTK 20151008
+					adw_bol.SetItem(1,"nmfcdescription3",ls_com_desc)
+//					
+//					ls_nmfc3= ldwc_nmfcitem_suplm.GetitemString(i,"nmfc"  )
+					adw_bol.SetItem(1,"nmfc3",'E')
+//					
+//					ls_class3= ldwc_nmfcitem_suplm.GetitemString(i,"class" )
+					adw_bol.SetItem(1,"class3",'92.5')
+					
+			ElseIf i = 4 Then
+					//ll_carton_count4= ldwc_nmfcitem_suplm.GetitemNumber(i, "carton_count")
+					//Handling unit Type from delivery_packing carton_type; one for all either all pallet or all Carton, only print once
+					//ll_carton_count4= ldwc_nmfcitem_suplm.GetitemNumber(i, "carton_count")
+					//ll_carton_count4= ldwc_nmfcitem_suplm.GetitemNumber(i, "cf_carton_countvisible")
+					ll_carton_count4= Long( ldwc_nmfcitem_suplm.GetitemString(i, "cf_carton_countvisible") )
+					adw_bol.SetItem(1,"carton_count4",ll_carton_count4)
+					ls_carton_type4= ldwc_nmfcitem_suplm.GetitemString(i, "cf_carton_type")
+					adw_bol.SetItem(1,"carton_type4",ls_carton_type4)
+					
+					ld_Item_qty4= ldwc_nmfcitem_suplm.GetitemDecimal(i, "item_qty")
+					adw_bol.SetItem(1,"item_qty4",ld_item_qty4)
+					
+					ld_Weight4= ldwc_nmfcitem_suplm.GetitemDecimal(i,"total_item_w")
+					adw_bol.SetItem(1,"Item_Weight4",ld_Weight4)
+
+//					if ldwc_nmfcitem_suplm.GetitemString(i,"hazard_tag") = 'HAZARDOUS' then
+//						adw_bol.SetItem(1,"hazmat_4",'X')
+//					end if
+
+//					ls_nmfcdescription4= ldwc_nmfcitem_suplm.GetitemString(i,"nmfcdescription")
+//					ls_nmfcdescription4= ldwc_nmfcitem_suplm.GetitemString(i,"item_master_hazard_cd_commodity_cd")			// LTK 20151008
+					ls_nmfcdescription4= ldwc_nmfcitem_suplm.GetitemString(i,"compute_commodity_description")			// LTK 20151008
+					adw_bol.SetItem(1,"nmfcdescription4",ls_com_desc)
+//					
+//					ls_nmfc4= ldwc_nmfcitem_suplm.GetitemString(i,"nmfc"  )
+					adw_bol.SetItem(1,"nmfc4",'E')
+//					
+//					ls_class4= ldwc_nmfcitem_suplm.GetitemString(i,"class" )
+					adw_bol.SetItem(1,"class4","92.5")
+			ElseIf i = 5 Then
+				//	ll_carton_count5= ldwc_nmfcitem_suplm.GetitemNumber(i, "carton_count")				
+//					//Handling unit Type from delivery_packing carton_type; one for all either all pallet or all Carton, only print once
+					//ll_carton_count5= ldwc_nmfcitem_suplm.GetitemNumber(i, "carton_count")
+					//ll_carton_count5= ldwc_nmfcitem_suplm.GetitemNumber(i, "cf_carton_countvisible")
+					ll_carton_count5= Long( ldwc_nmfcitem_suplm.GetitemString(i, "cf_carton_countvisible") )
+					adw_bol.SetItem(1,"carton_count5",ll_carton_count5)
+					ls_carton_type5= ldwc_nmfcitem_suplm.GetitemString(i, "cf_carton_type")
+					adw_bol.SetItem(1,"carton_type5",ls_carton_type5)
+					
+					ld_Item_qty5= ldwc_nmfcitem_suplm.GetitemDecimal(i, "item_qty")
+					adw_bol.SetItem(1,"item_qty5",ld_item_qty5)
+					
+					ld_Weight5= ldwc_nmfcitem_suplm.GetitemDecimal(i,"total_item_w")
+					adw_bol.SetItem(1,"Item_Weight5",ld_Weight5)
+					
+//					if ldwc_nmfcitem_suplm.GetitemString(i,"hazard_tag") = 'HAZARDOUS' then				// LTK 20151008
+//						adw_bol.SetItem(1,"hazmat_5",'X')
+//					end if
+
+//					ls_nmfcdescription5= ldwc_nmfcitem_suplm.GetitemString(i,"nmfcdescription")
+//					ls_nmfcdescription5= ldwc_nmfcitem_suplm.GetitemString(i,"item_master_hazard_cd_commodity_cd")			// LTK 20151008
+					ls_nmfcdescription5= ldwc_nmfcitem_suplm.GetitemString(i,"compute_commodity_description")			// LTK 20151008
+					adw_bol.SetItem(1,"nmfcdescription5",ls_com_desc)
+					
+//					ls_nmfc5= ldwc_nmfcitem_suplm.GetitemString(i,"nmfc"  )
+					adw_bol.SetItem(1,"nmfc5","E")
+//					
+//					ls_class5= ldwc_nmfcitem_suplm.GetitemString(i,"class" )
+					adw_bol.SetItem(1,"class5","92.5")
+				End if
+			Next			
+			//Total of all Number of carton from all orders group by carton_no with multiple Item. Examp one order with multiple line and multple NMFC pack together in one pallet
+
+			//14-Aug-2015 :Madhu- Added code to print Carton and Pallet count separetly on BOL - START
+			//ll_total_carton_count= ldwc_nmfcitem_suplm.GetitemNumber(1, "total_carton_count")  //14-Aug-2015 :Madhu commented
+			//adw_bol.SetItem(1,"total_carton_count", ll_total_carton_count ) //14-Aug-2015 :Madhu commented
+			FOR  row =1 to ldwc_nmfcitem_suplm.rowcount( )
+				lscarton_type =ldwc_nmfcitem_suplm.GetitemString(row, "cf_carton_type")
+				
+				CHOOSE CASE Upper(lscarton_type)
+					CASE 'PALLET', 'PL','PLTS'
+								ll_total_pallet_count += ldwc_nmfcitem_suplm.GetitemNumber(row, "cf_carton_countvisible")
+								adw_bol.SetItem(1,"total_pallet_count", ll_total_pallet_count )
+					CASE ELSE
+								ll_total_carton_count += ldwc_nmfcitem_suplm.GetitemNumber(row, "cf_carton_countvisible")
+								adw_bol.SetItem(1,"total_carton_count", ll_total_carton_count )				
+					END CHOOSE
+			Next
+			
+			// ldwc_nmfcitem_suplm.GetitemString(i, "cf_carton_type")
+			//14-Aug-2015 :Madhu- Added code to print Carton and Pallet count separetly on BOL - END
+			
+//			//Handling unit Type from delivery_packing carton_type; one for all either all pallet or all Carton, only print once
+//			ls_carton_type= ldwc_nmfcitem_suplm.GetitemString(1, "carton_type")
+//			adw_bol.SetItem(1,"carton_type",ls_carton_type)
+//			
+			//Total Qty and total Weight by NMFC (Item_master)
+			ld_total_item_qty=  ldwc_nmfcitem_suplm.GetitemDecimal(1,"total_item_qty")
+			adw_bol.SetItem(1,"total_item_qty",ld_total_item_qty)
+			
+			//The Net Weight for the Carrier Information section should always match the Total weight of the Customer Order Information.
+			//always row 1 for ext dw assuming 1Master treating detail as child			
+			ld_total_net_w=  ldwc_nmfcitem_suplm.GetitemDecimal(1,"total_net_w")
+			adw_bol.SetItem(1,"total_net_w",ld_total_net_w)
+		End If //NMFC 
+End If
+
+// LTK 20151022  Always display this, suplement or no
+//Total Qty and total Weight by NMFC (Item_master)
+ld_total_item_qty=  ldwc_nmfcitem_suplm.GetitemDecimal(1,"total_item_qty")
+adw_bol.SetItem(1,"total_item_qty",ld_total_item_qty)
+
+// LTK 20160114  Copied following block to set Vics_Bol_No on order
+//Jxlim 07/07/2013 End of SSCC for Bol and Vics value Pandora BRD 610   
+String ls_vics_bol_no
+//ls_vics_bol_no =  w_do.idw_other.GetItemString(1,'vics_bol_no')
+
+//IF IsNull(ls_vics_bol_no) OR Trim(ls_vics_bol_no) = '' then
+//	ls_vics_bol_no = l_nwarehouse.of_get_sscc_bol(gs_project,'BOL_No')  //(use 17 digits)
+//	If ls_vics_bol_no = '' OR IsNull(ls_vics_bol_no) Then
+//		MessageBox ("Error", "There was a problem creating the SSCC Number.  Please check with support")
+//		Return 1
+//	Else
+//		//w_do.idw_other.setitem(1,'vics_bol_no',ls_vics_bol_no)    //This required calling safe; 
+//		//use embeded sql to update directly to db instead after generate the vics_bol_no to avoid hard refresh
+//		Execute Immediate "Begin Transaction" using SQLCA;
+//		Update dbo.Delivery_master
+//		Set Vics_Bol_no =:ls_vics_bol_no
+//		//Where Project_id =:gs_Project and Do_no = :as_dono	
+//		Where Project_id =:gs_Project and Do_no = :w_do.is_dono
+//		Using SQLCA;
+//		Execute Immediate "COMMIT" using SQLCA;		
+//	End if				
+//	
+//	w_do.tab_main.tabpage_main.dw_main.SetItem(1,'vics_bol_no',ls_vics_bol_no)		// GailM 01/10/2014 Update main DW 
+//	w_do.idw_other.setitem(1,'vics_bol_no',ls_vics_bol_no)
+//End if
+////set vics_bol_no to BOL report
+//adw_bol.setitem(1,'vics_bol_no',ls_vics_bol_no)    		
+//Jxlim 07/07/2013 End of SSCC for Bol and Vics value	
+// End of set Vics_Bol_No on order
+
+
+String ls_page_count
+long ll_pages = 1
+
+If lb_suplm = True Then
+
+	// LTK 20151022  Print new message if hazardous materials and supplemental page exists
+//	for i = 1 to ldwc_nmfcitem_suplm.RowCount()
+//		if ldwc_nmfcitem_suplm.GetitemString(i,"hazard_tag") = 'HAZARDOUS' then
+//			adw_bol.Object.ordercount_t.text = "Hazardous Material - See Attached Supplemental Page(s)"
+//			adw_bol.Object.nmfccount_t.text = "Hazardous Material - See Attached Supplemental Page(s)"
+//			exit
+//		end if
+//	next
+
+	// Set the page count for the main page here by adding the supplemental pages to the count
+	ls_page_count = ldwc_detail_suplm.Describe( "Evaluate('pagecount()', 1)")
+	if IsNumber( ls_page_count ) then
+		ll_pages = Long( ls_page_count ) + 1
+	end if
+	adw_bol.Object.t_page_count_display.text = 'Page: 1 of ' + String( ll_pages )
+
+	//Print(lds_bol_suplm)	//no print dialog
+	OpenWithParm(w_dw_print_options,lds_bol_suplm) //print dialog
+Else
+	adw_bol.Object.t_page_count_display.text = 'Page: 1 of ' + String( ll_pages )
+End If
+	
+If adw_bol.RowCount() = 0 Then
+	adw_bol.InsertRow(0)
+End If
+
+adw_bol.SetRedraw(true)
+
+RETURN 1
+//END -09/03/2021- Dinesh - S57453-Google - SIMS - Bill of Lading Changes
+end function
+
+public function integer uf_process_cbol_greater5_combine_pandora (string as_shipment_id, ref datawindow adw_bol);// LTK 20151008  This method was modeled after uf_process_vics_bol_combine, all comments, etc. were copied below
+
+//Jxlim 12/10/2013 Freidrich Vics BOL up to 5 orders
+//This is an external datawindow useb by manipulating datastores to produce a combine Vics BOL up to 5 detail/NMFC rows
+//to fit into one single page of International standard Vics BOL.  (Strickly no extra page).  
+//In the event that the order exist 5 rows, a supplement page will be created to handle this and it will be a separate code from this.
+//This Vics BOL is officially name a Single page Vics BOL requested by Friedrich.
+//This report contains:
+//1. Header warehouse and order master, carrier from delivery_master and warehouse and Carrier_Master
+//2. Third party address from Delivery_alt_address where address_type ='BT'
+//Created a new datawindow for delivery alt address based on consolidation_no since we may have multiple do_no. 
+//Baseline should be able to fulfill this however, 
+//since we already have the consolidation_no variable within this code it is easier to just retrieve based on consolidation_no.
+//The existing baseline third party address datawindow is based on do_no
+//Customer Order Information and Carrier Information have to separate into 2 different query although they are source from the same table.
+//This is because Customer detail required to group by order and Carrier information required to group by item.
+//3. group by order: Order information detail from Delivery Master and Packing; and the weight is getting from item_master.weight_1
+//--Total Packing Weight = Sum(Delivery_Packing.Qty * Item_Master.Weight_1)	
+//4. group by NMFC: Carrier Information from Item_Master and Number of carton_no (count of carton_no) from delivery_packing 
+//--Total item Weight = Sum(Delivery_Packing.Qty * Item_Master.Weight_1)	
+//This is done through group by NMFC not carton_no
+//If an order with 2 different NMFC code (2 Items) pack into one pallet together
+//then the carton_no should show only 1 pallet this is done through group by carton_no
+//supplmental detail and nmfc datawindow will be used regradless 5 or less orders in a shipment
+
+//Begin -08/31/2021- Dinesh - S57453-Google - SIMS - Bill of Lading Changes
+Long   i, ll_consl_rowcount,	ll_detail_suplm_rowcount, ll_nmfc_suplm_rowcount, ll_detail_rowcount, ll_nmfc_rowcount, ll_alt_address_rowcount, ll_nmfc_carton_rowcount
+Long   ll_carton_count1, ll_carton_count2,ll_carton_count3,ll_carton_count4,ll_carton_count5,ll_total_carton_count,ll_bol_suplm
+String ls_custcode,ls_custname, ls_carton_type
+Decimal ld_Pack_qty1,ld_Pack_qty2,ld_Pack_qty3,ld_Pack_qty4,ld_Pack_qty5
+Decimal ld_total_item_qty, ld_total_pack_qty
+Decimal ld_weight1,ld_weight2,ld_weight3,ld_weight4,ld_weight5, ld_total_net_w, ld_total_pack_weight
+Decimal ld_totalw1, ld_totalw2,ld_totalw3,ld_totalw4,ld_totalw5
+String ls_carton_type1,ls_carton_type2,ls_carton_type3,ls_carton_type4,ls_carton_type5
+String ls_nmfcdescription1, ls_nmfcdescription2,ls_nmfcdescription3,ls_nmfcdescription4,ls_nmfcdescription5, ls_nmfc1,ls_nmfc2,ls_nmfc3,ls_nmfc4,ls_nmfc5
+String ls_class1,ls_class2,ls_class3,ls_class4,ls_class5
+String ls_cust_ord_nbr1,ls_cust_ord_nbr2,ls_cust_ord_nbr3,ls_cust_ord_nbr4,ls_cust_ord_nbr5
+String ls_invoice_no1, ls_invoice_no2,  ls_invoice_no3, ls_invoice_no4, ls_invoice_no5
+Decimal ld_item_qty1,ld_item_qty2,ld_item_qty3,ld_item_qty4,ld_item_qty5
+Datawindowchild ldwc_detail_suplm,ldwc_nmfcitem_suplm,ldwc_header_info,ldwc_footer_info,ldwc_nmfcitem_suplment,ldwc_detail_suplment,ldwc_sum_suplment
+Boolean lb_suplm
+string ls_stop_id,ls_pro_no,ls_load_seq,ls_seal_nbr,ls_trailer_no,	ls_shipment_id,ls_load_id,ls_abol,ls_carrier_code,ls_Carrier_name
+string ls_carrier,ls_LSLG,ls_ZIGL,ls_carrier1
+
+n_warehouse l_nwarehouse  //Jxlim 07/08/2013 SSCC fo BOL and VICS
+l_nwarehouse		= Create n_warehouse
+
+lb_suplm=False
+
+//03-Jan-2014 :Madhu -Added code to verify whether all serial no's are scanned? -START
+Long 	llpackqty,llscannedqty ,llserialcnt,lleligiblecnt
+
+//14-Aug-2015 :Madhu- Added code to print Carton and Pallet count separetly on BOL
+int row
+string lscarton_type,ls_hazard_cd,ls_hazard_class,ls_proper_shipping_name,ls_com_desc
+long ll_total_pallet_count
+
+//SELECT Load_Sequence, Stop_Id,Carrier_pro_no into :ls_load_seq,:ls_stop_id,:ls_pro_no from Delivery_Master where project_id=:gs_project and shipment_id=:as_shipment_id;
+// LTK 20151113  Configurable hard stop if HazMat is found on order, message displayed in method
+//if uf_is_pandora_hazmat_turned_on( "", as_shipment_id ) < 0 then	// NOTE: as_dono is consolidation_no in this case
+//	Return 0
+//end if
+
+SELECT Load_Sequence, Stop_Id,Carrier_pro_no into :ls_load_seq,:ls_stop_id,:ls_pro_no from Delivery_Master where project_id=:gs_project and shipment_id=:as_shipment_id;
+select Item_Master.hazard_cd,Item_Master.hazard_class,Item_Master.proper_shipping_name into :ls_hazard_cd,:ls_hazard_class,:ls_proper_shipping_name from Delivery_Packing,Item_Master,delivery_master
+where Delivery_Packing.SKU = Item_Master.SKU and Delivery_Packing.do_no=delivery_master.do_no
+and Delivery_master.shipment_id= :as_shipment_id
+and Item_Master.Project_Id= 'PANDORA';
+ls_com_desc= ls_hazard_cd +" " + ls_hazard_class +" "+ ls_proper_shipping_name
+
+
+//get eligible records for scanning
+// TAM 2014/01/15 - Changed from Count to Sum.  Not all items are scannable and we only want to compare the number of Scannable with the number of serials
+//select count(*) into :lleligiblecnt from Delivery_Packing,Item_Master
+select sum(Quantity) into :lleligiblecnt from Delivery_Packing,Item_Master,delivery_master
+where Delivery_Packing.SKU = Item_Master.SKU and Delivery_Packing.do_no=delivery_master.do_no
+and Delivery_master.shipment_id= :as_shipment_id
+and Item_Master.Project_Id=:gs_project
+and Item_Master.Serialized_Ind in ('Y','B')
+using SQLCA;
+
+//If lleligiblecnt >0 Then
+////TAM	Select sum(Quantity) into :llpackqty from Delivery_Packing where Do_No =:as_dono using SQLCA;
+//	Select Sum(quantity) into :llScannedQty from delivery_serial_detail Where Id_no in (select id_no from delivery_picking_detail,delivery_master where  delivery_picking_detail.do_no=delivery_master.do_no and delivery_master.shipment_id = :as_shipment_id) using SQLCA;
+//	
+//	If IsNull(llScannedQty) then 
+//		llScannedQty =0 
+//	end if
+//	
+////TAM 	If llpackqty <> llScannedQty Then
+//	If lleligiblecnt <> llScannedQty Then
+//		MessageBox(w_do.is_title,"All Serial no's are not being scanned. Please check.",Stopsign!)
+//		Return 0
+//	End if 
+//
+//End if 
+
+//03-Jan-2014 :Madhu - Added code to verify whether all serial no's are scanned? -END
+
+
+//// LTK 20151102  When IM.hazard_cd is set, validate IM.proper_shipping_name is also set or halt BOL generation
+//long ll_hazmat_description_errors
+//String ls_erroneous_sku
+//
+//select count(*), Max(SKU)
+//into :ll_hazmat_description_errors, :ls_erroneous_sku 
+//from Item_Master
+//where project_id = :gs_project
+//and hazard_cd is not null 
+//and Len( LTRIM(RTRIM( hazard_cd )) ) > 0 
+//and ( proper_shipping_name is null or LTRIM(RTRIM( proper_shipping_name ))  = '' ) 
+//and SKU in
+//	(select SKU
+//	from Delivery_Detail
+//	where do_no in
+//		(select do_no
+//		from delivery_master
+//		where project_id = :gs_project
+//		and shipment_id = :as_shipment_id) );		// as_dono is actually consolidation_no
+//
+//if ll_hazmat_description_errors > 0 then
+//	MessageBox(w_do.is_title, "GPN(s) exist marked as hazardous without proper shipping names, such as GPN:  "  + ls_erroneous_sku + &
+//										"~r~rPlease set the proper shipping name in the Item Master Maintenance.")
+//	return 0
+//end if
+//
+
+//Jxlim; Created data store to Retrieve report contains, then get the value from this datastore to set it to ext dw
+Datastore  lds_bol_suplm,lds_bol_combine_header, lds_bol_combine_alt_address
+Datastore  lds_nmfc_carton_count, ldwc_detail_suplm_suplm
+
+//Jxlim; may not need this datastore but for now 
+//Datastore for Report header section
+lds_bol_combine_header = create datastore
+lds_bol_combine_header.dataobject = 'd_vics_cbol_prt_combined_pandora_header'
+lds_bol_combine_header.SetTransObject(SQLCA)
+
+
+lds_bol_combine_header.Retrieve(gs_project, as_shipment_id)	// Consolidation is being passed in
+ll_consl_rowcount = lds_bol_combine_header.Rowcount()
+
+//Header Third Party alt address(DropShip) from Alt_Delivery_Addresss
+lds_bol_combine_alt_address = create datastore
+lds_bol_combine_alt_address.dataobject = 'd_vics_bol_prt_combined_alt_address'
+lds_bol_combine_alt_address.SetTransObject(SQLCA)
+lds_bol_combine_alt_address.Retrieve(gs_project, as_shipment_id, 'BT')  //as_dono(consolidation No) asType=BT (Bill To for BOL) --3P is for Trax/Third Party
+ll_alt_address_rowcount=lds_bol_combine_alt_address.Rowcount()
+
+lds_bol_suplm = Create datastore
+//lds_bol_suplm.dataobject = 'd_vics_bol_prt_combined_suplm_composite_rpt'
+lds_bol_suplm.dataobject ='d_vics_cbol_prt_greater5_suplm_composite_rpt'		// LTK 20151008
+
+lds_bol_suplm.GetChild('dw_detail_suplm', ldwc_detail_suplm)
+ldwc_detail_suplm.SetTransObject(SQLCA)	
+ldwc_detail_suplm.Retrieve(gs_project, as_shipment_id)
+//ll_detail_suplm_rowcount=ldwc_detail_suplm.RowCount()
+
+lds_bol_suplm.GetChild('dw_nmfcitem_suplm', ldwc_nmfcitem_suplm)
+ldwc_nmfcitem_suplm.SetTransObject(SQLCA)	
+ldwc_nmfcitem_suplm.Retrieve(gs_project, as_shipment_id)
+//ll_nmfc_suplm_rowcount=ldwc_nmfcitem_suplm.Rowcount()
+// Set carrier information from w_do fields
+uf_set_carrier_information( ldwc_nmfcitem_suplm )
+
+
+//long ll_nmfc_suplm_rowcount,ll_detail_suplm_rowcount
+//dw_bol_prt.dataobject ='d_vics_cbol_prt_greater5_suplm_composite_rpt'		// LTK 20151008
+//
+//
+adw_bol.GetChild('dw_header_item', ldwc_header_info)
+ldwc_header_info.SetTransObject(SQLCA)	
+//ldwc_header_info.Retrieve('PANDORA', '1000036044.1.2')
+ldwc_header_info.insertrow(0)
+
+adw_bol.GetChild('dw_detail_suplment', ldwc_detail_suplment)
+ldwc_detail_suplment.SetTransObject(SQLCA)	
+ldwc_detail_suplment.Retrieve(gs_project, as_shipment_id)
+//ll_detail_suplm_rowcount=ldwc_detail_suplment.RowCount()
+
+adw_bol.GetChild('dw_nmfcitem_suplment', ldwc_nmfcitem_suplment)
+ldwc_nmfcitem_suplment.SetTransObject(SQLCA)	
+ldwc_nmfcitem_suplment.Retrieve(gs_project, as_shipment_id)
+
+// Begin  - Dinesh - 04182022 - S70052- Google - SIMS - CBOL Enhancement III
+adw_bol.GetChild('dw_sum_suplment', ldwc_sum_suplment)
+ldwc_sum_suplment.SetTransObject(SQLCA)	
+ldwc_sum_suplment.Retrieve(gs_project, as_shipment_id)
+// End  - Dinesh - 04182022 - S70052- Google - SIMS - CBOL Enhancement III
+
+adw_bol.GetChild('dw_footer_item', ldwc_footer_info)
+ldwc_footer_info.SetTransObject(SQLCA)	
+ldwc_footer_info.insertrow(0)
+//ll_nmfc_suplm_rowcount=ldwc_nmfcitem_suplment.Rowcount()
+//dw_bol_prt.print()
+
+
+// LTK 20151120  Calculate the sort column and sort the item DW appropriately given we sort hazardous materials to the top
+uf_set_sort( ldwc_nmfcitem_suplm )
+
+//Jxlim Insert row to begin for external dw
+//adw_bol.InsertRow(0)
+//Header Info
+		//Using  lds_bol_combine_header datastore for Header section
+		//Ship From address from Warehouse Table
+	
+		//adw_bol.SetItem(1,"wh_code",  lds_bol_combine_header.GetitemString(1, "wh_code"))
+		ldwc_header_info.SetItem(1,"wh_name", lds_bol_combine_header.GetitemString(1, "wh_name"))
+		ldwc_header_info.SetItem(1,"wh_addr1", lds_bol_combine_header.GetitemString(1,"wh_Addr1" ))  
+		ldwc_header_info.SetItem(1,"wh_addr2", lds_bol_combine_header.GetitemString(1,"wh_Addr2" ))   
+		ldwc_header_info.SetItem(1,"wh_addr3", lds_bol_combine_header.GetitemString(1,"wh_Addr3"))    
+		ldwc_header_info.SetItem(1,"wh_addr4", lds_bol_combine_header.GetitemString(1,"wh_Addr4" ))   
+		ldwc_header_info.SetItem(1,"wh_city", lds_bol_combine_header.GetitemString(1,"wh_City" ))  
+		ldwc_header_info.SetItem(1,"wh_state", lds_bol_combine_header.GetitemString(1,"wh_State" ))     
+		ldwc_header_info.SetItem(1,"wh_zip", lds_bol_combine_header.GetitemString(1,"wh_Zip" ))    
+		
+		//Ship To from Delivery_Master Table
+		ldwc_header_info.SetItem(1,"cust_code",  lds_bol_combine_header.GetitemString(1, "Cust_code"))
+		ldwc_header_info.SetItem(1,"cust_name", lds_bol_combine_header.GetitemString(1, "Cust_Name"))
+		ldwc_header_info.SetItem(1,"cust_addr1", lds_bol_combine_header.GetitemString(1,"Address_1" ))  
+		ldwc_header_info.SetItem(1,"cust_addr2", lds_bol_combine_header.GetitemString(1,"Address_2" ))   
+		ldwc_header_info.SetItem(1,"cust_addr3", lds_bol_combine_header.GetitemString(1,"Address_3"))    
+		ldwc_header_info.SetItem(1,"cust_addr4", lds_bol_combine_header.GetitemString(1,"Address_4" ))   
+		ldwc_header_info.SetItem(1,"cust_city", lds_bol_combine_header.GetitemString(1,"City" ))  
+		ldwc_header_info.SetItem(1,"cust_state", lds_bol_combine_header.GetitemString(1,"State" ))     
+		ldwc_header_info.SetItem(1,"cust_zip", lds_bol_combine_header.GetitemString(1,"Zip" ))    
+		ldwc_header_info.SetItem(1,"contact_person", lds_bol_combine_header.GetitemString(1,"Contact_person"  ))  
+		ldwc_header_info.SetItem(1,"tel", lds_bol_combine_header.GetitemString(1,"Tel"  )) 
+		ldwc_header_info.SetItem(1,"cust_country", lds_bol_combine_header.GetitemString(1,"Country"  ))  //13-Aug-2015 Madhu Added customer Country
+		
+		ldwc_header_info.SetItem(1,"shipping_instr", lds_bol_combine_header.GetitemString(1,"shipping_instr"))  
+		ldwc_header_info.SetItem(1,"awb_bol_no", lds_bol_combine_header.GetitemString(1,"awb_bol_no" ))  
+			
+		//ldwc_header_info.SetItem(1,"request_date", lds_bol_combine_header.GetitemString(1,"request_date"  )) 
+		
+			// BEGIN -  Dinesh - 10/25/2021 -S57453-Google - SIMS - Bill of Lading Changes		
+			ls_carrier= lds_bol_combine_header.getitemstring(1,'carrier')
+			ls_shipment_id= lds_bol_combine_header.GetItemString(1,'shipment_id')
+			ls_abol=lds_bol_combine_header.GetitemString(1,"awb_bol_no" )
+			ls_load_id=lds_bol_combine_header.GetitemString(1,"load_id")
+			select SCAC_Code into : ls_carrier from carrier_master  where project_id = :gs_project and   Carrier_Code =:ls_carrier;
+			//ls_carrier_str=Left(ls_carrier, 4)
+			select LU.Code_ID into : ls_LSLG from Lookup_table LU where LU.project_id = :gs_project and LU.Code_Type = 'SHIPMENT_ID'  and LU.Code_ID= 'LSLG';
+			select LU.Code_ID into : ls_ZIGL from Lookup_table LU where LU.project_id = :gs_project and LU.Code_Type = 'SHIPMENT_ID'  and LU.Code_ID= 'ZIGL';
+			if ls_carrier = ls_LSLG then
+				ldwc_header_info.setitem(1,'awb_bol_no',ls_shipment_id)
+			elseif  ls_carrier=ls_ZIGL then
+				ldwc_header_info.setitem(1,'awb_bol_no',ls_shipment_id)
+			else
+				ldwc_header_info.setitem(1,'awb_bol_no',ls_load_id)
+			end if
+			// END -  Dinesh- 10/25/2021- S57453-Google - SIMS - Bill of Lading Changes
+			
+		ldwc_header_info.SetItem(1,"master_bol", lds_bol_combine_header.GetitemString(1,"master_bol"  ))
+		ldwc_header_info.SetItem(1,"load_id", lds_bol_combine_header.GetitemString(1,"load_id"  ))  
+		//adw_bol.SetItem(1,"consl_no", lds_bol_combine_header.GetitemString(1,"consolidation_no"  ))  
+		ldwc_header_info.SetItem(1,"vics_bol_no", lds_bol_combine_header.GetitemString(1,"delivery_master_vics_bol_no"  ))  
+		//adw_bol.SetItem(1,"trailer_no", lds_bol_combine_header.GetitemString(1,"Trailer_no"  ))  		 //DM.user_field2
+		ldwc_header_info.SetItem(1,"pro_no", ls_abol)	//DM.user_field7  Jxlim 04/02/2014 Replaced with carrier_pro_no name field
+		//adw_bol.SetItem(1,"scac", lds_bol_combine_header.GetitemString(1,"scac"  ))  					// Carrier_Master.Carrier_code first 4 digits
+		//ldwc_header_info.SetItem(1,"scac_1", lds_bol_combine_header.GetitemString(1,"carrier" ))
+		ldwc_header_info.SetItem(1,"scac_1", ls_carrier)
+		
+		//ldwc_header_info.SetItem(1,"carrier", lds_bol_combine_header.GetitemString(1,"ship_via"  )) // Dinesh- 11/26/2021 - DE23997- Google - SIMS - Production - Carrier Name not populating on BOL
+		ls_carrier_code=lds_bol_combine_header.GetitemString(1,"carrier"  )
+		select Carrier_Master.Carrier_name into : ls_Carrier_name FROM Carrier_Master WITH (NOLOCK)     
+		WHERE Carrier_Master.Project_ID = :gs_project  
+		and   Carrier_Master.Carrier_Code = :ls_carrier_code  ; // Dinesh- 11/30/2021 - DE23997- Google - SIMS - Production - Carrier Name not populating on BOL
+		ldwc_header_info.SetItem(1,"carrier", ls_Carrier_name)  // Dinesh- 11/26/2021 - DE23997- Google - SIMS - Production - Carrier Name not populating on BOL
+		ldwc_header_info.SetItem(1,"stop_id", string(ls_stop_id))	
+		//adw_bol.SetItem(1,"pro_no", string(ls_pro_no))
+		ldwc_header_info.SetItem(1,"load_sequence", string(ls_load_seq) )
+		ldwc_header_info.SetItem(1,"Freight_Terms", lds_bol_combine_header.GetitemString(1,"Freight_Terms"  )) //Frieght_terms, X mark visible based on frieght_terms 		
+		//adw_bol.SetItem(1,"ord_date", lds_bol_combine_header.GetitemDateTime(1,"delivery_master_ord_date"  )) 
+		ldwc_header_info.SetItem(1,"user_field10", lds_bol_combine_header.GetitemString(1,"user_field10"  )) 
+		ldwc_header_info.SetItem(1,"special_instr_invoice_no", lds_bol_combine_header.GetitemString(1,"invoice_no"  )) 
+		
+//		if lds_bol_combine_header.GetitemString(1,"load_id"  ) <> '' OR not isnull(lds_bol_combine_header.GetitemString(1,"load_id"  )) then			
+//			adw_bol.Object.t_1.text = 'X'
+//			//w_delivery_bol.dw_bol_prt.object.t_1.text='X'
+//		end if
+
+		//Header Third Party alt address(DropShip) from Alt_Delivery_Addresss --BOL third party address uses Bill TO ('BT') address type			
+		If	ll_alt_address_rowcount > 0 Then	
+			ldwc_header_info.SetItem(1, "alt_name", lds_bol_combine_alt_address.GetItemString(1, "name"))		
+			ldwc_header_info.SetItem(1, "alt_addr1", lds_bol_combine_alt_address.GetItemString(1, "address_1"))
+			ldwc_header_info.SetItem(1, "alt_addr2", lds_bol_combine_alt_address.GetItemString(1, "address_2"))
+			ldwc_header_info.SetItem(1, "alt_addr3", lds_bol_combine_alt_address.GetItemString(1, "address_3"))
+			ldwc_header_info.SetItem(1, "alt_addr4", lds_bol_combine_alt_address.GetItemString(1, "address_4"))
+			ldwc_header_info.SetItem(1, "alt_city",    lds_bol_combine_alt_address.GetItemString(1, "city"))
+			ldwc_header_info.SetItem(1, "alt_state",  lds_bol_combine_alt_address.GetItemString(1, "state"))
+			ldwc_header_info.SetItem(1, "alt_zip",     lds_bol_combine_alt_address.GetItemString(1, "zip"))
+		End If
+
+
+//Print supplementan page if more than 5 orders or more than 5 items
+lb_suplm= FALSE
+
+//If ll_consl_rowcount  > 5 Then //Print supplementan page
+//	adw_bol.SetItem(1, "order_count",  ll_detail_suplm_rowcount)
+//	lb_suplm= True
+//End If
+//
+//If ll_nmfc_suplm_rowcount > 5 Then
+//	adw_bol.SetItem(1, "nmfc_count",  ll_nmfc_suplm_rowcount)
+//	lb_suplm = True		
+//end if
+
+//If ll_consl_rowcount  > 5 or ll_nmfc_suplm_rowcount > 5 then
+//	lb_suplm=True
+//end if
+
+//if lb_suplm = FALSE then
+//	//Detail order Information--------------------------------------------------------------------------------------------------------------	
+//	//If	ll_detail_suplm_rowcount <=5  Then
+//			//For i = 1 to ll_detail_rowcount
+//	
+//			For i = 1 to 	ll_detail_suplm_rowcount
+//				If i = 1 Then
+//						ls_cust_ord_nbr1= ldwc_detail_suplm.GetitemString(i,"cust_order_no")
+//						adw_bol.SetItem(1,"cust_ord_nbr1",ls_cust_ord_nbr1)
+//						
+//						ld_pack_qty1=ldwc_detail_suplm.GetitemDecimal(i, "pack_qty")
+//						adw_bol.SetItem(1,"pack_qty1",ld_pack_qty1)
+//						
+//						ld_totalw1=ldwc_detail_suplm.GetitemDecimal(i, "total_weight")
+//						adw_bol.SetItem(1,"total_weight1",ld_totalw1)
+//							
+//						ls_invoice_no1=ldwc_detail_suplm.GetitemString(i, "invoice_no")
+//						adw_bol.SetItem(1,"invoice_no1",ls_invoice_no1)
+//						
+//						ls_seal_nbr=ldwc_detail_suplm.GetitemString(i, "seal_nbr")
+//						adw_bol.SetItem(1,"seal_nbr1",ls_seal_nbr)
+//						
+//						ls_trailer_no=ldwc_detail_suplm.GetitemString(i, "trailer_no")
+//						adw_bol.SetItem(1,"trailer_no1",ls_trailer_no)
+//						
+//				ElseIf i = 2 Then
+//						ls_cust_ord_nbr2= ldwc_detail_suplm.GetitemString(i,"cust_order_no")
+//						adw_bol.SetItem(1,"cust_ord_nbr2",ls_cust_ord_nbr2)
+//						
+//						ld_pack_qty2=ldwc_detail_suplm.GetitemDecimal(i, "pack_qty")
+//						adw_bol.SetItem(1,"pack_qty2",ld_pack_qty2)
+//						
+//						ld_totalw2=ldwc_detail_suplm.GetitemDecimal(i, "total_weight")
+//						adw_bol.SetItem(1,"total_weight2",ld_totalw2)
+//							
+//						ls_invoice_no2=ldwc_detail_suplm.GetitemString(i, "invoice_no")
+//						adw_bol.SetItem(1,"invoice_no2",ls_invoice_no2)
+//						
+//						ls_seal_nbr=ldwc_detail_suplm.GetitemString(i, "seal_nbr")
+//						adw_bol.SetItem(1,"seal_nbr2",ls_seal_nbr)
+//						
+//						ls_trailer_no=ldwc_detail_suplm.GetitemString(i, "trailer_no")
+//						adw_bol.SetItem(1,"trailer_no2",ls_trailer_no)
+//						
+//				ElseIf i = 3 Then
+//						ls_cust_ord_nbr3= ldwc_detail_suplm.GetitemString(i,"cust_order_no")
+//						adw_bol.SetItem(1,"cust_ord_nbr3",ls_cust_ord_nbr3)
+//							
+//						ld_pack_qty3=ldwc_detail_suplm.GetitemDecimal(i, "pack_qty")
+//						adw_bol.SetItem(1,"pack_qty3",ld_pack_qty3)
+//						
+//						ld_totalw3=ldwc_detail_suplm.GetitemDecimal(i, "total_weight")
+//						adw_bol.SetItem(1,"total_weight3",ld_totalw3)
+//						
+//						ls_invoice_no3=ldwc_detail_suplm.GetitemString(i, "invoice_no")
+//						adw_bol.SetItem(1,"invoice_no3",ls_invoice_no3)		
+//						
+//						ls_seal_nbr=ldwc_detail_suplm.GetitemString(i, "seal_nbr")
+//						adw_bol.SetItem(1,"seal_nbr3",ls_seal_nbr)
+//						
+//						ls_trailer_no=ldwc_detail_suplm.GetitemString(i, "trailer_no")
+//						adw_bol.SetItem(1,"trailer_no3",ls_trailer_no)
+//						  
+//				ElseIf i = 4 Then
+//						ls_cust_ord_nbr4= ldwc_detail_suplm.GetitemString(i,"cust_order_no")
+//						adw_bol.SetItem(1,"cust_ord_nbr4",ls_cust_ord_nbr4)
+//						
+//						ld_pack_qty4=ldwc_detail_suplm.GetitemDecimal(i, "pack_qty")
+//						adw_bol.SetItem(1,"pack_qty4",ld_pack_qty4)
+//						
+//						ld_totalw4=ldwc_detail_suplm.GetitemDecimal(i, "total_weight")
+//						adw_bol.SetItem(1,"total_weight4",ld_totalw4)
+//						
+//						ls_invoice_no4=ldwc_detail_suplm.GetitemString(i, "invoice_no")
+//						adw_bol.SetItem(1,"invoice_no4",ls_invoice_no4)
+//						
+//						ls_seal_nbr=ldwc_detail_suplm.GetitemString(i, "seal_nbr")
+//						adw_bol.SetItem(1,"seal_nbr4",ls_seal_nbr)
+//						
+//						ls_trailer_no=ldwc_detail_suplm.GetitemString(i, "trailer_no")
+//						adw_bol.SetItem(1,"trailer_no4",ls_trailer_no)
+//						
+//				ElseIf i = 5 Then	
+//						ls_cust_ord_nbr5= ldwc_detail_suplm.GetitemString(i,"cust_order_no")
+//						adw_bol.SetItem(1,"cust_ord_nbr5",ls_cust_ord_nbr2)
+//							
+//						ld_pack_qty5=ldwc_detail_suplm.GetitemDecimal(i, "pack_qty")
+//						adw_bol.SetItem(1,"pack_qty5",ld_pack_qty5)
+//						
+//						ld_totalw5=ldwc_detail_suplm.GetitemDecimal(i, "total_weight")
+//						adw_bol.SetItem(1,"total_weight5",ld_totalw5)
+//						
+//						ls_invoice_no5=ldwc_detail_suplm.GetitemString(i, "invoice_no")
+//						adw_bol.SetItem(1,"invoice_no5",ls_invoice_no5)	
+//						
+//						ls_seal_nbr=ldwc_detail_suplm.GetitemString(i, "seal_nbr")
+//						adw_bol.SetItem(1,"seal_nbr5",ls_seal_nbr)
+//						
+//						ls_trailer_no=ldwc_detail_suplm.GetitemString(i, "trailer_no")
+//						adw_bol.SetItem(1,"trailer_no5",ls_trailer_no)
+//				End if
+//			Next	
+//			//Total Qty and total Weight by Order number
+//			ld_total_pack_qty=  ldwc_detail_suplm.GetitemDecimal(1,"total_pack_qty")  //sum of total pack qty
+//			ld_total_pack_weight= ldwc_detail_suplm.GetitemDecimal(1,"total_pack_weight")  //sum of total weight
+//			
+//			//The Net Weight for the Carrier Information section should always match the Total weight of the Customer Order Information.
+//			//always row 1 for ext dw assuming 1Master treating detail as child
+//			adw_bol.SetItem(1,"total_pack_qty",ld_total_pack_qty)
+//			adw_bol.SetItem(1,"total_pack_Weight",ld_total_pack_Weight)	
+		//End If
+
+		//Carrier Information --NMFC--------------------------------------------------------------------------------------------------------------		
+		//If ll_nmfc_suplm_rowcount <=5  Then
+//			For i = 1 to ll_nmfc_suplm_rowcount	
+//			If i = 1 Then					
+//					ld_Item_qty1= ldwc_nmfcitem_suplm.GetitemDecimal(i, "item_qty")
+//					adw_bol.SetItem(1,"item_qty1",ld_item_qty1)
+//					
+//					ld_Weight1= ldwc_nmfcitem_suplm.GetitemDecimal(i,"total_item_w")
+//					adw_bol.SetItem(1,"Item_Weight1",ld_Weight1)
+//					
+//					if ldwc_nmfcitem_suplm.GetitemString(i,"hazard_tag") = 'HAZARDOUS' then
+//						adw_bol.SetItem(1,"hazmat_1",'X')
+//					
+//					end if
+//
+////					ls_nmfcdescription1= ldwc_nmfcitem_suplm.GetitemString(i,"nmfcdescription")
+////					ls_nmfcdescription1= ldwc_nmfcitem_suplm.GetitemString(i,"item_master_hazard_cd_commodity_cd")			// LTK 20151008
+//					ls_nmfcdescription1= ldwc_nmfcitem_suplm.GetitemString(i,"compute_commodity_description")			// LTK 20151008
+//					adw_bol.SetItem(1,"nmfcdescription1",ls_nmfcdescription1)
+//////					
+//					//ls_nmfc1= ldwc_nmfcitem_suplm.GetitemString(i,"nmfc"  )
+//				//	adw_bol.SetItem(1,"nmfc1",ls_nmfc1)
+////					
+////					ls_class1= ldwc_nmfcitem_suplm.GetitemString(i,"class" )
+////					adw_bol.SetItem(1,"class1",ls_class1)						
+//				
+////					//Handling unit Type from delivery_packing carton_type; one for all either all pallet or all Carton, only print once
+//					//ll_carton_count1= ldwc_nmfcitem_suplm.GetitemNumber(i, "carton_count")
+//					//ll_carton_count1= ldwc_nmfcitem_suplm.GetitemNumber(i, "cf_carton_countvisible")
+//					ll_carton_count1= Long( ldwc_nmfcitem_suplm.GetitemString(i, "carton_count") )
+//					adw_bol.SetItem(1,"carton_count1",ll_carton_count1)
+//					ls_carton_type1= ldwc_nmfcitem_suplm.GetitemString(i, "cf_carton_type")	
+//					adw_bol.SetItem(1,"carton_type1",ls_carton_type1)			
+//					
+//			ElseIf i = 2 Then		
+//					//ll_carton_count2= ldwc_nmfcitem_suplm.GetitemNumber(i, "carton_count")
+////					//Handling unit Type from delivery_packing carton_type; one for all either all pallet or all Carton, only print once
+//					//ll_carton_count2= ldwc_nmfcitem_suplm.GetitemNumber(i, "carton_count")
+//					//ll_carton_count2= ldwc_nmfcitem_suplm.GetitemNumber(i, "cf_carton_countvisible")
+//					ll_carton_count2= Long( ldwc_nmfcitem_suplm.GetitemString(i, "cf_carton_countvisible") )
+//					adw_bol.SetItem(1,"carton_count2",ll_carton_count2)
+//					ls_carton_type2= ldwc_nmfcitem_suplm.GetitemString(i, "cf_carton_type")
+//					adw_bol.SetItem(1,"carton_type2",ls_carton_type2)
+//					
+//					ld_Item_qty2= ldwc_nmfcitem_suplm.GetitemDecimal(i, "item_qty")
+//					adw_bol.SetItem(1,"item_qty2",ld_item_qty2)
+//					
+//					ld_Weight2= ldwc_nmfcitem_suplm.GetitemDecimal(i,"total_item_w")
+//					adw_bol.SetItem(1,"Item_Weight2",ld_Weight2)
+//
+//					if ldwc_nmfcitem_suplm.GetitemString(i,"hazard_tag") = 'HAZARDOUS' then
+//						adw_bol.SetItem(1,"hazmat_2",'X')
+//				
+//					end if
+//
+////					ls_nmfcdescription2= ldwc_nmfcitem_suplm.GetitemString(i,"nmfcdescription")
+////					ls_nmfcdescription2= ldwc_nmfcitem_suplm.GetitemString(i,"item_master_hazard_cd_commodity_cd")			// LTK 20151008
+//					ls_nmfcdescription2= ldwc_nmfcitem_suplm.GetitemString(i,"compute_commodity_description")			// LTK 20151008
+//					adw_bol.SetItem(1,"nmfcdescription2",ls_nmfcdescription2)
+//////					
+//					//ls_nmfc2= ldwc_nmfcitem_suplm.GetitemString(i,"nmfc"  )
+//					//adw_bol.SetItem(1,"nmfc2",ls_nmfc2)
+////					
+////					ls_class2= ldwc_nmfcitem_suplm.GetitemString(i,"class" )
+////					adw_bol.SetItem(1,"class2",ls_class2)
+//					
+//			ElseIf i = 3 Then
+//					//ll_carton_count3= ldwc_nmfcitem_suplm.GetitemNumber(i, "carton_count")
+//					//Handling unit Type from delivery_packing carton_type; one for all either all pallet or all Carton, only print once
+//					//ll_carton_count3= ldwc_nmfcitem_suplm.GetitemNumber(i, "carton_count")
+//					//ll_carton_count3= ldwc_nmfcitem_suplm.GetitemNumber(i, "cf_carton_countvisible")
+//					ll_carton_count3= Long( ldwc_nmfcitem_suplm.GetitemString(i, "cf_carton_countvisible") )
+//					adw_bol.SetItem(1,"carton_count3",ll_carton_count3)
+//					ls_carton_type3= ldwc_nmfcitem_suplm.GetitemString(i, "cf_carton_type")
+//					adw_bol.SetItem(1,"carton_type3",ls_carton_type3)
+//					
+//					ld_Item_qty3= ldwc_nmfcitem_suplm.GetitemDecimal(i, "item_qty")
+//					adw_bol.SetItem(1,"item_qty3",ld_item_qty3)
+//					
+//					ld_Weight3= ldwc_nmfcitem_suplm.GetitemDecimal(i,"total_item_w")
+//					adw_bol.SetItem(1,"Item_Weight3",ld_Weight3)
+//					
+//					if ldwc_nmfcitem_suplm.GetitemString(i,"hazard_tag") = 'HAZARDOUS' then
+//						adw_bol.SetItem(1,"hazmat_3",'X')
+//						
+//					end if
+//
+////					ls_nmfcdescription3= ldwc_nmfcitem_suplm.GetitemString(i,"nmfcdescription")
+////					ls_nmfcdescription3= ldwc_nmfcitem_suplm.GetitemString(i,"item_master_hazard_cd_commodity_cd")			// LTK 20151008
+//					ls_nmfcdescription3= ldwc_nmfcitem_suplm.GetitemString(i,"compute_commodity_description")			// LTK 20151008
+//					adw_bol.SetItem(1,"nmfcdescription3",ls_nmfcdescription3)
+//
+////					
+//					//ls_nmfc3= ldwc_nmfcitem_suplm.GetitemString(i,"nmfc"  )
+//					//adw_bol.SetItem(1,"nmfc3",ls_nmfc3)
+////					
+////					ls_class3= ldwc_nmfcitem_suplm.GetitemString(i,"class" )
+////					adw_bol.SetItem(1,"class3",ls_class3)
+//					
+//			ElseIf i = 4 Then
+//					//ll_carton_count4= ldwc_nmfcitem_suplm.GetitemNumber(i, "carton_count")
+//					//Handling unit Type from delivery_packing carton_type; one for all either all pallet or all Carton, only print once
+//					//ll_carton_count4= ldwc_nmfcitem_suplm.GetitemNumber(i, "carton_count")
+//					//ll_carton_count4= ldwc_nmfcitem_suplm.GetitemNumber(i, "cf_carton_countvisible")
+//					ll_carton_count4= Long( ldwc_nmfcitem_suplm.GetitemString(i, "cf_carton_countvisible") )
+//					adw_bol.SetItem(1,"carton_count4",ll_carton_count4)
+//					ls_carton_type4= ldwc_nmfcitem_suplm.GetitemString(i, "cf_carton_type")
+//					adw_bol.SetItem(1,"carton_type4",ls_carton_type4)
+//					
+//					ld_Item_qty4= ldwc_nmfcitem_suplm.GetitemDecimal(i, "item_qty")
+//					adw_bol.SetItem(1,"item_qty4",ld_item_qty4)
+//					
+//					ld_Weight4= ldwc_nmfcitem_suplm.GetitemDecimal(i,"total_item_w")
+//					adw_bol.SetItem(1,"Item_Weight4",ld_Weight4)
+//
+//					if ldwc_nmfcitem_suplm.GetitemString(i,"hazard_tag") = 'HAZARDOUS' then
+//						adw_bol.SetItem(1,"hazmat_4",'X')
+//						
+//					end if
+//
+////					ls_nmfcdescription4= ldwc_nmfcitem_suplm.GetitemString(i,"nmfcdescription")
+////					ls_nmfcdescription4= ldwc_nmfcitem_suplm.GetitemString(i,"item_master_hazard_cd_commodity_cd")			// LTK 20151008
+//					ls_nmfcdescription4= ldwc_nmfcitem_suplm.GetitemString(i,"compute_commodity_description")			// LTK 20151008
+//					adw_bol.SetItem(1,"nmfcdescription4",ls_nmfcdescription4)
+////					
+//				//	ls_nmfc4= ldwc_nmfcitem_suplm.GetitemString(i,"nmfc"  )
+//					//adw_bol.SetItem(1,"nmfc4",ls_nmfc4)
+////					
+////					ls_class4= ldwc_nmfcitem_suplm.GetitemString(i,"class" )
+////					adw_bol.SetItem(1,"class4",ls_class4)
+//			ElseIf i = 5 Then
+//				//	ll_carton_count5= ldwc_nmfcitem_suplm.GetitemNumber(i, "carton_count")				
+////					//Handling unit Type from delivery_packing carton_type; one for all either all pallet or all Carton, only print once
+//					//ll_carton_count5= ldwc_nmfcitem_suplm.GetitemNumber(i, "carton_count")
+//					//ll_carton_count5= ldwc_nmfcitem_suplm.GetitemNumber(i, "cf_carton_countvisible")
+//					ll_carton_count5= Long( ldwc_nmfcitem_suplm.GetitemString(i, "cf_carton_countvisible") )
+//					adw_bol.SetItem(1,"carton_count5",ll_carton_count5)
+//					ls_carton_type5= ldwc_nmfcitem_suplm.GetitemString(i, "cf_carton_type")
+//					adw_bol.SetItem(1,"carton_type5",ls_carton_type5)
+////					
+////					ld_Item_qty5= ldwc_nmfcitem_suplm.GetitemDecimal(i, "item_qty")
+////					adw_bol.SetItem(1,"item_qty5",ld_item_qty5)
+////					
+////					ld_Weight5= ldwc_nmfcitem_suplm.GetitemDecimal(i,"total_item_w")
+////					adw_bol.SetItem(1,"Item_Weight5",ld_Weight5)
+//					
+//					if ldwc_nmfcitem_suplm.GetitemString(i,"hazard_tag") = 'HAZARDOUS' then				// LTK 20151008
+//						adw_bol.SetItem(1,"hazmat_5",'X')
+//						
+//					end if
+//
+////					ls_nmfcdescription5= ldwc_nmfcitem_suplm.GetitemString(i,"nmfcdescription")
+////					ls_nmfcdescription5= ldwc_nmfcitem_suplm.GetitemString(i,"item_master_hazard_cd_commodity_cd")			// LTK 20151008
+//					ls_nmfcdescription5= ldwc_nmfcitem_suplm.GetitemString(i,"compute_commodity_description")			// LTK 20151008
+//					adw_bol.SetItem(1,"nmfcdescription5",ls_nmfcdescription5)
+//					
+//					//ls_nmfc5= ldwc_nmfcitem_suplm.GetitemString(i,"nmfc"  )
+//					//adw_bol.SetItem(1,"nmfc5",ls_nmfc5)
+//					
+////					ls_class5= ldwc_nmfcitem_suplm.GetitemString(i,"class" )
+////					adw_bol.SetItem(1,"class5",ls_class5)
+//				End if
+//			Next			
+//			//Total of all Number of carton from all orders group by carton_no with multiple Item. Examp one order with multiple line and multple NMFC pack together in one pallet
+//
+//			//14-Aug-2015 :Madhu- Added code to print Carton and Pallet count separetly on BOL - START
+//			//ll_total_carton_count= ldwc_nmfcitem_suplm.GetitemNumber(1, "total_carton_count")  //14-Aug-2015 :Madhu commented
+//			//adw_bol.SetItem(1,"total_carton_count", ll_total_carton_count ) //14-Aug-2015 :Madhu commented
+//			FOR  row =1 to ldwc_nmfcitem_suplm.rowcount( )
+//				lscarton_type =ldwc_nmfcitem_suplm.GetitemString(row, "cf_carton_type")
+//				
+//				CHOOSE CASE Upper(lscarton_type)
+//					CASE 'PALLET', 'PL','PLTS'
+//								ll_total_pallet_count += ldwc_nmfcitem_suplm.GetitemNumber(row, "cf_carton_countvisible")
+//								adw_bol.SetItem(1,"total_pallet_count", ll_total_pallet_count )
+//					CASE ELSE
+//								ll_total_carton_count += ldwc_nmfcitem_suplm.GetitemNumber(row, "cf_carton_countvisible")
+//								adw_bol.SetItem(1,"total_carton_count", ll_total_carton_count )				
+//					END CHOOSE
+//			Next
+//			
+//			// ldwc_nmfcitem_suplm.GetitemString(i, "cf_carton_type")
+//			//14-Aug-2015 :Madhu- Added code to print Carton and Pallet count separetly on BOL - END
+//			
+////			//Handling unit Type from delivery_packing carton_type; one for all either all pallet or all Carton, only print once
+////			ls_carton_type= ldwc_nmfcitem_suplm.GetitemString(1, "carton_type")
+////			adw_bol.SetItem(1,"carton_type",ls_carton_type)
+////			
+//			//Total Qty and total Weight by NMFC (Item_master)
+//			ld_total_item_qty=  ldwc_nmfcitem_suplm.GetitemDecimal(1,"total_item_qty")
+//			adw_bol.SetItem(1,"total_item_qty",ld_total_item_qty)
+//			
+//			//The Net Weight for the Carrier Information section should always match the Total weight of the Customer Order Information.
+//			//always row 1 for ext dw assuming 1Master treating detail as child			
+//			ld_total_net_w=  ldwc_nmfcitem_suplm.GetitemDecimal(1,"total_net_w")
+//			adw_bol.SetItem(1,"total_net_w",ld_total_net_w)
+//		//End If //NMFC 
+//End If
+
+// LTK 20151022  Always display this, suplement or no
+//Total Qty and total Weight by NMFC (Item_master)
+//ld_total_item_qty=  ldwc_nmfcitem_suplm.GetitemDecimal(1,"total_item_qty")
+//adw_bol.SetItem(1,"total_item_qty",ld_total_item_qty)
+
+//adw_bol.Object.ordercount_t.text = "See Attached Supplemental Page(s)"
+//adw_bol.Object.nmfccount_t.text = "See Attached Supplemental Page(s)"
+//
+// LTK 20160114  Copied following block to set Vics_Bol_No on order
+//Jxlim 07/07/2013 End of SSCC for Bol and Vics value Pandora BRD 610   
+String ls_vics_bol_no
+select awb_bol_no into :ls_vics_bol_no from delivery_master where shipment_id=:as_shipment_id;
+//ls_vics_bol_no =  w_do.idw_other.GetItemString(1,'awb_bol_no')
+
+IF IsNull(ls_vics_bol_no) OR Trim(ls_vics_bol_no) = '' then
+	ls_vics_bol_no = l_nwarehouse.of_get_sscc_bol(gs_project,'BOL_No')  //(use 17 digits)
+	If ls_vics_bol_no = '' OR IsNull(ls_vics_bol_no) Then
+		MessageBox ("Error", "There was a problem creating the SSCC Number.  Please check with support")
+		Return 1
+	Else
+		//w_do.idw_other.setitem(1,'vics_bol_no',ls_vics_bol_no)    //This required calling safe; 
+		//use embeded sql to update directly to db instead after generate the vics_bol_no to avoid hard refresh
+		Execute Immediate "Begin Transaction" using SQLCA;
+		Update dbo.Delivery_master
+		Set Vics_Bol_no =:ls_vics_bol_no
+		//Where Project_id =:gs_Project and Do_no = :as_dono	
+		Where Project_id =:gs_Project and shipment_id = :as_shipment_id
+		Using SQLCA;
+		Execute Immediate "COMMIT" using SQLCA;		
+	End if				
+	
+//	w_do.tab_main.tabpage_main.dw_main.SetItem(1,'vics_bol_no',ls_vics_bol_no)		// GailM 01/10/2014 Update main DW 
+//	w_do.idw_other.setitem(1,'vics_bol_no',ls_vics_bol_no)
+End if
+//set vics_bol_no to BOL report
+ldwc_header_info.setitem(1,'vics_bol_no',ls_vics_bol_no)    		
+//Jxlim 07/07/2013 End of SSCC for Bol and Vics value	
+// End of set Vics_Bol_No on order
+
+String ls_page_count
+long ll_pages = 1
+
+//If lb_suplm = True then
+//
+//	// LTK 20151022  Print new message if hazardous materials and supplemental page exists
+//	for i = 1 to ldwc_nmfcitem_suplm.RowCount()
+//		if ldwc_nmfcitem_suplm.GetitemString(i,"hazard_tag") = 'HAZARDOUS' then
+//			
+//			//if ldwc_nmfcitem_suplm.GetitemString(i,"hazard_tag") = 'HAZARDOUS' then
+//						adw_bol.SetItem(i,"hazmat",'X')
+//						
+//					//end if
+//			//adw_bol.Object.ordercount_t.text = "Hazardous Material - See Attached Supplemental Page(s)"
+//			//adw_bol.Object.nmfccount_t.text = "Hazardous Material - See Attached Supplemental Page(s)"
+//			exit
+//		end if
+//	next
+	
+	
+
+//	// Set the page count for the main page here by adding the supplemental pages to the count
+//	ls_page_count = ldwc_detail_suplm.Describe( "Evaluate('pagecount()', 1)")
+//	if IsNumber( ls_page_count ) then
+//		ll_pages = Long( ls_page_count ) + 1
+//	end if
+//	adw_bol.Object.t_page_count_display.text = 'Page: 1 of ' + String( ll_pages )
+
+	//Print(lds_bol_suplm)	//no print dialog
+	
+//	OpenWithParm(w_dw_print_options,adw_bol) //print dialog
+//	messagebox	('','Do you want to print the suppliment page as well')
+	//OpenWithParm(w_dw_print_options,lds_bol_suplm) //print dialog
+//Else
+//	adw_bol.Object.t_page_count_display.text = 'Page: 1 of ' + String( ll_pages )
+//End If
+
+// LTK 20151022  Print new message if hazardous materials and supplemental page exists
+
+//If lb_suplm = true or ll_consl_rowcount  <= 5 or ll_nmfc_suplm_rowcount<= 5 Then //Print supplementan page
+//	
+//	for i = 1 to ldwc_nmfcitem_suplm.RowCount()
+//		if ldwc_nmfcitem_suplm.GetitemString(i,"hazard_tag") = 'HAZARDOUS' then
+//			adw_bol.Object.ordercount_t.text = "Hazardous Material - See Attached Supplemental Page(s)"
+//			adw_bol.Object.nmfccount_t.text = "Hazardous Material - See Attached Supplemental Page(s)"
+//		else 
+//			adw_bol.Object.ordercount_t.text = "See Attached Supplemental Page(s)"
+//			adw_bol.Object.nmfccount_t.text = "See Attached Supplemental Page(s)"
+//			exit
+//		end if
+//	next
+//end if 
+	
+//If adw_bol.RowCount() = 0 Then
+//	adw_bol.InsertRow(0)
+//End If
+//
+//
+//adw_bol.SetRedraw(true)
+
+
+RETURN 1
+
+//END -08/31/2021- Dinesh - S57453-Google - SIMS - Bill of Lading Changes
+end function
+
+public function integer uf_process_cbol_combine_pandora_single (string as_shipment_id, ref datawindow adw_bol);// LTK 20151008  This method was modeled after uf_process_vics_bol_combine, all comments, etc. were copied below
+
+//Jxlim 12/10/2013 Freidrich Vics BOL up to 5 orders
+//This is an external datawindow useb by manipulating datastores to produce a combine Vics BOL up to 5 detail/NMFC rows
+//to fit into one single page of International standard Vics BOL.  (Strickly no extra page).  
+//In the event that the order exist 5 rows, a supplement page will be created to handle this and it will be a separate code from this.
+//This Vics BOL is officially name a Single page Vics BOL requested by Friedrich.
+//This report contains:
+//1. Header warehouse and order master, carrier from delivery_master and warehouse and Carrier_Master
+//2. Third party address from Delivery_alt_address where address_type ='BT'
+//Created a new datawindow for delivery alt address based on consolidation_no since we may have multiple do_no. 
+//Baseline should be able to fulfill this however, 
+//since we already have the consolidation_no variable within this code it is easier to just retrieve based on consolidation_no.
+//The existing baseline third party address datawindow is based on do_no
+//Customer Order Information and Carrier Information have to separate into 2 different query although they are source from the same table.
+//This is because Customer detail required to group by order and Carrier information required to group by item.
+//3. group by order: Order information detail from Delivery Master and Packing; and the weight is getting from item_master.weight_1
+//--Total Packing Weight = Sum(Delivery_Packing.Qty * Item_Master.Weight_1)	
+//4. group by NMFC: Carrier Information from Item_Master and Number of carton_no (count of carton_no) from delivery_packing 
+//--Total item Weight = Sum(Delivery_Packing.Qty * Item_Master.Weight_1)	
+//This is done through group by NMFC not carton_no
+//If an order with 2 different NMFC code (2 Items) pack into one pallet together
+//then the carton_no should show only 1 pallet this is done through group by carton_no
+//supplmental detail and nmfc datawindow will be used regradless 5 or less orders in a shipment
+
+//Begin -09/03/2021- Dinesh - S57453-Google - SIMS - Bill of Lading Changes
+
+Long   i, ll_consl_rowcount,	ll_detail_suplm_rowcount, ll_nmfc_suplm_rowcount, ll_detail_rowcount, ll_nmfc_rowcount, ll_alt_address_rowcount, ll_nmfc_carton_rowcount
+Long   ll_carton_count1, ll_carton_count2,ll_carton_count3,ll_carton_count4,ll_carton_count5,ll_total_carton_count,ll_bol_suplm
+String ls_custcode,ls_custname, ls_carton_type
+Decimal ld_Pack_qty1,ld_Pack_qty2,ld_Pack_qty3,ld_Pack_qty4,ld_Pack_qty5
+Decimal ld_total_item_qty, ld_total_pack_qty
+Decimal ld_weight1,ld_weight2,ld_weight3,ld_weight4,ld_weight5, ld_total_net_w, ld_total_pack_weight
+Decimal ld_totalw1, ld_totalw2,ld_totalw3,ld_totalw4,ld_totalw5
+String ls_carton_type1,ls_carton_type2,ls_carton_type3,ls_carton_type4,ls_carton_type5
+String ls_nmfcdescription1, ls_nmfcdescription2,ls_nmfcdescription3,ls_nmfcdescription4,ls_nmfcdescription5, ls_nmfc1,ls_nmfc2,ls_nmfc3,ls_nmfc4,ls_nmfc5
+String ls_class1,ls_class2,ls_class3,ls_class4,ls_class5
+String ls_cust_ord_nbr1,ls_cust_ord_nbr2,ls_cust_ord_nbr3,ls_cust_ord_nbr4,ls_cust_ord_nbr5
+String ls_invoice_no1, ls_invoice_no2,  ls_invoice_no3, ls_invoice_no4, ls_invoice_no5
+Decimal ld_item_qty1,ld_item_qty2,ld_item_qty3,ld_item_qty4,ld_item_qty5
+Datawindowchild ldwc_detail_suplm,ldwc_nmfcitem_suplm
+Boolean lb_suplm
+string ls_seal_nbr,ls_trailer_no
+
+n_warehouse l_nwarehouse  //Jxlim 07/08/2013 SSCC fo BOL and VICS
+l_nwarehouse		= Create n_warehouse
+
+lb_suplm=False
+
+//03-Jan-2014 :Madhu -Added code to verify whether all serial no's are scanned? -START
+Long 	llpackqty,llscannedqty ,llserialcnt,lleligiblecnt
+
+//14-Aug-2015 :Madhu- Added code to print Carton and Pallet count separetly on BOL
+int row
+string lscarton_type
+long ll_total_pallet_count
+
+
+// LTK 20151113  Configurable hard stop if HazMat is found on order, message displayed in method
+if uf_is_pandora_hazmat_turned_on( "", as_shipment_id ) < 0 then	// NOTE: as_dono is consolidation_no in this case
+	Return 0
+end if
+
+
+//get eligible records for scanning
+// TAM 2014/01/15 - Changed from Count to Sum.  Not all items are scannable and we only want to compare the number of Scannable with the number of serials
+//select count(*) into :lleligiblecnt from Delivery_Packing,Item_Master
+// Dinesh - 08/28/2021
+//select sum(Quantity) into :lleligiblecnt from Delivery_Packing,Item_Master
+//where Delivery_Packing.SKU = Item_Master.SKU
+//and Delivery_Packing.DO_No= :as_dono
+//and Item_Master.Project_Id=:gs_project
+//and Item_Master.Serialized_Ind in ('Y','B')
+//using SQLCA;
+
+//If lleligiblecnt >0 Then
+////TAM	Select sum(Quantity) into :llpackqty from Delivery_Packing where Do_No =:as_dono using SQLCA;
+////Dinesh - 08/25/2021
+////	Select Sum(quantity) into :llScannedQty from delivery_serial_detail Where Id_no in (select id_no from delivery_picking_detail where do_no = :as_dono) using SQLCA;
+//	
+//	If IsNull(llScannedQty) then 
+//		llScannedQty =0 
+//	end if
+//	
+////TAM 	If llpackqty <> llScannedQty Then
+//	If lleligiblecnt <> llScannedQty Then
+//		MessageBox(w_do.is_title,"All Serial no's are not being scanned. Please check.",Stopsign!)
+//		Return 0
+//	End if 
+//End if 
+
+//03-Jan-2014 :Madhu - Added code to verify whether all serial no's are scanned? -END
+
+
+// LTK 20151102  When IM.hazard_cd is set, validate IM.proper_shipping_name is also set or halt BOL generation
+long ll_hazmat_description_errors
+String ls_erroneous_sku
+
+//Dinesh- 08/25/2021
+//
+//select count(*), Max(SKU)
+//into :ll_hazmat_description_errors, :ls_erroneous_sku 
+//from Item_Master
+//where project_id = :gs_project
+//and hazard_cd is not null 
+//and Len( LTRIM(RTRIM( hazard_cd )) ) > 0 
+//and ( proper_shipping_name is null or LTRIM(RTRIM( proper_shipping_name ))  = '' ) 
+//and SKU in
+//	(select SKU
+//	from Delivery_Detail
+//	where do_no in
+//		(select do_no
+//		from delivery_master
+//		where project_id = :gs_project
+//		and consolidation_no = :as_dono) );		// as_dono is actually consolidation_no
+
+//if ll_hazmat_description_errors > 0 then
+//	MessageBox(w_do.is_title, "GPN(s) exist marked as hazardous without proper shipping names, such as GPN:  "  + ls_erroneous_sku + &
+//										"~r~rPlease set the proper shipping name in the Item Master Maintenance.")
+//	return 0
+//end if
+
+
+//Jxlim; Created data store to Retrieve report contains, then get the value from this datastore to set it to ext dw
+Datastore  lds_bol_suplm,lds_bol_combine_header, lds_bol_combine_alt_address
+Datastore  lds_nmfc_carton_count, ldwc_detail_suplm_suplm
+string ls_stop_id,ls_load_seq,ls_pro_no,ls_hazard_cd,ls_hazard_class,ls_proper_shipping_name,ls_com_desc
+
+SELECT Load_Sequence, Stop_Id,Carrier_pro_no into :ls_load_seq,:ls_stop_id,:ls_pro_no from Delivery_Master where project_id=:gs_project and shipment_id=:as_shipment_id;
+select Item_Master.hazard_cd,Item_Master.hazard_class,Item_Master.proper_shipping_name into :ls_hazard_cd,:ls_hazard_class,:ls_proper_shipping_name from Delivery_Packing,Item_Master,delivery_master
+where Delivery_Packing.SKU = Item_Master.SKU and Delivery_Packing.do_no=delivery_master.do_no
+and Delivery_master.shipment_id= :as_shipment_id
+and Item_Master.Project_Id= 'PANDORA';
+ls_com_desc= ls_hazard_cd +" " + ls_hazard_class +" "+ ls_proper_shipping_name
+//Jxlim; may not need this datastore but for now 
+//Datastore for Report header section
+lds_bol_combine_header = create datastore
+lds_bol_combine_header.dataobject = 'd_vics_cbol_prt_combined_pandora_header'
+lds_bol_combine_header.SetTransObject(SQLCA)
+
+lds_bol_combine_header.Retrieve(gs_project, as_shipment_id)	// Consolidation is being passed in
+ll_consl_rowcount = lds_bol_combine_header.Rowcount()
+
+//Header Third Party alt address(DropShip) from Alt_Delivery_Addresss
+lds_bol_combine_alt_address = create datastore
+lds_bol_combine_alt_address.dataobject = 'd_vics_cbol_prt_combined_alt_address'
+lds_bol_combine_alt_address.SetTransObject(SQLCA)
+lds_bol_combine_alt_address.Retrieve(gs_project, as_shipment_id, 'BT')  //as_dono(consolidation No) asType=BT (Bill To for BOL) --3P is for Trax/Third Party
+ll_alt_address_rowcount=lds_bol_combine_alt_address.Rowcount()
+
+lds_bol_suplm = Create datastore
+//lds_bol_suplm.dataobject = 'd_vics_bol_prt_combined_suplm_composite_rpt'
+//lds_bol_suplm.dataobject ='d_vics_bol_prt_combined_suplm_composite_rpt_pandora'		// LTK 20151008 // Dinesh - 08/25/2021- S57453- Google - SIMS - Bill of Lading Changes
+lds_bol_suplm.dataobject ='d_vics_cbol_prt_combined_composite_rpt_pandora'		// LTK 20151008  // Dinesh - 08/25/2021- S57453- Google - SIMS - Bill of Lading Changes
+
+lds_bol_suplm.GetChild('dw_order_detail_cbol', ldwc_detail_suplm)
+ldwc_detail_suplm.SetTransObject(SQLCA)	
+ldwc_detail_suplm.Retrieve(gs_project, as_shipment_id)
+ll_detail_suplm_rowcount=ldwc_detail_suplm.RowCount()
+
+lds_bol_suplm.GetChild('dw_nmfcitem_suplm', ldwc_nmfcitem_suplm)
+ldwc_nmfcitem_suplm.SetTransObject(SQLCA)	
+ldwc_nmfcitem_suplm.Retrieve(gs_project, as_shipment_id)
+ll_nmfc_suplm_rowcount=ldwc_nmfcitem_suplm.Rowcount()
+// Set carrier information from w_do fields
+uf_set_carrier_information( ldwc_nmfcitem_suplm )
+
+// LTK 20151120  Calculate the sort column and sort the item DW appropriately given we sort hazardous materials to the top
+uf_set_sort( ldwc_nmfcitem_suplm )
+
+//Jxlim Insert row to begin for external dw
+adw_bol.InsertRow(0)
+//Header Info
+		//Using  lds_bol_combine_header datastore for Header section
+		//Ship From address from Warehouse Table
+	
+		//adw_bol.SetItem(1,"wh_code",  lds_bol_combine_header.GetitemString(1, "wh_code"))
+		adw_bol.SetItem(1,"wh_name", lds_bol_combine_header.GetitemString(1, "wh_name"))
+		adw_bol.SetItem(1,"wh_addr1", lds_bol_combine_header.GetitemString(1,"wh_addr1" ))  
+		adw_bol.SetItem(1,"wh_addr2", lds_bol_combine_header.GetitemString(1,"wh_addr2" ))   
+		adw_bol.SetItem(1,"wh_addr3", lds_bol_combine_header.GetitemString(1,"wh_Addr3"))    
+		adw_bol.SetItem(1,"wh_addr4", lds_bol_combine_header.GetitemString(1,"wh_Addr4" ))   
+		adw_bol.SetItem(1,"wh_city", lds_bol_combine_header.GetitemString(1,"wh_City" ))  
+		adw_bol.SetItem(1,"wh_state", lds_bol_combine_header.GetitemString(1,"wh_State" ))     
+		adw_bol.SetItem(1,"wh_zip", lds_bol_combine_header.GetitemString(1,"wh_Zip" ))    
+		
+		//Ship To from Delivery_Master Table
+		adw_bol.SetItem(1,"cust_code",  lds_bol_combine_header.GetitemString(1, "Cust_code"))
+		adw_bol.SetItem(1,"cust_name", lds_bol_combine_header.GetitemString(1, "Cust_Name"))
+		adw_bol.SetItem(1,"cust_addr1", lds_bol_combine_header.GetitemString(1,"Address_1" ))  
+		adw_bol.SetItem(1,"cust_addr2", lds_bol_combine_header.GetitemString(1,"Address_2" ))   
+		adw_bol.SetItem(1,"cust_addr3", lds_bol_combine_header.GetitemString(1,"Address_3"))    
+		adw_bol.SetItem(1,"cust_addr4", lds_bol_combine_header.GetitemString(1,"Address_4" ))   
+		adw_bol.SetItem(1,"cust_city", lds_bol_combine_header.GetitemString(1,"City" ))  
+		adw_bol.SetItem(1,"cust_state", lds_bol_combine_header.GetitemString(1,"State" ))     
+		adw_bol.SetItem(1,"cust_zip", lds_bol_combine_header.GetitemString(1,"Zip" ))    
+		adw_bol.SetItem(1,"contact_person", lds_bol_combine_header.GetitemString(1,"Contact_person"  ))  
+		adw_bol.SetItem(1,"tel", lds_bol_combine_header.GetitemString(1,"Tel"  )) 
+		adw_bol.SetItem(1,"cust_country", lds_bol_combine_header.GetitemString(1,"Country"  ))  //13-Aug-2015 Madhu Added customer Country
+		
+		//adw_bol.SetItem(1,"shipping_instr", lds_bol_combine_header.GetitemString(1,"shipping_instr"))  
+		adw_bol.SetItem(1,"awb_bol_no", lds_bol_combine_header.GetitemString(1,"awb_bol_no"  ))  
+		adw_bol.SetItem(1,"load_id", lds_bol_combine_header.GetitemString(1,"load_id"  ))  
+		//adw_bol.SetItem(1,"seal_nbr", lds_bol_combine_header.GetitemString(1,"seal_nbr"  )) 
+		adw_bol.SetItem(1,"request_date", lds_bol_combine_header.GetitemString(1,"request_date"  )) 
+		adw_bol.SetItem(1,"master_bol", lds_bol_combine_header.GetitemString(1,"master_bol"  ))
+		adw_bol.SetItem(1,"load_sequence", string(ls_load_seq) )
+		//adw_bol.SetItem(1,"trailer_no", lds_bol_combine_header.GetitemString(1,"trailer_no"  ))
+		adw_bol.SetItem(1,"pro_no", lds_bol_combine_header.GetitemString(1,"Carrier_pro_no" )) 	//DM.user_field7  Jxlim 04/02/2014 Replaced with carrier_pro_no name field
+		adw_bol.SetItem(1,"scac_1", lds_bol_combine_header.GetitemString(1,"scac"  ))  					// Carrier_Master.Carrier_code first 4 digits
+		adw_bol.SetItem(1,"carrier", lds_bol_combine_header.GetitemString(1,"carrier" )) 
+		adw_bol.SetItem(1,"stop_id", string(ls_stop_id))	
+		adw_bol.SetItem(1,"pro_no", string(ls_pro_no))
+		adw_bol.SetItem(1,"Freight_Terms", lds_bol_combine_header.GetitemString(1,"Freight_Terms"  )) //Frieght_terms, X mark visible based on frieght_terms 		
+		//adw_bol.SetItem(1,"ord_date", lds_bol_combine_header.GetitemDateTime(1,"ord_date"  )) 
+		adw_bol.SetItem(1,"user_field10", lds_bol_combine_header.GetitemString(1,"user_field10"  )) 
+		//adw_bol.SetItem(1,"special_instr_invoice_no", lds_bol_combine_header.GetitemString(1,"invoice_no"  )) 
+		
+		if lds_bol_combine_header.GetitemString(1,"load_id"  ) <> '' OR not isnull(lds_bol_combine_header.GetitemString(1,"load_id"  )) then			
+		adw_bol.Object.t_49.text = 'X'
+		end if
+
+		//Header Third Party alt address(DropShip) from Alt_Delivery_Addresss --BOL third party address uses Bill TO ('BT') address type			
+		If	ll_alt_address_rowcount > 0 Then	
+			adw_bol.SetItem(1, "alt_name", lds_bol_combine_alt_address.GetItemString(1, "name"))		
+			adw_bol.SetItem(1, "alt_addr1", lds_bol_combine_alt_address.GetItemString(1, "address_1"))
+			adw_bol.SetItem(1, "alt_addr2", lds_bol_combine_alt_address.GetItemString(1, "address_2"))
+			adw_bol.SetItem(1, "alt_addr3", lds_bol_combine_alt_address.GetItemString(1, "address_3"))
+			adw_bol.SetItem(1, "alt_addr4", lds_bol_combine_alt_address.GetItemString(1, "address_4"))
+			adw_bol.SetItem(1, "alt_city",    lds_bol_combine_alt_address.GetItemString(1, "city"))
+			adw_bol.SetItem(1, "alt_state",  lds_bol_combine_alt_address.GetItemString(1, "state"))
+			adw_bol.SetItem(1, "alt_zip",     lds_bol_combine_alt_address.GetItemString(1, "zip"))
+		End If
+
+
+//Print supplementan page if more than 5 orders or more than 5 items
+lb_suplm= FALSE
+
+If ll_consl_rowcount  > 5 Then //Print supplementan page
+	adw_bol.SetItem(1, "order_count",  ll_detail_suplm_rowcount)
+	lb_suplm= True
+End If
+
+If ll_nmfc_suplm_rowcount > 5 Then
+	adw_bol.SetItem(1, "nmfc_count",  ll_nmfc_suplm_rowcount)
+	lb_suplm = True		
+end if
+
+if lb_suplm = FALSE then
+	//Detail order Information--------------------------------------------------------------------------------------------------------------	
+	If	ll_detail_suplm_rowcount <=5 Then
+			//For i = 1 to ll_detail_rowcount	
+			For i = 1 to 	ll_detail_suplm_rowcount
+				If i = 1 Then
+						ls_cust_ord_nbr1= ldwc_detail_suplm.GetitemString(i,"cust_order_no")
+						adw_bol.SetItem(1,"cust_ord_nbr1",ls_cust_ord_nbr1)
+						
+						ld_pack_qty1=ldwc_detail_suplm.GetitemDecimal(i, "pack_qty")
+						adw_bol.SetItem(1,"pack_qty1",ld_pack_qty1)
+						
+						ld_totalw1=ldwc_detail_suplm.GetitemDecimal(i, "total_weight")
+						adw_bol.SetItem(1,"total_weight1",ld_totalw1)
+							
+						ls_invoice_no1=ldwc_detail_suplm.GetitemString(i, "invoice_no")
+						adw_bol.SetItem(1,"invoice_no1",ls_invoice_no1)
+						
+						ls_seal_nbr=ldwc_detail_suplm.GetitemString(i, "seal_nbr")
+						adw_bol.SetItem(1,"seal_nbr1",ls_seal_nbr)
+						
+						ls_trailer_no=ldwc_detail_suplm.GetitemString(i, "trailer_no")
+						adw_bol.SetItem(1,"trailer_no1",ls_trailer_no)
+						
+				ElseIf i = 2 Then
+						ls_cust_ord_nbr2= ldwc_detail_suplm.GetitemString(i,"cust_order_no")
+						adw_bol.SetItem(1,"cust_ord_nbr2",ls_cust_ord_nbr2)
+						
+						ld_pack_qty2=ldwc_detail_suplm.GetitemDecimal(i, "pack_qty")
+						adw_bol.SetItem(1,"pack_qty2",ld_pack_qty2)
+						
+						ld_totalw2=ldwc_detail_suplm.GetitemDecimal(i, "total_weight")
+						adw_bol.SetItem(1,"total_weight2",ld_totalw2)
+							
+						ls_invoice_no2=ldwc_detail_suplm.GetitemString(i, "invoice_no")
+						adw_bol.SetItem(1,"invoice_no2",ls_invoice_no2)
+						
+						ls_seal_nbr=ldwc_detail_suplm.GetitemString(i, "seal_nbr")
+						adw_bol.SetItem(1,"seal_nbr2",ls_seal_nbr)
+						
+						ls_trailer_no=ldwc_detail_suplm.GetitemString(i, "trailer_no")
+						adw_bol.SetItem(1,"trailer_no2",ls_trailer_no)
+						
+				ElseIf i = 3 Then
+						ls_cust_ord_nbr3= ldwc_detail_suplm.GetitemString(i,"cust_order_no")
+						adw_bol.SetItem(1,"cust_ord_nbr3",ls_cust_ord_nbr3)
+							
+						ld_pack_qty3=ldwc_detail_suplm.GetitemDecimal(i, "pack_qty")
+						adw_bol.SetItem(1,"pack_qty3",ld_pack_qty3)
+						
+						ld_totalw3=ldwc_detail_suplm.GetitemDecimal(i, "total_weight")
+						adw_bol.SetItem(1,"total_weight3",ld_totalw3)
+						
+						ls_invoice_no3=ldwc_detail_suplm.GetitemString(i, "invoice_no")
+						adw_bol.SetItem(1,"invoice_no3",ls_invoice_no3)	
+						
+						ls_seal_nbr=ldwc_detail_suplm.GetitemString(i, "seal_nbr")
+						adw_bol.SetItem(1,"seal_nbr3",ls_seal_nbr)
+						
+						ls_trailer_no=ldwc_detail_suplm.GetitemString(i, "trailer_no")
+						adw_bol.SetItem(1,"trailer_no3",ls_trailer_no)
+						  
+				ElseIf i = 4 Then
+						ls_cust_ord_nbr4= ldwc_detail_suplm.GetitemString(i,"cust_order_no")
+						adw_bol.SetItem(1,"cust_ord_nbr4",ls_cust_ord_nbr4)
+						
+						ld_pack_qty4=ldwc_detail_suplm.GetitemDecimal(i, "pack_qty")
+						adw_bol.SetItem(1,"pack_qty4",ld_pack_qty4)
+						
+						ld_totalw4=ldwc_detail_suplm.GetitemDecimal(i, "total_weight")
+						adw_bol.SetItem(1,"total_weight4",ld_totalw4)
+						
+						ls_invoice_no4=ldwc_detail_suplm.GetitemString(i, "invoice_no")
+						adw_bol.SetItem(1,"invoice_no4",ls_invoice_no4)
+						
+						ls_seal_nbr=ldwc_detail_suplm.GetitemString(i, "seal_nbr")
+						adw_bol.SetItem(1,"seal_nbr4",ls_seal_nbr)
+						
+						ls_trailer_no=ldwc_detail_suplm.GetitemString(i, "trailer_no")
+						adw_bol.SetItem(1,"trailer_no4",ls_trailer_no)
+						
+				ElseIf i = 5 Then	
+						ls_cust_ord_nbr5= ldwc_detail_suplm.GetitemString(i,"cust_order_no")
+						adw_bol.SetItem(1,"cust_ord_nbr5",ls_cust_ord_nbr2)
+							
+						ld_pack_qty5=ldwc_detail_suplm.GetitemDecimal(i, "pack_qty")
+						adw_bol.SetItem(1,"pack_qty5",ld_pack_qty5)
+						
+						ld_totalw5=ldwc_detail_suplm.GetitemDecimal(i, "total_weight")
+						adw_bol.SetItem(1,"total_weight5",ld_totalw5)
+						
+						ls_invoice_no5=ldwc_detail_suplm.GetitemString(i, "invoice_no")
+						adw_bol.SetItem(1,"invoice_no5",ls_invoice_no5)		
+						
+						ls_seal_nbr=ldwc_detail_suplm.GetitemString(i, "seal_nbr")
+						adw_bol.SetItem(1,"seal_nbr5",ls_seal_nbr)
+						
+						ls_trailer_no=ldwc_detail_suplm.GetitemString(i, "trailer_no")
+						adw_bol.SetItem(1,"trailer_no5",ls_trailer_no)
+				End if
+			Next	
+			//Total Qty and total Weight by Order number
+			ld_total_pack_qty=  ldwc_detail_suplm.GetitemDecimal(1,"total_pack_qty")  //sum of total pack qty
+			ld_total_pack_weight= ldwc_detail_suplm.GetitemDecimal(1,"total_pack_weight")  //sum of total weight
+			
+			//The Net Weight for the Carrier Information section should always match the Total weight of the Customer Order Information.
+			//always row 1 for ext dw assuming 1Master treating detail as child
+			adw_bol.SetItem(1,"total_pack_qty",ld_total_pack_qty)
+			adw_bol.SetItem(1,"total_pack_Weight",ld_total_pack_Weight)	
+		End If
+
+		//Carrier Information --NMFC--------------------------------------------------------------------------------------------------------------		
+		If ll_nmfc_suplm_rowcount <=5  Then
+			For i = 1 to ll_nmfc_suplm_rowcount	
+			If i = 1 Then					
+					ld_Item_qty1= ldwc_nmfcitem_suplm.GetitemDecimal(i, "item_qty")
+					adw_bol.SetItem(1,"item_qty1",ld_item_qty1)
+					
+					ld_Weight1= ldwc_nmfcitem_suplm.GetitemDecimal(i,"total_item_w")
+					adw_bol.SetItem(1,"Item_Weight1",ld_Weight1)
+					
+//					if ldwc_nmfcitem_suplm.GetitemString(i,"hazard_tag") = 'HAZARDOUS' then
+//						adw_bol.SetItem(1,"hazmat_1",'X')
+//					end if
+
+//					ls_nmfcdescription1= ldwc_nmfcitem_suplm.GetitemString(i,"nmfcdescription")
+//					ls_nmfcdescription1= ldwc_nmfcitem_suplm.GetitemString(i,"item_master_hazard_cd_commodity_cd")			// LTK 20151008
+					ls_nmfcdescription1= ldwc_nmfcitem_suplm.GetitemString(i,"compute_commodity_description")			// LTK 20151008
+					adw_bol.SetItem(1,"nmfcdescription1",ls_com_desc)
+//					
+					//ls_nmfc1= ldwc_nmfcitem_suplm.GetitemString(i,"nmfc"  )
+					adw_bol.SetItem(1,"nmfc1",'E')
+					
+					//ls_class1= ldwc_nmfcitem_suplm.GetitemString(i,"class" )
+					adw_bol.SetItem(1,"class1",'92.5')						
+				
+//					//Handling unit Type from delivery_packing carton_type; one for all either all pallet or all Carton, only print once
+					//ll_carton_count1= ldwc_nmfcitem_suplm.GetitemNumber(i, "carton_count")
+					//ll_carton_count1= ldwc_nmfcitem_suplm.GetitemNumber(i, "cf_carton_countvisible")
+					ll_carton_count1= Long( ldwc_nmfcitem_suplm.GetitemString(i, "carton_count") )
+					adw_bol.SetItem(1,"carton_count1",ll_carton_count1)
+					ls_carton_type1= ldwc_nmfcitem_suplm.GetitemString(i, "cf_carton_type")	
+					adw_bol.SetItem(1,"carton_type1",ls_carton_type1)			
+					
+			ElseIf i = 2 Then		
+					//ll_carton_count2= ldwc_nmfcitem_suplm.GetitemNumber(i, "carton_count")
+//					//Handling unit Type from delivery_packing carton_type; one for all either all pallet or all Carton, only print once
+					//ll_carton_count2= ldwc_nmfcitem_suplm.GetitemNumber(i, "carton_count")
+					//ll_carton_count2= ldwc_nmfcitem_suplm.GetitemNumber(i, "cf_carton_countvisible")
+					ll_carton_count2= Long( ldwc_nmfcitem_suplm.GetitemString(i, "cf_carton_countvisible") )
+					adw_bol.SetItem(1,"carton_count2",ll_carton_count2)
+					ls_carton_type2= ldwc_nmfcitem_suplm.GetitemString(i, "cf_carton_type")
+					adw_bol.SetItem(1,"carton_type2",ls_carton_type2)
+					
+					ld_Item_qty2= ldwc_nmfcitem_suplm.GetitemDecimal(i, "item_qty")
+					adw_bol.SetItem(1,"item_qty2",ld_item_qty2)
+					
+					ld_Weight2= ldwc_nmfcitem_suplm.GetitemDecimal(i,"total_item_w")
+					adw_bol.SetItem(1,"Item_Weight2",ld_Weight2)
+
+//					if ldwc_nmfcitem_suplm.GetitemString(i,"hazard_tag") = 'HAZARDOUS' then
+//						adw_bol.SetItem(1,"hazmat_2",'X')
+//					end if
+
+//					ls_nmfcdescription2= ldwc_nmfcitem_suplm.GetitemString(i,"nmfcdescription")
+//					ls_nmfcdescription2= ldwc_nmfcitem_suplm.GetitemString(i,"item_master_hazard_cd_commodity_cd")			// LTK 20151008
+					ls_nmfcdescription2= ldwc_nmfcitem_suplm.GetitemString(i,"compute_commodity_description")			// LTK 20151008
+					adw_bol.SetItem(1,"nmfcdescription2",ls_com_desc)
+//					
+//					ls_nmfc2= ldwc_nmfcitem_suplm.GetitemString(i,"nmfc"  )
+					adw_bol.SetItem(1,"nmfc2",'E')
+//					
+//					ls_class2= ldwc_nmfcitem_suplm.GetitemString(i,"class" )
+					adw_bol.SetItem(1,"class2","92.5")
+					
+			ElseIf i = 3 Then
+					//ll_carton_count3= ldwc_nmfcitem_suplm.GetitemNumber(i, "carton_count")
+					//Handling unit Type from delivery_packing carton_type; one for all either all pallet or all Carton, only print once
+					//ll_carton_count3= ldwc_nmfcitem_suplm.GetitemNumber(i, "carton_count")
+					//ll_carton_count3= ldwc_nmfcitem_suplm.GetitemNumber(i, "cf_carton_countvisible")
+					ll_carton_count3= Long( ldwc_nmfcitem_suplm.GetitemString(i, "cf_carton_countvisible") )
+					adw_bol.SetItem(1,"carton_count3",ll_carton_count3)
+					ls_carton_type3= ldwc_nmfcitem_suplm.GetitemString(i, "cf_carton_type")
+					adw_bol.SetItem(1,"carton_type3",ls_carton_type3)
+					
+					ld_Item_qty3= ldwc_nmfcitem_suplm.GetitemDecimal(i, "item_qty")
+					adw_bol.SetItem(1,"item_qty3",ld_item_qty3)
+					
+					ld_Weight3= ldwc_nmfcitem_suplm.GetitemDecimal(i,"total_item_w")
+					adw_bol.SetItem(1,"Item_Weight3",ld_Weight3)
+					
+//					if ldwc_nmfcitem_suplm.GetitemString(i,"hazard_tag") = 'HAZARDOUS' then
+//						adw_bol.SetItem(1,"hazmat_3",'X')
+//					end if
+
+//					ls_nmfcdescription3= ldwc_nmfcitem_suplm.GetitemString(i,"nmfcdescription")
+//					ls_nmfcdescription3= ldwc_nmfcitem_suplm.GetitemString(i,"item_master_hazard_cd_commodity_cd")			// LTK 20151008
+					ls_nmfcdescription3= ldwc_nmfcitem_suplm.GetitemString(i,"compute_commodity_description")			// LTK 20151008
+					adw_bol.SetItem(1,"nmfcdescription3",ls_com_desc)
+//					
+//					ls_nmfc3= ldwc_nmfcitem_suplm.GetitemString(i,"nmfc"  )
+					adw_bol.SetItem(1,"nmfc3",'E')
+//					
+//					ls_class3= ldwc_nmfcitem_suplm.GetitemString(i,"class" )
+					adw_bol.SetItem(1,"class3",'92.5')
+					
+			ElseIf i = 4 Then
+					//ll_carton_count4= ldwc_nmfcitem_suplm.GetitemNumber(i, "carton_count")
+					//Handling unit Type from delivery_packing carton_type; one for all either all pallet or all Carton, only print once
+					//ll_carton_count4= ldwc_nmfcitem_suplm.GetitemNumber(i, "carton_count")
+					//ll_carton_count4= ldwc_nmfcitem_suplm.GetitemNumber(i, "cf_carton_countvisible")
+					ll_carton_count4= Long( ldwc_nmfcitem_suplm.GetitemString(i, "cf_carton_countvisible") )
+					adw_bol.SetItem(1,"carton_count4",ll_carton_count4)
+					ls_carton_type4= ldwc_nmfcitem_suplm.GetitemString(i, "cf_carton_type")
+					adw_bol.SetItem(1,"carton_type4",ls_carton_type4)
+					
+					ld_Item_qty4= ldwc_nmfcitem_suplm.GetitemDecimal(i, "item_qty")
+					adw_bol.SetItem(1,"item_qty4",ld_item_qty4)
+					
+					ld_Weight4= ldwc_nmfcitem_suplm.GetitemDecimal(i,"total_item_w")
+					adw_bol.SetItem(1,"Item_Weight4",ld_Weight4)
+
+//					if ldwc_nmfcitem_suplm.GetitemString(i,"hazard_tag") = 'HAZARDOUS' then
+//						adw_bol.SetItem(1,"hazmat_4",'X')
+//					end if
+
+//					ls_nmfcdescription4= ldwc_nmfcitem_suplm.GetitemString(i,"nmfcdescription")
+//					ls_nmfcdescription4= ldwc_nmfcitem_suplm.GetitemString(i,"item_master_hazard_cd_commodity_cd")			// LTK 20151008
+					ls_nmfcdescription4= ldwc_nmfcitem_suplm.GetitemString(i,"compute_commodity_description")			// LTK 20151008
+					adw_bol.SetItem(1,"nmfcdescription4",ls_com_desc)
+//					
+//					ls_nmfc4= ldwc_nmfcitem_suplm.GetitemString(i,"nmfc"  )
+					adw_bol.SetItem(1,"nmfc4",'E')
+//					
+//					ls_class4= ldwc_nmfcitem_suplm.GetitemString(i,"class" )
+					adw_bol.SetItem(1,"class4","92.5")
+			ElseIf i = 5 Then
+				//	ll_carton_count5= ldwc_nmfcitem_suplm.GetitemNumber(i, "carton_count")				
+//					//Handling unit Type from delivery_packing carton_type; one for all either all pallet or all Carton, only print once
+					//ll_carton_count5= ldwc_nmfcitem_suplm.GetitemNumber(i, "carton_count")
+					//ll_carton_count5= ldwc_nmfcitem_suplm.GetitemNumber(i, "cf_carton_countvisible")
+					ll_carton_count5= Long( ldwc_nmfcitem_suplm.GetitemString(i, "cf_carton_countvisible") )
+					adw_bol.SetItem(1,"carton_count5",ll_carton_count5)
+					ls_carton_type5= ldwc_nmfcitem_suplm.GetitemString(i, "cf_carton_type")
+					adw_bol.SetItem(1,"carton_type5",ls_carton_type5)
+					
+					ld_Item_qty5= ldwc_nmfcitem_suplm.GetitemDecimal(i, "item_qty")
+					adw_bol.SetItem(1,"item_qty5",ld_item_qty5)
+					
+					ld_Weight5= ldwc_nmfcitem_suplm.GetitemDecimal(i,"total_item_w")
+					adw_bol.SetItem(1,"Item_Weight5",ld_Weight5)
+					
+//					if ldwc_nmfcitem_suplm.GetitemString(i,"hazard_tag") = 'HAZARDOUS' then				// LTK 20151008
+//						adw_bol.SetItem(1,"hazmat_5",'X')
+//					end if
+
+//					ls_nmfcdescription5= ldwc_nmfcitem_suplm.GetitemString(i,"nmfcdescription")
+//					ls_nmfcdescription5= ldwc_nmfcitem_suplm.GetitemString(i,"item_master_hazard_cd_commodity_cd")			// LTK 20151008
+					ls_nmfcdescription5= ldwc_nmfcitem_suplm.GetitemString(i,"compute_commodity_description")			// LTK 20151008
+					adw_bol.SetItem(1,"nmfcdescription5",ls_com_desc)
+					
+//					ls_nmfc5= ldwc_nmfcitem_suplm.GetitemString(i,"nmfc"  )
+					adw_bol.SetItem(1,"nmfc5","E")
+//					
+//					ls_class5= ldwc_nmfcitem_suplm.GetitemString(i,"class" )
+					adw_bol.SetItem(1,"class5","92.5")
+				End if
+			Next			
+			//Total of all Number of carton from all orders group by carton_no with multiple Item. Examp one order with multiple line and multple NMFC pack together in one pallet
+
+			//14-Aug-2015 :Madhu- Added code to print Carton and Pallet count separetly on BOL - START
+			//ll_total_carton_count= ldwc_nmfcitem_suplm.GetitemNumber(1, "total_carton_count")  //14-Aug-2015 :Madhu commented
+			//adw_bol.SetItem(1,"total_carton_count", ll_total_carton_count ) //14-Aug-2015 :Madhu commented
+			FOR  row =1 to ldwc_nmfcitem_suplm.rowcount( )
+				lscarton_type =ldwc_nmfcitem_suplm.GetitemString(row, "cf_carton_type")
+				
+				CHOOSE CASE Upper(lscarton_type)
+					CASE 'PALLET', 'PL','PLTS'
+								ll_total_pallet_count += ldwc_nmfcitem_suplm.GetitemNumber(row, "cf_carton_countvisible")
+								adw_bol.SetItem(1,"total_pallet_count", ll_total_pallet_count )
+					CASE ELSE
+								ll_total_carton_count += ldwc_nmfcitem_suplm.GetitemNumber(row, "cf_carton_countvisible")
+								adw_bol.SetItem(1,"total_carton_count", ll_total_carton_count )				
+					END CHOOSE
+			Next
+			
+			// ldwc_nmfcitem_suplm.GetitemString(i, "cf_carton_type")
+			//14-Aug-2015 :Madhu- Added code to print Carton and Pallet count separetly on BOL - END
+			
+//			//Handling unit Type from delivery_packing carton_type; one for all either all pallet or all Carton, only print once
+//			ls_carton_type= ldwc_nmfcitem_suplm.GetitemString(1, "carton_type")
+//			adw_bol.SetItem(1,"carton_type",ls_carton_type)
+//			
+			//Total Qty and total Weight by NMFC (Item_master)
+			ld_total_item_qty=  ldwc_nmfcitem_suplm.GetitemDecimal(1,"total_item_qty")
+			adw_bol.SetItem(1,"total_item_qty",ld_total_item_qty)
+			
+			//The Net Weight for the Carrier Information section should always match the Total weight of the Customer Order Information.
+			//always row 1 for ext dw assuming 1Master treating detail as child			
+			ld_total_net_w=  ldwc_nmfcitem_suplm.GetitemDecimal(1,"total_net_w")
+			adw_bol.SetItem(1,"total_net_w",ld_total_net_w)
+		End If //NMFC 
+End If
+
+// LTK 20151022  Always display this, suplement or no
+//Total Qty and total Weight by NMFC (Item_master)
+ld_total_item_qty=  ldwc_nmfcitem_suplm.GetitemDecimal(1,"total_item_qty")
+adw_bol.SetItem(1,"total_item_qty",ld_total_item_qty)
+
+// LTK 20160114  Copied following block to set Vics_Bol_No on order
+//Jxlim 07/07/2013 End of SSCC for Bol and Vics value Pandora BRD 610   
+String ls_vics_bol_no
+//ls_vics_bol_no =  w_do.idw_other.GetItemString(1,'vics_bol_no')
+
+//IF IsNull(ls_vics_bol_no) OR Trim(ls_vics_bol_no) = '' then
+//	ls_vics_bol_no = l_nwarehouse.of_get_sscc_bol(gs_project,'BOL_No')  //(use 17 digits)
+//	If ls_vics_bol_no = '' OR IsNull(ls_vics_bol_no) Then
+//		MessageBox ("Error", "There was a problem creating the SSCC Number.  Please check with support")
+//		Return 1
+//	Else
+//		//w_do.idw_other.setitem(1,'vics_bol_no',ls_vics_bol_no)    //This required calling safe; 
+//		//use embeded sql to update directly to db instead after generate the vics_bol_no to avoid hard refresh
+//		Execute Immediate "Begin Transaction" using SQLCA;
+//		Update dbo.Delivery_master
+//		Set Vics_Bol_no =:ls_vics_bol_no
+//		//Where Project_id =:gs_Project and Do_no = :as_dono	
+//		Where Project_id =:gs_Project and Do_no = :w_do.is_dono
+//		Using SQLCA;
+//		Execute Immediate "COMMIT" using SQLCA;		
+//	End if				
+//	
+//	w_do.tab_main.tabpage_main.dw_main.SetItem(1,'vics_bol_no',ls_vics_bol_no)		// GailM 01/10/2014 Update main DW 
+//	w_do.idw_other.setitem(1,'vics_bol_no',ls_vics_bol_no)
+//End if
+////set vics_bol_no to BOL report
+//adw_bol.setitem(1,'vics_bol_no',ls_vics_bol_no)    		
+//Jxlim 07/07/2013 End of SSCC for Bol and Vics value	
+// End of set Vics_Bol_No on order
+
+
+String ls_page_count
+long ll_pages = 1
+
+If lb_suplm = True Then
+
+	// LTK 20151022  Print new message if hazardous materials and supplemental page exists
+//	for i = 1 to ldwc_nmfcitem_suplm.RowCount()
+//		if ldwc_nmfcitem_suplm.GetitemString(i,"hazard_tag") = 'HAZARDOUS' then
+//			adw_bol.Object.ordercount_t.text = "Hazardous Material - See Attached Supplemental Page(s)"
+//			adw_bol.Object.nmfccount_t.text = "Hazardous Material - See Attached Supplemental Page(s)"
+//			exit
+//		end if
+//	next
+
+	// Set the page count for the main page here by adding the supplemental pages to the count
+	ls_page_count = ldwc_detail_suplm.Describe( "Evaluate('pagecount()', 1)")
+	if IsNumber( ls_page_count ) then
+		ll_pages = Long( ls_page_count ) + 1
+	end if
+	adw_bol.Object.t_page_count_display.text = 'Page: 1 of ' + String( ll_pages )
+
+	//Print(lds_bol_suplm)	//no print dialog
+	OpenWithParm(w_dw_print_options,lds_bol_suplm) //print dialog
+Else
+	adw_bol.Object.t_page_count_display.text = 'Page: 1 of ' + String( ll_pages )
+End If
+	
+If adw_bol.RowCount() = 0 Then
+	adw_bol.InsertRow(0)
+End If
+
+adw_bol.SetRedraw(true)
+
+RETURN 1
+//END -09/03/2021- Dinesh - S57453-Google - SIMS - Bill of Lading Changes
 end function
 
 on u_nvo_custom_bol.create

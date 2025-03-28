@@ -112,6 +112,7 @@ public function integer uf_create_up_count_receive_serial_detail (string as_ro_n
 public function integer uf_create_up_count_inbound_serial_rollup (string as_ro_no)
 public function integer uf_check_serial_number_exist (string as_project, string as_ccno, string as_wh, string as_location, string as_sku, string as_serialno)
 public function integer uf_create_soc945_serial_adj (string as_project, string as_wh_code, string as_ownercd, long al_ownerid, string as_sku, string as_po_no, string as_serialno)
+public function integer uf_process_downcount_delay_validation (string asproject, string asadjustno, string ascodedesc)
 end prototypes
 
 public function integer uf_process_daily_files (string asinifile, string asemail);/* Not implemented for Pandora...
@@ -2123,8 +2124,8 @@ For llRowPos = 1 to llRowCount  //each row in d_cc_inventory (which includes fie
 						 lsSKU = upper(ldsCCDetail.GetItemString(llRowPos, 'SKU')	)
 						 lsProject = upper(ldsCCDetail.GetItemString(llRowPos, 'po_no'))
                                 //lsOutStringSOC = "OD|" + lsSKU +"|||" +lsProject +"|RESEARCH|1|" + string(ldQty - ldQtyCount) + "|||"
-                                lsOutStringSOC = "OD|" + lsSKU +"|||" +lsProject +"|RESEARCH|1|" + string(ldQty - ldQtyCount) + "|||" + as_ccno + '|' + ls_line_no + '|'
-                                                
+                                //lsOutStringSOC = "OD|" + lsSKU +"|||" +lsProject +"|RESEARCH|1|" + string(ldQty - ldQtyCount) + "|||" + as_ccno + '|' + ls_line_no + '|' // Dinesh - 04/18/2023- SIMS-197- Google - SIMS - Cycle Count Adjustment Changes
+                                  lsOutStringSOC = "OD|" + lsSKU +"|||" +lsProject +"|MAIN|1|" + string(ldQty - ldQtyCount) + "|||" + as_ccno + '|' + ls_line_no + '|'   // Dinesh - 04/18/2023- SIMS-197- Google - SIMS - Cycle Count Adjustment Changes            
                                                 llNewRowSOC = ldsOutSOC.insertRow(0)
                                                 ldsOutSOC.SetItem(llNewRowSOC, 'Project_id', as_Project)
                                                 ldsOutSOC.SetItem(llNewRowSOC, 'edi_batch_seq_no', Long(ldBatchSeq))
@@ -5432,7 +5433,8 @@ Next /*next output record */
 Return 0
 end function
 
-public function boolean uf_is_country_eu_to_eu (string asproject, string as_from_country, string as_to_country);boolean lb_return = FALSE
+public function boolean uf_is_country_eu_to_eu (string asproject, string as_from_country, string as_to_country);return false // 02092022- Dinesh - S66849-Google - SIMS - Change in Commercial Invoice for EU to EU orders
+boolean lb_return = FALSE
 boolean lb_exception_found = FALSE
 integer i
 long    ll_row, ll_exception_rowcount
@@ -6640,6 +6642,7 @@ Integer		liRC, liLine,DateDiffInMinutes, TimeDiffInMinutes, ElapsedTimeInMinutes
 DateTime 	 ldtToday,ldt_EndRetrieve
 Boolean		lbNeedGIM, lbSkipGIR, lbShipFromCityBlock, lbShipToCityBlock,lbLPN, lbNonLPN,lbParmFound, lbFootPrintSku, lbPallet
 string		lsUOM //dts 03/25/2021 - S53782
+string		lsSOM //dts 02/02/2022 - S67314
 
 ldtToday = DateTime(Today(), Now())
 SetNull(lsNull)
@@ -6752,7 +6755,13 @@ lsWH = idsDOMain.GetItemString(1, 'wh_code')
 ll_change_req_no = idsDOMain.getitemnumber(1,'OM_Change_request_nbr')
 ll_batch_seq_no =idsDOMain.getitemnumber(1,'EDI_Batch_Seq_No')
 //dts 03/25/2021 - S53782 (Google - SIMS - 945CI DIMS)
-if NoNull(idsDOMain.GetItemString(1, 'standard_of_measure')) = 'M' then
+//dts 02/02/2022 - S67314 (Google - SIMS -  UOM of Gross Weight in outbound modification)
+//  - Standard of Measure is Null in Delivery_Master so must get it from Delivery_Packing.
+select min(standard_of_measure) into :lsSOM from delivery_packing with(nolock) where do_no=:asDoNo
+using sqlca;	
+
+//dts 02/02/2022 if NoNull(idsDOMain.GetItemString(1, 'standard_of_measure')) = 'M' then
+if NoNull(lsSOM) = 'M' then
 	lsUOM='KG-CM'
 else
 	lsUOM='LB-IN'
@@ -7331,7 +7340,15 @@ For llRowPos = 1 to llRowCount
 			idsOMQWhDOSerial.setitem(ll_serial_row, 'WH_ORDER_NBR', Right(asdono, 10)) //Do No
 			idsOMQWhDOSerial.setitem(ll_serial_row, 'WH_ORDERLINE_NBR', string(idsDOSerial.GetItemNumber(llSerialRow, 'line_item_no'), '00000')) //Line Item No
 			idsOMQWhDOSerial.setitem(ll_serial_row, 'SERIALNUMBER', idsDOSerial.GetItemString(llSerialRow,"serial_no")) //Serial No
-			idsOMQWhDOSerial.setitem(ll_serial_row, 'CASEID', Right( idsDOSerial.GetItemString(llSerialRow, "carton_serial_no" ), 10 ) ) //Carton No ONLY RIGHT 10!! - Populate scanned Carton No# from Serial Tab.
+			//dts - S59788 - 08/30/2021 .....
+			// - We are now setting REFCHAR4 to pack_container_id (if present) so need to stamp CASEID with right-10 for the find (against OMQ Serial table) below...
+			//   - TODO - check if we need to do this for the 'else' (lbLPN=false) block.  Basically, non-Footprints. Note that it will be carton_no instead of carton_id...
+			ls_Pack_Container_ID=Right(idsDOSerial.GetItemString(llSerialRow, "carton_id"), 10) //why is it carton_id for footprints datawindow and carton_no for non-footprints?
+			If ls_Pack_Container_ID <> '' and ls_Pack_Container_ID <> '-' and ls_Pack_Container_ID <> 'NA' and not isnull(ls_Pack_Container_ID) Then	 
+				idsOMQWhDOSerial.setitem(ll_serial_row, 'CASEID', ls_Pack_Container_ID)
+			else
+				idsOMQWhDOSerial.setitem(ll_serial_row, 'CASEID', Right( idsDOSerial.GetItemString(llSerialRow, "carton_serial_no" ), 10 ) ) //Carton No ONLY RIGHT 10!! - Populate scanned Carton No# from Serial Tab.
+			end if
 			idsOMQWhDOSerial.setitem(ll_serial_row, 'SERIALNUMTRANSID', string(gu_nvo_process_files.uf_get_next_seq_no(asproject, 'OMQ_SERIALNUM_TRANS_ID', 'SERIAL_TRANSID'))) //SERIALNUMTRANSID
 			
 			//07-FEB-2018 :Madhu -S14838 - Foot Prints -Outbound Orders
@@ -7417,7 +7434,16 @@ For llRowPos = 1 to llRowCount
 					idsOMQWhDOSerial.setitem(ll_serial_row, 'WH_ORDER_NBR', Right(asdono, 10)) //Do No
 					idsOMQWhDOSerial.setitem(ll_serial_row, 'WH_ORDERLINE_NBR', string(idsDOSerial.GetItemNumber(llSkuRow, 'line_item_no'), '00000')) //Line Item No
 					idsOMQWhDOSerial.setitem(ll_serial_row, 'SERIALNUMBER', idsDOSerial.GetItemString(llSkuRow, 'serial_no')) //Serial No
-					idsOMQWhDOSerial.setitem(ll_serial_row, 'CASEID', Right(idsDOSerial.GetItemString(llSkuRow, 'carton_serial_no') ,10)) //Carton No - Scanned from Serial Tab
+					//dts - S59788 - 08/31/2021 .....
+					// - We are now setting REFCHAR4 to pack_container_id (if present) so need to stamp CASEID with right-10 for the find (against OMQ Serial table) below...
+					//   - TODO - check if we need to do this for the 'else' (lbLPN=false) block.  Basically, non-Footprints. Note that it will be carton_no instead of carton_id...
+					//idsOMQWhDOSerial.setitem(ll_serial_row, 'CASEID', Right(idsDOSerial.GetItemString(llSkuRow, 'carton_serial_no') ,10)) //Carton No - Scanned from Serial Tab
+					ls_Pack_Container_ID=Right(idsDOSerial.GetItemString(llSkuRow, "carton_no"), 10) //why is it carton_id for footprints datawindow and carton_no for non-footprints? Also, note llSkuRow instead of llSerialRow
+					If ls_Pack_Container_ID <> '' and ls_Pack_Container_ID <> '-' and ls_Pack_Container_ID <> 'NA' and not isnull(ls_Pack_Container_ID) Then	 
+						idsOMQWhDOSerial.setitem(ll_serial_row, 'CASEID', ls_Pack_Container_ID)
+					else
+						idsOMQWhDOSerial.setitem(ll_serial_row, 'CASEID', Right(idsDOSerial.GetItemString(llSkuRow, 'carton_serial_no') ,10)) //Carton No - Scanned from Serial Tab
+					end if
 					idsOMQWhDOSerial.setitem(ll_serial_row, 'SERIALNUMTRANSID', string(gu_nvo_process_files.uf_get_next_seq_no(asproject, 'OMQ_SERIALNUM_TRANS_ID', 'SERIAL_TRANSID'))) //SERIALNUMTRANSID
 					
 					idsDOSerial.DeleteRow(llSkuRow)
@@ -7622,7 +7648,9 @@ If llPackRowCount > 0 Then
 			// 07/19 - PCONKL - F17464/F17595 - For non-Footprints, if the Pack Container ID exists, we are using that as the Carton Number
 			//dts 05/19/21 - if the Pack_Container_id is packed into Carton_Type of Pallet, use the Pallet (carton_no)
 			//ElseIf lbFootPrintSku = False and ls_Pack_container_Id <> '' and ls_Pack_container_Id <> '-' and ls_Pack_container_Id <> 'NA' and not isnull(ls_Pack_container_Id) Then
-			ElseIf upper(ls_carton_type)<>'PALLET' and lbFootPrintSku = False and ls_Pack_container_Id <> '' and ls_Pack_container_Id <> '-' and ls_Pack_container_Id <> 'NA' and not isnull(ls_Pack_container_Id) Then
+			//dts - S60650 - 08/16/2021 ElseIf upper(ls_carton_type)<>'PALLET' and lbFootPrintSku = False and ls_Pack_container_Id <> '' and ls_Pack_container_Id <> '-' and ls_Pack_container_Id <> 'NA' and not isnull(ls_Pack_container_Id) Then
+			//dts - S60650 - 08/16/2021  - new OVERPACK carton type will be treated like a Pallet.
+			ElseIf upper(ls_carton_type)<>'PALLET' and upper(ls_carton_type)<>'OVERPACK' and lbFootPrintSku = False and ls_Pack_container_Id <> '' and ls_Pack_container_Id <> '-' and ls_Pack_container_Id <> 'NA' and not isnull(ls_Pack_container_Id) Then
 				
 				lsFind = " REFCHAR3 = '"+ls_Pack_container_Id+"'" /* rec will be built with REFCHAR3 = Pack Container ID*/
 				
@@ -7640,12 +7668,14 @@ If llPackRowCount > 0 Then
 			//dts - 03/30/2021 - TODO: revisit for Pack_Po_no2....
 			//e.(a) Get sum(PALLET) Qty.
 			ld_pallet_qty =0
-			lsFind ="upper(carton_type) = 'PALLET' and carton_no ='"+ ls_carton_No +"'"
+			//dts - S60650 - 08/16/2021 lsFind ="upper(carton_type) = 'PALLET' and carton_no ='"+ ls_carton_No +"'"
+			lsFind ="(upper(carton_type) = 'PALLET' or upper(carton_type) = 'OVERPACK') and carton_no ='"+ ls_carton_No +"'"
 			ld_pallet_qty = this.uf_get_pallet_carton_qty( lsFind)
 			
 			//e.(b) Get sum(CARTON) qty
 			ld_carton_qty =0
-			lsFind ="upper(carton_type) <> 'PALLET' and carton_no ='"+ls_carton_No +"'"
+			//dts - S60650 - 08/16/2021 lsFind ="upper(carton_type) <> 'PALLET' and carton_no ='"+ls_carton_No +"'"
+			lsFind ="upper(carton_type) <> 'PALLET' and upper(carton_type) <> 'OVERPACK' and carton_no ='"+ls_carton_No +"'"
 			ld_carton_qty = this.uf_get_pallet_carton_qty( lsFind)
 			
 			//e.(c) Get sum(Foot Print Carton) Qty.
@@ -7654,7 +7684,8 @@ If llPackRowCount > 0 Then
 			// 07/19 - PCONKL - F17464/F17595 - For non-footprints but container tracked (valid value in Pack_Container_ID), we will be building the Carton segment with ld_pallet_carton_qty as well
 			IF lbFootPrintSku Then
 			
-				lsFind ="upper(carton_type) = 'PALLET' and carton_no ='"+ ls_carton_No +"' and Pack_Container_Id ='"+ls_Pack_container_Id+"'"
+				//dts - S60650 - 08/16/2021 lsFind ="upper(carton_type) = 'PALLET' and carton_no ='"+ ls_carton_No +"' and Pack_Container_Id ='"+ls_Pack_container_Id+"'"
+				lsFind ="(upper(carton_type) = 'PALLET' or upper(carton_type) = 'OVERPACK') and carton_no ='"+ ls_carton_No +"' and Pack_Container_Id ='"+ls_Pack_container_Id+"'"
 				ld_pallet_carton_qty =  this.uf_get_pallet_carton_qty( lsFind)
 				
 			ElseIf lbFootPrintSku = False and ls_Pack_container_Id <> '' and ls_Pack_container_Id <> '-' and ls_Pack_container_Id <> 'NA' and not isnull(ls_Pack_container_Id) Then
@@ -7707,7 +7738,8 @@ If llPackRowCount > 0 Then
 			ELSE
 				
 				//Non-Foot Print
-				If ls_carton_Type = 'PALLET' and ls_carton_No <> ls_Pack_container_Id THEN
+				//dts - S60650 - 08/16/2021 If ls_carton_Type = 'PALLET' and ls_carton_No <> ls_Pack_container_Id THEN
+				If (ls_carton_Type = 'PALLET' or ls_carton_Type = 'OVERPACK') and ls_carton_No <> ls_Pack_container_Id THEN
 					
 					//dts 03/31/2021 - If Pack_PO_NO2 is a Pallet, shouldn't we use that here?
 					//dts 06/30/2021 - DE22163 - OMA_WAREHOUSE_ORDERATTR and OMA_WH_ORDERDETAIL_ATTR records not created correctly
@@ -7752,11 +7784,13 @@ If llPackRowCount > 0 Then
 						//dts 06/30/2021 - DE22163 - OMA_WAREHOUSE_ORDERATTR and OMA_WH_ORDERDETAIL_ATTR records not created correctly
 						If ls_Pack_Po_No2 <> '' and ls_Pack_Po_No2 <> '-' and ls_Pack_Po_No2 <> 'NA' and not isnull(ls_Pack_Po_No2) Then	 //do we need <lbFootPrintSku = False> as part of this?
 							idsOMQWhDOAttr.setitem(ll_attr_row, 'REFCHAR2', string(ll_Parent_RF1)) //store Pallet Id as Parent (Pallet -> Carton -> Item)
+						elseif ls_carton_Type = 'PALLET' or ls_carton_Type = 'OVERPACK' then  //dts - S60650 - 08/16/2021 - also need to stamp the Parent if it's a Pallet or Overpack with pack_container_id's
+							idsOMQWhDOAttr.setitem(ll_attr_row, 'REFCHAR2', string(ll_Parent_RF1)) //store Pallet Id as Parent (Pallet -> Carton -> Item)
 						End If
-												
+						
 					End If
 					
-				else /*Not a pallet*/
+				else /*Not a pallet or Overpack*/
 					
 					//07/19 - PCONKL - F17464/F17595 - If Pack_Container_ID has a valid value, we will build the Carton Construct with that value instead of Carton_No
 					If  ls_Pack_container_Id <> '' and ls_Pack_container_Id <> '-' and ls_Pack_container_Id <> 'NA' and not isnull(ls_Pack_container_Id) Then
@@ -7778,12 +7812,42 @@ If llPackRowCount > 0 Then
 			END IF
 			
 			lsRefch1 = string(llRefch1) //store parent REFCHAR1 value
-			
+								
 		else /* Pallet/Carton Attribute record exists*/
 			
 			lsRefch1 = idsOMQWhDOAttr.getitemstring(llFindRow, 'REFCHAR1') //store parent REFCHAR1 value
-			
-		End If
+		
+					//dts - S60650 - 08/16/2021 Only 1st Pack_Container_ID was creating a Carton Segment in OM, so...
+					//  - Copied the code that inserts the Carton Segment if Carton is a Pallet but it has a pack_container_id
+					// 08/19 - PCONKL - F17464/F17595 - Even if it's a pallet, we still want to create a carton segment if there is a valid container ID.
+					If  ls_Pack_container_Id <> '' and ls_Pack_container_Id <> '-' and ls_Pack_container_Id <> 'NA' and not isnull(ls_Pack_container_Id) Then
+						
+						//dts - 03/24/2022 - DE25265 (Zero quantity on the container ID)
+						//Like the case for S60650, Only 1st Pack_Container_ID was setting ld_pallet_carton_qty, so setting it here as well.
+						IF lbFootPrintSku Then
+							lsFind ="(upper(carton_type) = 'PALLET' or upper(carton_type) = 'OVERPACK') and carton_no ='"+ ls_carton_No +"' and Pack_Container_Id ='"+ls_Pack_container_Id+"'"
+							ld_pallet_carton_qty =  this.uf_get_pallet_carton_qty( lsFind)
+						ElseIf lbFootPrintSku = False and ls_Pack_container_Id <> '' and ls_Pack_container_Id <> '-' and ls_Pack_container_Id <> 'NA' and not isnull(ls_Pack_container_Id) Then
+							//dts - 03/30/2021 - TODO: revisit for Pack_Po_no2....
+							lsFind ="carton_no ='"+ ls_carton_No +"' and Pack_Container_Id ='"+ls_Pack_container_Id+"'"
+							ld_pallet_carton_qty =  this.uf_get_pallet_carton_qty( lsFind)				
+						END IF
+
+						ll_attr_row =idsOMQWhDOAttr.insertrow(0) 
+						this.uf_process_gi_om_carton_construct( ll_attr_row, aitransid, ls_client_id, asdono, lsWH, ld_pallet_carton_qty, ls_Pack_container_Id, '', ll_Pack_Row)
+						
+						llRefch1++
+						idsOMQWhDOAttr.setitem(ll_attr_row, 'REFCHAR1', string(llRefch1)) //Increment count
+						If ls_Pack_Po_No2 <> '' and ls_Pack_Po_No2 <> '-' and ls_Pack_Po_No2 <> 'NA' and not isnull(ls_Pack_Po_No2) Then	 //do we need <lbFootPrintSku = False> as part of this?
+							idsOMQWhDOAttr.setitem(ll_attr_row, 'REFCHAR2', string(ll_Parent_RF1)) //store Pallet Id as Parent (Pallet -> Carton -> Item)
+						elseif ls_carton_Type = 'PALLET' or ls_carton_Type = 'OVERPACK' then  //dts - S60650 - 08/16/2021 - also need to stamp the Parent if it's a Pallet or Overpack with pack_container_id's
+							idsOMQWhDOAttr.setitem(ll_attr_row, 'REFCHAR2', string(ll_Parent_RF1)) //store Pallet Id as Parent (Pallet -> Carton -> Item)
+						End If
+						//dts - DE23923 - 03/02/2022 - S60650 Cont'd - Only 1st Pack Row was setting Parent RefChar1 correctly, so setting it here as well
+						lsRefch1 = string(llRefch1) //store parent REFCHAR1 value
+					End If  //valid pack_container_id
+
+		End If // Pallet/Carton Attribute record exists
 	
 		//f. Item Level Construct
 		ll_Item_Attr_Id++
@@ -7805,7 +7869,13 @@ If llPackRowCount > 0 Then
 		idsOMQWhDoDetailAttr.setitem(ll_attr_detail_row, 'REFCHAR1', string(llRefch1)) //Increment count
 		idsOMQWhDoDetailAttr.setitem(ll_attr_detail_row, 'REFCHAR2', lsRefch1) //Parent RefChar1
 		idsOMQWhDoDetailAttr.setitem(ll_attr_detail_row, 'REFCHAR3', idsDOpack.GetItemString(ll_Pack_Row, 'Sku')) //Sku
-		idsOMQWhDoDetailAttr.setitem(ll_attr_detail_row, 'REFCHAR4', ls_carton_No) //Carton No
+		//dts - S60650 - 08/16/2021 - need to set REFCHAR4 to pack_container_id (now that we are adding 'T' prefix to the carton_no on Serial Tab and setting Pack_Container_id to same)
+		//  - REFCHAR4 was already being set to pack_container_id below, but too late to associate Serial Numbers correctly
+		If  ls_Pack_container_Id <> '' and ls_Pack_container_Id <> '-' and ls_Pack_container_Id <> 'NA' and not isnull(ls_Pack_container_Id) Then
+			idsOMQWhDoDetailAttr.setitem(ll_attr_detail_row, 'REFCHAR4', ls_pack_container_id) //Carton No
+		else
+			idsOMQWhDoDetailAttr.setitem(ll_attr_detail_row, 'REFCHAR4', ls_carton_No) //Carton No
+		end if
 
 		idsOMQWhDoDetailAttr.setitem(ll_attr_detail_row, 'REFCHAR5', idsDOpack.GetItemString(ll_Pack_Row, 'Country_Of_Origin')) //COO
 		
@@ -8031,7 +8101,7 @@ end function
 
 public function integer uf_om_adjustment (string asproject, long aladjustid, long altransid);//08-Aug-2017 :Madhu PINT-947 Stock Adjustment
 
-long		llOldQty, llNewQty, llAdjustID, ll_Inv_Row, llRC, llOldOwnerId, llNewOwnerId,llRowPos
+long		llOldQty, llNewQty, llAdjustID, ll_Inv_Row, llRC, llOldOwnerId, llNewOwnerId,llRowPos,ll_return
 string	 	lsSKU, lsWhcode, lsRONO, lsOldPoNo, lsNewPoNo, lsOldOwner_Cd, lsNewOwner_Cd, ls_client_id, lsLogOut, ls_om_enabled, lsAdjType
 string		lsOldCoo, lsNewCoo,ls_reasoncd,ls_reason,ls_custcode,ls_from_loc
 decimal	ldOMQ_Inv_Tran
@@ -8043,18 +8113,83 @@ Datastore ldsroPutaway  // Dinesh - 03/22/2021- S54935- Google - SIMS – 947 ch
 Datastore ldsroMaster  // Dinesh - 03/22/2021 - S54935- Google - SIMS – 947 change needed for Google SAP
 Datastore ldsdoPicking // Dinesh - 03/22/2021 - S54935- Google - SIMS – 947 change needed for Google SAP
 Datastore ldsdoMaster // Dinesh - 03/22/2021 - S54935- Google - SIMS – 947 change needed for Google SAP
+//Datastore ldsdoSerial // Akash Testing SIMS-546 ///
 string sql_syntax, ERRORS //dts 4/18/21 - creating rolled up Putaway/Picking datastores
 long llRowCount
 
 ldtToday = DateTime(Today(), Now())
 //Begin - Dinesh - 03/26/2021 - S54935- Google - SIMS – 947 change needed for Google SAP
 string ls_trans_parm,ls_trans_order
+Datetime ldt_EndRetrieve,dtrecordcreatedate
+String ls_CodeDesc
+String ls_AdjustID
+int DateDiffInMinutes,TimeDiffInMinutes,ElapsedTimeInMinutes //Dinesh - 06/02/2023 - SIMS-197- Cycle count adjustment
  select trans_parm,trans_order_id into :ls_trans_parm,:ls_trans_order from batch_transaction with(nolock) where trans_id=:altransid using sqlca;
-if alAdjustID <> 0 then
-	//Write to File and Screen
-	lsLogOut = '      - OM Adjustment- Start Processing of uf_om_adjustment() for AdjustId: ' + string(alAdjustID)
-	FileWrite(giLogFileNo,lsLogOut)
-	gu_nvo_process_files.uf_write_log(lsLogOut)
+
+//begin.....Akash Baghel....09/25/2024... SIMS-546 Google SIMS - SIMS not adjusting out serials numbers when manual order is processed for SHORTAGE ISSUE //
+
+String lsdono, project_id, ls_Serial_No
+//Select distinct a.project_id, a.do_no, b.trans_parm into :project_id, :lsdono, :ls_trans_parm  
+//from Serial_Number_Inventory a, Batch_Transaction b where a.Do_No = b.Trans_Order_Id and b.trans_id = :altransid using sqlca;
+Select distinct a.project_id, a.do_no, a.Serial_No, b.trans_parm into :project_id, :lsdono, :ls_Serial_No, :ls_trans_parm  
+from Serial_Number_Inventory a  
+Inner join  Batch_Transaction b ON  a.Do_No = b.Trans_Order_Id 
+and b.Trans_Order_Id = a.Do_No
+Where b.trans_id = :altransid using sqlca;
+
+If ls_trans_parm='Outbound' then
+//If lsdono <> null Then
+Delete from Serial_Number_Inventory where Do_No=:lsdono and project_id =:project_id using sqlca;
+end if
+   lsLogOut = "        *** Deleted the Serial Number : " + ls_Serial_No + " Record from This table Serial_Number_Inventory: " + lsdono
+   FileWrite(gilogFileNo,lsLogOut)
+
+//End.....Akash Baghel....09/25/2024... SIMS-546 Google SIMS - SIMS not adjusting out serials numbers when manual order is processed for SHORTAGE ISSUE //
+
+	// Begin - Dinesh - 06/02/2023 - SIMS-197- Cycle count adjustment
+	//Delay to process the MM transaction to OM for 10 min 
+	if alAdjustID <> 0 then
+				select code_descript
+				into :ls_CodeDesc  //This should be a value of minutes to delay the processing
+				from lookup_table
+				where project_id = 'PANDORA'
+				and code_type = 'DownCount_Delay'
+				and code_ID = 'Minutes'
+				and User_Updateable_Ind = 'Y';
+				
+				select TOP 1 current_timestamp into :ldt_EndRetrieve from sysobjects using sqlca; //get Server time instead local machine time
+				ls_AdjustID= string(alAdjustID)
+				//select Trans_create_date into :dtrecordcreatedate from batch_transaction where trans_order_id= :alAdjustID using sqlca;
+				select record_create_date into :dtrecordcreatedate from batch_transaction where trans_order_id= :ls_AdjustID using sqlca; //get CC created date
+			
+				lsLogOut = "      Creating Transaction For Adjust ID : " +  string(alAdjustID) +  " Transaction Created Date Time is: " + string(ldt_EndRetrieve)
+				FileWrite(gilogFileNo,lsLogOut)
+	
+				If ls_CodeDesc <> '' and Not IsNull ( ls_CodeDesc ) then
+					//ldt_EndRetrieve = DateTime(Today( ),Now( ) ) //Remeber if running this on a local machine this is your computer time not GMT
+					//Use the below datetime when running on local machine.  It adds 7 hours to the local time.  Adjust for DTS if needed.
+					//ldt_EndRetrieve = DateTime(Today( ),RelativeTime(Now( ),25200 ) ) //Remeber if running this on a local machine this is your computer time not GMT
+					DateDiffInMinutes = DaysAfter ( Date(dtrecordcreatedate), Date(ldt_EndRetrieve)  ) * 24 * 60
+					TimeDiffInMinutes = SecondsAfter ( Time(dtrecordcreatedate), Time (ldt_EndRetrieve ) ) / 60
+					ElapsedTimeInMinutes = DateDiffInMinutes + TimeDiffInMinutes
+					lsLogOut = "      Waiting for Loading Down Count Adjustment ID : " + string(alAdjustID) + '  ' + String(ElapsedTimeInMinutes) + ' Minutes have passed ' +  ' System DateTime is: ' + String(ldt_EndRetrieve) + '  Record Create Date is: ' + String(dtrecordcreatedate)
+					FileWrite(gilogFileNo,lsLogOut)
+
+				If ElapsedTimeInMinutes < Long ( ls_CodeDesc ) then //Compair the minutes with the theashold found in the lookup table.
+					lsLogOut = "      Skipping MM Transaction For Adjustment ID: " + string(alAdjustID) + " waiting time: " + ls_CodeDesc + " Min"
+					FileWrite(gilogFileNo,lsLogOut)
+					//w_main.SetMicroHelp("Ready")
+					Return 2
+				end If
+				
+				//If this.uf_process_downcount_delay_validation( asproject,string(alAdjustID), ls_CodeDesc) > 0 Then Return 2
+			End If
+		
+	//		//Write to File and Screen 
+	//		lsLogOut = '      - OM Adjustment- Start Processing of uf_om_adjustment() for AdjustId: ' + string(alAdjustID) // Dinesh - 06/02/2023 - SIMS-197- Cycle count adjustment
+	//		FileWrite(giLogFileNo,lsLogOut)
+	//		gu_nvo_process_files.uf_write_log(lsLogOut)
+		
 else
     if ls_trans_parm='Inbound' then
 		//Write to File and Screen
@@ -8072,6 +8207,7 @@ else
 		Return -1
 	end if
 End if
+
 //End - Dinesh - 03/26/2021 - S54935- Google - SIMS – 947 change needed for Google SAP
 gu_nvo_process_files.uf_connect_to_om( asproject) //connect to OT29 DB.
 
@@ -8079,6 +8215,7 @@ If Not isvalid(ldsAdjustment) Then
 	ldsAdjustment = Create Datastore
 	ldsAdjustment.Dataobject = 'd_adjustment'
 	ldsAdjustment.SetTransObject(SQLCA)
+
 End If
  // Begin - Dinesh - 03/22/2021- S54935- Google - SIMS – 947 change needed for Google SAP
 if ls_trans_parm='Inbound' then
@@ -9240,9 +9377,9 @@ end function
 public function integer uf_process_serial_change_om (string asproject);//22-Aug-2017 :Madhu PINT-947 - Serial No Adjustment
 
 Datastore	ldsOC
-Long 		ll_InvTxn_row, ll_Inv_Row, llid_no, llRowPos, llRowCount, llRC
-string 	ls_client_Id, lslogOut, sql_syntax, ERRORS, lsOwnerCD, ls_poNo, ls_wh, ls_sku
-string		ls_to_serialno, ls_from_serialno, ls_from_poNo, ls_Old_Po_No
+Long 		ll_InvTxn_row, ll_Inv_Row, llid_no, llRowPos, llRowCount, llRC,ll_Owner_Id_new
+string 	ls_client_Id, lslogOut, sql_syntax, ERRORS, lsOwnerCD, ls_poNo, ls_wh, ls_sku,lsToWarehouse,ls_Owner_code_new
+string		ls_to_serialno, ls_from_serialno, ls_from_poNo, ls_Old_Po_No,ls_custcode
 Decimal		ldBatchSeq, ldownerid, ldOMQ_Inv_Tran1, ldOMQ_Inv_Tran2
 DateTime	ldtToday
 
@@ -9497,8 +9634,41 @@ For llRowPos = 1 to llRowCount
 		End If
 	END IF
 	
-	IF Not IsNull(ls_Old_Po_No) AND ( 'RESEARCH' <> ls_Old_Po_No) THEN
+	//To Warehouse
+		 // Begin - Dinesh - 04/18/2023- SIMS-197- Google - SIMS - Cycle Count Adjustment Changes
+						select user_field2 into :lsToWarehouse 	from customer with(nolock)
+						where project_id = 'PANDORA' and cust_code = :lsOwnerCD using sqlca;
+						
+						// Begin  - Dinesh -04/13/2023- SIMS-197-Google- SIMS- Cycle count adjustment changes
+						// To Cust code
+						select cust_code into :ls_custcode from customer with(nolock) 
+						where  project_id = 'PANDORA' and user_field2=:lsToWarehouse
+						and cust_code like 'WH%PR' using sqlca;  //Fetch cust code for respective warehouse ---->>> WH*PR
+						
+						If (ls_custcode) = "" or isnull(ls_custcode)  Then
+                					lsLogOut = "                  *** No Customer code is available for this warehouse that ends with PR: " + lsToWarehouse
+                					FileWrite(gilogFileNo,lsLogOut)
+						End If
 
+						
+							if ls_custcode <> '' or not isnull(ls_custcode)  then
+//								// New Owner code
+								select owner_id into :ll_Owner_Id_new from owner with(nolock) where project_id = 'PANDORA' and owner_cd=:ls_custcode using sqlca;  // Fetch new owner id for the respective cust code
+								select owner_cd into :ls_Owner_code_new from owner with(nolock) where project_id = 'PANDORA' and owner_id=:ll_Owner_Id_new using sqlca;
+								
+								If (ls_Owner_code_new) = '' or isnull(ls_Owner_code_new)  Then
+											lsLogOut = "                  *** No Owner code is available for this Owner: " + ls_custcode
+											 FileWrite(gilogFileNo,lsLogOut)
+								End If
+							
+							end if
+//						// End - Dinesh -04/13/2023- SIMS-197-Google- SIMS- Cycle count adjustment changes
+
+	//IF Not IsNull(ls_Old_Po_No) AND ( 'RESEARCH' <> ls_Old_Po_No )  THEN // Dinesh - 04/18/2023- SIMS-197- Google - SIMS - Cycle Count Adjustment Changes
+	//IF Not IsNull(ls_Old_Po_No) AND ( 'MAIN' = ls_Old_Po_No ) AND RIGHT(ls_Owner_code_new,2) <> 'PR'  then //Dinesh - 04/18/2023- SIMS-197- Google - SIMS - Cycle Count Adjustment Changes
+	//Commented the line above - 11/29/2023- Dinesh- po_no like 'main%' - SIMS-262-Google-  system-generated Cycle Count issue
+	IF Not IsNull(ls_Old_Po_No) AND RIGHT(ls_Owner_code_new,2) <> 'PR'  then //Dinesh - 11/29/2023 - SIMS-262-Google-  system-generated Cycle Count issue
+	//AND ( 'MAIN' = ls_Old_Po_No ) THEN  // Query Dinesh - 04/18/2023- SIMS-197- Google - SIMS - Cycle Count Adjustment Changes
 		uf_create_soc945_serial_adj(asproject, ls_wh, lsOwnerCD, ldOwnerID, ls_sku, ls_Old_Po_No, ls_to_serialno )
 
 	END IF
@@ -9568,6 +9738,8 @@ Decimal		ldBatchSeq, ldOwnerID, ldOwnerID_Prev,ldWgt, ldWgtNet,ldTransID, ldOMQ_
 Integer		liRC, liLine,DateDiffInMinutes, TimeDiffInMinutes, ElapsedTimeInMinutes
 DateTime 	 ldtToday,ldt_EndRetrieve
 Boolean		lbNeedGIM, lbSkipGIR, lbShipFromCityBlock, lbShipToCityBlock,lbLPN, lbNonLPN,lbParmFound
+string		lsUOM //dts 03/25/2021 - S53782
+string		lsSOM //dts 02/02/2022 - S67314
 
 ldtToday = DateTime(Today(), Now())
 
@@ -9670,6 +9842,18 @@ lsOrdType = NoNull(idsDOMain.GetItemString(1, 'ord_type'))
 lsWH = idsDOMain.GetItemString(1, 'wh_code')
 ll_change_req_no = idsDOMain.getitemnumber(1,'OM_Change_request_nbr')
 ll_batch_seq_no =idsDOMain.getitemnumber(1,'EDI_Batch_Seq_No')
+//dts 03/25/2021 - S53782 (Google - SIMS - 945CI DIMS)
+//dts 02/02/2022 - S67314 (Google - SIMS -  UOM of Gross Weight in outbound modification)
+//  - Standard of Measure is Null in Delivery_Master so must get it from Delivery_Packing.
+select min(standard_of_measure) into :lsSOM from delivery_packing with(nolock) where do_no=:asDoNo
+using sqlca;	
+
+//dts 02/02/2022 if NoNull(idsDOMain.GetItemString(1, 'standard_of_measure')) = 'M' then
+if NoNull(lsSOM) = 'M' then
+	lsUOM='KG-CM'
+else
+	lsUOM='LB-IN'
+end if 
 
 Select DM.country DM_Country, C.Country C_Country  INTO 	:lsDM_Country, :lsCustCountry
 From delivery_master DM with(nolock), Customer C  with(nolock)
@@ -10280,7 +10464,8 @@ If llPackRowCount > 0 Then
 	idsOMQWhDOAttr.setitem(ll_attr_row, 'CLIENT_ID', long(ls_client_id))
 	idsOMQWhDOAttr.setitem(ll_attr_row, 'SITE_ID', lsWH)
 	idsOMQWhDOAttr.setitem(ll_attr_row, 'ORDERKEY', Right(asdono, 10))
-	idsOMQWhDOAttr.setitem(ll_attr_row, 'REFCHAR1', 'LB')
+	//dts 03/25/2021 - S53782 (Google - SIMS - 945CI DIMS) idsOMQWhDOAttr.setitem(ll_attr_row, 'REFCHAR1', 'LB')
+	idsOMQWhDOAttr.setitem(ll_attr_row, 'REFCHAR1', Left(lsUOM,2)) //lsUOM will be either 'LB-IN' or 'KG-CM' (set above)
 	idsOMQWhDOAttr.setitem(ll_attr_row, 'REFNUM1', ld_total_weight) //Total_Weight_Gross
 	idsOMQWhDOAttr.setitem(ll_attr_row, 'ADDDATE', ldtToday)
 	idsOMQWhDOAttr.setitem(ll_attr_row, 'ADDWHO','SIMSUSER')
@@ -10338,7 +10523,8 @@ If llPackRowCount > 0 Then
 			idsOMQWhDOAttr.setitem(ll_attr_row, 'REFCHAR1', string(llRefch1)) //Increment count
 			idsOMQWhDOAttr.setitem(ll_attr_row, 'REFCHAR3', ls_carton_No)
 			idsOMQWhDOAttr.setitem(ll_attr_row, 'REFCHAR4', ls_ship_track_Id)
-			idsOMQWhDOAttr.setitem(ll_attr_row, 'REFCHAR5','LB')
+			//dts 03/25/2021 - S53782 (Google - SIMS - 945CI DIMS) idsOMQWhDOAttr.setitem(ll_attr_row, 'REFCHAR5','LB')
+			idsOMQWhDOAttr.setitem(ll_attr_row, 'REFCHAR5', lsUOM)
 			
 			idsOMQWhDOAttr.setitem(ll_attr_row, 'REFNUM2', idsDOpack.GetItemNumber(ll_Pack_Row, 'Weight_Gross')) //Weight_Gross
 			idsOMQWhDOAttr.setitem(ll_attr_row, 'REFNUM3', idsDOpack.GetItemNumber(ll_Pack_Row, 'height') ) //height
@@ -10481,13 +10667,13 @@ public function integer uf_process_oc_om (string asproject, string astono, strin
 //Datastore	ldsOut, ldsOC
 Datastore	ldsOC
 				
-Long			llRowPos, llRowCount, llNewRow
+Long			llRowPos, llRowCount, llNewRow,ll_Owner_Id_new
 				
 String		lsFind, lsOutString,	lslogOut, lsProject,	lsNextRunTime,	lsNextRunDate,	&
 				lsRunFreq, lsWarehouse, lsWarehouseSave, lsSIKAWarehouse, lsFileName, sql_syntax, Errors, lsFileNamePath,  lsownercd, lsnewownercd
 				
 String lsSaveSku,lsSavePoNo, lsSaveNewPoNo, lsSaveLineNumber, lsPndser, ls_whcode, ls_gmt_offset
-string lsCurrentSku, lsCurrentPoNo, lsCurrentNewPoNo, lsCurrentLineNumber, lsWriteLineNumber, ls_client_id
+string lsCurrentSku, lsCurrentPoNo, lsCurrentNewPoNo, lsCurrentLineNumber, lsWriteLineNumber, ls_client_id,ls_Owner_code_new,lsToWarehouse,ls_custcode
 
 Decimal		ldBatchSeq, ldownerid, ldnewownerid, ldOMQ_Inv_Tran
 Integer		liRC
@@ -10874,9 +11060,41 @@ For llRowPos = 1 to llRowCount
 		idsOMQInvTran.setitem( ll_Inv_Row, 'RECEIPTKEY', Right(Trim(asTono),10)) //Adjustment.Adjustment Id
 		idsOMQInvTran.setitem( ll_Inv_Row, 'RECEIPTLINENUMBER', '0')
 		idsOMQInvTran.setitem( ll_Inv_Row, 'SOURCEKEY', Right(asToNo,10)+ string(ldsOC.GetItemNumber(llRowPos,'user_line_item_no') ,'00000')) //Transfer.Ro_No
+
+		//To Warehouse
+//		 // Begin - Dinesh - 04/18/2023- SIMS-197- Google - SIMS - Cycle Count Adjustment Changes
+//						select user_field2 into :lsToWarehouse 	from customer with(nolock)
+//						where project_id = 'PANDORA' and cust_code = :lsOwnerCD using sqlca;
+//						
+//						// Begin  - Dinesh -04/13/2023- SIMS-197-Google- SIMS- Cycle count adjustment changes
+//						// To Cust code
+//						select cust_code into :ls_custcode from customer with(nolock) 
+//						where  project_id = 'PANDORA' and user_field2=:lsToWarehouse
+//						and cust_code like 'WH%PR' using sqlca;  //Fetch cust code for respective warehouse ---->>> WH*PR
+//						
+//						If (ls_custcode) = "" or isnull(ls_custcode)  Then
+//                					lsLogOut = "                  *** No Customer code is available for this warehouse that ends with PR: " + lsToWarehouse
+//                					FileWrite(gilogFileNo,lsLogOut)
+//						End If
+//
+//						
+//							if ls_custcode <> '' or not isnull(ls_custcode)  then
+////								// New Owner code
+//								select owner_id into :ll_Owner_Id_new from owner with(nolock) where project_id = 'PANDORA' and owner_cd=:ls_custcode using sqlca;  // Fetch new owner id for the respective cust code
+//								select owner_cd into :ls_Owner_code_new from owner with(nolock) where project_id = 'PANDORA' and owner_id=:ll_Owner_Id_new using sqlca;
+//								
+//								If (ls_Owner_code_new) = '' or isnull(ls_Owner_code_new)  Then
+//											lsLogOut = "                  *** No Owner code is available for this Owner: " + ls_custcode
+//											 FileWrite(gilogFileNo,lsLogOut)
+//								End If
+//							
+//							end if
+////						// End - Dinesh -04/13/2023- SIMS-197-Google- SIMS- Cycle count adjustment changes
+//
 //TAM 11/01/2017 - We only set the the OMQ_Inventory_transaction.SOURCETYPE = 'ntrTransferDetailAdd' for SOCs created by a CC(ll_change_req_no = 0)
 //		If lsSaveNewPoNo = 'RESEARCH' then 
-		If lsSaveNewPoNo = 'RESEARCH' and ll_change_req_no = 0 then 
+		//If lsSaveNewPoNo = 'RESEARCH' and ll_change_req_no = 0 then  // Dinesh - 04/18/2023- SIMS-197- Google - SIMS - Cycle Count Adjustment Changes
+		If lsSaveNewPoNo = 'MAIN'   AND Right(lsNewOwnerCD,2) ='PR' and ll_change_req_no = 0 then // Dinesh - 04/18/2023- SIMS-197- Google - SIMS - Cycle Count Adjustment Changes
 			idsOMQInvTran.setitem( ll_Inv_Row, 'SOURCETYPE', 'ntrTransferDetailAdd') //ntrTransferDetailAdd
 		Else 
 			idsOMQInvTran.setitem( ll_Inv_Row, 'SOURCETYPE', 'SOC') //ntrTransferDetailAdd
@@ -10910,7 +11128,8 @@ For llRowPos = 1 to llRowCount
 		idsOMQInvTran.setitem( ll_Inv_Row, 'SOURCEKEY', Right(asToNo,10)+ string(ldsOC.GetItemNumber(llRowPos,'user_line_item_no') ,'00000')) //Adjustment.Ro_No
 //TAM 11/01/2017 - We only set the the OMQ_Inventory_transaction.SOURCETYPE = 'ntrTransferDetailAdd' for SOCs created by a CC(ll_change_req_no = 0)
 //		If lsSaveNewPoNo = 'RESEARCH' then 
-		If lsSaveNewPoNo = 'RESEARCH' and ll_change_req_no = 0 then 
+		//If lsSaveNewPoNo = 'RESEARCH' and ll_change_req_no = 0 then // Dinesh - 04/18/2023- SIMS-197- Google - SIMS - Cycle Count Adjustment Changes
+		  If lsSaveNewPoNo = 'MAIN' and RIGHT(lsNewOwnerCD,2)='PR' and ll_change_req_no = 0 then// query Dinesh - 04/18/2023- SIMS-197- Google - SIMS - Cycle Count Adjustment Changes
 			idsOMQInvTran.setitem( ll_Inv_Row, 'SOURCETYPE', 'ntrTransferDetailAdd') //ntrTransferDetailAdd
 		Else 
 			idsOMQInvTran.setitem( ll_Inv_Row, 'SOURCETYPE', 'SOC') //ntrTransferDetailAdd
@@ -11314,7 +11533,8 @@ For llRowPos = 1 to llRowCount  //each row in d_cc_inventory (which includes fie
 				idsOMQInvTran.setitem( ll_Inv_Row, 'EFFECTIVEDATE', ldtToday) //Effective Date
 				idsOMQInvTran.setitem( ll_Inv_Row, 'ITEM', lsSKU) //Adjustment.Sku
 				idsOMQInvTran.setitem( ll_Inv_Row, 'LOTTABLE01',lsOwner) //New_Owner_Cd
-				idsOMQInvTran.setitem( ll_Inv_Row, 'LOTTABLE03', 'RESEARCH') 
+				//idsOMQInvTran.setitem( ll_Inv_Row, 'LOTTABLE03', 'RESEARCH')  // Dinesh - 04/18/2023- SIMS-197- Google - SIMS - Cycle Count Adjustment Changes
+				idsOMQInvTran.setitem( ll_Inv_Row, 'LOTTABLE03', 'MAIN')   // Dinesh - 04/18/2023- SIMS-197- Google - SIMS - Cycle Count Adjustment Changes
 				idsOMQInvTran.setitem( ll_Inv_Row, 'QTY', ldQty -  ldQtyCount)
 				idsOMQInvTran.setitem( ll_Inv_Row, 'RECEIPTKEY', Right(Trim(as_ccno),10)) //Adjustment.Adjustment Id
 				idsOMQInvTran.setitem( ll_Inv_Row, 'RECEIPTLINENUMBER', '0')
@@ -11340,8 +11560,8 @@ For llRowPos = 1 to llRowCount  //each row in d_cc_inventory (which includes fie
 				ldsOutSOC.SetItem(llNewRowSOC, 'batch_data', lsOutStringSOC)
 				ldsOutSOC.SetItem(llNewRowSOC, 'file_name', lsFileNameSOC) 
 				//write detail...
-				lsOutStringSOC = "OD|" + lsSKU +"|||" +lsProject +"|RESEARCH|1|" + string(ldQty - ldQtyCount) + "|||" + as_ccno + '|' + ls_line_no + '|'
-				                
+				//lsOutStringSOC = "OD|" + lsSKU +"|||" +lsProject +"|RESEARCH|1|" + string(ldQty - ldQtyCount) + "|||" + as_ccno + '|' + ls_line_no + '|'
+				lsOutStringSOC = "OD|" + lsSKU +"|||" +lsProject +"|MAIN|1|" + string(ldQty - ldQtyCount) + "|||" + as_ccno + '|' + ls_line_no + '|'  // Dinesh - 04/18/2023- SIMS-197- Google - SIMS - Cycle Count Adjustment Changes
 				llNewRowSOC = ldsOutSOC.insertRow(0)
 	               ldsOutSOC.SetItem(llNewRowSOC, 'Project_id', as_Project)
 	               ldsOutSOC.SetItem(llNewRowSOC, 'edi_batch_seq_no', Long(ldBatchSeq))
@@ -11810,9 +12030,9 @@ end function
 public function long uf_process_cc_auto_create_soc (string as_project, string as_cc_no);//20-Nov-2017 :Madhu PEVS-806 - 3PL Cycle Count Orders.
 //27-Nov-2018 :Madhu S26546 Cycle Count Adjustments (Look for Null Qty instead Qty =0)
 
-string		lsFind, lsOwner_Cd, lsReasonCd, lsOrdStatus, ls_supp_code, lsLogOut, ls_cc_class_Code
-string		ls_sku, ls_pono, ls_lcode, ls_req_SN, ls_trans_parm, ls_wh, ls_sequence
-long		llRowCount, llFindRow, llNewRow, llRowPos, ll_row, ll_return
+string		lsFind, lsOwner_Cd, lsReasonCd, lsOrdStatus, ls_supp_code, lsLogOut, ls_cc_class_Code,ls_dc_class_Code // Dinesh - 12/27/2022- SIMS-151- Google - SIMS - Data Center ABC Cycle Counting Part 2
+string		ls_sku, ls_pono, ls_lcode, ls_req_SN, ls_trans_parm, ls_wh, ls_sequence,ls_dc_wh,ls_trans_status
+long		llRowCount, llFindRow, llNewRow, llRowPos, ll_row, ll_return,ll_ret
 long		ll_Qty, ll_Qty_Count, ll_Qty_Up, ll_Qty_Down, ll_high_volume, ll_cc_line
 double	ldBatchSeq, ldQty, ldQtyCount
 datetime ldtCountDate
@@ -11857,7 +12077,7 @@ ln_cc_utils = CREATE n_cc_utils
 ln_cc_utils.uf_spread_rolled_up_si_counts( ldsCCDetail )
 
 ls_wh = ldsCCMaster.getItemstring( 1, 'wh_code')
-
+ls_dc_wh = ldsCCMaster.getItemstring( 1, 'User_field3') // Dinesh - 12/27/2022- SIMS-151- Google - SIMS - Data Center ABC Cycle Counting Part 2- Added DC class
 llRowCount = ldsCCDetail.RowCount()
 For llRowPos = 1 to llRowCount
 	// Rolling up to Sku/Owner/Project...
@@ -11984,7 +12204,7 @@ For llRowPos = 1 to llRowCount
 			WHERE A.Project_Id =:as_project and A.sku =:ls_sku and A.Supp_code =:ls_supp_code
 			using sqlca;
 			
-			select CC_Class_Code into :ls_cc_class_Code from Item_Master with(nolock) 
+			select CC_Class_Code,DC_Class_Code into :ls_cc_class_Code, :ls_dc_class_Code from Item_Master with(nolock)  // Dinesh - 12/27/2022- SIMS-151- Google - SIMS - Data Center ABC Cycle Counting Part 2- Added DC class
 			where Project_Id =:as_project and sku =:ls_sku and Supp_code =:ls_supp_code
 			using sqlca;
 			
@@ -11993,6 +12213,16 @@ For llRowPos = 1 to llRowCount
 			else
 				ls_soc_parms.boolean_arg[1] = FALSE //Not High Value Item - Do Auto QTY Adjustment
 			END IF
+			
+			// Begin - Dinesh - 12/27/2022- SIMS-151- Google - SIMS - Data Center ABC Cycle Counting Part 2- Added DC class
+			if ls_dc_wh ='YES' then
+				IF (ll_high_volume > 0 OR upper(ls_dc_class_Code) ='A' )THEN
+					ls_soc_parms.boolean_arg[1] = TRUE //High Value Item - Don't do Auto QTY Adjustment
+				else
+					ls_soc_parms.boolean_arg[1] = FALSE //Not High Value Item - Do Auto QTY Adjustment
+				END IF
+			end if
+			// End - Dinesh - 12/27/2022- SIMS-151- Google - SIMS - Data Center ABC Cycle Counting Part 2- Added DC class
 
 			//Write to File and Screen
 			lsLogOut = '      - 3PL Cycle Count-  Processing of uf_process_cc_auto_create_soc  - Down Count for  CC_No: '+as_cc_no +' - sku: '+ls_sku
@@ -12000,11 +12230,26 @@ For llRowPos = 1 to llRowCount
 			FileWrite(giLogFileNo,lsLogOut)
 			gu_nvo_process_files.uf_write_log(lsLogOut)
 
-			//Auto confirm SOC
-			ll_return = this.uf_process_cc_auto_confirm_soc( as_project, ls_soc_parms)
-
+			//Auto confirm SOC\
+			// Dinesh - 06/01/2023- SIMS-197- Cycle count adjustment 
+			//select trans_status into : ls_trans_status from Batch_Transaction where Trans_Order_Id=:as_cc_no and Trans_Type='CC' using sqlca;
+			//	if ls_trans_status ='D' then
+					//ll_return = this.uf_process_cc_auto_confirm_soc( as_project, ls_soc_parms)
+				//else
+				//end if
+				
+				ll_return = this.uf_process_cc_auto_confirm_soc( as_project, ls_soc_parms)
+				ll_return = this.uf_process_cc_stock_adjustment( as_project, ls_soc_parms)
+			
 			//Stock Adjustment
-			ll_return = this.uf_process_cc_stock_adjustment( as_project, ls_soc_parms)
+			//ll_ret = uf_delay_downcount(as_cc_no) // Dinesh - 05/31/2023- SIMS-197- Cycle count adjustment 
+			
+			//if ll_ret > 0 then
+				
+			
+			//else
+				//continue
+			//end if
 			
 	END IF
 	
@@ -12046,13 +12291,13 @@ string		ls_sku, ls_supp_code, ls_wh, ls_lcode, ls_Inv_Type, ls_lot_No, ls_po_No,
 string		ls_po_No2, ls_coo, ls_owner_cd, ls_Ro_No , ls_Sequence, ls_tono, ls_SN_Ind, ls_req_SN
 string		lsFromWarehouse, lsToWarehouse, ls_uf3, ls_Delete_ToNo, ls_Delete_List, lsLogOut
 string		lsReturnTxt, lsListIgnored, lsListProcessed, ls_trans_parm, ls_container_Id, ls_formatted_ToNo
-string		ls_serial_find
+string		ls_serial_find,ls_custcode
 
 long		ll_Owner_Id, ll_Qty, ll_QtyCount, llLineItemNo, ll_row, ll_soc_sn_qty, ll_del_sn_count
 long		ll_header_row, ll_detail_row, llFromOwnerId, llToOwnerId, ll_serial_row, ll_count, ll_serial
-long		llReturnCode, llCntReceived, llCntIgnored, llCntProcessed, i, ll_cc_line_No, ll_tran_Id, ll_return, ll_rc
+long		llReturnCode, llCntReceived, llCntIgnored, llCntProcessed, i, ll_cc_line_No, ll_tran_Id, ll_return, ll_rc,llToOwnerIdnew
 
-boolean 	lbSQLCAauto, lbAutoSOC
+boolean 	lbSQLCAauto, lbAutoSOC,lb_pr=false
 decimal  	ldToNo
 
 Datetime ldt_Exp_Date, ldtWHTime
@@ -12147,6 +12392,32 @@ where project_id = :as_project and owner_cd = :ls_owner_cd using sqlca;
 select user_field2 into :lsToWarehouse 	from customer with(nolock)
 where project_id = :as_project and cust_code = :ls_owner_cd using sqlca;
 
+// Begin  - Dinesh -04/13/2023- SIMS-197-Google- SIMS- Cycle count adjustment changes
+// To Retrieve the Cust code
+select cust_code into :ls_custcode from customer with(nolock) 
+where  project_id = :as_project and user_field2=:lsToWarehouse
+and cust_code like 'WH%PR' using sqlca;  //Fetch cust code for respective warehouse ---->>> WH*PR
+
+		If (ls_custcode) = "" or isnull(ls_custcode)  Then
+							 lsLogOut = "                  *** No Customer code is available for this warehouse that ends with PR: " + lsToWarehouse
+							 FileWrite(gilogFileNo,lsLogOut)
+		End If
+		
+		
+if ls_custcode <> '' or not isnull(ls_custcode)  then
+		// New Owner code
+		select owner_id into :llToOwnerIdnew from owner  with(nolock) where project_id = :as_project and owner_cd=:ls_custcode using sqlca;  // Fetch new owner id for the respective cust code
+		
+		If (llToOwnerIdnew) = 0  Then
+							 lsLogOut = "                  *** No Owner ID is available for this customer: " + ls_custcode
+							 FileWrite(gilogFileNo,lsLogOut)
+		End If
+	
+		
+	end if
+		// End - Dinesh -04/13/2023- SIMS-197-Google- SIMS- Cycle count adjustment changes
+
+
 ldsTOHeader.SetItem(ll_header_row, 'd_warehouse', lsToWarehouse)
 
 If lsFromWarehouse <> lsToWarehouse Then
@@ -12183,7 +12454,8 @@ llLineItemNo++
 ll_detail_row =ldsToDetail.insertrow( 0)
 ldsToDetail.SetItem(ll_detail_row,'To_No', ls_ToNo)
 ldsToDetail.SetItem(ll_detail_row, 'Owner_id', llFromOwnerId)
-ldsToDetail.SetItem(ll_detail_row, 'New_Owner_id', llToOwnerId)
+ldsToDetail.SetItem(ll_detail_row, 'New_Owner_id', llFromOwnerId)
+//ldsToDetail.SetItem(ll_detail_row, 'New_Owner_id', llToOwnerIdnew) // Dinesh - 04/13/2023- SIMS-197-Google- SIMS- Cycle count adjustment changes
 ldsToDetail.SetItem(ll_detail_row,'Inventory_Type', 'N') 
 ldsToDetail.SetItem(ll_detail_row, 'New_Inventory_Type', 'N')
 ldsToDetail.SetItem(ll_detail_row,'Supp_Code', 'PANDORA') 
@@ -12197,8 +12469,14 @@ ldsToDetail.SetItem(ll_detail_row, 's_location', ls_lcode)
 ldsToDetail.SetItem(ll_detail_row, 'd_location', ls_lcode)
 			
 ldsToDetail.SetItem(ll_detail_row, 'sku', ls_sku)
-ldsToDetail.SetItem(ll_detail_row, 'Po_No', ls_po_no)
-ldsToDetail.SetItem(ll_detail_row, 'New_PO_NO', 'RESEARCH')
+// Dinesh - 04/11/2023- SIMS-197-Google- SIMS- Cycle count adjustment changes
+//if ls_po_no <> 'MAIN' then
+//	ls_po_no= 'MAIN'
+//end if
+// Dinesh - 04/11/2023- SIMS-197-Google- SIMS- Cycle count adjustment changes
+ldsToDetail.SetItem(ll_detail_row, 'Po_No', ls_po_no)	
+ldsToDetail.SetItem(ll_detail_row, 'New_PO_NO', 'RESEARCH') // Dinesh - 04/11/2023 - SIMS-197-Google- SIMS- Cycle count adjustment changes
+//ldsToDetail.SetItem(ll_detail_row, 'New_PO_NO', 'MAIN') // Dinesh - 04/11/2023- SIMS-197-Google- SIMS- Cycle count adjustment changes
 ldsToDetail.SetItem(ll_detail_row, 'Line_Item_No', ll_cc_line_No) //CC Line Item No
 ldsToDetail.SetItem(ll_detail_row, 'User_Line_Item_No', llLineItemNo)
 ldsToDetail.SetItem(ll_detail_row, 'Quantity', (ll_Qty - ll_QtyCount))
@@ -12309,7 +12587,8 @@ lbSQLCAauto = SQLCA.AutoCommit
 SQLCA.AutoCommit = true
 
 f_method_trace_special( as_project, this.ClassName() + ' - uf_process_cc_auto_confirm', 'Start Auto SOC CC Stored Procedure' ,ls_ToNo, '','',ls_sequence)										
-sqlca.Sp_Auto_SOC_CC('O', ls_sequence, ls_cc_no, ll_cc_line_No, lsReturnTxt, llReturnCode, llCntReceived, llCntIgnored, lsListIgnored, llCntProcessed, lsListProcessed) 	//Execute Stored Procedure	
+sqlca.Sp_Auto_SOC_CC('O', ls_sequence, ls_cc_no, ll_cc_line_No, lsReturnTxt, llReturnCode, llCntReceived, llCntIgnored, lsListIgnored, llCntProcessed, lsListProcessed) 	//Execute Stored Procedure	// Dinesh - SIMS-197 - Cycle count adjustment
+//sqlca.Sp_Auto_SOC_CC_test('O', ls_sequence, ls_cc_no, ll_cc_line_No, lsReturnTxt, llReturnCode, llCntReceived, llCntIgnored, lsListIgnored, llCntProcessed, lsListProcessed) 	//Execute Stored Procedure	
 SQLCA.AutoCommit = lbSQLCAauto
 
 f_method_trace_special( as_project, this.ClassName() + ' - uf_process_cc_auto_confirm', 'End Auto SOC CC Stored Procedure ' + lsReturnTxt + 'Return code ' + String(llReturnCode),ls_ToNo, '','',ls_sequence)	
@@ -12340,11 +12619,14 @@ public function long uf_process_cc_stock_adjustment (string as_project, str_parm
 string		ls_sku, ls_supp_code, ls_wh, ls_lcode, ls_Inv_Type, ls_lot_No, ls_po_No, ls_New_Po_No, ls_Sequence, ls_cc_no, ls_ToNo
 string		ls_po_No2, ls_coo, ls_owner_cd, ls_Ro_No, ls_serial, ls_container_Id, lsLogOut, ls_sku_filter, ls_serial_No, ls_serial_Ind, ls_Trans_Id
 string		ls_sql_syntax, ls_sql_errors
-long 		ll_Owner_Id, ll_Qty, ll_QtyCount, ll_difference_Qty, ll_New_Row, ll_adj_No, ll_rc, ll_delete_count, ll_row, ll_row_count, ll_adj_qty
-long		ll_Batch_Id, ll_Insert_count, ll_count, ll_line_item_no, ll_avail_Qty, ll_new_qty, ll_old_qty, ll_Trans_Id, ll_Pos, ll_adjust_count
-Datetime	ldt_Exp_Date, ldtToday
+long 		ll_Owner_Id, ll_Qty, ll_QtyCount, ll_difference_Qty, ll_New_Row, ll_adj_No, ll_rc, ll_delete_count, ll_row, ll_row_count, ll_adj_qty,ll_return
+long		ll_Batch_Id, ll_Insert_count, ll_count, ll_line_item_no, ll_avail_Qty, ll_new_qty, ll_old_qty, ll_Trans_Id, ll_Pos, ll_adjust_count,ll_Owner_Id_new
+Datetime	ldt_Exp_Date, ldtToday,ldt_EndRetrieve,dtrecordcreatedate
+Int DateDiffInMinutes, TimeDiffInMinutes, ElapsedTimeInMinutes
 Decimal ld_adj_No
 boolean lbAutoSOC =FALSE
+string ls_custcode,lsToWarehouse,ls_CodeDesc
+String ls_new_po_no_main='MAIN',ls_cc_class_Code,ls_dc_class_Code
 
 Str_Parms ls_serial_Parms, ls_Trans_Id_Parms
 
@@ -12382,6 +12664,11 @@ ldt_Exp_Date = as_Inv_parms.datetime_arg[1]
 select serialized_Ind into :ls_serial_Ind from Item_Master with(nolock) 
 where Project_Id =:as_project and sku=:ls_sku and supp_code =:ls_supp_code
 using sqlca;
+// Begin - Dinesh - 07072023- SIMS-246-Down Count not managing Adjustments and Inventory Correctly
+select cc_class_Code,dc_class_Code into :ls_cc_class_Code, :ls_dc_class_Code from Item_Master with(nolock) 
+where Project_Id =:as_project and sku=:ls_sku and supp_code =:ls_supp_code
+using sqlca;
+// End - Dinesh - 07072023- SIMS-246-Down Count not managing Adjustments and Inventory Correctly
 
 //Write to File and Screen
 lsLogOut = '      - 3PL Cycle Count- Start Processing of uf_process_cc_stock_adjustment  and CC_No: '+ls_cc_no + ' - SKU: ' +ls_sku +' - Serialized Ind: -' +ls_serial_Ind
@@ -12405,6 +12692,37 @@ ls_serial_Parms.boolean_arg[1] = as_Inv_parms.boolean_arg[1]
 
 lbAutoSOC = as_Inv_parms.boolean_arg[1]
 
+	//Dinesh - 04/11/2023- SIMS-197-Google- SIMS- Cycle count adjustment changes - Commented the above lines 
+						
+						//To Warehouse
+						select user_field2 into :lsToWarehouse 	from customer with(nolock)
+						where project_id = :as_project and cust_code = :ls_owner_cd using sqlca;
+						
+						// Begin  - Dinesh -04/13/2023- SIMS-197-Google- SIMS- Cycle count adjustment changes
+						// To Cust code
+						select cust_code into :ls_custcode from customer with(nolock) 
+						where  project_id = :as_project and user_field2=:lsToWarehouse
+						and cust_code like 'WH%PR' using sqlca;  //Fetch cust code for respective warehouse ---->>> WH*PR
+						
+						If (ls_custcode) = "" or isnull(ls_custcode)  Then
+                					lsLogOut = "                  *** No Customer code is available for this warehouse that ends with PR: " + lsToWarehouse
+                					FileWrite(gilogFileNo,lsLogOut)
+						End If
+
+						
+							if ls_custcode <> '' or not isnull(ls_custcode)  then
+//								// New Owner code
+								select owner_id into :ll_Owner_Id_new from owner with(nolock) where project_id = :as_project and owner_cd=:ls_custcode using sqlca;  // Fetch new owner id for the respective cust code
+								
+								If (ll_Owner_Id_new) = 0  Then
+											lsLogOut = "                  *** No Owner code is available for this Owner: " + ls_custcode
+											 FileWrite(gilogFileNo,lsLogOut)
+								End If
+							
+							end if
+//						// End - Dinesh -04/13/2023- SIMS-197-Google- SIMS- Cycle count adjustment changes
+//				
+//
 
 //Down Count
 IF ll_Qty > ll_QtyCount THEN
@@ -12421,16 +12739,23 @@ IF ll_Qty > ll_QtyCount THEN
 		If ll_Pos > 0 Then ls_Trans_Id =Left(ls_Trans_Id, len(ls_Trans_Id) - 1)
 		
 	END IF
-	
-	IF lbAutoSOC =FALSE Then //Non-High Value Items.
-		ll_difference_Qty = ll_Qty - ll_QtyCount
-		
-		//get Transfer Master
+	// Begin - Dinesh - 07/13/2023- SIMS-246- Google- Down Count not managing Adjustments and Inventory Correctly
+	//get Transfer Master
 		select To_No, count(*) into :ls_ToNo, :ll_count from Transfer_Master with(nolock) 
 		where Project_Id =:as_project and User_Field3 =:ls_Sequence and s_warehouse= :ls_wh and Ord_Status ='C'
 		group by To_No
 		using sqlca;
+	//End - Dinesh - 07/13/2023- SIMS-246- Google- Down Count not managing Adjustments and Inventory Correctly
+	
+	IF lbAutoSOC =FALSE Then //Non-High Value Items.
+		ll_difference_Qty = ll_Qty - ll_QtyCount
 		
+//		//get Transfer Master
+//		select To_No, count(*) into :ls_ToNo, :ll_count from Transfer_Master with(nolock) 
+//		where Project_Id =:as_project and User_Field3 =:ls_Sequence and s_warehouse= :ls_wh and Ord_Status ='C'
+//		group by To_No
+//		using sqlca;
+	
 		If ll_count > 0 Then
 			//get Transfer Detail
 			select New_Po_no into :ls_New_Po_No from Transfer_Detail with(nolock)
@@ -12478,7 +12803,8 @@ IF ll_Qty > ll_QtyCount THEN
 					else
 						ll_adj_qty = ll_new_qty
 					End If
-										
+					
+				
 					//update Existing Content Record - Clear Qty from New Project Code
 					update Content Set Avail_Qty = Avail_Qty - :ll_adj_qty, Last_User='SIMSFP', Reason_Cd ='CC'
 					where  Project_Id =:as_project and sku=:ls_sku and supp_code =:ls_supp_code 
@@ -12487,23 +12813,23 @@ IF ll_Qty > ll_QtyCount THEN
 					and Ro_No =:ls_Ro_No and Lot_No =:ls_Lot_No and Po_No2 =:ls_po_No2 and Expiration_date =:ldt_Exp_Date
 					using sqlca;
 					commit;
-									
+
 					//Write to File and Screen
 					lsLogOut = '      - 3PL Cycle Count-  Processing of uf_process_cc_stock_adjustment  and CC_No: '+ls_cc_no + ' Down Count - Updated Content with Qty:  ' + nz(string(ll_adj_qty),'-') + '  - Difference Qty: '+string(ll_difference_Qty)
-					lsLogOut += ' against SKU: '+ls_sku+ ' - Loc: '+ nz(ls_lcode,'-') +' - Po No: '+ nz(ls_New_Po_No,'-')+ ' - Ro No: '+nz(ls_Ro_No,'-') + ' - Owner Id: '+string(ll_Owner_Id) +' - Container Id: '+nz(string(ls_container_Id), '-')
+					lsLogOut += ' against SKU: '+ls_sku+ ' - Loc: '+ nz(ls_lcode,'-') +' - Po No: '+ nz(ls_New_Po_No_Main,'-')+ ' - Ro No: '+nz(ls_Ro_No,'-') + ' - Owner Id: '+string(ll_Owner_Id_New) +' - Container Id: '+nz(string(ls_container_Id), '-')
 					FileWrite(giLogFileNo,lsLogOut)
 					gu_nvo_process_files.uf_write_log(lsLogOut)
 			
 				else
 					//Insert record into Content Table
-					Insert into Content (Project_Id, sku, supp_code, Owner_Id,  Country_Of_Origin, wh_code,  l_code, Avail_Qty, Inventory_Type, Lot_No, Po_No, Po_No2 ,Ro_No , Expiration_date, Last_User, Last_Update, Reason_Cd, Container_Id)
-					values (:as_project, :ls_sku,  :ls_supp_code, :ll_Owner_Id, :ls_coo, :ls_wh, :ls_lcode, :ll_difference_Qty,  :ls_Inv_Type, :ls_Lot_No, :ls_New_Po_No, :ls_po_No2,  :ls_Ro_No, :ldt_Exp_Date, 'SIMSFP', :ldtToday, 'CC', :ls_container_Id)
-					using sqlca;
-					commit;
-					
+						Insert into Content (Project_Id, sku, supp_code, Owner_Id,  Country_Of_Origin, wh_code,  l_code, Avail_Qty, Inventory_Type, Lot_No, Po_No, Po_No2 ,Ro_No , Expiration_date, Last_User, Last_Update, Reason_Cd, Container_Id)
+						values (:as_project, :ls_sku,  :ls_supp_code, :ll_Owner_Id_New, :ls_coo, :ls_wh, :ls_lcode, :ll_difference_Qty,  :ls_Inv_Type, :ls_Lot_No, :ls_New_Po_No_Main, :ls_po_No2,  :ls_Ro_No, :ldt_Exp_Date, 'SIMSFP', :ldtToday, 'CC', :ls_container_Id)
+						using sqlca;
+						commit;
+		
 					//Write to File and Screen
 					lsLogOut = '      - 3PL Cycle Count-  Processing of uf_process_cc_stock_adjustment  and CC_No: '+ls_cc_no + ' Down Count - Inserted Content with Qty:  ' + nz(string(ll_difference_Qty),'-')
-					lsLogOut += ' against SKU: '+ls_sku+ ' - Loc: '+ nz(ls_lcode,'-') +' - Po No: '+ nz(ls_New_Po_No,'-')+ ' - Ro No: '+nz(ls_Ro_No,'-') + ' - Owner Id: '+string(ll_Owner_Id) +' - Container Id: '+string(ls_container_Id, '-')
+					lsLogOut += ' against SKU: '+ls_sku+ ' - Loc: '+ nz(ls_lcode,'-') +' - Po No: '+ nz(ls_New_Po_No_main,'-')+ ' - Ro No: '+nz(ls_Ro_No,'-') + ' - Owner Id: '+string(ll_Owner_Id) +' - Container Id: '+string(ls_container_Id, '-')
 					FileWrite(giLogFileNo,lsLogOut)
 					gu_nvo_process_files.uf_write_log(lsLogOut)
 			
@@ -12512,16 +12838,34 @@ IF ll_Qty > ll_QtyCount THEN
 				//Create Stock Adjustment
 				//08-Oct-2018 :Madhu DE6675 - Add container Id
 				//03-Jan-2019 :Madhu DE7881 - Always set Quantity =0 for Down Count
-				Insert Into Adjustment (project_id,sku,Supp_Code,old_owner, owner_id,country_of_origin, old_country_of_origin,&
-							wh_code,l_code,old_inventory_type,inventory_type,serial_no,lot_no,po_no,old_po_no,po_no2,old_po_no2,
-							container_ID, expiration_date, ro_no,Ref_No,old_quantity,quantity,reason,last_user,last_update, Adjustment_Type,
-							old_lot_no) 
-				values	(:as_project,:ls_sku,:ls_supp_code,:ll_Owner_Id,:ll_Owner_Id, :ls_coo,:ls_coo,:ls_wh,:ls_lcode,'N',:ls_Inv_Type, &
-							'-',:ls_lot_No,:ls_New_Po_No,:ls_New_Po_No,:ls_po_No2, :ls_po_No2,:ls_container_Id, :ldt_Exp_Date,:ls_Ro_No,:ls_cc_no,:ll_new_Qty, 0,'Down Count','SIMSFP',:ldtToday,'Q',
-							:ls_lot_No)
-				Using SQLCA;
-				commit;
+				
+//				Insert Into Adjustment (project_id,sku,Supp_Code,old_owner, owner_id,country_of_origin, old_country_of_origin,&
+//									wh_code,l_code,old_inventory_type,inventory_type,serial_no,lot_no,po_no,old_po_no,po_no2,old_po_no2,
+//									container_ID, expiration_date, ro_no,Ref_No,old_quantity,quantity,reason,last_user,last_update, Adjustment_Type,
+//									old_lot_no) 
+//						values	(:as_project,:ls_sku,:ls_supp_code,:ll_Owner_Id,:ll_Owner_Id, :ls_coo,:ls_coo,:ls_wh,:ls_lcode,'N',:ls_Inv_Type, &
+//									'-',:ls_lot_No,:ls_New_Po_No,:ls_New_Po_No,:ls_po_No2, :ls_po_No2,:ls_container_Id, :ldt_Exp_Date,:ls_Ro_No,:ls_cc_no,:ll_new_Qty, 0,'Down Count','SIMSFP',:ldtToday,'Q',
+//									:ls_lot_No) Using SQLCA;
+//				commit; 
+					
+						Insert Into Adjustment (project_id,sku,Supp_Code,old_owner, owner_id,country_of_origin, old_country_of_origin,&
+								wh_code,l_code,old_inventory_type,inventory_type,serial_no,lot_no,po_no,old_po_no,po_no2,old_po_no2,
+								container_ID, expiration_date, ro_no,Ref_No,old_quantity,quantity,reason,last_user,last_update, Adjustment_Type,
+								old_lot_no) 
+						values	(:as_project,:ls_sku,:ls_supp_code,:ll_Owner_Id,:ll_Owner_Id_new, :ls_coo,:ls_coo,:ls_wh,:ls_lcode,'N',:ls_Inv_Type, &
+								'-',:ls_lot_No,:ls_New_Po_No_Main,:ls_New_Po_No_Main,:ls_po_No2, :ls_po_No2,:ls_container_Id, :ldt_Exp_Date,:ls_Ro_No,:ls_cc_no,:ll_new_Qty, 0,'Down Count','SIMSFP',:ldtToday,'Q',
+								:ls_lot_No) Using SQLCA;
 						
+						update  Adjustment set po_no=:ls_New_Po_No_Main, owner_id=:ll_Owner_Id_new where project_id = 'PANDORA' and ro_no=:ls_Ro_No and wh_code=:ls_wh and sku=:ls_sku and Owner_id=:ll_Owner_Id and l_code=:ls_lcode and old_quantity=0 using sqlca;
+						//update content set po_no=:ls_New_Po_No_Main, Owner_id=:ll_Owner_Id_new where project_id = 'PANDORA' and ro_no=:ls_Ro_No and wh_code=:ls_wh and sku=:ls_sku and Owner_id=:ll_Owner_Id and l_code=:ls_lcode using sqlca;                               
+						
+						commit;
+						
+						
+						
+				 //End - Dinesh - 04/11/2023- SIMS-197-Google- SIMS- Cycle count adjustment changes
+									
+				
 				If Sqlca.sqlcode <> 0  Then
 					lsLogOut = '      - 3PL Cycle Count-  Processing of uf_process_cc_stock_adjustment  and CC_No: '+ls_cc_no + ' Down Count - Unable to create new stock adjustment:  ' +sqlca.sqlerrtext
 					FileWrite(giLogFileNo,lsLogOut)
@@ -12532,7 +12876,7 @@ IF ll_Qty > ll_QtyCount THEN
 				// Since it is auto generated by the DB, we need to retrieve it
 				Select Max(Adjust_no) into :ll_adj_no 	From	 Adjustment with(nolock)
 				Where project_id = :as_project and ro_no = :ls_Ro_No and sku = :ls_sku and wh_code =:ls_wh and l_code= :ls_lcode
-				and supp_code = :ls_supp_code and po_no =:ls_New_Po_No and last_user = 'SIMSFP' and last_update = :ldtToday
+				and supp_code = :ls_supp_code and po_no = :ls_New_Po_No_Main and last_user = 'SIMSFP' and last_update = :ldtToday
 				using sqlca;
 			
 				//Write to File and Screen
@@ -12542,11 +12886,58 @@ IF ll_Qty > ll_QtyCount THEN
 			
 				//Create Batch Transaction Record
 				ll_Batch_Id = this.uf_process_create_batch_transaction( as_project, 'MM', ll_adj_No, ls_Trans_Id)
-			Next
+			
+		// Begin - Dinesh - 07/13/2023- SIMS-246- Google- Down Count not managing Adjustments and Inventory Correctly
+		if ls_cc_class_Code='A' or ls_dc_class_Code='A' then // Dinesh - 02/08/2024 - SIMS-421 - Google - SIMS Bug on auto decrement from Cycle Count
+			update Content Set po_No=:ls_New_Po_No_Main,Owner_Id=:ll_Owner_Id_new
+			where  Project_Id =:as_project and sku=:ls_sku and supp_code =:ls_supp_code 
+			and Owner_Id= :ll_Owner_Id and Country_Of_Origin =:ls_coo and wh_code =:ls_wh
+			and l_code =:ls_lcode and Inventory_Type =:ls_Inv_Type  and Container_Id=:ls_container_Id
+			and Po_No ='RESEARCH' and Expiration_date =:ldt_Exp_Date
+			using sqlca;
+			commit;
+		else  // Begin -  Dinesh - 02/08/2024 - SIMS-421 - Google - SIMS Bug on auto decrement from Cycle Count
+			 delete from Content WHERE Project_Id =:as_project and sku=:ls_sku and supp_code =:ls_supp_code 
+			and Owner_Id= :ll_Owner_Id and Country_Of_Origin =:ls_coo and wh_code =:ls_wh
+			and l_code =:ls_lcode and Inventory_Type =:ls_Inv_Type  and Container_Id=:ls_container_Id
+			and Po_No ='RESEARCH' and Expiration_date =:ldt_Exp_Date
+			using sqlca;
+//		// Begin - 02/13/2024- Dinesh - 02/08/2024 - SIMS-421 - Google - SIMS Bug on auto decrement from Cycle Count
+//		Insert Into Adjustment (project_id,sku,Supp_Code,old_owner, owner_id,country_of_origin, old_country_of_origin,&
+//								wh_code,l_code,old_inventory_type,inventory_type,serial_no,lot_no,po_no,old_po_no,po_no2,old_po_no2,
+//								container_ID, expiration_date, ro_no,Ref_No,old_quantity,quantity,reason,last_user,last_update, Adjustment_Type,
+//								old_lot_no) 
+//						values	(:as_project,:ls_sku,:ls_supp_code,:ll_Owner_Id,:ll_Owner_Id_new, :ls_coo,:ls_coo,:ls_wh,:ls_lcode,'N',:ls_Inv_Type, &
+//								'-',:ls_lot_No,:ls_New_Po_No_Main,:ls_New_Po_No_Main,:ls_po_No2, :ls_po_No2,:ls_container_Id, :ldt_Exp_Date,:ls_Ro_No,:ls_cc_no,:ll_new_Qty, 0,'Down Count','SIMSFP',:ldtToday,'Q',
+//								:ls_lot_No) Using SQLCA;
+//						
+//		update  Adjustment set po_no=:ls_New_Po_No_Main, owner_id=:ll_Owner_Id_new where project_id = 'PANDORA' and ro_no=:ls_Ro_No and wh_code=:ls_wh and sku=:ls_sku and Owner_id=:ll_Owner_Id and l_code=:ls_lcode and old_quantity=0 using sqlca;
+//		// End - 02/13/2024- Dinesh - 02/08/2024 - SIMS-421 - Google - SIMS Bug on auto decrement from Cycle Count
+		end if
+		 // End - Dinesh - 02/08/2024 - SIMS-421 - Google - SIMS Bug on auto decrement from Cycle Count
+		Next
 		End IF
-	END IF
+	END IF // Dinesh - 02/13/2024 - SIMS-341-Google - SIMS Bug on auto decrement from Cycle Count
+		 if ls_ToNo <> '' or not isnull(ls_ToNo) then
+			update Transfer_Detail set New_PO_No='MAIN',New_Owner_Id=:ll_Owner_Id_new
+			where To_No= :ls_ToNo and sku =:ls_sku and S_Location =:ls_lcode and Owner_Id =:ll_Owner_Id
+			using sqlca;
+			commit;
+		end if
+		update  Adjustment set po_no=:ls_New_Po_No_Main, owner_id=:ll_Owner_Id_new where project_id = 'PANDORA'  and wh_code=:ls_wh and sku=:ls_sku and Owner_id=:ll_Owner_Id and l_code=:ls_lcode and old_quantity=0 using sqlca;
+		commit; 
+		// End - Dinesh - 07/13/2023- SIMS-246- Google- Down Count not managing Adjustments and Inventory Correctly
+		// Dinesh - 02/13/2024 - SIMS-341-Google - SIMS Bug on auto decrement from Cycle Count
+		update Content Set po_No=:ls_New_Po_No_Main,Owner_Id=:ll_Owner_Id_new
+			where  Project_Id =:as_project and sku=:ls_sku and supp_code =:ls_supp_code 
+			and Owner_Id= :ll_Owner_Id and Country_Of_Origin =:ls_coo and wh_code =:ls_wh
+			and l_code =:ls_lcode and Inventory_Type =:ls_Inv_Type  and Container_Id=:ls_container_Id
+			and Po_No ='RESEARCH' and Expiration_date =:ldt_Exp_Date
+			using sqlca;
+			commit;
+		// Dinesh - 02/13/2024 - SIMS-341-Google - SIMS Bug on auto decrement from Cycle Count
+		
 END IF
-
 
 //Up Count
 IF ll_Qty < ll_QtyCount THEN
@@ -12602,6 +12993,15 @@ IF ll_Qty < ll_QtyCount THEN
 				'-',:ls_lot_No,:ls_po_No,:ls_po_No,:ls_po_No2, :ls_po_No2,:ls_container_Id, :ldt_Exp_Date,:ls_Ro_No, :ls_cc_no,:ll_avail_Qty,:ll_new_qty,'UP Count','SIMSFP',:ldtToday,'Q',
 				:ls_lot_No)
 	Using SQLCA;
+	
+//	Insert Into Adjustment (project_id,sku,Supp_Code,old_owner, owner_id,country_of_origin, old_country_of_origin,&
+//				wh_code,l_code,old_inventory_type,inventory_type,serial_no,lot_no,po_no,old_po_no,po_no2,old_po_no2,
+//				container_ID, expiration_date, ro_no, Ref_No,old_quantity,quantity,reason,last_user,last_update, Adjustment_Type,
+//				old_lot_no) 
+//	values	(:as_project,:ls_sku,:ls_supp_code,:ll_Owner_Id,:ll_Owner_Id, :ls_coo,:ls_coo,:ls_wh,:ls_lcode,'N',:ls_Inv_Type, &
+//				'-',:ls_lot_No,:ls_po_No,:ls_po_No,:ls_po_No2, :ls_po_No2,:ls_container_Id, :ldt_Exp_Date,:ls_Ro_No, :ls_cc_no,:ll_avail_Qty,:ll_new_qty,'UP Count','SIMSFP',:ldtToday,'Q',
+//				:ls_lot_No)
+//	Using SQLCA;
 			
 	If Sqlca.sqlcode <> 0  Then
 		lsLogOut = '      - 3PL Cycle Count-  Processing of uf_process_cc_stock_adjustment  and CC_No: '+ls_cc_no + ' Up Count - Unable to create new stock adjustment:  ' +sqlca.sqlerrtext
@@ -12615,6 +13015,8 @@ IF ll_Qty < ll_QtyCount THEN
 	Where project_id = :as_project and ro_no = :ls_Ro_No and sku = :ls_sku and wh_code =:ls_wh and l_code= :ls_lcode
 	and supp_code = :ls_supp_code and po_no =:ls_po_No and last_user = 'SIMSFP' and last_update = :ldtToday
 	using sqlca;
+	
+
 
 	//Write to File and Screen
 	lsLogOut = '      - 3PL Cycle Count-  Processing of uf_process_cc_stock_adjustment  and CC_No: '+ls_cc_no + ' - UP Count- created Adjustment Record: '+ string(ll_adj_No)
@@ -12637,7 +13039,6 @@ IF ll_Qty < ll_QtyCount THEN
 	ll_Batch_Id = this.uf_process_create_batch_transaction( as_project, 'MM', ll_adj_No, ls_Trans_Id)
 	
 END IF
-
 
 //Write to File and Screen
 lsLogOut = '      - 3PL Cycle Count- End Processing of uf_process_cc_stock_adjustment  and CC_No: '+ls_cc_no
@@ -12741,8 +13142,11 @@ string		ls_cc_sku, ls_cc_lcode, ls_cc_serialno, ls_serial_list[], ls_formatted_s
 string		ls_lotno, ls_pono, ls_pono2, ls_rono, ls_InvType, ls_old_serial_No, ls_serialno, ls_prev_lcode, ls_loc_list[], ls_formatted_locs
 long		ll_count, ll_row, ll_scan_count, ll_ownerId, ll_sni_count, ll_find_row, ll_remain_count
 datetime	ldt_expdate, ldtToday
+string lsToWarehouse,ls_custcode,ls_owner_code_new,ls_pono_main
+long ll_owner_id_new
 
 datastore     ldsCCScanSN, ldsSNI
+ls_pono_main='MAIN'
 
 SetPointer(Hourglass!)
 
@@ -12851,20 +13255,60 @@ FOR ll_row =1 to ll_scan_count
 			ldt_expdate =ldsSNI.getItemDateTime(ll_find_row ,'Exp_DT')
 			ls_rono =ldsSNI.getItemstring(ll_find_row ,'ro_no')
 			ls_InvType= ldsSNI.getItemstring(ll_find_row ,'Inventory_Type')
+			ls_owner_cd= ldsSNI.getItemstring(ll_find_row ,'owner_cd') // Dinesh - 08/07/2023- SIMS-197-Google- SIMS- Cycle count adjustment changes 
 
 			//Write to File and Screen
 			lsLogOut = '      - 3PL Cycle Count- Processing of uf_process_cc_no_count - updating Location From: '+ls_lcode+' To: '+ls_cc_lcode+' -sku/serial No: '+ ls_cc_sku +' / '+ ls_cc_serialNo+ ' -CC_No: '+as_ccno
 			FileWrite(giLogFileNo,lsLogOut)
 			gu_nvo_process_files.uf_write_log(lsLogOut)
+			
+			//Begin - Dinesh - 08/07/2023- SIMS-197-Google- SIMS- Cycle count adjustment changes 
+						
+						//To Warehouse
+						select user_field2 into :lsToWarehouse 	from customer with(nolock)
+						where project_id = :as_project and cust_code = :ls_owner_cd using sqlca;
+						
+						// Begin  - Dinesh -04/13/2023- SIMS-197-Google- SIMS- Cycle count adjustment changes
+						// To Cust code
+						select cust_code into :ls_custcode from customer with(nolock) 
+						where  project_id = :as_project and user_field2=:lsToWarehouse
+						and cust_code like 'WH%PR' using sqlca;  //Fetch cust code for respective warehouse ---->>> WH*PR
+						
+						If (ls_custcode) = "" or isnull(ls_custcode)  Then
+                					lsLogOut = "                  *** No Customer code is available for this warehouse that ends with PR: " + lsToWarehouse
+                					FileWrite(gilogFileNo,lsLogOut)
+						End If
+
+						
+							if ls_custcode <> '' or not isnull(ls_custcode)  then
+//								// New Owner code
+								select owner_id into :ll_Owner_Id_new from owner with(nolock) where project_id = :as_project and owner_cd=:ls_custcode using sqlca;  // Fetch new owner id for the respective cust code
+								
+								If (ll_Owner_Id_new) = 0  Then
+											lsLogOut = "                  *** No Owner code is available for this Owner: " + ls_custcode
+											 FileWrite(gilogFileNo,lsLogOut)
+								End If
+								
+								select owner_cd into :ls_Owner_code_new from owner with(nolock) where project_id = 'PANDORA' and owner_id=:ll_Owner_Id_new using sqlca;
+							
+							end if
+			
 
 // TAM 2019/05 - S33409 - Populate Serial History Table
 			//update Location on Serial Number Inventory Table.
-			update Serial_Number_Inventory set l_code =:ls_cc_lcode, Update_User='SIMSFP', 
-				Transaction_Type = 'CYCLE_COUNT',	Transaction_Id = :as_ccno, Adjustment_Type = 'LOCATION'
-			where Project_Id= :as_project	and wh_code=:as_wh and sku = :ls_cc_sku  and serial_no=:ls_cc_serialNo 
-			and l_code =:ls_lcode and Owner_Id =:ll_ownerId
-			using sqlca;
-			commit;
+			if ls_pono='RESEARCH' then
+				ls_pono=ls_pono_main
+				ll_ownerId=ll_Owner_Id_new
+				ls_owner_cd=ls_Owner_code_new
+			end if
+			//End - Dinesh - 08/07/2023- SIMS-197-Google- SIMS- Cycle count adjustment changes 
+				
+				update Serial_Number_Inventory set l_code =:ls_cc_lcode, Update_User='SIMSFP', 
+					Transaction_Type = 'CYCLE_COUNT',	Transaction_Id = :as_ccno, Adjustment_Type = 'LOCATION'
+				where Project_Id= :as_project	and wh_code=:as_wh and sku = :ls_cc_sku  and serial_no=:ls_cc_serialNo 
+				and l_code =:ls_lcode and Owner_Id =:ll_ownerId
+				using sqlca;
+				commit;
 	
 		else
 			//Find a record with Location -> Serial No Mismatch
@@ -12882,7 +13326,8 @@ FOR ll_row =1 to ll_scan_count
 			If ll_find_row > 0 Then
 				ls_old_serial_No =ldsSNI.getItemstring(ll_find_row ,'serial_no')
 				ls_lcode =ldsSNI.getItemstring(ll_find_row ,'l_code')
-				ll_ownerId =ldsSNI.getItemNumber(ll_find_row ,'Owner_Id')
+				ll_ownerId =ldsSNI.getItemNumber(ll_find_row ,'Owner_Id') 
+				ls_owner_cd =ldsSNI.getItemString(1 ,'Owner_cd')  //Dinesh - 08/07/2023- SIMS-197-Google- SIMS- Cycle count adjustment changes
 				ls_lotno =ldsSNI.getItemstring(ll_find_row ,'lot_no')
 				ls_pono =ldsSNI.getItemstring(ll_find_row ,'po_no')
 				ls_pono2 =ldsSNI.getItemstring(ll_find_row ,'po_no2')
@@ -12895,7 +13340,48 @@ FOR ll_row =1 to ll_scan_count
 				FileWrite(giLogFileNo,lsLogOut)
 				gu_nvo_process_files.uf_write_log(lsLogOut)
 				
-// TAM 2019/05 - S33409 - Populate Serial History Table
+				//Begin - Dinesh - 08/07/2023- SIMS-197-Google- SIMS- Cycle count adjustment changes 
+						
+						//To Warehouse
+						select user_field2 into :lsToWarehouse 	from customer with(nolock)
+						where project_id = :as_project and cust_code = :ls_owner_cd using sqlca;
+						
+						// Begin  - Dinesh -04/13/2023- SIMS-197-Google- SIMS- Cycle count adjustment changes
+						// To Cust code
+						select cust_code into :ls_custcode from customer with(nolock) 
+						where  project_id = :as_project and user_field2=:lsToWarehouse
+						and cust_code like 'WH%PR' using sqlca;  //Fetch cust code for respective warehouse ---->>> WH*PR
+						
+						If (ls_custcode) = "" or isnull(ls_custcode)  Then
+                					lsLogOut = "                  *** No Customer code is available for this warehouse that ends with PR: " + lsToWarehouse
+                					FileWrite(gilogFileNo,lsLogOut)
+						End If
+
+						
+							if ls_custcode <> '' or not isnull(ls_custcode)  then
+//								// New Owner code
+								select owner_id into :ll_Owner_Id_new from owner with(nolock) where project_id = :as_project and owner_cd=:ls_custcode using sqlca;  // Fetch new owner id for the respective cust code
+								
+								If (ll_Owner_Id_new) = 0  Then
+											lsLogOut = "                  *** No Owner code is available for this Owner: " + ls_custcode
+											 FileWrite(gilogFileNo,lsLogOut)
+								End If
+								
+								select owner_cd into :ls_Owner_code_new from owner with(nolock) where project_id = 'PANDORA' and owner_id=:ll_Owner_Id_new using sqlca;
+							
+							end if
+			
+
+			if ls_pono='RESEARCH' then
+				ls_pono=ls_pono_main
+				ll_ownerId=ll_Owner_Id_new
+				ls_owner_cd=ls_Owner_code_new
+			end if
+			
+			//End - Dinesh - 08/07/2023- SIMS-197-Google- SIMS- Cycle count adjustment changes 	
+		
+				//update Location on Serial Number Inventory Table.
+			// TAM 2019/05 - S33409 - Populate Serial History Table
 				//update serial no
 				update Serial_Number_Inventory set serial_no =:ls_cc_serialNo, Update_User='SIMSFP',
 					Transaction_Type = 'CYCLE_COUNT',	Transaction_Id = :as_ccno, Adjustment_Type = 'SERIAL NUMBER CHANGE'
@@ -12917,6 +13403,7 @@ FOR ll_row =1 to ll_scan_count
 					ls_old_serial_No =ldsSNI.getItemstring(1 ,'serial_no')
 					ls_lcode =ldsSNI.getItemstring(1 ,'l_code')
 					ll_ownerId =ldsSNI.getItemNumber(1 ,'Owner_Id')
+					ls_owner_cd =ldsSNI.getItemString(1 ,'Owner_cd')// Dinesh - 08/07/2023 - SIMS-197- Cycle count adjustment
 					ls_lotno =ldsSNI.getItemstring(1 ,'lot_no')
 					ls_pono =ldsSNI.getItemstring(1 ,'po_no')
 					ls_pono2 =ldsSNI.getItemstring(1 ,'po_no2')
@@ -12929,6 +13416,47 @@ FOR ll_row =1 to ll_scan_count
 					FileWrite(giLogFileNo,lsLogOut)
 					gu_nvo_process_files.uf_write_log(lsLogOut)
 					
+					//Begin - Dinesh - 08/07/2023- SIMS-197-Google- SIMS- Cycle count adjustment changes 
+						
+						//To Warehouse
+						select user_field2 into :lsToWarehouse 	from customer with(nolock)
+						where project_id = :as_project and cust_code = :ls_owner_cd using sqlca;
+						
+						// Begin  - Dinesh -04/13/2023- SIMS-197-Google- SIMS- Cycle count adjustment changes
+						// To Cust code
+						select cust_code into :ls_custcode from customer with(nolock) 
+						where  project_id = :as_project and user_field2=:lsToWarehouse
+						and cust_code like 'WH%PR' using sqlca;  //Fetch cust code for respective warehouse ---->>> WH*PR
+						
+						If (ls_custcode) = "" or isnull(ls_custcode)  Then
+                					lsLogOut = "                  *** No Customer code is available for this warehouse that ends with PR: " + lsToWarehouse
+                					FileWrite(gilogFileNo,lsLogOut)
+						End If
+
+						
+							if ls_custcode <> '' or not isnull(ls_custcode)  then
+//								// New Owner code
+								select owner_id into :ll_Owner_Id_new from owner with(nolock) where project_id = :as_project and owner_cd=:ls_custcode using sqlca;  // Fetch new owner id for the respective cust code
+								
+								If (ll_Owner_Id_new) = 0  Then
+											lsLogOut = "                  *** No Owner code is available for this Owner: " + ls_custcode
+											 FileWrite(gilogFileNo,lsLogOut)
+								End If
+								
+								select owner_cd into :ls_Owner_code_new from owner with(nolock) where project_id = 'PANDORA' and owner_id=:ll_Owner_Id_new using sqlca;
+							
+							end if
+			
+
+			if ls_pono='RESEARCH' then
+				ls_pono=ls_pono_main
+				ll_ownerId=ll_Owner_Id_new
+				ls_owner_cd=ls_Owner_code_new
+			end if
+			
+			//End - Dinesh - 08/07/2023- SIMS-197-Google- SIMS- Cycle count adjustment changes 	
+		
+					
 // TAM 2019/05 - S33409 - Populate Serial History Table
 					//update serial no
 					update Serial_Number_Inventory set serial_no =:ls_cc_serialNo,  l_code =:ls_cc_lcode, Update_User='SIMSFP',
@@ -12939,6 +13467,47 @@ FOR ll_row =1 to ll_scan_count
 					commit;
 
 				else
+					
+					//Begin - Dinesh - 08/07/2023- SIMS-197-Google- SIMS- Cycle count adjustment changes 
+						
+						//To Warehouse
+						select user_field2 into :lsToWarehouse 	from customer with(nolock)
+						where project_id = :as_project and cust_code = :ls_owner_cd using sqlca;
+						
+						// Begin  - Dinesh -04/13/2023- SIMS-197-Google- SIMS- Cycle count adjustment changes
+						// To Cust code
+						select cust_code into :ls_custcode from customer with(nolock) 
+						where  project_id = :as_project and user_field2=:lsToWarehouse
+						and cust_code like 'WH%PR' using sqlca;  //Fetch cust code for respective warehouse ---->>> WH*PR
+						
+						If (ls_custcode) = "" or isnull(ls_custcode)  Then
+                					lsLogOut = "                  *** No Customer code is available for this warehouse that ends with PR: " + lsToWarehouse
+                					FileWrite(gilogFileNo,lsLogOut)
+						End If
+
+						
+							if ls_custcode <> '' or not isnull(ls_custcode)  then
+//								// New Owner code
+								select owner_id into :ll_Owner_Id_new from owner with(nolock) where project_id = :as_project and owner_cd=:ls_custcode using sqlca;  // Fetch new owner id for the respective cust code
+								
+								If (ll_Owner_Id_new) = 0  Then
+											lsLogOut = "                  *** No Owner code is available for this Owner: " + ls_custcode
+											 FileWrite(gilogFileNo,lsLogOut)
+								End If
+								
+								select owner_cd into :ls_Owner_code_new from owner with(nolock) where project_id = 'PANDORA' and owner_id=:ll_Owner_Id_new using sqlca;
+							
+							end if
+			
+
+			if ls_pono='RESEARCH' then
+				ls_pono=ls_pono_main
+				ll_ownerId=ll_Owner_Id_new
+				ls_owner_cd=ls_Owner_code_new
+			end if
+			
+			//End - Dinesh - 08/07/2023- SIMS-197-Google- SIMS- Cycle count adjustment changes 	
+		
 					//get OwnerCd
 					select Owner_Cd into :ls_owner_cd from Owner with(nolock) 
 					where Project_Id =:as_project and Owner_Id= :ll_ownerId 
@@ -13416,11 +13985,11 @@ end function
 public function integer uf_process_cc_update_serial_attributes (string as_project, string as_ccno);//11-Dec-2017 :Madhu PEVS-806 3PL Cycle Count Orders
 //Update Attributes of Serial Number Inventory table against Content.
 
-string		ls_sql, ls_errors, ls_lcode, ls_sku, ls_sku_prev, ls_sku_list[], ls_formatted_skus, ls_old_po_no, ls_ownercd, ls_Lot_No, ls_Po_No2, lsNull
+string		ls_sql, ls_errors, ls_lcode, ls_sku, ls_sku_prev, ls_sku_list[], ls_formatted_skus, ls_old_po_no, ls_ownercd, ls_Lot_No, ls_Po_No2, lsNull,ls_Owner_code_new,ls_owner_code
 string		ls_loc, ls_loc_list[], ls_formatted_locs, ls_serial_no, ls_wh, ls_pono, ls_find, ls_loc_prev, lsLogOut, ls_Ro_No, ls_Orig_sql
 string 	ls_formatted_ToNo, ls_serial_sql, ls_alt_serial_list[], ls_alt_serial, ls_formatted_alt_serial, lsContentFilter
-string		ls_cc_scan_serial, ls_cc_scan_serial_list[], ls_formatted_cc_scan_serial, ls_Container_Id, ls_old_po_no2
-long		ll_count, ll_scan_count, ll_row, ll_SNI_count, ll_content_count, ll_qty, ll_filter_count, ll_filter_row, ll_filter_qty, ll_ownerId, ll_cc_count, ll_rc
+string		ls_cc_scan_serial, ls_cc_scan_serial_list[], ls_formatted_cc_scan_serial, ls_Container_Id, ls_old_po_no2,lsToWarehouse,ls_custcode
+long		ll_count, ll_scan_count, ll_row, ll_SNI_count, ll_content_count, ll_qty, ll_filter_count, ll_filter_row, ll_filter_qty, ll_ownerId, ll_cc_count, ll_rc,ll_owner_id,ll_Owner_Id_new
 DateTime ldt_Exp_Date
 
 Datastore ldsCCScanSN, ldsContent, ldsSNI, ldsCCMaster, ldsCCDetail, ldsAltSerial
@@ -13443,6 +14012,7 @@ If Not isvalid(ldsCCDetail) Then
 	ldsCCDetail = Create Datastore
 	ldsCCDetail.Dataobject = 'd_cc_inventory'
 	ldsCCDetail.SetTransObject(SQLCA)
+	ll_cc_count = ldsCCDetail.retrieve( as_ccno) //get CC Inventory Records // Dinesh - 06/06/2023 - SIMS-197- Cycle count adjsutment
 End If
 
 If Not isvalid(ldsSNI) Then
@@ -13459,6 +14029,43 @@ If ldsCCMaster.retrieve(as_ccno ) <> 1 Then
 End If
 
 ls_wh = ldsCCMaster.getItemstring( 1, 'wh_code')
+
+
+//ll_owner_id = ldsCCMaster.getItemnumber( 1, 'owner_id')
+
+	select owner_id into :ll_owner_id 	from CC_Inventory with(nolock) where  cc_no = :as_ccno using sqlca; //Dinesh - 07/27/2023- SIMS-197- Cycle count adjustment
+	
+	select owner_cd into :ls_owner_code from owner with(nolock) where project_id = 'PANDORA' and owner_id=:ll_owner_id using sqlca;
+
+// Begin - Dinesh - 04/18/2023- SIMS-197- Google - SIMS - Cycle Count Adjustment Changes
+						select user_field2 into :lsToWarehouse 	from customer with(nolock)
+						where project_id = 'PANDORA' and cust_code = :ls_owner_code using sqlca;
+						// To Cust code
+						select cust_code into :ls_custcode from customer with(nolock) 
+						where  project_id = 'PANDORA' and user_field2=:lsToWarehouse
+						and cust_code like 'WH%PR' using sqlca;  //Fetch cust code for respective warehouse ---->>> WH*PR
+						
+						If (ls_custcode) = "" or isnull(ls_custcode)  Then
+                					lsLogOut = "                  *** No Customer code is available for this warehouse that ends with PR: " + lsToWarehouse
+                					FileWrite(gilogFileNo,lsLogOut)
+						End If
+
+						
+							if ls_custcode <> '' or not isnull(ls_custcode)  then
+//								// New Owner code
+								select owner_id into :ll_Owner_Id_new from owner with(nolock) where project_id = 'PANDORA' and owner_cd=:ls_custcode using sqlca;  // Fetch new owner id for the respective cust code
+								//select owner_cd into :ls_Owner_code_new from owner with(nolock) where project_id = 'PANDORA' and owner_id=:ll_Owner_Id_new using sqlca;
+								
+								If (ll_Owner_Id_new) = 0 Then
+											lsLogOut = "                  *** No Owner ID is available for this Owner: " + ls_custcode
+											 FileWrite(gilogFileNo,lsLogOut)
+								End If
+								
+								select owner_cd into :ls_Owner_code_new from owner with(nolock) where project_id = 'PANDORA' and owner_id=:ll_Owner_Id_new using sqlca;
+							
+							end if
+//						// End - Dinesh -04/13/2023- SIMS-197-Google- SIMS- Cycle count adjustment changes
+	
 
 //get distinct loc, sku from CC serial no's.
 ldsCCScanSN = create Datastore
@@ -13501,7 +14108,14 @@ If ll_scan_count > 0 Then
 	If UpperBound(ls_cc_scan_serial_list) > 0 Then ls_formatted_cc_scan_serial = in_string_util.of_format_string( ls_cc_scan_serial_list, n_string_util.FORMAT1 ) //format Serial No's
 
 else
-	ll_cc_count = ldsCCDetail.retrieve( as_ccno) //get CC Inventory Records
+	//ll_cc_count = ldsCCDetail.retrieve( as_ccno) //get CC Inventory Records
+	// Begin - Dinesh  - 06/06/2023- SIMS-197- Cycle count adjustment change
+	If ll_cc_count < 1 Then
+	lsLogOut =  "      - 3PL Cycle Count- Processing of uf_process_cc_update_serial_attributes()  - Unable to retreive CC Order from the Inventory : "+ string(ll_cc_count) + ' '+ nz(as_ccno, '-')
+	FileWrite(gilogFileNo,lsLogOut)
+	Return -1
+	// End - Dinesh  - 06/06/2023- SIMS-197- Cycle count adjustment change
+End If
 	//get list of SKU's
 	For ll_row =1 to ll_cc_count
 		ls_sku = ldsCCDetail.getItemString( ll_row, 'sku')
@@ -13539,9 +14153,9 @@ For ll_row = 1 to ldsAltSerial.rowcount( )
 	ls_alt_serial_list[ UpperBound(ls_alt_serial_list) + 1 ] = ls_alt_serial
 Next
 
-If UpperBound(ls_alt_serial_list) > 0 Then ls_formatted_alt_serial = in_string_util.of_format_string( ls_alt_serial_list, n_string_util.FORMAT1 )
-	
+If UpperBound(ls_alt_serial_list) > 0 Then ls_formatted_alt_serial = in_string_util.of_format_string( ls_alt_serial_list, n_string_util.FORMAT1 )	
 //get Content records.
+
 ldsContent = create Datastore
 ls_sql =	 " select sku, wh_code, l_code, po_no, owner_id, Ro_No, Lot_No, Po_No2, Container_Id, Expiration_Date, sum(avail_qty) as Qty from Content with(nolock) "
 ls_sql += " where project_Id='"+as_project+"' "
@@ -13579,14 +14193,46 @@ gu_nvo_process_files.uf_write_log(lsLogOut)
 If ll_SNI_count > 0 Then
 	
 	//A. HIGH VALUE ITEMS
-	//get Project ='RESEARCH ' Content Records and update Serial No's accordingly.
-	lsContentFilter ="Po_No ='RESEARCH'"
+	
+//	// Begin - Dinesh - 04/18/2023- SIMS-197- Google - SIMS - Cycle Count Adjustment Changes
+//						select user_field2 into :lsToWarehouse 	from customer with(nolock)
+//						where project_id = 'PANDORA' and cust_code = :ll_owner_id using sqlca;
+//						// To Cust code
+//						select cust_code into :ls_custcode from customer with(nolock) 
+//						where  project_id = 'PANDORA' and user_field2=:lsToWarehouse
+//						and cust_code like 'WH%PR' using sqlca;  //Fetch cust code for respective warehouse ---->>> WH*PR
+//						
+//						If (ls_custcode) = "" or isnull(ls_custcode)  Then
+//                					lsLogOut = "                  *** No Customer code is available for this warehouse that ends with PR: " + lsToWarehouse
+//                					FileWrite(gilogFileNo,lsLogOut)
+//						End If
+//
+//						
+//							if ls_custcode <> '' or not isnull(ls_custcode)  then
+////								// New Owner code
+//								select owner_id into :ll_Owner_Id_new from owner with(nolock) where project_id = 'PANDORA' and owner_cd=:ls_custcode using sqlca;  // Fetch new owner id for the respective cust code
+//								//select owner_cd into :ls_Owner_code_new from owner with(nolock) where project_id = 'PANDORA' and owner_id=:ll_Owner_Id_new using sqlca;
+//								
+//								If (ll_Owner_Id_new) = 0 Then
+//											lsLogOut = "                  *** No Owner ID is available for this Owner: " + ls_custcode
+//											 FileWrite(gilogFileNo,lsLogOut)
+//								End If
+//								
+//								select owner_cd into :ls_Owner_code_new from owner with(nolock) where project_id = 'PANDORA' and owner_id=:ll_Owner_Id_new using sqlca;
+//							
+//							end if
+////						// End - Dinesh -04/13/2023- SIMS-197-Google- SIMS- Cycle count adjustment changes
+//	//get Project ='RESEARCH ' Content Records and update Serial No's accordingly.
+	//lsContentFilter ="Po_No ='RESEARCH'"
+	ll_content_count = ldsContent.retrieve( )
+	lsContentFilter ="Po_No ='MAIN' and owner_id= "+string(ll_Owner_Id_new)+" "   // Dinesh - 04/18/2023- SIMS-197- Google - SIMS - Cycle Count Adjustment Changes
 	ldsContent.setfilter(lsContentFilter)
 	ldsContent.filter()
 	ll_content_count = ldsContent.rowcount()
 	
 	//Write to File and Screen
-	lsLogOut = '      - 3PL Cycle Count- Processing of uf_process_cc_update_serial_attributes() - Filter By Project = RESEARCH  CC_No: '+as_ccno + ' - Content Records Count: '+string(ll_content_count)
+	//lsLogOut = '      - 3PL Cycle Count- Processing of uf_process_cc_update_serial_attributes() - Filter By Project = RESEARCH  CC_No: '+as_ccno + ' - Content Records Count: '+string(ll_content_count) // Dinesh - 04/18/2023- SIMS-197- Google - SIMS - Cycle Count Adjustment Changes
+	lsLogOut = '      - 3PL Cycle Count- Processing of uf_process_cc_update_serial_attributes() - Filter By Project = MAIN  CC_No: '+as_ccno + ' - Content Records Count: '+string(ll_content_count)  // Dinesh - 04/18/2023- SIMS-197- Google - SIMS - Cycle Count Adjustment Changes
 	FileWrite(giLogFileNo,lsLogOut)
 	gu_nvo_process_files.uf_write_log(lsLogOut)
 
@@ -13614,12 +14260,15 @@ If ll_SNI_count > 0 Then
 		ll_SNI_count = ldsSNI.retrieve( )
 		
 		ls_find ="sku ='"+ls_sku+"' and l_code ='"+ls_loc+"' and wh_code ='"+ls_wh+"' and po_no='"+ls_pono+"' and Ro_No ='"+ls_Ro_No+"' and Lot_No ='"+ls_Lot_No+"' and Po_No2='"+ls_Po_No2+"' and Carton_Id ='"+ls_Container_Id+"' and serial_no in ("+ls_formatted_alt_serial+")"
-		ldsSNI.setfilter( ls_find)
+	
+		
+		ldsSNI.setfilter(ls_find)
 		ldsSNI.filter( )
 		ll_filter_count = ldsSNI.rowcount( )
 		
 		//Write to File and Screen
-		lsLogOut = '      - 3PL Cycle Count- Processing of uf_process_cc_update_serial_attributes() - Filter By Project  RESEARCH - CC_No: '+as_ccno + ' Find: '+ls_find +' against Serial Number Inventory Records and count: '+string(ll_filter_count)
+		//lsLogOut = '      - 3PL Cycle Count- Processing of uf_process_cc_update_serial_attributes() - Filter By Project  RESEARCH - CC_No: '+as_ccno + ' Find: '+ls_find +' against Serial Number Inventory Records and count: '+string(ll_filter_count) // Dinesh - 04/18/2023- SIMS-197- Google - SIMS - Cycle Count Adjustment Changes
+		lsLogOut = '      - 3PL Cycle Count- Processing of uf_process_cc_update_serial_attributes() - Filter By Project in MAIN with WH*PR - CC_No: '+as_ccno + ' Find: '+ls_find +' against Serial Number Inventory Records and count: '+string(ll_filter_count) // Dinesh - 04/18/2023- SIMS-197- Google - SIMS - Cycle Count Adjustment Changes
 		FileWrite(giLogFileNo,lsLogOut)
 		gu_nvo_process_files.uf_write_log(lsLogOut)
 		
@@ -13641,7 +14290,8 @@ If ll_SNI_count > 0 Then
 			end if
 			
 			//Write to File and Screen
-			lsLogOut = '      - 3PL Cycle Count- Processing of uf_process_cc_update_serial_attributes() -  Filter By Project = RESEARCH  CC_No: '+as_ccno + ' Find: '+ls_find +' against Serial Number Inventory Records and count: '+string(ll_filter_count)
+			//lsLogOut = '      - 3PL Cycle Count- Processing of uf_process_cc_update_serial_attributes() -  Filter By Project = RESEARCH  CC_No: '+as_ccno + ' Find: '+ls_find +' against Serial Number Inventory Records and count: '+string(ll_filter_count)  // Dinesh - 04/18/2023- SIMS-197- Google - SIMS - Cycle Count Adjustment Changes
+			lsLogOut = '      - 3PL Cycle Count- Processing of uf_process_cc_update_serial_attributes() -  Filter By Project =  MAIN*PR  CC_No: '+as_ccno + ' Find: '+ls_find +' against Serial Number Inventory Records and count: '+string(ll_filter_count) // Dinesh - 04/18/2023- SIMS-197- Google - SIMS - Cycle Count Adjustment Changes
 			lsLogOut +=' Filtered Qty: '+string(ll_filter_qty)
 			FileWrite(giLogFileNo,lsLogOut)
 			gu_nvo_process_files.uf_write_log(lsLogOut)
@@ -13661,7 +14311,8 @@ If ll_SNI_count > 0 Then
 				commit;
 
 				//Write to File and Screen
-				lsLogOut = '      - 3PL Cycle Count- Processing of uf_process_cc_update_serial_attributes() -  Filter By Project = RESEARCH  CC_No: '+as_ccno + ' Updated Po No From: '+ls_old_po_no +' To: '+ls_pono+ ' Po No2 From: '+ls_old_po_no2+' To: '+ls_Po_No2+' Mark Serial Flag =X '
+				//lsLogOut = '      - 3PL Cycle Count- Processing of uf_process_cc_update_serial_attributes() -  Filter By Project = RESEARCH  CC_No: '+as_ccno + ' Updated Po No From: '+ls_old_po_no +' To: '+ls_pono+ ' Po No2 From: '+ls_old_po_no2+' To: '+ls_Po_No2+' Mark Serial Flag =X ' // Dinesh - 04/18/2023- SIMS-197- Google - SIMS - Cycle Count Adjustment Changes
+				lsLogOut = '      - 3PL Cycle Count- Processing of uf_process_cc_update_serial_attributes() -  Filter By Project =  MAIN  CC_No: '+as_ccno + ' Updated Po No From: '+ls_old_po_no +' To: '+ls_pono+ ' Po No2 From: '+ls_old_po_no2+' To: '+ls_Po_No2+' Mark Serial Flag =X ' // Dinesh - 04/18/2023- SIMS-197- Google - SIMS - Cycle Count Adjustment Changes
 				lsLogOut +=' against Sku /Loc /SN: '+ls_sku+'/'+ls_loc+'/'+ls_serial_no
 				FileWrite(giLogFileNo,lsLogOut)
 				gu_nvo_process_files.uf_write_log(lsLogOut)
@@ -13682,7 +14333,12 @@ If ll_SNI_count > 0 Then
 	
 	//find scanned serial no's which are not in MAIN project
 	IF ls_formatted_cc_scan_serial > ' ' THEN
-		ls_find ="po_no <> 'MAIN' and serial_no  IN ("+ls_formatted_cc_scan_serial+")"
+		//ls_find ="po_no <> 'MAIN' and serial_no  IN ("+ls_formatted_cc_scan_serial+")" // Dinesh - 07/27/2023- SIMS-197- Google - Cycle count adjustment
+		//ls_find ="po_no <> 'MAIN' and owner_id = "+string(ll_Owner_Id_new)+ " and serial_no  IN ("+ls_formatted_cc_scan_serial+")" // Dinesh - 07/27/2023- SIMS-197- Google - Cycle count adjustment
+		ls_find ="((po_no = 'MAIN' and owner_id = "+string(ll_Owner_Id_new)+ ") or po_no <> 'MAIN') and serial_no  IN ("+ls_formatted_cc_scan_serial+")" // Dinesh - 11/30/2023- SIMS-362- Google - Cycle count issue - Dinesh- 11/29/2023
+		//Commeented the below line - SIMS-362- Google - Cycle count issue - Dinesh- 11/29/2023
+		//ls_find ="(po_no = 'MAIN' and owner_id = "+string(ll_Owner_Id_new)+ ") and serial_no  IN ("+ls_formatted_cc_scan_serial+")" // Dinesh - 08/04/2023- SIMS-197- Google - Cycle count adjustment
+		
 		ldsSNI.setfilter( ls_find)
 		ldsSNI.filter( )
 		ll_filter_count = ldsSNI.rowcount( )
@@ -13701,7 +14357,7 @@ If ll_SNI_count > 0 Then
 			commit;
 			
 			//Write to File and Screen
-			lsLogOut = '      - 3PL Cycle Count- Processing of uf_process_cc_update_serial_attributes() - Filter By Project <> MAIN CC_No: '+as_ccno + ' Updated Scanned Serial No : '+ ls_serial_no+' Po No From: RESEARCH To: MAIN Mark Serial Flag =X '
+			lsLogOut = '      - 3PL Cycle Count- Processing of uf_process_cc_update_serial_attributes() - Filter By Project = MAIN and WH*PR CC_No: '+as_ccno + ' Updated Scanned Serial No : '+ ls_serial_no+' Po No From: RESEARCH To: MAIN Mark Serial Flag =X '
 			lsLogOut +=' against Sku /Loc /SN: '+ls_sku+'/'+ls_loc+'/'+ls_serial_no
 			FileWrite(giLogFileNo,lsLogOut)
 			gu_nvo_process_files.uf_write_log(lsLogOut)
@@ -13719,14 +14375,45 @@ If ll_SNI_count > 0 Then
 	ldsContent.setfilter("")
 	ldsContent.filter()
 	ldsContent.rowcount()
-	
-	lsContentFilter ="Po_No <> 'RESEARCH'"
+//	// Begin - Dinesh - 04/18/2023- SIMS-197- Google - SIMS - Cycle Count Adjustment Changes
+//						select user_field2 into :lsToWarehouse 	from customer with(nolock)
+//						where project_id = 'PANDORA' and cust_code = :ll_owner_id using sqlca;
+//						// To Cust code
+//						select cust_code into :ls_custcode from customer with(nolock) 
+//						where  project_id = 'PANDORA' and user_field2=:lsToWarehouse
+//						and cust_code like 'WH%PR' using sqlca;  //Fetch cust code for respective warehouse ---->>> WH*PR
+//						
+//						If (ls_custcode) = "" or isnull(ls_custcode)  Then
+//                					lsLogOut = "                  *** No Customer code is available for this warehouse that ends with PR: " + lsToWarehouse
+//                					FileWrite(gilogFileNo,lsLogOut)
+//						End If
+//
+//						
+//							if ls_custcode <> '' or not isnull(ls_custcode)  then
+////								// New Owner code
+//								select owner_id into :ll_Owner_Id_new from owner with(nolock) where project_id = 'PANDORA' and owner_cd=:ls_custcode using sqlca;  // Fetch new owner id for the respective cust code
+//								//select owner_cd into :ls_Owner_code_new from owner with(nolock) where project_id = 'PANDORA' and owner_id=:ll_Owner_Id_new using sqlca;
+//								
+//								If (ll_Owner_Id_new) = 0 Then
+//											lsLogOut = "                  *** No Owner code is available for this Owner: " + ls_custcode
+//											 FileWrite(gilogFileNo,lsLogOut)
+//								End If
+//					
+//							end if
+////						// End - Dinesh -04/13/2023- SIMS-197-Google- SIMS- Cycle count adjustment changes
+//	
+	//lsContentFilter ="Po_No <> 'MAIN' and owner_id <> "+ string(ll_Owner_Id_new)+""   // Dinesh - 04/18/2023- SIMS-197- Google - SIMS - Cycle Count Adjustment Changes
+	//commented the above line - SIMS-362- Google - Cycle count issue for system generation
+	lsContentFilter ="owner_id <> "+ string(ll_Owner_Id_new)+""   // Dinesh - 11/29/2023- SIMS-362- Google - Cycle count issue for system generation
+	//lsContentFilter ="Po_No <> 'RESEARCH'"  // Dinesh - 04/18/2023- SIMS-197- Google - SIMS - Cycle Count Adjustment Changes
+	// lsContentFilter ="Po_No = 'MAIN'" //  Dinesh - 04/18/2023- SIMS-197- Google - SIMS - Cycle Count Adjustment Changes
 	ldsContent.setfilter(lsContentFilter)
 	ldsContent.filter()
 	ll_content_count = ldsContent.rowcount()
 	
 	//Write to File and Screen
-	lsLogOut = '      - 3PL Cycle Count- Processing of uf_process_cc_update_serial_attributes() - Filter By Project <> RESEARCH  CC_No: '+as_ccno + '  - Content Records Count: '+string(ll_content_count)
+	//lsLogOut = '      - 3PL Cycle Count- Processing of uf_process_cc_update_serial_attributes() - Filter By Project <> RESEARCH  CC_No: '+as_ccno + '  - Content Records Count: '+string(ll_content_count)
+	lsLogOut = '      - 3PL Cycle Count- Processing of uf_process_cc_update_serial_attributes() - Filter By Project <> MAIN*PR  CC_No: '+as_ccno + '  - Content Records Count: '+string(ll_content_count) // Dinesh - 06052023- SIMS-197- Cycle count adjustment change
 	FileWrite(giLogFileNo,lsLogOut)
 	gu_nvo_process_files.uf_write_log(lsLogOut)
 
@@ -13758,7 +14445,7 @@ If ll_SNI_count > 0 Then
 		ll_filter_count = ldsSNI.rowcount( )
 		
 		//Write to File and Screen
-		lsLogOut = '      - 3PL Cycle Count- Processing of uf_process_cc_update_serial_attributes() - Filter By Project <> RESEARCH  CC_No: '+as_ccno + ' Find: '+ls_find +' against Serial Number Inventory Records and count: '+string(ll_filter_count)
+		lsLogOut = '      - 3PL Cycle Count- Processing of uf_process_cc_update_serial_attributes() - Filter By Project = MAIN  CC_No: '+as_ccno + ' Find: '+ls_find +' against Serial Number Inventory Records and count: '+string(ll_filter_count)
 		FileWrite(giLogFileNo,lsLogOut)
 		gu_nvo_process_files.uf_write_log(lsLogOut)
 		
@@ -13768,6 +14455,7 @@ If ll_SNI_count > 0 Then
 			ldsSNI.rowcount( )
 	
 			ls_find ="sku ='"+ls_sku+"' and l_code ='"+ls_loc+"' and wh_code ='"+ls_wh+"' and (po_no ='"+ls_pono+"' OR po_no <>'"+ls_pono+"')  and serial_no NOT IN ("+ls_formatted_alt_serial+")"
+			//ls_find ="sku ='"+ls_sku+"' and l_code ='"+ls_loc+"' and wh_code ='"+ls_wh+"' and  po_no ='"+ls_pono+"' and serial_no NOT IN ("+ls_formatted_alt_serial+")" // Dinesh 07/27/2023 - SIMS-197- Cycle count adjustment
 			ldsSNI.setfilter( ls_find)
 			ldsSNI.filter( )
 			ll_filter_count = ldsSNI.rowcount( )
@@ -13779,7 +14467,8 @@ If ll_SNI_count > 0 Then
 			end if
 	
 			//Write to File and Screen
-			lsLogOut = '      - 3PL Cycle Count- Processing of uf_process_cc_update_serial_attributes() - Filter By Project <> RESEARCH  CC_No: '+as_ccno + ' Find: '+ls_find +' against Serial Number Inventory Records and count: '+string(ll_filter_count)
+			//lsLogOut = '      - 3PL Cycle Count- Processing of uf_process_cc_update_serial_attributes() - Filter By Project <> RESEARCH  CC_No: '+as_ccno + ' Find: '+ls_find +' against Serial Number Inventory Records and count: '+string(ll_filter_count)
+			lsLogOut = '      - 3PL Cycle Count- Processing of uf_process_cc_update_serial_attributes() - Filter By Project <> MAIN*PR  CC_No: '+as_ccno + ' Find: '+ls_find +' against Serial Number Inventory Records and count: '+string(ll_filter_count) // Dinesh - 05/24/2023- SIMS-197- cycle count adjustment 
 			lsLogOut +=' Filtered Qty: '+string(ll_filter_qty)
 			FileWrite(giLogFileNo,lsLogOut)
 			gu_nvo_process_files.uf_write_log(lsLogOut)
@@ -13799,7 +14488,8 @@ If ll_SNI_count > 0 Then
 				commit;
 				
 				//Write to File and Screen
-				lsLogOut = '      - 3PL Cycle Count- Processing of uf_process_cc_update_serial_attributes() - Filter By Project <> RESEARCH  CC_No: '+as_ccno + ' Updated Po No From: '+ls_old_po_no +' To: '+ls_pono+ ' Po No2 From: '+ls_old_po_no2+ ' To: '+ls_Po_No2+' Mark Serial Flag =X '
+				//lsLogOut = '      - 3PL Cycle Count- Processing of uf_process_cc_update_serial_attributes() - Filter By Project <> RESEARCH CC_No: '+as_ccno + ' Updated Po No From: '+ls_old_po_no +' To: '+ls_pono+ ' Po No2 From: '+ls_old_po_no2+ ' To: '+ls_Po_No2+' Mark Serial Flag =X '
+				lsLogOut = '      - 3PL Cycle Count- Processing of uf_process_cc_update_serial_attributes() - Filter By Project <> MAIN*PR  CC_No: '+as_ccno + ' Updated Po No From: '+ls_old_po_no +' To: '+ls_pono+ ' Po No2 From: '+ls_old_po_no2+ ' To: '+ls_Po_No2+' Mark Serial Flag =X ' // Dinesh - 06/05/2023 - SIMS-197- Cycle count adjustment
 				lsLogOut +=' against Sku /Loc /SN: '+ls_sku+'/'+ls_loc+'/'+ls_serial_no
 				FileWrite(giLogFileNo,lsLogOut)
 				gu_nvo_process_files.uf_write_log(lsLogOut)
@@ -13858,6 +14548,12 @@ End IF //SNI Count > 0
 ldsContent.setfilter("")
 ldsContent.filter()
 ldsContent.rowcount()
+
+//update Serial_Number_Inventory set Po_No = 'MAIN', Owner_Id =:ll_Owner_Id_new, Owner_Cd =:ls_Owner_code_new
+//				where project_Id =:as_project and sku=:ls_sku and wh_code =:ls_wh
+//				and l_code =:ls_loc and Po_No='RESEARCH'
+//				using sqlca;
+//				commit; // Dinesh - 07/27/2023 - sims-197- Google Cycle count adjustment
 
 destroy ldsCCScanSN
 destroy ldsContent 
@@ -13975,14 +14671,21 @@ IF ((ll_Qty > ll_QtyCount) and (lbAutoSOC =TRUE)) THEN
 			
 			If ll_FindRow > 0  and lb_serial =TRUE Then 
 				idsCCRecon.setItem( ll_FindRow, 'action_cd', 'U') //Don't delete
+				//Begin - Dinesh - 08/07/2023- SIMS-197- Cycle count adjustment
+				idsCCRecon.setItem( ll_FindRow, 'Po_No', ls_New_Po_No) //Update New PoNo
+				idsCCRecon.setItem( ll_FindRow, 'Po_No2', ls_Po_no2) //Update New PoNo2
+				idsCCRecon.setItem( ll_FindRow, 'Lot_No', ls_Lot_No) //Update New LotNo
+				idsCCRecon.setItem( ll_FindRow, 'Ro_No', ls_Ro_No) //Update RoNo
+				idsCCRecon.setItem( ll_FindRow, 'Exp_DT', ldt_Exp_dt) //Update New Exp Dt
+				//End - Dinesh - 08/07/2023- SIMS-197- Cycle count adjustment
 			else
 				idsCCRecon.setItem( ll_FindRow, 'action_cd', 'I') //Insert SN, it should be dummy SN
 			End IF
-			idsCCRecon.setItem( ll_FindRow, 'Po_No', ls_New_Po_No) //Update New PoNo
-			idsCCRecon.setItem( ll_FindRow, 'Po_No2', ls_Po_no2) //Update New PoNo2
-			idsCCRecon.setItem( ll_FindRow, 'Lot_No', ls_Lot_No) //Update New LotNo
-			idsCCRecon.setItem( ll_FindRow, 'Ro_No', ls_Ro_No) //Update RoNo
-			idsCCRecon.setItem( ll_FindRow, 'Exp_DT', ldt_Exp_dt) //Update New Exp Dt
+//			idsCCRecon.setItem( ll_FindRow, 'Po_No', ls_New_Po_No) //Update New PoNo //Dinesh - 08/07/2023- SIMS-197- Cycle count adjustment
+//			idsCCRecon.setItem( ll_FindRow, 'Po_No2', ls_Po_no2) //Update New PoNo2
+//			idsCCRecon.setItem( ll_FindRow, 'Lot_No', ls_Lot_No) //Update New LotNo
+//			idsCCRecon.setItem( ll_FindRow, 'Ro_No', ls_Ro_No) //Update RoNo
+//			idsCCRecon.setItem( ll_FindRow, 'Exp_DT', ldt_Exp_dt) //Update New Exp Dt
 
 			//Write to File and Screen
 			lsLogOut = '      - 3PL Cycle Count-  Processing of uf_process_cc_serial_change  -Down Count (High Value Item) - and CC_No: '+ls_cc_no + ' - SKU: ' +ls_sku + ' - Serial No: '+ls_serial_No
@@ -14081,7 +14784,7 @@ ls_trans_order_Id = string(al_trans_order_Id)
 //Create Batch Transaction Record
 Insert into Batch_Transaction (Project_Id, Trans_Type, Trans_Order_Id, Trans_Status, Trans_Parm,Trans_Create_Date)
 values (:as_project, :as_trans_type, :ls_trans_order_Id, 'N',:as_trans_parm, :ldtToday)
-using sqlca;
+using sqlca; 
 
 select Max(Trans_Id) into :ll_Batch_Id from Batch_Transaction with(nolock)
 where Project_Id=:as_project and Trans_Type=:as_trans_type
@@ -14369,13 +15072,55 @@ public function long uf_om_sn_adjustment (string asproject, long al_transid, str
 Datastore	ldsOC
 Long 		ll_InvTxn_row, llid_no, llRowPos, llRowCount, llRC
 string 	ls_client_Id, lslogOut, sql_syntax, ERRORS, ls_wh, ls_sku
-string		ls_to_serialno, ls_from_serialno, ls_trans_parm
+string		ls_to_serialno, ls_from_serialno, ls_AdjustID,ls_trans_parm
 DateTime	ldtToday
-
-ldtToday = DateTime(Today(), Now())
-
+////Begin - Dinesh - 03/26/2021 - S54935- Google - SIMS – 947 change needed for Google SAP
+//string ls_trans_parm,ls_trans_order
+//Datetime ldt_EndRetrieve,dtrecordcreatedate
+//String ls_CodeDesc,alAdjustID
+//
+//int DateDiffInMinutes,TimeDiffInMinutes,ElapsedTimeInMinutes //Dinesh - 06/02/2023 - SIMS-197- Cycle count adjustment
+//
+//ldtToday = DateTime(Today(), Now())
+//
+//				select code_descript
+//				into :ls_CodeDesc  //This should be a value of minutes to delay the processing
+//				from lookup_table
+//				where project_id = 'PANDORA'
+//				and code_type = 'DownCount_Delay'
+//				and code_ID = 'Minutes'
+//				and User_Updateable_Ind = 'Y';
+//				
+//				select TOP 1 current_timestamp into :ldt_EndRetrieve from sysobjects using sqlca; //get Server time instead local machine time
+//				//ls_AdjustID= string(alAdjustID)
+//				//select Trans_create_date into :dtrecordcreatedate from batch_transaction where trans_order_id= :alAdjustID using sqlca;
+//				select record_create_date into :dtrecordcreatedate from batch_transaction where trans_order_id= :al_transId using sqlca; //get CC created date
+//			
+//				lsLogOut = "      Creating Transaction For Adjust ID : " +  string(al_transId) +  " Transaction Created Date Time is: " + string(ldt_EndRetrieve)
+//				FileWrite(gilogFileNo,lsLogOut)
+//	
+//				If ls_CodeDesc <> '' and Not IsNull ( ls_CodeDesc ) then
+//					//ldt_EndRetrieve = DateTime(Today( ),Now( ) ) //Remeber if running this on a local machine this is your computer time not GMT
+//					//Use the below datetime when running on local machine.  It adds 7 hours to the local time.  Adjust for DTS if needed.
+//					//ldt_EndRetrieve = DateTime(Today( ),RelativeTime(Now( ),25200 ) ) //Remeber if running this on a local machine this is your computer time not GMT
+//					DateDiffInMinutes = DaysAfter ( Date(dtrecordcreatedate), Date(ldt_EndRetrieve)  ) * 24 * 60
+//					TimeDiffInMinutes = SecondsAfter ( Time(dtrecordcreatedate), Time (ldt_EndRetrieve ) ) / 60
+//					ElapsedTimeInMinutes = DateDiffInMinutes + TimeDiffInMinutes
+//					lsLogOut = "      Ready to process Down Count - uf_om_sn_adjustment() for Transaction ID : " + string(al_transId) + '  ' + String(ElapsedTimeInMinutes) + ' Minutes have passed ' +  ' System DateTime is: ' + String(ldt_EndRetrieve) + '  Record Create Date is: ' + String(dtrecordcreatedate)
+//					FileWrite(gilogFileNo,lsLogOut)
+//
+//				If ElapsedTimeInMinutes < Long ( ls_CodeDesc ) then //Compair the minutes with the theashold found in the lookup table.
+//					lsLogOut = "      Skipping MM Transaction For Transaction ID: " + string(al_transId)
+//					FileWrite(gilogFileNo,lsLogOut)
+//					//w_main.SetMicroHelp("Ready")
+//					Return 2
+//				end If
+//				
+//				//If this.uf_process_downcount_delay_validation( asproject,string(alAdjustID), ls_CodeDesc) > 0 Then Return 2
+//			End If
+////	
 //Write to File and Screen
-lsLogOut = '      - OM Adj-SN change- Start Processing of uf_om_sn_adjustment() ' 
+lsLogOut = '      - OM Adj-SN change- Start Processing of uf_om_sn_adjustment() '  
 FileWrite(giLogFileNo,lsLogOut)
 gu_nvo_process_files.uf_write_log(lsLogOut)
 	
@@ -14398,11 +15143,11 @@ if is_trans_parm='Inbound' then
 	//	sql_syntax += ";"
 		
 	//dts 4/16 - TODO - Need to use receive_serial_detail if serial roll-up is turned on, otherwise, get SN from putaway
-	sql_syntax = "SELECT rm.Wh_Code,rm.Complete_Date,rp.owner_id,rp.po_no,rp.sku,rsd.serial_no"
+	sql_syntax = "SELECT rm.Wh_Code,rm.Complete_Date,rp.owner_id,rp.po_no,rp.sku,rp.serial_no"
 	sql_syntax += " from receive_master rm with(nolock)"
 	sql_syntax += " inner join receive_putaway rp with(nolock) on rm.ro_no=rp.ro_no"
-	sql_syntax += " inner join receive_serial_detail rsd with(nolock) on rm.ro_no=rsd.ro_no and rp.ID_NO=rsd.ID_NO"
-	sql_syntax += " where rm.ro_no='"+as_trans_order_id+"' and line_item_no=" + string(il_LineNo) +";"
+	//sql_syntax += " inner join receive_serial_detail rsd with(nolock) on rm.ro_no=rsd.ro_no and rp.ID_NO=rsd.ID_NO" //Dhirendra- SIMS-51 PANDORA Commented this line because join is failing due toreceive_serial_detail table is no longer used
+	sql_syntax += " where rm.ro_no='"+as_trans_order_id+"' and line_item_no=" + string(il_LineNo) +";"                       //  so getting the serial_no from receive_putaway table .
 	ldsOC.Create(SQLCA.SyntaxFromSQL(sql_syntax,"", ERRORS))
 	
 	IF Len(ERRORS) > 0 THEN
@@ -14734,9 +15479,9 @@ end function
 
 public function long uf_process_cc_update_serial_records (string as_project);//27-Dec-2017 :Madhu PEVS-806 3PL CC Orders.
 
-string		ls_action_cd, ls_wh, ls_owner_cd, ls_sku, ls_serial_no, ls_lcode, ls_lot_No, lsFilter
+string		ls_action_cd, ls_wh, ls_owner_cd, ls_sku, ls_serial_no, ls_lcode, ls_lot_No, lsFilter,lsToWarehouse,ls_custcode,ls_Owner_code_new,ls_new_po_no
 string		ls_po_No, ls_po_No2, ls_Ro_No, ls_Inv_Type, ls_carton_Id, lsLogOut, ls_old_wh_code
-long		ll_Owner_Id, ll_row, ll_wh_count, ll_count, ll_filter_count
+long		ll_Owner_Id, ll_row, ll_wh_count, ll_count, ll_filter_count,ll_Owner_Id_new
 datetime		ldt_exp_date, ldtToday
 
 string ls_CS_RO_NO
@@ -14747,6 +15492,7 @@ lds_content_summary_ro_cc_resolve.dataobject = "d_content_summary_ro_cc_resolve"
 lds_content_summary_ro_cc_resolve.SetTransObject(SQLCA)
 
 ldtToday =DateTime(today(),now())
+ls_new_po_no='MAIN'
 
 SetPointer(HourGlass!)
 
@@ -14770,13 +15516,58 @@ IF idsCCRecon.rowcount( ) > 0 THEN
 		ls_serial_no =idsCCRecon.getItemString( ll_row, 'Serial_No')
 		ls_lcode= idsCCRecon.getItemString( ll_row, 'l_code')
 		ls_po_No =idsCCRecon.getItemString( ll_row, 'Po_No')
+		ll_Owner_Id =idsCCRecon.getItemNumber( ll_row, 'Owner_Id') // Dinesh - 07/31/2023- SIMS-197- Google Cycle count adjustment
+		ls_owner_cd =idsCCRecon.getItemString( ll_row, 'Owner_Cd') // Dinesh - 07/31/2023- SIMS-197- Google Cycle count adjustment
+		
+		//Dinesh - 07/28/2023- SIMS-197-Google- SIMS- Cycle count adjustment changes - Commented the above lines 
+						
+						//To Warehouse
+						select user_field2 into :lsToWarehouse 	from customer with(nolock)
+						where project_id = :as_project and cust_code = :ls_owner_cd using sqlca;
+					
+						// To Cust code
+						select cust_code into :ls_custcode from customer with(nolock) 
+						where  project_id = :as_project and user_field2=:lsToWarehouse
+						and cust_code like 'WH%PR' using sqlca;  //Fetch cust code for respective warehouse ---->>> WH*PR
+						
+						If (ls_custcode) = "" or isnull(ls_custcode)  Then
+                					lsLogOut = "                  *** No Customer code is available for this warehouse that ends with PR: " + lsToWarehouse
+                					FileWrite(gilogFileNo,lsLogOut)
+						End If
+
+						
+							if ls_custcode <> '' or not isnull(ls_custcode)  then
+//								// New Owner code
+								select owner_id into :ll_Owner_Id_new from owner with(nolock) where project_id = :as_project and owner_cd=:ls_custcode using sqlca;  // Fetch new owner id for the respective cust code
+								
+								If (ll_Owner_Id_new) = 0  Then
+											lsLogOut = "                  *** No Owner code is available for this Owner: " + ls_custcode
+											 FileWrite(gilogFileNo,lsLogOut)
+								End If
+								
+								select owner_cd into :ls_Owner_code_new from owner with(nolock) where project_id = 'PANDORA' and owner_id=:ll_Owner_Id_new using sqlca;
+							
+							end if
+
 
 	// TAM 2019/05 - S33409 - Populate Serial History Table
+	 // Begin -  Dinesh - 07/31/2023- SIMS-197- Google Cycle count adjustment - Replace 'Research' to MAIN AND WH*PR
+	 IF ls_po_No='RESEARCH' then
 		update  Serial_Number_Inventory
+		set		Transaction_Type = 'CYCLE COUNT',	Transaction_Id = '3PL', Adjustment_Type = 'SR-UNKNOWN', l_code = 'UNKNOWN',Po_No=:ls_new_po_no,Owner_Id=:ll_Owner_Id_new,Owner_Cd=:ls_Owner_code_new
+		where Project_Id =:as_project and WH_Code =:ls_wh and SKU =:ls_sku and Serial_No =:ls_serial_no and l_code = :ls_lcode and Po_No =:ls_po_No
+		using sqlca;
+		commit;  // Dinesh - 07/31/2023- SIMS-197- Google Cycle count adjustment
+		
+		 // End -  Dinesh - 07/31/2023- SIMS-197- Google Cycle count adjustment - Replace 'Research' to MAIN AND WH*PR
+		
+	else
+		update  Serial_Number_Inventory   // Dinesh - 07/31/2023- SIMS-197- Google Cycle count adjustment // Commented update line replacement of 'RESEARCH' to MAIN *PR'
 		set		Transaction_Type = 'CYCLE COUNT',	Transaction_Id = '3PL', Adjustment_Type = 'SR-UNKNOWN', l_code = 'UNKNOWN'
 		where Project_Id =:as_project and WH_Code =:ls_wh and SKU =:ls_sku and Serial_No =:ls_serial_no and l_code = :ls_lcode and Po_No =:ls_po_No
 		using sqlca;
 		commit;
+	end if
 			
 //		delete  from Serial_Number_Inventory where Project_Id =:as_project and WH_Code =:ls_wh and SKU =:ls_sku and Serial_No =:ls_serial_no and l_code = :ls_lcode and Po_No =:ls_po_No
 //		using sqlca;
@@ -14804,17 +15595,65 @@ IF idsCCRecon.rowcount( ) > 0 THEN
 		ls_serial_no =idsCCRecon.getItemString( ll_row, 'Serial_No')
 		ls_lcode= idsCCRecon.getItemString( ll_row, 'l_code')
 		ls_po_No =idsCCRecon.getItemString( ll_row, 'Po_No')
+		ll_Owner_Id =idsCCRecon.getItemNumber( ll_row, 'Owner_Id') // Dinesh - 07/31/2023- SIMS-197- Google Cycle count adjustment
+		ls_owner_cd =idsCCRecon.getItemString( ll_row, 'Owner_Cd') // Dinesh - 07/31/2023- SIMS-197- Google Cycle count adjustment
+		
+		//Dinesh - 07/28/2023- SIMS-197-Google- SIMS- Cycle count adjustment changes - Commented the above lines 
+						
+						//To Warehouse
+						select user_field2 into :lsToWarehouse 	from customer with(nolock)
+						where project_id = :as_project and cust_code = :ls_owner_cd using sqlca;
+						// To Cust code
+						select cust_code into :ls_custcode from customer with(nolock) 
+						where  project_id = :as_project and user_field2=:lsToWarehouse
+						and cust_code like 'WH%PR' using sqlca;  //Fetch cust code for respective warehouse ---->>> WH*PR
+						
+						If (ls_custcode) = "" or isnull(ls_custcode)  Then
+                					lsLogOut = "                  *** No Customer code is available for this warehouse that ends with PR: " + lsToWarehouse
+                					FileWrite(gilogFileNo,lsLogOut)
+						End If
+
+						
+							if ls_custcode <> '' or not isnull(ls_custcode)  then
+//								// New Owner code
+								select owner_id into :ll_Owner_Id_new from owner with(nolock) where project_id = :as_project and owner_cd=:ls_custcode using sqlca;  // Fetch new owner id for the respective cust code
+								
+								If (ll_Owner_Id_new) = 0  Then
+											lsLogOut = "                  *** No Owner code is available for this Owner: " + ls_custcode
+											 FileWrite(gilogFileNo,lsLogOut)
+								End If
+								
+								select owner_cd into :ls_Owner_code_new from owner with(nolock) where project_id = 'PANDORA' and owner_id=:ll_Owner_Id_new using sqlca;
+							
+							end if
+
 
 	// TAM 2019/05 - S33409 - Populate Serial History Table
-		update  Serial_Number_Inventory
-		set		Transaction_Type = 'CYCLE COUNT',	Transaction_Id = '3PL', Adjustment_Type = 'DELETED'
-		where Project_Id =:as_project and WH_Code =:ls_wh and SKU =:ls_sku and Serial_No =:ls_serial_no and l_code = :ls_lcode and Po_No =:ls_po_No
-		using sqlca;
+		 // Begin -  Dinesh - 07/31/2023- SIMS-197- Google Cycle count adjustment - Replace 'Research' to MAIN AND WH*PR
+		IF ls_po_No='RESEARCH' then
+			update  Serial_Number_Inventory
+			set		Transaction_Type = 'CYCLE COUNT',	Transaction_Id = '3PL', Adjustment_Type = 'DELETED',Po_No=:ls_new_po_no,Owner_Id=:ll_Owner_Id_new,Owner_Cd=:ls_Owner_code_new
+			where Project_Id =:as_project and WH_Code =:ls_wh and SKU =:ls_sku and Serial_No =:ls_serial_no and l_code = :ls_lcode and Po_No =:ls_po_No
+			using sqlca;
+			commit;
+				
+			delete  from Serial_Number_Inventory where Project_Id =:as_project and WH_Code =:ls_wh and SKU =:ls_sku and Serial_No =:ls_serial_no and l_code = :ls_lcode and Po_No=:ls_new_po_no and Owner_Id=:ll_Owner_Id_new and Owner_Cd=:ls_Owner_code_new
+			using sqlca;
+		else  
+				update  Serial_Number_Inventory  
+				set		Transaction_Type = 'CYCLE COUNT',	Transaction_Id = '3PL', Adjustment_Type = 'DELETED'
+				where Project_Id =:as_project and WH_Code =:ls_wh and SKU =:ls_sku and Serial_No =:ls_serial_no and l_code = :ls_lcode and Po_No =:ls_po_No
+				using sqlca;
+				commit;
+					
+				delete  from Serial_Number_Inventory where Project_Id =:as_project and WH_Code =:ls_wh and SKU =:ls_sku and Serial_No =:ls_serial_no and l_code = :ls_lcode and Po_No =:ls_po_No
+				using sqlca;
+				commit;
+			end if
+		// End -Dinesh - 07/31/2023- SIMS-197- Google Cycle count adjustment - Replace 'Research' to MAIN AND WH*PR
 		commit;
-			
-		delete  from Serial_Number_Inventory where Project_Id =:as_project and WH_Code =:ls_wh and SKU =:ls_sku and Serial_No =:ls_serial_no and l_code = :ls_lcode and Po_No =:ls_po_No
-		using sqlca;
-		commit;
+		
+		 // End -  Dinesh - 07/31/2023- SIMS-197- Google Cycle count adjustment - Replace 'Research' to MAIN AND WH*PR
 		
 		//Write to File and Screen
 		lsLogOut = '      - 3PL Cycle Count- Processing of uf_process_cc_update_serial_records - Deleted  Sku/Serial No /Loc: ' +ls_sku +' / '+ls_serial_no + ' / '+ls_lcode + '  Action Cd: '+ls_action_cd
@@ -14841,12 +15680,52 @@ IF idsCCRecon.rowcount( ) > 0 THEN
 		ls_po_No =idsCCRecon.getItemString( ll_row, 'Po_No')
 
 //		//Sept 2019 - MikeA - S37369 - F17811 - Google - SIMS - Serial Number Go Forward Process
-//		uf_check_serial_number_exist(as_project, 'CYCLE_COUNT-U', ls_wh, ls_lcode, ls_sku, ls_serial_no)	
+//		uf_check_serial_number_exist(as_project, 'CYCLE_COUNT-U', ls_wh, ls_lcode, ls_sku, ls_serial_no)
 
-		update Serial_Number_Inventory set l_code = :ls_lcode, Po_No =:ls_po_No, Owner_Id =:ll_Owner_Id, Owner_Cd =:ls_Owner_cd
+		//Dinesh - 07/28/2023- SIMS-197-Google- SIMS- Cycle count adjustment changes - Commented the above lines 
+						
+						//To Warehouse
+						select user_field2 into :lsToWarehouse 	from customer with(nolock)
+						where project_id = :as_project and cust_code = :ls_owner_cd using sqlca;
+						
+						// Begin  - Dinesh -04/13/2023- SIMS-197-Google- SIMS- Cycle count adjustment changes
+						// To Cust code
+						select cust_code into :ls_custcode from customer with(nolock) 
+						where  project_id = :as_project and user_field2=:lsToWarehouse
+						and cust_code like 'WH%PR' using sqlca;  //Fetch cust code for respective warehouse ---->>> WH*PR
+						
+						If (ls_custcode) = "" or isnull(ls_custcode)  Then
+                					lsLogOut = "                  *** No Customer code is available for this warehouse that ends with PR: " + lsToWarehouse
+                					FileWrite(gilogFileNo,lsLogOut)
+						End If
+
+						
+							if ls_custcode <> '' or not isnull(ls_custcode)  then
+//								// New Owner code
+								select owner_id into :ll_Owner_Id_new from owner with(nolock) where project_id = :as_project and owner_cd=:ls_custcode using sqlca;  // Fetch new owner id for the respective cust code
+								
+								If (ll_Owner_Id_new) = 0  Then
+											lsLogOut = "                  *** No Owner code is available for this Owner: " + ls_custcode
+											 FileWrite(gilogFileNo,lsLogOut)
+								End If
+								
+								select owner_cd into :ls_Owner_code_new from owner with(nolock) where project_id = 'PANDORA' and owner_id=:ll_Owner_Id_new using sqlca;
+							
+							end if
+	IF ls_po_No='RESEARCH' then
+		update Serial_Number_Inventory set l_code = :ls_lcode, Po_No = :ls_new_po_no, Owner_Id =:ll_Owner_Id_new, Owner_Cd =:ls_Owner_code_new
+		where Project_Id =:as_project and WH_Code =:ls_wh and SKU =:ls_sku and Serial_No =:ls_serial_no
+		using sqlca;
+		commit; 	 // Dinesh -07/28/2023- SIMS-197- Google- Cycle count adjustment - Commented this line to set po_no to 'Main', New owner id and new owner code
+		
+	else
+		
+	    update Serial_Number_Inventory set l_code = :ls_lcode, Po_No =:ls_po_No, Owner_Id =:ll_Owner_Id, Owner_Cd =:ls_Owner_cd
 		where Project_Id =:as_project and WH_Code =:ls_wh and SKU =:ls_sku and Serial_No =:ls_serial_no
 		using sqlca;
 		commit;
+	end if
+		
 		
 		//Write to File and Screen
 		lsLogOut = '      - 3PL Cycle Count- Processing of uf_process_cc_update_serial_records - Updated Sku/Serial No /Loc: ' +ls_sku +' / '+ls_serial_no + ' / '+ls_lcode + '  Action Cd: '+ls_action_cd
@@ -14875,10 +15754,46 @@ IF idsCCRecon.rowcount( ) > 0 THEN
 		ls_po_No2 = idsCCRecon.getItemString( ll_row, 'Po_No2')
 		ldt_exp_date = idsCCRecon.getItemDateTime( ll_row, 'Exp_DT')
 		
+		//Dinesh - 07/28/2023- SIMS-197-Google- SIMS- Cycle count adjustment changes - Commented the above lines 
+						
+						//To Warehouse
+						select user_field2 into :lsToWarehouse 	from customer with(nolock)
+						where project_id = :as_project and cust_code = :ls_owner_cd using sqlca;
+						
+						// Begin  - Dinesh -04/13/2023- SIMS-197-Google- SIMS- Cycle count adjustment changes
+						// To Cust code
+						select cust_code into :ls_custcode from customer with(nolock) 
+						where  project_id = :as_project and user_field2=:lsToWarehouse
+						and cust_code like 'WH%PR' using sqlca;  //Fetch cust code for respective warehouse ---->>> WH*PR
+						
+						If (ls_custcode) = "" or isnull(ls_custcode)  Then
+                					lsLogOut = "                  *** No Customer code is available for this warehouse that ends with PR: " + lsToWarehouse
+                					FileWrite(gilogFileNo,lsLogOut)
+						End If
+
+						
+							if ls_custcode <> '' or not isnull(ls_custcode)  then
+//								// New Owner code
+								select owner_id into :ll_Owner_Id_new from owner with(nolock) where project_id = :as_project and owner_cd=:ls_custcode using sqlca;  // Fetch new owner id for the respective cust code
+								
+								If (ll_Owner_Id_new) = 0  Then
+											lsLogOut = "                  *** No Owner code is available for this Owner: " + ls_custcode
+											 FileWrite(gilogFileNo,lsLogOut)
+								End If
+								
+								select owner_cd into :ls_Owner_code_new from owner with(nolock) where project_id = 'PANDORA' and owner_id=:ll_Owner_Id_new using sqlca;
+							
+							end if
+
+		
 		//OCT 2019 - Mikea - This will always be '-' because that is how it is passed from datawindow in CycleCount.
 		//Will try to resolve RO_No
-
-		lds_content_summary_ro_cc_resolve.Retrieve(as_project, ls_wh, ls_lcode, ls_sku, ll_Owner_Id, ls_po_No)
+	IF ls_po_No='RESEARCH' then
+		lds_content_summary_ro_cc_resolve.Retrieve(as_project, ls_wh, ls_lcode, ls_sku, ll_Owner_Id_new, ls_new_po_No) // Dinesh - SIMS-197- 07/31/2023- Google Cycle count adjustment
+	else
+		lds_content_summary_ro_cc_resolve.Retrieve(as_project, ls_wh, ls_lcode, ls_sku, ll_Owner_Id, ls_po_No) // Dinesh - SIMS-197- 07/31/2023- Google Cycle count adjustment
+	end if
+		
 
 		//There will need to be more logic put behind this if there are multip_ro_nos. 
 
@@ -14926,6 +15841,18 @@ IF idsCCRecon.rowcount( ) > 0 THEN
 			
 // TAM 2019/05 - S33409 - Populate Serial History Table
 			If ll_count = 0 Then //DE3082 -Sometimes, Serial No already exist with different location.
+			 if ls_po_No='RESEARCH' then
+				
+				Insert into Serial_Number_Inventory (Project_Id,WH_Code,Owner_Id,Owner_Cd,SKU,Serial_No,Component_Ind,
+						Component_No,Update_Date,Update_User,l_code,Lot_No,Po_No,Po_No2, Exp_DT,RO_NO,Inventory_Type, Carton_Id, Serial_Flag, Do_No,
+						Transaction_Type ,	Transaction_Id , Adjustment_Type)
+				values (:as_project, :ls_wh, :ll_Owner_Id_New, :ls_Owner_code_new, :ls_sku, :ls_serial_no, 'N', 0, :ldtToday, 'SIMSFP', :ls_lcode,
+						:ls_lot_no, :ls_new_po_No, :ls_po_No2, :ldt_exp_date, :ls_Ro_No, :ls_Inv_type, :ls_carton_Id, 'N','-',
+						'CYCLE_COUNT', '3PL', 'LOTTABLES')
+				using sqlca;
+				
+			else
+				
 				Insert into Serial_Number_Inventory (Project_Id,WH_Code,Owner_Id,Owner_Cd,SKU,Serial_No,Component_Ind,
 						Component_No,Update_Date,Update_User,l_code,Lot_No,Po_No,Po_No2, Exp_DT,RO_NO,Inventory_Type, Carton_Id, Serial_Flag, Do_No,
 						Transaction_Type ,	Transaction_Id , Adjustment_Type)
@@ -14933,6 +15860,7 @@ IF idsCCRecon.rowcount( ) > 0 THEN
 						:ls_lot_no, :ls_po_No, :ls_po_No2, :ldt_exp_date, :ls_Ro_No, :ls_Inv_type, :ls_carton_Id, 'N','-',
 						'CYCLE_COUNT', '3PL', 'LOTTABLES')
 				using sqlca;
+			end if
 				commit;
 				
 				//Write to File and Screen
@@ -14941,11 +15869,19 @@ IF idsCCRecon.rowcount( ) > 0 THEN
 
 			else
 // TAM 2019/05 - S33409 - Populate Serial History Table
+			if ls_po_No='RESEARCH' then
+				update Serial_Number_Inventory set  l_code = :ls_lcode, Po_No =:ls_new_po_No, Owner_Id =:ll_Owner_Id_New, Owner_Cd =:ls_Owner_code_new,
+					Transaction_Type = 'CYCLE_COUNT',	Transaction_Id = '3PL', Adjustment_Type = 'LOTTABLES'
+				where Project_Id =:as_project and WH_Code =:ls_wh and SKU =:ls_sku and Serial_No =:ls_serial_no
+				using sqlca;
+				commit;
+			else
 				update Serial_Number_Inventory set  l_code = :ls_lcode, Po_No =:ls_po_No, Owner_Id =:ll_Owner_Id, Owner_Cd =:ls_Owner_cd,
 					Transaction_Type = 'CYCLE_COUNT',	Transaction_Id = '3PL', Adjustment_Type = 'LOTTABLES'
 				where Project_Id =:as_project and WH_Code =:ls_wh and SKU =:ls_sku and Serial_No =:ls_serial_no
 				using sqlca;
 				commit;
+			end if
 
 				//Write to File and Screen
 				lsLogOut = '      - 3PL Cycle Count- Processing of uf_process_cc_update_serial_records - Inserted/Updated Sku/Serial No /Loc: ' +ls_sku +' / '+ls_serial_no + ' / '+ls_lcode + '  Action Cd: '+ls_action_cd
@@ -14981,6 +15917,38 @@ IF idsCCRecon.rowcount( ) > 0 THEN
 		ls_Inv_Type =idsCCRecon.getItemString( ll_row, 'Inventory_Type')
 		ls_carton_Id =idsCCRecon.getItemString( ll_row, 'Carton_Id')
 		
+			//Dinesh - 07/31/2023- SIMS-197-Google- SIMS- Cycle count adjustment changes - Commented the above lines 
+						
+						//To Warehouse
+						select user_field2 into :lsToWarehouse 	from customer with(nolock)
+						where project_id = :as_project and cust_code = :ls_owner_cd using sqlca;
+						
+						// Begin  - Dinesh -04/13/2023- SIMS-197-Google- SIMS- Cycle count adjustment changes
+						// To Cust code
+						select cust_code into :ls_custcode from customer with(nolock) 
+						where  project_id = :as_project and user_field2=:lsToWarehouse
+						and cust_code like 'WH%PR' using sqlca;  //Fetch cust code for respective warehouse ---->>> WH*PR
+						
+						If (ls_custcode) = "" or isnull(ls_custcode)  Then
+                					lsLogOut = "                  *** No Customer code is available for this warehouse that ends with PR: " + lsToWarehouse
+                					FileWrite(gilogFileNo,lsLogOut)
+						End If
+
+						
+							if ls_custcode <> '' or not isnull(ls_custcode)  then
+//								// New Owner code
+								select owner_id into :ll_Owner_Id_new from owner with(nolock) where project_id = :as_project and owner_cd=:ls_custcode using sqlca;  // Fetch new owner id for the respective cust code
+								
+								If (ll_Owner_Id_new) = 0  Then
+											lsLogOut = "                  *** No Owner code is available for this Owner: " + ls_custcode
+											 FileWrite(gilogFileNo,lsLogOut)
+								End If
+								
+								select owner_cd into :ls_Owner_code_new from owner with(nolock) where project_id = 'PANDORA' and owner_id=:ll_Owner_Id_new using sqlca;
+							
+							end if
+
+		
 		//Write to File and Screen
 		lsLogOut = '      - 3PL Cycle Count- Processing of uf_process_cc_update_serial_records - Not Deleted (High Value Item) Sku/Serial No /Loc: ' +ls_sku +' / '+ls_serial_no + ' / '+ls_lcode +'  Action Cd: '+ls_action_cd 
 		FileWrite(giLogFileNo,lsLogOut)
@@ -14991,6 +15959,18 @@ IF idsCCRecon.rowcount( ) > 0 THEN
 		
 		If ll_count = 0 Then
 // TAM 2019/05 - S33409 - Populate Serial History Table
+	// Begin  - Dinesh -07/31/2023- SIMS-197-Google- SIMS- Cycle count adjustment changes
+ 		if ls_po_no='RESEARCH' then
+			Insert into Serial_Number_Inventory (Project_Id,WH_Code,Owner_Id,Owner_Cd,SKU,Serial_No,Component_Ind,
+						Component_No,Update_Date,Update_User,l_code,Lot_No,Po_No,Po_No2, Exp_DT,RO_NO,Inventory_Type, Carton_Id, Serial_Flag, Do_No,
+						Transaction_Type , Transaction_Id , Adjustment_Type)
+			values (:as_project, :ls_wh, :ll_Owner_Id_new, :ls_Owner_code_new, :ls_sku, :ls_serial_no, 'N', 0, :ldtToday, 'SIMSFP', :ls_lcode,
+						:ls_lot_no, :ls_new_po_No, :ls_po_No2, :ldt_exp_date, :ls_Ro_No, :ls_Inv_type, :ls_carton_Id, 'N','-',
+						'CYCLE_COUNT', '3PL', 'LOTTABLES')
+			using sqlca;
+			commit;
+	// End  - Dinesh -07/31/2023- SIMS-197-Google- SIMS- Cycle count adjustment changes
+		else
 			Insert into Serial_Number_Inventory (Project_Id,WH_Code,Owner_Id,Owner_Cd,SKU,Serial_No,Component_Ind,
 						Component_No,Update_Date,Update_User,l_code,Lot_No,Po_No,Po_No2, Exp_DT,RO_NO,Inventory_Type, Carton_Id, Serial_Flag, Do_No,
 						Transaction_Type , Transaction_Id , Adjustment_Type)
@@ -14998,7 +15978,7 @@ IF idsCCRecon.rowcount( ) > 0 THEN
 						:ls_lot_no, :ls_po_No, :ls_po_No2, :ldt_exp_date, :ls_Ro_No, :ls_Inv_type, :ls_carton_Id, 'N','-',
 						'CYCLE_COUNT', '3PL', 'LOTTABLES')
 			using sqlca;
-			commit;
+		end if
 			
 			//Write to File and Screen
 			lsLogOut = '      - 3PL Cycle Count- Processing of uf_process_cc_update_serial_records - Inserted (High Value Item) Sku/Serial No /Loc: ' +ls_sku +' / '+ls_serial_no + ' / '+ls_lcode + '  Action Cd: '+ls_action_cd
@@ -15007,12 +15987,22 @@ IF idsCCRecon.rowcount( ) > 0 THEN
 		else
 // TAM 2019/05 - S33409 - Populate Serial History Table
 			//update attributes of Serial No
-			update Serial_Number_Inventory set  l_code = :ls_lcode, Po_No =:ls_po_No, Owner_Id =:ll_Owner_Id, Owner_Cd =:ls_Owner_cd,
-					Transaction_Type = 'CYCLE_COUNT',	Transaction_Id = '3PL', Adjustment_Type = 'LOTTABLES'
-			where Project_Id =:as_project and WH_Code =:ls_wh and SKU =:ls_sku and Serial_No =:ls_serial_no
-			using sqlca;
-			commit;
+			// Begin - Dinesh -07/31/2023- SIMS-197-Google- SIMS- Cycle count adjustment changes
+			if ls_po_no='RESEARCH' then
+				update Serial_Number_Inventory set  l_code = :ls_Owner_code_new, Po_No =:ls_new_po_No, Owner_Id =:ll_Owner_Id_new, Owner_Cd =:ls_Owner_cd,
+						Transaction_Type = 'CYCLE_COUNT',	Transaction_Id = '3PL', Adjustment_Type = 'LOTTABLES'
+				where Project_Id =:as_project and WH_Code =:ls_wh and SKU =:ls_sku and Serial_No =:ls_serial_no
+				using sqlca;
+				commit;
 
+			else
+				update Serial_Number_Inventory set  l_code = :ls_lcode, Po_No =:ls_po_No, Owner_Id =:ll_Owner_Id, Owner_Cd =:ls_Owner_cd,
+									Transaction_Type = 'CYCLE_COUNT',	Transaction_Id = '3PL', Adjustment_Type = 'LOTTABLES'
+							where Project_Id =:as_project and WH_Code =:ls_wh and SKU =:ls_sku and Serial_No =:ls_serial_no
+							using sqlca;
+							commit;
+			end if
+			// End - Dinesh -07/31/2023- SIMS-197-Google- SIMS- Cycle count adjustment changes
 			//Write to File and Screen
 			lsLogOut = '      - 3PL Cycle Count- Processing of uf_process_cc_update_serial_records - Updated (High Value Item) Sku/Serial No /Loc: ' +ls_sku +' / '+ls_serial_no + ' / '+ls_lcode + '  Action Cd: '+ls_action_cd
 			FileWrite(giLogFileNo,lsLogOut)
@@ -15476,9 +16466,9 @@ end function
 
 public function long uf_process_cc_auto_create_soc_serialized (string as_project, string as_cc_no, string as_sku, long al_owner_id, string as_pono);//20-Nov-2017 :Madhu PEVS-806 - 3PL Cycle Count Orders.
 
-string		lsFind, lsOwner_Cd, lsReasonCd, lsOrdStatus, ls_supp_code, lsLogOut, ls_cc_class_Code
+string		lsFind, lsOwner_Cd, lsReasonCd, lsOrdStatus, ls_supp_code, lsLogOut, ls_cc_class_Code,ls_dc_wh,ls_dc_class_Code
 string		ls_sku, ls_pono, ls_lcode, ls_req_SN, ls_trans_parm, ls_wh, ls_sequence, ls_sql_syntax, lsFilter
-long		llRowCount, llFindRow, llNewRow, llRowPos, ll_row, ll_return
+long		llRowCount, llFindRow, llNewRow, llRowPos, ll_row, ll_return,ll_ret
 long		ll_Qty, ll_Qty_Count, ll_Qty_Up, ll_Qty_Down, ll_high_volume, ll_cc_line
 double	ldBatchSeq, ldQty, ldQtyCount
 datetime ldtCountDate
@@ -15524,6 +16514,7 @@ ln_cc_utils = CREATE n_cc_utils
 ln_cc_utils.uf_spread_rolled_up_si_counts( ldsCCDetail )
 
 ls_wh = ldsCCMaster.getItemstring( 1, 'wh_code')
+ls_dc_wh=ldsCCMaster.getitemstring(1,'User_field3') //Dinesh - 12/28/2022- SIMS-151- Google - SIMS - Data Center ABC Cycle Counting Part 2- Added DC class
 
 llRowCount = ldsCCDetail.RowCount()
 
@@ -15660,7 +16651,7 @@ For llRowPos = 1 to llRowCount
 			WHERE A.Project_Id =:as_project and A.sku =:ls_sku and A.Supp_code =:ls_supp_code
 			using sqlca;
 			
-			select CC_Class_Code into :ls_cc_class_Code from Item_Master with(nolock) 
+			select CC_Class_Code,DC_Class_Code into :ls_cc_class_Code,:ls_dc_class_Code from Item_Master with(nolock) 
 			where Project_Id =:as_project and sku =:ls_sku and Supp_code =:ls_supp_code
 			using sqlca;
 			
@@ -15669,6 +16660,17 @@ For llRowPos = 1 to llRowCount
 			else
 				ls_soc_parms.boolean_arg[1] = FALSE //Not High Value Item - Do Auto QTY Adjustment
 			END IF
+			
+			// Begin - Dinesh - 12/28/2022- SIMS-151- Google - SIMS - Data Center ABC Cycle Counting Part 2- Added DC class
+			if ls_dc_wh ='YES' then
+				IF (ll_high_volume > 0 OR upper(ls_dc_class_Code) ='A' )THEN
+					ls_soc_parms.boolean_arg[1] = TRUE //High Value Item - Don't do Auto QTY Adjustment
+				else
+					ls_soc_parms.boolean_arg[1] = FALSE //Not High Value Item - Do Auto QTY Adjustment
+				END IF
+			end if
+			// End - Dinesh - 12/28/2022- SIMS-151- Google - SIMS - Data Center ABC Cycle Counting Part 2- Added DC class
+
 
 			//Write to File and Screen
 			lsLogOut = '      - 3PL Cycle Count-  Processing of uf_process_cc_auto_create_soc_serialized()  - Down Count for  CC_No: '+as_cc_no +' - sku: '+ls_sku
@@ -15678,9 +16680,15 @@ For llRowPos = 1 to llRowCount
 
 			//Auto confirm SOC
 			ll_return = this.uf_process_cc_auto_confirm_soc( as_project, ls_soc_parms)
-
-			//Stock Adjustment
+			
 			ll_return = this.uf_process_cc_stock_adjustment( as_project, ls_soc_parms)
+
+				//Stock Adjustment
+//			ll_ret = uf_delay_downcount(as_cc_no) // Dinesh - 05/31/2023- SIMS-197- Cycle count adjustment 
+//			
+//			if ll_ret > 0 then
+//				ll_return = this.uf_process_cc_stock_adjustment( as_project, ls_soc_parms)
+//			end if
 			
 	END IF
 	
@@ -15697,6 +16705,7 @@ For llRowPos = 1 to llRowCount
 			ls_soc_parms.boolean_arg[1] = FALSE
 			
 			//stock Adjustment
+			
 			ll_return =this.uf_process_cc_stock_adjustment( as_project, ls_soc_parms)
 
 	END IF
@@ -17760,7 +18769,8 @@ ldsToDetail.SetItem(ll_detail_row, 'd_location', ls_lcode)
 			
 ldsToDetail.SetItem(ll_detail_row, 'sku', as_sku)
 ldsToDetail.SetItem(ll_detail_row, 'Po_No', as_po_no)
-ldsToDetail.SetItem(ll_detail_row, 'New_PO_NO', 'RESEARCH')
+//ldsToDetail.SetItem(ll_detail_row, 'New_PO_NO', 'RESEARCH') // Dinesh - 04/18/2023- SIMS-197- Google - SIMS - Cycle Count Adjustment Changes
+ldsToDetail.SetItem(ll_detail_row, 'New_PO_NO', 'MAIN') // Dinesh - 04/18/2023- SIMS-197- Google - SIMS - Cycle Count Adjustment Changes
 ldsToDetail.SetItem(ll_detail_row, 'Line_Item_No', llLineItemNo) //CC Line Item No
 ldsToDetail.SetItem(ll_detail_row, 'User_Line_Item_No', llLineItemNo)
 ldsToDetail.SetItem(ll_detail_row, 'Quantity', 1)
@@ -17906,6 +18916,59 @@ destroy ldsToDetail
 destroy ldsToSerial
 
 Return 0
+end function
+
+public function integer uf_process_downcount_delay_validation (string asproject, string asadjustno, string ascodedesc);// 06/02/2023  : Dinesh  Add a Validation against Down count adjustment MM transaction Delay for 10 Min.
+//Begin - 06/02/2023 : SIMS-197- Cycle count adjustment
+//Write records back into OMQ Tables
+
+string			ls_tran_status, lsLogOut
+Integer		DateDiffInMinutes, TimeDiffInMinutes, ElapsedTimeInMinutes
+long			ll_count
+DateTime 	ldtToday,ldt_EndRetrieve, ldt_tran_comp_date
+
+ldtToday = DateTime(Today(), Now())
+
+//Write to File and Screen
+lsLogOut = '      - OM Adjustment- Start Processing of uf_process_downcount_delay_validation() for Adjustment ID : ' + asadjustno
+FileWrite(giLogFileNo,lsLogOut)
+gu_nvo_process_files.uf_write_log(lsLogOut)
+
+select TOP 1 current_timestamp into :ldt_EndRetrieve from sysobjects using sqlca; //get Server time instead local machine time
+
+lsLogOut = "       Outbound Confirmation -Creating MM transaction For Adjustment number: " + asadjustno +" current Server Time is: " + string(ldt_EndRetrieve)
+FileWrite(gilogFileNo,lsLogOut)
+
+
+
+select Trans_Status, Trans_Complete_Date, count(*) into :ls_tran_status, :ldt_tran_comp_date, :ll_count
+from Batch_Transaction with(nolock) 
+where Project_Id =:asproject and Trans_Order_Id =:asadjustno and Trans_Type ='MM'
+group by Trans_Status, Trans_Complete_Date
+using sqlca;
+
+//IF  upper(ls_tran_status) ='N' and ll_count > 0 THEN
+IF  upper(ls_tran_status) ='N' and ll_count > 0 THEN // Dinesh - 07/03/2023- SIMS-197- Google - Stock adjustment change
+	Return 2
+else
+	DateDiffInMinutes = DaysAfter ( Date(ldt_tran_comp_date), Date(ldt_EndRetrieve)  ) * 24 * 60
+	TimeDiffInMinutes = SecondsAfter ( Time(ldt_tran_comp_date), Time (ldt_EndRetrieve ) ) / 60
+	ElapsedTimeInMinutes = DateDiffInMinutes + TimeDiffInMinutes
+	lsLogOut = "      Skipping Down Count adjustment for Adjustment number : " + asadjustno + '  ' + String(ElapsedTimeInMinutes) + ' Minutes have passed ' +  ' System DateTime is: ' + String(ldt_EndRetrieve) + '  MM Complete Date is: ' + String(ldt_tran_comp_date)
+	FileWrite(gilogFileNo,lsLogOut)
+	
+	If ElapsedTimeInMinutes < Long ( asCodeDesc ) then //Compair the minutes with the theashold found in the lookup table.
+		lsLogOut = "      Skipping Down Count adjustment for Adjustment number : " + asadjustno 
+		FileWrite(gilogFileNo,lsLogOut)
+		w_main.SetMicroHelp("Ready")
+		Return 2
+	end If
+End IF
+
+Return 0
+
+//End - 06/02/2023 : SIMS-197- Cycle count adjustment
+
 end function
 
 on u_nvo_edi_confirmations_pandora.create

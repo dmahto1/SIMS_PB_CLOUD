@@ -127,15 +127,15 @@ llNewRow = dw_report.InsertRow(0)
 	Choose Case Upper(w_do.idw_Detail.GetITemString(1,'supp_Code'))
 			
 		Case 'AMD'
-			dw_report.SetITem(llNewRow,'ship_from_name','Amdiss C/O XPO Logistics')
+			dw_report.SetITem(llNewRow,'ship_from_name','Amdiss C/O GXO Logistics')
 		Case 'SPANSION'
-			dw_report.SetITem(llNewRow,'ship_from_name','Spansion C/O XPO Logistics')
+			dw_report.SetITem(llNewRow,'ship_from_name','Spansion C/O GXO Logistics')
 		Case 'LAM'
-			dw_report.SetITem(llNewRow,'ship_from_name','Lam C/O XPO Logistics')
+			dw_report.SetITem(llNewRow,'ship_from_name','Lam C/O GXO Logistics')
 		Case 'BLUECOAT'
-			dw_report.SetITem(llNewRow,'ship_from_name','Blue Coat C/O XPO Logistics')
+			dw_report.SetITem(llNewRow,'ship_from_name','Blue Coat C/O GXO Logistics')
 		Case Else
-			dw_report.SetITem(llNewRow,'ship_from_name','C/O XPO Logistics')
+			dw_report.SetITem(llNewRow,'ship_from_name','C/O GXO Logistics')
 	End Choose
 	
 	If llWarehouseRow > 0 Then
@@ -210,15 +210,15 @@ For llRowPOs = 1 to llRowCount
 	Choose Case Upper(w_do.idw_Detail.GetITemString(1,'supp_Code'))
 			
 		Case 'AMD'
-			dw_report.SetITem(llNewRow,'ship_from_name','Amdiss C/O XPO Logistics')
+			dw_report.SetITem(llNewRow,'ship_from_name','Amdiss C/O GXO Logistics')
 		Case 'SPANSION'
-			dw_report.SetITem(llNewRow,'ship_from_name','Spansion C/O XPO Logistics')
+			dw_report.SetITem(llNewRow,'ship_from_name','Spansion C/O GXO Logistics')
 		Case 'LAM'
-			dw_report.SetITem(llNewRow,'ship_from_name','Lam C/O XPO Logistics')
+			dw_report.SetITem(llNewRow,'ship_from_name','Lam C/O GXO Logistics')
 		Case 'BLUECOAT'
-			dw_report.SetITem(llNewRow,'ship_from_name','Blue Coat C/O XPO Logistics')
+			dw_report.SetITem(llNewRow,'ship_from_name','Blue Coat C/O GXO Logistics')
 		Case Else
-			dw_report.SetITem(llNewRow,'ship_from_name','C/O XPO Logistics')
+			dw_report.SetITem(llNewRow,'ship_from_name','C/O GXO Logistics')
 	End Choose
 	
 	If llWarehouseRow > 0 Then

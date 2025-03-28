@@ -54,6 +54,28 @@ end type
 type tabpage_mobile from userobject within tab_main
 dw_mobile dw_mobile
 end type
+type tabpage_sa from userobject within tab_main
+end type
+type cb_4 from commandbutton within tabpage_sa
+end type
+type cb_3 from commandbutton within tabpage_sa
+end type
+type cb_2 from commandbutton within tabpage_sa
+end type
+type cb_1 from commandbutton within tabpage_sa
+end type
+type dw_sa from datawindow within tabpage_sa
+end type
+type gb_1 from groupbox within tabpage_sa
+end type
+type tabpage_sa from userobject within tab_main
+cb_4 cb_4
+cb_3 cb_3
+cb_2 cb_2
+cb_1 cb_1
+dw_sa dw_sa
+gb_1 gb_1
+end type
 end forward
 
 global type w_maintenance_warehouse from w_std_master_detail
@@ -66,12 +88,13 @@ end type
 global w_maintenance_warehouse w_maintenance_warehouse
 
 type variables
-Datawindow   idw_main, idw_search,idw_location, idw_project_warehouse, idw_mobile
+Datawindow   idw_main, idw_search,idw_location, idw_project_warehouse, idw_mobile,idw_sa
 SingleLineEdit isle_whcode
 long ii_row = 0 //get datawindow(search) current rows,
 long  ilTabindex
 boolean  ib_loc_changed,ib_dimentions
 String	isOrigSQL
+boolean ib_sa
 
 // pvh 11/22/05
 string isWhCode
@@ -694,7 +717,7 @@ tab_main.tabpage_project_warehouse.cb_putaway_sort.visible=False
 end event
 
 event ue_save;Integer li_ret
-String ls_loc, ls_ploc, lswarehouse, lsSort
+String ls_loc, ls_ploc, lswarehouse, lsSort,ls_data
 Long ll_cnt, i
 
 IF f_check_access(is_process,"S") = 0 THEN Return 0
@@ -712,6 +735,19 @@ If idw_location.AcceptText() = -1 Then
 	idw_location.SetFocus()
 	Return -1
 End If
+
+// Begin....12/05/2024....Akash Baghel....SIMS-588... Development for Google – SIMS- Bulk Locations Utilization
+	long ll_row 
+	ll_row = idw_location.getrow()
+	ls_data = idw_location.getitemstring(ll_row, 'user_field2')
+	     IF gs_project='PANDORA' then
+	       if long(len(ls_data)) > 3 then
+		    messagebox('','Please enter the pallet qty less than or equal to 3 digit.')
+		     return -1
+	        end if
+	      END IF
+// End....12/05/2024...SIMS-588..Akash Baghel.... Development for Google – SIMS- Bulk Locations Utilization
+
 
 //TAM - 2017/12/18 - 3pl cc - Added AcceptText to project/warehouse 
 If idw_project_warehouse.AcceptText() = -1 Then 
@@ -757,6 +793,7 @@ IF li_ret = 1 THEN
 		idw_main.ResetUpdate()
 		// pvh - gmt 12/20/05
 		idsdstcodelookup.ResetUpdate()
+	//	idw_sa.ResetUpdate() // Dinesh -sa
 		//
 		SetMicroHelp("Record Saved!")
 		tab_main.tabpage_location.enabled = true
@@ -923,6 +960,21 @@ end if
 if not g.ibMobileEnabled Then
 	tab_main.Tabpage_mobile.visible = False
 End If
+
+//Begin - Dinesh - S69824 -Google -  SIMS - Saudi Arabia Shipments
+If Upper(gs_project) = 'PANDORA' then
+	
+	if gs_role <> '-1' then
+		tab_main.Tabpage_sa.visible = False
+		else 
+		tab_main.Tabpage_sa.visible = True
+	end if
+	
+else
+	
+	tab_main.Tabpage_sa.visible = False
+End if
+//End - Dinesh - S69824 -Google -  SIMS - Saudi Arabia Shipments
 end event
 
 event close;call super::close;g.of_setwarehouse(False)
@@ -953,18 +1005,21 @@ integer height = 2012
 tabpage_location tabpage_location
 tabpage_project_warehouse tabpage_project_warehouse
 tabpage_mobile tabpage_mobile
+tabpage_sa tabpage_sa
 end type
 
 on tab_main.create
 this.tabpage_location=create tabpage_location
 this.tabpage_project_warehouse=create tabpage_project_warehouse
 this.tabpage_mobile=create tabpage_mobile
+this.tabpage_sa=create tabpage_sa
 call super::create
 this.Control[]={this.tabpage_main,&
 this.tabpage_search,&
 this.tabpage_location,&
 this.tabpage_project_warehouse,&
-this.tabpage_mobile}
+this.tabpage_mobile,&
+this.tabpage_sa}
 end on
 
 on tab_main.destroy
@@ -972,23 +1027,49 @@ call super::destroy
 destroy(this.tabpage_location)
 destroy(this.tabpage_project_warehouse)
 destroy(this.tabpage_mobile)
+destroy(this.tabpage_sa)
 end on
 
-event tab_main::selectionchanged; ilTabindex = NewIndex
+event tab_main::selectionchanged;string ls_code_type
+string ls_pnd_wh
+ls_pnd_wh='PND_%'
+datawindowchild ldwc_warehouse
+connect using sqlca;
  
+ long ll_ret
+ ilTabindex = NewIndex
+ls_code_type= 'Saudi_Arabia_Shipment'
+
+tab_main.tabpage_sa.dw_sa.GetChild ( "code_id",ldwc_warehouse )
+ldwc_warehouse.SetTransObject (SQLCA)
+ldwc_warehouse.Retrieve (ls_pnd_wh)
  
 If NewIndex = 2 Then /*Loaction*/
 	wf_check_menu(TRUE,'sort')
 	idw_current = idw_location
+		
 	tabpage_location.dw_location_search.SetFocus()
 	tabpage_location.dw_location_search.SetColumn("from_loc")
-ELSEIF NewIndex = 5 THEN /*Sarch*/
+ELSEIF NewIndex = 5 THEN /*retrieve*/
+//idw_current = idw_sa
+	//tab_main.tabpage_sa.dw_sa.dataobject='d_maintanence_sa_shipments'
+	tabpage_sa.dw_sa.SetTransObject(sqlca)
+	ll_ret= tabpage_sa.dw_sa.retrieve(ls_code_type)
+    IF ll_ret > 0 THEN
+		tabpage_sa.dw_sa.retrieve(ls_code_type)
+		
+	else
+		tabpage_sa.dw_sa.insertrow(0)
+	end if
+//ELSEIF NewIndex = 5 THEN /*Sarch*/  Dinesh - Add tab
+ELSEIF NewIndex = 6 THEN /*Sarch*/
 		wf_check_menu(TRUE,'sort')
 		idw_current =idw_search
 Else
 	wf_check_menu(FALSE,'sort')
 //	SetNull(idw_current)
 End If
+ 
  
 end event
 
@@ -1831,10 +1912,22 @@ CHOOSE CASE dwo.name
 			This.object.cbm[row]=This.object.cbm.Original[row]
    		This.object.weight_capacity[row]=This.object.weight_capacity.Original[row]
 		END IF
-		
+	
 	CASE 'height','width','length','cbm','weight_capacity'
 		ib_dimentions = TRUE		// This is to ensure save messagebox
 		This.PostEvent('ue_calc_cbm')
+	
+	// Begin....11/27/2024....Akash Baghel..SIMS-588... Development for Google – SIMS- Bulk Locations Utilization
+	CASE 'user_field2' 
+	     IF gs_project='PANDORA' then
+	       if long(len(data)) > 3 then
+		    messagebox('','Please enter the pallet qty less than or equal to 3 digit.')
+		     return -1
+	        end if
+	      END IF
+			
+	// END....11/27/2024....Akash Baghel....SIMS-588... Development for Google – SIMS- Bulk Locations Utilization
+	
 		
 // Added SKU Reserved to Screen and Edit for valid SKU
 	CASE 'sku_reserved'
@@ -2050,4 +2143,256 @@ end type
 event itemchanged;call super::itemchanged;
 ib_changed = True
 end event
+
+type tabpage_sa from userobject within tab_main
+integer x = 18
+integer y = 112
+integer width = 4055
+integer height = 1884
+long backcolor = 79741120
+string text = "Saudi Arabia Shipment"
+long tabtextcolor = 33554432
+long tabbackcolor = 79741120
+long picturemaskcolor = 536870912
+cb_4 cb_4
+cb_3 cb_3
+cb_2 cb_2
+cb_1 cb_1
+dw_sa dw_sa
+gb_1 gb_1
+end type
+
+on tabpage_sa.create
+this.cb_4=create cb_4
+this.cb_3=create cb_3
+this.cb_2=create cb_2
+this.cb_1=create cb_1
+this.dw_sa=create dw_sa
+this.gb_1=create gb_1
+this.Control[]={this.cb_4,&
+this.cb_3,&
+this.cb_2,&
+this.cb_1,&
+this.dw_sa,&
+this.gb_1}
+end on
+
+on tabpage_sa.destroy
+destroy(this.cb_4)
+destroy(this.cb_3)
+destroy(this.cb_2)
+destroy(this.cb_1)
+destroy(this.dw_sa)
+destroy(this.gb_1)
+end on
+
+type cb_4 from commandbutton within tabpage_sa
+integer x = 1509
+integer y = 68
+integer width = 402
+integer height = 112
+integer taborder = 30
+integer textsize = -10
+integer weight = 400
+fontcharset fontcharset = ansi!
+fontpitch fontpitch = variable!
+fontfamily fontfamily = swiss!
+string facename = "Arial"
+string text = "Retrieve"
+end type
+
+event clicked;// Begin - Dinesh - 07042022- S69824- Google -  SIMS - Saudi Arabia Shipments
+string ls_code_type
+ls_code_type='SAUDI_ARABIA_SHIPMENT'
+ib_sa= false
+connect using sqlca;
+tab_main.tabpage_sa.dw_sa.dataobject='d_maintanence_sa_shipments_list'
+tab_main.tabpage_sa.dw_sa.SetTransObject(sqlca)
+tab_main.tabpage_sa.dw_sa.retrieve(ls_code_type)
+// Begin - Dinesh - 07042022- S69824- Google -  SIMS - Saudi Arabia Shipments
+
+end event
+
+type cb_3 from commandbutton within tabpage_sa
+integer x = 695
+integer y = 64
+integer width = 402
+integer height = 112
+integer taborder = 30
+integer textsize = -10
+integer weight = 400
+fontcharset fontcharset = ansi!
+fontpitch fontpitch = variable!
+fontfamily fontfamily = swiss!
+string facename = "Arial"
+string text = "Save"
+end type
+
+event clicked;
+// Begin - Dinesh - S69824- Google -  SIMS - Saudi Arabia Shipments
+string ls_code_type
+long ll_k
+connect using sqlca;
+tab_main.tabpage_sa.dw_sa.SetTransObject(sqlca)
+ll_k=tab_main.tabpage_sa.dw_sa.update()
+
+IF ll_k <> 1 THEN
+	 MessageBox("Error",'This warehouse code is already exists in the lookup table')
+	 return
+else
+	ls_code_type='SAUDI_ARABIA_SHIPMENT'
+	tab_main.tabpage_sa.dw_sa.dataobject='d_maintanence_sa_shipments_list'
+	tab_main.tabpage_sa.dw_sa.SetTransObject(sqlca)
+	tab_main.tabpage_sa.dw_sa.retrieve(upper(ls_code_type))
+	ib_sa= false
+end if
+ 
+
+
+// End - Dinesh - S69824- Google -  SIMS - Saudi Arabia Shipments
+end event
+
+type cb_2 from commandbutton within tabpage_sa
+integer x = 160
+integer y = 64
+integer width = 517
+integer height = 112
+integer taborder = 30
+integer textsize = -10
+integer weight = 400
+fontcharset fontcharset = ansi!
+fontpitch fontpitch = variable!
+fontfamily fontfamily = swiss!
+string facename = "Arial"
+string text = "Insert Warehouse"
+end type
+
+event clicked;// Begin - Dinesh - S69824- Google -  SIMS - Saudi Arabia Shipments
+
+Long ll_row
+datawindowchild ldwc_warehouse
+string ls_pnd_wh
+ls_pnd_wh='PND_%'
+dw_sa.SetFocus()
+long ll_retn
+//If idw_sa.AcceptText() = -1 Then Return
+connect using sqlca;
+
+tab_main.tabpage_sa.dw_sa.SetTransObject(sqlca)
+tab_main.tabpage_sa.dw_sa.dataobject='d_maintanence_sa_shipments'
+ll_row = tab_main.tabpage_sa.dw_sa.GetRow()
+tab_main.tabpage_sa.dw_sa.GetChild ( "code_id",ldwc_warehouse )
+ldwc_warehouse.SetTransObject (SQLCA)
+ldwc_warehouse.Retrieve (ls_pnd_wh)
+If ll_row > 0 Then
+	ll_row = tab_main.tabpage_sa.dw_sa.InsertRow(ll_row + 1)
+	tab_main.tabpage_sa.dw_sa.ScrollToRow(ll_row)
+	tab_main.tabpage_sa.dw_sa.setitem(ll_row,'Project_id','PANDORA')
+	tab_main.tabpage_sa.dw_sa.setitem(ll_row,'Code_Type','SAUDI_ARABIA_SHIPMENT')
+	tab_main.tabpage_sa.dw_sa.setitem(ll_row,'Code_Descript','Allow_Saudi_Arabia_Shipment')
+Else
+	ll_row = tab_main.tabpage_sa.dw_sa.InsertRow(0)
+	tab_main.tabpage_sa.dw_sa.setitem(ll_row,'Project_id','PANDORA')
+	tab_main.tabpage_sa.dw_sa.setitem(ll_row,'Code_Type','SAUDI_ARABIA_SHIPMENT')
+	tab_main.tabpage_sa.dw_sa.setitem(ll_row,'Code_Descript','Allow_Saudi_Arabia_Shipment')
+end if
+ib_sa= True
+
+// End - Dinesh - S69824- Google -  SIMS - Saudi Arabia Shipments
+
+end event
+
+type cb_1 from commandbutton within tabpage_sa
+integer x = 1929
+integer y = 68
+integer width = 526
+integer height = 116
+integer taborder = 50
+integer textsize = -10
+integer weight = 400
+fontcharset fontcharset = ansi!
+fontpitch fontpitch = variable!
+fontfamily fontfamily = swiss!
+string facename = "Arial"
+string text = "Delete warehouse"
+end type
+
+event clicked;// Begin - Dinesh - S69824- Google -  SIMS - Saudi Arabia Shipments
+string ls_code_type,ls_code_id
+long ll_row,ll_ret
+ls_code_type='SAUDI_ARABIA_SHIPMENT'
+connect using sqlca;
+
+tab_main.tabpage_sa.dw_sa.setredraw(True)
+ll_row=tab_main.tabpage_sa.dw_sa.getrow()
+ls_code_id= tab_main.tabpage_sa.dw_sa.getitemstring(ll_row,'code_id')
+tab_main.tabpage_sa.dw_sa.SetTransObject(sqlca)
+tab_main.tabpage_sa.dw_sa.retrieve(ls_code_type)
+
+IF ll_row <= 0 then
+	 Messagebox('Alert','Please select the row you want to delete the warehouse')	
+	 return
+end if
+
+IF ll_row > 0 THEN
+	tab_main.tabpage_sa.dw_sa.SelectRow(0, FALSE)
+	tab_main.tabpage_sa.dw_sa.SelectRow(ll_row, TRUE)
+END IF
+
+if ll_row> 0 then
+	
+	If Messagebox('Alert','Delete Warehouse from the Lookup table.~r~rAre you sure, You want to delete WH code (' + ls_code_id + ') ?',Question!,YesNo!,2) = 2 Then
+		return
+	End If
+end if
+ll_ret=tab_main.tabpage_sa.dw_sa.deleterow(ll_row)
+tab_main.tabpage_sa.dw_sa.update()
+tab_main.tabpage_sa.dw_sa.retrieve(ls_code_type)
+ib_sa= false
+
+// End - Dinesh - S69824- Google -  SIMS - Saudi Arabia Shipments
+end event
+
+type dw_sa from datawindow within tabpage_sa
+integer x = 146
+integer y = 228
+integer width = 3826
+integer height = 1152
+integer taborder = 40
+string title = "none"
+string dataobject = "d_maintanence_sa_shipments"
+boolean hscrollbar = true
+boolean vscrollbar = true
+boolean livescroll = true
+end type
+
+event clicked;
+if ib_sa= false then
+
+	if row > 0 then
+		tab_main.tabpage_sa.dw_sa.SelectRow(0, FALSE)
+		tab_main.tabpage_sa.dw_sa.SelectRow(row, TRUE)
+	end if
+	
+end if
+	
+
+end event
+
+type gb_1 from groupbox within tabpage_sa
+integer x = 137
+integer y = 8
+integer width = 2373
+integer height = 212
+integer taborder = 50
+integer textsize = -10
+integer weight = 400
+fontcharset fontcharset = ansi!
+fontpitch fontpitch = variable!
+fontfamily fontfamily = swiss!
+string facename = "Arial"
+long textcolor = 33554432
+long backcolor = 67108864
+borderstyle borderstyle = stylebox!
+end type
 

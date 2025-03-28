@@ -32,7 +32,7 @@ end type
 end forward
 
 global type w_pandora_generic_shipping_labels from w_main_ancestor
-integer width = 3191
+integer width = 3195
 integer height = 2044
 string title = "Shipping Labels"
 event ue_print ( )
@@ -615,6 +615,8 @@ Select Count(distinct Carton_NO) Into :llLabelCount
 From Delivery_Packing with(nolock)
 Where do_no = :lsDONO
 And Carton_No > 0;
+//And Carton_No is not null; // Dinesh - 03/20/2025-  SIMS-680-Google - SIMS - Shipping Label
+
 
 //Print each detail Row 
 llRowCount = dw_label.RowCount()
@@ -701,9 +703,11 @@ For llRowPos = 1 to llRowCount /*each detail row */
 				ll_tot_english_weight = ll_tot_english_weight + dw_label.GetItemnumber(llRowPos1,'delivery_packing_weight_gross')/*carton qty */
 				ll_tot_metrics_weight = ll_tot_metrics_weight + round(i_nwarehouse.of_convert(dw_label.GetItemnumber(llRowPos1,'delivery_packing_weight_gross'),"PO","KG"),2)		
 			END IF
-		lstrparms.Long_arg[5]=ll_tot_english_weight	
-		lstrparms.Long_arg[6]=ll_tot_metrics_weight	
+		lstrparms.Long_arg[5]=ll_tot_english_weight
+		lstrparms.Long_arg[6]=ll_tot_metrics_weight
 		ls_old_carton_no1= ls_carton_no1
+		ll_tot_metrics_weight =0 // Dinesh - 03/20/2025-  SIMS-646-Development for Google - SIMS -Weight in Packing list not matching on Shipping Label
+		ll_tot_english_weight =0 // Dinesh-  03/20/2025- SIMS-646-Development for Google - SIMS -Weight in Packing list not matching on Shipping Label
 		
 	 Next			 
 
@@ -796,7 +800,18 @@ For llRowPos = 1 to llRowCount /*each detail row */
 
 	lstrparms.String_arg[17] = dw_label.GetItemString(llRowPos,'delivery_packing_sku') //DP Sku
 	lstrparms.datetime_arg[1] = dw_label.GetItemDateTime(llRowPos, 'delivery_packing_pack_expiration_date') //DP Exp Date
-	lstrparms.String_arg[18] = dw_label.GetItemString(llRowPos,'item_master_alternate_sku') //IM Alt Sku
+	// Begin - Dinesh - 12/13/2021- S64720-Google - SIMS - Buy Sell Project
+	string lsinvoiceno,ls_buysell,ls_customer_sku
+	lsinvoiceno = dw_label.GetITemString(llRowPos,'delivery_master_invoice_no')
+	ls_buysell = dw_label.GetITemString(llRowPos,'user_field21')
+	select customer_sku into :ls_customer_sku from EDI_Outbound_Detail where invoice_no=:lsinvoiceno and sku=:lstrparms.String_arg[17];
+	if  ls_buysell='BUYSELLSALESORDER' then 
+			lstrparms.String_arg[18] = ls_customer_sku //IM Alt Sku
+	else
+			lstrparms.String_arg[18] = dw_label.GetItemString(llRowPos,'item_master_alternate_sku') //IM Alt Sku
+	end if
+	// End - Dinesh - 12/13/2021- S64720-Google - SIMS - Buy Sell Project
+	//lstrparms.String_arg[18] = dw_label.GetItemString(llRowPos,'item_master_alternate_sku') //IM Alt Sku
 	lstrparms.String_arg[19] = dw_label.GetItemString(llRowPos,'delivery_packing_country_of_origin') //DP COO
 
 	ls_sku_desc = dw_label.GetItemString(llRowPos,'item_master_description') //IM Description
@@ -870,12 +885,20 @@ For llRowPos = 1 to llRowCount /*each detail row */
 			END IF
 		END CHOOSE
 	LOOP
-
-	lstrparms.Long_arg[2] = dw_label.GetItemNumber(llRowPos,'delivery_packing_quantity') //DP Qty
-	lstrparms.String_arg[25] = dw_label.GetItemString(llRowPos,'delivery_master_cust_order_no') //DM Cust Order No
+     
+	//Dhirendra - Google - SIMS - Buy Sell Project- 12-06-2021 ---Start	  
+IF gs_project ='PANDORA' then 
+	lstrparms.Long_arg[2] =    dw_label.GetItemNumber(llRowPos,'delivery_packing_quantity') //DP Qty
+    lstrparms.String_arg[25] = dw_label.GetItemString(llRowPos,'client_cust_so_nbr') //DM Cust Order No
 	lstrparms.Long_arg[3] = dw_label.GetItemNumber(llRowPos,'delivery_packing_line_item_no') //DP Line Item No
+	lstrparms.String_arg[26] = dw_label.GetItemString(llRowPos,'delivery_master_cust_order_no') //DM Client Cust Po Nbr
+else 
+	  lstrparms.Long_arg[2] = dw_label.GetItemNumber(llRowPos,'delivery_packing_quantity') //DP Qty
+	 lstrparms.String_arg[25] = dw_label.GetItemString(llRowPos,'delivery_master_cust_order_no') //DM Cust Order No
+   	lstrparms.Long_arg[3] = dw_label.GetItemNumber(llRowPos,'delivery_packing_line_item_no') //DP Line Item No
 	lstrparms.String_arg[26] = dw_label.GetItemString(llRowPos,'client_cust_po_nbr') //DM Client Cust Po Nbr
-	
+end if 
+		//Dhirendra - Google - SIMS - Buy Sell Project- 12-06-2021 ---end
 	ls_pack_container_id = dw_label.GetItemString(llRowPos,'delivery_packing_pack_container_id') //DP Pack Container Id	
 	ls_pack_sscc_no = dw_label.GetItemString(llRowPos,'delivery_packing_pack_sscc_no') //DP Pack SSCC No
 	
@@ -903,10 +926,13 @@ For llRowPos = 1 to llRowCount /*each detail row */
 	lstrparms.String_Arg[29] = String(llLabelof) +" of " + String(llLabelCount)
 	lstrparms.String_arg[30] = is_ucc_prefix
 	
-	lsAny=lstrparms	
+	lsAny=lstrparms
+
 	invo_labels_pandora.uf_print_google_shipping_label(lsAny)
 	 
 Next /*detail row to Print*/
+
+
 end event
 
 event ue_print_include_pallet_label();//07-SEP-2018 :Madhu S23255 Shipping Labels
@@ -1209,6 +1235,7 @@ string ls_description1, ls_description2, ls_description3, ls_description4, ls_te
 string lsdono, ls_carton_no, lscitystatezip, ls_old_carton_no
 Long	llQty, llRowCount, llRowPos, ll_rtn, ll_alloc_qty, llRowPos1, llLabelCount, llLabelOf
 long   ll_row, ll_remain_length, ll_count
+string ls_customer_sku,lsinvoiceno,ls_buysell
 		
 Any	lsAny
 
@@ -1271,7 +1298,17 @@ For llRowPos = 1 to llRowCount /*each detail row */
 
 	lstrparms.String_arg[17] = dw_label.GetItemString(llRowPos,'delivery_picking_sku') //DP Sku
 	lstrparms.datetime_arg[1] = dw_label.GetItemDateTime(llRowPos, 'expiration_date') //DP Exp Date
-	lstrparms.String_arg[18] = dw_label.GetItemString(llRowPos,'item_master_alternate_sku') //IM Alt Sku
+	// Begin - Dinesh - 12/13/2021- S64720-Google - SIMS - Buy Sell Project
+	lsinvoiceno = dw_label.GetITemString(llRowPos,'delivery_master_invoice_no')
+	ls_buysell = dw_label.GetITemString(llRowPos,'user_field21')
+	select customer_sku into :ls_customer_sku from EDI_Outbound_Detail where invoice_no=:lsinvoiceno;
+	if  ls_buysell='BUYSELLSALESORDER' then 
+			lstrparms.String_arg[18] = ls_customer_sku //IM Alt Sku
+	else
+			lstrparms.String_arg[18] = dw_label.GetItemString(llRowPos,'item_master_alternate_sku') //IM Alt Sku
+	end if
+	// End - Dinesh - 12/13/2021- S64720-Google - SIMS - Buy Sell Project
+	//lstrparms.String_arg[18] = dw_label.GetItemString(llRowPos,'item_master_alternate_sku') //IM Alt Sku
 	lstrparms.String_arg[19] = dw_label.GetItemString(llRowPos,'delivery_picking_country_of_origin') //DP COO
 
 	ls_sku_desc = dw_label.GetItemString(llRowPos,'item_master_description') //IM Description
@@ -1345,12 +1382,23 @@ For llRowPos = 1 to llRowCount /*each detail row */
 			END IF
 		END CHOOSE
 	LOOP
-
-	lstrparms.Long_arg[2] = dw_label.GetItemNumber(llRowPos,'delivery_picking_quantity') //DP Qty
-	lstrparms.String_arg[25] = dw_label.GetItemString(llRowPos,'delivery_master_cust_order_no') //DM Cust Order No
-	lstrparms.Long_arg[3] = dw_label.GetItemNumber(llRowPos,'delivery_picking_line_item_no') //DP Line Item No
-	lstrparms.String_arg[26] = dw_label.GetItemString(llRowPos,'client_cust_po_nbr') //DM Client Cust Po Nbr
 	
+	//Begin - Dinesh - 12-13-2021 - S64720--Google - SIMS - Buy Sell Project	  
+IF gs_project ='PANDORA' then 
+	//lstrparms.Long_arg[2] =    dw_label.GetItemNumber(llRowPos,'delivery_packing_quantity') //DP Qty
+	lstrparms.Long_arg[2] =    dw_label.GetItemNumber(llRowPos,'delivery_picking_quantity') //DP Qty 02/15/2022- DE24740 - Google - SIMS Prod - Not able to print shipping Labels at Picking Status
+    lstrparms.String_arg[25] = dw_label.GetItemString(llRowPos,'client_cust_so_nbr') //DM Cust Order No
+	//lstrparms.Long_arg[3] = dw_label.GetItemNumber(llRowPos,'delivery_packing_line_item_no') //DP Line Item No
+	lstrparms.Long_arg[3] = dw_label.GetItemNumber(llRowPos,'delivery_picking_line_item_no') //DP Line Item No 02/15/2022- DE24740 - Google - SIMS Prod - Not able to print shipping Labels at Picking Status
+	lstrparms.String_arg[26] = dw_label.GetItemString(llRowPos,'delivery_master_cust_order_no') //DM Client Cust Po Nbr
+else 
+	  lstrparms.Long_arg[2] = dw_label.GetItemNumber(llRowPos,'delivery_packing_quantity') //DP Qty
+	 lstrparms.String_arg[25] = dw_label.GetItemString(llRowPos,'delivery_master_cust_order_no') //DM Cust Order No
+   	lstrparms.Long_arg[3] = dw_label.GetItemNumber(llRowPos,'delivery_packing_line_item_no') //DP Line Item No
+	lstrparms.String_arg[26] = dw_label.GetItemString(llRowPos,'client_cust_po_nbr') //DM Client Cust Po Nbr
+end if 
+		//End - Dinesh - 12-13-2021 - S64720--Google - SIMS - Buy Sell Project
+		
 	ls_container_id = dw_label.GetItemString(llRowPos,'container_id') //DP Pick Container Id	
 	//ls_pack_sscc_no = dw_label.GetItemString(llRowPos,'delivery_packing_pack_sscc_no') //DP Pack SSCC No
 	
@@ -1456,12 +1504,15 @@ invo_labels_pandora = create n_labels_pandora
 
 cb_label_print.Enabled = False
 
+
 //We can only print based on DO_NO - User must have valid order open to pass DO_NO in from w_DO
 If isVAlid(w_do) Then
 	if w_do.idw_main.RowCOunt() > 0 Then
 		isDoNo = w_do.idw_main.GetITemString(1,'do_no')
 	End If
 End If
+
+//select Ord_Status into : is_status from Delivery_Master where do_no=:isdono and project_id='PANDORA' using sqlca;//Dinesh - 10/09/2024
 
 If isNUll(isDONO) or  isDoNO = '' Then
 	Messagebox('Labels','You must have an order retrieved in the Delivery Order Window~rbefore you can print labels!')
@@ -1483,7 +1534,7 @@ select Ord_Status into : is_status from Delivery_Master where do_no=:isdono and 
 //if is_status = 'A' then
 //	dw_label.dataobject = 'd_pandora_generic_shipping_label'
 //	dw_label.settrans(sqlca)
-if is_status = 'I' then
+if is_status = 'I' then  // Dinesh - 03/17/2023- SIMS-53- Google - SIMS - Load Lock and New Loading Status - Added- Stats-packing
 	cbx_1.enabled= False
 	cbx_3.enabled= False
 	cbx_4.enabled= False
@@ -1492,10 +1543,19 @@ if is_status = 'I' then
 	dw_label.dataobject = 'd_pandora_generic_shipping_label_picklist'
 	dw_label.settrans(sqlca)
 end if
+
+if  is_status = 'A'  then  // Dinesh - 03/17/2023- SIMS-53- Google - SIMS - Load Lock and New Loading Status - Added- Stats-packing
+	cbx_1.enabled= False
+	cbx_3.enabled= False
+	cbx_4.enabled= False
+	cbx_5.enabled= False
+	cbx_6.enabled= False
+end if
 // Dinesh - End - 22/02/2021 - S53992- Google -  SIMS - Outbound shipping Labels at Picking
 cb_label_print.Enabled = False
 
 If isdono > '' Then
+	dw_label.settransobject(sqlca) // Dinesh - 10/09/2024- SIMS-567 -Google SIMS - Not able to print Shipping Labels at Picking status
 	dw_label.Retrieve(gs_project,isdono)
 End If
 
@@ -1610,6 +1670,7 @@ event clicked;//07-SEP-2018 :Madhu S23255 Shipping Label
 IF cbx_1.checked THEN Parent.TriggerEvent('ue_print_generic_address_label') //Generic Address Label
 //IF cbx_2.checked THEN Parent.TriggerEvent('ue_print_google_shipping_label') //Google Shipping Label // Dinesh - 22/02/2021 - S53992- Google -  SIMS - Outbound shipping Labels
 //if is_status = 'A' then // Dinesh - Begin - 22/02/2021 - S53992- Google -  SIMS - Outbound shipping Labels at Picking
+
 if is_status='I' then
 	IF cbx_2.checked THEN Parent.TriggerEvent('ue_print_google_shipping_label_picklist') //Google Shipping Label
 else

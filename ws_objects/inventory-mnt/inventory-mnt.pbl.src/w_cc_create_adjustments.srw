@@ -12,9 +12,8 @@ end type
 end forward
 
 global type w_cc_create_adjustments from w_response_ancestor
-integer y = 360
-integer width = 3833
-integer height = 2067
+integer width = 3831
+integer height = 2068
 string title = "Create CC Adjustment"
 dw_adjust dw_adjust
 cb_select cb_select
@@ -129,7 +128,7 @@ ldwc.Retrieve(gs_project)
 This.TriggerEvent('ue_retrieve')
 end event
 
-event closequery;call super::closequery;Long	llRowCount,	llRowPos, llRC, ll_owner,  llAdjustID, llContentPos, llContentCount
+event closequery;call super::closequery;Long	llRowCount,	llRowPos, llRC, ll_owner,  llAdjustID, llContentPos, llContentCount, i
 Str_parms	lstrparms
 decimal 	ldDifference, ldOrigContentQty, ldNewContentQty
 String	lsProject, lsType,	lsSerial,	lsLot, lsPO, lsWarehouse, lsSku, lsRef, lsReason, lsLoc,	lsRONO,  lspo2,  ls_container_ID, ls_supp, ls_coo,	 lsRemarks, lsFind, lsoldpo, lsErrText
@@ -261,9 +260,20 @@ For llRowPos = 1 to llRowCount
 		End IF
 		
 		//Get the adjustment ID
-		Select Max(Adjust_no) into :llAdjustID
-		From	 Adjustment
-		Where project_id = :gs_project and ro_no = :lsrono and sku = :lsSku and supp_code = :ls_supp and last_user = :gs_userid and last_update = :ldtToday;
+		//Begin - Dinesh - 11/18/2024 - SIMS-596- CC Adjustment: Add Delay between Insert of Adjustment and Insert of Batch Transaction
+		i=1
+		DO WHILE i <= 10
+			sleep (0.5)
+			if llAdjustID <> 0 then
+				i=10
+			else
+				Select Max(Adjust_no) into :llAdjustID
+				From	 Adjustment
+				Where project_id = :gs_project and ro_no = :lsrono and sku = :lsSku and supp_code = :ls_supp and last_user = :gs_userid and last_update = :ldtToday;
+			end if
+			i++
+		Loop
+		//End - Dinesh - 11/18/2024 - SIMS-596- CC Adjustment: Add Delay between Insert of Adjustment and Insert of Batch Transaction		
 	
 	Next /*Content record */
 	
@@ -307,16 +317,16 @@ end type
 type cb_ok from w_response_ancestor`cb_ok within w_cc_create_adjustments
 integer x = 1591
 integer y = 1824
-integer width = 669
+integer width = 667
 string text = "Create Adjustments"
 end type
 
 type dw_adjust from u_dw_ancestor within w_cc_create_adjustments
 event ue_check_enabled ( )
-integer x = 4
-integer y = 26
-integer width = 3789
-integer height = 1725
+integer x = 5
+integer y = 28
+integer width = 3790
+integer height = 1724
 boolean bringtotop = true
 string dataobject = "d_create_cc_adjustment"
 boolean hscrollbar = true
@@ -339,10 +349,10 @@ End If
 end event
 
 type cb_select from commandbutton within w_cc_create_adjustments
-integer x = 48
+integer x = 50
 integer y = 1776
-integer width = 369
-integer height = 93
+integer width = 370
+integer height = 92
 integer taborder = 20
 boolean bringtotop = true
 integer textsize = -8
@@ -375,10 +385,10 @@ End If
 end event
 
 type cb_clear from commandbutton within w_cc_create_adjustments
-integer x = 48
-integer y = 1885
-integer width = 369
-integer height = 93
+integer x = 50
+integer y = 1884
+integer width = 370
+integer height = 92
 integer taborder = 20
 boolean bringtotop = true
 integer textsize = -8

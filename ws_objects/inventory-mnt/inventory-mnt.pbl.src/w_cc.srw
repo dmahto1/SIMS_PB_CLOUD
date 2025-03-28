@@ -3,6 +3,8 @@ $PBExportComments$Cycle Count
 forward
 global type w_cc from w_std_master_detail
 end type
+type cb_readonly from commandbutton within tabpage_main
+end type
 type cb_commodity from commandbutton within tabpage_main
 end type
 type cb_adjustments from commandbutton within tabpage_main
@@ -59,6 +61,8 @@ type dw_result from u_dw_ancestor within tabpage_search
 end type
 type tabpage_si from userobject within tab_main
 end type
+type dw_sysinv from datawindow within tabpage_si
+end type
 type cb_release from commandbutton within tabpage_si
 end type
 type st_cc_warehouse_print_flag_set_to from statictext within tabpage_si
@@ -76,6 +80,7 @@ end type
 type dw_si from u_dw_ancestor within tabpage_si
 end type
 type tabpage_si from userobject within tab_main
+dw_sysinv dw_sysinv
 cb_release cb_release
 st_cc_warehouse_print_flag_set_to st_cc_warehouse_print_flag_set_to
 st_cc_warehouise_flag_set_to st_cc_warehouise_flag_set_to
@@ -238,9 +243,10 @@ end type
 end forward
 
 global type w_cc from w_std_master_detail
-integer width = 4375
+integer width = 4887
 integer height = 2612
 string title = "Cycle Count"
+boolean minbox = false
 event ue_selector ( boolean _selector )
 event ue_getowner ( )
 p_arrow p_arrow
@@ -253,14 +259,15 @@ Datawindow idw_si,idw_report , idw_cc_container
 Datawindow idw_result1,idw_result2,idw_result3, idw_mobile, idw_system_generated,idw_serial_numbers
 datawindowchild idwc_count1_supp,idwc_count2_supp,idwc_count3_supp
 SingleLineEdit isle_code
+long il_find_matchW,il_find_matchR
+String is_display_name,is_matched
 
 string is_sql
 string is_max_lcode,is_min_lcode
 string is_max_sku,is_min_sku
-
+boolean ib_access= False
 w_cc iw_window
 n_warehouse i_nwarehouse
-
 boolean ib_order_from_first
 boolean ib_order_to_first
 boolean ib_complete_from_first
@@ -312,6 +319,7 @@ string isDeleteCCValues
 
 boolean ib_freeze_cc_inventory
 boolean ib_up_count_zero_cc = FALSE
+boolean ib_cc_result
 
 inet	linit
 u_nvo_websphere_post	iuoWebsphere
@@ -336,6 +344,9 @@ boolean ib_verbose_tracing
 
 constant int PROTECT			= 1
 constant int UNPROTECT		= 0
+//dts - 04/05/2023 SIMS-214 (PIP/SIP Known Quantity Prompt) - super-duper users get prompt for 'Known' quantities (Pandora trigger on Project_Warehouse doesn't allow setting field in db to 'K')
+Boolean ib_SuperDuper_Asked
+string is_SuperDuper_BlindKnown
 
 end variables
 
@@ -442,6 +453,7 @@ public function boolean wf_is_sku_serialized (string as_sku, string as_supp_code
 public function long getsysinventorymaxlineitemno ()
 public function boolean wf_is_up_count_location_empty (string as_sku, string as_loc)
 public function integer dogeneratecountsheet (ref datawindow _dw, ref checkbox _cb)
+public subroutine wf_cc_order_readonly (boolean ab_read)
 end prototypes
 
 event ue_selector(boolean _selector);// ue_selector( boolean _selector )
@@ -1974,10 +1986,23 @@ if foundRow <= 0 then return
 //end if
 value =  g.ids_project_warehouse.object.blindflag[ foundRow ]
 if isNull( value ) or len( value ) = 0 then value = 'K' // default
+
+//dts - 04/05/2023 SIMS-214 (PIP/SIP Known Quantity Prompt) - super-duper users get prompt for 'Known' quantities...
+if gs_role = '-1' and value = 'B' then
+	if not ib_SuperDuper_Asked then
+	  if messagebox("SUPER-DUPER USER KNOWN QTY", "Super-Duper Users Blind/Known Quantities choice:    Set to Known?", question!, yesno!) =1 then 
+		is_SuperDuper_BlindKnown = 'K'
+	  else
+		is_SuperDuper_BlindKnown = 'B'
+	  end if
+	  ib_SuperDuper_Asked = True
+	end if
+	value = is_SuperDuper_BlindKnown
+end if
+//dts - 04/05/2023 SIMS-214 - END
+
 isBlindKnownFlag = value
 setBlindMessage( value )
-
-
 end subroutine
 
 public subroutine setblindknownprt ();// setBlindKnownPrt(  )
@@ -4060,6 +4085,7 @@ if ll_wareshoue_row > 0 then
 	else
 		ls_return = "N"
 	end if
+	
 		
 	if (   ai_tab_no = CC_RESULTS1_TAB AND g.ids_project_warehouse.Object.project_warehouse_cc_cnt1_container_id_req_ind[ ll_wareshoue_row ] = 'Y' ) OR &
 		( ai_tab_no = CC_RESULTS2_TAB AND g.ids_project_warehouse.Object.project_warehouse_cc_cnt2_container_id_req_ind[ ll_wareshoue_row ] = 'Y' ) OR &
@@ -5964,7 +5990,6 @@ If ai_count_tab = CC_RESULTS2_TAB and idw_result1.rowcount( ) > 0 Then
 		Next
 End If
 
-
 //copy up_count_zero rows from Count2 Tab to Count3 Tab.
 If ai_count_tab = CC_RESULTS3_TAB and idw_result2.rowcount( ) > 0 Then
 		For ll_row =1 to idw_result1.rowcount( )
@@ -6178,6 +6203,7 @@ string ls_count_rollup_code
 string ls_count_1_rollup_code = 'Count1_Rollup_Code'
 string ls_count_2_rollup_code = 'Count2_Rollup_Code'
 string ls_count_3_rollup_code = 'Count3_Rollup_Code'
+string ls_in_clause_sku,ls_in_clause_loc,ls_in_clause_serial_no,ls_in_clause_lot_no,ls_in_clause_po_no,ls_in_clause_po_no2,ls_in_clause_container_id // Dinesh - 02/02/2024- SIMS -373 - PH - SIMS-391- Cycle count roll up on 3rd count
 string ls_encoded_indicators, ls_filter
 boolean adw_count
 boolean lb_is_count_more_granular
@@ -6185,8 +6211,39 @@ int li_sibling_rows[]
 String ls_siblings_processed[]
 string ls_sibling_flag_column
 ldtToday = f_getLocalWorldTime( getWarehouse() ) 
-
+long ll_row,ll_lineitem
+string ls_location
+long ll_row1
+string ls_location1
+int ld_count
+ib_cc_result = False
+	long m
+	string ls_sku_not_match,ls_sys_match,ls_l_code_not_match
+ 
 SetNull(lNull)
+// Begin -Dinesh - 09082022 -SIMS-65-  SIMS -73- Cycle Count Warning Message for Allocated Inventory
+
+If upper(gs_project) ='PANDORA'  Then
+
+
+	if idw_si.rowcount() > 0 then
+		
+		for ll_row1=1 to idw_si.rowcount()
+		
+				ls_location1 =idw_si.getitemstring(ll_row1,'l_code')
+	 
+					if ls_location1 = 'Allocated' then
+							
+							If MessageBox(is_title, "There are one or more allocated line(s) on this cycle count order, Are you sure you want to still generate the cycle count?", Question!, YesNo!, 2) = 2 Then	Return failure
+						     exit
+					end if
+		
+		  next
+		  
+	end if
+	
+end if
+// End -Dinesh - 09082022 - SIMS-65-  SIMS -73- Cycle Count Warning Message for Allocated Inventory
 
 f_method_trace_special( gs_project, this.ClassName() , 'Start GenerateCountSheet ' ,isCCOrder, '','',isCCOrder) //18-Jun-2014 :Madhu- Added Method Trace calls.
 
@@ -6301,13 +6358,8 @@ if getCountTab() >3 then
 		ls_filter = ls_filter +  ' difference <> 0'
 	end if
 end if
-
-idw_si.SetFilter(ls_filter) 
-idw_si.filter()
-
-
-//idw_si.SetFilter("")
-//idw_si.filter()
+	idw_si.SetFilter(ls_filter) 
+	idw_si.filter()
 
 rows = idw_si.RowCount()
 f_method_trace_special( gs_project, this.ClassName() , 'Process GenerateCountSheet to get count of SI rows:  ' + String(rows) ,isCCOrder, '','',isCCOrder) //18-Jun-2014 :Madhu- Added Method Trace calls.
@@ -6405,6 +6457,82 @@ Next
 
 wf_generate_up_count_zero_records(_dw, getCountTab()) //14-MAY-2018 :Madhu S19286 - DE4781  Up count from Non existing qty
 
+// Begin- Dinesh - 02/01/2024- SIMS-391- PH - Part 2 of SIMS-373- Google - SIMS - Cycle Count Roll up on 3rd count (365)	
+
+if getCountTab()= 5 and Upper(gs_project) ="PANDORA" then
+	datastore lds_si,lds_cc3
+	lds_si = Create datastore
+			lds_si.Dataobject = 'd_cc_inventory'
+			lds_si.settrans(sqlca)
+			
+	string lsSqlSyntax,ls_in_clause,ls_cc_no,lsTemp,ls_in_clause1,ls_sku,ls_loc,ls_serial,ls_lot,ls_supp,ls_po,ls_po2,ls_type,ls_Container_id,ls_coo
+	int t,s,n=1
+	long llIdx,ll_count,llStart,llFindRow,ll_ret,ll_owner
+	
+	datetime ldt_expiration_date
+	decimal ld_qty
+	idw_si.SetFilter(ls_filter) 
+	idw_si.filter()
+	idw_si.RowsCopy(idw_si.GetRow(), idw_si.RowCount(), Primary!, lds_si, 1, Primary!)
+	ll_count = lds_si.rowcount()
+
+	ls_cc_no= idw_main.getItemString(1,'cc_no')
+
+	lsSqlSyntax = tab_main.tabpage_si.dw_sysinv.GetSQLSelect()
+	for index = 1 to idw_si.rowcount()
+		
+		ls_loc 					= lds_si.object.l_code[ index ]
+		ls_sku						= lds_si.object.sku[ index ] 
+		ls_supp					= lds_si.object.supp_code[ index ]
+		ll_owner					= lds_si.object.owner_id[ index ] 
+		ls_type					= lds_si.object.inventory_type[ index ]
+		ls_serial					= lds_si.object.serial_no[ index ]
+		ls_lot						= lds_si.object.lot_no[ index ] 
+		ls_po						= lds_si.object.po_no[ index ]
+		ls_po2					= lds_si.object.po_no2[ index ] 
+		ls_container_id			= lds_si.object.container_id[ index ] 
+		ldt_expiration_date	= lds_si.object.expiration_date[ index ]
+		ls_coo					= lds_si.object.country_of_origin[ index ]
+		ld_qty 					= lds_si.object.quantity[ index ]
+		
+			
+			if index=1 then
+				ls_in_clause_sku  ="'"+ ls_sku +"'"
+				ls_in_clause_loc= "'"+ ls_loc +"'"
+				//Begin - Dinesh - 02/02/2024- SIMS-391- PH - Part 2 of SIMS-373- Google - SIMS - Cycle Count Roll up on 3rd count (365)
+				ls_in_clause_serial_no= "'"+ ls_serial +"'"
+				ls_in_clause_lot_no= "'"+ ls_lot +"'"
+				ls_in_clause_po_no= "'"+ ls_po +"'"
+				ls_in_clause_po_no2= "'"+ ls_po2 +"'"
+				ls_in_clause_container_id= "'"+ ls_container_id +"'"
+			else
+				
+				ls_in_clause_sku  = + ls_in_clause_sku + ", " + "'" + ls_sku + "'"
+				ls_in_clause_loc =  + ls_in_clause_loc + ", " + "'" + ls_loc + "'"
+				ls_in_clause_serial_no =  + ls_in_clause_serial_no + ", " + "'" + ls_serial + "'"
+				ls_in_clause_lot_no =  + ls_in_clause_lot_no + ", " + "'" + ls_lot + "'"
+				ls_in_clause_po_no =  + ls_in_clause_po_no + ", " + "'" + ls_po + "'"
+				ls_in_clause_po_no2 =  + ls_in_clause_po_no2 + ", " + "'" + ls_po2 + "'"
+				ls_in_clause_container_id =  + ls_in_clause_container_id + ", " + "'" + ls_container_id + "'"
+				//End - Dinesh - 02/02/2024- SIMS-391- PH - Part 2 of SIMS-373- Google - SIMS - Cycle Count Roll up on 3rd count (365)
+			end if
+						
+	next
+		
+	lsSqlSyntax = lsSqlSyntax+" where a.cc_no=" +"'"+ls_cc_no +"'" + " and a.SKU IN (" + ls_in_clause_sku+")" + " and a.l_code IN (" + ls_in_clause_loc+")" +  " and a.serial_no IN (" + ls_in_clause_serial_no+")" + " and a.lot_no IN (" + ls_in_clause_lot_no+")" + " and a.po_no IN (" + ls_in_clause_po_no+")" + " and a.po_no2 IN (" + ls_in_clause_po_no2+")" + " and a.container_id IN (" + ls_in_clause_container_id  // Dinesh - 02/02/2024- SIMS-391- PH - Part 2 of SIMS-373- Google - SIMS - Cycle Count Roll up on 3rd count (365)
+	lsSqlSyntax  = lsSqlSyntax + ")"
+	tab_main.tabpage_si.dw_sysinv.SetTransObject(sqlca)
+	llIdx = tab_main.tabpage_si.dw_sysinv.SetSQLSelect( lsSqlSyntax )
+	lsSqlSyntax =tab_main.tabpage_si.dw_sysinv.getSQLSelect()
+	tab_main.tabpage_si.dw_sysinv.Retrieve()
+	//tab_main.tabpage_si.dw_sysinv.RowsCopy(tab_main.tabpage_si.dw_sysinv.GetRow(), tab_main.tabpage_si.dw_sysinv.RowCount(), Primary!, _dw, 1, Primary!)
+	end if
+	ls_filter=''
+	idw_si.SetFilter(ls_filter) 
+	idw_si.filter()
+	
+	//END- Dinesh - 02/01/2024- SIMS-391- PH - Part 2 of SIMS-373- Google - SIMS - Cycle Count Roll up on 3rd count (365)	
+
 if _dw.rowcount() = 0 then
 	messagebox( this.title, "No Rows Generated.")
 end if
@@ -6501,10 +6629,11 @@ if UpperBound( li_sibling_rows ) > 0 then
 				_dw.object.quantity[ innerIndex ] = lNull  // force to Null on generation
 				_dw.object.supp_code[ innerIndex ] = idw_si.object.supp_code[ ll_si_row_num ]
 				
-				IF Trim(Upper(  idw_si.object.sku[ index ])) =  'EMPTY' AND getCountTab() = CC_RESULTS1_TAB Then
+				IF (Trim(Upper(  idw_si.object.sku[ index ])) =  'EMPTY' AND getCountTab() = CC_RESULTS1_TAB) Then 
 					_dw.object.protected[ innerIndex ] = 1
 				Else
 					_dw.object.owner_id[ innerIndex ] = idw_si.object.owner_id[ ll_si_row_num ]
+	
 				End If
 				
 				_dw.object.l_code[ innerIndex ] = idw_si.object.l_code[ ll_si_row_num ]
@@ -6580,11 +6709,24 @@ if  upper(gs_project) ='NYCSP'  AND _cb.checked = true then
 	idw_si.Filter()
 end if
 
+
 idw_si.setRedraw( true )
 _dw.Setredraw(True)
 wf_check_status()
 wf_sort()
 ib_changed = true
+
+
+//if  upper(gs_project) ='PANDORA' and ib_cc_result = False then
+//
+//
+// for j=1 to _dw.rowcount() 
+//		_dw.Object.sku.Protect = 1
+//	//_dw.object.protected[ j ] =1
+//		//messagebox('',string(ld_count))
+//next
+//end if
+
 // set the count date
 idw_main.setItem( idw_main.getrow(), countDateColumn , ldtToday )
 idw_main.setItem( idw_main.getrow(), ls_count_rollup_code, wf_build_encoded_rollup_code( getCountTab() ) )
@@ -6595,6 +6737,54 @@ f_method_trace_special( gs_project, this.ClassName() , 'End GenerateCountSheet '
 return success
 
 end function
+
+public subroutine wf_cc_order_readonly (boolean ab_read);
+// Begin - Dinesh - 11/06/2023- SIMS-328- Google Read only part 2
+if ab_read=True then
+	idw_main.object.datawindow.readonly = 'yes'
+	idw_si.object.datawindow.readonly = 'yes'
+	idw_result1.object.datawindow.readonly = 'yes'
+	idw_result2.object.datawindow.readonly = 'yes'
+	idw_result3.object.datawindow.readonly = 'yes'
+	idw_mobile.object.datawindow.readonly = 'yes'
+	idw_system_generated.object.datawindow.readonly = 'yes'
+	idw_serial_numbers.object.datawindow.readonly = 'yes'
+	idw_cc_container.object.datawindow.readonly = 'yes'
+	tab_main.tabpage_container.cb_4.enabled=False
+	tab_main.tabpage_container.cb_5.enabled=False
+	tab_main.tabpage_container.cb_6.enabled=False
+	tab_main.tabpage_si.cb_si_insert.enabled=False
+	tab_main.tabpage_si.cb_si_delete.enabled=False
+	tab_main.tabpage_si.cb_release.enabled=False
+	tab_main.tabpage_result1.cb_generate1.enabled=False
+	tab_main.tabpage_result1.cb_selectall1.enabled=False
+	tab_main.tabpage_result1.cbx_include_components1.enabled=False
+	tab_main.tabpage_result2.cb_generate2.enabled=False
+	tab_main.tabpage_result2.cb_selectall2.enabled=False
+	tab_main.tabpage_result2.cbx_include_components2.enabled=False
+	tab_main.tabpage_result3.cb_generate3.enabled=False
+	tab_main.tabpage_result3.cb_selectall3.enabled=False
+	tab_main.tabpage_result3.cbx_include_components3.enabled=False
+	tab_main.tabpage_mobile.cb_delete_location.enabled=False
+	tab_main.tabpage_serial_numbers.cb_3.enabled=False
+	tab_main.tabpage_serial_numbers.cb_1.enabled=False
+	tab_main.tabpage_serial_numbers.cb_2.enabled=False
+	tab_main.tabpage_si.cb_release.enabled= False
+	tab_main.tabpage_si.cb_si_delete.enabled = False
+	tab_main.tabpage_si.cb_si_insert.enabled = False 
+	tab_main.tabpage_si.dw_si.object.datawindow.readonly='yes'
+	tab_main.tabpage_main.cb_confirm.enabled = False
+	tab_main.tabpage_main.cb_void.enabled = False
+	tab_main.tabpage_main.cb_adjustments.enabled = False
+	tab_main.tabpage_main.cb_report.enabled = False
+	tab_main.tabpage_main.cb_export.enabled = False
+	tab_main.tabpage_main.cb_readonly.enabled = False
+	tab_main.tabpage_main.cb_generate.enabled = False
+
+end if
+
+// End - Dinesh - 11/06/2023- SIMS-328- Google Read only part 2
+end subroutine
 
 on w_cc.create
 int iCurrent
@@ -6636,19 +6826,25 @@ end event
 
 event ue_save;Long ll_result
 String ls_type, ls_prefix, ls_order
-long ll_no, i
-string ls_loc, ls_sku, ls_supp, ls_serial, ls_lot, ls_po, ls_po2, ls_container_id, ls_coo, ls_ro_no, lsLocSave
+long ll_no, i,ll_spid,ll_spidR
+string ls_loc, ls_sku, ls_supp, ls_serial, ls_lot, ls_po, ls_po2, ls_container_id, ls_coo, ls_ro_no, lsLocSave,ls_User_IdW
+String ls_Edit_Mode,ls_user_id,ls_order_no,lsinvoice_no,ls_display_name1,ls_display_name,ls_Edit_modeW,ls_Edit_modeR
+datetime ld_entry_dateR,ld_entry_dateW
+boolean lb_readonly
+datastore lds_screen_lock
 long ll_owner
 datetime ldt_expiration_date
 integer li_idx
-string ls_wh_code, ls_cc_no
+string ls_wh_code, ls_cc_no,ls_ccno
 string ls_coo_key
 integer li_key
 boolean ib_update_cc_inventory = false
 string ls_max_country_origin
 String ls_SQLError
 long ll_CurLine, ll_SI_Line, ll_DeleteLine //dts - 2/27/2013 - 556-2; Setting the System Inventory location to ALLOCATED if deleting a line from counts
-
+ long ll_row1
+ string ls_location1
+ 
 // Acess Rights
 If f_check_access(is_process,"S") = 0 Then return -1
 
@@ -6657,7 +6853,42 @@ If f_check_access(is_process,"S") = 0 Then return -1
 
 long ll_Idx,ll_OwnerID
 
+if gs_project='PANDORA' then
+// Begin  - Dinesh - 11/06/2023- SIMS-328- Google - SIMS - Read Only Access Part -2
+				ls_cc_no = idw_Main.GetITemString(1,'cc_no')
+				gs_System_No = ls_cc_no
+				lds_screen_lock = Create datastore
+				lds_screen_lock.Dataobject = 'd_screen_lock_order_r'
+				lds_screen_lock.settrans(sqlca)
+				lds_screen_lock.retrieve(gs_System_No,'R')
+				select count(*) into : il_find_matchW from Screen_Lock with(nolock) where Order_No= :gs_System_No and Edit_Mode='W' and screen_name='Cycle Count' using sqlca;
+				select user_id,UserSPID,Edit_Mode,Entry_Date into :ls_User_IdW,:ll_spid,:ls_Edit_modeW,:ld_entry_dateR from Screen_Lock with(nolock) where Order_No= :gs_System_No and Edit_Mode='W' and screen_name='Cycle Count' using sqlca;
+				select count(*) into : il_find_matchR from Screen_Lock with(nolock) where Order_No= :gs_System_No and Edit_Mode='R' and screen_name='Cycle Count' using sqlca;
+				select user_id,UserSPID,Edit_Mode,Entry_Date,order_no into :ls_User_Id,:ll_spidR,:ls_Edit_Mode,:ld_entry_dateR,:ls_Order_No from Screen_Lock with(nolock) where Order_No= :gs_System_No and Edit_Mode='R' and userspid = :gl_userspid and screen_name='Cycle Count' using sqlca;
+							select display_name into :ls_display_name from usertable with (Nolock) where userid=:ls_User_IdW;
 
+				if  (il_find_matchW > 0 and il_find_matchR > 0) and (ls_Order_No=gs_System_No and gs_userid <> ls_User_IdW  and ll_spidR = gl_userspid ) then
+						messagebox(is_title,'User Name: ' + ls_display_name + '/Session: ' + string(ll_spid) + ' is already accessing the Order Number ' + ls_cc_no + '.~r~n~r~nThe screen is locked and can be accessible to read mode only.Please contact your Site Manager/Supervisor to unlock the screen or wait for sweeper to run for clearing the locked order.', Stopsign! )
+						lb_readonly=True
+						wf_cc_order_readonly(lb_readonly)
+						Return -1
+					
+				elseif (il_find_matchW > 0 and  il_find_matchR > 0) and (ls_Order_No=gs_System_No and gs_userid = ls_User_IdW and ls_Edit_mode='R' and  ll_spidR = gl_userspid) then
+						messagebox(is_title,'Hey!! You have already opened another session: ' +string(ll_spid)+ ' for the same Order Number ' + ls_cc_no + '.~r~nPlease close all your current/previous session first and then re-open the order.', Stopsign! )
+						lb_readonly=True
+						wf_cc_order_readonly(lb_readonly)
+						Return -1
+				elseif  ib_access= True and (il_find_matchW = 0 and  il_find_matchR > 0) and (ls_Order_No=gs_System_No and gs_userid = ls_User_Id and ls_Edit_mode='R' and  ll_spidR = gl_userspid) then
+						messagebox(is_title,'Hey!! You have changed this order to READ ONLY ACCESS, session: ' +string(ll_spidR)+ '. Please close all your current session and re- open the order again to make any change for this order. ', Stopsign! )
+						lb_readonly= True
+						wf_cc_order_readonly(lb_readonly)
+						Return -1
+
+				else
+					end if
+			
+		End if
+// End  - Dinesh - 11/06/2023- SIMS-328- Google - SIMS - Read Only Access Part -2
 
 If idw_result1.RowCount() > 0 Then
 	For ll_Idx = 1 to idw_result1.RowCount()
@@ -6673,8 +6904,36 @@ If idw_result1.RowCount() > 0 Then
 			IF Upper(idw_result1.GetItemString(ll_Idx, "sku")) = 'EMPTY' AND IsNull(ll_OwnerID) THEN  idw_result1.SetItem(ll_Idx, "owner_id",0) //Need this to save Empty Location
 			
 		End IF
+		
+		
+		
 	Next
 End If
+
+// Begin Dinesh - 09082022 - SIMS-65-  SIMS -73- Cycle Count Warning Message for Allocated Inventory
+
+If upper(gs_project) ='PANDORA'  Then
+
+
+	if idw_si.rowcount() > 0 then
+		
+		for ll_row1=1 to idw_si.rowcount()
+		
+				ls_location1 =idw_si.getitemstring(ll_row1,'l_code')
+	 
+					if ls_location1 = 'Allocated' then
+							
+							If MessageBox(is_title, "There are one or more allocated line(s) on this cycle count order, Are you sure you want to save the inventory or cycle count?", Question!, YesNo!, 2) = 2 Then	Return failure
+						    exit
+					end if
+		
+		  next
+		  
+	end if
+	
+end if
+// End -Dinesh - 09082022 - SIMS-65-  SIMS -73- Cycle Count Warning Message for Allocated Inventory
+
 
 If idw_result2.RowCount() > 0 Then
 	For ll_Idx = 1 to idw_result2.RowCount()
@@ -6711,6 +6970,8 @@ If idw_result3.RowCount() > 0 Then
 		End IF
 	Next	
 End If
+
+
 
 
 
@@ -7804,6 +8065,8 @@ IF ib_update_cc_inventory THEN
 	idw_si.REtrieve(idw_main.GetItemString(1,"CC_No"))
 END IF
 
+
+
 end event
 
 event ue_delete;call super::ue_delete;Long i, ll_cnt
@@ -8022,6 +8285,14 @@ event ue_refresh;//MessageBox(is_title, "Save record to re-fresh the counted qua
 end event
 
 event close;call super::close;destroy n_warehouse
+
+//Begin - dinesh - 10/30/2023- SIMS-328- Google Read only access - Part 2
+if gs_project = 'PANDORA' then
+delete from Screen_Lock where user_id=:gs_userid  and screen_name='Cycle Count' and  userspid=:gl_userspid using sqlca; // Dinesh - 10/30/2023- SIMS-328- Google Read only access - Part 2
+commit;
+end if
+//End - dinesh - 10/30/2023- SIMS-328- Google Read only access - Part 2
+
 f_method_trace_special( gs_project, this.ClassName() , 'Close CC order ' ,isCCOrder, '','',isCCOrder) //18-Jun-2014 :Madhu- Added Method Trace calls.
 end event
 
@@ -8040,7 +8311,8 @@ DataWindowChild ldwc_warehouse,&
                           ldwc_OrdTypSearch, &
                           ldwc_OrdTypResult
 
-datawindowchild ldwc_reason
+datawindowchild ldwc_reason,ldw_child1
+datawindowchild ldw_child2,ldw_child3
 	
 ib_changed = False
 ib_up_count_zero_cc =FALSE
@@ -8169,6 +8441,71 @@ idw_result1.GetChild('inventory_Type',ldwc2)
 ldwc2.SetTransObject(SQLCA)
 ldwc.ShareData(ldwc2)
 
+//Begin....Akash Baghel - 07/17/2023 - SIMS 243- added dddw for po_no drop down column all cycle counts (project code)
+
+if upper(gs_project) = 'PANDORA' then	
+	idw_result1.Modify("po_no.Visible='1'")
+	idw_result1.Modify("po_no.Edit.Style='dddw'")
+	
+	idw_result1.Modify("po_no.dddw.Case='Any'")
+	idw_result1.Modify("po_no.dddw.Name='dddw_project_code'")
+	idw_result1.Modify("po_no.dddw.DataColumn='project_code'")
+	idw_result1.Modify("po_no.dddw.DisplayColumn='project_code'")
+	idw_result1.Modify("po_no.dddw.Limit=30")
+	
+	idw_result1.Modify("po_no.dddw.PercentWidth=100")
+	idw_result1.Modify("po_no.dddw.UseAsBorder= Yes")
+	idw_result1.Modify("po_no.dddw.VScrollBar=Yes")
+	
+End if
+
+     idw_result1.GetChild ( "po_no", ldw_child1 )
+     ldw_child1.SetTransObject ( SQLCA )
+     ldw_child1.Retrieve ()
+
+  if upper(gs_project) = 'PANDORA' then	
+	idw_result2.Modify("po_no.Visible='1'")
+	idw_result2.Modify("po_no.Edit.Style='dddw'")
+	
+	idw_result2.Modify("po_no.dddw.Case='Any'")
+	idw_result2.Modify("po_no.dddw.Name='dddw_project_code'")
+	idw_result2.Modify("po_no.dddw.DataColumn='project_code'")
+	idw_result2.Modify("po_no.dddw.DisplayColumn='project_code'")
+	idw_result2.Modify("po_no.dddw.Limit=30")
+	
+	idw_result2.Modify("po_no.dddw.PercentWidth=100")
+	idw_result2.Modify("po_no.dddw.UseAsBorder= Yes")
+	idw_result2.Modify("po_no.dddw.VScrollBar=Yes")
+	
+End if
+
+    idw_result2.GetChild ( "po_no", ldw_child2 )
+    ldw_child2.SetTransObject ( SQLCA )
+    ldw_child2.Retrieve ()
+
+ if upper(gs_project) = 'PANDORA' then	
+	idw_result3.Modify("po_no.Visible='1'")
+	idw_result3.Modify("po_no.Edit.Style='dddw'")
+	
+	idw_result3.Modify("po_no.dddw.Case='Any'")
+	idw_result3.Modify("po_no.dddw.Name='dddw_project_code'")
+	idw_result3.Modify("po_no.dddw.DataColumn='project_code'")
+	idw_result3.Modify("po_no.dddw.DisplayColumn='project_code'")
+	idw_result3.Modify("po_no.dddw.Limit=30")
+	
+	idw_result3.Modify("po_no.dddw.PercentWidth=100")
+	idw_result3.Modify("po_no.dddw.UseAsBorder= Yes")
+	idw_result3.Modify("po_no.dddw.VScrollBar=Yes")
+	
+End if
+ 
+      idw_result3.GetChild ( "po_no", ldw_child3 )
+      ldw_child3.SetTransObject ( SQLCA )
+      ldw_child3.Retrieve ()
+
+// End....Akash Baghel - 07/17/2023 - SIMS 243- added dddw for po_no drop down column all cycle counts (project code)
+
+
 //TimA 08/27/12 Pandora issue #446 Show the reason code field
 if upper(gs_project) = 'PANDORA' then	
 	idw_si.GetChild("reason",ldwc_reason)
@@ -8261,6 +8598,41 @@ if Upper ( gs_project ) = "PANDORA" then
 //	if ll_FindRow > 0 then ldwc_OrdTypResult.SetItem ( ll_FindRow, "count_by_display_value", "Sequential" )
 end if
 
+
+////Start......Akash Baghel........
+//
+if upper(gs_project) = 'PANDORA' then    
+    idw_result1.Modify("po_no.Visible='1'")
+//    //idw_result1.Modify("reason_t.Visible='1'")    
+//
+    idw_result1.Modify("po_no.Edit.Style='dddw'")
+
+    idw_result1.Modify("po_no.dddw.Case='Any'")
+    idw_result1.Modify("po_no.dddw.Name='dddw_project_code'")
+    idw_result1.Modify("po_no.dddw.DataColumn='project_code'")
+    idw_result1.Modify("po_no.dddw.DisplayColumn='project_code'")
+    idw_result1.Modify("po_no.dddw.Limit=30")
+
+    //dw_si.Modify("reason.dddw.Name='dddw_lookup'")
+    idw_result1.Modify("po_no.dddw.PercentWidth=100")
+    idw_result1.Modify("po_no.dddw.VScrollBar=Yes")
+    idw_result1.Modify("po_no.dddw.AShowArrow=Yes")
+Else
+    idw_result1.Modify("po_no.Visible='1'")
+    //idw_si.Modify("reason_t.Visible='0'")    
+    //idw_si.Modify("reason_t.width='0'")
+    idw_result1.Modify("po_no.width='1'")
+
+ End if
+//
+////idw_si.Modify("ro_no_t.Visible='0'")    
+////idw_si.Modify("ro_no.Visible='0'")    
+//
+//
+idw_result1.GetChild ( "po_no", ldw_child1 )
+ldw_child1.SetTransObject ( SQLCA )
+ldw_child1.Retrieve ()
+//End Akash
 
 datawindowchild ldw_child
 
@@ -8481,9 +8853,10 @@ event create ( )
 event destroy ( )
 integer x = 0
 integer y = 0
-integer width = 4315
+integer width = 4850
 integer height = 2036
 integer textsize = -8
+boolean showpicture = false
 tabpage_si tabpage_si
 tabpage_result1 tabpage_result1
 tabpage_result2 tabpage_result2
@@ -8530,6 +8903,7 @@ end on
 
 event tab_main::selectionchanging;datawindow idw
 setnull(idw)
+long ll_row
 
 // LTK 20150330  The change below fixes an issue that was showing up on CC Report #8 which was not reporting inventory correctly (because of l_code on SI and Count Tabs).
 // The change below closes a path that allowed lines being released on the System Inventory to not correctly set the l_code to Allocated on the Count Tabs.
@@ -8558,9 +8932,11 @@ IF newindex = 8 THEN idw_current=idw_serial_numbers // TAM 2017/11  Added the re
 IF newindex = 9 THEN idw_current = idw_cc_container //24-APR-2018 :Madhu S18502 - FootPrint Cycle Count
 IF newindex = 10 THEN idw_current=idw_result
 
+
 setBlindKnown(  )
 setBlindKnownPrt(  )
 doDisplaySysQty( getBlindKnown() = 'K' )
+
 
 end event
 
@@ -8569,7 +8945,8 @@ choose case newindex
 	case 3
 		doCountDiffRefresh( idw_result1 )
 		If idw_result2.rowcount( ) > 0 Then	of_protectresults(idw_result1, PROTECT) //17-Jun-2014 :Madhu- Added code to Lock CC1, if CC2 has records.
-	case 4
+		
+case 4
 		doCountDiffRefresh( idw_result2 )
 		If idw_result3.rowcount( ) > 0 Then	of_protectresults(idw_result2, PROTECT) //17-Jun-2014 :Madhu- Added code to Lock CC2, if CC3 has records.
 	case 5
@@ -8577,13 +8954,16 @@ choose case newindex
 end choose
 
 
+
+
 end event
 
 type tabpage_main from w_std_master_detail`tabpage_main within tab_main
 integer y = 104
-integer width = 4279
+integer width = 4814
 integer height = 1916
 string text = "Order Information"
+cb_readonly cb_readonly
 cb_commodity cb_commodity
 cb_adjustments cb_adjustments
 rb_location rb_location
@@ -8610,6 +8990,7 @@ dw_main dw_main
 end type
 
 on tabpage_main.create
+this.cb_readonly=create cb_readonly
 this.cb_commodity=create cb_commodity
 this.cb_adjustments=create cb_adjustments
 this.rb_location=create rb_location
@@ -8636,33 +9017,35 @@ this.dw_main=create dw_main
 int iCurrent
 call super::create
 iCurrent=UpperBound(this.Control)
-this.Control[iCurrent+1]=this.cb_commodity
-this.Control[iCurrent+2]=this.cb_adjustments
-this.Control[iCurrent+3]=this.rb_location
-this.Control[iCurrent+4]=this.rb_sku
-this.Control[iCurrent+5]=this.cb_export
-this.Control[iCurrent+6]=this.cb_void
-this.Control[iCurrent+7]=this.st_cc_owner_nbr
-this.Control[iCurrent+8]=this.cb_generate
-this.Control[iCurrent+9]=this.cb_report
-this.Control[iCurrent+10]=this.cb_confirm
-this.Control[iCurrent+11]=this.sle_no
-this.Control[iCurrent+12]=this.cb_import_sku
-this.Control[iCurrent+13]=this.gb_1
-this.Control[iCurrent+14]=this.cb_stock_verification_report
-this.Control[iCurrent+15]=this.st_4
-this.Control[iCurrent+16]=this.sle_start_loc
-this.Control[iCurrent+17]=this.st_5
-this.Control[iCurrent+18]=this.sle_end_loc
-this.Control[iCurrent+19]=this.uo_commodity_code1
-this.Control[iCurrent+20]=this.select_commodity_t
-this.Control[iCurrent+21]=this.gb_import_sku
-this.Control[iCurrent+22]=this.dw_sku
-this.Control[iCurrent+23]=this.dw_main
+this.Control[iCurrent+1]=this.cb_readonly
+this.Control[iCurrent+2]=this.cb_commodity
+this.Control[iCurrent+3]=this.cb_adjustments
+this.Control[iCurrent+4]=this.rb_location
+this.Control[iCurrent+5]=this.rb_sku
+this.Control[iCurrent+6]=this.cb_export
+this.Control[iCurrent+7]=this.cb_void
+this.Control[iCurrent+8]=this.st_cc_owner_nbr
+this.Control[iCurrent+9]=this.cb_generate
+this.Control[iCurrent+10]=this.cb_report
+this.Control[iCurrent+11]=this.cb_confirm
+this.Control[iCurrent+12]=this.sle_no
+this.Control[iCurrent+13]=this.cb_import_sku
+this.Control[iCurrent+14]=this.gb_1
+this.Control[iCurrent+15]=this.cb_stock_verification_report
+this.Control[iCurrent+16]=this.st_4
+this.Control[iCurrent+17]=this.sle_start_loc
+this.Control[iCurrent+18]=this.st_5
+this.Control[iCurrent+19]=this.sle_end_loc
+this.Control[iCurrent+20]=this.uo_commodity_code1
+this.Control[iCurrent+21]=this.select_commodity_t
+this.Control[iCurrent+22]=this.gb_import_sku
+this.Control[iCurrent+23]=this.dw_sku
+this.Control[iCurrent+24]=this.dw_main
 end on
 
 on tabpage_main.destroy
 call super::destroy
+destroy(this.cb_readonly)
 destroy(this.cb_commodity)
 destroy(this.cb_adjustments)
 destroy(this.rb_location)
@@ -8698,9 +9081,28 @@ idw_result3.SaveAs("c:\temp\cc3_count" + ls_datetime + ".csv", csv!, true)
 
 end event
 
+event tabpage_main::constructor;call super::constructor;// Begin- Dinesh - 11/06/2023 - SIMS-328- Screen Lock  read only part 2 
+if gs_project= 'PANDORA' then
+	
+	tab_main.tabpage_main.cb_readonly.visible = True
+	
+	if gs_system_no <> '' or not isnull(gs_system_no) then
+		tab_main.tabpage_main.cb_readonly.enabled = False
+	else
+		tab_main.tabpage_main.cb_readonly.enabled = True
+end if
+
+else
+	tab_main.tabpage_main.cb_readonly.visible = False
+end if
+
+
+// End- Dinesh - 11/06/2023 - SIMS-328- Screen Lock  read only part 2 
+end event
+
 type tabpage_search from w_std_master_detail`tabpage_search within tab_main
 integer y = 104
-integer width = 4279
+integer width = 4814
 integer height = 1916
 cb_search cb_search
 dw_search dw_search
@@ -8729,6 +9131,33 @@ destroy(this.dw_search)
 destroy(this.cb_clear)
 destroy(this.dw_result)
 end on
+
+type cb_readonly from commandbutton within tabpage_main
+integer x = 2917
+integer y = 1628
+integer width = 462
+integer height = 100
+integer taborder = 100
+integer textsize = -8
+integer weight = 400
+fontcharset fontcharset = ansi!
+fontpitch fontpitch = variable!
+fontfamily fontfamily = swiss!
+string facename = "Arial"
+string text = "Read Only Access"
+end type
+
+event clicked;// Begin - Dinesh - 11/06/2023 - SIMS-328- Screen Lock  read only part 2 
+boolean lb_readonly
+lb_readonly= True
+If MessageBox( is_title, "Are you sure you want to change this order to read only?", Question!, YesNo!, 1 ) = 1 Then
+	update Screen_Lock set edit_mode='R' where  user_id=:gs_userid  and screen_name='Delivery Order' and  userspid=:gl_userspid using sqlca;
+	tab_main.tabpage_main.cb_readonly.enabled = False
+	wf_cc_order_readonly(lb_readonly)
+	 ib_access= True
+End If
+// End - Dinesh - 11/06/2023 - SIMS-328- Screen Lock  read only part 2 
+end event
 
 type cb_commodity from commandbutton within tabpage_main
 boolean visible = false
@@ -8971,7 +9400,7 @@ string ls_supp,ls_po2,ls_container_id, ls_coo //GAP 11-02 added container
 datetime ldt_expiration_date  //GAP 11-02
 Long i,  ll_cnt,ll_ctr,ll_ret,ll_owner, llRowCount, ll_pos, ll_row
 decimal ld_qty //GAP 11-02 convert to decimal
-string ls_ro_no, ls_alternate_sku
+string ls_ro_no, ls_alternate_sku,ls_owner_content
 string ls_uom, ls_grp
 Int		liRC
 string ls_inventory_type
@@ -8979,7 +9408,8 @@ integer li_day_afters
 decimal ld_alloc_qty  //TAM 2017/05 SIMSPEVS-420 and 513
 string lsSequence, ls_si_sequence  //TAM 2017/05 SIMSPEVS-420 and 513
 string ls_find
-string	ls_LCode
+string	ls_LCode,ls_owner_code,ls_owner_code_content
+long ll_owner_id,ll_owner_id_content,ll_owner_code_pr,ll_owner_code_non_pr
 
 ll_ctr=0
 
@@ -9024,7 +9454,7 @@ f_method_trace_special( gs_project, parent.ClassName() , 'Start  generate CC Ord
 	end if
 
  //End - Dinesh -F24934/S50765/- 10/29/2020 - Include component on cycle count for order type SKU as well
-ldsSysInv = f_datastoreFactory( 'd_sys_inv_by_item_master')
+ ldsSysInv = f_datastoreFactory( 'd_sys_inv_by_item_master')
 ldsCCGenericField = f_datastoreFactory('d_cc_generic_field')
 SqlUtil.setOriginalSql( ldsSysInv.GetSQLSelect() )
 SqlUtil.doParseSql()
@@ -9039,6 +9469,9 @@ If idw_main.GetItemString(1, "ord_type") = "P" and idw_main.GetItemString(1, "or
 	RETURN -1
 End If
 
+ls_owner_code =  tab_main.tabpage_system_generated.dw_system_generated.GetItemString( 1, "Owner_Cd") // Dinesh - 01/04/2023- SIMS-151-Google - SIMS - Data Center ABC Cycle Counting Part 2
+select owner_id into :ll_owner_id from Owner where Owner_Cd=:ls_owner_code;  // Dinesh - 01/04/2023-SIMS-151-Google - SIMS - Data Center ABC Cycle Counting Part 2
+	
 ls_s = idw_main.GetItemString(1, "range_start")
 ls_e = idw_main.GetItemString(1, "range_end")
 ls_wh = idw_main.GetItemstring(1, "wh_code")
@@ -9173,13 +9606,27 @@ If idw_main.GetItemString(1, "ord_type") = "L"  OR ( idw_main.GetItemString(1, "
 				
 			ls_loc = lds_cc.GetItemString( i, "l_code")
 			if trim(ls_loc) <> '' and not IsNull(ls_loc) then
-			  SELECT Sum(dbo.content_summary.alloc_qty)  
-			    INTO :ld_alloc_qty  
-			    FROM dbo.content_summary  
-			   WHERE ( dbo.content_summary.project_id = :gs_project ) AND  
-	   		      ( dbo.content_summary.wh_code = :ls_wh ) AND  
-	  	 	      ( dbo.content_summary.l_code = :ls_loc ) AND  	
-	   	  	   ( dbo.content_summary.alloc_qty > 0 )   ;
+				
+			if dw_main.getitemstring(1,'user_field3')='YES' and gs_project='PANDORA' then // Dinesh - 01/04/2023-SIMS-151-Google - SIMS - Data Center ABC Cycle Counting Part 2
+				  SELECT Sum(dbo.content_summary.alloc_qty)  
+					 INTO :ld_alloc_qty  
+					 FROM dbo.content_summary  
+					WHERE ( dbo.content_summary.project_id = :gs_project ) AND  
+							( dbo.content_summary.wh_code = :ls_wh ) AND  
+						( dbo.content_summary.l_code = :ls_loc ) AND  	
+						( dbo.content_summary.alloc_qty > 0 ) AND
+						( dbo.content_summary.owner_id = :ll_owner_id ) ;
+			else
+					
+				 SELECT Sum(dbo.content_summary.alloc_qty)  
+					 INTO :ld_alloc_qty  
+					 FROM dbo.content_summary  
+					WHERE ( dbo.content_summary.project_id = :gs_project ) AND  
+							( dbo.content_summary.wh_code = :ls_wh ) AND  
+						( dbo.content_summary.l_code = :ls_loc ) AND  	
+						( dbo.content_summary.alloc_qty > 0 )   ;
+					  
+			End if
 				// If allocated quantity exist then it cannot be cycle counted at this time
 				if ld_alloc_qty > 0 and not isnull(ld_alloc_qty) then 		
 					llRE = lds_cc.deleterow(i)
@@ -9200,8 +9647,19 @@ If idw_main.GetItemString(1, "ord_type") = "L"  OR ( idw_main.GetItemString(1, "
 
 	//TAM 2018/04 -S17607 - Exclude Inventory with Locations = "Research" or "Reconp" or or PoNo = "Research" 
 	If gs_project = 'PANDORA' Then 
+		
 		FOR i = 1 to lds_cc.RowCount()
-			if  (trim(lds_cc.GetItemString( i, "l_code")) >= 'RESEARCH' and trim(lds_cc.GetItemString( i, "l_code")) <= 'RESEARCZ') or trim(lds_cc.GetItemString( i, "l_code")) = 'RECONP' or  trim(lds_cc.GetItemString( i, "po_no")) = 'RESEARCH' then
+			//begin -  Dinesh - 12/07/2023- SIMS- 373- Google 3rd Cycle count issue
+			 ll_owner_id_content= lds_cc.GetItemNumber(i, "owner_id")
+			// select owner_cd into : ls_owner_code_content from owner where owner_id= :ll_owner_id_content using sqlca; 
+			// ls_owner_content= Right(ls_owner_code_content,2)  
+				select owner_id into : ll_owner_code_pr from owner where owner_cd like '%PR' and owner_id=:ll_owner_id_content  using sqlca; 
+				//select owner_id into : ll_owner_code_non_pr from owner where owner_cd not like '%PR' and owner_id=:ll_owner_id_content  using sqlca;
+				 
+			//if  (trim(lds_cc.GetItemString( i, "l_code")) >= 'RESEARCH' and trim(lds_cc.GetItemString( i, "l_code")) <= 'RESEARCZ') or trim(lds_cc.GetItemString( i, "l_code")) = 'RECONP' or  trim(lds_cc.GetItemString( i, "po_no")) = 'RESEARCH' then // Dinesh -12/08/2023 -  SIMS-336-Google: Cycle Count-Code Clean up of PONO RESEARCH
+			
+			if  (trim(lds_cc.GetItemString( i, "l_code")) >= 'RESEARCH' and trim(lds_cc.GetItemString( i, "l_code")) <= 'RESEARCZ') or trim(lds_cc.GetItemString( i, "l_code")) = 'RECONP' or  (trim(lds_cc.GetItemString( i, "po_no")) = 'MAIN' and lds_cc.GetItemNumber( i, "owner_id")  = ll_owner_code_pr) then // Dinesh -12/08/2023 -  SIMS-336-Google: Cycle Count-Code Clean up of PONO RESEARCH
+			//End -  Dinesh - 12/07/2023- SIMS- 373- Google 3rd Cycle count issue
 				llRE = lds_cc.deleterow(i)
 				if llRE = 1 then //step back 1 rowcount
 					i = i - 1
@@ -9234,13 +9692,27 @@ ElseIf idw_main.GetItemString(1, "ord_type") = "B" Then /* By Blank Location (ad
 			ls_loc = lds_cc.GetItemString( i, "l_code")
 
 			if trim(ls_loc) <> '' and not IsNull(ls_loc) then
+				
+			if dw_main.getitemstring(1,'user_field3')='YES' and gs_project='PANDORA' then // Dinesh - 01/04/2023-SIMS-151-Google - SIMS - Data Center ABC Cycle Counting Part 2
 			  SELECT Sum(dbo.content_summary.alloc_qty)  
 			    INTO :ld_alloc_qty  
 			    FROM dbo.content_summary  
 			   WHERE ( dbo.content_summary.project_id = :gs_project ) AND  
 		   	      ( dbo.content_summary.wh_code = :ls_wh ) AND  
 		  	       ( dbo.content_summary.l_code = :ls_loc ) AND  	
+		   	      ( dbo.content_summary.alloc_qty > 0 )  AND 
+					 ( dbo.content_summary.owner_id = :ll_owner_id ) 	;
+						
+			else
+						
+						 SELECT Sum(dbo.content_summary.alloc_qty)  
+			    INTO :ld_alloc_qty  
+			    FROM dbo.content_summary  
+			   WHERE ( dbo.content_summary.project_id = :gs_project ) AND  
+		   	      ( dbo.content_summary.wh_code = :ls_wh ) AND  
+		  	       ( dbo.content_summary.l_code = :ls_loc ) AND  	
 		   	      ( dbo.content_summary.alloc_qty > 0 )   ;
+			end if
 				// If allocated quantity exist then it cannot be cycle counted at this time
  				if ld_alloc_qty > 0 and not isnull(ld_alloc_qty) then 		
 					llRE = lds_cc.deleterow(i)
@@ -9256,7 +9728,8 @@ ElseIf idw_main.GetItemString(1, "ord_type") = "B" Then /* By Blank Location (ad
 	//TAM 2018/04 -S17607 - Exclude Inventory with Locations = "Research" or "Reconp" or or PoNo = "Research" 
 	If gs_project = 'PANDORA' Then 
 		FOR i = 1 to lds_cc.RowCount()
-			if  (trim(lds_cc.GetItemString( i, "l_code")) >= 'RESEARCH' and trim(lds_cc.GetItemString( i, "l_code")) <= 'RESEARCZ') or  trim(lds_cc.GetItemString( i, "l_code")) = 'RECONP' or  trim(lds_cc.GetItemString( i, "po_no")) = 'RESEARCH' then
+			//if  (trim(lds_cc.GetItemString( i, "l_code")) >= 'RESEARCH' and trim(lds_cc.GetItemString( i, "l_code")) <= 'RESEARCZ') or  trim(lds_cc.GetItemString( i, "l_code")) = 'RECONP' or  trim(lds_cc.GetItemString( i, "po_no")) = 'RESEARCH' then // Dinesh -12/08/2023 -  SIMS-336-Google: Cycle Count-Code Clean up of PONO RESEARCH
+			if  (trim(lds_cc.GetItemString( i, "l_code")) >= 'RESEARCH' and trim(lds_cc.GetItemString( i, "l_code")) <= 'RESEARCZ') or  trim(lds_cc.GetItemString( i, "l_code")) = 'RECONP' or (trim(lds_cc.GetItemString( i, "po_no")) = 'MAIN' and lds_cc.GetItemNumber( i, "owner_id")  = ll_owner_code_pr) then // Dinesh -12/08/2023 -  SIMS-336-Google: Cycle Count-Code Clean up of PONO RESEARCH
 				llRE = lds_cc.deleterow(i)
 				if llRE = 1 then //step back 1 rowcount
 					i = i - 1
@@ -9336,7 +9809,14 @@ ElseIf idw_main.GetItemString(1, "ord_type") = "R"  OR  idw_main.GetItemString(1
 	End If
 	
 	sql_syntax += " WHERE  Location.wh_code = '" + ls_wh + "'  "
+	if dw_main.getitemstring(1,'user_field3')='YES' and gs_project='PANDORA' then // Dinesh - 01/04/2023-SIMS-151-Google - SIMS - Data Center ABC Cycle Counting Part 2
+//		sql_syntax + = " and Content_Summary.owner_id = '" + ll_owner_id + "' "
+	//sql_syntax + = " and Content_Summary.owner_id =" + ll_owner_id 
+	sql_syntax += " and content_summary.owner_id='"+ string(ll_owner_id) +"' " // Dinesh - 01/04/2023-SIMS-151-Google - SIMS - Data Center ABC Cycle Counting Part 2
+	end if
 	sql_syntax += " and Location.L_Code in (Select Top " + String(idw_main.GetItemNumber(1, "range_cnt")) + " l_code from location where wh_code = '" + ls_wh + "' and (location_Available_ind = 'Y' or location_Available_ind is null) and CC_Rnd_Cnt_Ind = 'N' "
+	
+	
 	if idw_main.GetItemString(1, "ord_type") = "Q" then
 		// dts - 8/26/2010 - Pandora wants 'Random' to be sequential (but still use the 'Random Count Settings')
 		sql_syntax += " Order by l_code ) "
@@ -9364,13 +9844,26 @@ ElseIf idw_main.GetItemString(1, "ord_type") = "R"  OR  idw_main.GetItemString(1
 			ls_loc = lds_cc.GetItemString( i, "l_code")
 
 			if trim(ls_loc) <> '' and not IsNull(ls_loc) then
-			  SELECT Sum(dbo.content_summary.alloc_qty)  
-			    INTO :ld_alloc_qty  
-			    FROM dbo.content_summary  
-			   WHERE ( dbo.content_summary.project_id = :gs_project ) AND  
-		   	      ( dbo.content_summary.wh_code = :ls_wh ) AND  
-		  	       ( dbo.content_summary.l_code = :ls_loc ) AND  	
-		   	      ( dbo.content_summary.alloc_qty > 0 )   ;
+				if dw_main.getitemstring(1,'user_field3')='YES' and gs_project='PANDORA' then // Dinesh - 01/04/2023-SIMS-151-Google - SIMS - Data Center ABC Cycle Counting Part 2
+					  SELECT Sum(dbo.content_summary.alloc_qty)  
+						 INTO :ld_alloc_qty  
+						 FROM dbo.content_summary  
+						WHERE ( dbo.content_summary.project_id = :gs_project ) AND  
+								( dbo.content_summary.wh_code = :ls_wh ) AND  
+							 ( dbo.content_summary.l_code = :ls_loc ) AND  	
+								( dbo.content_summary.alloc_qty > 0 ) AND
+								( dbo.content_summary.owner_id = :ll_owner_id ) 
+								;
+						else
+								
+								SELECT Sum(dbo.content_summary.alloc_qty)  
+						 INTO :ld_alloc_qty  
+						 FROM dbo.content_summary  
+						WHERE ( dbo.content_summary.project_id = :gs_project ) AND  
+								( dbo.content_summary.wh_code = :ls_wh ) AND  
+							 ( dbo.content_summary.l_code = :ls_loc ) AND  	
+								( dbo.content_summary.alloc_qty > 0 )   ;
+						end if
 				// If allocated quantity exist then it cannot be cycle counted at this time
  				if ld_alloc_qty > 0 and not isnull(ld_alloc_qty) then 		
 					llRE = lds_cc.deleterow(i)
@@ -9386,7 +9879,8 @@ ElseIf idw_main.GetItemString(1, "ord_type") = "R"  OR  idw_main.GetItemString(1
 	//TAM 2018/04 -S17607 - Exclude Inventory with Locations = "Research" or "Reconp" or or PoNo = "Research" 
 	If gs_project = 'PANDORA' Then 
 		FOR i = 1 to lds_cc.RowCount()
-			if  (trim(lds_cc.GetItemString( i, "l_code")) >= 'RESEARCH' and trim(lds_cc.GetItemString( i, "l_code")) <= 'RESEARCZ') or  trim(lds_cc.GetItemString( i, "l_code")) = 'RECONP' or  trim(lds_cc.GetItemString( i, "po_no")) = 'RESEARCH' then
+			//if  (trim(lds_cc.GetItemString( i, "l_code")) >= 'RESEARCH' and trim(lds_cc.GetItemString( i, "l_code")) <= 'RESEARCZ') or  trim(lds_cc.GetItemString( i, "l_code")) = 'RECONP' or  trim(lds_cc.GetItemString( i, "po_no")) = 'RESEARCH' then // Dinesh -12/08/2023 -  SIMS-336-Google: Cycle Count-Code Clean up of PONO RESEARCH
+			if  (trim(lds_cc.GetItemString( i, "l_code")) >= 'RESEARCH' and trim(lds_cc.GetItemString( i, "l_code")) <= 'RESEARCZ') or  trim(lds_cc.GetItemString( i, "l_code")) = 'RECONP' or (trim(lds_cc.GetItemString( i, "po_no")) = 'MAIN'  and lds_cc.GetItemNumber( i, "owner_id")  = ll_owner_code_pr) then // Dinesh -12/08/2023 -  SIMS-336-Google: Cycle Count-Code Clean up of PONO RESEARCH GPNs
 				llRE = lds_cc.deleterow(i)
 				if llRE = 1 then //step back 1 rowcount
 					i = i - 1
@@ -9414,15 +9908,32 @@ ElseIf idw_main.GetItemString(1, "ord_type") = "X" Then /*by System Generated*/
 		// Check if allocated inventory			
 		If ib_filter_allocated = True	 Then //TAM 2017/06 Added Flag from Lookup Table to turn functionality on or off (Start)
 			if ls_sys_gen_type = 'S' then
-				SELECT sum(cs.alloc_qty)  
-				INTO :ldAllocQty  
-				FROM content_summary cs with (NOLOCK), cc_master cm with (NOLOCK), cc_system_criteria sc  with (NOLOCK)
-				WHERE cs.project_id = :gs_project AND
-						(cm.cc_no = sc.cc_no) AND
-						(cm.wh_code = cs.wh_code) AND
-						(cs.sku = :ls_sys_gen_value) AND  
-				       	( cm.cc_no = :ls_order )
-				      	;		
+				
+				if dw_main.getitemstring(1,'user_field3')='YES' and gs_project='PANDORA' then // Dinesh - 01/04/2023-SIMS-151-Google - SIMS - Data Center ABC Cycle Counting Part 2
+		
+					SELECT sum(cs.alloc_qty)  
+					INTO :ldAllocQty  
+					FROM content_summary cs with (NOLOCK), cc_master cm with (NOLOCK), cc_system_criteria sc  with (NOLOCK)
+					WHERE cs.project_id = :gs_project AND
+							(cm.cc_no = sc.cc_no) AND
+							(cm.wh_code = cs.wh_code) AND
+							(cs.sku = :ls_sys_gen_value) AND  
+								( cm.cc_no = :ls_order ) AND
+								(cs.owner_id = :ll_owner_id)
+								;	
+								
+					else
+								
+					SELECT sum(cs.alloc_qty)  
+					INTO :ldAllocQty  
+					FROM content_summary cs with (NOLOCK), cc_master cm with (NOLOCK), cc_system_criteria sc  with (NOLOCK)
+					WHERE cs.project_id = :gs_project AND
+							(cm.cc_no = sc.cc_no) AND
+							(cm.wh_code = cs.wh_code) AND
+							(cs.sku = :ls_sys_gen_value) AND  
+								( cm.cc_no = :ls_order )
+								;	
+					end if
 			else
 				SELECT sum(cs.alloc_qty)  
 				INTO :ldAllocQty  
@@ -9466,16 +9977,22 @@ ElseIf idw_main.GetItemString(1, "ord_type") = "X" Then /*by System Generated*/
 		
 		if ls_sys_gen_type = 'S' then
 //			TAM 2018/11/26 - D7402 -Exclude location like 'RESEARCH', 'RECON' and PoNo like 'RESEARCH'
-//			lsWhere += " and  content_summary.sku in ("+ls_sys_gen_where+")  "  
-			lsWhere += " and  content_summary.sku in ("+ls_sys_gen_where+") and content_summary.l_code NOT LIKE 'RESEARCH%' and content_summary.l_code <> 'RECONP'  and content_summary.po_no <> 'RESEARCH'  "  
+//			lsWhere += " and  content_summary.sku in ("+ls_sys_gen_where+")  " 
+				
+				lsWhere += " and  content_summary.sku in ("+ls_sys_gen_where+") and content_summary.l_code NOT LIKE 'RESEARCH%' and content_summary.l_code <> 'RECONP'  and content_summary.owner_id <> " + string(ll_owner_code_pr)  // Dinesh -12/08/2023 -  SIMS-336-Google: Cycle Count-Code Clean up of PONO RESEARCH
+				//lsWhere += " and  content_summary.sku in ("+ls_sys_gen_where+") and content_summary.l_code NOT LIKE 'RESEARCH%' and content_summary.l_code <> 'RECONP'  and content_summary.po_no <> 'RESEARCH'  "  // Dinesh -12/08/2023 -  SIMS-336-Google: Cycle Count-Code Clean up of PONO RESEARCH
 		else
 //			TAM 2018/11/26 - D7402 - Exclude location like 'RESEARCH', 'RECON' and PoNo like 'RESEARCH'
 //			lsWhere += " and  content_summary.l_code in ("+ls_sys_gen_where+") "  
-			lsWhere += " and  content_summary.l_code in ("+ls_sys_gen_where+") and content_summary.l_code NOT LIKE 'RESEARCH%' and content_summary.l_code <> 'RECONP' and content_summary.po_no <> 'RESEARCH'  "  
-		end if
+			//lsWhere += " and  content_summary.l_code in ("+ls_sys_gen_where+") and content_summary.l_code NOT LIKE 'RESEARCH%' and content_summary.l_code <> 'RECONP' and content_summary.po_no <> 'RESEARCH'  "  // Dinesh -12/08/2023 -  SIMS-336-Google: Cycle Count-Code Clean up of PONO RESEARCH
+			lsWhere += " and  content_summary.l_code in ("+ls_sys_gen_where+") and content_summary.l_code NOT LIKE 'RESEARCH%' and content_summary.l_code <> 'RECONP' and content_summary.owner_id <> " + string(ll_owner_code_pr) // Dinesh -12/08/2023 -  SIMS-336-Google: Cycle Count-Code Clean up of PONO RESEARCH
+	end if
 		
 		lsWhere += " and content_summary.wh_code ='"+ ls_wh +"'" +" " //02-Feb-2017 Madhu - PEVS-453 - Added selected warehouse in WHERE clause instead to look for Inventory across all WH's -START
-
+		
+		if dw_main.getitemstring(1,'user_field3')='YES' and gs_project='PANDORA' then
+			lsWhere += " and content_summary.owner_id='"+ string(ll_owner_id) +"' " // Dinesh - 01/04/2023-SIMS-SIMS-151-Google - SIMS - Data Center ABC Cycle Counting Part 2
+		end if
 //	end if
 
 	//02/20 MikeaA - DE14206 - Don't try to retrieve if ls_sys_gen_where is empty. Will cause -1 Error.
@@ -9485,8 +10002,8 @@ ElseIf idw_main.GetItemString(1, "ord_type") = "X" Then /*by System Generated*/
 		SqlUtil.setWhere( lsWhere )
 		ldsSysInv.SetSQLSelect ( SqlUtil.getSql() )
 	
-		sysInvRows = ldsSysInv.retrieve(  )
-		
+		sysInvRows = ldsSysInv.retrieve( )
+			
 	END IF
 	
 	//02/20 MikeaA - DE14206 - Added check to generate error if te ls_sys_gen_where is empty.
@@ -9545,7 +10062,7 @@ ElseIf idw_main.GetItemString(1, "ord_type") = "X" Then /*by System Generated*/
 		ls_loc 						= ldsSysInv.object.l_code[ index ]
 		ls_sku						= ldsSysInv.object.sku[ index ] 
 		ls_supp					= ldsSysInv.object.supp_code[ index ]
-		ll_owner					= ldsSysInv.object.owner_id[ index ] 
+		ll_owner					= ldsSysInv.object.owner_id[ index ] 	
 		ls_type					= ldsSysInv.object.inventory_type[ index ]
 		ls_serial					= ldsSysInv.object.serial_no[ index ]
 		ls_lot						= ldsSysInv.object.lot_no[ index ] 
@@ -9682,10 +10199,17 @@ ElseIf idw_main.GetItemString(1, "ord_type") = "F" Then /*by System Generated - 
 
 
 	ls_Sku =  tab_main.tabpage_system_generated.dw_system_generated.GetItemString( 1, "count_value")
+
+	
 	ls_LCode =idw_main.GetItemString( 1, "range_start")
+	
 
 	lsWhere += " and  content_summary.sku = ('"+ ls_Sku +"')  and  content_summary.l_code = ('"+ls_LCode+"') "    
 	lsWhere += " and content_summary.wh_code ='"+ ls_wh +"'" +" "
+	
+	if dw_main.getitemstring(1,'user_field3')='YES' and gs_project='PANDORA' then
+		lsWhere += " and content_summary.owner_id='"+ string(ll_owner_id) +"' " // Dinesh - 01/04/2023-SIMS-151-Google - SIMS - Data Center ABC Cycle Counting Part 2
+	end if
 
 
 	SqlUtil.setWhere( lsWhere )
@@ -9874,8 +10398,13 @@ Else	/*by Sku*/
 
 		//TAM 2018/04 -S17607 - Exclude Inventory with Locations = "Research" or "Reconp" or or PoNo = "Research" 
 		If gs_project = 'PANDORA' Then 
-			lsWhere += " and  dbo.content_summary.l_code NOT LIKE  'RESEARCH%'  and dbo.content_summary.l_code <> 'RECONP' and dbo.content_summary.po_no <> 'RESEARCH' " 
-		End If
+			//lsWhere += " and  dbo.content_summary.l_code NOT LIKE  'RESEARCH%'  and dbo.content_summary.l_code <> 'RECONP' and dbo.content_summary.po_no <> 'RESEARCH' " // Dinesh -12/08/2023 -  SIMS-336-Google: Cycle Count-Code Clean up of PONO RESEARCH
+			lsWhere += " and  dbo.content_summary.l_code NOT LIKE  'RESEARCH%'  and dbo.content_summary.l_code <> 'RECONP' and content_summary.owner_id <> " + string(ll_owner_code_pr) // Dinesh -12/08/2023 -  SIMS-336-Google: Cycle Count-Code Clean up of PONO RESEARCH	
+	End If
+		
+		if dw_main.getitemstring(1,'user_field3')='YES' and gs_project='PANDORA' then
+			lsWhere += " and content_summary.owner_id='"+ string(ll_owner_id) +"' " // Dinesh - 01/04/2023-SIMS-151-Google - SIMS - Data Center ABC Cycle Counting Part 2
+		end if
 	
 //TAM 2017/05 - SIMSPEVS-420  If Pandora Directed dont use class other criteria
 		If idw_main.GetItemString(1, "ord_type") <> "P" Then
@@ -9921,13 +10450,17 @@ Else	/*by Sku*/
 
 			//TAM 2018/04 -S17607 - Exclude Inventory with Locations = "Research" or "Reconp" or or PoNo = "Research" 
 			If gs_project = 'PANDORA' Then 
-				lsWhere += " and  content_summary.l_code NOT LIKE  'RESEARCH%'  and content_summary.l_code <> 'RECONP' and content_summary.po_no <> 'RESEARCH' " 
+				//lsWhere += " and  content_summary.l_code NOT LIKE  'RESEARCH%'  and content_summary.l_code <> 'RECONP' and content_summary.po_no <> 'RESEARCH' " // Dinesh - 12/08/2023 - SIMS-336-Google: Cycle Count-Code Clean up of PONO RESEARCH
+				lsWhere += " and  content_summary.l_code NOT LIKE  'RESEARCH%'  and content_summary.l_code <> 'RECONP' and content_summary.owner_id <> " + string(ll_owner_code_pr) // Dinesh -12/08/2023 - SIMS-336-Google: Cycle Count-Code Clean up of PONO RESEARCH
 			End If
 
 //TAM 2017/05 - SIMSPEVS-420   SIMSPEVS-513  Changed SQL to Content Summary
 //			lsWhere += " and content.wh_code ='"+ ls_wh +"'" +" " //02-Feb-2017 Madhu - PEVS-453 - Added selected warehouse in WHERE clause instead to look for Inventory across all WH's -START
 			lsWhere += " and content_summary.wh_code ='"+ ls_wh +"'" +" " //02-Feb-2017 Madhu - PEVS-453 - Added selected warehouse in WHERE clause instead to look for Inventory across all WH's -START
-
+			
+			if dw_main.getitemstring(1,'user_field3')='YES' and gs_project='PANDORA' then
+		     	lsWhere += " and content_summary.owner_id='"+ string(ll_owner_id) +"' " // Dinesh - 01/04/2023-SIMS-151-Google - SIMS - Data Center ABC Cycle Counting Part 2
+			end if
 			if Left( gs_project,4 ) = "NIKE" then
 				ls_inventory_type = idw_main.GetItemString( 1, "user_field2")
 				li_day_afters = integer(idw_main.GetItemString( 1, "user_field1"))
@@ -9979,7 +10512,7 @@ Else	/*by Sku*/
 
 	for index = 1 to sysInvRows
 		
-		ls_loc 						= ldsSysInv.object.l_code[ index ]
+		ls_loc 					= ldsSysInv.object.l_code[ index ]
 		ls_sku						= ldsSysInv.object.sku[ index ] 
 		ls_supp					= ldsSysInv.object.supp_code[ index ]
 		ll_owner					= ldsSysInv.object.owner_id[ index ] 
@@ -10366,9 +10899,13 @@ integer limit = 16
 borderstyle borderstyle = stylelowered!
 end type
 
-event modified;String ls_order, ls_customer, ls_Max, ls_filter_str, ls_encoded_indicators
+event modified;String ls_order, ls_customer, ls_Max, ls_filter_str, ls_encoded_indicators,ls_color,ls_Edit_ModeR,ls_user_idr,ls_order_nor,ls_Edit_ModeW
+String ls_user_id,ls_order_no,ls_screen_name,ls_edit_mode,ls_user_idw,ls_order_now,ls_edit_moderead
+datetime ldt_entry_date,ldt_out_date
+boolean lb_readonly, lb_selfuser
 
-Long rows, ll_Result1Rows, ll_Result2Rows, ll_Result3Rows, ll_SIRows
+Long rows, ll_Result1Rows, ll_Result2Rows, ll_Result3Rows, ll_SIRows,ll_row,ll_row1,ll_spid,ll_userspid
+datastore lds_screen_lockW,lds_screen_lockR
 
 // LTK 20150515  Lot-able rollup variables
 long ll_rows, ll_found_row,  ll_found_si_row, i,  j, k
@@ -10382,9 +10919,287 @@ Int li_line_item_numbers[], li_empty[]
 
 String ls_Wh //TAM 2017/06 Added Flag from Lookup Table to turn functionality on or off
 Long ll_cnt //TAM 2017/06 Added Flag from Lookup Table to turn functionality on or of
+string ll_ret
 
 ls_order = This.Text
 idw_main.Retrieve(ls_order)
+
+//Begin - Dinesh - 10/30/2023 - SIMS-328 - Google - SIMS - Google - SIMS - Read Only Access part-2
+if gs_project='PANDORA' then
+	
+	if ls_order ='' or isnull(ls_order) then return
+	
+	gs_System_No= ls_order
+//		ls_order_read=ls_order
+//		SELECT invoice_no INTO :ls_invoice_no FROM CC_master WHERE do_no = :ls_order_read   and project_id = :gs_project;
+//		if ls_invoice_no <> "" and not isnull(ls_invoice_no) then
+//			ls_order=ls_invoice_no
+//			is_order_new= ls_order
+//		end if
+
+//Begin - Dinesh - 11/06/2023 - SIMS-328 - Google - SIMS - Google - SIMS - Read Only Access part 2
+		if gs_System_No <> '' or not isnull(gs_System_No) then
+			tab_main.tabpage_main.cb_readonly.enabled = True
+		else
+			tab_main.tabpage_main.cb_readonly.enabled = False
+		end if
+		//End - Dinesh - 11/06/2023 - SIMS-328 - Google - SIMS - Google - SIMS - Read Only Access part 2
+			lds_screen_lockW = Create datastore
+			lds_screen_lockW.Dataobject = 'd_screen_lock_order_w'
+			lds_screen_lockW.settrans(sqlca)
+			lds_screen_lockW.retrieve(gs_System_No,'W')
+			
+			//gl_userspid
+			
+			//select top 1 Login_Time into :ldt_user_login_Date  from User_Login_History where UserId=:gs_userid order by Login_Time desc;
+			//select UserSPID into :gl_userspid  from User_Login_History where UserId=:gs_userid and Login_Time=:ldt_user_login_Date;
+			select count(*) into : il_find_matchW from Screen_Lock with(nolock) where Order_No= :gs_System_No and Edit_Mode='W' and screen_name='Cycle Count' using sqlca;
+			
+			lds_screen_lockR = Create datastore
+			lds_screen_lockR.Dataobject = 'd_screen_lock_order_r'
+			lds_screen_lockR.settrans(sqlca)
+			lds_screen_lockR.retrieve(gs_System_No,'R')
+		
+			for j= 1 to lds_screen_lockR.rowcount()
+					ls_Edit_ModeR = lds_screen_lockR.getitemstring(j,'edit_Mode')
+				 	ls_User_IdR = lds_screen_lockR.getitemstring(j,'user_Id')
+					ls_Order_NoR =lds_screen_lockR.getitemstring(j,'order_No')
+			NEXT
+			
+			select count(*) into : il_find_matchR from Screen_Lock with(nolock) where Order_No= :gs_System_No and Edit_Mode='R' and screen_name='Cycle Count' using sqlca;
+			
+			if (il_find_matchR > 0 and il_find_matchW=0)then
+				select User_Id,Order_No,screen_name,Entry_Date,Out_Date,Edit_Mode,UserSPID into :ls_User_Id,:gs_System_No,:ls_screen_name,:ldt_Entry_Date,:ldt_Out_Date,:ls_Edit_Mode,:ll_spid from Screen_Lock with(nolock) where Order_No= :ls_order and Edit_Mode='R' and screen_name='Cycle Count' using sqlca;
+			end if
+			if (il_find_matchW > 0 and il_find_matchR= 0) then
+				select User_Id,Order_No,screen_name,Entry_Date,Out_Date,Edit_Mode,UserSPID into :ls_User_Id,:gs_System_No,:ls_screen_name,:ldt_Entry_Date,:ldt_Out_Date,:ls_Edit_Mode,:ll_spid from Screen_Lock with(nolock) where Order_No= :ls_order and Edit_Mode='W' and screen_name='Cycle Count' using sqlca;	
+			end if
+			if (il_find_matchR > 0 and  il_find_matchW > 0) then
+				select User_Id,Order_No,screen_name,Entry_Date,Out_Date,Edit_Mode,UserSPID into :ls_User_Id,:gs_System_No,:ls_screen_name,:ldt_Entry_Date,:ldt_Out_Date,:ls_Edit_Mode,:ll_spid from Screen_Lock with(nolock) where Order_No= :ls_order and Edit_Mode='W' and screen_name='Cycle Count' using sqlca;
+			end if
+			
+			lds_screen_lockW.retrieve(gs_System_No,'W')
+				for k= 1 to lds_screen_lockW.rowcount()
+					 ls_Edit_ModeW = lds_screen_lockW.getitemstring(k,'edit_Mode')
+					 ls_User_IdW = lds_screen_lockW.getitemstring(k,'user_Id')
+					 ls_Order_NoW =lds_screen_lockW.getitemstring(k,'order_No')
+					 ll_userspid =lds_screen_lockW.getitemnumber(k,'userspid')
+				next
+				
+					select Display_Name into :is_display_name from UserTable with(nolock) where UserId=:ls_User_IdW;
+				
+			
+				if  gs_System_No = ls_Order_NoW and gs_userid <> ls_User_IdW and gs_System_No <> '' then
+						messagebox(is_title,'User Name: ' + is_display_name + '/Session: ' + string(ll_userspid) +  ' is already accessing the Order Number ' + ls_order + '.~r~nThe screen is locked and can be accessible to read mode only.Please contact your Site Manager/Supervisor to unlock the screen or wait for sweeper run to clear the lock automatically.', Stopsign! )
+						lb_readonly=True
+						lb_selfuser= False
+				
+				elseif gs_System_No=ls_Order_NoW and gs_userid = ls_User_IdW and ll_spid <>gl_userspid and gs_System_No <> '' then
+						messagebox(is_title,'Hey!! You have already opened another session: ' +string(ll_userspid)+ ' for~r~nthe same Order Number ' + ls_order + '.~r~n~r~nPlease close all your current/previous session first and then re-open the order.', Stopsign! )
+						
+						lb_readonly=True
+						lb_selfuser= False
+				
+				elseif gs_System_No=ls_Order_NoW and gs_userid = ls_User_IdW and  ll_spid = gl_userspid and gs_System_No <> '' then
+						//messagebox(is_title,'Hey!! You have already opened the same order in the same session with SPID ID: ' +string(ll_userspid)+ ' for~r for the Order number ' + ls_order + '.~r~n~r~n', Stopsign! )
+						lb_readonly=False
+						lb_selfuser= True	
+			
+				end if
+			if lb_selfuser= False  then
+			
+				if (il_find_matchW =  0 and il_find_matchR = 0 )  then
+					delete from screen_lock where User_Id=:gs_userid and screen_name='Cycle Count' and UserSPID=:gl_userspid using sqlca; // Dinesh - 09/20/2023- Read only
+					insert into Screen_Lock (User_Id,Order_No,Screen_Name,Entry_Date,Out_Date,Edit_Mode,UserSPID) values(:gs_userid,:gs_System_No,:is_title,getdate(),NULL,'W',:gl_userspid) using sqlca;
+					commit;
+					lb_readonly=false
+					
+				elseif (il_find_matchW = 0 and il_find_matchR = 0) and (gs_userid= ls_User_IdW and gs_System_No = ls_Order_NoW and ll_spid <> gl_userspid) then
+						insert into Screen_Lock (User_Id,Order_No,Screen_Name,Entry_Date,Out_Date,Edit_Mode,UserSPID) values(:gs_userid,:gs_System_No,:is_title,getdate(),NULL,'W',:gl_userspid) using sqlca;
+						commit;
+						lb_readonly=false
+				elseif (il_find_matchW > 0 and il_find_matchR > 0) and (gs_userid= ls_User_IdW and gs_System_No = ls_Order_NoW and ll_spid <> gl_userspid) then
+						delete from screen_lock where User_Id=:gs_userid and screen_name='Cycle Count' and UserSPID=:gl_userspid and Edit_Mode='R' using sqlca; //09/21/2023- Dinesh - Read only
+						insert into Screen_Lock (User_Id,Order_No,Screen_Name,Entry_Date,Out_Date,Edit_Mode,UserSPID) values(:gs_userid,:gs_System_No,:is_title,getdate(),NULL,'R',:gl_userspid) using sqlca;
+						commit;
+						lb_readonly=true
+				elseif (il_find_matchW > 0 and il_find_matchR = 0) and (gs_userid= ls_User_IdW and gs_System_No = ls_Order_NoW and ll_spid <> gl_userspid) then
+						delete from screen_lock where User_Id=:gs_userid and screen_name='Cycle Count' and UserSPID=:gl_userspid using sqlca; //09/21/2023- Dinesh - Read only
+						insert into Screen_Lock (User_Id,Order_No,Screen_Name,Entry_Date,Out_Date,Edit_Mode,UserSPID) values(:gs_userid,:ls_order,:is_title,getdate(),NULL,'R',:gl_userspid) using sqlca;
+						commit;
+						lb_readonly=True
+				elseif (il_find_matchW = 0 and il_find_matchR > 0) and (gs_userid= ls_User_IdW and gs_System_No = ls_Order_NoW and ll_spid <> gl_userspid ) then
+						delete from screen_lock where User_Id=:gs_userid and screen_name='Cycle Count' and UserSPID=:gl_userspid using sqlca; //09/21/2023- Dinesh - Read only
+						insert into Screen_Lock (User_Id,Order_No,Screen_Name,Entry_Date,Out_Date,Edit_Mode,UserSPID) values(:gs_userid,:gs_System_No,:is_title,getdate(),NULL,'W',:gl_userspid) using sqlca;
+						commit;
+						lb_readonly=false
+				//Begin - Dinesh - 09/20/2023- SIMS-328-  Google  - Read Only Access Part 2
+				elseif (il_find_matchW = 0 and il_find_matchR = 0) and (gs_userid= ls_User_IdW and gs_System_No <> ls_Order_NoW and ll_spid <> gl_userspid) then
+						insert into Screen_Lock (User_Id,Order_No,Screen_Name,Entry_Date,Out_Date,Edit_Mode,UserSPID) values(:gs_userid,:gs_System_No,:is_title,getdate(),NULL,'W',:gl_userspid) using sqlca;
+						commit;
+						lb_readonly=false
+				elseif (il_find_matchW > 0 and il_find_matchR > 0) and (gs_userid= ls_User_IdW and gs_System_No <> ls_Order_NoW and ll_spid <> gl_userspid) then
+						delete from screen_lock where User_Id=:gs_userid and screen_name='Cycle Count' and Edit_Mode='R' and UserSPID=:gl_userspid using sqlca; // Dinesh - 09/20/2023- SIMS-328-  Google  - Read Only Access Part 2
+						insert into Screen_Lock (User_Id,Order_No,Screen_Name,Entry_Date,Out_Date,Edit_Mode,UserSPID) values(:gs_userid,:gs_System_No,:is_title,getdate(),NULL,'R',:gl_userspid) using sqlca;
+						commit;
+						lb_readonly=true
+				elseif (il_find_matchW > 0 and il_find_matchR = 0) and (gs_userid= ls_User_IdW and gs_System_No <> ls_Order_NoW and ll_spid <> gl_userspid) then
+						//delete from screen_lock where User_Id=:gs_userid and screen_name='Cycle Count' using sqlca;
+						insert into Screen_Lock (User_Id,Order_No,Screen_Name,Entry_Date,Out_Date,Edit_Mode,UserSPID) values(:gs_userid,:gs_System_No,:is_title,getdate(),NULL,'R',:gl_userspid) using sqlca;
+						commit;
+						lb_readonly=True
+				elseif (il_find_matchW = 0 and il_find_matchR > 0) and (gs_userid= ls_User_IdW and gs_System_No <> ls_Order_NoW and ll_spid <> gl_userspid ) then
+						delete from screen_lock where User_Id=:gs_userid and screen_name='Cycle Count' and Edit_Mode='R' and UserSPID=:gl_userspid using sqlca; // Dinesh - 09/20/2023- SIMS-328-  Google  - Read Only Access Part 2
+						insert into Screen_Lock (User_Id,Order_No,Screen_Name,Entry_Date,Out_Date,Edit_Mode,UserSPID) values(:gs_userid,:gs_System_No,:is_title,getdate(),NULL,'W',:gl_userspid) using sqlca;
+						commit;
+						lb_readonly=false
+				//End - Dinesh - 09/20/2023- SIMS-328-  Google  - Read Only Access Part 2
+						
+				elseif (il_find_matchW = 0 and il_find_matchR = 0) and (gs_userid = ls_User_IdW and gs_System_No = ls_Order_NoW and ll_spid = gl_userspid) then
+					delete from screen_lock where User_Id=:gs_userid and screen_name='Cycle Count' and UserSPID=:gl_userspid using sqlca; //09/21/2023- Dinesh - SIMS-328-  Google  - Read Only Access Part 2
+					insert into Screen_Lock (User_Id,Order_No,Screen_Name,Entry_Date,Out_Date,Edit_Mode,UserSPID) values(:gs_userid,:gs_System_No,:is_title,getdate(),NULL,'W',:gl_userspid) using sqlca;
+					commit;
+					lb_readonly=false
+				elseif (il_find_matchW > 0 and il_find_matchR = 0) and (gs_userid = ls_User_IdW and gs_System_No = ls_Order_NoW and ll_spid = gl_userspid) then
+					delete from screen_lock where User_Id=:gs_userid and screen_name='Cycle Count' and UserSPID=:gl_userspid using sqlca; //09/21/2023- Dinesh - SIMS-328-  Google  - Read Only Access Part 2
+					insert into Screen_Lock (User_Id,Order_No,Screen_Name,Entry_Date,Out_Date,Edit_Mode,UserSPID) values(:gs_userid,:gs_System_No,:is_title,getdate(),NULL,'W',:gl_userspid) using sqlca;
+					commit;
+					lb_readonly=false
+				elseif (il_find_matchW > 0 and il_find_matchR > 0) and (gs_userid = ls_User_IdW and gs_System_No = ls_Order_NoW and ll_spid = gl_userspid) then
+					delete from screen_lock where User_Id=:gs_userid and screen_name='Cycle Count' and Edit_Mode='R' and UserSPID=:gl_userspid using sqlca; //09/21/2023- Dinesh - SIMS-328-  Google  - Read Only Access Part 2
+					insert into Screen_Lock (User_Id,Order_No,Screen_Name,Entry_Date,Out_Date,Edit_Mode,UserSPID) values(:gs_userid,:gs_System_No,:is_title,getdate(),NULL,'W',:gl_userspid) using sqlca;
+					commit;
+				elseif (il_find_matchW > 0 and il_find_matchR > 0) and (gs_userid = ls_User_IdW and gs_System_No = ls_Order_NoW and ll_spid = gl_userspid) then
+					delete from screen_lock where User_Id=:gs_userid and screen_name='Cycle Count' and Edit_Mode='R' and UserSPID=:gl_userspid using sqlca; //09/21/2023- Dinesh - SIMS-328-  Google  - Read Only Access Part 2
+					insert into Screen_Lock (User_Id,Order_No,Screen_Name,Entry_Date,Out_Date,Edit_Mode,UserSPID) values(:gs_userid,:gs_System_No,:is_title,getdate(),NULL,'W',:gl_userspid) using sqlca;
+					commit;
+					lb_readonly=true
+				elseif (il_find_matchW = 0 and il_find_matchR > 0) and (gs_userid = ls_User_IdW and gs_System_No = ls_Order_NoW and ll_spid = gl_userspid) then
+					delete from screen_lock where User_Id=:gs_userid and screen_name='Cycle Count' and UserSPID=:gl_userspid using sqlca; //09/21/2023- Dinesh - SIMS-328-  Google  - Read Only Access Part 2
+					insert into Screen_Lock (User_Id,Order_No,Screen_Name,Entry_Date,Out_Date,Edit_Mode,UserSPID) values(:gs_userid,:gs_System_No,:is_title,getdate(),NULL,'W',:gl_userspid) using sqlca;
+					commit;
+					lb_readonly=false
+					
+				elseif (il_find_matchW = 0 and il_find_matchR = 0) and (gs_userid = ls_User_IdW and gs_System_No <> ls_Order_NoW and ll_spid = gl_userspid) then
+					//delete from screen_lock where User_Id=:gs_userid and screen_name='Cycle Count' using sqlca;
+					insert into Screen_Lock (User_Id,Order_No,Screen_Name,Entry_Date,Out_Date,Edit_Mode,UserSPID) values(:gs_userid,:gs_System_No,:is_title,getdate(),NULL,'W',:gl_userspid) using sqlca;
+					commit;
+					lb_readonly=false
+				elseif (il_find_matchW > 0 and il_find_matchR = 0) and (gs_userid = ls_User_IdW and gs_System_No <> ls_Order_NoW and ll_spid = gl_userspid) then
+					delete from screen_lock where User_Id=:gs_userid and screen_name='Cycle Count' and UserSPID=:gl_userspid using sqlca; //09/21/2023- Dinesh - SIMS-328-  Google  - Read Only Access Part 2
+					insert into Screen_Lock (User_Id,Order_No,Screen_Name,Entry_Date,Out_Date,Edit_Mode,UserSPID) values(:gs_userid,:gs_System_No,:is_title,getdate(),NULL,'R',:gl_userspid) using sqlca;
+					commit;
+					lb_readonly=false
+				elseif (il_find_matchW > 0 and il_find_matchR > 0) and (gs_userid = ls_User_IdW and gs_System_No <> ls_Order_NoW and ll_spid = gl_userspid) then
+					delete from screen_lock where User_Id=:gs_userid and screen_name='Cycle Count'  and UserSPID=:gl_userspid using sqlca;//09/21/2023- Dinesh - SIMS-328-  Google  - Read Only Access Part 2
+					insert into Screen_Lock (User_Id,Order_No,Screen_Name,Entry_Date,Out_Date,Edit_Mode,UserSPID) values(:gs_userid,:gs_System_No,:is_title,getdate(),NULL,'W',:gl_userspid) using sqlca;
+					commit;
+					lb_readonly=false
+				elseif (il_find_matchW = 0 and il_find_matchR > 0) and (gs_userid = ls_User_IdW and gs_System_No <> ls_Order_NoW and ll_spid = gl_userspid) then
+					delete from screen_lock where User_Id=:gs_userid and screen_name='Cycle Count' and UserSPID=:gl_userspid using sqlca; //09/21/2023- Dinesh - SIMS-328-  Google  - Read Only Access Part 2
+					insert into Screen_Lock (User_Id,Order_No,Screen_Name,Entry_Date,Out_Date,Edit_Mode,UserSPID) values(:gs_userid,:gs_System_No,:is_title,getdate(),NULL,'W',:gl_userspid) using sqlca;
+					commit;
+					lb_readonly=false
+
+				elseif (il_find_matchW = 0 and il_find_matchR = 0) and (gs_userid <> ls_User_IdW and gs_System_No <> ls_Order_NoW and  ll_spid = gl_userspid) then
+					//delete from screen_lock where User_Id=:gs_userid and screen_name='Cycle Count' using sqlca;
+					insert into Screen_Lock (User_Id,Order_No,Screen_Name,Entry_Date,Out_Date,Edit_Mode,UserSPID) values(:gs_userid,:gs_System_No,:is_title,getdate(),NULL,'W',:gl_userspid) using sqlca;
+					commit;	
+					lb_readonly=false
+				elseif (il_find_matchW > 0 and il_find_matchR = 0) and (gs_userid <> ls_User_IdW and gs_System_No <> ls_Order_NoW and  ll_spid = gl_userspid) then
+					delete from screen_lock where User_Id=:gs_userid and screen_name='Cycle Count' and UserSPID=:gl_userspid using sqlca; //09/21/2023- Dinesh - SIMS-328-  Google  - Read Only Access Part 2
+					insert into Screen_Lock (User_Id,Order_No,Screen_Name,Entry_Date,Out_Date,Edit_Mode,UserSPID) values(:gs_userid,:gs_System_No,:is_title,getdate(),NULL,'W',:gl_userspid) using sqlca;
+					commit;	
+					lb_readonly=false
+				elseif (il_find_matchW > 0 and il_find_matchR > 0) and (gs_userid <> ls_User_IdW and gs_System_No <> ls_Order_NoW and  ll_spid = gl_userspid) then
+					delete from screen_lock where User_Id=:gs_userid and screen_name='Cycle Count' and UserSPID=:gl_userspid using sqlca; //09/21/2023- Dinesh - SIMS-328-  Google  - Read Only Access Part 2
+					insert into Screen_Lock (User_Id,Order_No,Screen_Name,Entry_Date,Out_Date,Edit_Mode,UserSPID) values(:gs_userid,:gs_System_No,:is_title,getdate(),NULL,'W',:gl_userspid) using sqlca;
+					commit;	
+					lb_readonly=false
+				elseif (il_find_matchW = 0 and il_find_matchR > 0) and (gs_userid <> ls_User_IdW and gs_System_No <> ls_Order_NoW and  ll_spid = gl_userspid) then
+					delete from screen_lock where User_Id=:gs_userid and screen_name='Cycle Count' and UserSPID=:gl_userspid using sqlca; //09/21/2023- Dinesh - SIMS-328-  Google  - Read Only Access Part 2
+					insert into Screen_Lock (User_Id,Order_No,Screen_Name,Entry_Date,Out_Date,Edit_Mode,UserSPID) values(:gs_userid,:gs_System_No,:is_title,getdate(),NULL,'W',:gl_userspid) using sqlca;
+					commit;		
+					lb_readonly=false
+				elseif (il_find_matchW = 0 and il_find_matchR = 0) and (gs_userid <> ls_User_IdW and gs_System_No = ls_Order_NoW and  ll_spid <> gl_userspid) then
+					//delete from screen_lock where User_Id=:gs_userid and screen_name='Cycle Count' using sqlca;
+					insert into Screen_Lock (User_Id,Order_No,Screen_Name,Entry_Date,Out_Date,Edit_Mode,UserSPID) values(:gs_userid,:gs_System_No,:is_title,getdate(),NULL,'W',:gl_userspid) using sqlca;
+					commit;	
+					lb_readonly=false
+				elseif (il_find_matchW > 0 and il_find_matchR = 0) and (gs_userid <> ls_User_IdW and gs_System_No = ls_Order_NoW and  ll_spid <> gl_userspid) then
+					delete from screen_lock where User_Id=:gs_userid and screen_name='Cycle Count' and UserSPID=:gl_userspid using sqlca; //09/21/2023- Dinesh - SIMS-328-  Google  - Read Only Access Part 2
+					insert into Screen_Lock (User_Id,Order_No,Screen_Name,Entry_Date,Out_Date,Edit_Mode,UserSPID) values(:gs_userid,:gs_System_No,:is_title,getdate(),NULL,'R',:gl_userspid) using sqlca;
+					commit;	
+					lb_readonly=true
+				elseif (il_find_matchW > 0 and il_find_matchR > 0) and (gs_userid <> ls_User_IdW and gs_System_No = ls_Order_NoW and  ll_spid <> gl_userspid) then
+					delete from screen_lock where User_Id=:gs_userid and screen_name='Cycle Count' and Edit_Mode in('R','W') and UserSPID=:gl_userspid using sqlca; //09/21/2023- Dinesh - SIMS-328-  Google  - Read Only Access Part 2
+					insert into Screen_Lock (User_Id,Order_No,Screen_Name,Entry_Date,Out_Date,Edit_Mode,UserSPID) values(:gs_userid,:gs_System_No,:is_title,getdate(),NULL,'R',:gl_userspid) using sqlca;
+					commit;	
+					lb_readonly=True
+				elseif (il_find_matchW = 0 and il_find_matchR > 0) and ((gs_userid <> ls_User_IdW) or (ls_User_IdW='')  and gs_System_No = ls_Order_NoW and  ll_spid <> gl_userspid) then
+					delete from screen_lock where User_Id=:gs_userid and screen_name='Cycle Count' and UserSPID=:gl_userspid using sqlca; //09/21/2023- Dinesh - SIMS-328-  Google  - Read Only Access Part 2
+					insert into Screen_Lock (User_Id,Order_No,Screen_Name,Entry_Date,Out_Date,Edit_Mode,UserSPID) values(:gs_userid,:gs_System_No,:is_title,getdate(),NULL,'W',:gl_userspid) using sqlca;
+					commit;	
+					lb_readonly=false
+				elseif (il_find_matchW = 0 and il_find_matchR > 0) and (gs_userid<> ls_User_IdR and gs_System_No = ls_Order_NoR and ll_spid <> gl_userspid) then
+					delete from screen_lock where User_Id=:gs_userid and screen_name='Cycle Count' and UserSPID=:gl_userspid using sqlca;//09/21/2023- Dinesh - SIMS-328-  Google  - Read Only Access Part 2
+					insert into Screen_Lock (User_Id,Order_No,Screen_Name,Entry_Date,Out_Date,Edit_Mode,UserSPID) values(:gs_userid,:gs_System_No,:is_title,getdate(),NULL,'W',:gl_userspid) using sqlca;
+					commit;
+					lb_readonly=false
+					
+				elseif (il_find_matchW = 0 and il_find_matchR = 0) and (gs_userid <> ls_User_IdW and gs_System_No <> ls_Order_NoW and  ll_spid <> gl_userspid) then
+					//delete from screen_lock where User_Id=:gs_userid and screen_name='Cycle Count' using sqlca;
+					insert into Screen_Lock (User_Id,Order_No,Screen_Name,Entry_Date,Out_Date,Edit_Mode,UserSPID) values(:gs_userid,:gs_System_No,:is_title,getdate(),NULL,'W',:gl_userspid) using sqlca;
+					commit;	
+					lb_readonly=true
+				elseif (il_find_matchW > 0 and il_find_matchR = 0) and (gs_userid <> ls_User_IdW and gs_System_No = ls_Order_NoW and  ll_spid <> gl_userspid) then
+					delete from screen_lock where User_Id=:gs_userid and screen_name='Cycle Count' and Edit_Mode ='R' and UserSPID=:gl_userspid using sqlca; //09/21/2023- Dinesh - SIMS-328-  Google  - Read Only Access Part 2
+					insert into Screen_Lock (User_Id,Order_No,Screen_Name,Entry_Date,Out_Date,Edit_Mode,UserSPID) values(:gs_userid,:gs_System_No,:is_title,getdate(),NULL,'R',:gl_userspid) using sqlca;
+					commit;	
+					lb_readonly=True
+					
+				elseif (il_find_matchW > 0 and il_find_matchR > 0) and (gs_userid <> ls_User_IdW and gs_System_No = ls_Order_NoW and  ll_spid <> gl_userspid) then
+						lds_screen_lockW.retrieve(ls_order,'W')
+					 for k= 1 to lds_screen_lockW.rowcount()
+						 ls_Edit_ModeW = lds_screen_lockW.getitemstring(k,'edit_Mode')
+						 ls_User_IdW = lds_screen_lockW.getitemstring(k,'user_Id')
+						 ls_Order_NoW =lds_screen_lockW.getitemstring(k,'order_No')
+						 ll_userspid =lds_screen_lockW.getitemnumber(k,'userspid')
+					next
+					delete from screen_lock where User_Id=:gs_userid and screen_name='Cycle Count' and UserSPID=:gl_userspid using sqlca;//09/21/2023- Dinesh - SIMS-328-  Google  - Read Only Access Part 2
+					insert into Screen_Lock (User_Id,Order_No,Screen_Name,Entry_Date,Out_Date,Edit_Mode,UserSPID) values(:gs_userid,:gs_System_No,:is_title,getdate(),NULL,'W',:gl_userspid) using sqlca;
+					commit;	
+					lb_readonly=false
+				elseif (il_find_matchW = 0 and il_find_matchR > 0) and (gs_userid <> ls_User_IdW and gs_System_No = ls_Order_NoW and  ll_spid <> gl_userspid) then
+					delete from screen_lock where User_Id=:gs_userid and screen_name='Cycle Count' and UserSPID=:gl_userspid using sqlca; //09/21/2023- Dinesh - SIMS-328-  Google  - Read Only Access Part 2
+					insert into Screen_Lock (User_Id,Order_No,Screen_Name,Entry_Date,Out_Date,Edit_Mode,UserSPID) values(:gs_userid,:gs_System_No,:is_title,getdate(),NULL,'W',:gl_userspid) using sqlca;
+					commit;	
+					lb_readonly=false
+					
+				
+				else
+					lb_readonly=false
+					//insert into Screen_Lock (User_Id,Order_No,Screen_Name,Entry_Date,Out_Date,Edit_Mode,UserSPID) values(:gs_userid,:gs_System_No,:is_title,getdate(),NULL,'R',:gl_userspid) using sqlca;
+				end if	
+			else
+				
+			end if
+			
+			//Begin - Dinesh - 11/06/2023 - SIMS-328 - Google - SIMS - Google - SIMS - Read Only Access part 2
+			select edit_mode into :ls_edit_moderead from Screen_Lock with(nolock) where Order_No= :gs_System_No and user_id = :gs_userid and screen_name='Cycle Count' and userspid=:gl_userspid using sqlca;
+			
+			if ls_edit_moderead= 'W' then
+				
+				tab_main.tabpage_main.cb_readonly.enabled = True
+			else
+				tab_main.tabpage_main.cb_readonly.enabled = False
+			end if
+			
+//			wf_cc_order_readonly(lb_readonly)
+//			//End - Dinesh - 11/06/2023 - SIMS-328 - Google - SIMS - Google - SIMS - Read Only Access part 2
+	 End if
+//End - Dinesh - 07/25/2023 - SIMS-198 - Google - SIMS - Google - SIMS - Read Only Access 
+
 
 
 If idw_main.RowCount() > 0 Then
@@ -10393,8 +11208,6 @@ If idw_main.RowCount() > 0 Then
 	
 	idw_si.Retrieve(ls_order)
 
-	
-	
 	// 11/24/2014 dts - force 'LARGE' cycle counts to be processed via CITRIX (for now defined where machine name starts 'DCXVR*' but could list Citrix Machines in lookup table )'
 	if idw_main.GetItemString(1, "Ord_Status") <> "C" and idw_main.GetItemString(1, "Ord_Status") <> "V" then
 		//  - 'LARGE' is governed by lookup table value
@@ -10438,12 +11251,17 @@ If idw_main.RowCount() > 0 Then
 	
 	ll_Result1Rows = idw_result1.Retrieve(ls_order)
 	ll_Result2Rows = idw_result2.Retrieve(ls_order)
-	ll_Result3Rows = idw_result3.Retrieve(ls_order)
-	
-	idw_mobile.Retrieve(ls_order) /* 04/15 - PCONKL*/
+	ll_Result3Rows = idw_result3.Retrieve(ls_order) 
 
+	idw_mobile.Retrieve(ls_order) /* 04/15 - PCONKL*/
+	
 // TAM - 2017/11 - 3PL CC 
 	idw_system_generated.Retrieve(ls_order)
+//	If idw_system_generated.rowcount() > 0 Then
+//		for ll_row=1 to idw_system_generated.rowcount()
+//                  idw_system_generated.Modify("count_value.Background.Color =~"67108864~tIf(Left(count_value, 6)='1705E1', rgb (255, 0, 255), rgb (255,255,255))~"")
+//		next
+//	End If
 // TAM - 2017/11 - 3PL CC 
 	idw_serial_numbers.Retrieve(ls_order) 
 	idw_cc_container.retrieve( ls_order)  //24-APR-2018 :Madhu S18502 - FootPrint Cycle Count
@@ -10468,6 +11286,7 @@ If idw_main.RowCount() > 0 Then
 	// upon the newly retrieved order (when retrieving multiple orders without closing the window)
 	of_ProtectResults ( idw_result1, UNPROTECT )
 	of_ProtectResults ( idw_result2, UNPROTECT )
+	
 	tab_main.tabpage_result1.cb_selectall1.Enabled = TRUE
 	tab_main.tabpage_result2.cb_selectall2.Enabled = TRUE
 
@@ -10719,6 +11538,11 @@ else
 	tab_main.tabpage_main.uo_commodity_code1.bringtotop = false
 	tab_main.tabpage_main.uo_commodity_code1.visible = false
 End IF
+//Begin - Dinesh - 11/06/2023 - SIMS-328 - Google - SIMS - Google - SIMS - Read Only Access part 2
+If upper(gs_project) ='PANDORA' then
+	wf_cc_order_readonly(lb_readonly)
+end if
+//End - Dinesh - 11/06/2023 - SIMS-328 - Google - SIMS - Google - SIMS - Read Only Access part 2
 //07-May-2017 :TAM - PEVS-513 -Stock Inventory Commodity Codes - END
 
 ////TAM 2017/11 -  3PL CC - START
@@ -11849,13 +12673,14 @@ event create ( )
 event destroy ( )
 integer x = 18
 integer y = 104
-integer width = 4279
+integer width = 4814
 integer height = 1916
 long backcolor = 79741120
 string text = " System Inventory "
 long tabtextcolor = 33554432
 long tabbackcolor = 79741120
 long picturemaskcolor = 536870912
+dw_sysinv dw_sysinv
 cb_release cb_release
 st_cc_warehouse_print_flag_set_to st_cc_warehouse_print_flag_set_to
 st_cc_warehouise_flag_set_to st_cc_warehouise_flag_set_to
@@ -11867,6 +12692,7 @@ dw_si dw_si
 end type
 
 on tabpage_si.create
+this.dw_sysinv=create dw_sysinv
 this.cb_release=create cb_release
 this.st_cc_warehouse_print_flag_set_to=create st_cc_warehouse_print_flag_set_to
 this.st_cc_warehouise_flag_set_to=create st_cc_warehouise_flag_set_to
@@ -11875,7 +12701,8 @@ this.st_msg1=create st_msg1
 this.cb_si_delete=create cb_si_delete
 this.cb_si_insert=create cb_si_insert
 this.dw_si=create dw_si
-this.Control[]={this.cb_release,&
+this.Control[]={this.dw_sysinv,&
+this.cb_release,&
 this.st_cc_warehouse_print_flag_set_to,&
 this.st_cc_warehouise_flag_set_to,&
 this.st_msg2,&
@@ -11886,6 +12713,7 @@ this.dw_si}
 end on
 
 on tabpage_si.destroy
+destroy(this.dw_sysinv)
 destroy(this.cb_release)
 destroy(this.st_cc_warehouse_print_flag_set_to)
 destroy(this.st_cc_warehouise_flag_set_to)
@@ -11895,6 +12723,19 @@ destroy(this.cb_si_delete)
 destroy(this.cb_si_insert)
 destroy(this.dw_si)
 end on
+
+type dw_sysinv from datawindow within tabpage_si
+boolean visible = false
+integer x = 3474
+integer y = 220
+integer width = 686
+integer height = 400
+integer taborder = 70
+string title = "none"
+string dataobject = "d_cc_result3_filter1"
+boolean livescroll = true
+borderstyle borderstyle = stylelowered!
+end type
 
 type cb_release from commandbutton within tabpage_si
 integer x = 1243
@@ -12193,8 +13034,6 @@ Else
 	// If and Rollup exist then build the find statement and get all the lines that are to be released for the message.
 	// Function to build the find statement on System inventory and return the line numbers.
 	lsReleaseLines = 	wf_get_rollup_release_lines( wf_find_corresponding_release_lines( this, ll_SI_Row, FALSE ) )
-	
-	
 	if messagebox(is_title, "The Line is Part of a Roll Up for Lines " + lsReleaseLines + "  Are you sure you want to Release Inventory for these lines?",question!, yesno! ) <> 1 then return
 		lsData = lsReleaseLines
 		lipos = pos(lsData,',')
@@ -12256,7 +13095,9 @@ if ls_status = '1' or ls_status = '2' or ls_status = '3' then
 	if ll_ResultRow > 0 then
 		// 3/07 dts - idw_result1.DeleteRow(ll_ResultRow)
 		//idw_result1.SetItem(ll_ResultRow, "l_code", "Allocated")		// LTK 20140731  Pandora #882
+		//idw_result1.SetItemStatus(ll_ResultRow, "l_code", Primary!, DataModified!)
 		idw_result1.SetItem(ll_ResultRow, "l_code", ls_allocated + ls_allocated_count)
+		
 	end if
 end if
 //'Release' from count 2 (we'll have to do that if the order is in count  2 or 3)
@@ -12333,7 +13174,7 @@ end event
 type tabpage_result1 from userobject within tab_main
 integer x = 18
 integer y = 104
-integer width = 4279
+integer width = 4814
 integer height = 1916
 long backcolor = 79741120
 string text = " Count Result 1 "
@@ -12556,7 +13397,8 @@ string facename = "Arial"
 string text = "Generate"
 end type
 
-event clicked;if doGenerateCountSheet( idw_result1, cbx_include_components1 ) < 0 then return 
+event clicked;
+if doGenerateCountSheet( idw_result1, cbx_include_components1 ) < 0 then return 
 
 end event
 
@@ -12597,6 +13439,7 @@ integer width = 3790
 integer height = 1740
 integer taborder = 30
 boolean bringtotop = true
+boolean titlebar = true
 string dataobject = "d_cc_result1"
 boolean hscrollbar = true
 boolean vscrollbar = true
@@ -12652,6 +13495,7 @@ long	ll_Prev_Line_Item_No, ll_max_line_item_no, ll_sys_inv_line_item_no
 //End if
 
 ib_changed = true
+ib_cc_result = true // dinesh
 
 this.accepttext( )
 this.setredraw( true)
@@ -12695,6 +13539,7 @@ else
 End If
 
 
+
 ll_row_count = this.rowcount( )
 insertRow = insertRow( ll_row_count +1 )
 this.SetItem(insertRow,'cc_no', idw_main.getItemString(1,'cc_no'))
@@ -12702,12 +13547,12 @@ this.SetItem(insertRow,'line_item_no', ll_max_line_item_no+1)
 this.SetItem(insertRow,'po_no', 'MAIN')
 this.SetItem(insertRow,'sysinvmatch', 'N')
 this.SetItem(insertRow,'up_count_zero', 'Y')
-this.SetItem(insertRow,'protected',1)
+this.SetItem(insertRow,'protected',1) 
+// Dinesh
 
 IF this.GetItemString( insertRow, "sku") <>  'EMPTY' Then
 	this.SetItem(insertRow,'owner_id', this.GetItemNumber(1,'owner_id'))	//Assign first owner in dropdown list
 End IF
-
 
 
 
@@ -12757,7 +13602,7 @@ Choose Case dwo.Name
 			ELSEIF idwc_count1_supp.RowCount() >= 1 THEN
 				This.object.supp_code[ row ] = ls_supp_code
 				ls_sku = data
-
+		
 				IF idwc_count1_supp.RowCount() = 1 THEN Post f_setfocus(idw_result1,row,'l_code')
 				
 				//20-JUNE-2018 :Madhu S19286 - Up Count From Empty Location -START
@@ -12783,11 +13628,12 @@ Choose Case dwo.Name
 					this.SetItem(row,'sysinvmatch', 'N')
 					this.SetItem(row,'up_count_zero', 'Y')
 					this.SetItem(row,'inventory_type', ls_null)
-					
 					this.object.protected[ row ] = 1
+					
 					this.SetItem(row, "owner_id", ll_null)
-				end if
 				
+				end if
+					
 				goto pick_data  
 			END IF
 		Else			
@@ -12884,6 +13730,22 @@ If g.is_coo_ind  <> 'Y' Then
 End If
 
 
+
+
+end event
+
+event clicked;call super::clicked;// Begin - Akash-SIMS-136 - Inventory Snapshot sent out with Blank/null GPN - 02/15/2023
+if dwo.name='sku' then
+	if this.getitemstring(row,'sku') <> "" or not isnull(this.getitemstring(row,'sku')) then
+		messagebox('','SKU already exist, you are not allowed to change SKU')
+		this.SetTabOrder("sku",0)
+	end if
+end if
+// End - Akash-SIMS-136 - Inventory Snapshot sent out with Blank/null GPN - 02/15/2023
+
+
+	
+
 end event
 
 type tabpage_result2 from userobject within tab_main
@@ -12891,7 +13753,7 @@ event create ( )
 event destroy ( )
 integer x = 18
 integer y = 104
-integer width = 4279
+integer width = 4814
 integer height = 1916
 long backcolor = 79741120
 string text = " Count Result 2 "
@@ -13301,12 +14163,23 @@ End If
 
 end event
 
+event clicked;call super::clicked;// Begin - Akash-SIMS-136 - Inventory Snapshot sent out with Blank/null GPN - 02/15/2023
+if dwo.name='sku' then
+	if this.getitemstring(row,'sku') <> "" or not isnull(this.getitemstring(row,'sku')) then
+		messagebox('','SKU already exist, you are not allowed to change SKU')
+		this.SetTabOrder("sku",0)
+	end if
+end if
+// End - Akash-SIMS-136 - Inventory Snapshot sent out with Blank/null GPN - 02/15/2023
+
+end event
+
 type tabpage_result3 from userobject within tab_main
 event create ( )
 event destroy ( )
 integer x = 18
 integer y = 104
-integer width = 4279
+integer width = 4814
 integer height = 1916
 long backcolor = 79741120
 string text = " Count Result 3 "
@@ -13735,10 +14608,22 @@ End If
 
 end event
 
+event clicked;call super::clicked;// Begin - Akash-SIMS-136 - Inventory Snapshot sent out with Blank/null GPN - 02/15/2023
+if dwo.name='sku' then
+	if this.getitemstring(row,'sku') <> "" or not isnull(this.getitemstring(row,'sku')) then
+		messagebox('','SKU already exist, you are not allowed to change SKU')
+		this.SetTabOrder("sku",0)
+	end if
+end if
+// End - Akash-SIMS-136 - Inventory Snapshot sent out with Blank/null GPN - 02/15/2023
+
+
+end event
+
 type tabpage_mobile from userobject within tab_main
 integer x = 18
 integer y = 104
-integer width = 4279
+integer width = 4814
 integer height = 1916
 long backcolor = 79741120
 string text = "Mobile"
@@ -13890,7 +14775,7 @@ end event
 type tabpage_system_generated from userobject within tab_main
 integer x = 18
 integer y = 104
-integer width = 4279
+integer width = 4814
 integer height = 1916
 long backcolor = 79741120
 string text = "System_Generated"
@@ -13914,7 +14799,7 @@ event ue_clear ( )
 event ue_build_location_list ( )
 event ue_delete_checked ( )
 integer y = 12
-integer width = 2062
+integer width = 2423
 integer height = 1836
 integer taborder = 30
 string dataobject = "d_cc_system_generated"
@@ -14004,7 +14889,7 @@ type tabpage_serial_numbers from userobject within tab_main
 event ue_import ( )
 integer x = 18
 integer y = 104
-integer width = 4279
+integer width = 4814
 integer height = 1916
 long backcolor = 79741120
 string text = "Serial No"
@@ -14443,7 +15328,7 @@ end event
 type tabpage_container from userobject within tab_main
 integer x = 18
 integer y = 104
-integer width = 4279
+integer width = 4814
 integer height = 1916
 long backcolor = 79741120
 string text = "FP_Container"

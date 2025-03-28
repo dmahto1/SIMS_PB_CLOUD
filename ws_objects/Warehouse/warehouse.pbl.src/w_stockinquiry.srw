@@ -96,6 +96,16 @@ type tabpage_adjustment from userobject within tab_main
 dw_select_adjust dw_select_adjust
 dw_adjust dw_adjust
 end type
+type tabpage_kits from userobject within tab_main
+end type
+type dw_si_kits from datawindow within tabpage_kits
+end type
+type dw_kits from datawindow within tabpage_kits
+end type
+type tabpage_kits from userobject within tab_main
+dw_si_kits dw_si_kits
+dw_kits dw_kits
+end type
 end forward
 
 global type w_stockinquiry from w_std_master_detail
@@ -109,16 +119,17 @@ type variables
 Datawindow   idw_main, idw_search,idw_query, idw_avail_inv, idw_avail_inv_search
 Datawindow idw_receive_search, idw_delivery_search
 Datawindow idw_receive,idw_delivery,idw_transfer
-Datawindow idw_select,idwCurrent,idw_Pick,idw_pack, idw_adjust, idw_search_SerialInventory, idw_SerialInventory
+Datawindow idw_select,idwCurrent,idw_Pick,idw_pack, idw_adjust, idw_search_SerialInventory, idw_SerialInventory,idw_kits
 //TimA 07/05/12 Pandora issue #360 add Owner to the search
 Datawindowchild	idw_Avail_child_owner, idw_All_child_owner
 Datawindowchild	idw_Receive_child_owner, idw_Delivery_child_owner
+string is_sku
 
 String  is_org_sql,isOrigsql_main,isorigsql_receive,isorigsql_delivery,isorigsql_transfer,isorigsql_adjust,isorigsql_loc
 String isWarehouse
 Protected String isSku
 integer ii_height
-String  isorigsql_pick,isOrigsql_pack,isOrigSql_bol, isorigSql_avail_inv, isorigSql_SerialInventory
+String  isorigsql_pick,isOrigsql_pack,isOrigSql_bol, isorigSql_avail_inv, isorigSql_SerialInventory,isorigsql_kits
 w_stockinquiry iw_window
 boolean ib_rcv_complete_from_first
 boolean ib_rcv_complete_to_first
@@ -326,10 +337,15 @@ Choose Case al_tabpagenum
 		ldw1 = tab_main.tabpage_adjustment.dw_select_adjust
 		ldw2 = tab_main.tabpage_adjustment.dw_adjust
 		
-	Case 10
+	Case 11
 		ldw1 = tab_main.tabpage_search.dw_query
 		ldw2 = tab_main.tabpage_search.dw_search	
 
+	// Begin - 28/03/2022- Dinesh - New tab Kits
+	Case 10
+		ldw1 = tab_main.tabpage_kits.dw_kits
+		ldw2 = tab_main.tabpage_kits.dw_si_kits
+	// End -  28/03/2022- Dinesh - New tab Kits
 End Choose
 
 // If the datawindow does not already have data,
@@ -507,6 +523,7 @@ idw_select = tab_main.tabpage_main.dw_select
 idw_query = tab_main.tabpage_search.dw_query
 idw_search = tab_main.tabpage_search.dw_search
 idw_avail_inv_search = tab_main.tabpage_avail_inventory.dw_avail_inv_search
+idw_kits = tab_main.tabpage_kits.dw_si_kits //Dinesh - 03/28/2022- kits
 
 //Jxlim 09/24/2013 Ariens CR-26 Serial Number Scanning
 idw_search_SerialInventory =  tab_main.tabpage_SerialInventory.dw_search_SerialInventory
@@ -532,6 +549,34 @@ IF g.ibSNchainofcustody THEN
 Else
 	 tab_main.tabpage_SerialInventory.visible = False	
 End IF
+
+// Begin....12/05/2024..Akash Baghel.SIMS-588... Development for Google – SIMS- Bulk Locations Utilization
+
+If Upper(gs_project) = 'PANDORA' then
+   idw_main.modify("user_field2.visible = True")
+  else
+   idw_main.modify("user_field2.visible = False")
+end if	 
+// End....12/05/2024..Akash Baghel.SIMS-588... Development for Google – SIMS- Bulk Locations Utilization
+
+
+//Begin -04192022- Dinesh - SIMS PIP/SIP - Work Order Refactoring - Stock Inquiry: New tab to Show KIT and associated Components
+If Upper(gs_project) = 'NYCSP'  or Upper(gs_project) = 'GEISTLICH'  then
+
+		tab_main.tabpage_kits.visible = False
+		else 
+		tab_main.tabpage_kits.visible = False
+end if
+	//End -04192022- Dinesh - SIMS PIP/SIP - Work Order Refactoring - Stock Inquiry: New tab to Show KIT and associated 
+	//Begin -09292022- Dinesh -SIMS-81- Geistlich Serialization - Updates (Part II)
+If Upper(gs_project) = 'PANDORA'  then
+		idw_select.modify("t_2.visible =false")
+		idw_select.modify("serial_no.visible =false")
+		idw_avail_inv_search.modify("t_2.visible =false")
+		idw_avail_inv_search.modify("serial_no.visible =false")
+end if
+//End -09292022- Dinesh -SIMS-81- Geistlich Serialization - Updates (Part II)
+
 
 //TimA 07/03/12 Pandora issue #360 Add Owner Search
 If Upper(gs_project) = 'PANDORA' then
@@ -619,6 +664,8 @@ tab_main.tabpage_adjustment.dw_select_adjust.GetChild('warehouse', ldwc2)
 ldwc.Sharedata(ldwc2) /*adjust Search*/
 tab_main.tabpage_SerialInventory.dw_search_SerialInventory.GetChild('warehouse', ldwc2) 
 ldwc.Sharedata(ldwc2) /*Serial Inventory Search*/  //Jxlim 09/24/2013 Ariens CR-26
+tab_main.tabpage_kits.dw_kits.GetChild('warehouse', ldwc2) // Dinesh - 03/28/2022 - Kit tab
+ldwc.Sharedata(ldwc2) /*Kits*/ // Dinesh - 03/28/2022 - Kit tab
 
 If Upper(gs_project) = 'PANDORA' then
 	//TimA 07/17/12
@@ -730,6 +777,7 @@ isorigsql_pack = idw_pack.getsqlselect()
 isorigsql_adjust = idw_adjust.getsqlselect()
 //Jxlim 09/26/2013 Ariens CR-26 place it here after all the child dw to avoid dw specify retrieval argument error message
 isorigSql_SerialInventory = idw_serialinventory.getsqlselect()	
+isorigsql_kits = idw_kits.getsqlselect() // Dinesh - 03/28/2022- Kits
 
 //idwCurrent = idw_main
 //idw_Current = idw_main
@@ -787,6 +835,7 @@ tab_main.tabpage_pick.dw_pick_detail.Resize(workspacewidth() - 60,workspaceHeigh
 tab_main.tabpage_pack.dw_pack_detail.Resize(workspacewidth() - 60,workspaceHeight()-280)
 tab_main.tabpage_adjustment.dw_adjust.Resize(workspacewidth() - 60,workspaceHeight()-350)
 tab_main.tabpage_serialinventory.dw_serialInventory.Resize(workspacewidth() - 60,workspaceHeight()-350)  //Jxlim 09/27/2013 Ariens CR-26
+tab_main.tabpage_kits.dw_si_kits.Resize(workspacewidth() - 60,workspaceHeight()-500) // Dinesh - 04042022
 end event
 
 event ue_clear;
@@ -882,7 +931,15 @@ Choose Case idwCurrent
 		
 		idw_search.Reset()
 		idw_query.Reset()
-		idw_query.InsertRow(0)		
+		idw_query.InsertRow(0)	
+		
+	case idw_kits
+		// Begin - 03/28/2022- Dinesh - Kit
+		tab_main.tabpage_kits.dw_kits.Reset()
+		tab_main.tabpage_kits.dw_kits.InsertRow(0)
+		idw_adjust.Reset()
+		idw_adjust.Setfocus()
+		// End - 03/22/2022- Dinesh - Kit
 
 End Choose
 end event
@@ -900,6 +957,13 @@ if Upper(gs_project) = 'PULSE' then
 	tab_main.tabpage_main.dw_main.dataobject = 'd_stock_inquiry_pulse'
 	tab_main.tabpage_main.dw_main.SetTransObject(SQLCA)
 end if
+
+//// Begin -Dinesh - 09282022 - SIMS-74- Geistlich Serialization - Updates
+//if Upper(gs_project) = 'GEISTLICH' then
+//	tab_main.tabpage_main.dw_select.dataobject = 'd_si_search_geistlich'
+//	tab_main.tabpage_main.dw_select.SetTransObject(SQLCA)
+//end if
+//// End -Dinesh - 09282022 - SIMS-74- Geistlich Serialization - Updates
 
 //if Upper(gs_project) = 'PHILIPS-SG' OR Upper(gs_project) = 'PHILIPS-TH' then
 //	tab_main.tabpage_avail_inventory.dw_avail_inv.dataobject = 'd_stock_inquiry_content_only_philips'
@@ -936,6 +1000,7 @@ tabpage_t_detail tabpage_t_detail
 tabpage_pick tabpage_pick
 tabpage_pack tabpage_pack
 tabpage_adjustment tabpage_adjustment
+tabpage_kits tabpage_kits
 end type
 
 on tab_main.create
@@ -947,17 +1012,19 @@ this.tabpage_t_detail=create tabpage_t_detail
 this.tabpage_pick=create tabpage_pick
 this.tabpage_pack=create tabpage_pack
 this.tabpage_adjustment=create tabpage_adjustment
-int iCurrent
+this.tabpage_kits=create tabpage_kits
 call super::create
-iCurrent=UpperBound(this.Control)
-this.Control[iCurrent+1]=this.tabpage_avail_inventory
-this.Control[iCurrent+2]=this.tabpage_serialinventory
-this.Control[iCurrent+3]=this.tabpage_r_detail
-this.Control[iCurrent+4]=this.tabpage_d_detail
-this.Control[iCurrent+5]=this.tabpage_t_detail
-this.Control[iCurrent+6]=this.tabpage_pick
-this.Control[iCurrent+7]=this.tabpage_pack
-this.Control[iCurrent+8]=this.tabpage_adjustment
+this.Control[]={this.tabpage_main,&
+this.tabpage_search,&
+this.tabpage_avail_inventory,&
+this.tabpage_serialinventory,&
+this.tabpage_r_detail,&
+this.tabpage_d_detail,&
+this.tabpage_t_detail,&
+this.tabpage_pick,&
+this.tabpage_pack,&
+this.tabpage_adjustment,&
+this.tabpage_kits}
 end on
 
 on tab_main.destroy
@@ -970,9 +1037,11 @@ destroy(this.tabpage_t_detail)
 destroy(this.tabpage_pick)
 destroy(this.tabpage_pack)
 destroy(this.tabpage_adjustment)
+destroy(this.tabpage_kits)
 end on
 
 event tab_main::selectionchanged;DatawindowChild	ldwc
+long ll_c
 wf_check_menu(TRUE,'sort')
 // 05/00 PCONKL - set the current DW for retrieving, etc.
 Choose Case newindex
@@ -983,7 +1052,8 @@ Choose Case newindex
 		idwCurrent = idw_main
 		
 		tab_main.tabpage_main.uo_commodity_code.bringtotop =False //07-Apr-2017 Madhu PEVS-517 -Stock Inventory Commodity Codes
-				
+			
+		
 	Case 2 /* 08/07 - PCONKL - Avail Inventory (Content Only)*/
 		
 		idwCurrent = idw_avail_inv
@@ -1049,10 +1119,17 @@ Choose Case newindex
 			tabpage_adjustment.dw_select_adjust.InsertRow(0)
 		End If
 		
-	Case 10 /*Search DW*/
+	Case 11 /*Search DW*/
 		
-		idwCurrent = idw_search	
-	
+		idwCurrent = idw_search
+	//Begin - 03/28/2022- Dinesh - Tab kit
+	Case 10 /* Kits DW*/
+		idwCurrent = idw_kits 
+		
+		If tabpage_kits.dw_kits.RowCount() = 0 Then
+			tabpage_kits.dw_kits.InsertRow(0)
+		End If
+	//End - 03/28/2022- Dinesh - Tab kit
 End Choose
 
 // KRZ Synchronize the sku and warehouse.
@@ -1065,9 +1142,9 @@ idw_current = idwCurrent /*ancestor for sort & filter using idw_current*/
 end event
 
 type tabpage_main from w_std_master_detail`tabpage_main within tab_main
-integer y = 104
+integer y = 192
 integer width = 4325
-integer height = 1940
+integer height = 1852
 string text = "All Inventory"
 uo_commodity_code uo_commodity_code
 dw_main dw_main
@@ -1094,9 +1171,9 @@ destroy(this.dw_select)
 end on
 
 type tabpage_search from w_std_master_detail`tabpage_search within tab_main
-integer y = 104
+integer y = 192
 integer width = 4325
-integer height = 1940
+integer height = 1852
 dw_search dw_search
 dw_query dw_query
 end type
@@ -1203,6 +1280,14 @@ if not isnull(idw_select.GetItemString(1,"supp_code")) then
 	lswhere += " and item_master.supp_code = '" + idw_select.GetItemString(1,"supp_code") + "'  "
 	lb_where = TRUE
 end if
+
+// Begin - Dinesh - 09282022- SIMS-89- Geistlich Serialization - Updates
+//if (upper(gs_project)='GEISTLICH')  or (upper(gs_project)='NYCSP')  then
+	if not isnull(idw_select.GetItemString(1,"serial_no")) then
+		lswhere += " and Content_Summary.serial_no = '" + idw_select.GetItemString(1,"serial_no") + "'" + " and Item_Master.Serialized_Ind ='Y'"
+	end if
+//End if
+// End - Dinesh - 09282022- SIMS-89- Geistlich Serialization - Updates
 
 // 10/00 PCONKL - Tackon PO Nbr
 //if  not isnull(idw_select.GetItemString(1,"PO_no")) then
@@ -1799,9 +1884,9 @@ end event
 
 type tabpage_avail_inventory from userobject within tab_main
 integer x = 18
-integer y = 104
+integer y = 192
 integer width = 4325
-integer height = 1940
+integer height = 1852
 long backcolor = 79741120
 string text = "Avail Inventory"
 long tabtextcolor = 33554432
@@ -1973,6 +2058,14 @@ if not isnull(idw_avail_inv_search.getItemString(1,"reason")) then
 	lswhere += " and Content.Adj_Reason like '%"+ idw_avail_inv_search.getItemString(1,"reason")+"%'"
 	lb_where =TRUE
 end if
+
+// Begin - Dinesh - 09292022- SIMS-89- Geistlich Serialization - Updates
+//if (upper(gs_project)='GEISTLICH')  or (upper(gs_project)='NYCSP')  then
+	if not isnull(dw_avail_inv_search.GetItemString(1,"serial_no")) then
+		lswhere += " and Content.serial_no = '" + dw_avail_inv_search.GetItemString(1,"serial_no") + "'" + " and Item_Master.Serialized_Ind ='Y'"
+	end if
+//End if
+// End - Dinesh - 09292022- SIMS-89- Geistlich Serialization - Updates
 
 //07-Apr-2017 Madhu PEVS-517 -Stock Inventory Commodity Codes
 ls_multiselect = tab_main.tabpage_avail_inventory.uo_commodity.uf_build_search( true)
@@ -2209,6 +2302,7 @@ Choose Case dwo.name
 		
 		// Capture the SKU.
 		isSku = data
+			
 		
 	Case 'warehouse'
 		
@@ -2259,9 +2353,9 @@ end event
 
 type tabpage_serialinventory from userobject within tab_main
 integer x = 18
-integer y = 104
+integer y = 192
 integer width = 4325
-integer height = 1940
+integer height = 1852
 long backcolor = 79741120
 string text = "Serial Inventory"
 long tabtextcolor = 33554432
@@ -2290,7 +2384,6 @@ integer x = 23
 integer y = 32
 integer width = 2853
 integer height = 188
-integer taborder = 20
 string dataobject = "d_si_search_serialinventory"
 boolean border = false
 borderstyle borderstyle = stylebox!
@@ -2468,9 +2561,9 @@ type tabpage_r_detail from userobject within tab_main
 event create ( )
 event destroy ( )
 integer x = 18
-integer y = 104
+integer y = 192
 integer width = 4325
-integer height = 1940
+integer height = 1852
 long backcolor = 79741120
 string text = "Receiving"
 long tabtextcolor = 33554432
@@ -2911,9 +3004,9 @@ end event
 
 type tabpage_d_detail from userobject within tab_main
 integer x = 18
-integer y = 104
+integer y = 192
 integer width = 4325
-integer height = 1940
+integer height = 1852
 long backcolor = 79741120
 string text = "Delivery~r~n"
 long tabtextcolor = 33554432
@@ -3287,9 +3380,9 @@ end event
 
 type tabpage_t_detail from userobject within tab_main
 integer x = 18
-integer y = 104
+integer y = 192
 integer width = 4325
-integer height = 1940
+integer height = 1852
 long backcolor = 79741120
 string text = "Transfer"
 long tabtextcolor = 33554432
@@ -3532,9 +3625,9 @@ end event
 
 type tabpage_pick from userobject within tab_main
 integer x = 18
-integer y = 104
+integer y = 192
 integer width = 4325
-integer height = 1940
+integer height = 1852
 long backcolor = 79741120
 string text = "Pick~r~n"
 long tabtextcolor = 33554432
@@ -3770,9 +3863,9 @@ end event
 
 type tabpage_pack from userobject within tab_main
 integer x = 18
-integer y = 104
+integer y = 192
 integer width = 4325
-integer height = 1940
+integer height = 1852
 long backcolor = 79741120
 string text = "Pack~r~n"
 long tabtextcolor = 33554432
@@ -3974,9 +4067,9 @@ end event
 
 type tabpage_adjustment from userobject within tab_main
 integer x = 18
-integer y = 104
+integer y = 192
 integer width = 4325
-integer height = 1940
+integer height = 1852
 long backcolor = 79741120
 string text = "Adjustments"
 long tabtextcolor = 33554432
@@ -4204,5 +4297,141 @@ ls_column[6]="expiration_date"
 ls_value[6] = '12/31/2999'
 li_width[6] = 334
 i_nwarehouse.of_width_set(this,ls_column[],ls_value[],li_width[])
+end event
+
+type tabpage_kits from userobject within tab_main
+string tag = "Kits"
+integer x = 18
+integer y = 192
+integer width = 4325
+integer height = 1852
+long backcolor = 79741120
+string text = "Kits"
+long tabtextcolor = 33554432
+long tabbackcolor = 79741120
+long picturemaskcolor = 536870912
+dw_si_kits dw_si_kits
+dw_kits dw_kits
+end type
+
+on tabpage_kits.create
+this.dw_si_kits=create dw_si_kits
+this.dw_kits=create dw_kits
+this.Control[]={this.dw_si_kits,&
+this.dw_kits}
+end on
+
+on tabpage_kits.destroy
+destroy(this.dw_si_kits)
+destroy(this.dw_kits)
+end on
+
+type dw_si_kits from datawindow within tabpage_kits
+event ue_retrieve ( )
+integer x = 5
+integer y = 196
+integer width = 4315
+integer height = 1648
+integer taborder = 30
+string title = "none"
+string dataobject = "d_stock_inquiry_content_kit"
+boolean hscrollbar = true
+boolean vscrollbar = true
+boolean livescroll = true
+borderstyle borderstyle = stylelowered!
+end type
+
+event ue_retrieve();string lswhere,ls_sku,ls_warehouse,lsorder
+boolean lb_where
+int liRC,ll_row
+//Begin -  Dinesh - Kits new tab stock inquiry
+//lsWhere  += " and delivery_master.Project_id = '" + gs_project + "'"
+
+//lsWhere  += " 
+idw_kits.AcceptTExt()
+idw_kits.setfocus()
+//ls_sku=tab_main.tabpage_kits.sle_sku.text
+//idw_kits.settrans(sqlca)
+//idw_kits.Retrieve()
+//ls_sku = dw_kits.GetItemString(1,"sku")
+//ls_sku='FO'
+//messagebox('',isSku)
+if  not isnull(isSku) and trim(isSku) <> "" then
+	lsWhere += "where m.project_id='" + gs_project + "'" + " and c.component_no in (select component_no from content_summary where project_id= '"+ gs_project +"'"+ " and SKU ='" + isSku + "'" + ")" 
+	lb_where = True
+end if
+
+
+
+//DGM For giving warning for all no search criteria
+if not lb_where then
+	  IF i_nwarehouse.of_msg(is_title,1) = 2 THEN Return
+END IF	
+
+
+integer li_union_pos
+string lsNewSQL
+
+// Added Union for Works Orders
+
+li_union_pos = Pos(Upper( isorigsql_kits), "UNION ALL")
+
+lsNewSQL = left( isorigsql_kits, li_union_pos -1) + lswhere + " " +  mid ( isorigsql_kits, li_union_pos)
+
+lsorder += " order by c.component_no,l_code,Avail_Qty desc"
+string ls_sql
+ls_sql= lsNewSQL + lswhere +lsorder
+
+
+This.settrans(sqlca)
+liRC = This.setsqlselect(ls_sql)
+
+
+If This.Retrieve() <= 0 Then
+	MessageBox(is_title, "No Kits records were found matching your search criteria!")
+Else
+	This.Setfocus()
+End If
+
+//End -  Dinesh - Kits new tab stock inquiry
+
+end event
+
+type dw_kits from datawindow within tabpage_kits
+integer y = 56
+integer width = 1120
+integer height = 120
+integer taborder = 30
+string title = "none"
+string dataobject = "d_si_search_kit"
+boolean border = false
+boolean livescroll = true
+end type
+
+event itemchanged;// KRZ What item was changed?
+Choose Case dwo.name
+		
+	// SKU
+	Case 'sku'
+		
+		// Capture the SKU.
+	
+		isSku = data
+	
+		
+	// Warehouse
+//	Case 'warehouse'
+//		
+//		// Capture the warehouse ID.
+//		isWareHouse = Data
+		
+// End what item was changed.
+End Choose
+end event
+
+event losefocus;accepttext()
+end event
+
+event clicked;accepttext()
 end event
 

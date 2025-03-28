@@ -18,6 +18,7 @@ public function integer uf_process_reports (string asinifile)
 public function integer uf_send_email (string asproject, string asdistriblist, string assubject, string astext, string asattachments)
 public function integer uf_process_functions (string asinifile)
 public function integer uf_process_trax_eod (string asproject, string aswarehouse, string asparmstring, datetime adtlastruntime, string asemailstring, string asemailsubject)
+public function string uf_method_trace_archive ()
 end prototypes
 
 public function integer uf_process_reports (string asinifile);
@@ -386,7 +387,7 @@ end function
 
 public function integer uf_process_functions (string asinifile);// Process the Reports scheduled to run in the table Activity_Schedule.  The Datastore only shows records where 
 // Current Server Time is > Next Run Time.  After a report is run the Next Run Time is updated to the same time tomorrow.
-//
+//uf_write_log
 // Activity Schedule contains a Local Run Time and a server offset. 
 // Local Run Time = Server Time + Offset .....  Server Time = Local Run Time - Offset
 // If report may need to run at 10pm PST (6:00am GMT), the database will have 22:00 for Local Run Time and a Server Offset of -8.
@@ -397,6 +398,7 @@ Datastore	ldsOut,	&
 				ldsfunctions, &
 				ldsResults
 Datastore 	ldsWarehouseTime
+	string lsMessage_archive
 
 
 u_nvo_scheduled_functions	lu_scheduled_functions
@@ -444,6 +446,7 @@ u_nvo_proc_hager_my lu_nvo_proc_hager_my
 u_nvo_proc_coty 	lu_nvo_proc_coty 	//18-APR-2018 :Madhu S18357 - COTY - Inventory Snapshot
 u_nvo_proc_rema 	lu_nvo_proc_rema 	//TAM 2018/11/29  S25784 - REMA - OM inventory Sync
 u_nvo_proc_cree lu_nvo_proc_cree //07-Jan-2019 :Madhu S27852 - CREE Delivery Order Report
+u_nvo_proc_scheduled_activity lu_nvo_proc_scheduled_activity // Dinesh - 11/21/2022- Adding METHOD_TRACE_ARCHIVE                              
 
 Long			llRowPos, llRowCount, llWHRow, llWHRowCount, &
 				llFunctionRowPos, llFunctionRowCount, llServerOffset, llWHServerOffset, &
@@ -638,7 +641,14 @@ For llFunctionRowPos = 1 to llFunctionRowCOunt
 
 	If lbRunToday Then
 		Choose Case (lsfunctionname)
-			//
+			// Begin -Dinesh - 11/21/2022- SIMS-125 -  METHOD_TRACE_ARCHIVE to Archive method_trace_log_archive table                             
+			Case 'uf_method_trace_archive'
+				 if lsproject='DEMO' or lsproject='PANDORA' then
+					lsMessage_archive=uf_method_trace_archive()
+				 	gu_nvo_process_files.uf_write_log(lsMessage_archive) /*display msg to screen*/
+				 	FileWrite(gilogFileNo,lsMessage_archive)
+				end if
+			// End -Dinesh - 11/21/2022- SIMS-125-    METHOD_TRACE_ARCHIVE to Archive method_trace_log_archive table
 			// pvh - Ford
 			Case 'u_nvo_proc_ford.uf_process_inventory_snapshot'
 				If Not isvalid(u_nvo_proc_ncr) Then	
@@ -1342,8 +1352,11 @@ For llFunctionRowPos = 1 to llFunctionRowCOunt
 				If Not isvalid(lu_nvo_proc_Pandora2) Then
 					lu_nvo_proc_Pandora2 = Create u_nvo_proc_Pandora2
 				End If
-			
-				liRC = lu_nvo_proc_Pandora2.uf_create_system_cycle_counts( lsproject, lswarehouse)
+				//SIMS-80 Added by Dhirendra , lsParmString parameter added to drive dc_class_code and dc_frequency 
+				// with same function lu_nvo_proc_Pandora2.uf_create_system_cycle_counts
+				
+			   //  liRC = lu_nvo_proc_Pandora2.uf_create_system_cycle_counts( lsproject, lswarehouse)
+				liRC = lu_nvo_proc_Pandora2.uf_create_system_cycle_counts( lsproject, lswarehouse,lsParmString)
 
 			Case 'u_nvo_proc_pandora2.uf_process_cc_inv_snapshot'
 				If Not isvalid(lu_nvo_proc_Pandora2) Then
@@ -1446,7 +1459,6 @@ End If
 
 
 Return 0
-
 end function
 
 public function integer uf_process_trax_eod (string asproject, string aswarehouse, string asparmstring, datetime adtlastruntime, string asemailstring, string asemailsubject);//BCR 4-AUG-11: Create a TRAX End of Day auto-posting transaction to Websphere for one or more project/wh/carrier combination...
@@ -1554,6 +1566,39 @@ End Choose
 Return 0
 
 
+end function
+
+public function string uf_method_trace_archive ();// Begin -Dinesh - 11/23/2022- SIMS-125   METHOD_TRACE_ARCHIVE to Archive method_trace_log_archive table
+long ll_count,ll_days,llrc,lirc1,llcount
+string ls_msg
+date ldate_method_trace
+datastore lds_Method_Trace_Log
+datastore lds_Method_Trace_Log_archive
+long ll_Trans_Id,ll_Spid,i,llcountarchive
+string ls_Project_ID,ls_UserId,ls_Login_Name,ls_Application_Name,ls_Object_Name
+String ls_Method_Desc_Enter,ls_System_No
+date ld_Method_Enter_Dt,ld_Method_Exit_Dt,ld_calculate_date_to
+string ls_Method_Desc_Exit,ls_Purge_Flg
+//create datastore lds_Method_Trace_Log
+//select  code_id into :ll_days from lookup_table where code_type='METHOD_TRACE_ARCHIVE_DAYS' and project_id='*ALL';
+select count(*) into :ll_count from method_trace_SP_log where Method_Enter_Dt < getdate()- 7 ;
+//ldate_method_trace= today()
+//ld_calculate_date_to = date(RelativeDate(ldate_method_trace, - ll_days ))
+
+		DECLARE lsp_method_trace_SP_log_archive PROCEDURE FOR dbo.sp_method_trace_SP_log_archive 
+		USING SQLCA;
+		
+		EXECUTE lsp_method_trace_SP_log_archive;
+		 
+		IF SQLCA.SQLCode = -1 THEN
+			ls_msg = 'METHOD TRACE ARCHIVE is unsuccessful with this error' + ' ' + SQLCA.SQLErrText
+		ELSE
+			ls_msg ='METHOD TRACE ARCHIVE is successfully completed, Total record(s) ' + String(ll_count) + ' is/are archived on method_trace_log_archive table.'
+			
+		END IF
+
+return ls_msg
+// End -Dinesh - 11/23/2022- SIMS-125 -   METHOD_TRACE_ARCHIVE to Archive method_trace_log_archive table
 end function
 
 on u_nvo_proc_scheduled_activity.create

@@ -51,8 +51,8 @@ end type
 end forward
 
 global type w_maintenance_project from w_std_master_detail
-integer width = 4969
-integer height = 2368
+integer width = 5554
+integer height = 2356
 string title = "Project"
 event ue_set_pick_sort ( )
 end type
@@ -208,7 +208,6 @@ isle_whcode = tab_main.tabpage_main.sle_project
 
 idw_main.SetTransObject(Sqlca)
 idw_search.SetTransObject(Sqlca)
-
 
 //28-Jul-2014 : Madhu - Initially set Column Sort button disable - START
 String lsSql,lsError
@@ -587,11 +586,11 @@ end type
 on tab_main.create
 this.tabpage_reports=create tabpage_reports
 this.tabpage_label=create tabpage_label
-int iCurrent
 call super::create
-iCurrent=UpperBound(this.Control)
-this.Control[iCurrent+1]=this.tabpage_reports
-this.Control[iCurrent+2]=this.tabpage_label
+this.Control[]={this.tabpage_main,&
+this.tabpage_search,&
+this.tabpage_reports,&
+this.tabpage_label}
 end on
 
 on tab_main.destroy
@@ -871,9 +870,9 @@ type dw_warehouse from u_dw_ancestor within tabpage_main
 event ue_load ( )
 event ue_save ( )
 integer x = 2414
-integer y = 476
+integer y = 444
 integer width = 946
-integer height = 444
+integer height = 496
 integer taborder = 20
 string dataobject = "d_project_warehouse_list"
 boolean hscrollbar = true

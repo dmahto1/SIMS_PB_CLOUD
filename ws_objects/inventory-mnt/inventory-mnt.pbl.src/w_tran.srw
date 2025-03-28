@@ -3,6 +3,8 @@ $PBExportComments$*+  warehouse transfer
 forward
 global type w_tran from w_std_master_detail
 end type
+type cb_readonly from commandbutton within tabpage_main
+end type
 type rb_replenishment from radiobutton within tabpage_main
 end type
 type st_itemcount from statictext within tabpage_main
@@ -110,6 +112,8 @@ Datawindow idw_detail,idw_content,idw_dcontent
 
 Datawindow idw_transfer_detail_content_append		//s22208
 Datawindow idw_transfer_detail_content
+long il_find_matchW,il_userspid,il_find_matchR
+string is_display_name
 
 u_ds_ancestor idsContent
 u_ds_ancestor idsContentSummary
@@ -125,6 +129,7 @@ boolean ib_transfer_to_first
 boolean ib_complete_from_first
 boolean ib_complete_to_first
 boolean ib_error , ibFWDPickPending
+boolean ib_access=False
 // pvh 09/16/05
 datastore idsFromLocations, idsFromLocationsContainer
 long ilOwnerid
@@ -187,6 +192,7 @@ public function string wf_validate_single_project_rule (string as_l_code, long a
 public function integer wf_check_toloc_cc (string assku, string assuppcode, string astoloc)
 public function integer wf_sku_tracked_by_validation ()
 public function integer wf_check_full_pallet_container ()
+public subroutine wf_transfer_read_only (boolean ab_read)
 end prototypes
 
 event ue_deleterow();// ue_deleterow()
@@ -1102,8 +1108,8 @@ public function integer wf_update_content ();// int = wf_update_content()
 //Same filds have been added for getitem & setitem statements
 
 decimal ld_req, ld_avail //GAP 11-02  convert to decimal
-long i, j, k, ll_currow, ll_totalrows,ll_own,llCompNo, llLineItemNo
-string ls_sku, ls_lcode,ls_dlcode, ls_itype,ls_sno,ls_lno,ls_Pono
+long i, j, k, ll_currow, ll_totalrows,ll_own,llCompNo, llLineItemNo, ll_row
+string ls_sku, ls_lcode,ls_dlcode, ls_itype,ls_sno,ls_lno,ls_Pono,New_ls_itype
 string ls_supp,ls_po2,ls_coo
 string ls_container_id 			//GAP 11-02 
 datetime ldt_expiration_date	//GAP 11-02 
@@ -1136,12 +1142,12 @@ If getOrderStatus()  = 'X' Then Return 0
 // Retrieve related content records for all modified rows
 
 for i = 1 to idw_detail.rowcount()
-	
+	//idw_detail.Accepttext()
 	ldis_status = idw_detail.getitemstatus(i,0,Primary!)
 	If ibFWDPickPending Then /*always retrieve content if Pending FWD Pick*/
 	Elseif ldis_status <> newmodified! and ldis_status <> datamodified! then
 		continue
-	End If
+	End If	
 	
 	ls_sku = Upper(idw_detail.getitemstring(i,'sku'))
 	ls_supp = Upper(idw_detail.getitemstring(i,'supp_code'))
@@ -1308,7 +1314,7 @@ test = idw_detail.deletedcount()
 
 // Return deleted rows to content table
 for i = 1 to idw_detail.deletedcount()
-	
+	//idw_detail.accepttext()
 	ldis_status = idw_detail.getitemstatus(i,0,Delete!)
 	if ldis_status = new! or ldis_status = newmodified! then Continue
 	
@@ -1323,6 +1329,7 @@ for i = 1 to idw_detail.deletedcount()
 	ls_lno = idw_detail.getitemstring(i,'lot_no',Delete!,True)
 	ls_pono = idw_detail.getitemstring(i,'po_no',Delete!,True)
 	ls_itype = idw_detail.getitemstring(i,'inventory_type',Delete!,True)
+	new_ls_itype = idw_detail.getitemstring(i,'transfer_detail_new_inventory_type',Delete!,True)   //....Akash Baghel.....SIMS-434 Google SIMS - stock Transfer issue in PROD.......03/18/2024
 	ls_po2 = idw_detail.getitemstring(i,'po_no2',Delete!,True)
 	ls_container_id = idw_detail.getitemstring(i,'container_id',Delete!,True)				//GAP 11-02 
 	ldt_expiration_date = idw_detail.getitemdatetime(i,'expiration_date',Delete!,True)	//GAP 11-02 
@@ -1336,7 +1343,7 @@ for i = 1 to idw_detail.deletedcount()
 	//+ ' - owner_id: ' +string(ll_own) + ' - InvType: ' + ls_itype,isToNo, ' ',' ',isToNo) //04-Sep-2013  :Madhu added		
 
 	idw_dcontent.retrieve(getToNo(), ls_sku,ls_supp,ll_own, ls_lcode, ls_dlcode, ls_itype, ls_sno, ls_lno,&
-									ls_pono,ls_po2, ls_container_id, ldt_expiration_date, ls_coo  )
+									  ls_pono,ls_po2, ls_container_id, ldt_expiration_date, ls_coo  )  
 	
 	ll_totalrows = idw_dcontent.RowCount()
 
@@ -1459,11 +1466,13 @@ If GetOrderStatus() <> "V" Then
 		ls_container_id   = Upper(idw_detail.getitemstring(i,'container_id'))	//GAP 11-02
 		ldt_expiration_date   = idw_detail.getitemdatetime(i,'expiration_date')	//GAP 11-02
 		ls_itype = Upper(idw_detail.getitemstring(i,'inventory_type'))
+		new_ls_itype = Upper(idw_detail.getitemstring(i,'transfer_detail_new_inventory_type'))   //...Akash Baghel....SIMS-434 Google SIMS - Stock Transfer issue in PROD........03/18/2024
 		ld_req   = idw_detail.getitemnumber(i,'quantity') 
 		ls_coo = Upper(idw_detail.getitemstring(i,'country_of_origin'))
 		ll_own = idw_detail.getitemnumber(i,'owner_id')
-		llLineItemNo = idw_detail.getitemnumber(i,'Line_Item_No') /* 09/15 - PCONKL */
-	
+		llLineItemNo = idw_detail.getitemnumber(i,'Line_Item_No') /* 09/15 - PCONKL */  
+	     
+		  
 		sFilter = "upper(sku) = '" + ls_sku + "' and upper(l_code) = '" + ls_lcode + &
 			"' and upper(country_of_origin) = '" + ls_coo + "' and owner_id = "+ string(ll_own) +  &
 		     " and upper(supp_code) = '" + ls_supp + "' and upper(po_no2) = '" +ls_po2  + &
@@ -1896,10 +1905,18 @@ for i = 1 to idw_detail.rowcount()
 	//TimA Commend out 08/06/14
 		//f_method_trace_special( gs_project, this.ClassName() + ' - wf_confirm', 'find  wf_confirm:' + ' Ro_No: ' +ls_ro +' - componentNo: '+ string(llCompNo) +' - Find: ' + lsFind ,isToNo, ' ',' ',isToNo) //04-Sep-2013  :Madhu added		
 		
-		//If component exists, add to find
-		If llCompNo > 0 Then
-			lsFind += " and component_no = " + String(llCompNo)
-		End If
+        //If component exists, add to find
+		 If llCompNo > 0 Then
+            If gs_Project = 'LOGITECH' Then
+                /*dts - 05/25/2023 - SIMS-228 - For Logitech, Stock transfers may crash because Component_No is present, but not part of Primary Key.
+                      - They don't distinguish between components (eg, by container_id) so don't include in FIND
+                          so it will update existing record instead of trying to insert another one with all other lot-ables being the same
+                         (actually, thinking that component_no should never be part of the FIND but only Logitech has complained) */
+                f_method_trace_special( gs_project, this.ClassName() + ' - wf_confirm', 'Not using Component_no in FIND: ' + string(llCompNo) ,isToNo, ' ',' ',isToNo) //dts - 05/25/2023 - SIMS-228
+            else
+                lsFind += " and component_no = " + String(llCompNo)
+            end if
+        	End If
 		
 		ll_currow = idw_content.Find(lsFind, 1, idw_content.RowCount())
 		If ll_currow <= 0 Then
@@ -2003,9 +2020,10 @@ Execute Immediate "Begin Transaction" using SQLCA;
 
 ll_rtn = 0
 if idw_content.Update(false,false)  = 1 then
+	//if idw_content.Update(True,True)  = 1 then
 	
 	//GailM 08/02/2017 SIMSPEVS-717 NYCSP Defect-Not Updating Component Location with Parent SKU
-	if gs_Project = 'NYCSP' then
+	if gs_Project = 'NYCSP' and gs_Project = 'GEISTLICH' then  //Added by Dhirendra:gs_Project = 'GEISTLICH'/ S70297- Work Order Refactoring - Stock Transfer: Move Components with KIT
 		For ll_row = 1 to idw_content.rowcount()
 			If idw_content.GetItemNumber(ll_row,'component_no') > 0 Then
 				sql_syntax = "UPDATE content SET l_code = '" + idw_content.GetItemString(ll_row,'l_code') + &
@@ -2219,7 +2237,6 @@ ELSE
 	Return -1
 END IF
 
-
 end function
 
 public subroutine dotransferall (long detailrow);// doTransferAll( long detailRow )
@@ -2234,6 +2251,7 @@ long FromLocrows
 long newRow
 long index, i
 long max
+Long LineItemNo
 datastore idsworker, idschild
 
 f_method_trace_special( gs_project, this.ClassName() + ' - dotransferall', 'Start dotransferall:'  ,isToNo, ' ',' ',isToNo) //04-Sep-2013  :Madhu added
@@ -2246,7 +2264,6 @@ if gs_Project = "NYCSP" then  //hdc NYCSP wants to see the component children in
 end if
 
 idw_detail.accepttext()
-
 
 sku = idw_detail.object.sku[ detailrow ]
 if isNull( sku ) or len( sku ) = 0 then
@@ -2310,6 +2327,7 @@ for index = 1 to FromLocRows
 	idsworker.object.d_location[ newRow] = toLocation
 	idsworker.object.quantity[ newRow ] = idsFromLocations.object.avail_qty[ index ]
 	idsworker.object.inventory_type[ newRow ] = idsFromLocations.object.inventory_type[ index ]
+	idsworker.object.transfer_detail_new_inventory_type[ newRow ] = idsFromLocations.object.inventory_type[ index ]  //..Akash Baghel....SIMS-434 Google SIMS - Stock Transfer issue in PROD........03/18/2024
 	idsworker.object.owner_id[ newRow ] = idsFromLocations.object.owner_id[ index ]
 	idsworker.object.to_no[ newRow] =  idw_main.object.to_no[ 1 ]
 	idsworker.object.lot_no[ newRow ] = idsFromLocations.object.lot_no[ index ]
@@ -2318,6 +2336,8 @@ for index = 1 to FromLocRows
 	idsworker.object.container_ID[ newRow ] = idsFromLocations.object.container_ID[ index ]
 	idsworker.object.expiration_date[ newRow ] = idsFromLocations.object.expiration_date[ index ]
 	idsworker.object.serial_no[ newRow ] = idsFromLocations.object.serial_no[ index ]
+     idsworker.object.line_Item_No[ newRow ] = index // Akash Baghel....SIMS-434 Google SIMS - Stock Transfer issue in PROD........03/13/2024
+	 
 	if gs_Project = "NYCSP" then  //hdc this is the meat of the NYCSP child detail population
 		idschild.accepttext()
 		idschild.retrieve( idsworker.object.to_no[ newRow], idsworker.object.sku[newRow]  )
@@ -2371,8 +2391,12 @@ for index = 1 to max
 	idw_detail.object.po_no2[ newRow ] = idsWorker.object.po_no2[ index ]
 	idw_detail.object.container_ID[ newRow ] = idsWorker.object.container_ID[ index ]
 	idw_detail.object.expiration_date[ newRow ] = idsWorker.object.expiration_date[ index ]
-	idw_detail.object.serial_no[ newRow ] = idsWorker.object.serial_no[ index ]	
-
+	idw_detail.object.serial_no[ newRow ] = idsWorker.object.serial_no[ index ]
+	// Begin....Akash Baghel....SIMS-434 Google SIMS - Stock Transfer issue in PROD........03/18/2024
+	idw_detail.object.line_Item_No[ newRow ] =  idsworker.object.line_Item_No[ index ]  
+    // idw_detail.object.transfer_detail_new_inventory_type[ newRow ] = idsworker.object.transfer_detail_new_inventory_type[ newRow ]    //commented this and added below line....Akash Baghel....SIMS-434 Google SIMS - Stock Transfer issue in PROD........04/18/2024
+	 idw_detail.object.transfer_detail_new_inventory_type[ newRow ] = idsWorker.object.inventory_type[ index ]    //....Akash Baghel....SIMS-434 Google SIMS - Stock Transfer issue in PROD........04/18/2024
+	// End....Akash Baghel....SIMS-434 Google SIMS - Stock Transfer issue in PROD........03/18/2024
 	if gs_Project = "NYCSP" then
 	  for i = 1 to idschild.rowcount()  		
 		newRow =idw_detail.insertrow(0)	
@@ -4078,6 +4102,32 @@ End If
 Return 0
 end function
 
+public subroutine wf_transfer_read_only (boolean ab_read);// Begin -  Dinesh - 11/06/2023- SIMS-328- Google read only changes  Part 2
+//wf_transfer_order_readonly
+
+if ab_read=True then
+
+ 	tab_main.tabpage_detail.dw_mobile.object.datawindow.readonly='yes'
+	tab_main.tabpage_detail.dw_detail.object.datawindow.readonly='yes'
+	 
+//	tab_main.tabpage_serial.cb_serial_generate.enabled = False
+	tab_main.tabpage_detail.cb_insert.enabled = False
+	tab_main.tabpage_detail.cb_delete.enabled = False
+	tab_main.tabpage_detail.cb_copyrow.enabled = False
+	tab_main.tabpage_detail.cb_replenish.enabled = False
+	tab_main.tabpage_detail.cb_serial.enabled = False
+	tab_main.tabpage_detail.cb_xferall.enabled = False
+	tab_main.tabpage_main.cb_import_sku.enabled = False
+	tab_main.tabpage_main.cb_generate.enabled = False
+	tab_main.tabpage_main.cb_clear_gen.enabled = False
+	tab_main.tabpage_main.cb_confirm.enabled = False
+	tab_main.tabpage_main.cb_void.enabled = False
+
+end if
+
+// End -  Dinesh - 11/06/2023- SIMS-328- Google read only changes  Part 2
+end subroutine
+
 event open;call super::open;DatawindowChild	ldwc, ldwc2
 String				lsFilter
 i_nwarehouse = create n_warehouse
@@ -4137,10 +4187,13 @@ isle_code.SetFocus()
 end event
 
 event ue_save;Integer li_ret,li_ret_l,li_ret_ll,li_return
-long i,ll_totalrows, ll_no,ll_rtn, ll_cnt
-String ls_prefix, ls_order,ls_Message,ls_status
+long i,ll_totalrows, ll_no,ll_rtn, ll_cnt,ll_spid,ll_spidR
+String ls_prefix, ls_order,ls_Message,ls_status,ls_userspid,ls_tono,ls_User_IdW
 String ls_dLocation, ls_LocType
-
+datastore lds_screen_lock
+String ls_Edit_Mode,ls_user_id,ls_order_no,lsinvoice_no,ls_display_name1,ls_display_name,ls_Edit_modeW,ls_Edit_modeR
+datetime ld_entry_dateR,ld_entry_dateW
+boolean lb_readonly
 ls_Message = "Record Saved !!!"
 IF f_check_access(is_process,"S") = 0 THEN Return -1
 
@@ -4190,6 +4243,42 @@ f_method_trace_special( gs_project, this.ClassName() + ' - ue_save', 'Process ue
 	end if
 	
 end if
+
+if gs_project='PANDORA' then
+// Begin  - Dinesh - 11/06/2023- SIMS-328- Google - SIMS - Read Only Access Part -2
+				ls_tono= idw_main.GetItemString(1,'to_no')
+				lds_screen_lock = Create datastore
+				lds_screen_lock.Dataobject = 'd_screen_lock_order_r'
+				lds_screen_lock.settrans(sqlca)
+				lds_screen_lock.retrieve(gs_System_No,'R')
+				select count(*) into : il_find_matchW from Screen_Lock with(nolock) where Order_No= :gs_System_No and Edit_Mode='W' and screen_name='Stock Transfer' using sqlca;
+				select user_id,UserSPID,Edit_Mode,Entry_Date into :ls_User_IdW,:ll_spid,:ls_Edit_modeW,:ld_entry_dateR from Screen_Lock with(nolock) where Order_No= :gs_System_No and Edit_Mode='W' and screen_name='Stock Transfer' using sqlca;
+				select count(*) into : il_find_matchR from Screen_Lock with(nolock) where Order_No= :gs_System_No and Edit_Mode='R' and screen_name='Stock Transfer' using sqlca;
+				select user_id,UserSPID,Edit_Mode,Entry_Date,order_no into :ls_User_Id,:ll_spidR,:ls_Edit_Mode,:ld_entry_dateR,:ls_Order_No from Screen_Lock with(nolock) where Order_No= :gs_System_No and Edit_Mode='R' and userspid = :gl_userspid and screen_name='Stock Transfer' using sqlca;
+							select display_name into :ls_display_name from usertable with (Nolock) where userid=:ls_User_IdW;
+
+				if  (il_find_matchW > 0 and il_find_matchR > 0) and (ls_Order_No=gs_System_No and gs_userid <> ls_User_IdW  and ll_spidR = gl_userspid ) then
+						messagebox(is_title,'User Name: ' + ls_display_name + '/Session: ' + string(ll_spid) + ' is already accessing the Order Number ' + ls_tono + '.~r~n~r~nThe screen is locked and can be accessible to read mode only.Please contact your Site Manager/Supervisor to unlock the screen or wait for sweeper to run for clearing the locked order.', Stopsign! )
+						lb_readonly=True
+						wf_transfer_read_only(lb_readonly)
+						Return -1
+					
+				elseif (il_find_matchW > 0 and  il_find_matchR > 0) and (ls_Order_No=gs_System_No and gs_userid = ls_User_IdW and ls_Edit_mode='R' and  ll_spidR = gl_userspid) then
+						messagebox(is_title,'Hey!! You have already opened another session: ' +string(ll_spid)+ ' for the same Order Number ' + ls_tono + '.~r~nPlease close all your current/previous session first and then re-open the order.', Stopsign! )
+						lb_readonly=True
+						wf_transfer_read_only(lb_readonly)
+						Return -1
+				elseif  ib_access= True and (il_find_matchW = 0 and  il_find_matchR > 0) and (ls_Order_No=gs_System_No and gs_userid = ls_User_Id and ls_Edit_mode='R' and  ll_spidR = gl_userspid) then
+						messagebox(is_title,'Hey!! You have changed this order to READ ONLY ACCESS, session: ' +string(ll_spidR)+ '. Please close all your current session and re- open the order again to make any change for this order. ', Stopsign! )
+						lb_readonly= True
+						wf_transfer_read_only(lb_readonly)
+						Return -1
+
+				else
+					end if
+			
+		End if
+// Begin  - Dinesh - 11/06/2023- SIMS-328- Google - SIMS - Read Only Access Part -2
 
 SetPointer(HourGlass!)
 If idw_main.RowCount() > 0 Then
@@ -4643,6 +4732,14 @@ This.TriggerEvent("ue_edit")
 end event
 
 event close;call super::close;destroy i_nwarehouse
+
+//Begin - dinesh - 10/30/2023- SIMS-328- Google Read only access - Part 2
+if gs_project = 'PANDORA' then
+delete from Screen_Lock where user_id=:gs_userid  and screen_name='Stock Transfer' and  userspid=:gl_userspid using sqlca; // Dinesh - 10/30/2023- SIMS-328- Google Read only access - Part 2
+commit;
+end if
+//End - dinesh - 10/30/2023- SIMS-328- Google Read only access - Part 2
+
 end event
 
 event closequery;call super::closequery;
@@ -4733,6 +4830,7 @@ integer y = 104
 integer width = 3776
 integer height = 1916
 string text = " Transfer Information "
+cb_readonly cb_readonly
 rb_replenishment rb_replenishment
 st_itemcount st_itemcount
 rb_containerid rb_containerid
@@ -4753,6 +4851,7 @@ dw_generate dw_generate
 end type
 
 on tabpage_main.create
+this.cb_readonly=create cb_readonly
 this.rb_replenishment=create rb_replenishment
 this.st_itemcount=create st_itemcount
 this.rb_containerid=create rb_containerid
@@ -4773,27 +4872,29 @@ this.dw_generate=create dw_generate
 int iCurrent
 call super::create
 iCurrent=UpperBound(this.Control)
-this.Control[iCurrent+1]=this.rb_replenishment
-this.Control[iCurrent+2]=this.st_itemcount
-this.Control[iCurrent+3]=this.rb_containerid
-this.Control[iCurrent+4]=this.rb_pono2
-this.Control[iCurrent+5]=this.rb_pono
-this.Control[iCurrent+6]=this.rb_sku
-this.Control[iCurrent+7]=this.dw_sku
-this.Control[iCurrent+8]=this.cb_import_sku
-this.Control[iCurrent+9]=this.cb_clear_gen
-this.Control[iCurrent+10]=this.cb_generate
-this.Control[iCurrent+11]=this.st_2
-this.Control[iCurrent+12]=this.sle_orderno
-this.Control[iCurrent+13]=this.cb_confirm
-this.Control[iCurrent+14]=this.cb_void
-this.Control[iCurrent+15]=this.dw_main
-this.Control[iCurrent+16]=this.sle_count
-this.Control[iCurrent+17]=this.dw_generate
+this.Control[iCurrent+1]=this.cb_readonly
+this.Control[iCurrent+2]=this.rb_replenishment
+this.Control[iCurrent+3]=this.st_itemcount
+this.Control[iCurrent+4]=this.rb_containerid
+this.Control[iCurrent+5]=this.rb_pono2
+this.Control[iCurrent+6]=this.rb_pono
+this.Control[iCurrent+7]=this.rb_sku
+this.Control[iCurrent+8]=this.dw_sku
+this.Control[iCurrent+9]=this.cb_import_sku
+this.Control[iCurrent+10]=this.cb_clear_gen
+this.Control[iCurrent+11]=this.cb_generate
+this.Control[iCurrent+12]=this.st_2
+this.Control[iCurrent+13]=this.sle_orderno
+this.Control[iCurrent+14]=this.cb_confirm
+this.Control[iCurrent+15]=this.cb_void
+this.Control[iCurrent+16]=this.dw_main
+this.Control[iCurrent+17]=this.sle_count
+this.Control[iCurrent+18]=this.dw_generate
 end on
 
 on tabpage_main.destroy
 call super::destroy
+destroy(this.cb_readonly)
 destroy(this.rb_replenishment)
 destroy(this.st_itemcount)
 destroy(this.rb_containerid)
@@ -4812,6 +4913,25 @@ destroy(this.dw_main)
 destroy(this.sle_count)
 destroy(this.dw_generate)
 end on
+
+event tabpage_main::constructor;call super::constructor;// Begin- Dinesh - 11/06/2023 - SIMS-328- Screen Lock  read only part 2 
+if gs_project= 'PANDORA' then
+	
+	tab_main.tabpage_main.cb_readonly.visible = True
+	
+	if gs_system_no <> '' or not isnull(gs_system_no) then
+		tab_main.tabpage_main.cb_readonly.enabled = False
+	else
+		tab_main.tabpage_main.cb_readonly.enabled = True
+end if
+
+else
+	tab_main.tabpage_main.cb_readonly.visible = False
+end if
+
+
+// End- Dinesh - 11/06/2023 - SIMS-328- Screen Lock  read only part 2 
+end event
 
 type tabpage_search from w_std_master_detail`tabpage_search within tab_main
 integer y = 104
@@ -4844,6 +4964,34 @@ destroy(this.dw_search)
 destroy(this.cb_clear)
 destroy(this.dw_result)
 end on
+
+type cb_readonly from commandbutton within tabpage_main
+integer x = 2368
+integer y = 1812
+integer width = 462
+integer height = 108
+integer taborder = 40
+boolean bringtotop = true
+integer textsize = -8
+integer weight = 400
+fontcharset fontcharset = ansi!
+fontpitch fontpitch = variable!
+fontfamily fontfamily = swiss!
+string facename = "Arial"
+string text = "Read Only Access"
+end type
+
+event clicked;// Begin - Dinesh - 11/06/2023 - SIMS-328- Screen Lock  read only part 2 
+boolean lb_readonly
+lb_readonly= True
+If MessageBox( is_title, "Are you sure you want to change this order to read only?", Question!, YesNo!, 1 ) = 1 Then
+	update Screen_Lock set edit_mode='R' where  user_id=:gs_userid  and screen_name='Stock Transfer' and  userspid=:gl_userspid using sqlca;
+	tab_main.tabpage_main.cb_readonly.enabled = False
+	wf_transfer_read_only(lb_readonly)
+	 ib_access= True 
+End If
+// End - Dinesh - 11/06/2023 - SIMS-328- Screen Lock  read only part 2 
+end event
 
 type rb_replenishment from radiobutton within tabpage_main
 integer x = 96
@@ -5131,11 +5279,15 @@ integer limit = 16
 borderstyle borderstyle = stylelowered!
 end type
 
-event modified;String ls_order, ls_wh_code, ls_serial_ind
+event modified;String ls_order, ls_wh_code, ls_serial_ind,ls_edit_moderead
 Integer	lirc
 long  ll_row, ll_detailcount 			//03-APR-2017 :Madhu -PEVS-424 - Stock Transfer Serial No.
 DatawindowChild	dwcFromLoc, ldwc
-
+String ls_User_Id,ls_Order_No,ls_screen_name,ls_Edit_Mode,ls_Edit_ModeW,ls_User_IdW,ls_Order_NoW,lsFind,ls_order_read,ls_invoice_no,ls_Edit_ModeR,ls_User_IdR,ls_Order_NoR
+Long	llCount, ll_rownum, ll_numrows, ll_edibatchseqno,j,ll_spid,k,ll_userspid,ll_userspidR,llFindRow
+datetime ldt_user_login_Date,ldt_Entry_Date,ldt_Out_Date
+datastore lds_screen_lockW,lds_screen_lockR
+boolean lb_readonly,lb_selfuser
 ls_order = This.Text
 idw_main.Retrieve(ls_order,gs_project)
 
@@ -5170,6 +5322,258 @@ If idw_main.RowCount() > 0 Then
 		
 	END IF
 	
+	//Begin - Dinesh - 11/06/2023 - SIMS-328 - Google - SIMS - Google - SIMS - Read Only Access part 2
+if gs_project='PANDORA' then
+
+		if gs_System_No <> '' or not isnull(gs_System_No) then
+			tab_main.tabpage_main.cb_readonly.enabled = True
+		else
+			tab_main.tabpage_main.cb_readonly.enabled = False
+		end if
+	
+			lds_screen_lockW = Create datastore
+			lds_screen_lockW.Dataobject = 'd_screen_lock_order_w'
+			lds_screen_lockW.settrans(sqlca)
+			lds_screen_lockW.retrieve(gs_System_No,'W')
+			
+			select top 1 Login_Time into :ldt_user_login_Date  from User_Login_History where UserId=:gs_userid order by Login_Time desc;
+			select UserSPID into :il_userspid  from User_Login_History where UserId=:gs_userid and Login_Time=:ldt_user_login_Date;
+			select count(*) into : il_find_matchW from Screen_Lock with(nolock) where Order_No= :gs_System_No and Edit_Mode='W' and screen_name='Stock Transfer' using sqlca;
+			
+			lds_screen_lockR = Create datastore
+			lds_screen_lockR.Dataobject = 'd_screen_lock_order_r'
+			lds_screen_lockR.settrans(sqlca)
+			lds_screen_lockR.retrieve(gs_System_No,'R')
+			
+			select count(*) into : il_find_matchR from Screen_Lock with(nolock) where Order_No= :gs_System_No and Edit_Mode='R' and screen_name='Stock Transfer'  using sqlca;
+					
+			if (il_find_matchR > 0 and il_find_matchW=0)	then
+				select User_Id,Order_No,screen_name,Entry_Date,Out_Date,Edit_Mode,UserSPID into :ls_User_Id,:ls_Order_No,:ls_screen_name,:ldt_Entry_Date,:ldt_Out_Date,:ls_Edit_Mode,:ll_spid from Screen_Lock with(nolock) where Order_No= :gs_System_No and Edit_Mode='R' and screen_name='Stock Transfer' using sqlca;
+			end if
+			if (il_find_matchW > 0 and il_find_matchR= 0) then
+				select User_Id,Order_No,screen_name,Entry_Date,Out_Date,Edit_Mode,UserSPID into :ls_User_Id,:ls_Order_No,:ls_screen_name,:ldt_Entry_Date,:ldt_Out_Date,:ls_Edit_Mode,:ll_spid from Screen_Lock with(nolock) where Order_No= :gs_System_No and Edit_Mode='W' and screen_name='Stock Transfer' using sqlca;	
+			end if
+			if (il_find_matchR > 0 and  il_find_matchW > 0) then
+				select User_Id,Order_No,screen_name,Entry_Date,Out_Date,Edit_Mode,UserSPID into :ls_User_Id,:ls_Order_No,:ls_screen_name,:ldt_Entry_Date,:ldt_Out_Date,:ls_Edit_Mode,:ll_spid from Screen_Lock with(nolock) where Order_No= :gs_System_No and Edit_Mode ='W' and screen_name='Stock Transfer' using sqlca;
+			end if
+		
+				lds_screen_lockW.retrieve(gs_System_No,'W')
+				for k= 1 to lds_screen_lockW.rowcount()
+					 ls_Edit_ModeW = lds_screen_lockW.getitemstring(k,'edit_Mode')
+					 ls_User_IdW = lds_screen_lockW.getitemstring(k,'user_Id')
+					 ls_Order_NoW =lds_screen_lockW.getitemstring(k,'order_No')
+					 ll_userspid =lds_screen_lockW.getitemnumber(k,'userspid')
+				next
+				
+					select Display_Name into :is_display_name from UserTable with(nolock) where UserId=:ls_User_IdW;
+				
+			
+				if  gs_System_No = ls_Order_NoW and gs_userid <> ls_User_IdW and gs_System_No <> '' then
+						messagebox(is_title,'User Name: ' + is_display_name + '/Session: ' + string(ll_userspid) +  ' is already accessing the Order Number ' + isToNo + '.~r~nThe screen is locked and can be accessible to read mode only.Please contact your Site Manager/Supervisor to unlock the screen or wait for sweeper run to clear the lock automatically.', Stopsign! )
+						lb_readonly=True
+						lb_selfuser= False
+				
+				elseif gs_System_No=ls_Order_NoW and gs_userid = ls_User_IdW and ll_spid <>il_userspid and gs_System_No <> '' then
+						messagebox(is_title,'Hey!! You have already opened another session: ' +string(ll_userspid)+ ' for~r~nthe same Order Number ' + isToNo + '.~r~n~r~nPlease close all your current/previous session first and then re-open the order.', Stopsign! )
+						lb_readonly=True
+						lb_selfuser= False
+				
+				elseif gs_System_No=ls_Order_NoW and gs_userid = ls_User_IdW and  ll_spid = il_userspid and gs_System_No <> '' then
+						//messagebox(is_title,'Hey!! You have already opened the same order in the same session with SPID ID: ' +string(ll_userspid)+ ' for~r for the Order number ' + ls_bol + '.~r~n~r~n', Stopsign! )
+						lb_readonly=False
+						lb_selfuser= True	
+			
+				end if
+		if lb_selfuser= False  then
+			 if (il_find_matchW =  0 and il_find_matchR = 0 )  then
+					delete from screen_lock where User_Id=:gs_userid and screen_name='Stock Transfer' and UserSPID=:gl_userspid using sqlca; // Dinesh - 09/20/2023- Read only
+					insert into Screen_Lock (User_Id,Order_No,Screen_Name,Entry_Date,Out_Date,Edit_Mode,UserSPID) values(:gs_userid,:gs_System_No,:is_title,getdate(),NULL,'W',:gl_userspid) using sqlca;
+					commit;
+					lb_readonly=false
+					
+				elseif (il_find_matchW = 0 and il_find_matchR = 0) and (gs_userid= ls_User_IdW and gs_System_No = ls_Order_NoW and ll_spid <> gl_userspid) then
+						insert into Screen_Lock (User_Id,Order_No,Screen_Name,Entry_Date,Out_Date,Edit_Mode,UserSPID) values(:gs_userid,:gs_System_No,:is_title,getdate(),NULL,'W',:gl_userspid) using sqlca;
+						commit;
+						lb_readonly=false
+				elseif (il_find_matchW > 0 and il_find_matchR > 0) and (gs_userid= ls_User_IdW and gs_System_No = ls_Order_NoW and ll_spid <> gl_userspid) then
+						delete from screen_lock where User_Id=:gs_userid and screen_name='Stock Transfer' and UserSPID=:gl_userspid and Edit_Mode='R' using sqlca; //09/21/2023- Dinesh - Read only
+						insert into Screen_Lock (User_Id,Order_No,Screen_Name,Entry_Date,Out_Date,Edit_Mode,UserSPID) values(:gs_userid,:gs_System_No,:is_title,getdate(),NULL,'R',:gl_userspid) using sqlca;
+						commit;
+						lb_readonly=true
+				elseif (il_find_matchW > 0 and il_find_matchR = 0) and (gs_userid= ls_User_IdW and gs_System_No = ls_Order_NoW and ll_spid <> gl_userspid) then
+						delete from screen_lock where User_Id=:gs_userid and screen_name='Stock Transfer' and UserSPID=:gl_userspid using sqlca; //09/21/2023- Dinesh - Read only
+						insert into Screen_Lock (User_Id,Order_No,Screen_Name,Entry_Date,Out_Date,Edit_Mode,UserSPID) values(:gs_userid,:gs_System_No,:is_title,getdate(),NULL,'R',:gl_userspid) using sqlca;
+						commit;
+						lb_readonly=True
+				elseif (il_find_matchW = 0 and il_find_matchR > 0) and (gs_userid= ls_User_IdW and gs_System_No = ls_Order_NoW and ll_spid <> gl_userspid ) then
+						delete from screen_lock where User_Id=:gs_userid and screen_name='Stock Transfer' and UserSPID=:gl_userspid using sqlca; //09/21/2023- Dinesh - Read only
+						insert into Screen_Lock (User_Id,Order_No,Screen_Name,Entry_Date,Out_Date,Edit_Mode,UserSPID) values(:gs_userid,:gs_System_No,:is_title,getdate(),NULL,'W',:gl_userspid) using sqlca;
+						commit;
+						lb_readonly=false
+				//Begin - Dinesh - 09/20/2023- SIMS-328-  Google  - Read Only Access Part 2
+				elseif (il_find_matchW = 0 and il_find_matchR = 0) and (gs_userid= ls_User_IdW and gs_System_No <> ls_Order_NoW and ll_spid <> gl_userspid) then
+						insert into Screen_Lock (User_Id,Order_No,Screen_Name,Entry_Date,Out_Date,Edit_Mode,UserSPID) values(:gs_userid,:gs_System_No,:is_title,getdate(),NULL,'W',:gl_userspid) using sqlca;
+						commit;
+						lb_readonly=false
+				elseif (il_find_matchW > 0 and il_find_matchR > 0) and (gs_userid= ls_User_IdW and gs_System_No <> ls_Order_NoW and ll_spid <> gl_userspid) then
+						delete from screen_lock where User_Id=:gs_userid and screen_name='Delivery Order' and Edit_Mode='R' and UserSPID=:gl_userspid using sqlca; // Dinesh - 09/20/2023- SIMS-328-  Google  - Read Only Access Part 2
+						insert into Screen_Lock (User_Id,Order_No,Screen_Name,Entry_Date,Out_Date,Edit_Mode,UserSPID) values(:gs_userid,:gs_System_No,:is_title,getdate(),NULL,'R',:gl_userspid) using sqlca;
+						commit;
+						lb_readonly=true
+				elseif (il_find_matchW > 0 and il_find_matchR = 0) and (gs_userid= ls_User_IdW and gs_System_No <> ls_Order_NoW and ll_spid <> gl_userspid) then
+						//delete from screen_lock where User_Id=:gs_userid and screen_name='Stock Transfer' using sqlca;
+						insert into Screen_Lock (User_Id,Order_No,Screen_Name,Entry_Date,Out_Date,Edit_Mode,UserSPID) values(:gs_userid,:gs_System_No,:is_title,getdate(),NULL,'R',:gl_userspid) using sqlca;
+						commit;
+						lb_readonly=True
+				elseif (il_find_matchW = 0 and il_find_matchR > 0) and (gs_userid= ls_User_IdW and gs_System_No <> ls_Order_NoW and ll_spid <> gl_userspid ) then
+						delete from screen_lock where User_Id=:gs_userid and screen_name='Stock Transfer' and Edit_Mode='R' and UserSPID=:gl_userspid using sqlca; // Dinesh - 09/20/2023- SIMS-328-  Google  - Read Only Access Part 2
+						insert into Screen_Lock (User_Id,Order_No,Screen_Name,Entry_Date,Out_Date,Edit_Mode,UserSPID) values(:gs_userid,:gs_System_No,:is_title,getdate(),NULL,'W',:gl_userspid) using sqlca;
+						commit;
+						lb_readonly=false
+				//End - Dinesh - 09/20/2023- SIMS-328-  Google  - Read Only Access Part 2
+						
+				elseif (il_find_matchW = 0 and il_find_matchR = 0) and (gs_userid = ls_User_IdW and gs_System_No = ls_Order_NoW and ll_spid = gl_userspid) then
+					delete from screen_lock where User_Id=:gs_userid and screen_name='Stock Transfer' and UserSPID=:gl_userspid using sqlca; //09/21/2023- Dinesh - SIMS-328-  Google  - Read Only Access Part 2
+					insert into Screen_Lock (User_Id,Order_No,Screen_Name,Entry_Date,Out_Date,Edit_Mode,UserSPID) values(:gs_userid,:gs_System_No,:is_title,getdate(),NULL,'W',:gl_userspid) using sqlca;
+					commit;
+					lb_readonly=false
+				elseif (il_find_matchW > 0 and il_find_matchR = 0) and (gs_userid = ls_User_IdW and gs_System_No = ls_Order_NoW and ll_spid = gl_userspid) then
+					delete from screen_lock where User_Id=:gs_userid and screen_name='Stock Transfer' and UserSPID=:gl_userspid using sqlca; //09/21/2023- Dinesh - SIMS-328-  Google  - Read Only Access Part 2
+					insert into Screen_Lock (User_Id,Order_No,Screen_Name,Entry_Date,Out_Date,Edit_Mode,UserSPID) values(:gs_userid,:gs_System_No,:is_title,getdate(),NULL,'W',:gl_userspid) using sqlca;
+					commit;
+					lb_readonly=false
+				elseif (il_find_matchW > 0 and il_find_matchR > 0) and (gs_userid = ls_User_IdW and gs_System_No = ls_Order_NoW and ll_spid = gl_userspid) then
+					delete from screen_lock where User_Id=:gs_userid and screen_name='Stock Transfer' and Edit_Mode='R' and UserSPID=:gl_userspid using sqlca; //09/21/2023- Dinesh - SIMS-328-  Google  - Read Only Access Part 2
+					insert into Screen_Lock (User_Id,Order_No,Screen_Name,Entry_Date,Out_Date,Edit_Mode,UserSPID) values(:gs_userid,:gs_System_No,:is_title,getdate(),NULL,'W',:gl_userspid) using sqlca;
+					commit;
+					lb_readonly=true
+				elseif (il_find_matchW = 0 and il_find_matchR > 0) and (gs_userid = ls_User_IdW and gs_System_No = ls_Order_NoW and ll_spid = gl_userspid) then
+					delete from screen_lock where User_Id=:gs_userid and screen_name='Stock Transfer' and UserSPID=:gl_userspid using sqlca; //09/21/2023- Dinesh - SIMS-328-  Google  - Read Only Access Part 2
+					insert into Screen_Lock (User_Id,Order_No,Screen_Name,Entry_Date,Out_Date,Edit_Mode,UserSPID) values(:gs_userid,:gs_System_No,:is_title,getdate(),NULL,'W',:gl_userspid) using sqlca;
+					commit;
+					lb_readonly=false
+					
+				elseif (il_find_matchW = 0 and il_find_matchR = 0) and (gs_userid = ls_User_IdW and gs_System_No <> ls_Order_NoW and ll_spid = gl_userspid) then
+					//delete from screen_lock where User_Id=:gs_userid and screen_name='Stock Transfer' using sqlca;
+					insert into Screen_Lock (User_Id,Order_No,Screen_Name,Entry_Date,Out_Date,Edit_Mode,UserSPID) values(:gs_userid,:gs_System_No,:is_title,getdate(),NULL,'W',:gl_userspid) using sqlca;
+					commit;
+					lb_readonly=false
+				elseif (il_find_matchW > 0 and il_find_matchR = 0) and (gs_userid = ls_User_IdW and gs_System_No <> ls_Order_NoW and ll_spid = gl_userspid) then
+					delete from screen_lock where User_Id=:gs_userid and screen_name='Stock Transfer' and UserSPID=:gl_userspid using sqlca; //09/21/2023- Dinesh - SIMS-328-  Google  - Read Only Access Part 2
+					insert into Screen_Lock (User_Id,Order_No,Screen_Name,Entry_Date,Out_Date,Edit_Mode,UserSPID) values(:gs_userid,:gs_System_No,:is_title,getdate(),NULL,'R',:gl_userspid) using sqlca;
+					commit;
+					lb_readonly=false
+				elseif (il_find_matchW > 0 and il_find_matchR > 0) and (gs_userid = ls_User_IdW and gs_System_No <> ls_Order_NoW and ll_spid = gl_userspid) then
+					delete from screen_lock where User_Id=:gs_userid and screen_name='Stock Transfer'  and UserSPID=:gl_userspid using sqlca;//09/21/2023- Dinesh - SIMS-328-  Google  - Read Only Access Part 2
+					insert into Screen_Lock (User_Id,Order_No,Screen_Name,Entry_Date,Out_Date,Edit_Mode,UserSPID) values(:gs_userid,:gs_System_No,:is_title,getdate(),NULL,'W',:gl_userspid) using sqlca;
+					commit;
+					lb_readonly=false
+				elseif (il_find_matchW = 0 and il_find_matchR > 0) and (gs_userid = ls_User_IdW and gs_System_No <> ls_Order_NoW and ll_spid = gl_userspid) then
+					delete from screen_lock where User_Id=:gs_userid and screen_name='Stock Transfer' and UserSPID=:gl_userspid using sqlca; //09/21/2023- Dinesh - SIMS-328-  Google  - Read Only Access Part 2
+					insert into Screen_Lock (User_Id,Order_No,Screen_Name,Entry_Date,Out_Date,Edit_Mode,UserSPID) values(:gs_userid,:gs_System_No,:is_title,getdate(),NULL,'W',:gl_userspid) using sqlca;
+					commit;
+					lb_readonly=false
+
+				elseif (il_find_matchW = 0 and il_find_matchR = 0) and (gs_userid <> ls_User_IdW and gs_System_No <> ls_Order_NoW and  ll_spid = gl_userspid) then
+					//delete from screen_lock where User_Id=:gs_userid and screen_name='Stock Transfer' using sqlca;
+					insert into Screen_Lock (User_Id,Order_No,Screen_Name,Entry_Date,Out_Date,Edit_Mode,UserSPID) values(:gs_userid,:gs_System_No,:is_title,getdate(),NULL,'W',:gl_userspid) using sqlca;
+					commit;	
+					lb_readonly=false
+				elseif (il_find_matchW > 0 and il_find_matchR = 0) and (gs_userid <> ls_User_IdW and gs_System_No <> ls_Order_NoW and  ll_spid = gl_userspid) then
+					delete from screen_lock where User_Id=:gs_userid and screen_name='Stock Transfer' and UserSPID=:gl_userspid using sqlca; //09/21/2023- Dinesh - SIMS-328-  Google  - Read Only Access Part 2
+					insert into Screen_Lock (User_Id,Order_No,Screen_Name,Entry_Date,Out_Date,Edit_Mode,UserSPID) values(:gs_userid,:gs_System_No,:is_title,getdate(),NULL,'W',:gl_userspid) using sqlca;
+					commit;	
+					lb_readonly=false
+				elseif (il_find_matchW > 0 and il_find_matchR > 0) and (gs_userid <> ls_User_IdW and gs_System_No <> ls_Order_NoW and  ll_spid = gl_userspid) then
+					delete from screen_lock where User_Id=:gs_userid and screen_name='Stock Transfer' and UserSPID=:gl_userspid using sqlca; //09/21/2023- Dinesh - SIMS-328-  Google  - Read Only Access Part 2
+					insert into Screen_Lock (User_Id,Order_No,Screen_Name,Entry_Date,Out_Date,Edit_Mode,UserSPID) values(:gs_userid,:gs_System_No,:is_title,getdate(),NULL,'W',:gl_userspid) using sqlca;
+					commit;	
+					lb_readonly=false
+				elseif (il_find_matchW = 0 and il_find_matchR > 0) and (gs_userid <> ls_User_IdW and gs_System_No <> ls_Order_NoW and  ll_spid = gl_userspid) then
+					delete from screen_lock where User_Id=:gs_userid and screen_name='Stock Transfer' and UserSPID=:gl_userspid using sqlca; //09/21/2023- Dinesh - SIMS-328-  Google  - Read Only Access Part 2
+					insert into Screen_Lock (User_Id,Order_No,Screen_Name,Entry_Date,Out_Date,Edit_Mode,UserSPID) values(:gs_userid,:gs_System_No,:is_title,getdate(),NULL,'W',:gl_userspid) using sqlca;
+					commit;		
+					lb_readonly=false
+				elseif (il_find_matchW = 0 and il_find_matchR = 0) and (gs_userid <> ls_User_IdW and gs_System_No = ls_Order_NoW and  ll_spid <> gl_userspid) then
+					//delete from screen_lock where User_Id=:gs_userid and screen_name='Stock Transfer' using sqlca;
+					insert into Screen_Lock (User_Id,Order_No,Screen_Name,Entry_Date,Out_Date,Edit_Mode,UserSPID) values(:gs_userid,:gs_System_No,:is_title,getdate(),NULL,'W',:gl_userspid) using sqlca;
+					commit;	
+					lb_readonly=false
+				elseif (il_find_matchW > 0 and il_find_matchR = 0) and (gs_userid <> ls_User_IdW and gs_System_No = ls_Order_NoW and  ll_spid <> gl_userspid) then
+					delete from screen_lock where User_Id=:gs_userid and screen_name='Stock Transfer' and UserSPID=:gl_userspid using sqlca; //09/21/2023- Dinesh - SIMS-328-  Google  - Read Only Access Part 2
+					insert into Screen_Lock (User_Id,Order_No,Screen_Name,Entry_Date,Out_Date,Edit_Mode,UserSPID) values(:gs_userid,:gs_System_No,:is_title,getdate(),NULL,'R',:gl_userspid) using sqlca;
+					commit;	
+					lb_readonly=true
+				elseif (il_find_matchW > 0 and il_find_matchR > 0) and (gs_userid <> ls_User_IdW and gs_System_No = ls_Order_NoW and  ll_spid <> gl_userspid) then
+					delete from screen_lock where User_Id=:gs_userid and screen_name='Stock Transfer' and Edit_Mode in('R','W') and UserSPID=:gl_userspid using sqlca; //09/21/2023- Dinesh - SIMS-328-  Google  - Read Only Access Part 2
+					insert into Screen_Lock (User_Id,Order_No,Screen_Name,Entry_Date,Out_Date,Edit_Mode,UserSPID) values(:gs_userid,:gs_System_No,:is_title,getdate(),NULL,'R',:gl_userspid) using sqlca;
+					commit;	
+					lb_readonly=True
+				elseif (il_find_matchW = 0 and il_find_matchR > 0) and ((gs_userid <> ls_User_IdW) or (ls_User_IdW='')  and gs_System_No = ls_Order_NoW and  ll_spid <> gl_userspid) then
+					delete from screen_lock where User_Id=:gs_userid and screen_name='Stock Transfer' and UserSPID=:gl_userspid using sqlca; //09/21/2023- Dinesh - SIMS-328-  Google  - Read Only Access Part 2
+					insert into Screen_Lock (User_Id,Order_No,Screen_Name,Entry_Date,Out_Date,Edit_Mode,UserSPID) values(:gs_userid,:gs_System_No,:is_title,getdate(),NULL,'W',:gl_userspid) using sqlca;
+					commit;	
+					lb_readonly=false
+				elseif (il_find_matchW = 0 and il_find_matchR > 0) and (gs_userid<> ls_User_IdR and gs_System_No = ls_Order_NoR and ll_spid <> gl_userspid) then
+					delete from screen_lock where User_Id=:gs_userid and screen_name='Stock Transfer' and UserSPID=:gl_userspid using sqlca;//09/21/2023- Dinesh - SIMS-328-  Google  - Read Only Access Part 2
+					insert into Screen_Lock (User_Id,Order_No,Screen_Name,Entry_Date,Out_Date,Edit_Mode,UserSPID) values(:gs_userid,:gs_System_No,:is_title,getdate(),NULL,'W',:gl_userspid) using sqlca;
+					commit;
+					lb_readonly=false
+					
+				elseif (il_find_matchW = 0 and il_find_matchR = 0) and (gs_userid <> ls_User_IdW and gs_System_No <> ls_Order_NoW and  ll_spid <> gl_userspid) then
+					//delete from screen_lock where User_Id=:gs_userid and screen_name='Stock Transfer' using sqlca;
+					insert into Screen_Lock (User_Id,Order_No,Screen_Name,Entry_Date,Out_Date,Edit_Mode,UserSPID) values(:gs_userid,:gs_System_No,:is_title,getdate(),NULL,'W',:gl_userspid) using sqlca;
+					commit;	
+					lb_readonly=true
+				elseif (il_find_matchW > 0 and il_find_matchR = 0) and (gs_userid <> ls_User_IdW and gs_System_No = ls_Order_NoW and  ll_spid <> gl_userspid) then
+					delete from screen_lock where User_Id=:gs_userid and screen_name='Stock Transfer' and Edit_Mode = 'R' and UserSPID=:gl_userspid using sqlca; //09/21/2023- Dinesh - SIMS-328-  Google  - Read Only Access Part 2
+					insert into Screen_Lock (User_Id,Order_No,Screen_Name,Entry_Date,Out_Date,Edit_Mode,UserSPID) values(:gs_userid,:gs_System_No,:is_title,getdate(),NULL,'R',:gl_userspid) using sqlca;
+					commit;	
+					lb_readonly=True
+					
+				elseif (il_find_matchW > 0 and il_find_matchR > 0) and (gs_userid <> ls_User_IdW and gs_System_No = ls_Order_NoW and  ll_spid <> gl_userspid) then
+						lds_screen_lockW.retrieve(gs_System_No,'W')
+					 for k= 1 to lds_screen_lockW.rowcount()
+						 ls_Edit_ModeW = lds_screen_lockW.getitemstring(k,'edit_Mode')
+						 ls_User_IdW = lds_screen_lockW.getitemstring(k,'user_Id')
+						 ls_Order_NoW =lds_screen_lockW.getitemstring(k,'order_No')
+						 ll_userspid =lds_screen_lockW.getitemnumber(k,'userspid')
+					next
+					delete from screen_lock where User_Id=:gs_userid and screen_name='Stock Transfer' and UserSPID=:gl_userspid using sqlca;//09/21/2023- Dinesh - SIMS-328-  Google  - Read Only Access Part 2
+					insert into Screen_Lock (User_Id,Order_No,Screen_Name,Entry_Date,Out_Date,Edit_Mode,UserSPID) values(:gs_userid,:gs_System_No,:is_title,getdate(),NULL,'W',:gl_userspid) using sqlca;
+					commit;	
+					lb_readonly=false
+				elseif (il_find_matchW = 0 and il_find_matchR > 0) and (gs_userid <> ls_User_IdW and gs_System_No = ls_Order_NoW and  ll_spid <> gl_userspid) then
+					delete from screen_lock where User_Id=:gs_userid and screen_name='Stock Transfer' and UserSPID=:gl_userspid using sqlca; //09/21/2023- Dinesh - SIMS-328-  Google  - Read Only Access Part 2
+					insert into Screen_Lock (User_Id,Order_No,Screen_Name,Entry_Date,Out_Date,Edit_Mode,UserSPID) values(:gs_userid,:gs_System_No,:is_title,getdate(),NULL,'W',:gl_userspid) using sqlca;
+					commit;	
+					lb_readonly=false
+					
+				
+				else
+					lb_readonly=false
+					//insert into Screen_Lock (User_Id,Order_No,Screen_Name,Entry_Date,Out_Date,Edit_Mode,UserSPID) values(:gs_userid,:gs_System_No,:is_title,getdate(),NULL,'R',:gl_userspid) using sqlca;
+				end if	
+			else
+			
+			end if
+			
+			//Begin - Dinesh - 11/06/2023 - SIMS-328 - Google - SIMS - Google - SIMS - Read Only Access part 2
+			select edit_mode into :ls_edit_moderead from Screen_Lock with(nolock) where Order_No= :gs_System_No and user_id = :gs_userid and screen_name='Stock Transfer' and userspid=:gl_userspid using sqlca;
+			
+			if ls_edit_moderead= 'W' then
+				
+				tab_main.tabpage_main.cb_readonly.enabled = True
+			else
+				tab_main.tabpage_main.cb_readonly.enabled = False
+			end if
+			//End - Dinesh - 11/06/2023 - SIMS-328 - Google - SIMS - Google - SIMS - Read Only Access part 2
+			
+		wf_transfer_read_only(lb_readonly)
+	
+		End if
+	//End -Dinesh - 11/06/2023- SIMS-328- Google- Read only PART 2
+
 	//03-APR-2017 :Madhu -PEVS-424 - Stock Transfer Serial No. - START
 	For ll_row =1 to ll_detailcount
 		ls_serial_ind = idw_detail.getitemstring( ll_row, 'serialized_ind')

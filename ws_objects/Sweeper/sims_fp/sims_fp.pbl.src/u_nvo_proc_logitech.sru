@@ -9,6 +9,10 @@ global type u_nvo_proc_logitech from nonvisualobject
 end type
 global u_nvo_proc_logitech u_nvo_proc_logitech
 
+type prototypes
+Function Long MultiByteToWideChar(UnsignedLong CodePage, Ulong dwFlags, string lpMultiByteStr, Long cbMultiByte,  REF blob lpWideCharStr, Long cchWideChar) Library "kernel32.dll" alias for "MultiByteToWideChar;Ansi"
+end prototypes
+
 type variables
 datastore	idsPOHeader,	&
 				idsPODetail,	&
@@ -73,6 +77,8 @@ Long			llRowCount,	llRowPos,llNewRow,llOrderSeq,	llBatchSeq,	llLineSeq,llCount, 
 DateTime		ldtToday
 
 Boolean		lbError, lbDM, lbDD
+
+Blob			lblb_wide_chars //dts - 01/12/2022 - S66465 - Handle Spanish Chars
 
 ldtToday = DateTime(today(),Now())
 				
@@ -146,8 +152,28 @@ llRowCount = iu_ds.RowCount()
 
 //Process each Row
 For llRowPos = 1 to llRowCount 
-
 	lsRecData = iu_ds.GetITemString(llRowPos,'rec_data')
+//dts  - 01/12/2022 - S66465 - Handle Spanish Chars
+	//--
+	// Convert utf-8 to utf-16 
+	// Return the numbers of Wide Chars 
+  	liRC = MultiByteToWideChar(65001, 0, lsRecData, -1, lblb_wide_chars, 0) 
+  	IF liRC > 0 THEN 
+		
+			// Reserve Unicode Chars 
+			lblb_wide_chars = blob( space( (liRC+1)*2 ) ) 
+	
+			// Convert UTF-8 to UTF-16 
+			liRC = MultiByteToWideChar(65001, 0, lsRecData, -1, lblb_wide_chars, (liRC+1)*2 ) 
+	
+			// Convert UTF-16 to ANSI 
+			// Gailm 9/17/2018 S20467 From Unicode is obsolete and will be replaced in a future release - Change to String()
+			lsRecData = String( lblb_wide_chars )
+			//lsRecData = FromUnicode( lblb_wide_chars )       
+			
+  	END IF 
+	iu_ds.SetItem(llRowPos,'rec_data',lsRecData) /*dts - 01/12/2022 - S66465 - Handle Spanish Chars - set rec_data to the multi-byte version (for use below)*/
+
 	lsRecType = Left(lsRecData,2)
 	
 	//Process header or Detail */
@@ -188,7 +214,9 @@ For llRowPos = 1 to llRowCount
 					gu_nvo_process_files.uf_writeError("Row: " + string(llRowPos) + " Invalid 'Ord Type' field. Record will not be processed.")
 					Return -1
 				Else
-					If lsOrderType <> 'S' and lsOrderType <> 'P' Then
+					//Dhirendra - Logitech- S63601/F33727 - Logitech MX-ECOMM-QA SIMS-Orders -start (adding 'W' and 'M')
+					If lsOrderType <> 'S' and lsOrderType <> 'P' and lsOrderType <> 'W' and  lsOrderType <> 'M' Then
+						//Dhirendra - Logitech- S63601/F33727 - Logitech MX-ECOMM-QA SIMS-Orders -END 
 						gu_nvo_process_files.uf_writeError("Row: " + string(llRowPos) + " Invalid 'Ord Type' field. Record will not be processed.")
 						Return -1
 					End If
@@ -447,7 +475,9 @@ For llRowPos = 1 to llRowCount
 			//OM Note Code Test
 			lsTemp = Trim(Mid(iu_ds.GetItemString(llRowPos,'rec_data'),1332,255))
 			If lsTemp <> "" Then
-				idsDOHeader.SetItem(llNewRow,'OM_Note_Code_Test',lsTemp)
+				//idsDOHeader.SetItem(llNewRow,'OM_Note_Code_Test',lsTemp) // Dinesh - 10/28/2021 - OM_Note_Code_Test incorrect column name
+				idsDOHeader.SetItem(llNewRow,'OM_Note_Code_Text',lsTemp) // Dinesh - 10/28/2021 - OM_Note_Code_Test incorrect column nam
+				
 			End If
 
 			//User Field 10
@@ -663,7 +693,8 @@ For llRowPos = 1 to llRowCount
 			End If			
 			
 			//Inventory Type
-			lsTemp = Trim(Mid(iu_ds.GetItemString(llRowPos,'rec_data'),203,2))
+			//lsTemp = Trim(Mid(iu_ds.GetItemString(llRowPos,'rec_data'),203,2))
+			lsTemp = Trim(Mid(iu_ds.GetItemString(llRowPos,'rec_data'),203,3))  //dts 11/07/2021 - S64229 - we will now be getting 3-char Logitech Inv Type
 			If lsTemp <> "" Then
 				Select Code_ID into :lsInventoryType
 				From Lookup_Table
@@ -685,13 +716,12 @@ For llRowPos = 1 to llRowCount
 
 			End If			
 
-			idsDODetail.SetItem(llNewRow,'user_field4',Trim(Mid(lsRecData,205,30))) /* User Field 4 */
-			idsDODetail.SetItem(llNewRow,'line_item_notes',Trim(Mid(lsRecData,235,255))) /* Line Item Notes */
+			//dts 11/07/2021 - S64229 - we will now be getting 3-char Logitech Inv Type so bumping remaining detail starting positions by 1
+			idsDODetail.SetItem(llNewRow,'user_field4',Trim(Mid(lsRecData,206,30))) /* User Field 4 */
+			idsDODetail.SetItem(llNewRow,'line_item_notes',Trim(Mid(lsRecData,236,255))) /* Line Item Notes */
 	
-
-			
-			lsnotetype = Trim(Mid(lsRecData,490,2)) /* Note Type */
-			lsnotetext = Trim(Mid(lsRecData,492,255)) /* Note Text */
+			lsnotetype = Trim(Mid(lsRecData,491,2)) /* Note Type */
+			lsnotetext = Trim(Mid(lsRecData,493,255)) /* Note Text */
 			llnoteseqno = 1
 
 // TAM added Detail Print Notes to Deliver Notes Table
@@ -752,6 +782,8 @@ End If
 If lbError Then Return -1
 
 Return 0
+
+
 end function
 
 public function integer uf_process_itemmaster (string aspath, string asproject);//Process Item Master (IM) Transaction for Logitech
@@ -1241,7 +1273,8 @@ For llRowPos = 1 to llRowCount
 
 
 		//Inventory Type
-		lsTemp = mid(lsdata,191,2)
+		//lsTemp = mid(lsdata,191,2)
+		lsTemp = mid(lsdata,191,3) //dts 11/07/2021 - S64229 - we will now be getting 3-char Logitech Inv Type so bumping remaining detail starting positions by 1
 		If trim(lsTemp) = "" Then /*Default*/
 // Default blanks to Z
 			lsInventoryType = 'Z'
@@ -1260,7 +1293,7 @@ For llRowPos = 1 to llRowCount
 		End If
 
 		//Detail Action
-		lsTemp = mid(lsdata,193,1)
+		lsTemp = mid(lsdata,194,1) //dts 11/07/2021 - S64229 - we will now be getting 3-char Logitech Inv Type so bumping remaining detail starting positions by 1
 		If trim(lsTemp) = "" Then /*error*/
 			gu_nvo_process_files.uf_writeError("Row: " + string(llRowPos) + " Data expected at 'Detail Action' field. Record will not be processed.")
 			Return -1
@@ -1314,12 +1347,13 @@ For llRowPos = 1 to llRowCount
 
 
 
+		//dts 11/07/2021 - S64229 - we will now be getting 3-char Logitech Inv Type so bumping remaining detail starting positions by 1
 		//AWB BOL
-		lsAWBBOL = mid(lsdata,194,20)
+		lsAWBBOL = mid(lsdata,195,20)
 		//Customs Doc
-		lsCustomsDoc = mid(lsdata,214,20)
+		lsCustomsDoc = mid(lsdata,215,20)
 		//Hot Shipment Flag(User Field 9)
-		lsUserField8 = mid(lsdata,234,30) 
+		lsUserField8 = mid(lsdata,235,30) 
 
 	End If // End of Header/Detail Unload
 
@@ -1941,7 +1975,7 @@ For llRowPos = 1 to llRowCount
 
 
 		//Inventory Type
-		lsTemp = mid(lsdata,191,2)
+		lsTemp = mid(lsdata,191,3) //dts 11/07/2021 - S64229 - we will now be getting 3-char Logitech Inv Type so bumping remaining detail starting positions by 1
 		If trim(lsTemp) = "" Then /*Default*/
 //TAM Default to Z
 					lsInventoryType = 'Z'
@@ -1978,7 +2012,9 @@ For llRowPos = 1 to llRowCount
 //
 ///////
 		//Detail Action
-		lsTemp = mid(lsdata,193,1)
+
+		//dts 11/07/2021 - S64229 - we will now be getting 3-char Logitech Inv Type so bumping remaining detail starting positions by 1
+		lsTemp = mid(lsdata,194,1)
 		If trim(lsTemp) = "" Then /*error*/
 			gu_nvo_process_files.uf_writeError("Row: " + string(llRowPos) + " Data expected at 'Detail Action' field. Record will not be processed.")
 			Return -1
@@ -2013,12 +2049,13 @@ For llRowPos = 1 to llRowCount
 		End If
 		
 ////////		
+		//dts 11/07/2021 - S64229 - we will now be getting 3-char Logitech Inv Type so bumping remaining detail starting positions by 1
 		//AWB BOL
-		lsAWBBOL = mid(lsdata,194,20)
+		lsAWBBOL = mid(lsdata,195,20)
 		//Customs Doc
-		lsCustomsDoc = mid(lsdata,214,20)
+		lsCustomsDoc = mid(lsdata,215,20)
 		//Hot Shipment Flag(User Field 8)
-		lsUF8 = mid(lsdata,234,30)
+		lsUF8 = mid(lsdata,235,30)
 
 	End If // End of Header/Detail Unload
 

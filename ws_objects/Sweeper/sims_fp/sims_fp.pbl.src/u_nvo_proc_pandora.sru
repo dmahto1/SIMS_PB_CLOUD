@@ -34,7 +34,9 @@ datastore	idsPOHeader,	&
 				idsDONotes, &
 				idsRONotes, &
 				idsROMain, &
-				idsRODetail
+				idsRODetail, &
+				idsDOinfo, &
+				idsOMCwhorderdetailAttr
 
 //06-JUN-2017 :Madhu Added OM Respective Datastores for PINT
 datastore idsOMPO, &
@@ -120,6 +122,7 @@ public function str_parms uf_process_load_plan_rejection (string as_project, str
 public function datetime convert_string_to_datetime (string as_data)
 public function integer uf_sync_om_inventory (string asproject, string aswarehouse)
 public function integer uf_process_boh_sap ()
+public function integer uf_process_projectcode (string aspath)
 end prototypes
 
 public function integer uf_process_so (string aspath, string asproject);//Process Material Transfer (Sales Order) for PANDORA (used SIKA as a template)
@@ -794,16 +797,19 @@ end function
 
 public function integer uf_process_itemmaster (string aspath, string asproject);//Process Item Master (IM) Transaction for Pandora
 
+
 String		lsData, lsTemp, lsLogOut, lsStringData, lsSKU, 	lsCOO, lsSupplier, lsSetSerializedInd, lsGetSerializedInd, lsMsg
 String 	ls_action, ls_ind, sql_syntax, ls_Errors, lsFind, ls_supp[]
 String 	ls_description, ls_uom1, ls_weight1, ls_length1, ls_width1, ls_height1, ls_std_cost, ls_cc_freq
 String 	ls_part_upc, ls_freight_class, ls_storage_code, ls_inv_class, ls_alt_sku, ls_coo, ls_shelf_life
 String 	ls_item_delete_ind, ls_uf1, ls_uf4, ls_uf5, ls_uf15, ls_sn_track, ls_cc_class_code, ls_foot_print_ind
+string		ls_HriCageTrack_ind, ls_class_dc_code, ls_dc_freq //dhirendra (SIMS-80)
 
 Integer	liRC,	liFileNo
 
 Long		llCount,	llPos, llOwner, llNew, llExist, llNewRow, llFileRowCount, llFileRowPos, ll_ContentSKU, llFindRow
 Long		ll_supp_row, ll_supp_found, ll_Owner_Row, ll_owner_found
+Long		llLoopCount //dts 02/12/2021
 
 Boolean	lbNew, lbError, lbSave, lb_otm_item_turned_on
 
@@ -813,6 +819,8 @@ datastore	lu_ds, ldsItemGroupCode, ldsSuppOwner
 
 n_otm ln_otm
 ln_otm = CREATE n_otm
+
+long ll_IM_Max_Lines //dts - 12/10/21
 
 ldsItemOrig = Create u_ds_datastore
 ldsItemOrig.dataobject= 'd_item_master'
@@ -873,7 +881,22 @@ FileClose(liFileNo)
 
 //Process each Row
 llFileRowCount = lu_ds.RowCount()
+
+//dts - 12/10/21 - adding Max Lines threshold for Item Master interface (really intended for QA to prevent full item master files from holding the Sweeper hostage)
+select code_descript into :ll_IM_Max_Lines from lookup_table where project_id = 'PANDORA' and code_type = 'FLAG' and code_id = 'IM_MAX_LINES';
+
+if llFileRowCount > ll_IM_Max_Lines then
+	lsLogOut = '      !!!! Not loading Item Master file! Too many records (' + string(llFileRowCount) + '). The maximum allowed lines is ' + string(ll_IM_Max_Lines) + ' (as governed in lookup_table, code_id=IM_MAX_LINES).'
+	FileWrite(giLogFileNo,lsLogOut)
+	gu_nvo_process_files.uf_write_log(lsLogOut) /*write to Screen*/
+	gu_nvo_process_files.uf_writeError(lsLogOut)
+	return -1
+end if
+
 w_main.SetMicroHelp("Total Item Master Records "+ string(llFileRowCount)+" have to Process and continues...")
+lsLogOut = "-       Total Item Master Records "+ string(llFileRowCount)+" have to Process..." + asPath
+FileWrite(giLogFileNo,lsLogOut)
+gu_nvo_process_files.uf_write_log(lsLogOut) /*write to Screen*/
 
 For llfileRowPos = 1 to llFileRowCount
 	lbSave = True	
@@ -1178,6 +1201,24 @@ For llfileRowPos = 1 to llFileRowCount
 		ls_foot_print_ind = lsData
 	End If	
 
+	// Dhirendra-S61896//Google - SIMS - HRI/Cage Tracked Enhancement --Start
+	lsData = Right(lsData,(len(lsData) - (Len(ls_foot_print_ind) + 1)))
+		If Pos(lsData,'|') > 0 Then
+		ls_HRIcagetrack_ind = Left(lsData,(pos(lsData,'|') - 1))
+	Else
+		ls_HRIcagetrack_ind = lsData
+	End If	
+	
+	// Dhirendra SIMS-80//Google  --Startc DC_class_code
+		lsData = Right(lsData,(len(lsData) - (Len(ls_HRIcagetrack_ind) + 1)))
+		IF Pos(lsData,'|') > 0 Then
+		ls_class_dc_code = Left(lsData,(pos(lsData,'|') - 1))
+	Else
+		ls_class_dc_code = lsData
+	End If
+	   //d
+	 // Dhirendra-SIMS-80//Google 
+
 	//20-Dec-2018 :Madhu S27372 - Update all Item Master Record attribute values
 	llCount = ldsItem.RowCount() //get Item's count
 	FOR llPos = 1 to llCount
@@ -1205,6 +1246,7 @@ For llfileRowPos = 1 to llFileRowCount
 		IF ls_storage_code > '' 			THEN	ldsItem.SetItem(llPos,'Storage_Code', left(ls_storage_code,10))	//Storage Code	
 		IF ls_inv_class > '' 				THEN	ldsItem.SetItem(llPos,'Inventory_Class', left(ls_inv_class,10))		//Inventory Class
 		IF ls_alt_sku > '' 					THEN	ldsItem.SetItem(llPos,'Alternate_SKU', left(ls_alt_sku,50))        	//Alternate SKU
+		IF isnumber(trim(ls_dc_freq))	THEN 	ldsItem.SetItem(llPos,'dc_freq', Dec(trim(ls_dc_freq)))				//DC Freq (dhirenrda, SIMS-80)
 
 		IF ls_coo > '' THEN						//COO
 			ldsItem.SetItem(llPos,'Country_Of_Origin_Default', left(ls_coo,3))
@@ -1224,29 +1266,35 @@ For llfileRowPos = 1 to llFileRowCount
 		IF ls_sn_track > '' THEN
 			ldsItem.SetItem(llPos, 'SN_Tracking', ls_sn_track)            //SN Tracking
 			
+			lsSetSerializedInd = '' //dts 07/19/2023 - SIMS-247- Google- Need to reset lsSetSerializedInd (or risk inadvertent setting of serial flag)
+			
 			Choose case ls_sn_track
 			Case 'Y'
 				If lbNew Then 
 					lsSetSerializedInd = 'B' //New Record just set the serialized ind to Both
 				Else
-					//Check for Inventory
-					select count(Content_Summary.SKU)
-						into :ll_ContentSKU
-					from Content_Summary with(nolock)
-					where project_id = 'PANDORA'
-					and Content_Summary.SKU = :lsSku
-					using SQLCA;
-				
-					If ll_ContentSKU = 0 then
-						lsSetSerializedInd = 'B' //Allow the indicator to be changed
-					Else
-						//Throw and error there is inventory fail the line
-						lsLogOut  = "-       *** Error: Inventory found for SKU: " + lsSku + " Flag was set to " + lsTemp 
-						gu_nvo_process_files.uf_writeError("Row: " + string(llFileRowPos) + lsLogOut)
-						gu_nvo_process_files.uf_write_log(lsLogOut) /*display msg to screen*/
-						FileWrite(gilogFileNo,lsLogOut)
-						gu_nvo_process_files.uf_send_email('PANDORA', 'CUSTVAL', 'Serial number flag error. Inventory already in SIMS', lsLogOut, '')
-						lbSave = False
+					if lsGetSerializedInd <> 'B' then  //dts 12/10/21 - only need to check inventory and then write error if not already serialized B.
+						//Check for Inventory
+						select count(Content_Summary.SKU)
+							into :ll_ContentSKU
+						from Content_Summary with(nolock)
+						where project_id = 'PANDORA'
+						and Content_Summary.SKU = :lsSku
+						using SQLCA;
+					
+						If ll_ContentSKU = 0 then
+							lsSetSerializedInd = 'B' //Allow the indicator to be changed
+						Else
+							//Throw and error there is inventory fail the line
+							//dts 12/10/2021 - fixing error msg (to not use lsTemp).
+							//lsLogOut  = "-       *** Error: Inventory found for SKU: " + lsSku + " Flag was set to " + lsTemp 
+							lsLogOut  = "-       *** Error: Inventory found for SKU: " + lsSku + " Flag was NOT set to B (Both)"
+							gu_nvo_process_files.uf_writeError("Row: " + string(llFileRowPos) + lsLogOut)
+							gu_nvo_process_files.uf_write_log(lsLogOut) /*display msg to screen*/
+							FileWrite(gilogFileNo,lsLogOut)
+							//dts 02/12/2021 gu_nvo_process_files.uf_send_email('PANDORA', 'CUSTVAL', 'Serial number flag error. Inventory already in SIMS', lsLogOut, '')
+							lbSave = False
+						end if
 					End if
 				End if
 				
@@ -1260,25 +1308,29 @@ For llfileRowPos = 1 to llFileRowCount
 					lsSetSerializedInd = 'N' 
 					
 				Else					
-					//Check for Inventory
-					select count(Content_Summary.SKU)
-						into :ll_ContentSKU
-					from Content_Summary with(nolock)
-					where project_id = 'PANDORA'
-					and Content_Summary.SKU = :lsSku
-					using SQLCA;
-				
-					If ll_ContentSKU = 0 then
-						lsSetSerializedInd = 'N'
-					else
+					if lsGetSerializedInd <> 'N' then  //dts 12/10/21 - only need to check inventory and write error if not already serialized N.
+						//Check for Inventory
+						select count(Content_Summary.SKU)
+							into :ll_ContentSKU
+						from Content_Summary with(nolock)
+						where project_id = 'PANDORA'
+						and Content_Summary.SKU = :lsSku
+						using SQLCA;
+					
+						If ll_ContentSKU = 0 then
+							lsSetSerializedInd = 'N'
+						else
 						//Throw and error there is inventory fail the line
 						//TimA 07/15/14 change the message to was "NOT" set
-						lsLogOut  = "-       *** Error: Inventory found for SKU: " + lsSku + " Flag was NOT set to " + lsTemp 
-						gu_nvo_process_files.uf_writeError("Row: " + string(llFileRowPos) + lsLogOut)
-						gu_nvo_process_files.uf_write_log(lsLogOut) /*display msg to screen*/
-						FileWrite(gilogFileNo,lsLogOut)
-						gu_nvo_process_files.uf_send_email('PANDORA', 'CUSTVAL', 'Serial number flag error. Inventory already in SIMS', lsLogOut, '')							
-						lbSave = False												
+						//dts 12/10/2021 - fixing error msg (to not use lsTemp).
+						//lsLogOut  = "-       *** Error: Inventory found for SKU: " + lsSku + " Flag was NOT set to " + lsTemp 
+							lsLogOut  = "-       *** Error: Inventory found for SKU: " + lsSku + " Flag was NOT set to N"
+							gu_nvo_process_files.uf_writeError("Row: " + string(llFileRowPos) + lsLogOut)
+							gu_nvo_process_files.uf_write_log(lsLogOut) /*display msg to screen*/
+							//dts 02/12/2021 FileWrite(gilogFileNo,lsLogOut)
+							//dts 02/12/2021 gu_nvo_process_files.uf_send_email('PANDORA', 'CUSTVAL', 'Serial number flag error. Inventory already in SIMS', lsLogOut, '')							
+							lbSave = False												
+						end if
 					End if
 				End If
 			End Choose
@@ -1293,6 +1345,14 @@ For llfileRowPos = 1 to llFileRowCount
 			IF llFindRow > 0 THEN ldsItem.SetItem(llPos,'CC_Freq',  ldsItemGroupCode.getItemNumber( llFindRow, 'Count_Frequency')) //CC Freq
 		END IF
 		
+		//Added BY Dhirendra  SIMS-80 -start
+		lsFind ="Group_Code ='1' and Class_Code ='"+ls_class_dc_code+"'"
+	    llFindRow = ldsItemGroupCode.find( lsFind, 1, ldsItemGroupCode.rowcount())
+		IF ls_class_dc_code > '' THEN						//DC Class Code
+			ldsItem.SetItem(llPos,'DC_Class_Code',ls_class_dc_code)
+			IF llFindRow > 0 THEN ldsItem.SetItem(llPos,'DC_Freq',  ldsItemGroupCode.getItemNumber( llFindRow, 'Count_Frequency')) //DC Freq
+		END IF
+		//Added BY Dhirendra  SIMS-80 -END
 		
 		IF ls_foot_print_ind > '' THEN						//Foot Prints Ind
 			ldsItem.SetItem(llPos, 'Foot_Prints_Ind', ls_foot_print_ind)
@@ -1307,6 +1367,16 @@ For llfileRowPos = 1 to llFileRowCount
 			End If
 		END IF
 
+	 // Dhirendra-S61896//Google - SIMS - HRI/Cage Tracked Enhancement --START
+	IF ls_HRIcagetrack_ind > '' THEN						//QA_Check_ind Added by Dhirendra
+	   If upper(ls_HRIcagetrack_ind) = 'Y' and  (ldsitem.getItemstring(llPos, 'qa_check_ind') <>'H' or isnull(ldsitem.getItemstring(llPos, 'qa_check_ind'))) then
+		  ldsitem.SetItem(llPos, 'qa_check_ind', 'H')
+	  elseif upper(ls_HRIcagetrack_ind) = 'N' and  (ldsitem.getItemstring(llPos, 'qa_check_ind') = 'H' or isnull(ldsitem.getItemstring(llPos, 'qa_check_ind'))) then 
+		  ldsItem.SetItem(llPos, 'qa_check_ind', 'N')
+	  End If
+    END IF
+    // Dhirendra-S61896//Google - SIMS - HRI/Cage Tracked Enhancement --END
+	
 		
 		//Update any record defaults
 		ldsItem.SetItem(llPos, 'Last_user', 'SIMSFP')
@@ -1330,8 +1400,8 @@ For llfileRowPos = 1 to llFileRowCount
 		Commit;
 		
 		lsLogOut ="Row: " + string(llfileRowPos) + " SKU: "+lsSku + " processed successfully!  - " + String(Today(), "mm/dd/yyyy hh:mm:ss.fff")
-		gu_nvo_process_files.uf_write_log(lsLogOut) /*display msg to screen*/
-		FileWrite(gilogFileNo,lsLogOut)
+		//dts 02/12/2021 gu_nvo_process_files.uf_write_log(lsLogOut) /*display msg to screen*/
+		//dts 02/12/2021 FileWrite(gilogFileNo,lsLogOut)
 
 		//TimA 01/25/12 OTM Project Added OTM Flag
 		If gs_OTM_Flag = 'Y' and lb_otm_item_turned_on then // LTK 20120111	OTM Additions
@@ -1356,12 +1426,21 @@ For llfileRowPos = 1 to llFileRowCount
 		If lbSave = True then
 			Rollback;
 			lsLogOut = Space(17) + "- ***System Error!  Unable to Save new Item Master Record(s) to database!"
-			FileWrite(gilogFileNo,lsLogOut)
-			gu_nvo_process_files.uf_writeError("- ***System Error!  Unable to Save new Item Master Record to database!")
+			//dts 02/12/2021 FileWrite(gilogFileNo,lsLogOut)
+			//dts 02/12/2021 gu_nvo_process_files.uf_writeError("- ***System Error!  Unable to Save new Item Master Record to database!")
 			Return -1
 			Continue
 		End if
 	END IF
+
+	//dts 02/12/2021 - not logging every record (and not sending e-mail for each sku that is not updated)
+		llLoopCount = llLoopCount + 1
+		if llLoopCount =100 then
+			lsLogOut ="Row: " + string(llfileRowPos) +  " processed.  - " + String(Today(), "mm/dd/yyyy hh:mm:ss.fff")
+			gu_nvo_process_files.uf_write_log(lsLogOut) /*display msg to screen*/
+			FileWrite(gilogFileNo,lsLogOut)
+			llLoopCount=0
+		end if
 	
 Next /*File row to Process */
 
@@ -1401,6 +1480,8 @@ Choose Case Upper(Left(asFile,2))
 		liRC = uf_Process_ItemMaster(asPath, asProject)	
 	Case 'IU' /* Price Update File (may process in ItemMaster function... */
 		liRC = uf_Process_Item_Cost(asPath, asProject)	
+	Case 'PC' /*  Project code File*/	    // Akash Baghel - 07/26/2023...- SIMS-243 calling function for project code
+	     liRC = uf_Process_ProjectCode(asPath)	 // Akash Baghel - 07/26/2023...- SIMS-243 calling function for project code
 	Case 'PO' /* Processed PO File */ // TAM 2009/06/16 - Added Rosettanet Mapping
 		Choose Case Upper(Left(asFile,3))
 			Case 'POR' /* Receive Order Files */
@@ -8371,7 +8452,7 @@ public function integer uf_process_to_rose (string aspath, string asproject);//P
 /* 05/24/2010 ujh:  Even though the DiskErase/HWOPS Key words are specified on the OD, the use of lsSOC_variant assumes that the
 	whole order is as specified and will call the appropriate stored procedure for all ODs.  Note that lsSOC_variant is set only once.  */
 boolean lb_diskerase
-string lsSOC_variant, lsNewInvType
+string lsSOC_variant, lsNewInvType,ls_custcode
 
 Datastore	lu_ds, ldsItem, lsLookupTable
 
@@ -9088,13 +9169,15 @@ For llRowPos = 1 to llRowCount
 			lsToProject = lsTemp
 			
 			//Jxlim 11/15/2011 BRD #302 Do not process SOC when the project is Research to Research
-			If 	lsFromProject = 'RESEARCH'  and lsToProject = 'RESEARCH' Then     
+			//If 	lsFromProject = 'RESEARCH'  and lsToProject = 'RESEARCH' Then   // Dinesh - 04/18/2023- SIMS-197-Google- SIMS- Cycle count adjustment changes  
+			If 	(lsFromProject = 'MAIN'  and lsToProject = 'MAIN')  Then // Dinesh - 04/18/2023- SIMS-197-Google- SIMS- Cycle count adjustment changes
 				//dts 5/2/2014 - only skipping 'RESEARCH' SOC if From/To owner are the same...
 				if lsFromOwnerCD = lsToOwnerCD then
 					//Jxlim 11/17/2011 Remove error message BRD #302
 					//gu_nvo_process_files.uf_writeError("Row: " + string(llRowPos) + " - From Research To Research are in the same project changed. SOC will not be  processed.")
 					//dts - 5/2/2014 added log message to aid in investigating an SOC that doesn't process.
-					lsLogOut =  '  - !!! FROM and TO Project are RESEARCH - Not processing SOC'
+					//lsLogOut =  '  - !!! FROM and TO Project are RESEARCH - Not processing SOC'
+					lsLogOut =  '  -!!! FROM and TO Project and FROM and TO OWNER CODE are same - Not processing SOC' // // Dinesh - 04/18/2023- SIMS-197-Google- SIMS- Cycle count adjustment changes  
 					FileWrite(giLogFileNo,lsLogOut)
 					Return -1
 				end if
@@ -14116,6 +14199,7 @@ String  lsOwnerCD_Prev, lsOwnerID, lsGroup, lsCrossDock_Loc, lsSupplier, lsProje
 String ls_om_type, ls_omc_sql, ls_om_client_cust_po_no, ls_user_Line_Item_No, lsFind, ls_PrevOrderNo, ls_container_tracking_ind, lsAltSKU
 String lsPoNo2Controlled
 string lsNextLeg, ls_SAP_Enabled // dts - 01/16/2021, S53004
+string lsMultiLeg, ls_om_vendor_invoice_nbr
 
 integer liItems, lirc
 
@@ -14128,6 +14212,11 @@ long	llDeleteRowPos, llDeleteRowCount, llFindRow
 boolean lbUpdateExistRec =TRUE
 boolean lbExcludeOrder = FALSE
 datetime ldtWHTime, ldtToday
+
+//dts 02/24/2021 - S54137
+boolean lbCaptureContainers
+boolean lbDashR_Only = FALSE
+long ll_DashR_Only
 
 //GailM 10/25/2013 #668
 llLPNNo = 1		//Initialize LPN No
@@ -14253,9 +14342,9 @@ IF ll_receipt_queue_count > 0 Then
 	ll_receipt_count = idsOMCReceipt.retrieve( )
 	
 	//Write to File and Screen
-	lsLogOut = '      - OM Inbound - Query for OMC_Receipt : ' +ls_omc_sql
-	FileWrite(giLogFileNo,lsLogOut)
-	gu_nvo_process_files.uf_write_log(lsLogOut)
+	//dts 2/24/2021 lsLogOut = '      - OM Inbound - Query for OMC_Receipt : ' +ls_omc_sql
+	//dts 2/24/2021 FileWrite(giLogFileNo,lsLogOut)
+	//dts 2/24/2021 gu_nvo_process_files.uf_write_log(lsLogOut)
 
 	//Write to File and Screen
 	lsLogOut = '      - OM Inbound - Getting count(Records) from OM Receipt Table for Processing: ' + string(ll_receipt_count)
@@ -14326,9 +14415,13 @@ IF ll_receipt_queue_count > 0 Then
 		
 		//09/19 - PCONKL - Added CIMOR and check against client_cust_po_nbr
 		ls_om_client_cust_po_no = idsOMCReceipt.getitemstring(ll_Row_Pos, 'EXTERNRECEIPTKEY')
+		//03/10/2021 - dts - S54693
+		ls_om_vendor_invoice_nbr = idsOMCReceipt.getitemstring(ll_Row_Pos, 'SUSR2')  //Vendor Order Number
 		
 		//  dts, 01/16/2021, S53004 - grab Previous Leg and Next Leg if present (for multi-leg orders)... 
 		//      (note that we're not grabbing Multi-leg Indicator at this time, found in OMC_RECEIPT.SERVICE_TYPE (Y, N, or Null))
+		//dts 03/10/2021 - Need Multileg indicator for different rules (below) between WH*P and (WH*Q / WH*SC)
+		lsMultiLeg = trim(idsOMCReceipt.getitemstring(ll_Row_Pos, 'SERVICE_TYPE'))
 		idsPOheader.SetItem(ll_New_Row, 'User_Field13', idsOMCReceipt.getitemstring(ll_Row_Pos, 'SUSR5'))  //Previous Leg
 		lsNextLeg = trim(idsOMCReceipt.getitemstring(ll_Row_Pos, 'SUSR4'))
 		idsPOheader.SetItem(ll_New_Row, 'User_Field15', lsNextLeg)  //Next Leg
@@ -14441,8 +14534,8 @@ IF ll_receipt_queue_count > 0 Then
 		
 		idsPOheader.SetItem(ll_New_Row, 'supp_code', 'PANDORA')   	// Supplier ID -default to PANDORA
 		idsPOheader.SetItem(ll_New_Row, 'Arrival_Date', string(idsOMCReceipt.getitemdatetime( ll_Row_Pos, 'EXPECTED_RECEIPT_DATE'), 'mm/dd/yyyy hh:mm')) //Expected Arrival Date
-		lsWarehouse = idsOMCReceipt.getitemstring(ll_Row_Pos, 'DEST_WHS_ID')
-		idsPOheader.SetItem(ll_New_Row,'wh_code', lsWarehouse)  	//WH Code
+		//dts 03/01/2021 lsWarehouse = idsOMCReceipt.getitemstring(ll_Row_Pos, 'DEST_WHS_ID')
+		//dts 03/01/2021 idsPOheader.SetItem(ll_New_Row,'wh_code', lsWarehouse)  	//WH Code
 		
 		If not isnull(idsOMCReceipt.getitemstring(ll_Row_Pos, 'CARRIERKEY')) Then
 			idsPOheader.SetItem(ll_New_Row,'Carrier', Left(idsOMCReceipt.getitemstring(ll_Row_Pos, 'CARRIERKEY'), 10))  	//Carrier
@@ -14558,13 +14651,73 @@ IF ll_receipt_queue_count > 0 Then
 				lbDetailError = True
 			End If
 			
+			//dts 02/23/2021 - S54137 - Owner_CD lookup moved from below (for use in container-tracking logic)
+			//Need to look-up Owner_CD (but shouldn't look it up for each row if it doesn't change)
+			lsOwnerCD = idsOMCReceiptDetail.getitemstring(ll_Row_Pos_RD, 'LOTTABLE01')
+
+			if lsOwnerCD <> lsOwnerCD_Prev then 	
+				lsOwnerID = ''
+				select owner_id into :lsOwnerID
+				from owner with(nolock)
+				where project_id = :asProject and owner_cd = :lsOwnerCD
+				using SQLCA;
+
+				// TAM 2017/09 - SIMSPEVS - 816 - If Customer Type = "INACTIVE" then it is invalid -Begin
+				string lsSTCustType
+				
+				//dts 02/24/2021 - S54137 - combined a select against Customer from below into this one... 
+				//select customer_type into :lsSTCustType
+				select customer_type, user_field1, user_field2 into :lsSTCustType, :lsGroup, :lsWarehouse
+				from customer with(nolock)
+				where project_id = 'PANDORA' and customer_type <> 'IN'
+				and cust_code = :lsOwnerCD;
+			
+				// - Throw error message if Customer is not in Customer_Master
+				if isnull(lsSTCustType) or lsSTCustType = '' then
+					ls_error_msg +="Row: " + string(llNewDetailRow) + " -Invalid Customer Code specified. Record will not be processed. ~n~r"
+					idsPOheader.SetItem(ll_New_Row, 'Status_cd', 'E')
+					idsPOheader.SetItem(ll_New_Row, 'Status_Message', 'Errors exist on Header/Detail')
+					idsPODetail.SetItem(llNewDetailRow, 'Status_cd', 'E')
+					idsPODetail.SetItem(llNewDetailRow, 'Status_Message', 'Invalid Customer Code specified. Record will not be processed.')
+					lbDetailError = True
+				End iF
+				// TAM 2017/09 - SIMSPEVS - 816 - If Customer Type = "INACTIVE" then it is invalid -End
+				
+				//dts 02/24/2021 - S54137
+				lbDashR_Only=FALSE
+				if not isnull(lsWarehouse) then
+					select count(*) into :ll_DashR_Only from lookup_table with(nolock)
+					where project_id='PANDORA' and code_type='FLAG' and upper(code_id)='DASHR_ONLY' and code_descript=:lsWarehouse and user_updateable_ind='Y'
+					using SQLCA;
+		
+					if ll_DashR_Only>0 then
+						lbDashR_Only=TRUE
+					End if
+				end if
+				//Write to Log File and Screen
+				lsLogOut = "      - OM Inbound - Processing uf_process_om_receipt - Dash-R Only? "+string(lbDashR_Only)
+				FileWrite(giLogFileNo,lsLogOut)
+				gu_nvo_process_files.uf_write_log(lsLogOut)
+	
+				lsOwnerCD_Prev = lsOwnerCD
+			end if //lsOwnerCD <> lsOwnerCD_Prev 
+			
 			//29-MAY-2019 :Madhu S34063 Exclude Container Tracking Ind Condition for Orders 'MTR', CMTR', 'FMTR'
 			// 07/20 - PCONKL - Needs to apply to Client Cust PO Nbr as well
-			IF left(ls_OrderNo, 3)='MTR' OR left(ls_OrderNo, 4)='CMTR' OR left(ls_OrderNo, 4)='FMTR' or left(ls_om_client_cust_po_no, 3)='MTR' OR left(ls_om_client_cust_po_no, 4)='CMTR' OR left(ls_om_client_cust_po_no, 4)='FMTR' THEN
-				lbExcludeOrder =TRUE
-			ELSE
-				lbExcludeOrder =FALSE
-			END IF
+			// dts 02/23/2021 - S54137 - For SAP, no longer getting order prefixes so Container Tracking logic is now governed by Owner Codes (WH*PM, WH*PD, WH*RK and WH*P (-R only)			
+			//   - note that 'lbExcludeOrder' refers to Orders that are excluded from the rule where we only load containers if the sku is container-tracked
+			//     replacing lbExcludeOrder with lbCaptureContainers
+			//Basically, if owner_cd mask is WH*PM, WH*PD, WH*RK or WH*P then we'll set lbCaptureContainers=True
+			//  - for WH*P, this will only be for '-R' parts.  For the others, the '-R_Only' factor is configurable.
+			if ls_SAP_Enabled <>'Y' then
+				IF left(ls_OrderNo, 3)='MTR' OR left(ls_OrderNo, 4)='CMTR' OR left(ls_OrderNo, 4)='FMTR' or left(ls_om_client_cust_po_no, 3)='MTR' OR left(ls_om_client_cust_po_no, 4)='CMTR' OR left(ls_om_client_cust_po_no, 4)='FMTR' THEN
+					//	lbExcludeOrder =TRUE
+					lbCaptureContainers=TRUE
+				ELSE
+					//	lbExcludeOrder =FALSE
+					lbCaptureContainers=FALSE
+				END IF
+			end if
 			
 			IF not isnull(idsOMCReceiptDetail.getitemstring(ll_Row_Pos_RD, 'ITEM')) Then //SKU
 				lsSKU = idsOMCReceiptDetail.getitemstring(ll_Row_Pos_RD, 'ITEM') //SKU
@@ -14577,11 +14730,36 @@ IF ll_receipt_queue_count > 0 Then
 				idsPODetail.SetItem(llNewDetailRow, 'Status_Message', 'SKU should not be NULL. Record will not be processed.')
 				lbDetailError = True
 			End If
-			
+
+			// dts 02/23/2021 - S54137 
+			//WH*P will capture containers for only '-R' parts. WH*PM/PD/RK will be configurable for '-R' only or all parts
+			if ls_SAP_Enabled = 'Y' then
+				//dts 03/10/2021 - S54963
+				If left(ls_OrderNo, 1)='X' OR left(ls_OrderNo, 3)='SID' OR left(ls_OrderNo, 10)='SYNWHGAFB1' or left(ls_om_client_cust_po_no, 3)='X' OR left(ls_om_client_cust_po_no, 3)='SID' OR left(ls_om_client_cust_po_no, 10)='SYNWHGAFB1' or left(ls_om_vendor_invoice_nbr, 3)='X' OR left(ls_om_vendor_invoice_nbr, 3)='SID' OR left(ls_om_vendor_invoice_nbr, 10)='SYNWHGAFB1' THEN
+					lbCaptureContainers=True
+				// in addition to the order prefixes driving container capture, some Owner Codes will capture containers...
+				//dts 03/10/2021 - S54657 - adding WH*SC and WH*Q (and MultiLeg portion of WH*P)    elseif left(lsOwnerCD,2)='WH' and right(lsOwnerCD,1)='P' and right(lsSKU,2)='-R' then
+				elseif left(lsOwnerCD,2)='WH' and ( (right(lsOwnerCD,1)='P' and lsMultiLeg='Y') or right(lsOwnerCD,2)='SC' or right(lsOwnerCD,1)='Q') and right(lsSKU,2)='-R' then
+					lbCaptureContainers=True
+				elseif left(lsOwnerCD,2)='WH' and (right(lsOwnerCD,2)='PM' or right(lsOwnerCD,2)='PD' or right(lsOwnerCD,2)='RK' ) then
+					if lbDashR_Only=False or right(lsSKU,2)='-R' then
+						lbCaptureContainers=True
+					else
+						lbCaptureContainers=False
+					end if
+				else
+					lbCaptureContainers=False
+				End If
+			end if
 			//Write to Log File and Screen
-			lsLogOut = '      - OM Inbound - Processing Detail Record for Change Request Nbr: ' + string(ll_change_request_nbr) +"  and Order No: "+ nz(ls_OrderNo,'-') +"  and Line Item No: " + idsOMCReceiptDetail.getitemstring(ll_Row_Pos_RD, 'EXTERNLINENO')
+			lsLogOut = "      - OM Inbound - Processing uf_process_om_receipt - Owner CD: " + lsOwnerCD +". CaptureContainers is " +string(lbCaptureContainers)
 			FileWrite(giLogFileNo,lsLogOut)
 			gu_nvo_process_files.uf_write_log(lsLogOut)
+			
+			//Write to Log File and Screen
+			//dts 2/24/2021 lsLogOut = '      - OM Inbound - Processing Detail Record for Change Request Nbr: ' + string(ll_change_request_nbr) +"  and Order No: "+ nz(ls_OrderNo,'-') +"  and Line Item No: " + idsOMCReceiptDetail.getitemstring(ll_Row_Pos_RD, 'EXTERNLINENO')
+			//dts 2/24/2021 FileWrite(giLogFileNo,lsLogOut)
+			//dts 2/24/2021 gu_nvo_process_files.uf_write_log(lsLogOut)
 			
 			//16-Jan-2018 :Madhu S14839 -Foot Prints - START
 			//Assign same Line Item No, if user_line_item_no already exists else bump up llLineNum++
@@ -14690,6 +14868,14 @@ IF ll_receipt_queue_count > 0 Then
 			lsPoNo = idsPODetail.getitemstring(llNewDetailRow,'PO_NO') //Po No
 			idsPODetail.SetItem(llNewDetailRow, 'user_field2', idsOMCReceiptDetail.getitemstring(ll_Row_Pos_RD, 'SUSR1')) //UF2
 			lsPONO2 = idsOMCReceiptDetail.getitemstring(ll_Row_Pos_RD, 'SUSR5') //PO NO 2
+//Write to Log File and Screen
+lsLogOut = "TEMPORARY MSG 0 -  "
+FileWrite(giLogFileNo,lsLogOut)
+gu_nvo_process_files.uf_write_log(lsLogOut)
+//Write to Log File and Screen
+lsLogOut = "TEMPORARY MSG 0.1 -  lsPNO2: " + lsPONO2
+FileWrite(giLogFileNo,lsLogOut)
+gu_nvo_process_files.uf_write_log(lsLogOut)
 			idsPODetail.SetItem(llNewDetailRow,'po_no2',lsPONO2)
 			
 			If lsPONO2Prev = "" Then
@@ -14728,6 +14914,7 @@ IF ll_receipt_queue_count > 0 Then
 				lsPONO2Prev = lsPONO2
 			END IF
 			
+			/*dts 02/23/2021 - S54137 - Owner_CD look-up moved above...
 			//Need to look-up Owner_CD (but shouldn't look it up for each row if it doesn't change)
 			lsOwnerCD = idsOMCReceiptDetail.getitemstring(ll_Row_Pos_RD, 'LOTTABLE01')
 	
@@ -14759,6 +14946,7 @@ IF ll_receipt_queue_count > 0 Then
 	
 				lsOwnerCD_Prev = lsOwnerCD
 			end if
+			*/
 			
 			idsPODetail.SetItem(llNewDetailRow, 'owner_id', lsOwnerID)
 			idsPOHeader.SetItem(ll_New_Row,'User_Field2',lsOwnerCD)			
@@ -14772,10 +14960,15 @@ IF ll_receipt_queue_count > 0 Then
 			end if
 
 			//If first row for the order, set UF2 to Sub-Inv Loc
+			//dts 03/01/2021 - shouldn't this be llLineNum instead of llLineSeq?
+//Write to Log File and Screen
+lsLogOut = "TEMPORARY MSG - LineSeq: " + string(llLineSeq) +", LineNum: " + string(llLineNum) + ", lsWarehouse: " + nz(lsWarehouse,'-')
+FileWrite(giLogFileNo,lsLogOut)
 			IF llLineSeq = 1 Then
-				select user_field1, user_field2 into :lsGroup, :lsWarehouse
-				from customer with(nolock)
-				where project_id = :asProject and cust_code = :lsOwnerCD using sqlca;
+				//dts 02/24/2021 - S54137 - Moving this Select above to use for '-R Only' logic
+				//select user_field1, user_field2 into :lsGroup, :lsWarehouse
+				//from customer with(nolock)
+				//where project_id = :asProject and cust_code = :lsOwnerCD using sqlca;
 				
 				idsPOheader.SetItem(ll_New_Row, 'wh_code', lsWarehouse)
 				
@@ -14824,8 +15017,17 @@ IF ll_receipt_queue_count > 0 Then
 					
 					//20-MAY-2019 :Madhu S33850 Container Tracked Items. - START
 					//29-MAY-2019 :Madhu S34063 Exclude Container Tracking Ind Condition
-					IF ls_container_tracking_ind ='Y'  OR lbExcludeOrder THEN
+					//dts 02/24/2021 - S54137 now using lbCaptureContainers instead of lbExcludeOrder
+					//IF ls_container_tracking_ind ='Y'  OR lbExcludeOrder THEN
+					IF ls_container_tracking_ind ='Y'  OR lbCaptureContainers THEN
 						idsPODetail.SetItem(llNewDetailRow, 'container_id', idsOMCReceiptDetail.getitemstring(ll_Row_Pos_RD, 'SUSR4')) //container Id
+//Write to Log File and Screen
+lsLogOut = "TEMPORARY MSG 1 - Owner CD: " + lsOwnerCD +". CaptureContainers is " +string(lbCaptureContainers)
+FileWrite(giLogFileNo,lsLogOut)
+gu_nvo_process_files.uf_write_log(lsLogOut)
+lsLogOut = "TEMPORARY MSG 1.2 - SUSR4: " + nz(idsOMCReceiptDetail.getitemstring(ll_Row_Pos_RD, 'SUSR4'),'null') // nz(ls_OrderNo,'-')
+FileWrite(giLogFileNo,lsLogOut)
+gu_nvo_process_files.uf_write_log(lsLogOut)
 					ELSE
 						//OCT 2019 - MikeA - DE12998
 						idsPODetail.SetItem(llNewDetailRow, 'container_id', '') //container Id
@@ -14833,8 +15035,17 @@ IF ll_receipt_queue_count > 0 Then
 					//20-MAY-2019 :Madhu S33850 Container Tracked Items. - END
 					
 					//GailM 2/21/2020 S42902 F21477 Google - Suppress Pallet ID's on IB orders 
-					IF lsPoNo2Controlled ='Y' OR lbExcludeOrder THEN
+					//dts 02/24/2021 - S54137 now using lbCaptureContainers instead of lbExcludeOrder
+					//IF lsPoNo2Controlled ='Y' OR lbExcludeOrder THEN
+					IF lsPoNo2Controlled ='Y' OR lbCaptureContainers THEN
 						idsPODetail.SetItem(llNewDetailRow, 'po_no2', idsOMCReceiptDetail.getitemstring(ll_Row_Pos_RD, 'SUSR5')) //container Id
+//Write to Log File and Screen
+lsLogOut = "TEMPORARY MSG 1.3 - Owner CD: " + lsOwnerCD +". CaptureContainers is " +string(lbCaptureContainers)
+FileWrite(giLogFileNo,lsLogOut)
+gu_nvo_process_files.uf_write_log(lsLogOut)
+lsLogOut = "TEMPORARY MSG 1.4 - SUSR5: " + nz(idsOMCReceiptDetail.getitemstring(ll_Row_Pos_RD, 'SUSR5'),'null')
+FileWrite(giLogFileNo,lsLogOut)
+gu_nvo_process_files.uf_write_log(lsLogOut)
 					ELSE
 						idsPODetail.SetItem(llNewDetailRow, 'po_no2', '') //Pallet Id
 					END IF
@@ -14873,9 +15084,9 @@ IF ll_receipt_queue_count > 0 Then
 		
 		If ll_receipt_detail_sn > 0 Then
 			//Write to Log File and Screen
-			lsLogOut = '      - OM Inbound - Processing Serial Record for Change Request Nbr: ' + string(ll_change_request_nbr) +" and Line Item No: " + ls_receipt_lineNo + " and count is: "+ string(ll_receipt_detail_sn)
-			FileWrite(giLogFileNo,lsLogOut)
-			gu_nvo_process_files.uf_write_log(lsLogOut)
+			//dts 2/24/2021 lsLogOut = '      - OM Inbound - Processing Serial Record for Change Request Nbr: ' + string(ll_change_request_nbr) +" and Line Item No: " + ls_receipt_lineNo + " and count is: "+ string(ll_receipt_detail_sn)
+			//dts 2/24/2021 FileWrite(giLogFileNo,lsLogOut)
+			//dts 2/24/2021 gu_nvo_process_files.uf_write_log(lsLogOut)
 	
 			lbUpdateExistRec =TRUE //set to TRUE for each detail record
 			
@@ -14895,16 +15106,31 @@ IF ll_receipt_queue_count > 0 Then
 					idsPODetail.SetItem(llNewDetailRow, 'Serial_No', lsSerial)
 					
 					//GailM 07/17/2019 DE11716 Google containerID error
-					IF ls_container_tracking_ind ='Y' OR lbExcludeOrder THEN
+					//dts 02/24/2021 - S54137 now using lbCaptureContainers instead of lbExcludeOrder
+					//IF ls_container_tracking_ind ='Y' OR lbExcludeOrder THEN
+					IF ls_container_tracking_ind ='Y' OR lbCaptureContainers THEN
 						idsPODetail.SetItem(llNewDetailRow, 'container_id', lsContainer) //container Id
+//Write to Log File and Screen
+lsLogOut = "TEMPORARY MSG 2 - Owner CD: " + lsOwnerCD +". CaptureContainers is " +string(lbCaptureContainers)
+FileWrite(giLogFileNo,lsLogOut)
+gu_nvo_process_files.uf_write_log(lsLogOut)
 					ELSE
 						//OCT 2019 - MikeA - DE12998
 						idsPODetail.SetItem(llNewDetailRow, 'container_id', '') //container Id
 					END IF
 					
 					//GailM 2/21/2020 S42902 F21477 Google - Suppress Pallet ID's on IB orders 
-					IF lsPoNo2Controlled ='Y' OR lbExcludeOrder THEN
+					//dts 02/24/2021 - S54137 now using lbCaptureContainers instead of lbExcludeOrder
+					//IF lsPoNo2Controlled ='Y' OR lbExcludeOrder THEN
+					IF lsPoNo2Controlled ='Y' OR lbCaptureContainers THEN
 						idsPODetail.SetItem(llNewDetailRow, 'po_no2', lsPONO2) //container Id
+//Write to Log File and Screen
+lsLogOut = "TEMPORARY MSG 2.PONO2 - Owner CD: " + lsOwnerCD +". CaptureContainers is " +string(lbCaptureContainers)
+FileWrite(giLogFileNo,lsLogOut)
+gu_nvo_process_files.uf_write_log(lsLogOut)
+lsLogOut = "TEMPORARY MSG 2.PONO2 - Owner CD: " + lsOwnerCD +". lsPONO2: " +lsPONO2
+FileWrite(giLogFileNo,lsLogOut)
+gu_nvo_process_files.uf_write_log(lsLogOut)
 					ELSE
 						idsPODetail.SetItem(llNewDetailRow, 'po_no2', '') //Pallet Id
 					END IF
@@ -14914,9 +15140,9 @@ IF ll_receipt_queue_count > 0 Then
 					llQuantity = llQuantity - 1 //decrement qty					
 
 						//Write to Log File and Screen
-						lsLogOut = "      - OM Inbound - Processing Serial Record for Change Request Nbr: " + string(ll_change_request_nbr) +" and Line Item No: " + idsOMCReceiptDetail.getitemstring(ll_Row_Pos_RD, 'EXTERNLINENO') + "  and Serial No: " + lsSerial + " update existing row."
-						FileWrite(giLogFileNo,lsLogOut)
-						gu_nvo_process_files.uf_write_log(lsLogOut)
+						//dts 2/24/2021 lsLogOut = "      - OM Inbound - Processing Serial Record for Change Request Nbr: " + string(ll_change_request_nbr) +" and Line Item No: " + idsOMCReceiptDetail.getitemstring(ll_Row_Pos_RD, 'EXTERNLINENO') + "  and Serial No: " + lsSerial + " update existing row."
+						//dts 2/24/2021 FileWrite(giLogFileNo,lsLogOut)
+						//dts 2/24/2021 gu_nvo_process_files.uf_write_log(lsLogOut)
 						
 				ELSE
 					llQuantity = llQuantity - 1 //decrement qty					
@@ -14962,8 +15188,18 @@ IF ll_receipt_queue_count > 0 Then
 	
 						//20-MAY-2019 :Madhu S33850 Container Tracked Items. - START
 						//29-MAY-2019 :Madhu S34063 Exclude Container Tracking Ind Condition
-						IF ls_container_tracking_ind ='Y' OR lbExcludeOrder THEN
+						//dts 02/24/2021 - S54137 now using lbCaptureContainers instead of lbExcludeOrder
+						//IF ls_container_tracking_ind ='Y' OR lbExcludeOrder THEN
+//Write to Log File and Screen
+lsLogOut = "TEMPORARY MSG 3 - Owner CD: " + lsOwnerCD +". CaptureContainers is " +string(lbCaptureContainers)
+FileWrite(giLogFileNo,lsLogOut)
+gu_nvo_process_files.uf_write_log(lsLogOut)
+						IF ls_container_tracking_ind ='Y' OR lbCaptureContainers THEN
 							idsPODetail.SetItem(llNewDetailRow, 'container_id', lsContainer) //container Id
+//Write to Log File and Screen
+lsLogOut = "TEMPORARY MSG 3.2 - Owner CD: " + lsOwnerCD +". CaptureContainers is " +string(lbCaptureContainers)
+FileWrite(giLogFileNo,lsLogOut)
+gu_nvo_process_files.uf_write_log(lsLogOut)
 						ELSE
 							//OCT 2019 - MikeA - DE12998
 							idsPODetail.SetItem(llNewDetailRow, 'container_id', '') //container Id
@@ -14971,8 +15207,18 @@ IF ll_receipt_queue_count > 0 Then
 						//20-MAY-2019 :Madhu S33850 Container Tracked Items. - END
 						
 						//GailM 2/21/2020 S42902 F21477 Google - Suppress Pallet ID's on IB orders 
-						IF lsPoNo2Controlled ='Y' OR lbExcludeOrder THEN
+						//dts 02/24/2021 - S54137 now using lbCaptureContainers instead of lbExcludeOrder
+						//IF lsPoNo2Controlled ='Y' OR lbExcludeOrder THEN
+						IF lsPoNo2Controlled ='Y' OR lbCaptureContainers THEN
 							idsPODetail.SetItem(llNewDetailRow,'po_no2', lsPONO2)
+//Write to Log File and Screen
+lsLogOut = "TEMPORARY MSG 3.3 - Owner CD: " + lsOwnerCD
+FileWrite(giLogFileNo,lsLogOut)
+gu_nvo_process_files.uf_write_log(lsLogOut)
+//Write to Log File and Screen
+lsLogOut = "TEMPORARY MSG 3.4 - Owner CD: " + lsOwnerCD +". lsPONO2: " +lsPONO2
+FileWrite(giLogFileNo,lsLogOut)
+gu_nvo_process_files.uf_write_log(lsLogOut)
 						Else
 							idsPODetail.SetItem(llNewDetailRow,'po_no2', '')
 						End If
@@ -14981,9 +15227,9 @@ IF ll_receipt_queue_count > 0 Then
 						idsPODetail.SetItem(llNewDetailRow, 'OM_CHANGE_REQUEST_NBR', ll_change_request_nbr)  //CHANGE_REQUEST_NBR	
 						
 						//Write to Log File and Screen
-						lsLogOut = "      - OM Inbound - Processing Serial Record for Change Request Nbr: " + string(ll_change_request_nbr) +" and Line Item No: " + idsOMCReceiptDetail.getitemstring(ll_Row_Pos_RD, 'EXTERNLINENO') + "  and Serial No: " + lsSerial
-						FileWrite(giLogFileNo,lsLogOut)
-						gu_nvo_process_files.uf_write_log(lsLogOut)
+						//dts 2/24/2021 lsLogOut = "      - OM Inbound - Processing Serial Record for Change Request Nbr: " + string(ll_change_request_nbr) +" and Line Item No: " + idsOMCReceiptDetail.getitemstring(ll_Row_Pos_RD, 'EXTERNLINENO') + "  and Serial No: " + lsSerial
+						//dts 2/24/2021 FileWrite(giLogFileNo,lsLogOut)
+						//dts 2/24/2021 gu_nvo_process_files.uf_write_log(lsLogOut)
 						
 						if lbCrossDock = True and lsCrossDock_Loc > '' then
 							idsPODetail.SetItem(llNewDetailRow, 'l_code', lsCrossDock_Loc)
@@ -15030,6 +15276,14 @@ IF ll_receipt_queue_count > 0 Then
 				idsPODetail.SetItem(llNewDetailRow, 'Lot_no', '-')
 				idsPODetail.SetItem(llNewDetailRow, 'PO_NO', lsPoNo)
 				idsPODetail.SetItem(llNewDetailRow, 'user_field2', idsOMCReceiptDetail.getitemstring(ll_Row_Pos_RD, 'SUSR1')) //UF2
+//Write to Log File and Screen
+lsLogOut = "TEMPORARY MSG 4 - Owner CD: " + lsOwnerCD
+FileWrite(giLogFileNo,lsLogOut)
+gu_nvo_process_files.uf_write_log(lsLogOut)
+//Write to Log File and Screen
+lsLogOut = "TEMPORARY MSG 4.2 - Owner CD: " + lsOwnerCD +". lsPONO2: " +lsPONO2
+FileWrite(giLogFileNo,lsLogOut)
+gu_nvo_process_files.uf_write_log(lsLogOut)
 				idsPODetail.SetItem(llNewDetailRow,'po_no2', lsPONO2)
 				idsPODetail.SetItem(llNewDetailRow,'Serial_No', '-')
 				idsPODetail.SetItem(llNewDetailRow, 'owner_id', lsOwnerID)
@@ -15037,8 +15291,18 @@ IF ll_receipt_queue_count > 0 Then
 				
 				//20-MAY-2019 :Madhu S33850 Container Tracked Items. - START
 				//29-MAY-2019 :Madhu S34063 Exclude Container Tracking Ind Condition
-				IF ls_container_tracking_ind ='Y' OR lbExcludeOrder THEN
+				//dts 02/24/2021 - S54137 now using lbCaptureContainers instead of lbExcludeOrder
+				//IF ls_container_tracking_ind ='Y' OR lbExcludeOrder THEN
+//Write to Log File and Screen
+lsLogOut = "TEMPORARY MSG 4 - Owner CD: " + lsOwnerCD +". CaptureContainers is " +string(lbCaptureContainers)
+FileWrite(giLogFileNo,lsLogOut)
+gu_nvo_process_files.uf_write_log(lsLogOut)
+				IF ls_container_tracking_ind ='Y' OR lbCaptureContainers THEN
 					idsPODetail.SetItem(llNewDetailRow, 'container_id', lsContainer) //container Id
+//Write to Log File and Screen
+lsLogOut = "TEMPORARY MSG 4.2 - Owner CD: " + lsOwnerCD +". lsContainer " +lsContainer
+FileWrite(giLogFileNo,lsLogOut)
+gu_nvo_process_files.uf_write_log(lsLogOut)
 				ELSE
 					//OCT 2019 - MikeA - DE12998
 					idsPODetail.SetItem(llNewDetailRow, 'container_id', '') //container Id
@@ -15049,9 +15313,9 @@ IF ll_receipt_queue_count > 0 Then
 				idsPODetail.SetItem(llNewDetailRow, 'OM_CHANGE_REQUEST_NBR', ll_change_request_nbr)  //CHANGE_REQUEST_NBR	
 				
 				//Write to Log File and Screen
-				lsLogOut = "      - OM Inbound - Processing Serial Record for Change Request Nbr: " + string(ll_change_request_nbr) +" and Line Item No: " + idsOMCReceiptDetail.getitemstring(ll_Row_Pos_RD, 'EXTERNLINENO') + " with a blank SN and the remaining quantity."
-				FileWrite(giLogFileNo,lsLogOut)
-				gu_nvo_process_files.uf_write_log(lsLogOut)
+				//dts 2/24/2021 lsLogOut = "      - OM Inbound - Processing Serial Record for Change Request Nbr: " + string(ll_change_request_nbr) +" and Line Item No: " + idsOMCReceiptDetail.getitemstring(ll_Row_Pos_RD, 'EXTERNLINENO') + " with a blank SN and the remaining quantity."
+				//dts 2/24/2021 FileWrite(giLogFileNo,lsLogOut)
+				//dts 2/24/2021 gu_nvo_process_files.uf_write_log(lsLogOut)
 				
 				if lbCrossDock = True and lsCrossDock_Loc > '' then
 					idsPODetail.SetItem(llNewDetailRow, 'l_code', lsCrossDock_Loc)
@@ -15074,9 +15338,9 @@ IF ll_receipt_queue_count > 0 Then
 			idsRoNotes.SetItem(llNewNotesRow,'note_Text',ls_Notes)
 			
 			//Write to Log File and Screen
-			lsLogOut = "      - OM Inbound - Processing Receive Notes Record for Change Request Nbr: " + string(ll_change_request_nbr) +" and Line Item No: " + idsOMCReceiptDetail.getitemstring(ll_Row_Pos_RD, 'EXTERNLINENO')
-			FileWrite(giLogFileNo,lsLogOut)
-			gu_nvo_process_files.uf_write_log(lsLogOut)
+			//dts 2/24/2021 lsLogOut = "      - OM Inbound - Processing Receive Notes Record for Change Request Nbr: " + string(ll_change_request_nbr) +" and Line Item No: " + idsOMCReceiptDetail.getitemstring(ll_Row_Pos_RD, 'EXTERNLINENO')
+			//dts 2/24/2021 FileWrite(giLogFileNo,lsLogOut)
+			//dts 2/24/2021 gu_nvo_process_files.uf_write_log(lsLogOut)
 						
 		END IF
 		
@@ -15182,7 +15446,7 @@ Integer		liRC, i
 Long			llRowPos,llNewRow, llNewDetailRow ,llOrderSeq,	llBatchSeq,	llLineSeq, llTempRow,	&
 				llLineItemNo, llOwner, llNewAddressRow, llOwnerId,  &
 				ll_delivery_queue_count, ll_delivery_count, ll_delivery_detail_count, ll_change_request_nbr, ll_Row_Pos_Detail, llCountInv, &
-				ll_detail_error_count, ll_rc, ll_delivery_attr_count, ll_found, llNewNotesRow, llFound 
+				ll_detail_error_count, ll_rc, ll_delivery_attr_count, ll_found, llNewNotesRow, llFound,ll_wh_order_detail_attr_count
 				
 Decimal		ldQty, ldPrice
 				
@@ -15221,7 +15485,6 @@ ldsDONotes = Create u_ds_datastore
 ldsDONotes.dataobject = 'd_mercator_do_notes'
 ldsDONotes.SetTransObject(SQLCA)
 
-
 IF NOT isvalid(idsOMCDelivery) THEN					//OMC_Warehouse_Order
 	idsOMCDelivery = Create u_ds_datastore
 	idsOMCDelivery.dataobject ='d_omc_warehouse_order'
@@ -15240,6 +15503,14 @@ IF NOT isvalid(idsOMCDeliveryAttr) THEN		 		//OMC_Warehouse_OrderAttr
 	idsOMCDeliveryAttr.SetTransObject(om_sqlca)
 END IF
 
+// Begin -Dinesh -  12/09/2021 - S64720 -Google - SIMS - Buy Sell Project
+IF NOT isvalid(idsOMCwhorderdetailAttr) THEN		 		//OMC_Warehouse_OrderAttr
+	idsOMCwhorderdetailAttr = Create u_ds_datastore
+	idsOMCwhorderdetailAttr.dataobject ='d_omc_wh_orderdetail_attr'
+	idsOMCwhorderdetailAttr.SetTransObject(om_sqlca)
+END IF
+// End -Dinesh -  12/09/2021 - S64720 -Google - SIMS - Buy Sell Project
+
 IF NOT isvalid(idsOMADeliveryQueue) THEN		 		//OMA_Warehouse_Order_Queue
 	idsOMADeliveryQueue = Create u_ds_datastore
 	idsOMADeliveryQueue.dataobject ='d_oma_warehouse_order_queue'
@@ -15250,6 +15521,8 @@ idsOMCDelivery.reset()
 idsOMCDeliveryDetail.reset()
 idsOMADeliveryQueue.reset()
 idsOMCDeliveryAttr.reset()
+idsOMCwhorderdetailAttr.reset() // Dinesh -  12/09/2021 - S64720 -Google - SIMS - Buy Sell Project
+
 //Open the File
 lsLogOut = '      - OM Inbound Start Processing of uf_process_om_delivery() ' 
 FileWrite(giLogFileNo,lsLogOut)
@@ -15364,7 +15637,10 @@ IF ll_delivery_queue_count > 0 Then
 
 		// Get the first detail record for this header. It contains Owner and PONO(project) needed on the header		
 		ll_delivery_detail_count = idsOMCDeliveryDetail.retrieve(ll_change_request_nbr )
-
+		
+		// Get the orderrefchar1 records for this header. 	
+		ll_wh_order_detail_attr_count=idsOMCwhorderdetailAttr.retrieve(ll_change_request_nbr ) //Dinesh -  12/09/2021 - S64720 -Google - SIMS - Buy Sell Project
+		
 		// Get Project from first detail
 		if ll_delivery_detail_count > 0 Then
 			lsPoNo = Trim(idsOMCDeliveryDetail.GetItemString(1, 'LOTTABLE03'))
@@ -16005,6 +16281,28 @@ IF ll_delivery_queue_count > 0 Then
 			lsTemp = Trim(idsOMCDeliveryAttr.GetItemString(ll_found, 'REFCHAR1'))
 			idsDOheader.SetItem(llNewRow, 'User_Field11', Trim(lsTemp)) 
 		end if
+	// Begin -Dinesh -  12/01/2021 - S64720 -Google - SIMS - Buy Sell Project
+		ll_found = idsOMCDeliveryAttr.Find("CHANGE_REQUEST_NBR = " + string(ll_change_request_nbr) + " and UPPER(ATTR_TYPE) = 'BUYSELL_CUSTPONBR' " , 1, ll_delivery_attr_count)
+		
+		if ll_found > 0 then
+			lsTemp = Trim(idsOMCDeliveryAttr.GetItemString(ll_found, 'REFCHAR1'))
+			idsDOheader.SetItem(llNewRow, 'Client_Cust_SO_Nbr', Trim(lsTemp)) 
+		end if
+		
+		ll_found = idsOMCDeliveryAttr.Find("CHANGE_REQUEST_NBR = " + string(ll_change_request_nbr) + " and UPPER(ATTR_TYPE) = 'BUYSELL_DLVYORDTYPE' " , 1, ll_delivery_attr_count)
+		if ll_found > 0 then
+			lsTemp = Trim(idsOMCDeliveryAttr.GetItemString(ll_found, 'REFCHAR1'))
+			
+			idsDOheader.SetItem(llNewRow, 'User_field21', Trim(lsTemp)) 
+		end if
+		
+//		ll_found = idsOMCwhorderdetailAttr.Find("CHANGE_REQUEST_NBR = " + string(ll_change_request_nbr) + " and UPPER(ATTR_TYPE) = 'BUYSELL_CUSTPARTNBR' " , 1, ll_wh_order_detail_attr_count)
+//		if ll_found > 0 then
+//			lsTemp = Trim(idsOMCwhorderdetailAttr.GetItemString(ll_found, 'REFCHAR1'))
+//			idsDOdetail.SetItem(llNewRow, 'Customer_Sku', Trim(lsTemp)) 
+//		end if
+		
+	// End -Dinesh -  12/01/2021 - S64720 Google - SIMS - Buy Sell Project
 
 //  User Field 10 - CostCenter
 		lsTemp = Trim(idsOMCDelivery.GetItemString(llRowPos, 'DEPARTMENT'))
@@ -16022,11 +16320,26 @@ IF ll_delivery_queue_count > 0 Then
 	
 				lbCrossdock = true
 				idsDOheader.SetItem(llNewRow, 'Crossdock_ind', 'Y')
-	
-				select min(l_code) into :lsCrossDock_Loc 
-				from location with(nolock)
-				where wh_code = :lsWH and l_type = '9';
+				
+				//dts - 09/26/2021 - DE23250 (Reverse Logistics Crossdock Pick Exceptions)	
+				// - Getting Pick exceptions because we're seeding EDI Detail with the first crossdock location (min(l_code)) instead of the l_code on the associated Inbound order.
+				//dts - 05/05/2023 - SIMS-219 (Getting Pick Exceptions on RMA Harvest orders)
+				// - Looks like DE23250 was never deployed. Note that this change requires a single Location for Inbound order.
+				select min(l_code) into :lsCrossDock_Loc 	
+				from receive_master rm with(nolock) inner join receive_putaway rp with(nolock) on rm.ro_no=rp.ro_no	
+				where rm.Project_id='PANDORA' and supp_invoice_no=:lsTemp;	
+					
+				if lsCrossDock_Loc = "" or isnull(lsCrossDock_Loc) then	
+					select min(l_code) into :lsCrossDock_Loc 
+					from location with(nolock)
+					where wh_code = :lsWH and l_type = '9';
+				end if	
 			else
+	
+//				select min(l_code) into :lsCrossDock_Loc 
+//				from location with(nolock)
+//				where wh_code = :lsWH and l_type = '9';
+//			else
 				lbCrossdock = false
 				idsDOheader.SetItem(llNewRow, 'Crossdock_ind', 'N')
 			END IF
@@ -16286,7 +16599,7 @@ IF ll_delivery_queue_count > 0 Then
 		f_method_trace_special( asproject, this.ClassName() + ' - uf_process_om_delivery',lsMessage, lsWH, ' ',' ',lsInvoice)
 
 		idsDOHeader.SetItem(llNewRow,'schedule_date',string(ldtScheduleDate, 'mm-dd-yyyy hh:mm'))
-
+		
 		//GailM 2/19/2020 - DE14765 On insert, check for CANCEL in this batch.  If found code INSERT as "E" with message
 		If lsAction = 'A' Then
 			lsFind = "EXTERNORDERKEY = '" + lsInvoice + "' and CHANGE_REQUEST_INDICATOR = 'CANCEL' "
@@ -16354,11 +16667,25 @@ IF ll_delivery_queue_count > 0 Then
 			idsDODetail.SetItem(llNewDetailRow, 'order_seq_no', llOrderSeq) 
 			idsDODetail.SetItem(llNewDetailRow, "order_line_no", string(llLineSeq)) /*next line seq within order*/
 			idsDODetail.SetItem(llNewDetailRow, 'Status_cd', 'N')
+			// Begin - Dinesh - 02/15/2024 - SIMS-412- Google - SIMS – Outbound RMA Number
+			//lsTemp = Trim(idsOMCwhorderdetailAttr.GetItemString(ll_Row_Pos_Detail, 'REFCHAR2'))
+			lsTemp = Trim(idsOMCDeliveryDetail.GetItemString(ll_Row_Pos_Detail, 'REFCHAR2')) //  Dinesh - 04/01/2024 - SIMS-412- Google - SIMS – Outbound RMA Number
+			idsDODetail.SetItem(llNewDetailRow, 'User_Field8', Trim(lsTemp)) // Dinesh - 03/21/2024 - SIMS-412- Google - SIMS – Outbound RMA Number
+			// End - Dinesh - 02/15/2024 - SIMS-412- Google - SIMS – Outbound RMA Number
+			
 			// 09/09 - per Ian, don't want to default Inv Type....
 			//idsDODetail.SetItem(llNewDetailRow, 'Inventory_type', 'N') /*normal inventory*/
 
 		//Invoice No
 			idsDODetail.SetItem(llNewDetailRow, 'Invoice_no', lsInvoice) 
+			// Begin -Dinesh -  12/13/2021 - S64720 -Google - SIMS - Buy Sell Project
+			ll_found = idsOMCwhorderdetailAttr.Find("CHANGE_REQUEST_NBR = " + string(ll_change_request_nbr) + " and UPPER(ATTR_TYPE) = 'BUYSELL_CUSTPARTNBR' " , 1, ll_wh_order_detail_attr_count)
+			if ll_found > 0 then
+				lsTemp = Trim(idsOMCwhorderdetailAttr.GetItemString(ll_Row_Pos_Detail, 'REFCHAR1'))
+				idsDOdetail.SetItem(llNewDetailRow, 'Customer_Sku', Trim(lsTemp)) 
+			end if
+			idsDOdetail.SetItem(llNewDetailRow, 'OM_CHANGE_REQUEST_NBR', ll_change_request_nbr)  //CHANGE_REQUEST_NBR 
+			// End -Dinesh -  12/13/2021 - S64720 -Google - SIMS - Buy Sell Project
 // TAM TODO Invoice Error Handling
 
 		//  Line_Number
@@ -16838,7 +17165,8 @@ public function integer uf_process_om_soc (string asproject);//Process Tranfer O
 /* 05/24/2010 ujh:  Even though the DiskErase/HWOPS Key words are specified on the OD, the use of lsSOC_variant assumes that the
 	whole order is as specified and will call the appropriate stored procedure for all ODs.  Note that lsSOC_variant is set only once.  */
 boolean lb_diskerase
-string lsSOC_variant, lsNewInvType
+string lsSOC_variant, lsNewInvType,lsFind
+
 
 Datastore	lu_ds, ldsItem, lsLookupTable
 
@@ -16852,9 +17180,9 @@ String	lsLogout,lsStringData, lsOrder, lsTemp, lsRecData, lsRecType, lsDesc, lsS
 		lsDelete_TONO, lsDelete_List, lsRecDataSOC, lsReturnTxt, lsListIgnored, lsListProcessed, lsParamSeperator
 Integer	liRC,liFileNo
 Long		llNewRow, llNewDetailRow, llFindRow, llBatchSeq, llOrderSeq, llRowPos, llRowCount, llLineSeq, llCount, llOwnerID, llNewNotesRow, llNoteSeq, llNoteLine &
-              ,llReturnCode, llCntReceived, llCntIgnored, llCntProcessed,   llspParamMax,ll_ccline, ll_ccinvt
+              ,llReturnCode, llCntReceived, llCntIgnored, llCntProcessed,   llspParamMax,ll_ccline, ll_ccinvt,llCountInv,llFound
 
-Boolean	lbError, lbDetailError, lbSQLCAauto
+Boolean	lbError, lbDetailError, lbSQLCAauto,lbAcceptedsoc
 DateTime	ldtToday
 Decimal	ldWeight, ldLineItemNo_c, ldFromOwnerID, ldToOwnerID
 String ls_ccno, ls_ccline, ls_ccsku, ls_ccsupp_code, ls_cccoo, ls_cclotno, ls_ccpono, ls_ccpono2, ls_ccqty, ls_ccownerid, ls_cclcode, ls_ccinvtype, ls_ccserialno, ls_cccontid, ls_ccrono
@@ -17031,21 +17359,48 @@ IF ll_delivery_queue_count > 0 Then
 	For llRowPos = 1 to ll_delivery_count
 		
 		ll_change_request_nbr = idsOMCSOCDelivery.getitemnumber(llRowPos, 'CHANGE_REQUEST_NBR')
+		
 
 		//Write to Log File and Screen
-		lsLogOut = '      -OM SOC - Processing Header Record for Change Request Nbr: ' + string(ll_change_request_nbr)
-		FileWrite(giLogFileNo,lsLogOut)
+	
 		gu_nvo_process_files.uf_write_log(lsLogOut)
-
-
+		
+               //Dhirendra- SIMS-50/SIMS-62  Stock Owner Change Order Cancellation- Start
+                lsTemp = Trim(idsOMCSOCDelivery.GetItemString(llRowPos, 'EXTERNORDERKEY'))
 		choose case  Upper(idsOMCSOCDelivery.GetItemString(llRowPos, 'CHANGE_REQUEST_INDICATOR'))
 			case 'CANCEL'
-				ls_error_msg = "Change_Request_Nbr ="+string(ll_change_request_nbr)+" CANCEL is not valid for SOC. Record will not be processed."
-				gu_nvo_process_files.uf_process_om_writeerror( asproject, 'E', ll_change_request_nbr,'OB', ls_error_msg)
-				lbError = True
-				Continue //Process Next Record
+				//Write to Log File and Screen
+					lsLogOut = '      -OM SOC - Processing Header Record for Change Request Nbr: ' + string(ll_change_request_nbr)
+					FileWrite(giLogFileNo,lsLogOut)
+				
+				Select  Count(1) into :llCountInv
+				From transfer_master
+				Where project_ID = :asproject and user_field3 = :lsTemp and Ord_Status = 'N' using sqlca;
+			
+				lsFind = "EXTERNORDERKEY = '" + lsTemp + "' and CHANGE_REQUEST_INDICATOR = 'INSERT'"
+				llFound = idsOMCSOCDelivery.Find(lsFind, 1, idsOMCSOCDelivery.RowCount())
+			
+				If llCountInv = 0 And llFound = 0 Then //Order is not found.  Set the OMC record to 'REJECTED' otherwise set to 'Accepted'
+					idsOMCSOCDelivery.setitem( llRowPos, 'CHANGE_REQUEST_STATUS', 'REJECTED')
+					idsOMCSOCDelivery.setitem( llRowPos, 'editwho', 'SIMSUSER')
+					// ls_error_msg = "Change_Request_Nbr ="+string(ll_change_request_nbr)+" CANCEL is not valid for SOC. Record will not be processed."
+					  ls_error_msg = "Change_Request_Nbr ="+string(ll_change_request_nbr)+" CANCEL is not valid for SOC that is not in NEW Status. Record will not be processed."
+						gu_nvo_process_files.uf_process_om_writeerror( asproject, 'E', ll_change_request_nbr,'OB', ls_error_msg)
+						lsLogOut = '      -OM SOC - Processing Header Record rejected for CANCEL, Change Request Nbr: ' + string(ll_change_request_nbr)
+						FileWrite(giLogFileNo,lsLogOut)
+					lbError = True
+					Continue //Process Next Record
+				else
+					idsOMCSOCDelivery.setitem( llRowPos, 'CHANGE_REQUEST_STATUS', 'ACCEPTED')
+					idsOMCSOCDelivery.setitem( llRowPos, 'editwho', 'SIMSUSER')
+					 lbAcceptedsoc=true
+					 lsLogOut = '      -OM SOC - Processing Header Record Accepted for CANCEL, Change Request Nbr: ' + string(ll_change_request_nbr)
+					 FileWrite(giLogFileNo,lsLogOut)	
+				END IF
+			
+		      //Continue //Process Next Record
 		end Choose
-		
+		//Dhirendra- SIMS-50/SIMS-62  Stock Owner Change Order Cancellation- END 
 		
 		lsSOC_variant = '*EMPTY*'  // 06/11/2010 ujh:  Set on each order so variants can be set at most once to apply to whole order
 		llNewRow=idsToHeader.InsertRow(0)
@@ -17060,9 +17415,36 @@ IF ll_delivery_queue_count > 0 Then
 		idsTOHeader.SetItem(llNewRow,'project_id',asProject)
 		idsTOHeader.SetItem(llNewRow,'last_user','SIMSFP')
 		idsTOHeader.SetItem(llNewRow, 'Ord_type', 'O')  /* Internal Order Type )  */
-		idsTOHeader.SetItem(llNewRow, 'Ord_Status', 'N')
+		//Dhirendra- SIMS-50/SIMS-62  Stock Owner Change Order Cancellation- Start
+		IF lbAcceptedsoc = true then 
+			idsTOHeader.SetItem(llNewRow, 'Ord_Status', 'V')
+			lbAcceptedsoc =false 
+		else
+	     	idsTOHeader.SetItem(llNewRow, 'Ord_Status', 'N')
+			lbAcceptedsoc =false
+       	end if
+		 //Dhirendra- SIMS-50/SIMS-62  Stock Owner Change Order Cancellation- End
 		idsTOHeader.SetItem(llNewRow, 'OM_Change_Request_Nbr', ll_change_request_nbr)  
 		idsTOHeader.SetItem(llNewRow, 'OM_Confirmation_Type', 'E')  
+		
+		
+		//choose case  Upper(idsOMCSOCDelivery.GetItemString(llRowPos, 'CHANGE_REQUEST_INDICATOR'))
+			//case 'CANCEL'
+		
+			
+			//GailM 2/19/2020 - DE14765 Before rejecting, check whether the INSERT is in this batch.  If it is, 
+			//lsFind = "EXTERNORDERKEY = '" + lsTemp + "' and CHANGE_REQUEST_INDICATOR = 'INSERT'"
+			//llFound = idsOMCDelivery.Find(lsFind, 1, idsOMCDelivery.RowCount())
+			
+//			If llCountInv = 0 And llFound = 0 Then //Order is not found.  Set the OMC record to 'REJECTED' otherwise set to 'Accepted'
+//				idsOMCDelivery.setitem( llRowPos, 'CHANGE_REQUEST_STATUS', 'REJECTED')
+//				idsOMCDelivery.setitem( llRowPos, 'editwho', 'SIMSUSER')
+//			else
+//				idsOMCDelivery.setitem( llRowPos, 'CHANGE_REQUEST_STATUS', 'ACCEPTED')
+//				idsOMCDelivery.setitem( llRowPos, 'editwho', 'SIMSUSER')
+//			END IF
+//			Continue
+		//End if //940C = END
 
 		
 // From Owner
@@ -17161,7 +17543,7 @@ IF ll_delivery_queue_count > 0 Then
 		FileWrite(giLogFileNo,lsLogOut)
 		gu_nvo_process_files.uf_write_log(lsLogOut) /*write to Screen*/
 
-		lsTemp = Trim(idsOMCSOCDelivery.GetItemString(llRowPos, 'EXTERNORDERKEY'))
+		
 
 		IF len(lsTemp) = 0 Then
 			ls_error_msg = "Change_Request_Nbr ="+string(ll_change_request_nbr)+" -EXTERNORDERKEY(MTR Numbrt) is not valid. Record will not be processed."
@@ -17382,11 +17764,14 @@ IF ll_delivery_queue_count > 0 Then
 			lsToProject = lsTemp
 			
 			//Jxlim 11/15/2011 BRD #302 Do not process SOC when the project is Research to Research
-			If 	lsFromProject = 'RESEARCH'  and lsToProject = 'RESEARCH' Then     
+			If 	lsFromProject = 'RESEARCH'  and lsToProject = 'RESEARCH' Then   // Dinesh - 04/18/2023- SIMS-197-Google- SIMS- Cycle count adjustment changes
+			//If 	(lsFromProject = 'MAIN'  and lsToProject = 'MAIN') Then 
 				//dts 5/2/2014 - only skipping 'RESEARCH' SOC if From/To owner are the same...
 				if lsFromOwnerCD = lsToOwnerCD then
 	// TAM TODO  - Process Detail Error
-					lsLogOut =  '  - !!! FROM and TO Project are RESEARCH - Not processing SOC'
+					//lsLogOut =  '  - !!! FROM and TO Project are RESEARCH - Not processing SOC'
+					lsLogOut =  '  - !!! FROM and TO Project and FROM and TO OWNER CODE are same - Not processing SOC'
+					//lsLogOut =  '  - !!! FROM and TO Project are MAIN - Not processing SOC'// Dinesh - 04/18/2023- SIMS-197-Google- SIMS- Cycle count adjustment changes
 					FileWrite(giLogFileNo,lsLogOut)
 					Return -1
 				end if
@@ -17555,6 +17940,7 @@ IF ll_delivery_queue_count > 0 Then
 						//Aliased - the SP name is dbo.sp_auto_stockowner_change
 						ls_Test = 'O' + "," +  lsTemp + "," + ls_ccno + "," +  String(ll_ccline) + "," + String(llReturnCode) + "," +  String(llCntReceived) + "," +  String(llCntIgnored) + "," +  lsListIgnored + "," +  String(llCntProcessed) + "," +  lsListProcessed						
 						sqlca.Sp_Auto_SOC('O', lsTemp, lsReturnTxt, llReturnCode, llCntReceived, llCntIgnored, lsListIgnored, llCntProcessed, lsListProcessed)
+						//sqlca.sp_auto_stockowner_change('O', lsTemp, lsReturnTxt, llReturnCode, llCntReceived, llCntIgnored, lsListIgnored, llCntProcessed, lsListProcessed)
 						
 						f_method_trace_special( asproject, this.ClassName() + ' - uf_process_om_soc', 'End Auto SOC Stored Procedure ' + lsReturnTxt + 'Return code ' + String(llReturnCode),lsToNo, isFileName,'',ls_method_trace)																
 						
@@ -17636,8 +18022,6 @@ destroy idsOMCSOCDeliveryDetail
 
 
 Return 0
-
-
 end function
 
 public function integer uf_process_om_warehouse_order_oc (readonly datastore adsorderlist);//JULY-2017 :TAM - Added for PINT - 940SOC  Confirmation.
@@ -19099,13 +19483,15 @@ ldsOut = Create Datastore
 ldsOut.Dataobject = 'd_edi_generic_out'
 
 ldsboh = Create Datastore
-sql_syntax="SELECT cs.wh_code, owner_cd, po_no, SKU, Sum(Avail_Qty) + Sum(alloc_Qty) + Sum(Tfr_In) as total_qty"
+//sql_syntax="SELECT cs.wh_code, owner_cd, po_no, SKU, Sum(Avail_Qty) + Sum(alloc_Qty) + Sum(Tfr_In) as total_qty" // Dinesh - 01/04/2023- SIMS-110- SIMS Inventory Snapshots writing wrong inventory into 846 files
+sql_syntax="SELECT cs.wh_code, owner_cd, po_no, SKU, Sum(Avail_Qty) + Sum(alloc_Qty) + Sum(Tfr_Out) as total_qty"
 sql_syntax +=" from Content_Summary cs with(nolock)"
 sql_syntax +=" inner join owner o with(nolock) on cs.project_id=o.project_id and cs.owner_id=o.owner_id"
 sql_syntax +=" inner join project_warehouse pw with(nolock) on cs.project_id=pw.project_id and cs.wh_code=pw.wh_code"
 sql_syntax +=" Where cs.Project_ID = 'PANDORA'"
 sql_syntax +=" Group by cs.wh_code, owner_cd, po_no, SKU"
-sql_syntax +=" Having Sum(Avail_Qty) + Sum(alloc_Qty) +Sum(Tfr_In) > 0"
+//sql_syntax +=" Having Sum(Avail_Qty) + Sum(alloc_Qty) +Sum(Tfr_In) > 0" // Dinesh - 01/04/2023- SIMS-110- SIMS Inventory Snapshots writing wrong inventory into 846 files
+sql_syntax +=" Having Sum(Avail_Qty) + Sum(alloc_Qty) +Sum(Tfr_Out) > 0"
 sql_syntax += " Order by cs.wh_Code "
 
 ldsboh.Create(SQLCA.SyntaxFromSQL(sql_syntax,"", ERRORS))
@@ -19199,6 +19585,136 @@ End If
 		
 
 REturn 0
+end function
+
+public function integer uf_process_projectcode (string aspath);//Process Project Code for Pandora Only...//
+// /*Created New Function for the Project Code Validation ........SIMS-243 Created By......Akash Baghel.....07/27/2023  */
+// Basically we are using for the new project code to add in the table "Project_Code" by the process of PC.DAT file..........//
+
+String	lsData, lsTemp, lsLogOut, lsStringData, lsRectype, lsProjectCode, lsStatus, lsFind
+			
+Integer	liRC,	liFileNo
+			
+Long		i, llCount,	llPos, llOwner, llNew, llExist, llNewRow, llFileRowCount, llFileRowPos, llFindRow 
+
+Decimal ldTemp
+
+Boolean	lbNew, lbError
+
+datastore	ldsProjectCode 
+datastore	ldsPC
+
+ldsProjectCode = Create datastore
+ldsProjectCode.dataobject= 'd_project_code'
+ldsProjectCode.SetTransobject(SQLCA)
+llPos = ldsProjectCode.Retrieve()
+
+ldsPC = Create datastore
+ldsPC.dataobject = 'd_project_code_import'
+
+//Open and read the File In
+lsLogOut = '      - Opening Project Code File: ' + asPath
+FileWrite(giLogFileNo,lsLogOut)
+gu_nvo_process_files.uf_write_log(lsLogOut) /*write to Screen*/
+
+   liFileNo = FileOpen(asPath,LineMode!,Read!,LockReadWrite!)
+  If liFileNo < 0 Then
+     lsLogOut = "-       ***Unable to Open Project Code File for Pandora Processing: " + asPath
+	 FileWrite(giLogFileNo,lsLogOut)
+	 gu_nvo_process_files.uf_write_log(lsLogOut) /*write to Screen*/
+	Return -99 /* we wont move to error directory if we can't open the file here*/
+   End If
+
+      //read file and load to datastore for processing
+        liRC = FileRead(liFileNo,lsStringData)
+
+    Do While liRC > 0
+	    llNewRow = ldsPC.InsertRow(0)
+	    ldsPC.SetItem(llNewRow,'project_code',Trim(lsStringData))
+	    liRC = FileRead(liFileNo,lsStringData)
+     Loop /*Next File record*/
+
+      FileClose(liFileNo)
+
+      //Process each Row
+        llFileRowCount = ldsPC.RowCount()
+
+  For llfileRowPos = 1 to llFileRowCount
+	    w_main.SetMicroHelp("Processing Project Code Update Record " + String(llFileRowPos) + " of " + String(llFilerowCOunt))
+	    lsData = Trim(ldsPC.GetITemString(llFileRowPos,'project_code'))
+        //Make sure first Char is not a Comma
+	   If Left(lsData,1) = ',' Then
+		  lsData = Right(lsData,Len(lsData) - 1)
+	     End If
+	
+	      //Validate Rec Type is PC
+	       lsTemp = Left(lsData,(pos(lsData,',') - 1))
+	    If lsTemp <> 'PC' Then
+		   gu_nvo_process_files.uf_writeError("Row: " + string(llFileRowPos) + " - Invalid Record Type: '" + lsTemp + "'. Record will not be processed.")
+		   lbError = True
+		   //Continue /*Process Next Record */
+	      End If	
+	     lsData = Right(lsData,(len(lsData) - (Len(lsTemp) + 1))) //Strip off until the next Comma	
+        //Project Code.....
+	    If Pos(lsData,',') > 0 Then
+		   lsTemp = Left(lsData,(pos(lsData,',') - 1))
+		   lsProjectCode = lsTemp
+	     Else
+		    gu_nvo_process_files.uf_writeError("Row: " + string(llFileRowPos) + " - Data expected after 'Project Code' field. Record will not be processed.")
+		    lbError = True
+		  Continue
+	    End If
+
+	     lsData = Right(lsData,(len(lsData) - (Len(lsTemp) + 1))) //Strip off until the next Comma
+	     //Status.....
+	   If Pos(lsData,',') > 0 Then
+		  lsTemp = Left(lsData,(pos(lsData,',') - 1))
+		  lsStatus = lsTemp
+	    Else
+       //		gu_nvo_process_files.uf_writeError("Row: " + string(llFileRowPos) + " - Data expected after 'Status' field. Record will not be processed.")
+       //		lbError = True
+	  //	    Continue
+	        lsStatus = lsData
+	    End If	
+		 
+	   /* comparing the project code from the table of Project_Code for the validation*/
+	      llCount = ldsProjectCode.RowCount()
+	      lsFind = "Project_code = '" +lsprojectcode + "'"
+          llFindRow = ldsProjectCode.Find(lsFind, 1, llCount )
+      If  llFindRow = 0 and ( lsStatus = 'Blank' or  lsStatus = 'APPROVED' or  lsStatus = 'CLOSE_INITIATED') Then
+		 llNewRow = ldsProjectCode.InsertRow(0)
+	     ldsProjectCode.SetItem(llNewRow, 'project_code', lsprojectcode)
+       Elseif  llFindRow >0 and ( lsStatus = 'Blank' or  lsStatus = 'APPROVED' or  lsStatus = 'CLOSE_INITIATED') Then		
+	   Elseif  llFindRow > 0 and lsStatus ='CLOSED' Then
+	       Delete from Project_code where project_code =:lsprojectcode;
+		  Commit;	
+		  Elseif llFindRow = 0  and lsStatus ='CLOSED' Then		
+	 End if
+		  
+	    //Save New Project Code in DB
+	     lirc = ldsProjectCode.Update()
+	   If liRC = 1 then
+		 Commit;
+	    Else
+		 Rollback;
+		 lsLogOut = Space(17) + "- ***System Error!  Unable to Save new Project Code Record(s) to database!"
+		 FileWrite(gilogFileNo,lsLogOut)
+		 gu_nvo_process_files.uf_writeError("- ***System Error!  Unable to Save new Project Code Record to database!")
+	Return -1
+		Continue
+	  End If
+ 
+ Next /*File row to Process */
+
+   Destroy ldsProjectCode
+
+ If lbError then
+	Return -1
+Else
+	Return 0
+  End If
+
+Return 0
 end function
 
 on u_nvo_proc_pandora.create
