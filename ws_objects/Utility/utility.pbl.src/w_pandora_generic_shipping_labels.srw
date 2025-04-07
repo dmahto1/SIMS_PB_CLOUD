@@ -593,6 +593,7 @@ string	lsCityStateZip, ls_old_carton_no,ls_carton_no,ls_old_carton_no1,ls_carton
 long ll_tot_metrics_weight,ll_tot_english_weight,ll_cnt1
 long	llQty, llRowCount, llRowPos, ll_rtn, ll_alloc_qty, llRowPos1, llLabelCount, llLabelOf
 Any	lsAny
+decimal ld_tot_english_weight,ld_tot_metrics_weight // Dinesh - 04/07/2025
 
 dw_Label.AcceptText()
 
@@ -697,24 +698,32 @@ For llRowPos = 1 to llRowCount /*each detail row */
 		 ll_cnt1++
 		 
 			IF dw_label.object.delivery_packing_standard_of_measure[llRowPos1] = 'M' THEN			
-				ll_tot_english_weight = ll_tot_english_weight + round(i_nwarehouse.of_convert(dw_label.GetItemnumber(llRowPos1,'delivery_packing_weight_gross'),"KG","PO"),2)
-				ll_tot_metrics_weight = ll_tot_metrics_weight + dw_label.GetItemnumber(llRowPos1,'delivery_packing_weight_gross')/*carton qty */
+				
+				//ll_tot_metrics_weight = ll_tot_metrics_weight + dw_label.GetItemnumber(llRowPos1,'delivery_packing_weight_gross')/*carton qty */ // Dinesh - 04/07/2025- SIMS-646- Development for Google - SIMS -Weight in Packing list not matching on Shipping Label 
+				//ll_tot_english_weight = ll_tot_english_weight + round(i_nwarehouse.of_convert(dw_label.GetItemnumber(llRowPos1,'delivery_packing_weight_gross'),"KG","PO"),2) // Dinesh - 04/07/2025- SIMS-646- Development for Google - SIMS -Weight in Packing list not matching on Shipping Label 
+				ld_tot_metrics_weight = ld_tot_metrics_weight + dw_label.GetItemdecimal(llRowPos1,'delivery_packing_weight_gross')/*carton qty */  // Dinesh - 04/07/2025- SIMS-646- Development for Google - SIMS -Weight in Packing list not matching on Shipping Label 
+				ld_tot_english_weight = ld_tot_english_weight + round(i_nwarehouse.of_convert(dw_label.GetItemdecimal(llRowPos1,'delivery_packing_weight_gross'),"KG","PO"),2)  // Dinesh - 04/07/2025- SIMS-646- Development for Google - SIMS -Weight in Packing list not matching on Shipping Label 
 			ELSE
-				ll_tot_english_weight = ll_tot_english_weight + dw_label.GetItemnumber(llRowPos1,'delivery_packing_weight_gross')/*carton qty */
-				ll_tot_metrics_weight = ll_tot_metrics_weight + round(i_nwarehouse.of_convert(dw_label.GetItemnumber(llRowPos1,'delivery_packing_weight_gross'),"PO","KG"),2)		
+				//ll_tot_english_weight = ll_tot_english_weight + dw_label.GetItemnumber(llRowPos1,'delivery_packing_weight_gross')/*carton qty */ // Dinesh - 04/07/2025- SIMS-646- Development for Google - SIMS -Weight in Packing list not matching on Shipping Label 
+				//ll_tot_metrics_weight = ll_tot_metrics_weight + round(i_nwarehouse.of_convert(dw_label.GetItemnumber(llRowPos1,'delivery_packing_weight_gross'),"PO","KG"),2)		 // Dinesh - 04/07/2025- SIMS-646- Development for Google - SIMS -Weight in Packing list not matching on Shipping Label 
+				ld_tot_english_weight = ld_tot_english_weight + dw_label.GetItemdecimal(llRowPos1,'delivery_packing_weight_gross')/*carton qty */  // Dinesh - 04/07/2025- SIMS-646- Development for Google - SIMS -Weight in Packing list not matching on Shipping Label 
+				ld_tot_metrics_weight = ld_tot_metrics_weight + round(i_nwarehouse.of_convert(dw_label.GetItemdecimal(llRowPos1,'delivery_packing_weight_gross'),"PO","KG"),2)	  // Dinesh - 04/07/2025- SIMS-646- Development for Google - SIMS -Weight in Packing list not matching on Shipping Label 	
 			END IF
-		lstrparms.Long_arg[5]=ll_tot_english_weight
-		lstrparms.Long_arg[6]=ll_tot_metrics_weight
+		//lstrparms.Long_arg[5]=ll_tot_english_weight// Dinesh - 04/07/2025
+		//lstrparms.Long_arg[6]=ll_tot_metrics_weight// Dinesh - 04/07/2025
+		lstrparms.Decimal_arg[1]=ld_tot_english_weight // Dinesh - 04/07/2025- SIMS-646- Development for Google - SIMS -Weight in Packing list not matching on Shipping Label 
+		lstrparms.Decimal_arg[2]=ld_tot_metrics_weight // Dinesh - 04/07/2025- SIMS-646- Development for Google - SIMS -Weight in Packing list not matching on Shipping Label 
 		ls_old_carton_no1= ls_carton_no1
-		ll_tot_metrics_weight =0 // Dinesh - 03/20/2025-  SIMS-646-Development for Google - SIMS -Weight in Packing list not matching on Shipping Label
-		ll_tot_english_weight =0 // Dinesh-  03/20/2025- SIMS-646-Development for Google - SIMS -Weight in Packing list not matching on Shipping Label
+		ld_tot_english_weight =0 // Dinesh - 03/20/2025-  SIMS-646-Development for Google - SIMS -Weight in Packing list not matching on Shipping Label
+		ld_tot_metrics_weight =0 // Dinesh-  03/20/2025- SIMS-646-Development for Google - SIMS -Weight in Packing list not matching on Shipping Label
 		
 	 Next			 
 
 	If lscartonHold <> ls_carton_no Then
 		llLabelof ++
 		lstrparms.String_Arg[24] = String(llLabelof) +" of " + String(llLabelCount)
-		ll_tot_metrics_weight =0;ll_tot_english_weight =0
+		//ll_tot_metrics_weight =0;ll_tot_english_weight =0 // Dinesh - 04/07/2025- SIMS-646- Development for Google - SIMS -Weight in Packing list not matching on Shipping Label 
+		ld_tot_metrics_weight =0;ld_tot_english_weight =0 // Dinesh - 04/07/2025- SIMS-646- Development for Google - SIMS -Weight in Packing list not matching on Shipping Label 
 		
 		lstrparms.String_arg[25] = is_ucc_prefix
 		lstrparms.datetime_arg[1] = w_do.idw_main.GetItemDateTime(1, 'request_date')
