@@ -241,7 +241,7 @@ type variables
 w_shipments	iw_window
 u_nvo_shipments	iu_Shipments
 SingleLineEdit	Isle_AWB
-DataWindow	Idw_Main, Idw_Detail, Idw_Status, Idw_Search, Idw_Result, Idw_Origin, Idw_Dest,  idw_bol, idw_Order, idw_packPrint //Jxlim 12/22/2011 Pandora-OTM #337 order tab
+DataWindow	Idw_Main, Idw_Detail, Idw_Status, Idw_Search, Idw_Result, Idw_Origin, Idw_Dest,  idw_bol, idw_Order, idw_packPrint,idw_warehouse //Jxlim 12/22/2011 Pandora-OTM #337 order tab
 DataStore ids_do_main, ids_do_other,ids_do_detail,  ids_pick, ids_pack, ids_serial   //Jxlim 12/22/2011 Pandora-OTM #337 Datawindow from w_do
 
 String 	isOrigSQL, isShipNo, is_OldNew, is_bolno, is_dono, is_text[], isrodono
@@ -2458,7 +2458,7 @@ call super::destroy
 if IsValid(MenuID) then destroy(MenuID)
 end on
 
-event ue_postopen;call super::ue_postopen;DatawindowChild	ldwc, ldwc2, ldwc_ordstatus, ldwc_shipordstatus,ldwc_wh_code
+event ue_postopen;call super::ue_postopen;DatawindowChild	ldwc, ldwc2, ldwc_ordstatus, ldwc_shipordstatus,ldwc_wh_code,ldwc3
  long ll_ret,ll_wh
  string ls_wh_code,lsFilter // Dinesh - 02/21/2024- SIMS-378- Google - SIMS – Shuttle Consolidation and BOL Printing (368)
 iw_window = This
@@ -2478,6 +2478,7 @@ idw_Dest = tab_main.tabpage_Main.tab_locations.tabpage_dest.dw_Dest
 idw_bol = tab_main.tabpage_bol.dw_bol_prt
 idw_order = tab_main.tabpage_order.dw_order	//Jxlim 12/22/2011 Pandora-OTM #337
 idw_packprint = tab_main.tabpage_order.dw_packprint  //Jxlim 12/22/2011 Pandora-OTM #337
+idw_warehouse = tab_main.tabpage_order.dw_warehouse // Dinesh - 04/15/2025- SIMS-690
 
 iSle_AWB = Tab_main.tabpage_main.sle_awb
 
@@ -2530,6 +2531,12 @@ g.of_set_warehouse_dropdown(ldwc) /* load from USer Warehouse DS */
 idw_search.GetChild("wh_code",ldwc2)
 ldwc.ShareData(ldwc2)
 
+// Begin- Dinesh - 04/15/2025- SIMS-690- PH- Shuttle Shipments - Fix Loading of WH Drop-down-690 
+idw_warehouse.insertrow(0) 
+idw_warehouse.GetChild("wh_code",ldwc3) 
+ldwc3.SetTransObject(SQLCA)
+ldwc.ShareData(ldwc3)
+// End- Dinesh - 04/15/2025- SIMS-690- PH- Shuttle Shipments - Fix Loading of WH Drop-down-690 
 //Carrier - no need to retrieve until needed
 idw_Search.GetChild("Carrier",ldwc)
 ldwc.SetTransObject(SQLCA)
@@ -2549,17 +2556,21 @@ If gs_project = 'PANDORA' Then
 	 ldwc_ordstatus.SetTransObject(SQLCA)	
 	 ldwc_ordstatus.Retrieve(gs_project)		
 	 
-	 // Beign -Dinesh -  SIMS-378 - Google - SIMS – Shuttle Consolidation and BOL Printing (368)
+ // Beign -Dinesh -  SIMS-378 - Google - SIMS – Shuttle Consolidation and BOL Printing (368)
 	 tab_main.tabpage_order.dw_shipment.dataobject ='d_shipment_order'
-	 tab_main.tabpage_order.dw_warehouse.SetTransObject(SQLCA)	
-	 tab_main.tabpage_order.dw_warehouse.Retrieve()
-	 tab_main.tabpage_order.dw_warehouse.GetChild('wh_code', ldwc_wh_code)
-	 ldwc_wh_code.SetTransObject(SQLCA)	
-	 ldwc_wh_code.Retrieve()
-	 lsFilter = "Upper(userid) = '" + Upper(gs_userid) + "'"
-	ldwc_wh_code.SetFilter(lsFilter)
-	ldwc_wh_code.Filter()
-	  // End - Dinesh - SIMS-378 - Google - SIMS – Shuttle Consolidation and BOL Printing (368)
+	
+//	 idw_warehouse.GetChild('wh_code', ldwc_wh_code)
+//	 ldwc_wh_code.SetTransObject(sqlca)
+//	 g.of_set_warehouse_dropdown(ldwc_wh_code)
+////	 tab_main.tabpage_order.dw_warehouse.SetTransObject(SQLCA)	
+//	 tab_main.tabpage_order.dw_warehouse.Retrieve(gs_project)
+//	 tab_main.tabpage_order.dw_warehouse.GetChild('wh_code', ldwc_wh_code)
+//	 ldwc_wh_code.SetTransObject(SQLCA)	
+//	 ldwc_wh_code.Retrieve(gs_project)
+//	 lsFilter = "Upper(userid) = '" + Upper(gs_userid) + "'"
+//	ldwc_wh_code.SetFilter(lsFilter)
+//	ldwc_wh_code.Filter()
+// End - Dinesh - SIMS-378 - Google - SIMS – Shuttle Consolidation and BOL Printing (368)
 	
 	//On the shipment main screen
 	 idw_main.object.ord_status.dddw.name='dddw_shipment_order_status_otm'		
@@ -2771,6 +2782,8 @@ idw_order.Retrieve(isShipNo) /*order records*/  	//Jxlim 12/22/2011 Pandora-OTM 
 
 idw_detail.Retrieve(isShipNo) /*detail records*/
 idw_Status.Retrieve(isShipNo) /*Status Records*/
+//idw_warehouse.SetTransObject(SQLCA)	// Dinesh - 04/15/2025
+//idw_warehouse.Retrieve(gs_project) // Dinesh - 04/15/2025
 
 /* dts 05/05/06 Now sorting newest to the top */
 idw_status.SetSort("status_date D")
@@ -2813,21 +2826,21 @@ if g.ibEtaMaintEnabled then
 //	tab_main.tabpage_main.cb_ETAmaint.visible = false
 end if
 
-// Beign -Dinesh -02/21/2024-  SIMS-378 - Google - SIMS – Shuttle Consolidation and BOL Printing (368)
-	 long ll_ret,ll_wh
-	 string ls_wh_code,lsFilter
-	 datawindowchild ldwc_wh_code
-	 tab_main.tabpage_order.dw_shipment.dataobject ='d_shipment_orders'
-	 tab_main.tabpage_order.dw_warehouse.SetTransObject(SQLCA)	
-	 tab_main.tabpage_order.dw_warehouse.Retrieve()
-	 tab_main.tabpage_order.dw_warehouse.GetChild('wh_code', ldwc_wh_code)
-	 ldwc_wh_code.SetTransObject(SQLCA)	
-	 ldwc_wh_code.Retrieve()
-	 lsFilter = "Upper(userid) = '" + Upper(gs_userid) + "'"
-	ldwc_wh_code.SetFilter(lsFilter)
-	ldwc_wh_code.Filter()
-	// End - Dinesh 02/21/2024 - SIMS-378 - Google - SIMS – Shuttle Consolidation and BOL Printing (368)
-
+//// Beign -Dinesh -02/21/2024-  SIMS-378 - Google - SIMS – Shuttle Consolidation and BOL Printing (368)
+//	 long ll_ret,ll_wh
+//	 string ls_wh_code,lsFilter
+//	 datawindowchild ldwc_wh_code
+//	 tab_main.tabpage_order.dw_shipment.dataobject ='d_shipment_orders'
+//	 tab_main.tabpage_order.dw_warehouse.SetTransObject(SQLCA)	
+//	 tab_main.tabpage_order.dw_warehouse.Retrieve()
+//	 tab_main.tabpage_order.dw_warehouse.GetChild('wh_code', ldwc_wh_code)
+//	 ldwc_wh_code.SetTransObject(SQLCA)	
+//	 ldwc_wh_code.Retrieve()
+//	 lsFilter = "Upper(userid) = '" + Upper(gs_userid) + "'"
+//	ldwc_wh_code.SetFilter(lsFilter)
+//	ldwc_wh_code.Filter()
+//	// End - Dinesh 02/21/2024 - SIMS-378 - Google - SIMS – Shuttle Consolidation and BOL Printing (368)
+//
 tab_main.tabpage_bol.dw_bol_entry.Reset()
 tab_main.tabpage_bol.dw_bol_prt.Reset()
 tab_main.tabpage_bol.cb_bol_print.Enabled = False /*Disable printing of BOL*/
@@ -3863,8 +3876,19 @@ long textcolor = 33554432
 borderstyle borderstyle = stylelowered!
 end type
 
-event modified;
-iw_window.TriggerEvent('ue_Retrieve')
+event modified;	datawindowchild ldwc_wh_code
+	string lsFilter
+	iw_window.TriggerEvent('ue_Retrieve')
+	
+//	tab_main.tabpage_order.dw_warehouse.SetTransObject(SQLCA)	
+//	tab_main.tabpage_order.dw_warehouse.Retrieve(gs_project)
+//	tab_main.tabpage_order.dw_warehouse.GetChild('wh_code', ldwc_wh_code)
+//	ldwc_wh_code.SetTransObject(SQLCA)	
+//	ldwc_wh_code.Retrieve(gs_project)
+//	lsFilter = "Upper(userid) = '" + Upper(gs_userid) + "'"
+//	ldwc_wh_code.SetFilter(lsFilter)
+//	ldwc_wh_code.Filter()
+//	
 end event
 
 type st_shipment_awb_bol_nbr from statictext within tabpage_main
@@ -4668,14 +4692,13 @@ end event
 
 type dw_warehouse from datawindow within tabpage_order
 integer x = 14
-integer y = 136
-integer width = 512
+integer y = 140
+integer width = 786
 integer height = 100
 integer taborder = 40
 string title = "none"
-string dataobject = "d_shipment_order_wh"
+string dataobject = "d_shipment_order_warehouse"
 boolean livescroll = true
-borderstyle borderstyle = stylelowered!
 end type
 
 event itemchanged;////Begin - 02/20/2024 - Dinesh - SIMS-378- Google - SIMS – Shuttle Consolidation and BOL Printing (368)

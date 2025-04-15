@@ -616,7 +616,7 @@ Select Count(distinct Carton_NO) Into :llLabelCount
 From Delivery_Packing with(nolock)
 Where do_no = :lsDONO
 And Carton_No > 0;
-//And Carton_No is not null; // Dinesh - 03/20/2025-  SIMS-680-Google - SIMS - Shipping Label
+//And Carton_No is not null; // Dinesh - 03/20/2025-  SIMS-688-Google - SIMS - Shipping Label
 
 
 //Print each detail Row 

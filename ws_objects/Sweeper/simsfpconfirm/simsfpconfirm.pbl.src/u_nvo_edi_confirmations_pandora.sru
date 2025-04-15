@@ -15147,7 +15147,8 @@ if is_trans_parm='Inbound' then
 	sql_syntax += " from receive_master rm with(nolock)"
 	sql_syntax += " inner join receive_putaway rp with(nolock) on rm.ro_no=rp.ro_no"
 	//sql_syntax += " inner join receive_serial_detail rsd with(nolock) on rm.ro_no=rsd.ro_no and rp.ID_NO=rsd.ID_NO" //Dhirendra- SIMS-51 PANDORA Commented this line because join is failing due toreceive_serial_detail table is no longer used
-	sql_syntax += " where rm.ro_no='"+as_trans_order_id+"' and line_item_no=" + string(il_LineNo) +";"                       //  so getting the serial_no from receive_putaway table .
+	//sql_syntax += " where rm.ro_no='"+as_trans_order_id+"' and line_item_no=" + string(il_LineNo) +";"  
+	sql_syntax += " where rm.ro_no='"+as_trans_order_id+"' and line_item_no=" + string(il_LineNo) +" and serial_no <> '-';"   /// Akash Baghel...03/24/2025.....SIMS-684 Development for Google - Serials sent as "-" in the Manual Inbound Order receipt//  so getting the serial_no from receive_putaway table .
 	ldsOC.Create(SQLCA.SyntaxFromSQL(sql_syntax,"", ERRORS))
 	
 	IF Len(ERRORS) > 0 THEN
