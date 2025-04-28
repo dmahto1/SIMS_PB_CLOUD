@@ -1,0 +1,475 @@
+HA$PBExportHeader$m_main.srm
+$PBExportComments$System main menu
+forward
+global type m_main from menu
+end type
+type m_file from menu within m_main
+end type
+type m_saveas from menu within m_file
+end type
+type m_clear from menu within m_file
+end type
+type m_print from menu within m_file
+end type
+type m_printsetup from menu within m_file
+end type
+type m_02 from menu within m_file
+end type
+type m_exit from menu within m_file
+end type
+type m_2 from menu within m_file
+end type
+type m_1 from menu within m_file
+end type
+type m_file from menu within m_main
+m_saveas m_saveas
+m_clear m_clear
+m_print m_print
+m_printsetup m_printsetup
+m_02 m_02
+m_exit m_exit
+m_2 m_2
+m_1 m_1
+end type
+type m_window from menu within m_main
+end type
+type m_tilevertical from menu within m_window
+end type
+type m_tilehorizontal from menu within m_window
+end type
+type m_cascade from menu within m_window
+end type
+type m_layer from menu within m_window
+end type
+type m_03 from menu within m_window
+end type
+type m_arrange_icons from menu within m_window
+end type
+type m_window from menu within m_main
+m_tilevertical m_tilevertical
+m_tilehorizontal m_tilehorizontal
+m_cascade m_cascade
+m_layer m_layer
+m_03 m_03
+m_arrange_icons m_arrange_icons
+end type
+type m_help from menu within m_main
+end type
+type m_contents from menu within m_help
+end type
+type m_index from menu within m_help
+end type
+type m_aboutsims from menu within m_help
+end type
+type m_help from menu within m_main
+m_contents m_contents
+m_index m_index
+m_aboutsims m_aboutsims
+end type
+global type m_main from menu
+m_file m_file
+m_window m_window
+m_help m_help
+end type
+end forward
+
+global type m_main from menu
+m_file m_file
+m_window m_window
+m_help m_help
+end type
+global m_main m_main
+
+type variables
+Boolean ibRefresh
+end variables
+
+on m_main.create
+m_main=this
+call super::create
+this.m_file=create m_file
+this.m_window=create m_window
+this.m_help=create m_help
+this.Item[UpperBound(this.Item)+1]=this.m_file
+this.Item[UpperBound(this.Item)+1]=this.m_window
+this.Item[UpperBound(this.Item)+1]=this.m_help
+end on
+
+on m_main.destroy
+call super::destroy
+destroy(this.m_file)
+destroy(this.m_window)
+destroy(this.m_help)
+end on
+
+type m_file from menu within m_main
+m_saveas m_saveas
+m_clear m_clear
+m_print m_print
+m_printsetup m_printsetup
+m_02 m_02
+m_exit m_exit
+m_2 m_2
+m_1 m_1
+end type
+
+on m_file.create
+call super::create
+this.text = "&FILE"
+this.m_saveas=create m_saveas
+this.m_clear=create m_clear
+this.m_print=create m_print
+this.m_printsetup=create m_printsetup
+this.m_02=create m_02
+this.m_exit=create m_exit
+this.m_2=create m_2
+this.m_1=create m_1
+this.Item[UpperBound(this.Item)+1]=this.m_saveas
+this.Item[UpperBound(this.Item)+1]=this.m_clear
+this.Item[UpperBound(this.Item)+1]=this.m_print
+this.Item[UpperBound(this.Item)+1]=this.m_printsetup
+this.Item[UpperBound(this.Item)+1]=this.m_02
+this.Item[UpperBound(this.Item)+1]=this.m_exit
+this.Item[UpperBound(this.Item)+1]=this.m_2
+this.Item[UpperBound(this.Item)+1]=this.m_1
+end on
+
+on m_file.destroy
+call super::destroy
+destroy(this.m_saveas)
+destroy(this.m_clear)
+destroy(this.m_print)
+destroy(this.m_printsetup)
+destroy(this.m_02)
+destroy(this.m_exit)
+destroy(this.m_2)
+destroy(this.m_1)
+end on
+
+type m_saveas from menu within m_file
+end type
+
+on m_saveas.create
+call super::create
+this.text = "Save As"
+this.microhelp = "Export Contents to a file"
+this.toolbaritemname = "SaveAs!"
+this.toolbaritemtext = "Export Contents to a file"
+this.toolbaritemorder = 99
+end on
+
+event clicked;message.StringParm = "SAVEAS"
+ParentWindow.TriggerEvent("ue_file")
+end event
+
+on m_saveas.destroy
+call super::destroy
+end on
+
+type m_clear from menu within m_file
+end type
+
+on m_clear.create
+call super::create
+this.text = "Clear"
+this.toolbaritemname = "Clear!"
+this.toolbaritemtext = "Clear"
+this.toolbaritemorder = 30
+end on
+
+event clicked;ParentWindow.TriggerEvent("ue_clear")
+end event
+
+on m_clear.destroy
+call super::destroy
+end on
+
+type m_print from menu within m_file
+end type
+
+event clicked;ParentWindow.TriggerEvent("ue_print")
+
+
+end event
+
+on m_print.create
+call super::create
+this.text = "&Print~tF4"
+this.shortcut = 115
+this.toolbaritemname = "Print!"
+this.toolbaritemtext = "Print"
+this.toolbaritemorder = 20
+end on
+
+on m_print.destroy
+call super::destroy
+end on
+
+type m_printsetup from menu within m_file
+end type
+
+on clicked;PrintSetUp()
+end on
+
+on m_printsetup.create
+call super::create
+this.text = "Pr&int Setup"
+end on
+
+on m_printsetup.destroy
+call super::destroy
+end on
+
+type m_02 from menu within m_file
+end type
+
+on m_02.create
+call super::create
+this.text = "-"
+end on
+
+on m_02.destroy
+call super::destroy
+end on
+
+type m_exit from menu within m_file
+end type
+
+on clicked;halt Close
+end on
+
+on m_exit.create
+call super::create
+this.text = "E&xit"
+this.toolbaritemname = "Exit!"
+this.toolbaritemspace = 1
+end on
+
+on m_exit.destroy
+call super::destroy
+end on
+
+type m_2 from menu within m_file
+end type
+
+on m_2.create
+call super::create
+this.text = "-"
+end on
+
+on m_2.destroy
+call super::destroy
+end on
+
+type m_1 from menu within m_file
+end type
+
+event clicked;parentWindow.TriggerEvent('ue_change_Log')
+end event
+
+on m_1.create
+call super::create
+this.text = "Change Log File"
+end on
+
+on m_1.destroy
+call super::destroy
+end on
+
+type m_window from menu within m_main
+m_tilevertical m_tilevertical
+m_tilehorizontal m_tilehorizontal
+m_cascade m_cascade
+m_layer m_layer
+m_03 m_03
+m_arrange_icons m_arrange_icons
+end type
+
+on m_window.create
+call super::create
+this.text = "&WINDOW"
+this.m_tilevertical=create m_tilevertical
+this.m_tilehorizontal=create m_tilehorizontal
+this.m_cascade=create m_cascade
+this.m_layer=create m_layer
+this.m_03=create m_03
+this.m_arrange_icons=create m_arrange_icons
+this.Item[UpperBound(this.Item)+1]=this.m_tilevertical
+this.Item[UpperBound(this.Item)+1]=this.m_tilehorizontal
+this.Item[UpperBound(this.Item)+1]=this.m_cascade
+this.Item[UpperBound(this.Item)+1]=this.m_layer
+this.Item[UpperBound(this.Item)+1]=this.m_03
+this.Item[UpperBound(this.Item)+1]=this.m_arrange_icons
+end on
+
+on m_window.destroy
+call super::destroy
+destroy(this.m_tilevertical)
+destroy(this.m_tilehorizontal)
+destroy(this.m_cascade)
+destroy(this.m_layer)
+destroy(this.m_03)
+destroy(this.m_arrange_icons)
+end on
+
+type m_tilevertical from menu within m_window
+end type
+
+on clicked;ParentWindow.ArrangeSheets(Tile!)
+end on
+
+on m_tilevertical.create
+call super::create
+this.text = "&Tile Vertical"
+end on
+
+on m_tilevertical.destroy
+call super::destroy
+end on
+
+type m_tilehorizontal from menu within m_window
+end type
+
+on clicked;ParentWindow.ArrangeSheets(TileHorizontal!)
+end on
+
+on m_tilehorizontal.create
+call super::create
+this.text = "Tile &Horizontal"
+end on
+
+on m_tilehorizontal.destroy
+call super::destroy
+end on
+
+type m_cascade from menu within m_window
+end type
+
+on clicked;ParentWindow.ArrangeSheets(Cascade!)
+end on
+
+on m_cascade.create
+call super::create
+this.text = "&Cascade"
+end on
+
+on m_cascade.destroy
+call super::destroy
+end on
+
+type m_layer from menu within m_window
+end type
+
+on clicked;ParentWindow.ArrangeSheets(Layer!)
+end on
+
+on m_layer.create
+call super::create
+this.text = "&Layer"
+end on
+
+on m_layer.destroy
+call super::destroy
+end on
+
+type m_03 from menu within m_window
+end type
+
+on m_03.create
+call super::create
+this.text = "-"
+end on
+
+on m_03.destroy
+call super::destroy
+end on
+
+type m_arrange_icons from menu within m_window
+end type
+
+on clicked;ParentWindow.ArrangeSheets(Icons!)
+end on
+
+on m_arrange_icons.create
+call super::create
+this.text = "Arrange &Icons"
+end on
+
+on m_arrange_icons.destroy
+call super::destroy
+end on
+
+type m_help from menu within m_main
+m_contents m_contents
+m_index m_index
+m_aboutsims m_aboutsims
+end type
+
+on m_help.create
+call super::create
+this.text = "&HELP"
+this.m_contents=create m_contents
+this.m_index=create m_index
+this.m_aboutsims=create m_aboutsims
+this.Item[UpperBound(this.Item)+1]=this.m_contents
+this.Item[UpperBound(this.Item)+1]=this.m_index
+this.Item[UpperBound(this.Item)+1]=this.m_aboutsims
+end on
+
+on m_help.destroy
+call super::destroy
+destroy(this.m_contents)
+destroy(this.m_index)
+destroy(this.m_aboutsims)
+end on
+
+type m_contents from menu within m_help
+end type
+
+on m_contents.create
+call super::create
+this.text = "Contents"
+this.toolbaritemvisible = false
+end on
+
+on m_contents.destroy
+call super::destroy
+end on
+
+event clicked;ShowHelp("simshelp.hlp",Index!)
+end event
+
+type m_index from menu within m_help
+end type
+
+on m_index.create
+call super::create
+this.text = "Index"
+this.toolbaritemname = "Help!"
+this.toolbaritemtext = "Help"
+this.toolbaritemorder = 98
+end on
+
+on m_index.destroy
+call super::destroy
+end on
+
+event clicked;ParentWindow.PostEvent("ue_help")
+end event
+
+type m_aboutsims from menu within m_help
+end type
+
+on m_aboutsims.create
+call super::create
+this.text = "About SIMS"
+this.toolbaritemvisible = false
+end on
+
+on m_aboutsims.destroy
+call super::destroy
+end on
+
+event clicked;//Open(w_sims_about)
+end event
+

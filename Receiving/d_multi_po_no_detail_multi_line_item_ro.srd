@@ -1,0 +1,38 @@
+HA$PBExportHeader$d_multi_po_no_detail_multi_line_item_ro.srd
+$PBExportComments$- Update Content information for Stock Adjustment
+release 7;
+datawindow(units=0 timer_interval=0 color=16777215 processing=0 HTMLDW=no print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.prompt=no print.buttons=no print.preview.buttons=no )
+header(height=84 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=84 color="536870912" )
+table(column=(type=char(16) updatewhereclause=yes key=yes name=po_no dbname="Receive_Xref.PO_NO" )
+ column=(type=char(10) updatewhereclause=yes key=yes name=project_id dbname="Receive_Xref.Project_ID" )
+ column=(type=char(16) updatewhereclause=yes key=yes name=ro_no dbname="Receive_Xref.RO_NO" )
+ column=(type=decimal(0) updatewhereclause=yes key=yes name=line_item_no dbname="Receive_Xref.Line_Item_No" )
+ column=(type=char(50) updatewhereclause=yes key=yes name=sku dbname="Receive_Xref.SKU" )
+ column=(type=char(20) updatewhereclause=yes key=yes name=supp_code dbname="Receive_Xref.Supp_Code" )
+ retrieve="  SELECT Receive_XRef.PO_NO,   
+         Receive_XRef.Project_ID,   
+         Receive_XRef.RO_NO,   
+         Receive_XRef.Line_Item_No,   
+         Receive_XRef.SKU,   
+         Receive_XRef.Supp_Code   
+    FROM Receive_XRef
+   WHERE ( Receive_XRef.SKU = :as_sku ) AND  
+         ( Receive_XRef.SKU > '0' ) and
+			( Receive_XRef.RO_NO = :an_ro_no)
+ORDER BY Receive_XRef.RO_No ASC,   
+         Receive_XRef.SKU ASC   
+" update="Receive_XRef" updatewhere=0 updatekeyinplace=yes arguments=(("as_sku", string),("an_ro_no", string))  sort="line_item_no A po_no A " )
+group(level=1 header.height=0 trailer.height=0 by=("line_item_no" ) header.color="536870912" trailer.color="536870912" )
+text(band=header alignment="1" text="Line Item #:" border="0" color="0" x="5" y="8" height="64" width="366"  name=t_1  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+text(band=header alignment="0" text="PO Number" border="0" color="0" x="562" y="8" height="68" width="462"  name=serial_no_t  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+column(band=header id=4 alignment="0" tabsequence=32766 border="0" color="0" x="393" y="8" height="68" width="146" format="[general]"  name=line_item_no edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=5 alignment="0" tabsequence=32766 border="0" color="0" x="4617" y="0" height="76" width="1600" format="[general]"  name=sku edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-12" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=6 alignment="0" tabsequence=32766 border="0" color="0" x="6217" y="0" height="76" width="640" format="[general]"  name=supp_code edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-12" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="0" color="0" x="2103" y="4" height="76" width="320" format="[general]"  name=project_id edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-12" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="0" color="0" x="2423" y="4" height="76" width="512" format="[general]"  name=ro_no edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-12" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="0" color="0" x="562" y="8" height="76" width="512" format="[general]"  name=po_no edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" )

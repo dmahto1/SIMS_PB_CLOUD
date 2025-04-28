@@ -1,0 +1,27 @@
+﻿$PBExportHeader$dddw_inventory_type_siemens_lm.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=16777215 processing=1 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no grid.lines=1 selected.mouse=no )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=88 color="536870912" )
+table(column=(type=char(1) update=yes updatewhereclause=yes name=inv_type dbname="Inv_Type" )
+ column=(type=char(30) update=yes updatewhereclause=yes name=inv_type_desc dbname="Inv_Type_Desc" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=inventory_shippable_ind dbname="Inventory_Shippable_Ind" )
+ column=(type=char(10) updatewhereclause=yes name=project_id dbname="Project_ID" )
+ retrieve="SELECT  Inventory_Type.Inv_Type ,
+           Inventory_Type.Inv_Type_Desc ,
+           Inventory_Type.Inventory_Shippable_Ind ,
+           Inventory_Type.Project_ID     
+        FROM Inventory_Type   
+where project_id = 'SIEMENS-LM'
+        ORDER BY Inventory_Type.Inv_Type_Desc          ASC  " )
+column(band=detail id=2 alignment="0" tabsequence=10 border="0" color="0" x="9" y="4" height="64" width="1394" format="[general]" html.valueishtml="0"  name=inv_type_desc visible="1" edit.limit=30 edit.case=any edit.autoselect=yes edit.nilisnull=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=1 alignment="0" tabsequence=20 border="0" color="0" x="1417" y="4" height="76" width="498" html.valueishtml="0"  name=inv_type visible="1"  font.face="Arial" font.height="-12" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="Inv Type" border="0" color="0" x="1413" y="4" height="76" width="503" html.valueishtml="0"  name=inv_type_t visible="1"  font.face="Arial" font.height="-12" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=4 alignment="0" tabsequence=30 border="0" color="0" x="1929" y="8" height="76" width="311" html.valueishtml="0"  name=project_id visible="1"  font.face="Arial" font.height="-12" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="Project Id" border="0" color="0" x="1925" y="4" height="76" width="315" html.valueishtml="0"  name=project_id_t visible="1"  font.face="Arial" font.height="-12" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

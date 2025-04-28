@@ -1,0 +1,47 @@
+﻿$PBExportHeader$d_ro_list_sku.srd
+$PBExportComments$*Receiving Detail Record
+release 7;
+datawindow(units=0 timer_interval=0 color=16777215 processing=1 HTMLDW=no print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.prompt=no print.buttons=no print.preview.buttons=no grid.lines=0 )
+header(height=132 color="536870912" )
+summary(height=116 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=72 color="536870912" )
+table(column=(type=char(50) update=yes updatewhereclause=yes name=sku dbname="Item_Master.SKU" )
+ column=(type=char(50) update=yes updatewhereclause=yes name=alternate_sku dbname="Item_Master.Alternate_SKU" )
+ column=(type=char(20) update=yes updatewhereclause=yes name=supp_code dbname="Item_Master.Supp_Code" )
+ column=(type=decimal(0) update=yes updatewhereclause=yes name=owner_id dbname="Item_Master.Owner_ID" )
+ column=(type=char(4) updatewhereclause=yes name=uom_1 dbname="Item_Master.UOM_1" )
+ column=(type=char(70) updatewhereclause=yes name=description dbname="Item_Master.Description" )
+ column=(type=char(3) updatewhereclause=yes name=country_of_origin_default dbname="Item_Master.Country_of_Origin_Default" )
+ column=(type=decimal(5) updatewhereclause=yes name=req_qty dbname="Item_Master.req_qty" validation="Number(GetText()) >= 0 and Number(GetText()) <= 9999999" validationmsg="~"Please enter a value between 0 and 9999999~"" )
+ retrieve="  SELECT dbo.Item_Master.SKU,   
+         dbo.Item_Master.Alternate_SKU,   
+         dbo.Item_Master.Supp_Code,   
+         dbo.Item_Master.Owner_ID,   
+         dbo.Item_Master.UOM_1,   
+         dbo.Item_Master.Description,    
+         dbo.Item_Master.Country_of_Origin_Default, 
+0.00000 as req_qty  
+    FROM dbo.Item_Master  
+   WHERE ( dbo.Item_Master.project_id = :as_project ) AND  
+         ( dbo.Item_Master.Supp_Code = :as_supp_code )   
+ORDER BY dbo.Item_Master.SKU ASC   
+" arguments=(("as_project", string),("as_supp_code", string))  sort="sku A alternate_sku A owner_id A " )
+text(band=header alignment="2" text="Row#" border="6" color="0" x="9" y="12" height="112" width="137"  name=t_5  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="78567654" )
+text(band=header alignment="2" text="Req Qty" border="6" color="0" x="155" y="12" height="112" width="343"  name=t_8  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="80269524" )
+text(band=header alignment="2" text="SKU" border="6" color="0" x="507" y="12" height="112" width="590"  name=sku_t  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="80269524" )
+text(band=header alignment="2" text="ALT SKU" border="6" color="0" x="1106" y="12" height="112" width="471"  name=alternate_sku_t  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="80269524" )
+text(band=header alignment="0" text="      Description" border="6" color="0" x="1586" y="12" height="112" width="1536"  name=t_1  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="80269524" )
+text(band=header alignment="2" text="Owner Id" border="6" color="0" x="3131" y="12" height="112" width="288"  name=t_2  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="80269524" )
+text(band=header alignment="0" text="COO" border="6" color="0" x="3429" y="12" height="112" width="123"  name=t_3  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="80269524" )
+text(band=header alignment="2" text="Uom 1" border="6" color="0" x="3561" y="12" height="112" width="256"  name=t_4  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="80269524" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="0" color="0" x="1106" y="4" height="60" width="471" format="[general]"  name=alternate_sku edit.limit=0 edit.case=upper edit.autoselect=yes  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="0" color="0" x="507" y="4" height="60" width="590" format="[general]"  name=sku edit.limit=50 edit.case=upper edit.focusrectangle=no edit.autoselect=yes edit.required=yes edit.autohscroll=yes  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=detail alignment="2" expression="GetRow()"border="0" color="0" x="9" y="4" height="60" width="137" format="[GENERAL]"  name=compute_1  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" )
+column(band=detail id=8 alignment="2" tabsequence=10 border="0" color="0" x="155" y="4" height="60" width="343" format="#,##0.#####"  name=req_qty editmask.mask="#,###" editmask.focusrectangle=no  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=5 alignment="0" tabsequence=32766 border="0" color="0" x="3561" y="4" height="60" width="256" format="[general]"  name=uom_1 edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=6 alignment="0" tabsequence=32766 border="0" color="0" x="1586" y="4" height="60" width="1536" format="[general]"  name=description edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=4 alignment="2" tabsequence=32766 border="0" color="0" x="3131" y="4" height="60" width="288" format="[general]"  name=owner_id edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+column(band=detail id=7 alignment="0" tabsequence=32766 border="0" color="0" x="3429" y="4" height="60" width="123" format="[general]"  name=country_of_origin_default edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" )

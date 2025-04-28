@@ -1,0 +1,68 @@
+﻿$PBExportHeader$w_nike_delivery_pack_disc_rpt.srd
+$PBExportComments$Ver :~tEWMS 2.0 091028#11 SARUN
+release 11;
+datawindow(units=2 timer_interval=60000 color=16777215 processing=1 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 250 print.margin.right = 250 print.margin.top = 250 print.margin.bottom = 250 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes print.preview.outline=yes hidegrayline=no showbackcoloronxp=no grid.lines=0 )
+header(height=1447 color="536870912" )
+summary(height=281 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=197 color="536870912" )
+table(column=(type=char(20) updatewhereclause=yes name=delivery_master_do_no dbname="Delivery_Master.DO_No" )
+ column=(type=datetime updatewhereclause=yes name=delivery_master_reschedule_date dbname="Delivery_Master.Reschedule_Date" )
+ column=(type=char(50) updatewhereclause=yes name=delivery_master_ship_to_name dbname="Delivery_Master.ship_to_name" )
+ column=(type=char(50) updatewhereclause=yes name=delivery_detail_sku dbname="Delivery_Detail.SKU" )
+ column=(type=decimal(5) updatewhereclause=yes identity=yes name=creq_qty dbname="req_qty" )
+ column=(type=decimal(5) updatewhereclause=yes identity=yes name=cpick_qty dbname="pick_qty" )
+ column=(type=decimal(5) updatewhereclause=yes identity=yes name=cpack_qty dbname="Pack_QTY" )
+ column=(type=char(20) updatewhereclause=yes name=cdel_no dbname="Delivery_Detail.DEL_NO" )
+ retrieve="  SELECT dbo.Delivery_Master.invoice_no as DO_No,   
+         dbo.Delivery_Master.schedule_date as Reschedule_Date,   
+         dbo.Delivery_Master.cust_name as ship_to_name,   
+         dbo.Delivery_Detail.SKU ,
+			SUM(Delivery_Detail.Req_Qty) req_qty,
+			SUM(Delivery_Detail.Alloc_Qty) pick_qty,
+			ISNULL((SELECT SUM(Quantity) FROM Delivery_Packing where do_no = dbo.Delivery_Master.DO_No and sku = Delivery_Detail.SKU),0) Pack_QTY,
+			Delivery_Detail.User_Field1 as DEL_NO 
+    FROM dbo.Delivery_Detail,   
+         dbo.Delivery_Master  
+   WHERE  ( dbo.Delivery_Master.project_id = :project_id ) and  
+		 ( dbo.Delivery_Detail.DO_No = dbo.Delivery_Master.DO_No ) and  
+         ( ( dbo.Delivery_Master.invoice_no = :rt_do ) )    
+group by 	Delivery_Master.DO_No,
+			  	Delivery_Master.Invoice_No ,     
+				Delivery_Master.schedule_date,     
+				Delivery_Master.cust_name,     
+		    	Delivery_Detail.SKU,
+			Delivery_Detail.User_Field1
+" arguments=(("project_id", string),("rt_do", string)) )
+text(band=header alignment="2" text="SKU" border="0" color="0" x="20" y="1166" height="208" width="1145" html.valueishtml="0"  name=delivery_master_reschedule_date_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Quanitity" border="0" color="0" x="1187" y="1166" height="208" width="833" html.valueishtml="0"  name=delivery_master_ship_to_name_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Allocated" border="0" color="0" x="2041" y="1166" height="208" width="833" html.valueishtml="0"  name=delivery_detail_sku_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Packed" border="0" color="0" x="2895" y="1166" height="208" width="843" html.valueishtml="0"  name=t_3 visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Pack Diff" border="0" color="0" x="3760" y="1166" height="208" width="843" html.valueishtml="0"  name=t_4 visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Delivery No." border="0" color="0" x="4625" y="1166" height="208" width="1010" html.valueishtml="0"  name=t_5 visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="Delivery Master Do No" border="0" color="0" x="5656" y="10" height="197" width="1229" html.valueishtml="0"  name=delivery_master_do_no_t visible="1"  font.face="Tahoma" font.height="-12" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="0" color="0" x="20" y="10" height="177" width="1145" format="@@@@@@-@@@-@@@@@@" html.valueishtml="0"  name=delivery_detail_sku visible="1" edit.limit=16 edit.case=any edit.format="@@@@@@-@@@-@@@@@@" edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="2" tabsequence=32766 border="0" color="0" x="1187" y="10" height="177" width="833" format="[general]" html.valueishtml="0"  name=creq_qty visible="1" edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="2" tabsequence=32766 border="0" color="0" x="2041" y="10" height="177" width="833" format="[general]" html.valueishtml="0"  name=cpick_qty visible="1" edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=7 alignment="2" tabsequence=32766 border="0" color="0" x="2895" y="10" height="177" width="843" format="[general]" html.valueishtml="0"  name=cpack_qty visible="1" edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=detail alignment="2" expression="cpack_qty - cpick_qty "border="0" color="0" x="3760" y="10" height="177" width="843" format="[general]" html.valueishtml="0"  name=pack_diff visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=8 alignment="0" tabsequence=32766 border="0" color="0" x="4625" y="10" height="177" width="1010" format="[general]" html.valueishtml="0"  name=cdel_no visible="1" edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="0" color="0" x="5666" y="0" height="166" width="1218" format="[general]" html.valueishtml="0"  name=delivery_master_do_no visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=summary alignment="2" expression="sum(cpack_qty for all)"border="0" color="0" x="2895" y="42" height="177" width="843" format="[general]" html.valueishtml="0"  name=compute_1 visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=summary alignment="2" expression="sum( cpick_qty  -   cpack_qty  for all)"border="0" color="0" x="3760" y="42" height="177" width="843" format="[general]" html.valueishtml="0"  name=compute_2 visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=summary alignment="2" expression="sum(cpick_qty for all)"border="0" color="0" x="2041" y="42" height="177" width="833" format="[general]" html.valueishtml="0"  name=compute_3 visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=summary alignment="1" text="Total :" border="0" color="0" x="20" y="21" height="208" width="1145" html.valueishtml="0"  name=t_7 visible="1"  font.face="Arial" font.height="-12" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+column(band=foreground id=2 alignment="0" tabsequence=32766 border="0" color="0" x="20" y="625" height="197" width="3000" format="mm/dd/yyyy hh:mm:ss" html.valueishtml="0"  name=delivery_master_reschedule_date visible="1"  resizeable=1  moveable=1 edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=foreground id=3 alignment="0" tabsequence=32766 border="0" color="0" x="20" y="864" height="197" width="3000" format="[general]" html.valueishtml="0"  name=delivery_master_ship_to_name visible="1"  resizeable=1  moveable=1 edit.limit=40 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=foreground alignment="0" expression="today()"border="0" color="0" x="31" y="375" height="208" width="1802" format="mm/dd/yyyy hh:mm:ss" html.valueishtml="0"  name=compute_4 visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" pagingmethod=0 generatedddwframes="1" )
+xhtmlgen() cssgen(sessionspecific="0" )
+xmlgen(inline="0" )
+xsltgen()
+jsgen()
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )
+export.xhtml()
+ 

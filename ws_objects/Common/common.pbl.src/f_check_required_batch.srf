@@ -1,0 +1,49 @@
+﻿$PBExportHeader$f_check_required_batch.srf
+global type f_check_required_batch from function_object
+end type
+
+forward prototypes
+global function integer f_check_required_batch (ref string as_title, ref datawindow adw_control, ref string as_error_txt)
+end prototypes
+
+global function integer f_check_required_batch (ref string as_title, ref datawindow adw_control, ref string as_error_txt);//MEA - 5/13 - Batch Mode
+
+Integer li_colnbr = 1
+Long ll_row = 1
+String ls_colname, ls_textname
+
+// Find the first empty row and column, if any
+
+IF adw_control.FindRequired(Primary!, ll_row, li_colnbr, ls_colname, False) < 1 THEN
+	RETURN -1
+END IF
+
+// Was any row found?
+
+IF ll_row <> 0 THEN
+
+// Get the text of that column's label.
+
+	ls_textname = ls_colname + "_t.Text"
+	ls_colname = adw_control.Describe(ls_textname)
+	If Right(ls_colname,1) = ":" Then
+		ls_colname = Left(ls_colname, Len(ls_colname) - 1)
+	End If
+	
+// Tell the user which row and column to fill in
+
+	as_error_txt = "Please enter a value for '" + ls_colname + "'"
+
+//	MessageBox(as_title, "Please enter a value for '" + ls_colname + "'", StopSign! )
+//	adw_control.SetColumn(li_colnbr)
+//	adw_control.ScrollToRow(ll_row)
+//	adw_control.SetFocus()
+	RETURN -1
+
+END IF
+
+// Return success code if all required rows and columns have data
+
+RETURN 1
+end function
+

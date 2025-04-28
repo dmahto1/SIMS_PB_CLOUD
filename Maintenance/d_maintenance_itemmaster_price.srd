@@ -1,0 +1,61 @@
+HA$PBExportHeader$d_maintenance_itemmaster_price.srd
+$PBExportComments$- itemmaster
+release 9;
+datawindow(units=0 timer_interval=0 color=16777215 processing=1 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no grid.lines=0 grid.columnmove=no )
+header(height=76 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=76 color="536870912" )
+table(column=(type=char(10) update=yes updatewhereclause=yes key=yes name=project_id dbname="Project_ID" )
+ column=(type=char(50) update=yes updatewhereclause=yes key=yes name=sku dbname="SKU" )
+ column=(type=char(3) update=yes updatewhereclause=yes key=yes name=price_class dbname="Price_Class" )
+ column=(type=decimal(4) update=yes updatewhereclause=yes name=price_1 dbname="Price_1" initial="0" validation="Number(GetText()) >= 0 and Number(GetText()) <= 9999999.9999" validationmsg="~"Please enter a value between 0 and 9999999.9999~"" )
+ column=(type=decimal(4) update=yes updatewhereclause=yes name=price_2 dbname="Price_2" initial="0" validation="Number(GetText()) >= 0 and Number(GetText()) <= 9999999.9999" validationmsg="~"Please enter a value between 0 and 9999999.9999~"" )
+ column=(type=decimal(4) update=yes updatewhereclause=yes name=price_3 dbname="Price_3" initial="0" validation="Number(GetText()) >= 0 and Number(GetText()) <= 9999999.9999" validationmsg="~"Please enter a value between 0 and 9999999.9999~"" )
+ column=(type=decimal(4) update=yes updatewhereclause=yes name=price_4 dbname="Price_4" initial="0" validation="Number(GetText()) >= 0 and Number(GetText()) <= 9999999.9999" validationmsg="~"Please enter a value between 0 and 9999999.9999~"" )
+ column=(type=decimal(4) update=yes updatewhereclause=yes name=price_5 dbname="Price_5" initial="0" validation="Number(GetText()) >= 0 and Number(GetText()) <= 9999999.9999" validationmsg="~"Please enter a value between 0 and 9999999.9999~"" )
+ column=(type=decimal(4) update=yes updatewhereclause=yes name=price_6 dbname="Price_6" initial="0" validation="Number(GetText()) >= 0 and Number(GetText()) <= 9999999.9999" validationmsg="~"Please enter a value between 0 and 9999999.9999~"" )
+ column=(type=decimal(4) update=yes updatewhereclause=yes name=price_7 dbname="Price_7" initial="0" validation="Number(GetText()) >= 0 and Number(GetText()) <= 9999999.9999" validationmsg="~"Please enter a value between 0 and 9999999.9999~"" )
+ column=(type=char(20) update=yes updatewhereclause=yes key=yes name=supp_code dbname="Supp_Code" )
+ column=(type=char(10) update=yes updatewhereclause=yes name=currency_cd dbname="Currency_CD" )
+ column=(type=char(50) update=yes updatewhereclause=yes name=user_field1 dbname="User_Field1" )
+ retrieve="SELECT  Price_Master.Project_ID ,
+           Price_Master.SKU ,
+           Price_Master.Price_Class ,
+           Price_Master.Price_1 ,
+           Price_Master.Price_2 ,
+           Price_Master.Price_3 ,
+           Price_Master.Price_4 ,
+           Price_Master.Price_5 ,
+           Price_Master.Price_6 ,
+           Price_Master.Price_7 ,
+           Price_Master.Supp_Code,
+			  Price_Master.Currency_CD,
+   		  Price_Master.User_Field1
+        FROM Price_Master      
+        WHERE ( Price_Master.SKU = :a_sku ) and          ( Price_Master.Project_ID = :a_project ) and          ( Price_Master.Supp_Code = :a_supplier )   " update="Price_Master" updatewhere=0 updatekeyinplace=yes arguments=(("a_project", string),("a_sku", string),("a_supplier", string)) )
+text(band=header alignment="2" text="Class" border="0" color="0" x="9" y="8" height="64" width="247" html.valueishtml="0"  name=price_class_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Price 1" border="0" color="0" x="265" y="8" height="64" width="315" html.valueishtml="0"  name=price_1_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Price 2" border="0" color="0" x="590" y="8" height="64" width="315" html.valueishtml="0"  name=price_2_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Price 3" border="0" color="0" x="914" y="8" height="64" width="315" html.valueishtml="0"  name=price_3_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Price 4" border="0" color="0" x="1239" y="8" height="64" width="315" html.valueishtml="0"  name=price_4_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Price 5" border="0" color="0" x="1563" y="8" height="64" width="315" html.valueishtml="0"  name=price_5_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Price 6" border="0" color="0" x="1888" y="8" height="64" width="315" html.valueishtml="0"  name=price_6_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Price 7" border="0" color="0" x="2213" y="8" height="64" width="315" html.valueishtml="0"  name=price_7_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Currency CD" border="0" color="33554432" x="2537" y="8" height="64" width="370" html.valueishtml="0"  name=currency_cd_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+text(band=header alignment="2" text="User Field1" border="0" color="33554432" x="2917" y="8" height="64" width="526" html.valueishtml="0"  name=user_field1_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+column(band=detail id=3 alignment="0" tabsequence=10 border="0" color="0" x="9" y="4" height="68" width="247" format="[general]" html.valueishtml="0"  name=price_class visible="1" edit.limit=3 edit.case=upper edit.autoselect=yes edit.required=yes edit.nilisnull=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=12 alignment="0" tabsequence=90 border="0" color="0" x="2537" y="4" height="64" width="370" format="[general]" html.valueishtml="0"  name=currency_cd visible="1" edit.limit=0 edit.case=upper edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=13 alignment="0" tabsequence=100 border="0" color="0" x="2917" y="4" height="64" width="526" format="[general]" html.valueishtml="0"  name=user_field1 visible="1" edit.limit=0 edit.case=upper edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="1" tabsequence=20 border="0" color="0" x="265" y="4" height="68" width="315" format="0.00" html.valueishtml="0"  name=price_1 visible="1" edit.limit=0 edit.case=any edit.format="0.00" edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="1" tabsequence=30 border="0" color="0" x="590" y="4" height="68" width="315" format="0.00" html.valueishtml="0"  name=price_2 visible="1" edit.limit=0 edit.case=any edit.format="0.00" edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="1" tabsequence=40 border="0" color="0" x="914" y="4" height="68" width="315" format="0.00" html.valueishtml="0"  name=price_3 visible="1" edit.limit=0 edit.case=any edit.format="0.00" edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=7 alignment="1" tabsequence=50 border="0" color="0" x="1239" y="4" height="68" width="315" format="0.00" html.valueishtml="0"  name=price_4 visible="1" edit.limit=0 edit.case=any edit.format="0.00" edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=8 alignment="1" tabsequence=60 border="0" color="0" x="1563" y="4" height="68" width="315" format="0.00" html.valueishtml="0"  name=price_5 visible="1" edit.limit=0 edit.case=any edit.format="0.00" edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=9 alignment="1" tabsequence=70 border="0" color="0" x="1888" y="4" height="68" width="315" format="0.00" html.valueishtml="0"  name=price_6 visible="1" edit.limit=0 edit.case=any edit.format="0.00" edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=10 alignment="1" tabsequence=80 border="0" color="0" x="2213" y="4" height="68" width="315" format="0.00" html.valueishtml="0"  name=price_7 visible="1" edit.limit=0 edit.case=any edit.format="0.00" edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

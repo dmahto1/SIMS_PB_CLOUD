@@ -1,0 +1,27 @@
+HA$PBExportHeader$f_string_replace.srf
+$PBExportComments$Given a source string, replace all occurences of string x with string y.
+global type f_string_replace from function_object
+end type
+
+forward prototypes
+global function string f_string_replace (string as_source_string, string as_token_to_find, string as_replace_with_this)
+end prototypes
+
+global function string f_string_replace (string as_source_string, string as_token_to_find, string as_replace_with_this);/*
+	Within a given a source string, replace all occurrences of string x with string y.
+	Example: to replace all carriage return and line feeds within the source string, 
+	with an empty string, make the following call:
+	
+		f_string_replace(ls_source_string, "~r~n", "  ")
+*/
+
+if Pos(as_source_string, as_token_to_find) > 0 then
+	as_source_string = Replace(as_source_string, Pos(as_source_string, as_token_to_find), Len(as_token_to_find), as_replace_with_this)
+	return f_string_replace(as_source_string, as_token_to_find, as_replace_with_this)
+else
+	// base case
+	return as_source_string
+end if
+
+end function
+

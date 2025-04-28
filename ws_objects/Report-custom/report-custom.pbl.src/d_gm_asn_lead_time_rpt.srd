@@ -1,0 +1,67 @@
+﻿$PBExportHeader$d_gm_asn_lead_time_rpt.srd
+$PBExportComments$GM ASN Lead Time Report
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=396 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=60 color="536870912" )
+table(column=(type=char(30) updatewhereclause=yes name=receive_master_supp_invoice_no dbname="Receive_Master.Supp_Invoice_No" )
+ column=(type=char(20) updatewhereclause=yes name=receive_master_supp_code dbname="Receive_Master.Supp_Code" )
+ column=(type=datetime updatewhereclause=yes name=receive_master_request_date dbname="Receive_Master.Request_Date" )
+ column=(type=datetime updatewhereclause=yes name=receive_master_c_receipt_date dbname="Receive_Master.c_receipt_Date" )
+ column=(type=char(35) updatewhereclause=yes name=supplier_state dbname="Supplier.State" )
+ column=(type=char(30) updatewhereclause=yes name=supplier_country dbname="Supplier.Country" )
+ column=(type=char(40) updatewhereclause=yes name=supplier_supp_name dbname="Supplier.Supp_Name" )
+ column=(type=long updatewhereclause=yes name=c_lead_time dbname="c_lead_time" )
+ retrieve="  SELECT    
+         dbo.Receive_Master.Supp_Invoice_No,   
+         dbo.Receive_Master.Supp_Code,  
+			dbo.Receive_Master.Request_Date, 
+			Case When dbo.Receive_Master.Putaway_Start_time is NOt Null Then dbo.Receive_Master.Putaway_Start_time Else dbo.Receive_Master.Complete_Date  End as c_receipt_Date,  
+         dbo.Supplier.State,   
+         dbo.Supplier.Country,   
+         dbo.Supplier.Supp_Name, 
+			DateDiff(dd, Request_Date, Case When dbo.Receive_Master.Putaway_Start_time is NOt Null Then dbo.Receive_Master.Putaway_Start_time Else dbo.Receive_Master.Complete_Date  End) as c_lead_time  
+    FROM dbo.Receive_Master,   
+         dbo.Supplier  
+   WHERE ( dbo.Supplier.Project_ID = dbo.Receive_Master.Project_ID ) and  
+         ( dbo.Supplier.Supp_Code = dbo.Receive_Master.Supp_Code )   and
+			Ord_status in ('C', 'P') and
+			Request_Date is not null and
+			(Putaway_start_time is not null or Complete_Date is not null)
+"  sort="receive_master_supp_code A receive_master_request_date A receive_master_supp_invoice_no A " )
+group(level=1 header.height=0 trailer.height=148 by=("receive_master_supp_code" ) header.color="536870912" trailer.color="536870912" )
+text(band=header alignment="2" text="ASN Lead Time Report" border="0" color="33554432" x="5" y="16" height="100" width="3378" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-16" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+line(band=header x1="5" y1="356" x2="3419" y2="352"  name=l_2 visible="1" pen.style="0" pen.width="9" pen.color="0"  background.mode="2" background.color="16777215" )
+compute(band=header alignment="1" expression="'Page ' + page() + ' of ' + PageCount()"border="0" color="33554432" x="2775" y="20" height="60" width="599" format="[GENERAL]" html.valueishtml="0"  name=compute_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=header alignment="0" expression="'Date: ' + String(today(),'mm/dd/yyyy hh:mm')"border="0" color="33554432" x="9" y="24" height="56" width="672" format="[GENERAL]" html.valueishtml="0"  name=compute_2 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=detail alignment="0" expression=" receive_master_supp_code + ' - ' +  supplier_supp_name "border="0" color="33554432" x="18" y="4" height="56" width="1065" format="[GENERAL]" html.valueishtml="0"  name=c_supplier visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="0" color="33554432" x="2720" y="0" height="56" width="297" format="[shortdate]" html.valueishtml="0"  name=receive_master_c_receipt_date visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="0" tabsequence=32766 border="0" color="33554432" x="1358" y="4" height="56" width="443" format="[general]" html.valueishtml="0"  name=supplier_country visible="1" edit.limit=30 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="0" tabsequence=32766 border="0" color="33554432" x="1115" y="4" height="56" width="210" format="[general]" html.valueishtml="0"  name=supplier_state visible="1" edit.limit=35 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="0" color="33554432" x="2267" y="0" height="56" width="297" format="[shortdate]" html.valueishtml="0"  name=receive_master_request_date visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="0" color="33554432" x="1851" y="4" height="56" width="329" format="[general]" html.valueishtml="0"  name=receive_master_supp_invoice_no visible="1" edit.limit=30 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=8 alignment="1" tabsequence=32766 border="0" color="33554432" x="3127" y="0" height="56" width="233" format="[general]" html.valueishtml="0"  name=c_lead_time visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+line(band=trailer.1 x1="5" y1="120" x2="3419" y2="120"  name=l_1 visible="1" pen.style="0" pen.width="5" pen.color="0"  background.mode="2" background.color="16777215" )
+text(band=trailer.1 alignment="0" text="# of Orders:" border="0" color="33554432" x="133" y="32" height="64" width="306" html.valueishtml="0"  name=t_8 visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=trailer.1 alignment="1" text="Avg Lead Time:" border="0" color="33554432" x="713" y="32" height="64" width="393" html.valueishtml="0"  name=t_7 visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=trailer.1 alignment="1" expression="avg(  c_lead_time  for group 1 )"border="0" color="33554432" x="1120" y="32" height="64" width="119" format="[GENERAL]" html.valueishtml="0"  name=compute_4 visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=trailer.1 alignment="1" expression="count(  receive_master_supp_invoice_no  for group 1 )"border="0" color="33554432" x="453" y="32" height="64" width="119" format="[GENERAL]" html.valueishtml="0"  name=compute_3 visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="Supplier" border="0" color="33554432" x="41" y="288" height="60" width="539" html.valueishtml="0"  name=receive_master_supp_code_t visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="Days in" border="0" color="33554432" x="3200" y="228" height="60" width="261" html.valueishtml="0"  name=t_3 visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="Transit" border="0" color="33554432" x="3209" y="288" height="60" width="242" html.valueishtml="0"  name=t_4 visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="Putaway/" border="0" color="33554432" x="2683" y="228" height="60" width="329" html.valueishtml="0"  name=receive_master_putaway_start_time_t visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="Complete DT" border="0" color="33554432" x="2656" y="288" height="60" width="379" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="Country" border="0" color="33554432" x="1358" y="288" height="60" width="343" html.valueishtml="0"  name=supplier_country_t visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="State" border="0" color="33554432" x="1097" y="288" height="60" width="219" html.valueishtml="0"  name=supplier_state_t visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="Ship" border="0" color="33554432" x="2295" y="228" height="60" width="329" html.valueishtml="0"  name=receive_master_request_date_t visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="Date" border="0" color="33554432" x="2295" y="288" height="60" width="206" html.valueishtml="0"  name=t_5 visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="Number" border="0" color="33554432" x="1870" y="288" height="60" width="265" html.valueishtml="0"  name=t_6 visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="Order" border="0" color="33554432" x="1888" y="228" height="60" width="329" html.valueishtml="0"  name=receive_master_supp_invoice_no_t visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+
+sparse(names="c_supplier	supplier_state	supplier_country")htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

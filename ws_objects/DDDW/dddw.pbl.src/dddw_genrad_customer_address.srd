@@ -1,0 +1,42 @@
+﻿$PBExportHeader$dddw_genrad_customer_address.srd
+$PBExportComments$Genrad Address options
+release 6;
+datawindow(units=0 timer_interval=0 color=16777215 processing=0 print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.prompt=no print.buttons=no print.preview.buttons=no )
+header(height=80 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=76 color="536870912" )
+table(column=(type=char(20) updatewhereclause=yes name=cust_code dbname="Customer.Cust_code" )
+ column=(type=char(10) updatewhereclause=yes name=address_code dbname="address_code" )
+ column=(type=char(40) updatewhereclause=yes name=cust_name dbname="Customer.Cust_name" )
+ column=(type=char(40) updatewhereclause=yes name=address_1 dbname="Customer.Address_1" )
+ column=(type=char(30) updatewhereclause=yes name=city dbname="Customer.City" )
+ retrieve="  SELECT Customer.Cust_code,  
+			'Primary' as address_code, 
+			Customer.Cust_name,  
+         Customer.Address_1,   
+         Customer.City  
+    FROM Customer   
+		Where project_id = :project_id and
+				customer.Cust_code = :cust_code
+
+Union
+
+Select Customer_address.Cust_Code,
+		customer_address.address_code, 
+		Customer_address.Address_name, 
+		Customer_address.Address_1, 
+		Customer_Address.City
+From Customer_Address
+Where project_id = :project_id and
+		customer_address.Cust_code = :cust_code
+" arguments=(("project_id", string),("cust_code", string)) )
+column(band=detail id=2 alignment="0" tabsequence=0 border="0" color="0" x="18" y="8" height="52" width="247"  name=address_code  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Type"border="0" color="0" x="9" y="20" height="56" width="146"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="0" color="0" x="283" y="8" height="52" width="517" format="[general]"  name=cust_name edit.limit=40 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Cust Name"border="0" color="0" x="320" y="20" height="56" width="325"  name=cust_name_t  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="0" color="0" x="814" y="8" height="52" width="658" format="[general]"  name=address_1 edit.limit=40 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Address 1"border="0" color="0" x="891" y="20" height="56" width="297"  name=address_1_t  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="0" tabsequence=32766 border="0" color="0" x="1504" y="8" height="52" width="453" format="[general]"  name=city edit.limit=30 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="City"border="0" color="0" x="1573" y="20" height="56" width="114"  name=city_t  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" cellpadding="0" cellspacing="0" generatecss="no" nowrap="yes")

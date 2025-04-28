@@ -1,0 +1,52 @@
+﻿$PBExportHeader$d_phxbrands_mthly_inbound_ctn_count_rpt.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 2 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=212 color="536870912" )
+summary(height=108 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=68 color="536870912" )
+table(column=(type=char(10) updatewhereclause=yes name=wh_code dbname="Receive_Master.WH_Code" )
+ column=(type=char(40) updatewhereclause=yes name=warehouse_wh_name dbname="Warehouse.WH_Name" )
+ column=(type=char(30) updatewhereclause=yes name=supp_invoice_no dbname="Receive_Master.Supp_Invoice_No" )
+ column=(type=datetime updatewhereclause=yes name=complete_date dbname="Receive_Master.Complete_Date" )
+ column=(type=decimal(0) updatewhereclause=yes name=carton_count dbname="carton_count" )
+ retrieve="  SELECT dbo.Receive_Master.WH_Code,  
+         dbo.Warehouse.WH_Name,    
+         dbo.Receive_Master.Supp_Invoice_No,   
+         dbo.Receive_Master.Complete_Date,   
+          isnull( ctn_cnt, 0 ) carton_count 
+    FROM dbo.Receive_Master,   
+         dbo.Warehouse  
+   WHERE ( dbo.Warehouse.WH_Code = dbo.Receive_Master.WH_Code ) and  
+         ( ( dbo.Receive_Master.Project_ID = 'PHXBRANDS' ) AND  
+         ( dbo.Receive_Master.Complete_Date >= :begindate ) AND  
+         ( dbo.Receive_Master.Complete_Date <= :enddate ) AND  
+         ( Upper( dbo.Receive_Master.Ord_Status) = 'C' ) )   
+ORDER BY dbo.Receive_Master.WH_Code ASC,   
+         dbo.Receive_Master.Supp_Invoice_No ASC   
+" arguments=(("begindate", date),("enddate", date)) )
+group(level=1 header.height=160 trailer.height=0 by=("wh_code" ) header.color="536870912" trailer.color="536870912" )
+compute(band=header alignment="1" expression="'Page ' + page() + ' of ' + pageCount()"border="0" color="33554432" x="2030" y="84" height="56" width="1225" format="[general]" html.valueishtml="0"  name=page_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="PHXBRANDS Monthly Inbound Carton Count" border="0" color="33554432" x="32" y="4" height="64" width="3223" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=header alignment="0" expression="~"Report Date: ~" + string( datetime( today(), now() ), 'mmmm dd, yyyy  hh:mm:ss am/pm' )"border="0" color="33554432" x="32" y="80" height="56" width="1079" format="[GENERAL]" html.valueishtml="0"  name=compute_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="Project: PHXBRANDS" border="0" color="33554432" x="32" y="148" height="56" width="521" html.valueishtml="0"  name=t_3 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=header alignment="2" expression="String(   begindate , 'mmmm, yyyy')"border="0" color="33554432" x="1399" y="88" height="56" width="489" format="[GENERAL]" html.valueishtml="0"  name=compute_2 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header.1 alignment="0" text="Order Number" border="4" color="33554432" x="32" y="96" height="56" width="544" html.valueishtml="0"  name=supp_invoice_no_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header.1 alignment="2" text="Completion Date" border="4" color="33554432" x="1344" y="96" height="56" width="599" html.valueishtml="0"  name=complete_date_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header.1 alignment="1" text="Cartons Recieved" border="4" color="33554432" x="2793" y="96" height="56" width="462" html.valueishtml="0"  name=ctn_cnt_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.1 id=1 alignment="0" tabsequence=32766 border="0" color="33554432" x="2583" y="12" height="56" width="805" format="[general]" html.valueishtml="0"  name=wh_code visible="0" dddw.name=dddw_linksys_warehouse dddw.displaycolumn=warehouse dddw.datacolumn=wh_code dddw.percentwidth=0 dddw.lines=0 dddw.limit=0 dddw.allowedit=no dddw.useasborder=no dddw.case=any dddw.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header.1 alignment="0" text="Warehouse: " border="0" color="33554432" x="32" y="12" height="56" width="315" html.valueishtml="0"  name=t_4 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.1 id=2 alignment="0" tabsequence=32766 border="0" color="33554432" x="366" y="12" height="56" width="2158" format="[general]" html.valueishtml="0"  name=warehouse_wh_name visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="2" tabsequence=32766 border="0" color="33554432" x="1344" y="4" height="56" width="599" format="[shortdate] " html.valueishtml="0"  name=complete_date visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400~tif( carton_count = 0, 700,400)"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="0" color="33554432" x="32" y="4" height="56" width="544" format="[general]" html.valueishtml="0"  name=supp_invoice_no visible="1" edit.limit=30 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400~tif( carton_count = 0, 700,400)"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+line(band=summary x1="2807" y1="84" x2="3250" y2="84"  name=l_1 visible="1" pen.style="0" pen.width="9" pen.color="0"  background.mode="2" background.color="16777215" )
+line(band=summary x1="2807" y1="100" x2="3250" y2="100"  name=l_2 visible="1" pen.style="0" pen.width="9" pen.color="0"  background.mode="2" background.color="16777215" )
+compute(band=summary alignment="1" expression="sum( carton_count for all) "border="0" color="33554432" x="2807" y="20" height="56" width="443" format="###,###,##0" html.valueishtml="0"  name=compute_3 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=summary alignment="2" text="Total:" border="0" color="33554432" x="2624" y="20" height="56" width="165" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+line(band=summary x1="2807" y1="4" x2="3250" y2="4"  name=l_3 visible="1" pen.style="0" pen.width="9" pen.color="0"  background.mode="2" background.color="16777215" )
+column(band=detail id=5 alignment="1" tabsequence=32766 border="0" color="33554432" x="2926" y="8" height="56" width="329" format="###,###,##0" html.valueishtml="0"  name=carton_count visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400~tif( carton_count = 0, 700,400)"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

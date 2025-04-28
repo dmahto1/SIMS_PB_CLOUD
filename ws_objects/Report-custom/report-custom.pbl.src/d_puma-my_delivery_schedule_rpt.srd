@@ -1,0 +1,96 @@
+﻿$PBExportHeader$d_puma-my_delivery_schedule_rpt.srd
+release 11;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=1 HTMLDW=no print.printername="" print.documentname="" print.orientation = 1 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes print.preview.outline=yes hidegrayline=no showbackcoloronxp=no grid.lines=0 )
+header(height=468 color="536870912" )
+summary(height=100 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=72 color="536870912" height.autosize=yes )
+table(column=(type=char(30) updatewhereclause=yes name=schedule_date dbname="Schedule_Date" )
+ column=(type=char(50) updatewhereclause=yes name=cust_name dbname="Cust_Name" )
+ column=(type=char(60) updatewhereclause=yes name=address_1 dbname="Address_1" )
+ column=(type=char(60) updatewhereclause=yes name=address_2 dbname="Address_2" )
+ column=(type=char(60) updatewhereclause=yes name=address_3 dbname="Address_3" )
+ column=(type=char(60) updatewhereclause=yes name=address_4 dbname="Address_4" )
+ column=(type=char(50) updatewhereclause=yes name=customer_city dbname="Customer_City" )
+ column=(type=char(50) updatewhereclause=yes name=customer_state dbname="Customer_State" )
+ column=(type=char(50) updatewhereclause=yes name=zip dbname="Zip" )
+ column=(type=char(20) updatewhereclause=yes name=sales_order dbname="Sales_Order" )
+ column=(type=long updatewhereclause=yes identity=yes name=no_of_ctns dbname="No of Ctns" )
+ column=(type=char(255) updatewhereclause=yes name=remarks dbname="Remarks" )
+ column=(type=char(255) updatewhereclause=yes name=shipping_instruction dbname="Shipping Instruction" )
+ retrieve="
+SELECT       
+   IsNull(CONVERT(varchar,Delivery_Master.schedule_date, 101), '00/00/0000')  			AS		'Schedule_Date',
+
+
+				Delivery_Master.Cust_Name       			AS 	'Cust_Name',
+				IsNull(Delivery_Master.Address_1,'')     			AS 	'Address_1',
+				IsNull(Delivery_Master.Address_2,'')      			AS 	'Address_2',
+				IsNull(Delivery_Master.Address_3,'')       			AS 	'Address_3',
+				IsNull(Delivery_Master.Address_4,'')     			AS 	'Address_4',
+				Delivery_Master.City                  			AS		'Customer_City',
+				Delivery_Master.State                			AS 	'Customer_State',
+				Delivery_Master.zip                   			AS 	'Zip',
+
+				--IsNull(Delivery_Master.Address_1,'')+' '+IsNull(Delivery_Master.Address_2,'')+' '+
+				--IsNull(Delivery_Master.Address_3,'')+' '+IsNull(Delivery_Master.Address_4,'')+' '
+				--IsNull(Delivery_Master.City,'')+' '+IsNull(Delivery_Master.State,'')+' '+
+				--IsNull(Delivery_Master.zip,'') as 'Address',
+
+				Delivery_Master.Invoice_No       			AS 	'Sales_Order',
+				max(CAST(ROUND(Delivery_Packing.Carton_No, 0) as INT)) as 'No of Ctns',
+				Delivery_Master.Remark            			AS 	'Remarks',
+				Delivery_Master.Shipping_Instructions	As		'Shipping Instruction'
+
+    FROM 	Delivery_Master
+				,Delivery_Packing
+
+   WHERE  
+			Delivery_Master.DO_No = dbo.Delivery_Packing.DO_No		And  
+	         Delivery_Master.Project_ID = :project_id				         And
+			Delivery_Master.WH_Code = :wh_code					    And
+              Delivery_Master.ord_status in ( 'P', 'A' , 'C' ) 					And 
+              Delivery_Master.WH_Code <> 'PHX-THORO'	And				
+              Delivery_Master.schedule_date >= :start_date 				And
+			 Delivery_Master.schedule_date <= :end_date
+
+group by Delivery_Master.Invoice_No, Delivery_Master.schedule_date, Delivery_Master.Cust_Name  
+			,Delivery_Master.Address_1,Delivery_Master.Address_2,Delivery_Master.Address_3,Delivery_Master.Address_4
+			,Delivery_Master.City, Delivery_Master.State, Delivery_Master.zip
+			,Delivery_Master.Remark, Delivery_Master.Shipping_Instructions
+
+order by Delivery_Master.schedule_date
+;" arguments=(("project_id", string),("wh_Code", string),("start_date", datetime),("end_date", datetime)) )
+text(band=header alignment="2" text="Delivery
+Schedule Report" border="0" color="0" x="882" y="36" height="272" width="1038" html.valueishtml="0"  name=t_3 visible="1"  font.face="Arial" font.height="-22" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215"  height.autosize=yes)
+text(band=header alignment="0" text="Schedule
+Date" border="0" color="0" x="9" y="348" height="112" width="343" html.valueishtml="0"  name=schedule_date_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+bitmap(band=header filename="Puma-Menlo Logo for Delivery Schedule.JPG" x="2674" y="28" height="340" width="1321" border="0"  name=p_1 visible="1" )
+text(band=header alignment="0" text=" No Of 
+ Ctns" border="0" color="0" x="2459" y="352" height="112" width="201" html.valueishtml="0"  name=no_of_ctns_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text=" Cust_Name" border="0" color="0" x="361" y="388" height="76" width="512" html.valueishtml="0"  name=cust_name_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text=" Shipping Instruction" border="0" color="0" x="3374" y="388" height="76" width="640" html.valueishtml="0"  name=shipping_instruction_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text=" Sales Order" border="0" color="0" x="1929" y="388" height="76" width="521" html.valueishtml="0"  name=sales_order_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text=" Address" border="0" color="0" x="882" y="388" height="76" width="1038" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text=" Remarks" border="0" color="0" x="2670" y="388" height="76" width="695" html.valueishtml="0"  name=remarks_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="0" color="0" x="9" y="0" height="64" width="343" format="[general]" html.valueishtml="0"  name=schedule_date visible="1" height.autosize=yes edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=11 alignment="2" tabsequence=32766 border="0" color="0" x="2459" y="0" height="64" width="201" format="[general]" html.valueishtml="0"  name=no_of_ctns visible="1" height.autosize=yes edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=10 alignment="0" tabsequence=32766 border="0" color="0" x="1929" y="0" height="64" width="521" format="[general]" html.valueishtml="0"  name=sales_order visible="1" height.autosize=yes edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="0" color="0" x="361" y="0" height="64" width="512" format="[general]" html.valueishtml="0"  name=cust_name visible="1" height.autosize=yes edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=12 alignment="0" tabsequence=32766 border="0" color="0" x="2670" y="0" height="64" width="695" format="[general]" html.valueishtml="0"  name=remarks visible="1" height.autosize=yes edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=13 alignment="0" tabsequence=32766 border="0" color="0" x="3374" y="0" height="64" width="640" format="[general]" html.valueishtml="0"  name=shipping_instruction visible="1" height.autosize=yes edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=detail alignment="0" expression="address_1 +' '+ address_2 +' '+ address_3 +''+If(IsNull(address_4),'~~r~~n',address_4+'~~r~~n') +''+If(IsNull(customer_city),'',customer_city+' ') +' '+ If(IsNull(customer_state),'',customer_state+' ') +' '+If(IsNull(zip),'',zip)"border="0" color="0" x="882" y="0" height="64" width="1038" format="[GENERAL]" html.valueishtml="0"  name=compute_4 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215"  height.autosize=yes)
+compute(band=summary alignment="2" expression="count( sales_order )"border="0" color="0" x="1929" y="12" height="76" width="521" format="[GENERAL]" html.valueishtml="0"  name=compute_3 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=summary alignment="2" expression=" sum( no_of_ctns ) "border="0" color="0" x="2459" y="12" height="76" width="201" format="[General]" html.valueishtml="0"  name=compute_2 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=summary alignment="1" text="Grand Total " border="0" color="0" x="9" y="12" height="76" width="343" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" pagingmethod=0 generatedddwframes="1" )
+xhtmlgen() cssgen(sessionspecific="0" )
+xmlgen(inline="0" )
+xsltgen()
+jsgen()
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )
+export.xhtml()
+ 

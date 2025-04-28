@@ -1,0 +1,66 @@
+﻿$PBExportHeader$d_sn_change_for_receive_order_parent.srd
+$PBExportComments$- Capture outbound serials
+release 11;
+datawindow(units=0 timer_interval=0 color=16777215 processing=1 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes print.preview.outline=yes hidegrayline=no showbackcoloronxp=no grid.lines=0 )
+header(height=132 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=76 color="536870912" )
+table(column=(type=char(16) updatewhereclause=yes key=yes name=ro_no dbname="Receive_Putaway.RO_No" dbalias=".RO_No" )
+ column=(type=decimal(0) updatewhereclause=yes key=yes name=line_item_no dbname="Receive_Putaway.Line_Item_No" dbalias=".Line_Item_No" )
+ column=(type=char(20) updatewhereclause=yes name=supp_code dbname="Receive_Putaway.Supp_Code" dbalias=".Supp_Code" )
+ column=(type=char(50) updatewhereclause=yes name=sku dbname="Receive_Putaway.SKU" dbalias=".SKU" )
+ column=(type=char(50) updatewhereclause=yes name=alt_sku dbname="Receive_Putaway.Alt_SKU" dbalias=".Alt_SKU" )
+ column=(type=char(50) updatewhereclause=yes name=currentserialnumber dbname="Receive_Putaway.CurrentSerialNumber" dbalias=".CurrentSerialNumber" )
+ column=(type=char(50) update=yes updatewhereclause=yes key=yes name=serial_no dbname="Receive_Putaway.Serial_No" dbalias=".Serial_No" )
+ column=(type=char(1) updatewhereclause=yes name=component_ind dbname="Receive_Putaway.Component_Ind" dbalias=".Component_Ind" )
+ column=(type=char(10) updatewhereclause=yes name=receive_master_wh_code dbname="Receive_Master.WH_code" dbalias=".WH_code" )
+ column=(type=decimal(0) updatewhereclause=yes name=receive_putaway_owner_id dbname="Receive_Putaway.Owner_Id" dbalias=".Owner_Id" )
+ column=(type=char(1) updatewhereclause=yes name=receive_putaway_inventory_type dbname="Receive_Putaway.Inventory_Type" dbalias=".Inventory_Type" )
+ column=(type=char(50) updatewhereclause=yes name=receive_putaway_po_no dbname="Receive_Putaway.po_no" dbalias=".po_no" )
+ retrieve="  SELECT dbo.Receive_Putaway.RO_No,   
+         	dbo.Receive_Putaway.Line_Item_No,   
+         	dbo.Receive_Putaway.Supp_Code,   
+         	dbo.Receive_Putaway.SKU,   
+			dbo.Receive_Putaway.SKU as Alt_SKU,   
+        	 	dbo.Receive_Putaway.Serial_No as CurrentSerialNumber,
+         	dbo.Receive_Putaway.Serial_No,
+			dbo.Receive_Putaway.Component_Ind,
+ 			dbo.Receive_Master.WH_code,
+			dbo.Receive_Putaway.Owner_Id,
+			dbo.Receive_Putaway.Inventory_Type,
+			dbo.Receive_Putaway.po_no
+    FROM dbo.Receive_Putaway,
+			dbo.Receive_Master WITH (NOLOCK)
+			Where 	dbo.Receive_Putaway.Serial_No = :asParentSerialNumber and
+				dbo.Receive_Master.RO_NO      			= dbo.Receive_Putaway.RO_NO and
+				dbo.Receive_Master.Project_ID 			= 'PANDORA'
+
+" update="dbo.Receive_Putaway" updatewhere=0 updatekeyinplace=yes arguments=(("asParentSerialNumber", string)) )
+text(band=header alignment="0" text=" " border="6" color="0" x="9" y="8" height="120" width="119" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="80269524" )
+text(band=header alignment="2" text="Row#" border="6" color="0" x="137" y="8" height="120" width="155" html.valueishtml="0"  name=t_6 visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="80269524" )
+text(band=header alignment="2" text="Receive Order  Number" border="6" color="0" x="302" y="4" height="120" width="430" html.valueishtml="0"  name=ro_no_t visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Receive OrderLine Item Number" border="6" color="0" x="741" y="4" height="120" width="480" html.valueishtml="0"  name=line_item_no_t visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="ParentSupplier" border="6" color="0" x="1230" y="4" height="120" width="718" html.valueishtml="0"  name=supp_code_t visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="ParentSKU" border="6" color="0" x="1957" y="4" height="120" width="741" html.valueishtml="0"  name=sku_t visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Invalid Parent Serial Number" border="6" color="0" x="2711" y="4" height="120" width="901" html.valueishtml="0"  name=currentserialnumber_t visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Valid Parent Serial Number" border="6" color="0" x="3621" y="4" height="120" width="901" html.valueishtml="0"  name=serial_no_t visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+compute(band=detail alignment="0" expression="''"border="0" color="0" x="9" y="0" height="64" width="119" format="[general]" html.valueishtml="0"  name=compute_1 visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="0" background.color="16777215~tif( participatingsupplier =1, rgb( 192,0,0 ), rgb( 255,255,255 ) )" )
+compute(band=detail alignment="0" expression="getrow()"border="0" color="0" x="137" y="0" height="64" width="155" format="[GENERAL]" html.valueishtml="0"  name=compute_2 visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="0" background.color="67108864~tIf(currentrow() = getrow(),12639424,16777215)" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="5" color="0" x="306" y="8" height="60" width="425" format="[general]" html.valueishtml="0"  name=ro_no visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="5" color="0" x="745" y="8" height="60" width="475" format="[general]" html.valueishtml="0"  name=line_item_no visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="5" color="0" x="1234" y="8" height="60" width="713" format="[general]" html.valueishtml="0"  name=supp_code visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="5" color="0" x="1961" y="8" height="60" width="736" format="[general]" html.valueishtml="0"  name=sku visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+column(band=detail id=6 alignment="0" tabsequence=32766 border="5" color="0" x="2715" y="8" height="60" width="896" format="[general]" html.valueishtml="0"  name=currentserialnumber visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+column(band=detail id=7 alignment="0" tabsequence=32766 border="5" color="0" x="3625" y="8" height="60" width="896" format="[general]" html.valueishtml="0"  name=serial_no visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" pagingmethod=0 generatedddwframes="1" )
+xhtmlgen() cssgen(sessionspecific="0" )
+xmlgen(inline="0" )
+xsltgen()
+jsgen()
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )
+export.xhtml()
+ 

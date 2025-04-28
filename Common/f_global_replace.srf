@@ -1,0 +1,43 @@
+HA$PBExportHeader$f_global_replace.srf
+global type f_global_replace from function_object
+end type
+
+forward prototypes
+global function string f_global_replace (string as_source, string as_old, string as_new)
+end prototypes
+
+global function string f_global_replace (string as_source, string as_old, string as_new);////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+//	Function:  f_global_replace	
+//
+//	Purpose:  Replace all occurrences of one string inside another with a new string
+//
+//	Scope:  public
+//
+//	Arguments:	as_Source	the string being searched
+//				as_Old		the old string being replaced
+//				as_New		the new string
+//
+//	Returns:		string		as_Source with all occurrences of as_Old replaced with as_New
+//
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+Integer	li_Start, li_OldLen, li_NewLen
+
+li_OldLen = Len(as_Old)
+li_NewLen = Len(as_New)
+
+li_Start = Pos(as_Source, as_Old)
+
+Do While li_Start > 0
+	// replace as_Old with as_New
+	as_Source = Replace(as_Source, li_Start, li_OldLen, as_New)
+
+	// find the next occurrence of as_Old
+	li_Start = Pos(as_Source, as_Old, (li_Start + li_NewLen))
+Loop
+
+Return as_Source
+
+end function
+

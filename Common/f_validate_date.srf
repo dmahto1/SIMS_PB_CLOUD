@@ -1,0 +1,19 @@
+HA$PBExportHeader$f_validate_date.srf
+global type f_validate_date from function_object
+end type
+
+forward prototypes
+global function integer f_validate_date (date ad_date)
+end prototypes
+
+global function integer f_validate_date (date ad_date);
+//Created by TimA 09/18/15
+//This just validates that the data is a valid date.
+
+If IsDate(String(Date(ad_Date ) ) ) then
+	Return 1
+Else
+	Return 0
+End if
+end function
+

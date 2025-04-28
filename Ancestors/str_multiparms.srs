@@ -1,0 +1,13 @@
+HA$PBExportHeader$str_multiparms.srs
+$PBExportComments$Structure Parms
+global type str_multiparms from structure
+	string		string_arg1[]
+	string		string_arg2[]
+	string		string_arg3[]
+	string		string_arg4[]
+	string		string_arg5[]
+	string		string_arg6[]
+	long		long_arg1[]
+	string		string_arg108[]
+end type
+

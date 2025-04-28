@@ -1,0 +1,29 @@
+﻿$PBExportHeader$d_ship_do_detail.srd
+$PBExportComments$Delivery Detail rows for building Shipment Line
+release 7;
+datawindow(units=0 timer_interval=0 color=16777215 processing=1 HTMLDW=no print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.prompt=no print.buttons=no print.preview.buttons=no grid.lines=0 )
+header(height=80 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=92 color="536870912" )
+table(column=(type=char(50) updatewhereclause=yes name=sku dbname="Delivery_Detail.SKU" )
+ column=(type=decimal(5) updatewhereclause=yes name=alloc_qty dbname="Delivery_Detail.Alloc_Qty" )
+ column=(type=decimal(4) updatewhereclause=yes name=price dbname="Delivery_Detail.Price" )
+ column=(type=decimal(0) updatewhereclause=yes name=line_item_no dbname="Delivery_Detail.Line_Item_No" )
+ retrieve="  SELECT dbo.Delivery_Detail.SKU,   
+         dbo.Delivery_Detail.Alloc_Qty,   
+         dbo.Delivery_Detail.Price,   
+         dbo.Delivery_Detail.Line_Item_No  
+    FROM dbo.Delivery_Detail   
+	Where do_no = :asDONO
+" arguments=(("asDONO", string)) )
+text(band=header alignment="2" text="Sku" border="0" color="0" x="9" y="8" height="64" width="517"  name=sku_t  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Alloc Qty" border="0" color="0" x="535" y="8" height="64" width="329"  name=alloc_qty_t  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Price" border="0" color="0" x="873" y="8" height="64" width="329"  name=price_t  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Line Item No" border="0" color="0" x="1211" y="8" height="64" width="334"  name=line_item_no_t  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="0" color="0" x="9" y="8" height="76" width="517" format="[general]"  name=sku edit.limit=50 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="1" tabsequence=32766 border="0" color="0" x="535" y="8" height="76" width="329" format="[general]"  name=alloc_qty edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="1" tabsequence=32766 border="0" color="0" x="873" y="8" height="76" width="329" format="[general]"  name=price edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="1" tabsequence=32766 border="0" color="0" x="1211" y="8" height="76" width="334" format="[general]"  name=line_item_no edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" )

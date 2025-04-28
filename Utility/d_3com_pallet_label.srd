@@ -1,0 +1,51 @@
+HA$PBExportHeader$d_3com_pallet_label.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1090519039 processing=1 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no grid.lines=0 )
+header(height=124 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=76 color="536870912" )
+table(column=(type=char(40) updatewhereclause=yes name=delivery_master_cust_name dbname="Delivery_Master_Cust_Name" )
+ column=(type=char(20) updatewhereclause=yes name=cust_order_no dbname="Cust_Order_No" )
+ column=(type=char(25) updatewhereclause=yes name=carton_no dbname="Carton_no" )
+ column=(type=char(50) updatewhereclause=yes name=user_field1 dbname="User_Field1" )
+ column=(type=char(16) updatewhereclause=yes name=delivery_master_do_no dbname="DO_No" )
+ column=(type=char(10) updatewhereclause=yes name=delivery_master_project_id dbname="Project_ID" )
+ column=(type=char(1) updatewhereclause=yes name=c_print_ind dbname="c_print_ind" values="	Y/	N" )
+ column=(type=char(50) updatewhereclause=yes name=delivery_master_invoice_no dbname="Invoice_No" )
+ retrieve="  SELECT DISTINCT 
+         DM.Cust_Name as  Delivery_Master_Cust_Name,   
+         DM.Cust_Order_No,  
+         DP.Carton_no, 
+         DP.User_Field1, 
+         DM.DO_No,   
+         DM.Project_ID,   
+         ' ' as c_print_ind,   
+         DM.Invoice_No
+			  
+    FROM Delivery_Packing DP,
+         Delivery_Master DM,
+         Delivery_Detail DD
+   WHERE  
+         DD.DO_No = DM.DO_No and 
+         DP.DO_No = DD.DO_No and  
+			DP.Line_Item_No = DD.Line_Item_No and  
+			DP.SKU = DD.SKU and 
+         
+         DM.Project_ID = :as_project_id AND  
+         DM.do_No = :as_do_no
+" arguments=(("as_project_id", string),("as_do_no", string)) )
+text(band=header alignment="2" text="Prt" border="6" color="0" x="9" y="8" height="112" width="96" html.valueishtml="0"  name=obj_53251992 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="80269524" )
+text(band=header alignment="2" text="CustOrder Nbr" border="6" color="0" x="114" y="8" height="112" width="439" html.valueishtml="0"  name=delivery_master_cust_order_no_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="80269524" )
+text(band=header alignment="2" text="Box
+Count" border="6" color="0" x="1262" y="8" height="112" width="297" html.valueishtml="0"  name=user_field1_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Carton No" border="6" color="0" x="562" y="4" height="112" width="690" html.valueishtml="0"  name=carton_no_t visible="1"  font.face="Arial" font.height="-12" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+column(band=detail id=7 alignment="2" tabsequence=10 border="0" color="0" x="9" y="4" height="60" width="96" format="[general]" html.valueishtml="0"  name=c_print_ind visible="1" checkbox.text="" checkbox.on="Y" checkbox.off="N" checkbox.scale=no checkbox.threed=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1090519039" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="0" color="0" x="114" y="8" height="60" width="439" format="[general]" html.valueishtml="0"  name=cust_order_no visible="1" edit.limit=20 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1090519039" )
+column(band=detail id=4 alignment="0" tabsequence=20 border="5" color="0" x="1262" y="8" height="56" width="297" format="[general]" html.valueishtml="0"  name=user_field1 visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1090519039" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="0" color="0" x="562" y="8" height="56" width="690" format="[general]" html.valueishtml="0"  name=carton_no visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1090519039" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

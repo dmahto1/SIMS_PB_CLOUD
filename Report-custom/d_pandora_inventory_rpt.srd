@@ -1,0 +1,92 @@
+HA$PBExportHeader$d_pandora_inventory_rpt.srd
+$PBExportComments$Datawindow used for pandora inventory report
+release 11;
+datawindow(units=0 timer_interval=0 color=16777215 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 1 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes print.preview.outline=yes hidegrayline=no showbackcoloronxp=no )
+header(height=420 color="536870912" )
+summary(height=84 color="536870912" )
+footer(height=4 color="536870912" )
+detail(height=68 color="536870912" )
+table(column=(type=char(10) updatewhereclause=yes name=content_summary_project_id dbname="project_id" )
+ column=(type=char(10) updatewhereclause=yes name=content_summary_wh_code dbname="WH_Code" )
+ column=(type=datetime updatewhereclause=yes name=arrival_date dbname="arrival_date" )
+ column=(type=char(50) updatewhereclause=yes name=content_summary_sku dbname="sku" )
+ column=(type=char(70) updatewhereclause=yes name=item_master_description dbname="description" )
+ column=(type=decimal(5) updatewhereclause=yes identity=yes name=avail_qty dbname="avail_qty" )
+ column=(type=char(20) updatewhereclause=yes name=owner_cd dbname="Owner_Cd" )
+ column=(type=char(10) updatewhereclause=yes name=content_summary_l_code dbname="l_code" )
+ column=(type=char(30) updatewhereclause=yes name=inv_type_desc dbname="inv_type_desc" )
+ column=(type=char(50) updatewhereclause=yes name=lot_no dbname="lot_no" )
+ column=(type=char(10) updatewhereclause=yes name=commodity_cd dbname="commodity_cd" )
+ column=(type=char(50) updatewhereclause=yes name=project_code dbname="project_code" )
+ retrieve="SELECT DISTINCT 	cs.project_id,
+						cs.WH_Code,
+						ro.arrival_date,
+						cs.sku,
+						itm.description,
+						Sum(cs.avail_qty) as avail_qty,
+						owner.Owner_Cd,
+						cs.l_code,
+						inv.inv_type_desc,
+						cs.lot_no,
+						itm.user_field5 as commodity_cd,
+						cs.po_no as project_code		
+FROM					content_summary cs,
+						inventory_type inv,
+						item_master itm, 
+						Owner,
+						receive_master ro
+WHERE					cs.sku = itm.sku and
+                  cs.supp_code = itm.supp_code and
+						cs.inventory_type = inv.inv_type and
+                  cs.project_id = inv.project_id and
+						cs.project_id = itm.project_id and
+						cs.Owner_id = owner.Owner_id and
+						cs.project_id = ro.project_id and
+						cs.ro_no = ro.ro_no
+GROUP BY				cs.project_id,	cs.WH_Code, cs.sku, cs.l_code, cs.lot_no,itm.description,
+						itm.user_field5, inv.inv_type_desc, ro.arrival_date, owner.Owner_Cd,cs.po_no
+
+" filter="avail_qty > 0" sort="content_summary_wh_code A content_summary_sku A content_summary_l_code A inv_type_desc A " )
+text(band=header alignment="2" text="PANDORA INVENTORY REPORT" border="0" color="0" x="9" y="0" height="92" width="4599" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-14" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="SIMS301" border="0" color="0" x="270" y="12" height="56" width="265" html.valueishtml="0"  name=t_4 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="0" expression="today()"border="0" color="0" x="270" y="64" height="56" width="517" format="mm/dd/yyyy hh:mm" html.valueishtml="0"  name=compute_1 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="Report ID:" border="0" color="0" x="18" y="12" height="56" width="238" html.valueishtml="0"  name=t_3 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="Date:" border="0" color="0" x="18" y="64" height="56" width="155" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="Project Name:" border="0" color="0" x="18" y="140" height="64" width="416" html.valueishtml="0"  name=t_5 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="Warehouse" border="0" color="0" x="18" y="284" height="112" width="288" html.valueishtml="0"  name=t_12 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header id=1 alignment="0" tabsequence=32766 border="0" color="0" x="448" y="144" height="56" width="229" format="[general]" html.valueishtml="0"  name=content_summary_project_id visible="1" edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+line(band=header x1="9" y1="404" x2="4608" y2="400"  name=l_1 visible="1" pen.style="0" pen.width="9" pen.color="0"  background.mode="2" background.color="16777215" )
+compute(band=header alignment="1" expression="'Page: ' + page() + ' of ' + pagecount()"border="0" color="0" x="4018" y="12" height="56" width="549" format="[general]" html.valueishtml="0"  name=compute_2 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="SKU" border="0" color="0" x="773" y="284" height="112" width="128" html.valueishtml="0"  name=content_summary_sku_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="DESCRIPTION" border="0" color="0" x="1184" y="284" height="112" width="421" html.valueishtml="0"  name=t_7 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="AVAIL" border="0" color="0" x="2208" y="284" height="112" width="165" html.valueishtml="0"  name=content_summary_avail_qty_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="OWNER" border="0" color="0" x="2395" y="284" height="112" width="201" html.valueishtml="0"  name=t_9 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text=" INV TYPE" border="0" color="0" x="3072" y="284" height="112" width="229" html.valueishtml="0"  name=inventory_type_inv_type_desc_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text=" LOT NO" border="0" color="0" x="3333" y="284" height="112" width="229" html.valueishtml="0"  name=t_10 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text=" COMMODITY CD" border="0" color="0" x="3579" y="284" height="112" width="421" html.valueishtml="0"  name=t_6 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912"  height.autosize=yes)
+text(band=header alignment="2" text="LOCATION" border="0" color="0" x="2738" y="284" height="112" width="306" html.valueishtml="0"  name=t_8 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text=" PROJECT CODE" border="0" color="0" x="4023" y="280" height="112" width="585" html.valueishtml="0"  name=t_14 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912"  height.autosize=yes)
+text(band=header alignment="0" text="Arrival Date" border="0" color="0" x="393" y="284" height="112" width="288" html.valueishtml="0"  name=t_13 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="0" color="0" x="27" y="4" height="56" width="343" format="[general]" html.valueishtml="0"  name=content_summary_wh_code visible="1" edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="0" color="0" x="773" y="4" height="56" width="393" format="[general]" html.valueishtml="0"  name=content_summary_sku visible="1" edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="0" tabsequence=32766 border="0" color="0" x="1193" y="4" height="56" width="946" format="[general]" html.valueishtml="0"  name=item_master_description visible="1" edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="1" tabsequence=32766 border="0" color="0" x="2153" y="4" height="56" width="215" format="#######.#####" html.valueishtml="0"  name=avail_qty visible="1" editmask.mask="#######.#####" editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=7 alignment="0" tabsequence=32766 border="0" color="0" x="2409" y="4" height="56" width="320" format="[general]" html.valueishtml="0"  name=owner_cd visible="1" edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=10 alignment="0" tabsequence=32766 border="0" color="0" x="3333" y="4" height="56" width="311" format="[general]" html.valueishtml="0"  name=lot_no visible="1" edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=9 alignment="0" tabsequence=32766 border="0" color="0" x="3095" y="4" height="56" width="210" format="[general]" html.valueishtml="0"  name=inv_type_desc visible="1" edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=8 alignment="2" tabsequence=32766 border="0" color="0" x="2734" y="4" height="56" width="306" format="[general]" html.valueishtml="0"  name=content_summary_l_code visible="1" edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="0" color="0" x="389" y="4" height="56" width="361" format="[shortdate] [time]" html.valueishtml="0"  name=arrival_date visible="1" editmask.mask="mm/dd/yy hh:mm" editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=11 alignment="0" tabsequence=32766 border="0" color="0" x="3657" y="4" height="56" width="343" format="[general]" html.valueishtml="0"  name=commodity_cd visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=12 alignment="0" tabsequence=32766 border="0" color="0" x="4014" y="0" height="56" width="1152" format="[general]" html.valueishtml="0"  name=project_code visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=summary alignment="0" text="END OF REPORT" border="0" color="0" x="3063" y="20" height="56" width="507" html.valueishtml="0"  name=t_11 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" pagingmethod=0 generatedddwframes="1" )
+xhtmlgen() cssgen(sessionspecific="0" )
+xmlgen(inline="0" )
+xsltgen()
+jsgen()
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )
+export.xhtml()
+ 

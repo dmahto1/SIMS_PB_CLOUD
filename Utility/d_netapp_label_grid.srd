@@ -1,0 +1,76 @@
+HA$PBExportHeader$d_netapp_label_grid.srd
+$PBExportComments$NetApp Label selection
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=1 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no grid.lines=0 )
+header(height=132 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=76 color="536870912" )
+table(column=(type=char(1) updatewhereclause=yes name=c_select_ind dbname="c_select_ind" values="	Y/	N" )
+ column=(type=long updatewhereclause=yes name=c_print_qty dbname="c_print_Qty" )
+ column=(type=decimal(0) updatewhereclause=yes name=delivery_detail_line_item_no dbname="Line_Item_No" )
+ column=(type=char(50) updatewhereclause=yes name=sku dbname="SKU" )
+ column=(type=decimal(5) updatewhereclause=yes name=alloc_qty dbname="Alloc_Qty" )
+ column=(type=char(20) updatewhereclause=yes name=delivery_detail_user_field1 dbname="User_Field1" )
+ column=(type=char(20) updatewhereclause=yes name=delivery_detail_user_field2 dbname="User_Field2" )
+ column=(type=char(30) updatewhereclause=yes name=delivery_detail_user_field3 dbname="User_Field3" )
+ column=(type=char(25) updatewhereclause=yes name=carton_no dbname="Carton_no" )
+ column=(type=decimal(5) updatewhereclause=yes name=quantity dbname="Quantity" )
+ column=(type=char(70) updatewhereclause=yes name=description dbname="Description" )
+ column=(type=char(3) updatewhereclause=yes name=country_of_origin_default dbname="Country_of_Origin_Default" )
+ column=(type=char(30) updatewhereclause=yes name=item_master_user_field8 dbname="User_Field8" )
+ column=(type=char(3) updatewhereclause=yes name=c_rev dbname="c_rev" )
+ column=(type=char(3) updatewhereclause=yes name=c_coo dbname="c_coo" )
+ column=(type=long updatewhereclause=yes name=c_starting_box dbname="c_starting_box" )
+ retrieve="  SELECT 'N' as c_select_ind, 
+			0001 as c_print_Qty, 
+			dbo.Delivery_Detail.Line_Item_No, 
+         dbo.Delivery_Detail.SKU,   
+         dbo.Delivery_Detail.Alloc_Qty,   
+         dbo.Delivery_Detail.User_Field1,   
+         dbo.Delivery_Detail.User_Field2,   
+         dbo.Delivery_Detail.User_Field3, 
+			Delivery_Packing.Carton_no, 
+			Delivery_PAcking.Quantity, 
+			dbo.Item_master.Description, 
+			dbo.Item_master.Country_of_Origin_Default, 
+			dbo.Item_master.User_Field8, 
+			'   ' as c_rev, 
+			'   ' as c_coo, 
+			000 as c_starting_box
+    FROM dbo.Delivery_Detail, Delivery_PAcking, Item_Master 
+   WHERE delivery_detail.do_no = :asdono and 
+			Delivery_Detail.SKU = Item_master.Sku and
+			Delivery_Detail.Supp_Code = Item_master.Supp_Code and
+			Delivery_Detail.do_no = Delivery_PAcking.do_no and
+			Delivery_Detail.Line_Item_No = Delivery_PAcking.Line_Item_No and
+			Item_MAster.Project_id = 'Netapp'
+" arguments=(("asdono", string))  sort="delivery_detail_user_field2 A carton_no A " )
+group(level=1 header.height=0 trailer.height=8 by=("delivery_detail_user_field2" ) header.color="536870912" trailer.color="12639424" )
+text(band=header alignment="2" text="" border="6" color="0" x="9" y="8" height="112" width="119" html.valueishtml="0"  name=c_select_ind_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="LineType" border="6" color="33554432" x="905" y="8" height="112" width="197" html.valueishtml="0"  name=delivery_detail_user_field1_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="SOLine" border="6" color="33554432" x="334" y="8" height="112" width="178" html.valueishtml="0"  name=delivery_detail_user_field2_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Copies" border="6" color="0" x="137" y="8" height="112" width="187" html.valueishtml="0"  name=c_print_qty_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="LineQty" border="6" color="33554432" x="1710" y="8" height="112" width="210" html.valueishtml="0"  name=delivery_detail_alloc_qty_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="ItemType" border="6" color="33554432" x="1111" y="8" height="112" width="590" html.valueishtml="0"  name=item_master_user_field8_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="SKU" border="6" color="33554432" x="2149" y="8" height="112" width="489" html.valueishtml="0"  name=delivery_detail_sku_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Description" border="6" color="0" x="2647" y="8" height="112" width="526" html.valueishtml="0"  name=description_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="CartonNbr" border="6" color="33554432" x="521" y="8" height="112" width="375" html.valueishtml="0"  name=carton_no_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="CartonQty" border="6" color="33554432" x="1929" y="8" height="112" width="210" html.valueishtml="0"  name=quantity_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+column(band=detail id=1 alignment="2" tabsequence=10 border="0" color="33554432" x="9" y="0" height="64" width="119" format="[general]" html.valueishtml="0"  name=c_select_ind visible="1" checkbox.text="" checkbox.on="Y" checkbox.off="N" checkbox.scale=no checkbox.threed=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="2" tabsequence=20 border="0" color="33554432" x="137" y="0" height="64" width="187" format="[general]" html.valueishtml="0"  name=c_print_qty visible="1" editmask.spin=yes editmask.mask="###0" editmask.imemode=0 editmask.spinincr=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=7 alignment="0" tabsequence=32766 border="0" color="33554432" x="334" y="0" height="64" width="178" format="[general]" html.valueishtml="0"  name=delivery_detail_user_field2 visible="1" edit.limit=20 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="1" tabsequence=32766 border="0" color="33554432" x="1710" y="0" height="64" width="210" format="[general]" html.valueishtml="0"  name=alloc_qty visible="1" editmask.mask="#######0" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="0" tabsequence=32766 border="0" color="33554432" x="905" y="0" height="64" width="197" format="[general]" html.valueishtml="0"  name=delivery_detail_user_field1 visible="1" edit.limit=20 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=13 alignment="0" tabsequence=32766 border="0" color="33554432" x="1111" y="0" height="64" width="590" format="[general]" html.valueishtml="0"  name=item_master_user_field8 visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="0" color="33554432" x="2149" y="0" height="64" width="489" format="[general]" html.valueishtml="0"  name=sku visible="1" edit.limit=50 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=11 alignment="0" tabsequence=32766 border="0" color="33554432" x="2647" y="0" height="64" width="526" format="[general]" html.valueishtml="0"  name=description visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=9 alignment="0" tabsequence=30 border="0" color="33554432" x="521" y="0" height="64" width="375" format="[general]" html.valueishtml="0"  name=carton_no visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=10 alignment="1" tabsequence=40 border="0" color="33554432" x="1929" y="0" height="64" width="210" format="[general]" html.valueishtml="0"  name=quantity visible="1" editmask.mask="#######0" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=detail alignment="0" expression=" c_line_copies "border="0" color="33554432" x="3182" y="12" height="56" width="293" format="[GENERAL]" html.valueishtml="0"  name=c_box_count visible="0"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=trailer.1 alignment="2" expression="sum(c_print_qty for group 1)"border="0" color="33554432" x="137" y="4" height="56" width="187" format="[general]" html.valueishtml="0"  name=c_line_copies visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

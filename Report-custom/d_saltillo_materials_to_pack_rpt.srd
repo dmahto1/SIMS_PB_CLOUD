@@ -1,0 +1,77 @@
+HA$PBExportHeader$d_saltillo_materials_to_pack_rpt.srd
+$PBExportComments$Saltillo - Raw Materials required to package Report
+release 7;
+datawindow(units=0 timer_interval=0 color=16777215 processing=0 HTMLDW=no print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.prompt=no print.buttons=no print.preview.buttons=no )
+header(height=284 color="536870912" )
+summary(height=292 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=52 color="536870912" )
+table(column=(type=char(10) updatewhereclause=yes name=wh_code dbname="WH_Code" )
+ column=(type=char(50) updatewhereclause=yes name=delivery_master_invoice_no dbname="Invoice_No" )
+ column=(type=char(20) updatewhereclause=yes name=cust_order_no dbname="Cust_ORder_No" )
+ column=(type=char(50) updatewhereclause=yes name=sku dbname="SKU" )
+ column=(type=char(20) updatewhereclause=yes name=delivery_detail_supp_code dbname="Supp_code" )
+ column=(type=decimal(0) updatewhereclause=yes name=delivery_detail_req_qty dbname="Req_Qty" )
+ column=(type=datetime updatewhereclause=yes name=delivery_master_ord_date dbname="Ord_Date" )
+ column=(type=char(70) updatewhereclause=yes name=item_master_description dbname="Description" )
+ column=(type=long updatewhereclause=yes name=c_avail_qty dbname="c_avail_qty" )
+ retrieve="  SELECT Delivery_Master.WH_Code,   
+         Delivery_Master.Invoice_No,   
+			Delivery_Master.Cust_ORder_No, 
+         Delivery_Detail.SKU,   
+         Delivery_Detail.Supp_code,   
+         Delivery_Detail.Req_Qty,   
+         Delivery_Master.Ord_Date,
+         Item_Master.Description, 
+			00000000 as c_avail_qty 
+    FROM Delivery_Detail,   
+         Delivery_Master,   
+         Item_Master  
+   WHERE ( Delivery_Master.DO_No = Delivery_Detail.DO_No ) and  
+         ( Delivery_Master.Project_ID = Item_Master.Project_ID ) and  
+         ( Delivery_Detail.SKU = Item_Master.SKU ) and  
+         ( Item_Master.Supp_Code = Delivery_Detail.Supp_code )   and
+			Delivery_MaSter.Project_id = :asProject and
+			Delivery_MaSter.Ord_status = 'H' 
+" arguments=(("asProject", string))  sort="wh_code A sku A delivery_master_invoice_no A " )
+group(level=1 header.height=160 trailer.height=208 by=("wh_code" , "sku" ) header.color="536870912" trailer.color="536870912" )
+compute(band=header alignment="1" expression="'Page ' + Page() + ' of ' + PageCount()"border="0" color="0" x="2606" y="12" height="56" width="750" format="[GENERAL]"  name=compute_4  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="Report ID:" border="0" color="0" x="14" y="12" height="56" width="302"  name=t_1  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="Date:" border="0" color="0" x="14" y="60" height="56" width="302"  name=t_2  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="Project:" border="0" color="0" x="14" y="108" height="56" width="302"  name=t_5  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="Warehouse:" border="0" color="0" x="14" y="156" height="56" width="302"  name=delivery_master_wh_code_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header id=1 alignment="0" tabsequence=32766 border="0" color="0" x="297" y="156" height="56" width="370" format="[general]"  name=wh_code edit.limit=10 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=header alignment="0" expression=" Upper(asProject )"border="0" color="0" x="297" y="108" height="56" width="407" format="[GENERAL]"  name=compute_1  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=header alignment="0" expression="String(Today(),'MM/DD/YYYY HH:MM')"border="0" color="0" x="297" y="60" height="56" width="512" format="[General]"  name=compute_2  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Raw Materials to Package" border="0" color="0" x="0" y="8" height="124" width="3401"  name=t_6  font.face="Arial" font.height="-14" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="(For orders in  ~"Hold~" Status)" border="0" color="0" x="5" y="88" height="64" width="3392"  name=t_12  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+line(band=header.1 x1="82" y1="0" x2="2944" y2="0"  name=l_1 pen.style="0" pen.width="5" pen.color="0"  background.mode="2" background.color="16777215" )
+text(band=header.1 alignment="1" text="Sku:" border="0" color="0" x="46" y="12" height="64" width="169"  name=delivery_detail_sku_t  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.1 id=4 alignment="0" tabsequence=32766 border="0" color="0" x="224" y="12" height="64" width="654" format="[general]"  name=sku edit.limit=50 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header.1 alignment="1" text="Supplier:" border="0" color="0" x="937" y="12" height="64" width="311"  name=delivery_detail_supp_code_t  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.1 id=5 alignment="0" tabsequence=32766 border="0" color="0" x="1266" y="12" height="64" width="375" format="[general]"  name=delivery_detail_supp_code edit.limit=20 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="0"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header.1 alignment="1" text="Desc:" border="0" color="0" x="1682" y="12" height="64" width="155"  name=t_4  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.1 id=8 alignment="0" tabsequence=32766 border="0" color="0" x="1856" y="12" height="64" width="1102" format="[general]"  name=item_master_description edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-10" font.weight="0"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header.1 alignment="0" text="Order Date" border="0" color="0" x="347" y="96" height="60" width="366"  name=t_3  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" font.underline="1" background.mode="1" background.color="536870912" )
+text(band=header.1 alignment="0" text="Order Nbr" border="0" color="0" x="841" y="96" height="60" width="311"  name=delivery_master_invoice_no_t  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" font.underline="1" background.mode="1" background.color="536870912" )
+text(band=header.1 alignment="0" text="Cust Order Nbr" border="0" color="0" x="1225" y="96" height="60" width="466"  name=t_13  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" font.underline="1" background.mode="1" background.color="536870912" )
+text(band=header.1 alignment="0" text="Req Qty:" border="0" color="0" x="1947" y="96" height="60" width="311"  name=delivery_detail_req_qty_t  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" font.underline="1" background.mode="1" background.color="536870912" )
+column(band=detail id=7 alignment="0" tabsequence=32766 border="0" color="0" x="347" y="0" height="56" width="471" format="[shortdate] [time]"  name=delivery_master_ord_date editmask.mask="mm/dd/yy hh:mm" editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="0" color="0" x="841" y="0" height="56" width="366" format="[general]"  name=delivery_master_invoice_no edit.limit=20 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="0" color="0" x="1225" y="0" height="56" width="498" format="[general]"  name=cust_order_no edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=summary alignment="0" text="Packaged By:" border="0" color="0" x="133" y="216" height="64" width="448"  name=t_10  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=summary alignment="0" text="Date/Time:" border="0" color="0" x="1481" y="216" height="64" width="521"  name=t_11  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+line(band=summary x1="535" y1="280" x2="1376" y2="280"  name=l_3 pen.style="0" pen.width="9" pen.color="0"  background.mode="2" background.color="16777215" )
+line(band=summary x1="1806" y1="280" x2="2213" y2="276"  name=l_4 pen.style="0" pen.width="9" pen.color="0"  background.mode="2" background.color="16777215" )
+column(band=detail id=9 alignment="0" tabsequence=32766 border="0" color="0" x="2258" y="0" height="56" width="101" format="[general]"  name=c_avail_qty visible="1~t0" edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=detail alignment="0" expression=" c_raw_req_qty_for_sku "border="0" color="0" x="2395" y="0" height="64" width="91" format="[GENERAL]"  name=c_detail_raw_req visible="1~t0"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=trailer.1 alignment="0" text="- Total Qty required to Ship" border="0" color="0" x="2194" y="12" height="56" width="987"  name=t_7  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=trailer.1 alignment="0" text="- Qty Available in Normal Stock" border="0" color="0" x="2194" y="64" height="56" width="987"  name=t_8  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=trailer.1 alignment="0" text="- Total Raw Qty required to Pack" border="0" color="0" x="2194" y="132" height="68" width="987"  name=t_9  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="1" tabsequence=32766 border="0" color="0" x="1746" y="0" height="56" width="416" format="#######.#####"  name=delivery_detail_req_qty editmask.mask="#######.#####" editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+line(band=trailer.1 x1="1810" y1="0" x2="2162" y2="0"  name=l_2 pen.style="0" pen.width="5" pen.color="0"  background.mode="2" background.color="16777215" )
+compute(band=trailer.1 alignment="1" expression="sum(delivery_detail_req_qty for group 1)"border="0" color="0" x="1746" y="12" height="56" width="416" format="#######.#####"  name=c_req_qty_for_sku  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=trailer.1 alignment="1" expression="sum(c_avail_qty for group 1)"border="0" color="0" x="1746" y="64" height="56" width="416" format="#######.#####"  name=c_avail_qty_for_sku  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=trailer.1 alignment="1" expression=" c_req_qty_for_sku -  c_avail_qty_for_sku "border="0" color="0" x="1682" y="132" height="68" width="480" format="#######.#####"  name=c_raw_req_qty_for_sku  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" )

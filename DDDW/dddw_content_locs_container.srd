@@ -1,0 +1,81 @@
+HA$PBExportHeader$dddw_content_locs_container.srd
+$PBExportComments$*+ DDDW for Content locations
+release 9;
+datawindow(units=0 timer_interval=0 color=16777215 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=68 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=64 color="536870912" )
+table(column=(type=char(50) updatewhereclause=yes name=sku dbname="content.sku" )
+ column=(type=char(10) updatewhereclause=yes name=project_id dbname="content.project_id" )
+ column=(type=char(10) updatewhereclause=yes name=wh_code dbname="content.wh_code" )
+ column=(type=char(10) updatewhereclause=yes name=l_code dbname="content.l_code" )
+ column=(type=char(1) updatewhereclause=yes name=inventory_type dbname="content.inventory_type" )
+ column=(type=char(30) updatewhereclause=yes name=inventory_type_inv_type_desc dbname="inventory_type.inv_type_desc" )
+ column=(type=char(50) updatewhereclause=yes name=serial_no dbname="content.serial_no" )
+ column=(type=char(50) updatewhereclause=yes name=lot_no dbname="content.lot_no" )
+ column=(type=char(50) updatewhereclause=yes name=po_no dbname="content.po_no" )
+ column=(type=char(50) updatewhereclause=yes name=po_no2 dbname="content.po_no2" )
+ column=(type=char(25) updatewhereclause=yes name=container_id dbname="content.container_id" )
+ column=(type=datetime updatewhereclause=yes name=expiration_date dbname="content.expiration_date" )
+ column=(type=char(3) updatewhereclause=yes name=country_of_origin dbname="content.country_of_origin" )
+ column=(type=decimal(5) updatewhereclause=yes name=avail_qty dbname="content.avail_qty" )
+ column=(type=decimal(0) updatewhereclause=yes name=owner_id dbname="content.owner_id" )
+ column=(type=char(20) updatewhereclause=yes name=owner_owner_cd dbname="owner.owner_cd" )
+ column=(type=char(20) updatewhereclause=yes name=ro_no dbname="content.ro_no" )
+ column=(type=char(20) updatewhereclause=yes name=supp_code dbname="content.supp_code" )
+ retrieve="  SELECT Content.Sku,
+			Content.Project_ID,   
+         Content.WH_Code,   
+         Content.L_Code,   
+         Content.Inventory_Type,   
+			Inventory_Type.inv_type_desc, 
+         Content.Serial_No,   
+         Content.Lot_No,   
+			Content.PO_No, 
+			Content.PO_No2, 
+			Content.Container_ID,
+			Content.Expiration_Date,
+			Content.Country_of_origin, 
+         Content.Avail_Qty, 
+			Content.owner_id,
+			Owner.Owner_cd,
+			content.ro_no,
+			content.supp_code 
+    FROM Content, Inventory_Type, Owner
+   WHERE ( Content.Project_ID = 'xxxxx' ) and /*not having luck passing parms in, this will be modified in code for proper retrieval*/ 
+			Content.Inventory_type = Inventory_type.Inv_type and Content.Project_id = Inventory_type.Project_id and
+			Content.Owner_id = owner.Owner_id and Content.Project_id = Owner.Project_id
+"  sort="l_code A " )
+text(band=header alignment="1" text="Loc" border="0" color="0" x="59" y="8" height="56" width="105" html.valueishtml="0"  name=l_code_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="1" text="Qty" border="0" color="0" x="366" y="8" height="56" width="101" html.valueishtml="0"  name=avail_qty_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Type" border="0" color="0" x="782" y="8" height="56" width="146" html.valueishtml="0"  name=inventory_type_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Supplier" border="0" color="0" x="1047" y="8" height="56" width="320" html.valueishtml="0"  name=t_7 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="COO" border="0" color="0" x="1376" y="8" height="56" width="119" html.valueishtml="0"  name=t_3 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Owner" border="0" color="0" x="1513" y="8" height="56" width="169" html.valueishtml="0"  name=t_4 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="Lot Nbr" border="0" color="0" x="1705" y="8" height="56" width="215" html.valueishtml="0"  name=lot_no_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="Serial Nbr" border="0" color="0" x="1975" y="8" height="56" width="270" html.valueishtml="0"  name=serial_no_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="PO Nbr" border="0" color="0" x="2258" y="8" height="56" width="210" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="PO Nbr2" border="0" color="0" x="2533" y="8" height="56" width="270" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="Container ID" border="0" color="0" x="2807" y="8" height="56" width="306" html.valueishtml="0"  name=t_5 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="Exp. DATE" border="0" color="0" x="3145" y="8" height="56" width="270" html.valueishtml="0"  name=t_6 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="0" color="0" x="9" y="4" height="56" width="306" format="[general]" html.valueishtml="0"  name=l_code visible="1" edit.limit=10 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=14 alignment="0" tabsequence=32766 border="0" color="0" x="347" y="4" height="56" width="421" format="#######.#####" html.valueishtml="0"  name=avail_qty visible="1" editmask.mask="#######.#####" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=6 alignment="0" tabsequence=32766 border="0" color="0" x="791" y="4" height="56" width="238" format="[general]" html.valueishtml="0"  name=inventory_type_inv_type_desc visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=18 alignment="0" tabsequence=32766 border="0" color="0" x="1047" y="4" height="56" width="320" format="[general]" html.valueishtml="0"  name=supp_code visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=13 alignment="0" tabsequence=32766 border="0" color="0" x="1385" y="4" height="56" width="105" format="[general]" html.valueishtml="0"  name=country_of_origin visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=8 alignment="0" tabsequence=32766 border="0" color="0" x="1682" y="4" height="56" width="270" format="[general]" html.valueishtml="0"  name=lot_no visible="1" edit.limit=20 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=10 alignment="0" tabsequence=32766 border="0" color="0" x="2533" y="4" height="56" width="270" format="[general]" html.valueishtml="0"  name=po_no2 visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=9 alignment="0" tabsequence=32766 border="0" color="0" x="2249" y="4" height="56" width="270" format="[general]" html.valueishtml="0"  name=po_no visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=7 alignment="0" tabsequence=32766 border="0" color="0" x="1966" y="4" height="56" width="270" format="[general]" html.valueishtml="0"  name=serial_no visible="1" edit.limit=20 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=16 alignment="0" tabsequence=32766 border="0" color="0" x="1513" y="4" height="56" width="146" format="[general]" html.valueishtml="0"  name=owner_owner_cd visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=11 alignment="0" tabsequence=32766 border="0" color="0" x="2802" y="4" height="56" width="329" format="[general]" html.valueishtml="0"  name=container_id visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=12 alignment="0" tabsequence=32766 border="0" color="0" x="3150" y="4" height="56" width="439" format="[shortdate]" html.valueishtml="0"  name=expiration_date visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=17 alignment="0" tabsequence=32766 border="0" color="0" x="4654" y="4" height="56" width="462" format="[general]" html.valueishtml="0"  name=ro_no visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=15 alignment="0" tabsequence=32766 border="0" color="0" x="4064" y="4" height="56" width="370" format="[general]" html.valueishtml="0"  name=owner_id visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=1 alignment="0" tabsequence=0 border="0" color="0" x="5115" y="0" height="56" width="1152" html.valueishtml="0"  name=sku visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

@@ -1,0 +1,100 @@
+HA$PBExportHeader$d_gi_outbound_carton_serial.srd
+$PBExportComments$Delivery Carton Serial Numbers
+release 9;
+datawindow(units=0 timer_interval=0 color=16777215 processing=1 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no grid.lines=0 )
+header(height=88 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=72 color="536870912" )
+table(column=(type=char(10) update=yes updatewhereclause=yes key=yes name=project_id dbname="Carton_Serial.Project_ID" )
+ column=(type=char(20) update=yes updatewhereclause=yes key=yes name=carton_id dbname="Carton_Serial.Carton_ID" )
+ column=(type=char(50) update=yes updatewhereclause=yes key=yes name=serial_no dbname="Carton_Serial.Serial_No" )
+ column=(type=char(50) update=yes updatewhereclause=yes key=yes name=mac_id dbname="Carton_Serial.Mac_ID" )
+ column=(type=char(20) update=yes updatewhereclause=yes key=yes name=pallet_id dbname="Carton_Serial.Pallet_ID" )
+ column=(type=char(50) update=yes updatewhereclause=yes name=sku dbname="Carton_Serial.SKU" )
+ column=(type=char(20) update=yes updatewhereclause=yes name=supp_code dbname="Carton_Serial.Supp_Code" )
+ column=(type=char(3) update=yes updatewhereclause=yes name=country_of_origin dbname="Carton_Serial.Country_of_Origin" )
+ column=(type=datetime update=yes updatewhereclause=yes name=manufacture_date dbname="Carton_Serial.Manufacture_Date" )
+ column=(type=char(16) update=yes updatewhereclause=yes name=do_no dbname="Carton_Serial.DO_NO" )
+ column=(type=char(16) update=yes updatewhereclause=yes name=ro_no dbname="Carton_Serial.RO_NO" )
+ column=(type=datetime update=yes updatewhereclause=yes name=last_update dbname="Carton_Serial.Last_Update" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=status_cd dbname="Carton_Serial.Status_Cd" )
+ column=(type=decimal(5) update=yes updatewhereclause=yes name=carton_qty dbname="Carton_Serial.Carton_Qty" )
+ column=(type=char(25) update=yes updatewhereclause=yes name=user_field1 dbname="Carton_Serial.User_field1" )
+ column=(type=char(25) update=yes updatewhereclause=yes name=user_field2 dbname="Carton_Serial.User_field2" )
+ column=(type=char(25) update=yes updatewhereclause=yes name=user_field3 dbname="Carton_Serial.User_field3" )
+ column=(type=char(25) update=yes updatewhereclause=yes name=user_field4 dbname="Carton_Serial.User_field4" )
+ column=(type=decimal(0) updatewhereclause=yes name=line_item_no dbname="Delivery_Picking_Detail.Line_Item_No" )
+ column=(type=decimal(5) update=yes updatewhereclause=yes name=pallet_qty dbname="Carton_Serial.Pallet_Qty" )
+ retrieve="  SELECT dbo.Carton_Serial.Project_ID,   
+         dbo.Carton_Serial.Carton_ID,   
+         dbo.Carton_Serial.Serial_No,   
+         dbo.Carton_Serial.Mac_ID,   
+         dbo.Carton_Serial.Pallet_ID,   
+         dbo.Carton_Serial.SKU,   
+         dbo.Carton_Serial.Supp_Code,   
+         dbo.Carton_Serial.Country_of_Origin,   
+         dbo.Carton_Serial.Manufacture_Date,   
+         dbo.Carton_Serial.DO_NO,   
+         dbo.Carton_Serial.RO_NO,   
+         dbo.Carton_Serial.Last_Update,   
+         dbo.Carton_Serial.Status_Cd,    
+         dbo.Carton_Serial.Carton_Qty,   
+         dbo.Carton_Serial.User_field1,   
+         dbo.Carton_Serial.User_field2,   
+         dbo.Carton_Serial.User_field3,   
+         dbo.Carton_Serial.User_field4,   
+         dbo.Delivery_Picking_Detail.Line_Item_No,   
+         dbo.Carton_Serial.Pallet_Qty  
+    FROM dbo.Carton_Serial,   
+         dbo.Delivery_Picking_Detail,   
+         dbo.Delivery_Serial_Detail  
+   WHERE ( dbo.Delivery_Picking_Detail.ID_No = dbo.Delivery_Serial_Detail.ID_No ) and  
+         ( dbo.Delivery_Picking_Detail.SKU = dbo.Carton_Serial.SKU ) and  
+         ( dbo.Delivery_Serial_Detail.Serial_No = dbo.Carton_Serial.Serial_No )    
+" update="dbo.Carton_Serial" updatewhere=0 updatekeyinplace=no )
+text(band=header alignment="2" text="Do No" border="0" color="0" x="9" y="4" height="56" width="361" html.valueishtml="0"  name=carton_serial_do_no_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Serial No" border="0" color="0" x="1961" y="8" height="56" width="512" html.valueishtml="0"  name=delivery_serial_detail_serial_no_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Sku" border="0" color="0" x="1070" y="4" height="56" width="247" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Line Item No" border="0" color="0" x="750" y="4" height="56" width="311" html.valueishtml="0"  name=line_item_no_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Project Id" border="0" color="0" x="1641" y="4" height="56" width="311" html.valueishtml="0"  name=carton_serial_project_id_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Carton Id" border="0" color="0" x="2889" y="4" height="56" width="407" html.valueishtml="0"  name=carton_serial_carton_id_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Mac Id" border="0" color="0" x="3305" y="4" height="56" width="407" html.valueishtml="0"  name=carton_serial_mac_id_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Pallet Id" border="0" color="0" x="2482" y="4" height="56" width="398" html.valueishtml="0"  name=carton_serial_pallet_id_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Supp Code" border="0" color="0" x="1326" y="4" height="56" width="306" html.valueishtml="0"  name=carton_serial_supp_code_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="COO" border="0" color="0" x="3721" y="4" height="56" width="201" html.valueishtml="0"  name=carton_serial_country_of_origin_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Manufacture Date" border="0" color="0" x="3931" y="4" height="56" width="430" html.valueishtml="0"  name=carton_serial_manufacture_date_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text=" Ro No" border="0" color="0" x="379" y="4" height="56" width="361" html.valueishtml="0"  name=carton_serial_ro_no_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Last Update" border="0" color="0" x="4370" y="4" height="56" width="430" html.valueishtml="0"  name=carton_serial_last_update_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Status Cd" border="0" color="0" x="4809" y="4" height="56" width="334" html.valueishtml="0"  name=carton_serial_status_cd_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Carton Qty" border="0" color="0" x="5472" y="4" height="56" width="375" html.valueishtml="0"  name=carton_serial_carton_qty_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="User Field1" border="0" color="0" x="5856" y="4" height="56" width="357" html.valueishtml="0"  name=carton_serial_user_field1_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="User Field2" border="0" color="0" x="6222" y="4" height="56" width="357" html.valueishtml="0"  name=carton_serial_user_field2_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="User Field3" border="0" color="0" x="6587" y="4" height="56" width="338" html.valueishtml="0"  name=carton_serial_user_field3_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="User Field4" border="0" color="0" x="6935" y="4" height="56" width="375" html.valueishtml="0"  name=carton_serial_user_field4_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Pallet Qty" border="0" color="0" x="5152" y="4" height="56" width="311" html.valueishtml="0"  name=carton_serial_pallet_qty_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=3 alignment="0" tabsequence=70 border="0" color="0" x="1961" y="8" height="60" width="512" format="[general]" html.valueishtml="0"  name=serial_no visible="1" edit.limit=20 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="0" tabsequence=40 border="0" color="0" x="1070" y="8" height="60" width="247" format="[general]" html.valueishtml="0"  name=sku visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=19 alignment="0" tabsequence=30 border="0" color="0" x="750" y="0" height="56" width="311" format="[general]" html.valueishtml="0"  name=line_item_no visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=1 alignment="0" tabsequence=60 border="0" color="0" x="1641" y="0" height="56" width="311" format="[general]" html.valueishtml="0"  name=project_id visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="0" tabsequence=90 border="0" color="0" x="2889" y="0" height="56" width="407" format="[general]" html.valueishtml="0"  name=carton_id visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="0" tabsequence=100 border="0" color="0" x="3305" y="0" height="56" width="407" format="[general]" html.valueishtml="0"  name=mac_id visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="0" tabsequence=80 border="0" color="0" x="2482" y="0" height="56" width="398" format="[general]" html.valueishtml="0"  name=pallet_id visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=7 alignment="0" tabsequence=50 border="0" color="0" x="1326" y="0" height="56" width="306" format="[general]" html.valueishtml="0"  name=supp_code visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=8 alignment="0" tabsequence=110 border="0" color="0" x="3721" y="0" height="56" width="201" format="[general]" html.valueishtml="0"  name=country_of_origin visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=9 alignment="0" tabsequence=120 border="0" color="0" x="3931" y="0" height="56" width="430" format="[shortdate] [time]" html.valueishtml="0"  name=manufacture_date visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=10 alignment="0" tabsequence=10 border="0" color="0" x="9" y="0" height="56" width="361" format="[general]" html.valueishtml="0"  name=do_no visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=11 alignment="0" tabsequence=20 border="0" color="0" x="379" y="0" height="56" width="361" format="[general]" html.valueishtml="0"  name=ro_no visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=12 alignment="0" tabsequence=130 border="0" color="0" x="4370" y="0" height="56" width="430" format="[shortdate] [time]" html.valueishtml="0"  name=last_update visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=13 alignment="0" tabsequence=140 border="0" color="0" x="4809" y="0" height="56" width="334" format="[general]" html.valueishtml="0"  name=status_cd visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=14 alignment="0" tabsequence=160 border="0" color="0" x="5472" y="0" height="56" width="375" format="[general]" html.valueishtml="0"  name=carton_qty visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=15 alignment="0" tabsequence=170 border="0" color="0" x="5856" y="0" height="56" width="357" format="[general]" html.valueishtml="0"  name=user_field1 visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=16 alignment="0" tabsequence=180 border="0" color="0" x="6222" y="0" height="56" width="357" format="[general]" html.valueishtml="0"  name=user_field2 visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=17 alignment="0" tabsequence=190 border="0" color="0" x="6587" y="0" height="56" width="338" format="[general]" html.valueishtml="0"  name=user_field3 visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=18 alignment="0" tabsequence=200 border="0" color="0" x="6935" y="0" height="56" width="375" format="[general]" html.valueishtml="0"  name=user_field4 visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=20 alignment="0" tabsequence=150 border="0" color="0" x="5152" y="0" height="56" width="311" format="[general]" html.valueishtml="0"  name=pallet_qty visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

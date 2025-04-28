@@ -1,0 +1,76 @@
+HA$PBExportHeader$d_do_bom_report_detail.srd
+$PBExportComments$Delivery Order BOM Report - Child Detail
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=52 color="536870912" )
+table(column=(type=char(50) updatewhereclause=yes name=delivery_picking_sku dbname="Delivery_Picking.SKU" )
+ column=(type=decimal(0) updatewhereclause=yes name=delivery_picking_line_item_no dbname="Delivery_Picking.Line_item_No" )
+ column=(type=decimal(5) updatewhereclause=yes name=total_child_qty dbname="total_Child_Qty" )
+ column=(type=char(70) updatewhereclause=yes name=item_master_description dbname="Item_Master.Description" )
+ column=(type=decimal(5) updatewhereclause=yes name=item_component_child_qty dbname="Child_Qty" )
+ column=(type=char(25) updatewhereclause=yes name=item_component_bom_group dbname="Bom_Group" )
+ column=(type=decimal(0) updatewhereclause=yes name=item_component_bom_sort_order dbname="Bom_Sort_Order" )
+ retrieve="  SELECT Distinct dbo.Delivery_Picking.SKU,   
+			dbo.Delivery_Picking.Line_item_No, 
+			Sum(dbo.Delivery_Picking.Quantity) as total_Child_Qty, 
+         dbo.Item_Master.Description,   
+         Max(dbo.Item_Component.Child_Qty) as Child_Qty,   
+         Max(dbo.Item_Component.BOM_Group) as Bom_Group,   
+         Max(dbo.Item_Component.BOM_Sort_order) as Bom_Sort_Order
+    FROM dbo.Delivery_Picking,   
+         dbo.Item_Component,   
+         dbo.Item_Master  
+   WHERE ( dbo.Delivery_Picking.SKU = dbo.Item_Master.SKU ) and  
+         ( dbo.Item_Master.Supp_Code = dbo.Delivery_Picking.Supp_Code ) and  
+			( dbo.Item_MAster.Project_ID = :asProject) and 
+			( dbo.DElivery_Picking.do_no = :asDONO) and 
+			( dbo.Delivery_Picking.Component_Ind = 'W') and 
+			( dbo.Delivery_Picking.Line_Item_No = :alLine) and 
+         ( dbo.Item_Component.SKU_Child = dbo.Delivery_Picking.SKU ) and  
+         ( dbo.Item_Component.Project_ID = dbo.Item_Master.Project_ID ) and 
+			( dbo.Item_Component.Sku_parent = :asSku) 
+
+Group BY	dbo.Delivery_Picking.SKU,   
+			dbo.Delivery_Picking.Line_item_No, 
+         dbo.Item_Master.Description,   
+         dbo.item_Component.Child_Qty,
+			dbo.Item_Component.BOM_Group, 
+			dbo.Item_Component.BOM_Sort_order
+
+Union SELECT Distinct dbo.Delivery_Picking.SKU,   
+			dbo.Delivery_Picking.Line_item_No, 
+			Sum(dbo.Delivery_Picking.Quantity) as total_Child_Qty, 
+         dbo.Item_Master.Description,   
+         Delivery_Bom.Child_qty as Child_Qty,   
+         ~"~" as Bom_Group,   
+         0 as Bom_Sort_Order
+    FROM dbo.Delivery_Picking,   
+         dbo.Delivery_Bom,   
+         dbo.Item_Master  
+   WHERE ( dbo.Delivery_Picking.SKU = dbo.Item_Master.SKU ) and  
+         ( dbo.Item_Master.Supp_Code = dbo.Delivery_Picking.Supp_Code ) and  
+			( dbo.Item_MAster.Project_ID = :asProject) and 
+			( dbo.DElivery_Picking.do_no = :asDONO) and 
+			( dbo.Delivery_Picking.Component_Ind = 'W') and 
+			( dbo.Delivery_Picking.Line_Item_No = :alLine) and 
+         ( dbo.Delivery_Bom.do_no = dbo.Delivery_Picking.do_no ) and  
+			( dbo.Delivery_Bom.SKU_Child = dbo.Delivery_Picking.SKU ) and  
+         ( dbo.Delivery_Bom.Project_ID = dbo.Item_Master.Project_ID ) and 
+			( dbo.Delivery_Bom.Sku_parent = :asSku) 
+
+Group BY	dbo.Delivery_Picking.SKU,   
+			dbo.Delivery_Picking.Line_item_No, 
+         dbo.Item_Master.Description,   
+         dbo.Delivery_Bom.Child_Qty" arguments=(("asProject", string),("asDoNo", string),("alLine", number),("asSku", string),("alparentQty", number))  sort="item_component_bom_group A item_component_bom_sort_order A delivery_picking_sku A " )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="0" color="33554432" x="23" y="4" height="52" width="594" format="[general]" html.valueishtml="0"  name=delivery_picking_sku visible="1" edit.limit=50 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="0" tabsequence=32766 border="0" color="33554432" x="635" y="4" height="52" width="453" format="[general]" html.valueishtml="0"  name=item_component_bom_group visible="1" edit.limit=25 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="0" color="33554432" x="1115" y="4" height="52" width="736" format="[general]" html.valueishtml="0"  name=item_master_description visible="1" edit.limit=70 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=detail alignment="0" expression="'(' + String( c_child_qty / alparentQty,'#######.##' ) + ' Each )'"border="0" color="33554432" x="2418" y="4" height="56" width="585" format="[GENERAL]" html.valueishtml="0"  name=compute_1 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=detail alignment="1" expression="If(item_component_child_qty > 0, alparentQty *  item_component_child_qty , alParentQty)"border="0" color="33554432" x="2075" y="4" height="56" width="325" format="#######.####" html.valueishtml="0"  name=c_child_qty visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

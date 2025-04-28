@@ -1,0 +1,98 @@
+﻿$PBExportHeader$d_ge_replenish_rpt2.srd
+$PBExportComments$Datawindow used for displaying NON G and GE Parts.
+release 11;
+datawindow(units=0 timer_interval=0 color=16777215 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 1 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes print.preview.outline=yes hidegrayline=no showbackcoloronxp=no )
+header(height=436 color="536870912" )
+summary(height=104 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=68 color="536870912" )
+table(column=(type=char(50) updatewhereclause=yes name=item_master_sku dbname="SKU" )
+ column=(type=char(70) updatewhereclause=yes name=item_master_description dbname="Description" )
+ column=(type=char(10) updatewhereclause=yes name=item_master_grp dbname="GRP" )
+ column=(type=decimal(5) updatewhereclause=yes name=reorder_point_min_rop dbname="MIN_ROP" )
+ column=(type=decimal(5) updatewhereclause=yes name=reorder_point_max_supply_onhand dbname="MAX_Supply_Onhand" )
+ column=(type=decimal(5) updatewhereclause=yes identity=yes name=content_avail_qty dbname="avail_qty" )
+ column=(type=char(10) updatewhereclause=yes name=content_project_id dbname="Project_ID" )
+ column=(type=char(10) updatewhereclause=yes name=content_wh_code dbname="WH_Code" )
+ column=(type=char(40) updatewhereclause=yes name=warehouse_name dbname="warehouse_name" )
+ retrieve="SELECT 		A.SKU,  
+				
+        		A.Description,   
+        		A.GRP,   
+        		Reorder_Point.MIN_ROP,   
+        		Reorder_Point.MAX_Supply_Onhand,   
+        		sum(Content.Avail_Qty) as avail_qty,   
+        		Content.Project_ID,   
+        		content.WH_Code,
+				warehouse_name = (select wh_name
+					from warehouse
+						where warehouse.wh_code = content.wh_code)  
+
+FROM			
+         	Item_Master A,   
+         	content right outer join item_master b
+         	on Content.sku = b.sku,
+         	Reorder_Point right outer join Item_Master c 
+         	on Reorder_Point.SKU = c.SKU
+  
+WHERE 		A.Project_ID = :as_project  			and 						
+         	Reorder_Point.Project_ID = :as_project  		and           	
+         	content.Inventory_Type = 'N' 						AND  
+         	Content.Project_ID = :as_project					AND 
+	  			content.wh_code = :as_warehouse					AND
+         	A.GRP not in ('G', 'GG')    
+
+GROUP BY 	A.sku,
+				
+				A.description,
+				A.grp,
+				Reorder_Point.MIN_ROP,   
+        		Reorder_Point.MAX_Supply_Onhand,   
+				content.project_id,
+				content.wh_code
+
+having		(sum(content.avail_qty) < sum(reorder_point.min_rop)) OR 
+				sum(content.avail_qty) = NULL" arguments=(("as_project", string),("as_warehouse", string))  sort="item_master_sku A " )
+text(band=header alignment="0" text="Report ID:" border="0" color="0" x="18" y="12" height="56" width="242" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="SIMS901" border="0" color="0" x="274" y="12" height="56" width="201" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="0" expression="today()"border="0" color="0" x="274" y="72" height="56" width="535" format="mm/dd/yyyy hh:mm" html.valueishtml="0"  name=compute_1 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="Date:" border="0" color="0" x="18" y="72" height="56" width="155" html.valueishtml="0"  name=t_3 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="Project:" border="0" color="0" x="18" y="180" height="64" width="311" html.valueishtml="0"  name=t_5 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="" border="0" color="0" x="347" y="180" height="64" width="1125" html.valueishtml="0"  name=project visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="Warehouse:" border="0" color="0" x="18" y="248" height="64" width="311" html.valueishtml="0"  name=t_6 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="" border="0" color="0" x="347" y="248" height="64" width="1125" html.valueishtml="0"  name=warehouse visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="SKU" border="0" color="0" x="27" y="360" height="56" width="128" html.valueishtml="0"  name=content_sku_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+line(band=header x1="23" y1="432" x2="4251" y2="432"  name=l_1 visible="1" pen.style="0" pen.width="9" pen.color="0"  background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="GE  REPLENISH  REPORT" border="0" color="0" x="1417" y="12" height="64" width="731" html.valueishtml="0"  name=t_7 visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="(ALL EXCEPT G AND GG PARTS)" border="0" color="0" x="1381" y="72" height="60" width="809" html.valueishtml="0"  name=t_8 visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="DESCRIPTION" border="0" color="0" x="937" y="360" height="56" width="421" html.valueishtml="0"  name=item_master_description_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="PART GROUP" border="0" color="0" x="1975" y="360" height="56" width="311" html.valueishtml="0"  name=item_master_grp_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="Page:" border="0" color="0" x="3616" y="12" height="56" width="137" html.valueishtml="0"  name=t_4 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="1" expression="page() + ' of ' + pagecount()"border="0" color="0" x="3767" y="12" height="56" width="315" format="[general]" html.valueishtml="0"  name=compute_2 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="REPLENISH
+    QTY" border="0" color="0" x="3931" y="304" height="112" width="261" html.valueishtml="0"  name=t_9 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="   QTY
+AVAILABLE" border="0" color="0" x="3447" y="304" height="112" width="283" html.valueishtml="0"  name=content_avail_qty_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="MIN STOCK
+    QTY" border="0" color="0" x="2578" y="304" height="112" width="274" html.valueishtml="0"  name=reorder_point_min_rop_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="MAX STOCK
+    QTY" border="0" color="0" x="3013" y="304" height="112" width="297" html.valueishtml="0"  name=reorder_point_max_supply_onhand_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="0" color="0" x="27" y="4" height="68" width="901" format="[general]" html.valueishtml="0"  name=item_master_sku visible="1" edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="0" color="0" x="942" y="4" height="68" width="1010" format="[general]" html.valueishtml="0"  name=item_master_description visible="1" edit.limit=70 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="0" color="0" x="1975" y="4" height="68" width="270" format="[general]" html.valueishtml="0"  name=item_master_grp visible="1" edit.limit=10 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=detail alignment="1" expression="if ( reorder_point_max_supply_onhand > 0,  reorder_point_max_supply_onhand  -   cf_avail_qty  ,0)"border="0" color="0" x="3845" y="4" height="68" width="361" format="#######.#####" html.valueishtml="0"  name=cf_replenish visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=detail alignment="1" expression="if (isnull( content_avail_qty ),0, content_avail_qty )"border="0" color="0" x="3406" y="4" height="68" width="361" format="#######.#####" html.valueishtml="0"  name=cf_avail_qty visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="1" tabsequence=32766 border="0" color="0" x="2505" y="4" height="68" width="361" format="#######.#####" html.valueishtml="0"  name=reorder_point_min_rop visible="1" editmask.mask="#######.#####" editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="1" tabsequence=32766 border="0" color="0" x="2953" y="4" height="68" width="361" format="#######.#####" html.valueishtml="0"  name=reorder_point_max_supply_onhand visible="1" editmask.mask="#######.#####" editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=summary alignment="0" text="END OF REPORT" border="0" color="0" x="1449" y="36" height="56" width="375" html.valueishtml="0"  name=t_10 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" pagingmethod=0 generatedddwframes="1" )
+xhtmlgen() cssgen(sessionspecific="0" )
+xmlgen(inline="0" )
+xsltgen()
+jsgen()
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )
+export.xhtml()
+ 

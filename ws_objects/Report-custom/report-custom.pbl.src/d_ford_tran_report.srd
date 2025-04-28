@@ -1,0 +1,82 @@
+﻿$PBExportHeader$d_ford_tran_report.srd
+$PBExportComments$Ford warehouse transfer master - Sorted by from loc & sku
+release 9;
+datawindow(units=2 timer_interval=0 color=16777215 processing=1 HTMLDW=no print.printername="" print.documentname="" print.orientation = 1 print.margin.left = 800 print.margin.right = 400 print.margin.top = 400 print.margin.bottom = 400 print.paper.source = 0 print.paper.size = 1 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no grid.lines=1 grid.columnmove=no selected.mouse=no )
+header(height=1531 color="536870912" )
+summary(height=10 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=229 color="536870912" )
+table(column=(type=char(16) updatewhereclause=yes name=to_no dbname="Transfer_Master.TO_No" )
+ column=(type=char(10) updatewhereclause=yes name=project_id dbname="Transfer_Master.Project_ID" )
+ column=(type=datetime updatewhereclause=yes name=ord_date dbname="Transfer_Master.Ord_Date" )
+ column=(type=datetime updatewhereclause=yes name=complete_date dbname="Transfer_Master.Complete_Date" )
+ column=(type=char(10) updatewhereclause=yes name=s_warehouse dbname="Transfer_Master.S_Warehouse" )
+ column=(type=char(10) updatewhereclause=yes name=d_warehouse dbname="Transfer_Master.D_Warehouse" )
+ column=(type=char(250) updatewhereclause=yes name=remark dbname="Transfer_Master.Remark" )
+ column=(type=char(50) updatewhereclause=yes name=sku dbname="Transfer_Detail.SKU" )
+ column=(type=char(50) updatewhereclause=yes name=serial_no dbname="Transfer_Detail.Serial_No" )
+ column=(type=char(50) updatewhereclause=yes name=lot_no dbname="Transfer_Detail.Lot_No" )
+ column=(type=char(10) updatewhereclause=yes name=s_location dbname="Transfer_Detail.S_Location" )
+ column=(type=char(10) updatewhereclause=yes name=d_location dbname="Transfer_Detail.D_Location" )
+ column=(type=decimal(5) updatewhereclause=yes name=quantity dbname="Transfer_Detail.Quantity" )
+ column=(type=char(30) updatewhereclause=yes name=ord_type dbname="Transfer_Order_Type.Ord_Type_Desc" )
+ column=(type=char(30) updatewhereclause=yes name=inv_type_desc dbname="Inventory_Type.Inv_Type_Desc" )
+ retrieve="  SELECT Transfer_Master.TO_No,   
+         Transfer_Master.Project_ID,   
+         Transfer_Master.Ord_Date,   
+         Transfer_Master.Complete_Date,   
+         Transfer_Master.S_Warehouse,   
+         Transfer_Master.D_Warehouse,   
+         Transfer_Master.Remark,   
+         Transfer_Detail.SKU,   
+         Transfer_Detail.Serial_No,   
+         Transfer_Detail.Lot_No,   
+         Transfer_Detail.S_Location,   
+         Transfer_Detail.D_Location,   
+         Transfer_Detail.Quantity,   
+         Transfer_Order_Type.Ord_Type_Desc,   
+         Inventory_Type.Inv_Type_Desc  
+    FROM Transfer_Detail,   
+         Transfer_Master,   
+         Transfer_Order_Type,   
+         Inventory_Type  
+   WHERE ( Transfer_Master.TO_No = Transfer_Detail.TO_No ) and  
+         ( Transfer_Master.Ord_Type = Transfer_Order_Type.Ord_Type ) and  
+         ( Transfer_Detail.Inventory_Type = Inventory_Type.Inv_Type ) and  
+         ( Transfer_Master.Project_ID = Inventory_Type.Project_ID ) and  
+         ( ( Transfer_Master.TO_No = :as_order ) )   
+ORDER BY Transfer_Detail.S_Location ASC,
+			Transfer_Detail.SKU ASC   
+
+" arguments=(("as_order", string)) )
+text(band=background alignment="2" text="Stock Transfer Report" border="0" color="0" x="20" y="20" height="166" width="9145" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="SKU" border="2" color="0" x="20" y="1364" height="145" width="1770" html.valueishtml="0"  name=transfer_detail_sku_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="SERIAL NBR" border="2" color="0" x="1812" y="1364" height="145" width="1510" html.valueishtml="0"  name=transfer_detail_serial_no_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="LOT NBR" border="2" color="0" x="3343" y="1364" height="145" width="1531" html.valueishtml="0"  name=transfer_detail_lot_no_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="INVENTORY TYPE" border="2" color="0" x="4895" y="1364" height="145" width="1104" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="FROM" border="2" color="0" x="6020" y="1364" height="145" width="1083" html.valueishtml="0"  name=transfer_detail_s_location_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="TO" border="2" color="0" x="7125" y="1364" height="145" width="1104" html.valueishtml="0"  name=transfer_detail_d_location_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="QUANTITY" border="2" color="0" x="8250" y="1364" height="145" width="854" html.valueishtml="0"  name=transfer_detail_quantity_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=10 alignment="0" tabsequence=32766 border="0" color="0" x="3343" y="21" height="177" width="1531" format="[general]" html.valueishtml="0"  name=lot_no visible="1" edit.limit=20 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=15 alignment="0" tabsequence=32766 border="0" color="0" x="4895" y="21" height="177" width="1104" format="[general]" html.valueishtml="0"  name=inv_type_desc visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=11 alignment="0" tabsequence=32766 border="0" color="0" x="6020" y="21" height="177" width="1083" format="[general]" html.valueishtml="0"  name=s_location visible="1" edit.limit=10 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=12 alignment="0" tabsequence=32766 border="0" color="0" x="7125" y="21" height="177" width="1104" format="[general]" html.valueishtml="0"  name=d_location visible="1" edit.limit=10 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=13 alignment="1" tabsequence=32766 border="0" color="0" x="8250" y="21" height="177" width="854" format="#######.#####" html.valueishtml="0"  name=quantity visible="1" editmask.mask="#######.#####" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=9 alignment="0" tabsequence=32766 border="0" color="0" x="1812" y="21" height="177" width="1510" format="[general]" html.valueishtml="0"  name=serial_no visible="1" edit.limit=20 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=8 alignment="0" tabsequence=32766 border="0" color="0" x="20" y="21" height="177" width="1770" format="[general]" html.valueishtml="0"  name=sku visible="1" edit.limit=50 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=summary alignment="1" text="Total: " border="0" color="0" x="7125" y="167" height="145" width="1104" html.valueishtml="0"  name=t_3 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=summary alignment="1" expression="sum(quantity for all)"border="0" color="0" x="8250" y="167" height="166" width="854" format="[general]" html.valueishtml="0"  name=compute_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=foreground alignment="0" expression="'Order No.: ' +  to_no + Space (5) + 'Project: ' +  project_id  + space(5) + 'Warehouse: ' +  s_warehouse + ' to ' +  d_warehouse  + space(5) + 'Order Date: ' + String( ord_date , 'mm/dd/yyyy hh:mm') + space(5) + 'Complete Date: ' + String( complete_date , 'mm/dd/yyyy hh:mm')"border="0" color="0" x="10" y="635" height="166" width="9156" format="[general]" html.valueishtml="0"  name=compute_2 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+text(band=foreground alignment="1" text="Remark: " border="0" color="0" x="20" y="833" height="145" width="645" html.valueishtml="0"  name=t_4 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+compute(band=foreground alignment="0" expression="remark"border="0" color="0" x="677" y="833" height="500" width="8458" format="[general]" html.valueishtml="0"  name=compute_3 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+text(band=foreground alignment="0" text="Report ID:" border="0" color="0" x="10" y="20" height="145" width="552" html.valueishtml="0"  name=t_5 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+text(band=foreground alignment="0" text="Date:" border="0" color="0" x="10" y="177" height="145" width="291" html.valueishtml="0"  name=t_6 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+text(band=foreground alignment="0" text="SIMS312" border="0" color="0" x="593" y="20" height="145" width="479" html.valueishtml="0"  name=t_7 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+compute(band=foreground alignment="0" expression="String(Today(), 'mm/dd/yyyy hh:mm')"border="0" color="0" x="593" y="177" height="145" width="2500" format="[general]" html.valueishtml="0"  name=compute_4 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+text(band=foreground alignment="0" text="Page:" border="0" color="0" x="7458" y="20" height="145" width="322" html.valueishtml="0"  name=t_8 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=foreground alignment="1" expression="page() + ' of ' + pageCount()"border="0" color="0" x="7822" y="20" height="166" width="916" format="[general]" html.valueishtml="0"  name=compute_5 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

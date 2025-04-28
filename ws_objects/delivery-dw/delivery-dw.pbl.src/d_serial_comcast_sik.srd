@@ -1,0 +1,54 @@
+﻿$PBExportHeader$d_serial_comcast_sik.srd
+release 11;
+datawindow(units=0 timer_interval=0 color=16777215 processing=1 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes print.preview.outline=yes hidegrayline=no showbackcoloronxp=no grid.lines=0 )
+header(height=88 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=72 color="536870912" )
+table(column=(type=char(50) updatewhereclause=yes name=sku dbname="Delivery_Picking_Detail.SKU" )
+ column=(type=char(30) updatewhereclause=yes name=user_field10 dbname="Item_Master.User_Field10" )
+ column=(type=char(10) updatewhereclause=no name=user_field4 dbname="Item_Master.User_Field4" )
+ column=(type=char(70) updatewhereclause=yes name=item_master_description dbname="Item_Master.Description" )
+ column=(type=char(50) update=yes updatewhereclause=yes key=yes name=serial_no dbname="Delivery_Serial_Detail.Serial_No" )
+ column=(type=decimal(0) update=yes updatewhereclause=yes key=yes name=id_no dbname="Delivery_Serial_Detail.ID_No" )
+ column=(type=decimal(0) updatewhereclause=yes identity=yes name=delivery_picking_detail_id_no dbname="Delivery_Picking_Detail.ID_No" )
+ column=(type=decimal(5) update=yes updatewhereclause=yes name=quantity dbname="Delivery_Serial_Detail.Quantity" )
+ column=(type=decimal(5) updatewhereclause=yes name=delivery_picking_detail_quantity dbname="Delivery_Picking_Detail.Quantity" )
+ column=(type=char(50) updatewhereclause=yes name=delivery_picking_detail_serial_no dbname="Delivery_Picking_Detail.Serial_No" )
+ retrieve="  SELECT dbo.Delivery_Picking_Detail.SKU,   
+         dbo.Item_Master.User_Field10,   
+		 dbo.Item_Master.User_Field4,  
+         dbo.Item_Master.Description,   
+         dbo.Delivery_Serial_Detail.Serial_No,   
+         dbo.Delivery_Serial_Detail.ID_No,   
+         dbo.Delivery_Picking_Detail.ID_No,   
+         dbo.Delivery_Serial_Detail.Quantity,   
+         dbo.Delivery_Picking_Detail.Quantity,   
+         dbo.Delivery_Picking_Detail.Serial_No  
+    FROM {oj dbo.Delivery_Picking_Detail LEFT OUTER JOIN dbo.Delivery_Serial_Detail ON dbo.Delivery_Picking_Detail.ID_No = dbo.Delivery_Serial_Detail.ID_No},   
+         dbo.Item_Master  with (nolock)
+   WHERE ( dbo.Delivery_Picking_Detail.Supp_Code = dbo.Item_Master.Supp_Code ) and  
+         ( dbo.Delivery_Picking_Detail.SKU = dbo.Item_Master.SKU ) and  
+         ( ( dbo.Item_Master.Project_ID = 'COMCAST' ) AND  
+         ( ( dbo.Delivery_Picking_Detail.DO_No = :as_do_no ) ) And
+			(Item_Master.Serialized_Ind = 'O') )    
+" update="dbo.Delivery_Serial_Detail" updatewhere=0 updatekeyinplace=no arguments=(("as_do_no", string)) )
+text(band=header alignment="2" text="SKU" border="6" color="33554432" x="14" y="12" height="64" width="745" html.valueishtml="0"  name=delivery_picking_detail_sku_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Model" border="6" color="0" x="768" y="12" height="64" width="658" html.valueishtml="0"  name=item_master_user_field10_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Description" border="6" color="0" x="1435" y="12" height="64" width="1198" html.valueishtml="0"  name=item_master_description_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Serial" border="6" color="0" x="2642" y="12" height="64" width="910" html.valueishtml="0"  name=delivery_serial_detail_serial_no_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="0" color="33554432" x="14" y="8" height="56" width="745" format="[general]" html.valueishtml="0"  name=sku visible="1" edit.limit=50 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="0" color="33554432" x="773" y="8" height="56" width="654" format="[general]" html.valueishtml="0"  name=user_field10 visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="0" color="33554432" x="1440" y="8" height="56" width="1193" format="[general]" html.valueishtml="0"  name=item_master_description visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+column(band=detail id=5 alignment="0" tabsequence=32766 border="0" color="33554432" x="2647" y="8" height="56" width="905" format="[general]" html.valueishtml="0"  name=serial_no visible="1" edit.limit=0 edit.case=upper edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" pagingmethod=0 generatedddwframes="1" )
+xhtmlgen() cssgen(sessionspecific="0" )
+xmlgen(inline="0" )
+xsltgen()
+jsgen()
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )
+export.xhtml()
+ 

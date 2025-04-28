@@ -1,0 +1,61 @@
+HA$PBExportHeader$f_retrieve_parm.srf
+$PBExportComments$***EDIT SOURCE*** function is overloaded. Retrieves parameters stored in the lookup_table.
+global type f_retrieve_parm from function_object
+end type
+
+forward prototypes
+global function string f_retrieve_parm (string as_project_id, string as_code_type, string as_code_id)
+global function string f_retrieve_parm (string as_project_id, string as_code_type, string as_code_id, string as_column_returned)
+end prototypes
+
+global function string f_retrieve_parm (string as_project_id, string as_code_type, string as_code_id);//	***NOTE*** this method is overloaded, "edit source" to see all implementations
+
+
+// Retrieve a parameter from the lookup_table.  An empty string will be returned upon an unhappy path.
+// LTK 20111221
+
+String ls_parm
+
+select code_descript
+into :ls_parm
+from lookup_table
+where project_id = :as_project_id
+and code_type = :as_code_type
+and code_id = :as_code_id;
+
+return ls_parm
+
+end function
+
+global function string f_retrieve_parm (string as_project_id, string as_code_type, string as_code_id, string as_column_returned);//	***NOTE*** this method is overloaded, "edit source" to see all implementations
+
+
+// Retrieve a parameter from the lookup_table.  An empty string will be returned upon an unhappy path.
+// LTK 20150924
+//11-Apr-2017 :Madhu PEVS-424 Stock Transfer Serial No- Added USER_UPDATEABLE_IND
+String ls_return, ls_code_descript, ls_user_field1, ls_user_field2, ls_user_field3, ls_user_updateable_ind
+
+select code_descript, user_field1, user_field2, user_field3, User_Updateable_Ind
+into :ls_code_descript, :ls_user_field1, :ls_user_field2, :ls_user_field3, :ls_user_updateable_ind
+from lookup_table
+where project_id = :as_project_id
+and code_type = :as_code_type
+and code_id = :as_code_id;
+
+choose case as_column_returned
+	case "CODE_DESCRIPT"
+		ls_return = ls_code_descript		
+	case "USER_FIELD1"
+		ls_return = ls_user_field1
+	case "USER_FIELD2"
+		ls_return = ls_user_field2
+	case "USER_FIELD3"
+		ls_return = ls_user_field3
+	case "USER_UPDATEABLE_IND"
+		ls_return = ls_user_updateable_ind
+end choose
+
+return ls_return
+
+end function
+

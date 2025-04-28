@@ -1,0 +1,61 @@
+﻿$PBExportHeader$f_footprint_serial_numbers.srf
+$PBExportComments$S37314 F17337 I1304 Google Footprints GPN Conversion Process
+global type f_footprint_serial_numbers from function_object
+end type
+
+forward prototypes
+global function long f_footprint_serial_numbers (string assku, string aswhcode, string aslocation, string aspono2, string ascontainer, integer aiqty)
+end prototypes
+
+global function long f_footprint_serial_numbers (string assku, string aswhcode, string aslocation, string aspono2, string ascontainer, integer aiqty);//GailM 9/5/2019 S37314 F17337 I1304 Google Footprints GPN Conversion Process  
+//  Return 0 mean there are no missing serial numbers between content and serial number inventory
+//  Return a positive number means there are missing serial numbers and they must be entered
+//  Return a negative number means there are more serial numbers that what is in content for WH/SKU/pallet/container
+Long llNbrSerialReq, llNbrSerialPresent, llNbrDiff, llFound
+String lsFilter
+llNbrDiff = 0
+datastore ldsSN
+
+ldsSN = Create datastore
+
+//Allow the pallet and container to also be a dash - Treat dashes like NA until data is changed (or should we intervene now?)
+If (asPoNo2 = gsFootPrintBlankInd and asContainer = gsFootPrintBlankInd) OR  (asPoNo2 = '-' and asContainer = '-') Then
+	//Count the number of serial for the wh/sku/location/pono2/container and number of serials linked to another order
+	select count(*) into :llNbrSerialPresent
+	from serial_number_inventory with (nolock)
+	where project_id = :gs_project and wh_code = :asWhCode
+	and sku = :asSKU and l_code = :asLocation and po_no2 = :asPoNo2 and carton_id = :asContainer 
+	//and serial_flag not in ('L','P')
+	using sqlca;
+	
+	
+	
+	llNbrDiff =  llNbrSerialPresent - aiQty
+Else
+	//Find number of serial numbers to look for from content summary.  Add avail_qty, alloc_qty, tfr_out.
+	//DE14186 Add check for serial numbers that are in SNI but have a question mark ? in front of the number.
+	select sum(avail_qty) + sum(alloc_qty) + sum(tfr_out) into :llNbrSerialReq
+	from content_summary with (nolock) where project_id = :gs_project and wh_code = :asWhCode
+	and sku = :asSKU and l_code = :asLocation and po_no2 = :asPoNo2 and container_id = :asContainer using sqlca;
+	
+	If IsNull(llNbrSerialReq) Then llNbrSerialReq = 0
+	
+	select count(*) into :llNbrSerialPresent
+	from serial_number_inventory with (nolock)
+	where project_id = :gs_project and wh_code = :asWhCode
+	and sku = :asSKU and l_code = :asLocation 
+	and po_no2 = :asPoNo2 and carton_id = :asContainer 
+	and left(serial_no,1) <> '?'
+	using sqlca;
+	
+	
+	llNbrDiff = llNbrSerialReq - llNbrSerialPresent
+	
+End If
+
+return llNbrDiff
+
+
+
+end function
+

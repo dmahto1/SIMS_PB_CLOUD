@@ -1,0 +1,38 @@
+﻿$PBExportHeader$d_ironport_shipment_rpt_search.srd
+$PBExportComments$IRonport Shipment Report Search
+release 9;
+datawindow(units=0 timer_interval=0 color=79741120 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=20 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=248 color="536870912" )
+table(column=(type=datetime updatewhereclause=no name=order_from_date dbname="order_from_date" )
+ column=(type=datetime updatewhereclause=no name=order_to_date dbname="order_to_date" )
+ column=(type=datetime updatewhereclause=no name=complete_from_date dbname="complete_from_date" )
+ column=(type=datetime updatewhereclause=no name=complete_to_date dbname="complete_to_date" )
+ column=(type=datetime updatewhereclause=no name=sched_date_from dbname="sched_date_from" )
+ column=(type=datetime updatewhereclause=no name=sched_date_to dbname="sched_date_to" )
+ )
+text(band=detail alignment="1" text="Order
+Date" border="0" color="0" x="87" y="16" height="140" width="146" html.valueishtml="0"  name=t_5 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=1 alignment="2" tabsequence=50 border="5" color="0" x="352" y="16" height="64" width="535" format="mm/dd/yyyy hh:mm" html.valueishtml="0"  name=order_from_date visible="1" editmask.spin=yes editmask.mask="mm/dd/yyyy hh:mm" editmask.imemode=0 editmask.spinrange="~~" editmask.spinincr=1  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+column(band=detail id=2 alignment="2" tabsequence=60 border="5" color="0" x="352" y="96" height="64" width="535" format="mm/dd/yyyy hh:mm" html.valueishtml="0"  name=order_to_date visible="1" editmask.spin=yes editmask.mask="mm/dd/yyyy hh:mm" editmask.imemode=0 editmask.spinrange="~~" editmask.spinincr=1  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+text(band=detail alignment="0" text="To:" border="0" color="0" x="256" y="96" height="56" width="78" html.valueishtml="0"  name=t_10 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=detail alignment="1" text="Fr:" border="0" color="0" x="256" y="16" height="56" width="78" html.valueishtml="0"  name=t_6 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=detail alignment="1" text="Complete
+Date" border="0" color="0" x="1760" y="16" height="140" width="247" html.valueishtml="0"  name=t_11 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=detail alignment="1" text="Fr:" border="0" color="0" x="2021" y="16" height="56" width="78" html.valueishtml="0"  name=t_7 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="2" tabsequence=70 border="5" color="0" x="2117" y="16" height="64" width="535" format="mm/dd/yyyy hh:mm" html.valueishtml="0"  name=complete_from_date visible="1" editmask.spin=yes editmask.mask="mm/dd/yyyy hh:mm" editmask.imemode=0 editmask.spinrange="~~" editmask.spinincr=1  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+text(band=detail alignment="0" text="To:" border="0" color="0" x="2025" y="96" height="56" width="73" html.valueishtml="0"  name=t_13 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="2" tabsequence=80 border="5" color="0" x="2117" y="96" height="64" width="535" format="mm/dd/yyyy hh:mm" html.valueishtml="0"  name=complete_to_date visible="1" editmask.spin=yes editmask.mask="mm/dd/yyyy hh:mm" editmask.imemode=0 editmask.spinrange="~~" editmask.spinincr=1  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+text(band=detail alignment="1" text="Sched
+Date" border="0" color="0" x="923" y="16" height="140" width="155" html.valueishtml="0"  name=t_15 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=detail alignment="1" text="Fr:" border="0" color="0" x="1097" y="16" height="56" width="78" html.valueishtml="0"  name=t_12 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="2" tabsequence=110 border="5" color="0" x="1193" y="16" height="64" width="535" format="mm/dd/yyyy hh:mm" html.valueishtml="0"  name=sched_date_from visible="1" editmask.spin=yes editmask.mask="mm/dd/yyyy hh:mm" editmask.imemode=0 editmask.spinrange="~~" editmask.spinincr=1  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=detail alignment="0" text="To:" border="0" color="0" x="1102" y="92" height="56" width="73" html.valueishtml="0"  name=t_16 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="2" tabsequence=120 border="5" color="0" x="1193" y="96" height="64" width="535" format="mm/dd/yyyy hh:mm" html.valueishtml="0"  name=sched_date_to visible="1" editmask.spin=yes editmask.mask="mm/dd/yyyy hh:mm" editmask.imemode=0 editmask.spinrange="~~" editmask.spinincr=1  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

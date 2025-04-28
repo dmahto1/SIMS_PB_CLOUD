@@ -1,0 +1,44 @@
+HA$PBExportHeader$f_validate_transparm.srf
+global type f_validate_transparm from function_object
+end type
+
+forward prototypes
+global function string f_validate_transparm (string as_line_no, string as_transparm, ref boolean lb_parmfound)
+end prototypes
+
+global function string f_validate_transparm (string as_line_no, string as_transparm, ref boolean lb_parmfound);Integer cnt, i, lpos
+String lsLineParm
+
+	lb_ParmFound = False
+	cnt = 0
+	i = 1
+	lpos = 0
+	//Cycle through the list of possible detail lines if they exist.  If one matches the line number process that row.
+	If len(as_transparm ) > 0 then
+		For cnt = 1 to len(as_transparm )
+			lpos = pos(as_transparm, ',', i )
+			cnt ++
+			if lpos > 0 then
+				lsLineParm = mid(as_transparm, i, lpos - i )
+				If lsLineParm = as_line_no then //The line matches the parm
+					lb_ParmFound = True
+					Exit //Exit the For loop and process this row
+				End if
+				i = lpos + 1
+			elseif lpos = 0 and i = 0 then
+				lsLineParm = ''
+				i++
+				cnt --
+			else
+				lsLineParm = mid(as_transparm, i )
+				lb_ParmFound = True
+				//Found the last line paramater and it is the last line of the row.  Set "i" to a value the the above If condition will not fire.
+				//i = llen + 1 
+			end if
+		Next
+	End if
+
+Return lsLineParm
+
+end function
+

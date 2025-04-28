@@ -1,0 +1,65 @@
+﻿$PBExportHeader$f_cleanse_printer.srf
+$PBExportComments$Convert any special characters in printer file
+global type f_cleanse_printer from function_object
+end type
+
+forward prototypes
+global function string f_cleanse_printer (string astext)
+end prototypes
+
+global function string f_cleanse_printer (string astext);
+String	lsText, lsChar
+Long	llLen, llPOs, llCount, llArrayPOs
+String	lsConvert[], lsFrom, lsTo
+
+//From/to values seperated by |
+
+//To Add - Use character map in LabelVision to add field to a label. Print to a file and see what is printed
+
+lsConvert[1] = "À|·"
+lsConvert[2] = "Á|µ"
+lsConvert[3] = "Â|¶"
+lsConvert[4] = "Ã|Ç"
+lsConvert[5] = "Ä|Ž"
+lsConvert[6] = "É|"
+lsConvert[7] = "Ò|ã"
+lsConvert[8] = "Ó|à"
+lsConvert[9] = "Ô|â"
+lsConvert[10] = "Õ|å"
+lsConvert[11] = "Ö|™"
+lsConvert[12] = "Î|×"
+lsConvert[13] = "Ì|Þ"
+
+// These convert to other characters that are converted as well. They need to be converted last
+lsConvert[14] = "È|Ô"
+lsConvert[15] = "Ê|Ò"
+lsConvert[16] = "Ë|Ó"
+lsConvert[17] = "Í|Ö"
+
+SetPointer(Hourglass!)
+
+lsText = asText
+
+For llArrayPos = 1 to Upperbound(lsConvert)
+
+	lsFrom = Left(lsConvert[llArrayPOs], (Pos(lsConvert[llArrayPOs],'|') - 1))
+	lsTo = Mid(lsConvert[llArrayPos],(Pos(lsConvert[llArrayPOs],'|') + 1),999)
+	
+	llPOs = Pos(lsText,lsFrom,1)
+	Do While llPos > 0
+		lsText = Replace(lsText,llPos,1,lsTo)
+		llPos ++
+		If llPos > Len(lsText) Then
+			llPos = 0
+		Else
+			llPOs = Pos(lsText,lsFrom,llPOs)
+		End If
+	Loop
+	
+Next
+
+SetPointer(Arrow!)
+
+REturn lsText
+end function
+

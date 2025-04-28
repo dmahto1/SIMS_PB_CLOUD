@@ -1,0 +1,17 @@
+HA$PBExportHeader$dddw_country_code.srd
+release 7;
+datawindow(units=0 timer_interval=0 color=16777215 processing=0 HTMLDW=no print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.prompt=no print.buttons=no print.preview.buttons=no )
+header(height=72 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=84 color="536870912" )
+table(column=(type=decimal(0) update=yes updatewhereclause=yes name=iso_country_no dbname="Country.ISO_Country_No" )
+ column=(type=char(30) update=yes updatewhereclause=yes name=country_name dbname="Country.Country_Name" )
+ column=(type=char(3) update=yes updatewhereclause=yes key=yes name=iso_country_cd dbname="Country.ISO_Country_Cd" )
+ retrieve="PBSELECT( VERSION(400) TABLE(NAME=~"Country~" ) COLUMN(NAME=~"Country.ISO_Country_No~") COLUMN(NAME=~"Country.Country_Name~") COLUMN(NAME=~"Country.ISO_Country_Cd~")) " update="Country" updatewhere=1 updatekeyinplace=no )
+text(band=header alignment="0" text="Country Name" border="0" color="0" x="434" y="4" height="64" width="850"  name=country_name_t  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" font.underline="1" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="0" tabsequence=20 border="0" color="0" x="439" y="4" height="76" width="850" format="[general]"  name=country_name edit.limit=30 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="Iso Country Cd" border="0" color="0" x="14" y="4" height="64" width="393"  name=iso_country_cd_t  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" font.underline="1" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="0" tabsequence=30 border="0" color="0" x="9" y="4" height="76" width="302" format="[general]"  name=iso_country_cd edit.limit=3 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" )

@@ -1,0 +1,16 @@
+﻿$PBExportHeader$d_select_owner_quick.srd
+$PBExportComments$Select Owner - entering code only
+release 7;
+datawindow(units=0 timer_interval=0 color=80269524 processing=0 HTMLDW=no print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.prompt=no print.buttons=no print.preview.buttons=no )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=140 color="536870912" )
+table(column=(type=char(1) updatewhereclause=no name=owner_type dbname="owner_type" values="&Supplier	S/&Customer	C/" )
+ column=(type=char(20) updatewhereclause=no name=owner_code dbname="owner_code" )
+ column=(type=char(1) updatewhereclause=no name=update_all_rows_ind dbname="update_all_rows_ind" values="&Update All rows	Y/&Update All rows	N" )
+ )
+column(band=detail id=1 alignment="0" tabsequence=10 border="0" color="0" x="9" y="4" height="124" width="425" format="[general]"  name=owner_type radiobuttons.columns=1 radiobuttons.scale=no radiobuttons.threed=yes  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="0" tabsequence=20 border="5" color="0" x="462" y="28" height="76" width="736" format="[general]"  name=owner_code edit.limit=0 edit.case=upper edit.focusrectangle=no edit.autoselect=yes edit.nilisnull=yes edit.autohscroll=yes  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=3 alignment="0" tabsequence=30 border="0" color="0" x="1371" y="36" height="64" width="521" format="[general]"  name=update_all_rows_ind checkbox.text="&Update All rows" checkbox.on="Y" checkbox.off="N" checkbox.scale=no checkbox.threed=yes  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" )

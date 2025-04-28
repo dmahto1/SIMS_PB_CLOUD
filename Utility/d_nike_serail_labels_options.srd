@@ -1,0 +1,19 @@
+HA$PBExportHeader$d_nike_serail_labels_options.srd
+$PBExportComments$Nike Serial Number Label Options
+release 7;
+datawindow(units=0 timer_interval=0 color=79741120 processing=0 HTMLDW=no print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.prompt=no print.buttons=no print.preview.buttons=no )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=276 color="536870912" )
+table(column=(type=char(10) updatewhereclause=yes name=starting_serial_nbr dbname="starting_serial_nbr" )
+ column=(type=number updatewhereclause=yes name=label_qty dbname="label_qty" )
+ column=(type=number updatewhereclause=yes name=label_copies dbname="label_copies" )
+ )
+text(band=detail alignment="1" text="Starting Serial Nbr:" border="0" color="0" x="27" y="20" height="64" width="608"  name=starting_serial_nbr_t  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=detail alignment="1" text="Qty of Labels:" border="0" color="0" x="27" y="112" height="64" width="608"  name=label_qty_t  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=detail alignment="1" text="Qty of Each Serial #:" border="0" color="0" x="27" y="204" height="64" width="608"  name=label_copies_t  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=1 alignment="0" tabsequence=10 border="5" color="0" x="663" y="20" height="64" width="448" format="[general]"  name=starting_serial_nbr editmask.mask="AA########" editmask.focusrectangle=no  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1090519039" )
+column(band=detail id=2 alignment="1" tabsequence=20 border="5" color="0" x="663" y="112" height="64" width="219" format="[general]"  name=label_qty edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1090519039" )
+column(band=detail id=3 alignment="1" tabsequence=30 border="5" color="0" x="663" y="204" height="64" width="219" format="[general]"  name=label_copies edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1090519039" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" )

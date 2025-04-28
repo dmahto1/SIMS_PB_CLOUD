@@ -1,0 +1,74 @@
+HA$PBExportHeader$d_comcast_inbound_intransit_invt_rpt.srd
+release 11;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=1 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes print.preview.outline=yes hidegrayline=no showbackcoloronxp=no grid.lines=0 )
+header(height=84 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=92 color="536870912" )
+table(column=(type=char(50) updatewhereclause=yes name=receive_detail_sku dbname="Receive_Detail.SKU" dbalias=".SKU" )
+ column=(type=char(20) updatewhereclause=yes name=supp_code dbname="Receive_Detail.Supp_Code" dbalias=".Supp_Code" )
+ column=(type=char(30) updatewhereclause=yes name=item_master_user_field10 dbname="Item_Master.User_Field10" dbalias=".User_Field10" )
+ column=(type=decimal(5) updatewhereclause=yes name=atlanta dbname="Atlanta" initial="0" )
+ column=(type=decimal(5) updatewhereclause=yes name=aurora dbname="Aurora" initial="0" )
+ column=(type=decimal(5) updatewhereclause=yes name=fremont dbname="Fremont" initial="0" )
+ column=(type=decimal(5) updatewhereclause=yes name=monroe dbname="Monroe" initial="0" )
+ column=(type=char(10) updatewhereclause=yes name=item_master_grp dbname="Item_Master.grp" dbalias=".grp" )
+ column=(type=char(1) updatewhereclause=yes name=receive_master_ord_type dbname="Receive_Master.Ord_Type" dbalias=".Ord_Type" )
+ retrieve="  SELECT dbo.Receive_Detail.SKU,
+		Receive_Detail.Supp_Code, 
+		dbo.Item_Master.User_Field10, 
+         CASE WHEN dbo.Receive_Master.WH_Code = 'COM-ATLNTA' THEN sum(dbo.Receive_Detail.Req_Qty) END as Atlanta,   
+         CASE WHEN dbo.Receive_Master.WH_Code = 'COM-AURORA' THEN sum(dbo.Receive_Detail.Req_Qty) END as Aurora,   
+         CASE WHEN dbo.Receive_Master.WH_Code = 'COM-FREMNT' THEN sum(dbo.Receive_Detail.Req_Qty) END as Fremont,   
+         CASE WHEN dbo.Receive_Master.WH_Code = 'COM-Monroe' THEN sum(dbo.Receive_Detail.Req_Qty) END as Monroe,   
+         dbo.Item_Master.grp,
+		dbo.Receive_Master.Ord_Type
+    FROM dbo.Receive_Detail,   
+         dbo.Receive_Master,   
+         dbo.Item_Master  
+   WHERE ( dbo.Receive_Master.RO_No = dbo.Receive_Detail.RO_No ) and  
+         ( dbo.Receive_Master.Project_ID = dbo.Item_Master.Project_ID ) and  
+         ( dbo.Receive_Detail.SKU = dbo.Item_Master.SKU ) and  
+         ( dbo.Receive_Detail.Supp_Code = dbo.Item_Master.Supp_Code ) and  
+         ( ( dbo.Receive_Master.Project_ID = 'COMCAST' ) AND  
+         ( dbo.Receive_Master.WH_Code in ('COM-ATLNTA', 'COM-AURORA', 'COM-FREMNT', 'COM-MONROE') ) AND  
+         ( dbo.Receive_Master.Ord_Status = 'N' ) AND  
+         ( dbo.Receive_Master.Ord_Type <> 'Z' ) )   
+GROUP BY dbo.Receive_Master.WH_Code,   
+         dbo.Receive_Detail.SKU,   
+		Receive_Detail.Supp_Code, 
+         dbo.Receive_Master.Ord_Type,   
+         dbo.Item_Master.User_Field10,
+		dbo.Item_Master.grp 
+ORDER BY dbo.Receive_Detail.SKU ASC,   
+         dbo.Item_Master.User_Field10 ASC   
+" )
+text(band=header alignment="2" text="Atlanta" border="0" color="33554432" x="1943" y="8" height="64" width="293" html.valueishtml="0"  name=atlanta_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Aurora" border="0" color="33554432" x="2245" y="8" height="64" width="288" html.valueishtml="0"  name=aurora_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Fremont" border="0" color="33554432" x="2542" y="8" height="64" width="352" html.valueishtml="0"  name=fremont_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Monroe" border="0" color="33554432" x="2903" y="8" height="64" width="334" html.valueishtml="0"  name=monroe_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="User Field10" border="0" color="33554432" x="933" y="8" height="64" width="992" html.valueishtml="0"  name=item_master_user_field10_1_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="Ord Type" border="0" color="33554432" x="3250" y="8" height="60" width="256" html.valueishtml="0"  name=receive_master_ord_type_t visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="Item Master Grp" border="0" color="0" x="3515" y="4" height="76" width="224" html.valueishtml="0"  name=item_master_grp_t visible="1"  font.face="Tahoma" font.height="-12" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="0" color="33554432" x="937" y="8" height="76" width="987" format="[general]" html.valueishtml="0"  name=item_master_user_field10_1 visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="1" tabsequence=32766 border="0" color="33554432" x="1947" y="8" height="76" width="288" format="0" html.valueishtml="0"  name=atlanta visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="1" tabsequence=32766 border="0" color="33554432" x="2249" y="8" height="76" width="283" format="0" html.valueishtml="0"  name=aurora visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="1" tabsequence=32766 border="0" color="33554432" x="2546" y="8" height="76" width="347" format="0" html.valueishtml="0"  name=fremont visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=7 alignment="1" tabsequence=32766 border="0" color="33554432" x="2907" y="8" height="76" width="329" format="0" html.valueishtml="0"  name=monroe visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=9 alignment="0" tabsequence=32766 border="0" color="33554432" x="3255" y="8" height="76" width="251" format="[general]" html.valueishtml="0"  name=receive_master_ord_type visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=8 alignment="0" tabsequence=32766 border="0" color="33554432" x="3520" y="0" height="60" width="219" format="[general]" html.valueishtml="0"  name=item_master_grp visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Sku" border="0" color="33554432" x="14" y="8" height="64" width="448" html.valueishtml="0"  name=receive_detail_sku_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text=" Supp Code" border="0" color="33554432" x="471" y="8" height="60" width="457" html.valueishtml="0"  name=receive_detail_supp_code_t visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="0" color="33554432" x="14" y="8" height="76" width="448" format="[general]" html.valueishtml="0"  name=receive_detail_sku visible="1" edit.limit=50 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="0" tabsequence=0 border="0" color="33554432" x="475" y="8" height="76" width="453" html.valueishtml="0"  name=supp_code visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" pagingmethod=0 generatedddwframes="1" )
+xhtmlgen() cssgen(sessionspecific="0" )
+xmlgen(inline="0" )
+xsltgen()
+jsgen()
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )
+export.xhtml()
+ 

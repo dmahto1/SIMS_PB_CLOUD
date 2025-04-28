@@ -1,0 +1,20 @@
+﻿$PBExportHeader$dddw_sku_supplier.srd
+$PBExportComments$valid Suppliers for SKU
+release 6;
+datawindow(units=0 timer_interval=0 color=16777215 processing=0 print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.prompt=no print.buttons=no print.preview.buttons=no )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=64 color="536870912" )
+table(column=(type=char(20) updatewhereclause=yes name=item_master_supp_code dbname="Item_Master.Supp_Code" )
+ column=(type=char(40) updatewhereclause=yes name=supplier_supp_name dbname="Supplier.Supp_Name" )
+ retrieve="  SELECT Item_Master.Supp_Code,   
+         Supplier.Supp_Name  
+    FROM Item_Master,   
+         Supplier  
+   WHERE ( Supplier.Project_ID = Item_Master.Project_ID ) and  
+         ( Supplier.Supp_Code = Item_Master.Supp_Code ) and  
+         ( ( Item_Master.Project_ID = 'xxxxxxxxxx' ) AND  
+         ( Item_Master.SKU = 'zzzzzzzzzz' ) )    
+" )
+compute(band=detail alignment="0" expression=" item_master_supp_code + ' - ' +  supplier_supp_name "border="0" color="0" x="9" y="4" height="56" width="1422" format="[general]"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" cellpadding="0" cellspacing="0" generatecss="no" nowrap="yes")

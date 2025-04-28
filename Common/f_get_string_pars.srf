@@ -1,0 +1,40 @@
+HA$PBExportHeader$f_get_string_pars.srf
+global type f_get_string_pars from function_object
+end type
+
+forward prototypes
+global function string f_get_string_pars (string ar_string, string as_look_for)
+end prototypes
+
+global function string f_get_string_pars (string ar_string, string as_look_for);//TimA 01/17/14 Started because of Pandora issue #693
+//New Function to pars out a string that has a wild card.
+
+Long li_Start, li_End, li_Len
+String ls_ReturnString
+
+//argumnet as_look_for could be a string character like *
+li_Start = Pos( ar_string,as_look_for,1 )
+
+If li_Start > 0 then
+	If li_Start = Len(ar_String ) then //The as_look_for is at the end of the string
+		li_Start = 1
+	Else
+		li_Start = li_Start + 1
+	End if
+	
+	li_End = Pos( ar_string,as_look_for,li_Start )
+	If li_End = 0 then
+		ls_ReturnString = Mid(ar_String,li_Start,Len(ar_String ) )
+	Else
+		li_Len = li_End - li_Start
+		ls_ReturnString = Mid(ar_String,li_Start,li_Len ) 
+	End if
+Else
+	ls_ReturnString = ar_String
+End if
+
+
+Return ls_ReturnString
+
+end function
+

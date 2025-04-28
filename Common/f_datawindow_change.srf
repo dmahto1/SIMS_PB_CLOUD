@@ -1,0 +1,107 @@
+HA$PBExportHeader$f_datawindow_change.srf
+global type f_datawindow_change from function_object
+end type
+
+forward prototypes
+global function integer f_datawindow_change (datawindow dwold)
+end prototypes
+
+global function integer f_datawindow_change (datawindow dwold);//this function for changing object attribute
+
+string l_dname,l_ctext,l_clabel,l_ctype,l_dis_format,l_modifystring,l_visible,l_cname,l_temp
+string l_default,l_datacolumn,find,l_dn,l_dd
+integer l_lens
+DataStore lds_temp
+long ll_row,i,j
+l_dname = dwold.DataObject
+
+lds_temp = Create datastore
+lds_temp.DataObject = 'd_columnlabel'
+lds_temp.SetTransObject(sqlca)
+ll_row  = lds_temp.retrieve(l_dname)
+for i = 1 to ll_row
+	l_cname = lds_temp.getitemstring(i,"column_name")
+	l_clabel = lds_temp.getitemstring(i,"column_label")
+	l_ctype = lds_temp.getitemstring(i,"edit_type")
+	l_dis_format = lds_temp.getitemstring(i,"display_format")
+	l_visible = lds_temp.getitemstring(i,"invisible")
+	l_default = lds_temp.getitemstring(i,"default_value")
+	l_ctext = l_cname + '_t'
+	l_clabel = l_clabel 
+	l_lens = len(l_clabel)
+	l_clabel = upper(left(l_clabel,1)) + mid(l_clabel,2,l_lens)
+	If l_clabel = '' or IsNull(l_clabel) Then l_clabel = ' '
+	l_modifystring = " "+ l_ctext +".Text = '"+ l_clabel +"' "
+	dwold.modify(l_modifystring)
+	if l_visible<>'Y' then
+		dwold.modify(" "+ l_cname +".visible = 1")
+		dwold.modify(" "+ l_ctext +".visible = 1")
+	else
+		dwold.modify(" "+ l_cname +".visible = 0")
+		dwold.modify(" "+ l_ctext +".visible = 0")
+	end if
+	Choose Case l_ctype 
+		Case 'EM' 
+			dwold.modify(" "+ l_cname +".EditMask.Mask = '"+ l_dis_format +"' ")
+		Case 'E' 
+			dwold.modify(" "+ l_cname +".Format = '"+ l_dis_format +"' ")
+		Case 'DD'
+         for j = 1 to len(l_dis_format)
+				find = mid(l_dis_format,j,1)
+				if find = '/' then
+					l_dn = left(l_dis_format,j - 1)
+					l_dd = mid(l_dis_format,j+1,len(l_dis_format)-j)
+			      dwold.modify(" "+ l_cname +".dddw.name = '"+ l_dn +"' ")
+					dwold.modify(" "+ l_cname +".dddw.displaycolumn = '"+ l_dd +"' ")
+					dwold.modify(" "+ l_cname +".dddw.datacolumn = '"+ l_dd +"' ")
+					dwold.modify(" "+ l_cname +".dddw.VScrollBar = Yes ")
+					dwold.modify(" "+ l_cname +".dddw.UseAsBorder = Yes ")
+				end if
+			next
+	end choose
+	dwold.Modify(" "+ l_cname +".initial = '"+ l_default +"' ")
+next
+destroy lds_temp
+		
+//DECLARE d_obj_curs CURSOR FOR
+//	SELECT column_name, column_label,edit_type,display_format,invisible,default_value
+//	FROM column_label 
+//	WHERE datawindow = :l_dname;
+//open d_obj_curs;
+//FETCH d_obj_curs INTO :l_cname,:l_clabel,:l_ctype,:l_dis_format,:l_visible,:l_default;
+//DO WHILE sqlca.sqlcode = 0
+//	l_ctext = l_cname + '_t'
+//	l_clabel = l_clabel 
+//	l_lens = len(l_clabel)
+//	l_clabel = upper(left(l_clabel,1)) + mid(l_clabel,2,l_lens)
+//	If l_clabel = '' or IsNull(l_clabel) Then l_clabel = ' '
+//	l_modifystring = " "+ l_ctext +".Text = '"+ l_clabel +"' "
+//	dwold.modify(l_modifystring)
+//	if l_visible<>'Y' then
+//		dwold.modify(" "+ l_cname +".visible = 1")
+//		dwold.modify(" "+ l_ctext +".visible = 1")
+//	else
+//		dwold.modify(" "+ l_cname +".visible = 0")
+//		dwold.modify(" "+ l_ctext +".visible = 0")
+//	end if
+//	Choose Case l_ctype 
+//		Case 'EM' 
+//			dwold.modify(" "+ l_cname +".EditMask.Mask = '"+ l_dis_format +"' ")
+//		Case 'E' 
+//			dwold.modify(" "+ l_cname +".Format = '"+ l_dis_format +"' ")
+//		Case 'DD'
+//			dwold.getchild("l_cname",ldwc)
+//			ldwc.SetTransObject(Sqlca)
+//			l_datacolumn = ldwc.getitemstring(1,"datacolumn")
+//			dwold.modify(" "+ l_cname +".dddw.datacolumn = '"+ l_datacolumn +"' ")
+//	end choose
+//	dwold.Modify(" "+ l_cname +".initial = '"+ l_default +"' ")
+//	FETCH d_obj_curs INTO :l_cname,:l_clabel,:l_ctype,:l_dis_format,:l_visible,:l_default;
+//LOOP
+//CLOSE d_obj_curs;
+//
+
+
+return 0
+end function
+

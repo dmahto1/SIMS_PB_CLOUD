@@ -1,0 +1,109 @@
+HA$PBExportHeader$d_supplier_master.srd
+$PBExportComments$Supplier Master Import
+release 7;
+datawindow(units=0 timer_interval=0 color=16777215 processing=1 HTMLDW=no print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.prompt=no print.buttons=no print.preview.buttons=no grid.lines=0 )
+header(height=76 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=72 color="536870912" )
+table(column=(type=char(10) update=yes updatewhereclause=yes key=yes name=project_id dbname="Supplier.Project_ID" )
+ column=(type=char(20) update=yes updatewhereclause=yes key=yes name=supp_code dbname="Supplier.Supp_Code" )
+ column=(type=char(40) update=yes updatewhereclause=yes name=supp_name dbname="Supplier.Supp_Name" )
+ column=(type=char(40) update=yes updatewhereclause=yes name=address_1 dbname="Supplier.Address_1" )
+ column=(type=char(40) update=yes updatewhereclause=yes name=address_2 dbname="Supplier.Address_2" )
+ column=(type=char(40) update=yes updatewhereclause=yes name=address_3 dbname="Supplier.Address_3" )
+ column=(type=char(40) update=yes updatewhereclause=yes name=address_4 dbname="Supplier.Address_4" )
+ column=(type=char(30) update=yes updatewhereclause=yes name=city dbname="Supplier.City" )
+ column=(type=char(35) update=yes updatewhereclause=yes name=state dbname="Supplier.State" )
+ column=(type=char(15) update=yes updatewhereclause=yes name=zip dbname="Supplier.Zip" )
+ column=(type=char(30) update=yes updatewhereclause=yes name=country dbname="Supplier.Country" )
+ column=(type=char(40) update=yes updatewhereclause=yes name=contact_person dbname="Supplier.Contact_Person" )
+ column=(type=char(20) update=yes updatewhereclause=yes name=tel dbname="Supplier.Tel" )
+ column=(type=char(20) update=yes updatewhereclause=yes name=fax dbname="Supplier.Fax" )
+ column=(type=char(50) update=yes updatewhereclause=yes name=email_address dbname="Supplier.Email_Address" )
+ column=(type=char(250) update=yes updatewhereclause=yes name=remark dbname="Supplier.Remark" )
+ column=(type=char(15) update=yes updatewhereclause=yes name=export_control_commodity_no dbname="Supplier.Export_control_Commodity_No" )
+ column=(type=char(20) update=yes updatewhereclause=yes name=harmonized_code dbname="Supplier.Harmonized_Code" )
+ column=(type=char(20) update=yes updatewhereclause=yes name=vat_id dbname="Supplier.VAT_ID" )
+ column=(type=char(10) update=yes updatewhereclause=yes name=user_field1 dbname="Supplier.User_Field1" )
+ column=(type=char(20) update=yes updatewhereclause=yes name=user_field2 dbname="Supplier.User_Field2" )
+ column=(type=char(30) update=yes updatewhereclause=yes name=user_field3 dbname="Supplier.User_Field3" )
+ column=(type=char(10) update=yes updatewhereclause=yes name=last_user dbname="Supplier.Last_User" )
+ column=(type=datetime update=yes updatewhereclause=yes name=last_update dbname="Supplier.Last_Update" )
+ retrieve="  SELECT Supplier.Project_ID,   
+         Supplier.Supp_Code,   
+         Supplier.Supp_Name,   
+         Supplier.Address_1,   
+         Supplier.Address_2,   
+         Supplier.Address_3,   
+         Supplier.Address_4,   
+         Supplier.City,   
+         Supplier.State,   
+         Supplier.Zip,   
+         Supplier.Country,   
+         Supplier.Contact_Person,   
+         Supplier.Tel,   
+         Supplier.Fax,   
+         Supplier.Email_Address,   
+         Supplier.Remark,   
+         Supplier.Export_control_Commodity_No,   
+         Supplier.Harmonized_Code,   
+         Supplier.VAT_ID,   
+         Supplier.User_Field1,   
+         Supplier.User_Field2,   
+         Supplier.User_Field3,   
+         Supplier.Last_User,   
+         Supplier.Last_Update  
+    FROM Supplier   
+	Where Project_id = :asProject and supp_code = :asSupplier
+" update="Supplier" updatewhere=0 updatekeyinplace=yes arguments=(("asProject", string),("asSupplier", string)) )
+text(band=header alignment="2" text="Project Id" border="0" color="0" x="9" y="8" height="56" width="302"  name=project_id_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Supp Code" border="0" color="0" x="320" y="8" height="56" width="297"  name=supp_code_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Supp Name" border="0" color="0" x="626" y="8" height="56" width="361"  name=supp_name_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Address 1" border="0" color="0" x="997" y="8" height="56" width="302"  name=address_1_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Address 2" border="0" color="0" x="1307" y="8" height="56" width="306"  name=address_2_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Address 3" border="0" color="0" x="1623" y="8" height="56" width="293"  name=address_3_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Address 4" border="0" color="0" x="1925" y="8" height="56" width="242"  name=address_4_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="City" border="0" color="0" x="2176" y="8" height="56" width="201"  name=city_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="State" border="0" color="0" x="2386" y="8" height="56" width="178"  name=state_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Zip" border="0" color="0" x="2574" y="8" height="56" width="133"  name=zip_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Country" border="0" color="0" x="2715" y="8" height="56" width="224"  name=country_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Contact Person" border="0" color="0" x="2949" y="8" height="56" width="357"  name=contact_person_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Tel" border="0" color="0" x="3314" y="8" height="56" width="206"  name=tel_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Fax" border="0" color="0" x="3529" y="8" height="56" width="165"  name=fax_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Email Address" border="0" color="0" x="3703" y="8" height="56" width="425"  name=email_address_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Remark" border="0" color="0" x="4137" y="8" height="56" width="379"  name=remark_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Export Control Commodity No" border="0" color="0" x="4526" y="8" height="56" width="791"  name=export_control_commodity_no_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Harmonized Code" border="0" color="0" x="5326" y="8" height="56" width="576"  name=harmonized_code_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Vat Id" border="0" color="0" x="5911" y="8" height="56" width="576"  name=vat_id_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="User Field1" border="0" color="0" x="6496" y="8" height="56" width="302"  name=user_field1_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="User Field2" border="0" color="0" x="6807" y="8" height="56" width="576"  name=user_field2_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="User Field3" border="0" color="0" x="7392" y="8" height="56" width="850"  name=user_field3_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Last User" border="0" color="0" x="8251" y="8" height="56" width="302"  name=last_user_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Last Update" border="0" color="0" x="8562" y="8" height="56" width="603"  name=last_update_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=1 alignment="0" tabsequence=10 border="0" color="0" x="9" y="8" height="56" width="302" format="[general]"  name=project_id edit.limit=10 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="0" tabsequence=20 border="0" color="0" x="320" y="8" height="56" width="297" format="[general]"  name=supp_code edit.limit=20 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="0" tabsequence=30 border="0" color="0" x="626" y="8" height="56" width="361" format="[general]"  name=supp_name edit.limit=40 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="0" tabsequence=40 border="0" color="0" x="997" y="8" height="56" width="302" format="[general]"  name=address_1 edit.limit=40 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="0" tabsequence=50 border="0" color="0" x="1307" y="8" height="56" width="306" format="[general]"  name=address_2 edit.limit=40 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="0" tabsequence=60 border="0" color="0" x="1623" y="8" height="56" width="293" format="[general]"  name=address_3 edit.limit=40 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=7 alignment="0" tabsequence=70 border="0" color="0" x="1925" y="8" height="56" width="242" format="[general]"  name=address_4 edit.limit=40 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=8 alignment="0" tabsequence=80 border="0" color="0" x="2176" y="8" height="56" width="201" format="[general]"  name=city edit.limit=30 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=9 alignment="0" tabsequence=90 border="0" color="0" x="2386" y="8" height="56" width="178" format="[general]"  name=state edit.limit=35 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=10 alignment="0" tabsequence=100 border="0" color="0" x="2574" y="8" height="56" width="133" format="[general]"  name=zip edit.limit=15 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=11 alignment="0" tabsequence=110 border="0" color="0" x="2715" y="8" height="56" width="224" format="[general]"  name=country edit.limit=30 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=12 alignment="0" tabsequence=120 border="0" color="0" x="2949" y="8" height="56" width="357" format="[general]"  name=contact_person edit.limit=40 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=13 alignment="0" tabsequence=130 border="0" color="0" x="3314" y="8" height="56" width="206" format="[general]"  name=tel edit.limit=20 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=14 alignment="0" tabsequence=140 border="0" color="0" x="3529" y="8" height="56" width="165" format="[general]"  name=fax edit.limit=20 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=15 alignment="0" tabsequence=150 border="0" color="0" x="3703" y="8" height="56" width="425" format="[general]"  name=email_address edit.limit=50 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=16 alignment="0" tabsequence=160 border="0" color="0" x="4137" y="8" height="56" width="379" format="[general]"  name=remark edit.limit=250 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=17 alignment="0" tabsequence=170 border="0" color="0" x="4526" y="8" height="56" width="791" format="[general]"  name=export_control_commodity_no edit.limit=15 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=18 alignment="0" tabsequence=180 border="0" color="0" x="5326" y="8" height="56" width="576" format="[general]"  name=harmonized_code edit.limit=20 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=19 alignment="0" tabsequence=190 border="0" color="0" x="5911" y="8" height="56" width="576" format="[general]"  name=vat_id edit.limit=20 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=20 alignment="0" tabsequence=200 border="0" color="0" x="6496" y="8" height="56" width="302" format="[general]"  name=user_field1 edit.limit=10 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=21 alignment="0" tabsequence=210 border="0" color="0" x="6807" y="8" height="56" width="576" format="[general]"  name=user_field2 edit.limit=20 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=22 alignment="0" tabsequence=220 border="0" color="0" x="7392" y="8" height="56" width="850" format="[general]"  name=user_field3 edit.limit=30 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=23 alignment="0" tabsequence=230 border="0" color="0" x="8251" y="8" height="56" width="302" format="[general]"  name=last_user edit.limit=10 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=24 alignment="0" tabsequence=240 border="0" color="0" x="8562" y="8" height="56" width="603" format="[shortdate] [time]"  name=last_update edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" )

@@ -1,0 +1,438 @@
+﻿$PBExportHeader$d_do_tms_load_plan.srd
+$PBExportComments$+ TMS Load Plan
+release 11.5;
+datawindow(units=0 timer_interval=0 color=67108864 brushmode=0 transparency=0 gradient.angle=0 gradient.color=8421504 gradient.focus=0 gradient.repetition.count=0 gradient.repetition.length=100 gradient.repetition.mode=0 gradient.scale=100 gradient.spread=100 gradient.transparency=0 picture.blur=0 picture.clip.bottom=0 picture.clip.left=0 picture.clip.right=0 picture.clip.top=0 picture.mode=0 picture.scale.x=100 picture.scale.y=100 picture.transparency=0 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes print.background=no print.preview.background=no print.preview.outline=yes hidegrayline=no showbackcoloronxp=no picture.file="" )
+header(height=0 color="536870912" transparency="0" gradient.color="8421504" gradient.transparency="0" gradient.angle="0" brushmode="0" gradient.repetition.mode="0" gradient.repetition.count="0" gradient.repetition.length="100" gradient.focus="0" gradient.scale="100" gradient.spread="100" )
+summary(height=0 color="536870912" transparency="0" gradient.color="8421504" gradient.transparency="0" gradient.angle="0" brushmode="0" gradient.repetition.mode="0" gradient.repetition.count="0" gradient.repetition.length="100" gradient.focus="0" gradient.scale="100" gradient.spread="100" )
+footer(height=0 color="536870912" transparency="0" gradient.color="8421504" gradient.transparency="0" gradient.angle="0" brushmode="0" gradient.repetition.mode="0" gradient.repetition.count="0" gradient.repetition.length="100" gradient.focus="0" gradient.scale="100" gradient.spread="100" )
+detail(height=920 color="536870912" transparency="0" gradient.color="8421504" gradient.transparency="0" gradient.angle="0" brushmode="0" gradient.repetition.mode="0" gradient.repetition.count="0" gradient.repetition.length="100" gradient.focus="0" gradient.scale="100" gradient.spread="100" )
+table(column=(type=char(16) update=yes updatewhereclause=yes key=yes name=do_no dbname="Delivery_Master.DO_No" )
+ column=(type=char(10) update=yes updatewhereclause=yes name=project_id dbname="Delivery_Master.Project_Id" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=ord_type dbname="Delivery_Master.Ord_Type" )
+ column=(type=decimal(0) update=yes updatewhereclause=yes name=priority dbname="Delivery_Master.Priority" )
+ column=(type=datetime update=yes updatewhereclause=yes name=ord_date dbname="Delivery_Master.Ord_Date" )
+ column=(type=datetime update=yes updatewhereclause=yes name=complete_date dbname="Delivery_Master.Complete_Date" )
+ column=(type=datetime update=yes updatewhereclause=yes name=pick_start dbname="Delivery_Master.Pick_Start" )
+ column=(type=datetime update=yes updatewhereclause=yes name=pick_complete dbname="Delivery_Master.Pick_Complete" )
+ column=(type=datetime update=yes updatewhereclause=yes name=schedule_date dbname="Delivery_Master.Schedule_Date" )
+ column=(type=datetime update=yes updatewhereclause=yes name=request_date dbname="Delivery_Master.Request_Date" )
+ column=(type=datetime update=yes updatewhereclause=yes name=delivery_date dbname="Delivery_Master.Delivery_Date" )
+ column=(type=datetime update=yes updatewhereclause=yes name=receive_date dbname="Delivery_Master.Receive_Date" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=ord_status dbname="Delivery_Master.Ord_Status" )
+ column=(type=char(10) update=yes updatewhereclause=yes name=wh_code dbname="Delivery_Master.WH_Code" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=inventory_type dbname="Delivery_Master.Inventory_Type" )
+ column=(type=char(20) update=yes updatewhereclause=yes name=cust_order_no dbname="Delivery_Master.Cust_Order_No" )
+ column=(type=decimal(0) update=yes updatewhereclause=yes name=back_order_no dbname="Delivery_Master.Back_Order_No" )
+ column=(type=char(20) update=yes updatewhereclause=yes name=cust_code dbname="Delivery_Master.Cust_Code" )
+ column=(type=char(50) update=yes updatewhereclause=yes name=cust_name dbname="Delivery_Master.Cust_Name" )
+ column=(type=char(10) update=yes updatewhereclause=yes name=address_code dbname="Delivery_Master.Address_Code" )
+ column=(type=char(60) update=yes updatewhereclause=yes name=address_1 dbname="Delivery_Master.Address_1" )
+ column=(type=char(60) update=yes updatewhereclause=yes name=address_2 dbname="Delivery_Master.Address_2" )
+ column=(type=char(60) update=yes updatewhereclause=yes name=address_3 dbname="Delivery_Master.Address_3" )
+ column=(type=char(60) update=yes updatewhereclause=yes name=address_4 dbname="Delivery_Master.Address_4" )
+ column=(type=char(50) update=yes updatewhereclause=yes name=city dbname="Delivery_Master.City" )
+ column=(type=char(50) update=yes updatewhereclause=yes name=state dbname="Delivery_Master.State" )
+ column=(type=char(50) update=yes updatewhereclause=yes name=zip dbname="Delivery_Master.Zip" )
+ column=(type=char(50) update=yes updatewhereclause=yes name=country dbname="Delivery_Master.Country" )
+ column=(type=char(50) update=yes updatewhereclause=yes name=contact_person dbname="Delivery_Master.Contact_Person" )
+ column=(type=char(20) update=yes updatewhereclause=yes name=tel dbname="Delivery_Master.Tel" )
+ column=(type=char(20) update=yes updatewhereclause=yes name=fax dbname="Delivery_Master.Fax" )
+ column=(type=char(50) update=yes updatewhereclause=yes name=email_address dbname="Delivery_Master.Email_Address" )
+ column=(type=char(250) update=yes updatewhereclause=yes name=remark dbname="Delivery_Master.Remark" )
+ column=(type=char(60) update=yes updatewhereclause=yes name=ship_via dbname="Delivery_Master.Ship_Via" )
+ column=(type=char(40) update=yes updatewhereclause=yes name=ship_ref dbname="Delivery_Master.Ship_Ref" )
+ column=(type=char(50) update=yes updatewhereclause=yes name=invoice_no dbname="Delivery_Master.Invoice_No" )
+ column=(type=char(20) update=yes updatewhereclause=yes name=carrier dbname="Delivery_Master.Carrier" )
+ column=(type=char(20) update=yes updatewhereclause=yes name=freight_terms dbname="Delivery_Master.Freight_Terms" )
+ column=(type=datetime update=yes updatewhereclause=yes name=freight_etd dbname="Delivery_Master.Freight_ETD" )
+ column=(type=datetime update=yes updatewhereclause=yes name=freight_eta dbname="Delivery_Master.Freight_ETA" )
+ column=(type=datetime update=yes updatewhereclause=yes name=freight_atd dbname="Delivery_Master.Freight_ATD" )
+ column=(type=datetime update=yes updatewhereclause=yes name=freight_ata dbname="Delivery_Master.Freight_ATA" )
+ column=(type=decimal(3) update=yes updatewhereclause=yes name=freight_cost dbname="Delivery_Master.Freight_Cost" )
+ column=(type=decimal(0) update=yes updatewhereclause=yes name=ctn_cnt dbname="Delivery_Master.Ctn_Cnt" )
+ column=(type=decimal(5) update=yes updatewhereclause=yes name=weight dbname="Delivery_Master.Weight" )
+ column=(type=char(255) update=yes updatewhereclause=yes name=user_field1 dbname="Delivery_Master.User_Field1" )
+ column=(type=char(255) update=yes updatewhereclause=yes name=user_field2 dbname="Delivery_Master.User_Field2" )
+ column=(type=char(255) update=yes updatewhereclause=yes name=user_field3 dbname="Delivery_Master.User_Field3" )
+ column=(type=char(255) update=yes updatewhereclause=yes name=user_field4 dbname="Delivery_Master.User_Field4" )
+ column=(type=char(255) update=yes updatewhereclause=yes name=user_field5 dbname="Delivery_Master.User_Field5" )
+ column=(type=char(255) update=yes updatewhereclause=yes name=user_field6 dbname="Delivery_Master.User_Field6" )
+ column=(type=char(255) update=yes updatewhereclause=yes name=user_field7 dbname="Delivery_Master.User_Field7" )
+ column=(type=char(255) update=yes updatewhereclause=yes name=user_field8 dbname="Delivery_Master.User_Field8" )
+ column=(type=char(30) update=yes updatewhereclause=yes name=agent_info dbname="Delivery_Master.Agent_Info" )
+ column=(type=char(20) update=yes updatewhereclause=yes name=carrier_tracking_no dbname="Delivery_Master.Carrier_Tracking_No" )
+ column=(type=char(20) update=yes updatewhereclause=yes name=customs_doc dbname="Delivery_Master.Customs_Doc" )
+ column=(type=char(15) update=yes updatewhereclause=yes name=export_control_commodity_no dbname="Delivery_Master.Export_Control_Commodity_No" )
+ column=(type=char(20) update=yes updatewhereclause=yes name=harmonized_code dbname="Delivery_Master.Harmonized_Code" )
+ column=(type=char(10) update=yes updatewhereclause=yes name=transport_mode dbname="Delivery_Master.Transport_Mode" )
+ column=(type=decimal(1) update=yes updatewhereclause=yes name=shipping_carton_volume dbname="Delivery_Master.Shipping_Carton_Volume" )
+ column=(type=char(30) update=yes updatewhereclause=yes name=awb_bol_no dbname="Delivery_Master.Awb_Bol_No" )
+ column=(type=char(20) update=yes updatewhereclause=yes name=vat_id dbname="Delivery_Master.VAT_Id" )
+ column=(type=char(25) update=yes updatewhereclause=yes name=last_user dbname="Delivery_Master.Last_User" )
+ column=(type=datetime update=yes updatewhereclause=yes name=last_update dbname="Delivery_Master.Last_Update" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=file_transmit_ind dbname="Delivery_Master.File_Transmit_Ind" )
+ column=(type=decimal(0) update=yes updatewhereclause=yes name=edi_batch_seq_no dbname="Delivery_Master.EDI_Batch_Seq_No" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=standard_of_measure dbname="Delivery_Master.Standard_Of_Measure" )
+ column=(type=char(28) update=yes updatewhereclause=yes name=description dbname="Delivery_Master.Description" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=type_of_product dbname="Delivery_Master.Type_Of_Product" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=type_of_service dbname="Delivery_Master.Type_Of_Service" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=type_of_payment dbname="Delivery_Master.Type_Of_Payment" )
+ column=(type=decimal(2) update=yes updatewhereclause=yes name=declared_value dbname="Delivery_Master.Declared_Value" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=delivery_confirm_ind dbname="Delivery_Master.Delivery_Confirm_Ind" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=confirmation_ind dbname="Delivery_Master.Confirmation_Ind" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=gemini_ind dbname="Delivery_Master.Gemini_Ind" )
+ column=(type=datetime update=yes updatewhereclause=yes name=gemini_export_datetime dbname="Delivery_Master.Gemini_Export_Datetime" )
+ column=(type=char(1024) update=yes updatewhereclause=yes name=shipping_instructions dbname="Delivery_Master.Shipping_Instructions" )
+ column=(type=char(255) update=yes updatewhereclause=yes name=om_note_code_text dbname="Delivery_Master.OM_Note_Code_Text" )
+ column=(type=char(255) update=yes updatewhereclause=yes name=packlist_notes dbname="Delivery_Master.Packlist_Notes" )
+ column=(type=char(40) update=yes updatewhereclause=yes name=district dbname="Delivery_Master.District" )
+ column=(type=datetime update=yes updatewhereclause=yes name=edm_generate_datetime dbname="Delivery_Master.EDM_Generate_Datetime" )
+ column=(type=char(20) update=yes updatewhereclause=yes name=gemini_order_no dbname="Delivery_Master.Gemini_Order_No" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=vor_shipment_ind dbname="Delivery_Master.VOR_Shipment_Ind" )
+ column=(type=decimal(0) update=yes updatewhereclause=yes name=batch_pick_id dbname="Delivery_Master.Batch_Pick_Id" )
+ column=(type=char(10) update=yes updatewhereclause=yes name=line_of_business dbname="Delivery_Master.Line_Of_Business" )
+ column=(type=char(30) update=yes updatewhereclause=yes name=consolidation_no dbname="Delivery_Master.Consolidation_No" )
+ column=(type=char(10) update=yes updatewhereclause=yes name=consolidate_to_wh_code dbname="Delivery_Master.Consolidate_To_Wh_Code" )
+ column=(type=char(25) update=yes updatewhereclause=yes name=scanner_id dbname="Delivery_Master.Scanner_Id" )
+ column=(type=char(10) update=yes updatewhereclause=yes name=scanner_status dbname="Delivery_Master.Scanner_Status" )
+ column=(type=char(35) update=yes updatewhereclause=yes name=gls_tr_id dbname="Delivery_Master.GLS_TR_ID" )
+ column=(type=datetime update=yes updatewhereclause=yes name=customs_clearance_date dbname="Delivery_Master.Customs_Clearance_Date" )
+ column=(type=datetime update=yes updatewhereclause=yes name=carrier_notified_date dbname="Delivery_Master.Carrier_Notified_Date" )
+ column=(type=char(30) update=yes updatewhereclause=yes name=forecast_release_no dbname="Delivery_Master.Forecast_Release_No" )
+ column=(type=char(20) update=yes updatewhereclause=yes name=trader_id dbname="Delivery_Master.Trader_Id" )
+ column=(type=char(20) update=yes updatewhereclause=yes name=factory_id dbname="Delivery_Master.Factory_Id" )
+ column=(type=char(20) update=yes updatewhereclause=yes name=contract_owner_id dbname="Delivery_Master.Contract_Owner_Id" )
+ column=(type=char(255) update=yes updatewhereclause=yes name=user_field9 dbname="Delivery_Master.User_Field9" )
+ column=(type=char(255) update=yes updatewhereclause=yes name=user_field10 dbname="Delivery_Master.User_Field10" )
+ column=(type=char(255) update=yes updatewhereclause=yes name=user_field11 dbname="Delivery_Master.User_Field11" )
+ column=(type=char(255) update=yes updatewhereclause=yes name=user_field12 dbname="Delivery_Master.User_Field12" )
+ column=(type=char(255) update=yes updatewhereclause=yes name=user_field13 dbname="Delivery_Master.User_Field13" )
+ column=(type=char(255) update=yes updatewhereclause=yes name=user_field14 dbname="Delivery_Master.User_Field14" )
+ column=(type=char(255) update=yes updatewhereclause=yes name=user_field15 dbname="Delivery_Master.User_Field15" )
+ column=(type=datetime update=yes updatewhereclause=yes name=create_time dbname="Delivery_Master.Create_Time" )
+ column=(type=char(25) update=yes updatewhereclause=yes name=create_user dbname="Delivery_Master.Create_User" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=dwg_upload dbname="Delivery_Master.DWG_Upload" )
+ column=(type=datetime update=yes updatewhereclause=yes name=dwg_upload_timestamp dbname="Delivery_Master.DWG_Upload_Timestamp" )
+ column=(type=long update=yes updatewhereclause=yes name=delivery_note_print_count dbname="Delivery_Master.Delivery_Note_Print_Count" )
+ column=(type=char(255) update=yes updatewhereclause=yes name=user_field16 dbname="Delivery_Master.User_Field16" )
+ column=(type=char(255) update=yes updatewhereclause=yes name=user_field17 dbname="Delivery_Master.User_Field17" )
+ column=(type=char(255) update=yes updatewhereclause=yes name=user_field18 dbname="Delivery_Master.User_Field18" )
+ column=(type=datetime update=yes updatewhereclause=yes name=customer_sent_date dbname="Delivery_Master.Customer_Sent_Date" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=crossdock_ind dbname="Delivery_Master.Crossdock_Ind" )
+ column=(type=char(255) update=yes updatewhereclause=yes name=user_field19 dbname="Delivery_Master.User_Field19" )
+ column=(type=char(255) update=yes updatewhereclause=yes name=user_field20 dbname="Delivery_Master.User_Field20" )
+ column=(type=char(255) update=yes updatewhereclause=yes name=user_field21 dbname="Delivery_Master.User_Field21" )
+ column=(type=char(255) update=yes updatewhereclause=yes name=user_field22 dbname="Delivery_Master.User_Field22" )
+ column=(type=char(50) update=yes updatewhereclause=yes name=trax_acct_no dbname="Delivery_Master.Trax_Acct_No" )
+ column=(type=char(50) update=yes updatewhereclause=yes name=return_tracking_no dbname="Delivery_Master.Return_Tracking_No" )
+ column=(type=long update=yes updatewhereclause=yes name=pick_list_print_count dbname="Delivery_Master.Pick_List_Print_Count" )
+ column=(type=long update=yes updatewhereclause=yes name=pack_list_print_count dbname="Delivery_Master.Pack_List_Print_Count" )
+ column=(type=long update=yes updatewhereclause=yes name=carton_label_print_count dbname="Delivery_Master.Carton_Label_Print_Count" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=otm_status dbname="Delivery_Master.OTM_Status" )
+ column=(type=char(20) update=yes updatewhereclause=yes name=trax_duty_terms dbname="Delivery_Master.Trax_Duty_Terms" )
+ column=(type=char(50) update=yes updatewhereclause=yes name=trax_duty_acct_no dbname="Delivery_Master.Trax_Duty_Acct_No" )
+ column=(type=datetime update=yes updatewhereclause=yes name=otm_call_date dbname="Delivery_Master.OTM_Call_Date" )
+ column=(type=datetime update=yes updatewhereclause=yes name=otm_receive_date dbname="Delivery_Master.OTM_Receive_Date" )
+ column=(type=char(5) update=yes updatewhereclause=yes name=trax_pack_location dbname="Delivery_Master.Trax_Pack_Location" )
+ column=(type=char(25) update=yes updatewhereclause=yes name=pack_list_last_user dbname="Delivery_Master.Pack_List_Last_User" )
+ column=(type=datetime update=yes updatewhereclause=yes name=pack_list_last_update dbname="Delivery_Master.Pack_List_Last_Update" )
+ column=(type=char(25) update=yes updatewhereclause=yes name=confirmation_user dbname="Delivery_Master.Confirmation_User" )
+ column=(type=char(25) update=yes updatewhereclause=yes name=embargoed_override_user dbname="Delivery_Master.Embargoed_Override_User" )
+ column=(type=datetime update=yes updatewhereclause=yes name=embargoed_override_date dbname="Delivery_Master.Embargoed_Override_Date" )
+ column=(type=char(50) update=yes updatewhereclause=yes name=embargoed_override_license dbname="Delivery_Master.Embargoed_Override_License" )
+ column=(type=char(10) update=yes updatewhereclause=yes name=otm_y_n dbname="Delivery_Master.OTM_Y_N" )
+ column=(type=char(50) update=yes updatewhereclause=yes name=vics_bol_no dbname="Delivery_Master.Vics_Bol_no" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=otm_sent_ind dbname="Delivery_Master.OTM_Sent_Ind" )
+ column=(type=datetime update=yes updatewhereclause=yes name=record_create_date dbname="Delivery_Master.Record_Create_Date" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=pick_cart_ind dbname="Delivery_Master.Pick_Cart_Ind" )
+ column=(type=char(30) update=yes updatewhereclause=yes name=carrier_pro_no dbname="Delivery_Master.Carrier_Pro_no" )
+ column=(type=datetime update=yes updatewhereclause=yes name=pack_complete_date dbname="Delivery_Master.Pack_Complete_Date" )
+ column=(type=datetime update=yes updatewhereclause=yes name=authorized_to_ship_date dbname="Delivery_Master.Authorized_to_Ship_Date" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=customer_order_status dbname="Delivery_Master.Customer_Order_Status" )
+ column=(type=char(100) update=yes updatewhereclause=yes name=shipment_type dbname="Delivery_Master.Shipment_Type" )
+ column=(type=char(50) update=yes updatewhereclause=yes name=shipment_odid dbname="Delivery_Master.Shipment_ODID" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=ignore_shelflife_ind dbname="Delivery_Master.Ignore_Shelflife_Ind" )
+ column=(type=char(255) update=yes updatewhereclause=yes name=client_order_type dbname="Delivery_Master.Client_Order_Type" )
+ column=(type=decimal(0) update=yes updatewhereclause=yes name=ship_cnt dbname="Delivery_Master.Ship_Cnt" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=mobile_enabled_ind dbname="Delivery_Master.Mobile_Enabled_Ind" )
+ column=(type=long update=yes updatewhereclause=yes name=mobile_pick_sequence dbname="Delivery_Master.Mobile_Pick_Sequence" )
+ column=(type=char(25) update=yes updatewhereclause=yes name=mobile_user_assigned dbname="Delivery_Master.Mobile_User_Assigned" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=mobile_status_ind dbname="Delivery_Master.Mobile_Status_Ind" )
+ column=(type=char(10) update=yes updatewhereclause=yes name=mobile_pack_location dbname="Delivery_Master.Mobile_Pack_Location" )
+ column=(type=datetime update=yes updatewhereclause=yes name=mobile_released_time dbname="Delivery_Master.Mobile_Released_Time" )
+ column=(type=datetime update=yes updatewhereclause=yes name=mobile_pick_start_time dbname="Delivery_Master.Mobile_Pick_Start_Time" )
+ column=(type=datetime update=yes updatewhereclause=yes name=mobile_pick_complete_time dbname="Delivery_Master.Mobile_Pick_Complete_Time" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=mobile_scan_all_units_req_ind dbname="Delivery_Master.Mobile_Scan_All_Units_Req_Ind" )
+ column=(type=char(20) update=yes updatewhereclause=yes name=account_nbr dbname="Delivery_Master.Account_Nbr" )
+ column=(type=char(20) update=yes updatewhereclause=yes name=asn_number dbname="Delivery_Master.ASN_Number" )
+ column=(type=char(20) update=yes updatewhereclause=yes name=client_cust_po_nbr dbname="Delivery_Master.Client_Cust_PO_Nbr" )
+ column=(type=char(20) update=yes updatewhereclause=yes name=client_cust_so_nbr dbname="Delivery_Master.Client_Cust_SO_Nbr" )
+ column=(type=char(20) update=yes updatewhereclause=yes name=container_nbr dbname="Delivery_Master.Container_Nbr" )
+ column=(type=char(10) update=yes updatewhereclause=yes name=dock_code dbname="Delivery_Master.Dock_Code" )
+ column=(type=char(255) update=yes updatewhereclause=yes name=document_codes dbname="Delivery_Master.Document_Codes" )
+ column=(type=decimal(0) update=yes updatewhereclause=yes name=equipment_nbr dbname="Delivery_Master.Equipment_Nbr" )
+ column=(type=char(3) update=yes updatewhereclause=yes name=fob dbname="Delivery_Master.FOB" )
+ column=(type=char(20) update=yes updatewhereclause=yes name=fob_bill_duty_acct dbname="Delivery_Master.FOB_Bill_Duty_Acct" )
+ column=(type=char(20) update=yes updatewhereclause=yes name=fob_bill_duty_party dbname="Delivery_Master.FOB_Bill_Duty_Party" )
+ column=(type=char(20) update=yes updatewhereclause=yes name=fob_bill_freight_party dbname="Delivery_Master.FOB_Bill_Freight_Party" )
+ column=(type=char(20) update=yes updatewhereclause=yes name=fob_bill_freight_to_acct dbname="Delivery_Master.FOB_Bill_Freight_To_Acct" )
+ column=(type=char(10) update=yes updatewhereclause=yes name=from_wh_loc dbname="Delivery_Master.From_Wh_Loc" )
+ column=(type=char(20) update=yes updatewhereclause=yes name=routing_nbr dbname="Delivery_Master.Routing_Nbr" )
+ column=(type=char(10) update=yes updatewhereclause=yes name=seal_nbr dbname="Delivery_Master.Seal_Nbr" )
+ column=(type=char(20) update=yes updatewhereclause=yes name=shipping_route dbname="Delivery_Master.Shipping_Route" )
+ column=(type=char(20) update=yes updatewhereclause=yes name=sli_nbr dbname="Delivery_Master.SLI_Nbr" )
+ column=(type=char(50) update=yes updatewhereclause=yes name=department_code dbname="Delivery_Master.Department_Code" )
+ column=(type=char(100) update=yes updatewhereclause=yes name=department_name dbname="Delivery_Master.Department_Name" )
+ column=(type=char(50) update=yes updatewhereclause=yes name=division dbname="Delivery_Master.Division" )
+ column=(type=char(50) update=yes updatewhereclause=yes name=vendor dbname="Delivery_Master.Vendor" )
+ column=(type=char(3) update=yes updatewhereclause=yes name=currency_code dbname="Delivery_Master.Currency_Code" )
+ column=(type=decimal(4) update=yes updatewhereclause=yes name=order_tax_amt dbname="Delivery_Master.Order_Tax_Amt" )
+ column=(type=decimal(4) update=yes updatewhereclause=yes name=order_discount_amt dbname="Delivery_Master.Order_Discount_Amt" )
+ column=(type=decimal(4) update=yes updatewhereclause=yes name=shipping_handling_amt dbname="Delivery_Master.Shipping_Handling_Amt" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=mobile_pack_status_ind dbname="Delivery_Master.Mobile_Pack_status_Ind" )
+ column=(type=char(25) update=yes updatewhereclause=yes name=mobile_pack_user_assigned dbname="Delivery_Master.Mobile_Pack_User_Assigned" )
+ column=(type=datetime update=yes updatewhereclause=yes name=mobile_pack_start_time dbname="Delivery_Master.Mobile_Pack_Start_Time" )
+ column=(type=datetime update=yes updatewhereclause=yes name=mobile_pack_complete_time dbname="Delivery_Master.Mobile_Pack_Complete_Time" )
+ column=(type=char(20) update=yes updatewhereclause=yes name=source_type dbname="Delivery_Master.Source_Type" )
+ column=(type=char(100) update=yes updatewhereclause=yes name=pick_sort_order dbname="Delivery_Master.Pick_Sort_Order" )
+ column=(type=datetime update=yes updatewhereclause=yes name=pack_start_time dbname="Delivery_Master.Pack_Start_Time" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=om_order_type dbname="Delivery_Master.OM_Order_Type" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=om_confirmation_type dbname="Delivery_Master.OM_Confirmation_Type" )
+ column=(type=decimal(0) update=yes updatewhereclause=yes name=om_change_request_nbr dbname="Delivery_Master.OM_CHANGE_REQUEST_NBR" )
+ column=(type=char(12) update=yes updatewhereclause=yes name=load_id dbname="Delivery_Master.Load_Id" )
+ column=(type=char(20) update=yes updatewhereclause=yes name=shipment_id dbname="Delivery_Master.Shipment_Id" )
+ column=(type=decimal(0) update=yes updatewhereclause=yes name=stop_id dbname="Delivery_Master.Stop_Id" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=load_lock dbname="Delivery_Master.Load_Lock" )
+ column=(type=char(20) update=yes updatewhereclause=yes name=master_bol dbname="Delivery_Master.Master_BOL" )
+ column=(type=decimal(0) update=yes updatewhereclause=yes name=load_sequence dbname="Delivery_Master.Load_Sequence" )
+ column=(type=datetime update=yes updatewhereclause=yes name=ready_by_date dbname="Delivery_Master.Ready_By_Date" )
+ retrieve="  SELECT dbo.Delivery_Master.DO_No,   
+         dbo.Delivery_Master.Project_Id,   
+         dbo.Delivery_Master.Ord_Type,   
+         dbo.Delivery_Master.Priority,   
+         dbo.Delivery_Master.Ord_Date,   
+         dbo.Delivery_Master.Complete_Date,   
+         dbo.Delivery_Master.Pick_Start,   
+         dbo.Delivery_Master.Pick_Complete,   
+         dbo.Delivery_Master.Schedule_Date,   
+         dbo.Delivery_Master.Request_Date,   
+         dbo.Delivery_Master.Delivery_Date,   
+         dbo.Delivery_Master.Receive_Date,   
+         dbo.Delivery_Master.Ord_Status,   
+         dbo.Delivery_Master.WH_Code,   
+         dbo.Delivery_Master.Inventory_Type,   
+         dbo.Delivery_Master.Cust_Order_No,   
+         dbo.Delivery_Master.Back_Order_No,   
+         dbo.Delivery_Master.Cust_Code,   
+         dbo.Delivery_Master.Cust_Name,   
+         dbo.Delivery_Master.Address_Code,   
+         dbo.Delivery_Master.Address_1,   
+         dbo.Delivery_Master.Address_2,   
+         dbo.Delivery_Master.Address_3,   
+         dbo.Delivery_Master.Address_4,   
+         dbo.Delivery_Master.City,   
+         dbo.Delivery_Master.State,   
+         dbo.Delivery_Master.Zip,   
+         dbo.Delivery_Master.Country,   
+         dbo.Delivery_Master.Contact_Person,   
+         dbo.Delivery_Master.Tel,   
+         dbo.Delivery_Master.Fax,   
+         dbo.Delivery_Master.Email_Address,   
+         dbo.Delivery_Master.Remark,   
+         dbo.Delivery_Master.Ship_Via,   
+         dbo.Delivery_Master.Ship_Ref,   
+         dbo.Delivery_Master.Invoice_No,   
+         dbo.Delivery_Master.Carrier,   
+         dbo.Delivery_Master.Freight_Terms,   
+         dbo.Delivery_Master.Freight_ETD,   
+         dbo.Delivery_Master.Freight_ETA,   
+         dbo.Delivery_Master.Freight_ATD,   
+         dbo.Delivery_Master.Freight_ATA,   
+         dbo.Delivery_Master.Freight_Cost,   
+         dbo.Delivery_Master.Ctn_Cnt,   
+         dbo.Delivery_Master.Weight,   
+         dbo.Delivery_Master.User_Field1,   
+         dbo.Delivery_Master.User_Field2,   
+         dbo.Delivery_Master.User_Field3,   
+         dbo.Delivery_Master.User_Field4,   
+         dbo.Delivery_Master.User_Field5,   
+         dbo.Delivery_Master.User_Field6,   
+         dbo.Delivery_Master.User_Field7,   
+         dbo.Delivery_Master.User_Field8,   
+         dbo.Delivery_Master.Agent_Info,   
+         dbo.Delivery_Master.Carrier_Tracking_No,   
+         dbo.Delivery_Master.Customs_Doc,   
+         dbo.Delivery_Master.Export_Control_Commodity_No,   
+         dbo.Delivery_Master.Harmonized_Code,   
+         dbo.Delivery_Master.Transport_Mode,   
+         dbo.Delivery_Master.Shipping_Carton_Volume,   
+         dbo.Delivery_Master.Awb_Bol_No,   
+         dbo.Delivery_Master.VAT_Id,   
+         dbo.Delivery_Master.Last_User,   
+         dbo.Delivery_Master.Last_Update,   
+         dbo.Delivery_Master.File_Transmit_Ind,   
+         dbo.Delivery_Master.EDI_Batch_Seq_No,   
+         dbo.Delivery_Master.Standard_Of_Measure,   
+         dbo.Delivery_Master.Description,   
+         dbo.Delivery_Master.Type_Of_Product,   
+         dbo.Delivery_Master.Type_Of_Service,   
+         dbo.Delivery_Master.Type_Of_Payment,   
+         dbo.Delivery_Master.Declared_Value,   
+         dbo.Delivery_Master.Delivery_Confirm_Ind,   
+         dbo.Delivery_Master.Confirmation_Ind,   
+         dbo.Delivery_Master.Gemini_Ind,   
+         dbo.Delivery_Master.Gemini_Export_Datetime,   
+         dbo.Delivery_Master.Shipping_Instructions,   
+         dbo.Delivery_Master.OM_Note_Code_Text,   
+         dbo.Delivery_Master.Packlist_Notes,   
+         dbo.Delivery_Master.District,   
+         dbo.Delivery_Master.EDM_Generate_Datetime,   
+         dbo.Delivery_Master.Gemini_Order_No,   
+         dbo.Delivery_Master.VOR_Shipment_Ind,   
+         dbo.Delivery_Master.Batch_Pick_Id,   
+         dbo.Delivery_Master.Line_Of_Business,   
+         dbo.Delivery_Master.Consolidation_No,   
+         dbo.Delivery_Master.Consolidate_To_Wh_Code,   
+         dbo.Delivery_Master.Scanner_Id,   
+         dbo.Delivery_Master.Scanner_Status,   
+         dbo.Delivery_Master.GLS_TR_ID,   
+         dbo.Delivery_Master.Customs_Clearance_Date,   
+         dbo.Delivery_Master.Carrier_Notified_Date,   
+         dbo.Delivery_Master.Forecast_Release_No,   
+         dbo.Delivery_Master.Trader_Id,   
+         dbo.Delivery_Master.Factory_Id,   
+         dbo.Delivery_Master.Contract_Owner_Id,   
+         dbo.Delivery_Master.User_Field9,   
+         dbo.Delivery_Master.User_Field10,   
+         dbo.Delivery_Master.User_Field11,   
+         dbo.Delivery_Master.User_Field12,   
+         dbo.Delivery_Master.User_Field13,   
+         dbo.Delivery_Master.User_Field14,   
+         dbo.Delivery_Master.User_Field15,   
+         dbo.Delivery_Master.Create_Time,   
+         dbo.Delivery_Master.Create_User,   
+         dbo.Delivery_Master.DWG_Upload,   
+         dbo.Delivery_Master.DWG_Upload_Timestamp,   
+         dbo.Delivery_Master.Delivery_Note_Print_Count,   
+         dbo.Delivery_Master.User_Field16,   
+         dbo.Delivery_Master.User_Field17,   
+         dbo.Delivery_Master.User_Field18,   
+         dbo.Delivery_Master.Customer_Sent_Date,   
+         dbo.Delivery_Master.Crossdock_Ind,   
+         dbo.Delivery_Master.User_Field19,   
+         dbo.Delivery_Master.User_Field20,   
+         dbo.Delivery_Master.User_Field21,   
+         dbo.Delivery_Master.User_Field22,   
+         dbo.Delivery_Master.Trax_Acct_No,   
+         dbo.Delivery_Master.Return_Tracking_No,   
+         dbo.Delivery_Master.Pick_List_Print_Count,   
+         dbo.Delivery_Master.Pack_List_Print_Count,   
+         dbo.Delivery_Master.Carton_Label_Print_Count,   
+         dbo.Delivery_Master.OTM_Status,   
+         dbo.Delivery_Master.Trax_Duty_Terms,   
+         dbo.Delivery_Master.Trax_Duty_Acct_No,   
+         dbo.Delivery_Master.OTM_Call_Date,   
+         dbo.Delivery_Master.OTM_Receive_Date,   
+         dbo.Delivery_Master.Trax_Pack_Location,   
+         dbo.Delivery_Master.Pack_List_Last_User,   
+         dbo.Delivery_Master.Pack_List_Last_Update,   
+         dbo.Delivery_Master.Confirmation_User,   
+         dbo.Delivery_Master.Embargoed_Override_User,   
+         dbo.Delivery_Master.Embargoed_Override_Date,   
+         dbo.Delivery_Master.Embargoed_Override_License,   
+         dbo.Delivery_Master.OTM_Y_N,   
+         dbo.Delivery_Master.Vics_Bol_no,   
+         dbo.Delivery_Master.OTM_Sent_Ind,   
+         dbo.Delivery_Master.Record_Create_Date,   
+         dbo.Delivery_Master.Pick_Cart_Ind,   
+         dbo.Delivery_Master.Carrier_Pro_no,   
+         dbo.Delivery_Master.Pack_Complete_Date,   
+         dbo.Delivery_Master.Authorized_to_Ship_Date,   
+         dbo.Delivery_Master.Customer_Order_Status,   
+         dbo.Delivery_Master.Shipment_Type,   
+         dbo.Delivery_Master.Shipment_ODID,   
+         dbo.Delivery_Master.Ignore_Shelflife_Ind,   
+         dbo.Delivery_Master.Client_Order_Type,   
+         dbo.Delivery_Master.Ship_Cnt,   
+         dbo.Delivery_Master.Mobile_Enabled_Ind,   
+         dbo.Delivery_Master.Mobile_Pick_Sequence,   
+         dbo.Delivery_Master.Mobile_User_Assigned,   
+         dbo.Delivery_Master.Mobile_Status_Ind,   
+         dbo.Delivery_Master.Mobile_Pack_Location,   
+         dbo.Delivery_Master.Mobile_Released_Time,   
+         dbo.Delivery_Master.Mobile_Pick_Start_Time,   
+         dbo.Delivery_Master.Mobile_Pick_Complete_Time,   
+         dbo.Delivery_Master.Mobile_Scan_All_Units_Req_Ind,   
+         dbo.Delivery_Master.Account_Nbr,   
+         dbo.Delivery_Master.ASN_Number,   
+         dbo.Delivery_Master.Client_Cust_PO_Nbr,   
+         dbo.Delivery_Master.Client_Cust_SO_Nbr,   
+         dbo.Delivery_Master.Container_Nbr,   
+         dbo.Delivery_Master.Dock_Code,   
+         dbo.Delivery_Master.Document_Codes,   
+         dbo.Delivery_Master.Equipment_Nbr,   
+         dbo.Delivery_Master.FOB,   
+         dbo.Delivery_Master.FOB_Bill_Duty_Acct,   
+         dbo.Delivery_Master.FOB_Bill_Duty_Party,   
+         dbo.Delivery_Master.FOB_Bill_Freight_Party,   
+         dbo.Delivery_Master.FOB_Bill_Freight_To_Acct,   
+         dbo.Delivery_Master.From_Wh_Loc,   
+         dbo.Delivery_Master.Routing_Nbr,   
+         dbo.Delivery_Master.Seal_Nbr,   
+         dbo.Delivery_Master.Shipping_Route,   
+         dbo.Delivery_Master.SLI_Nbr,   
+         dbo.Delivery_Master.Department_Code,   
+         dbo.Delivery_Master.Department_Name,   
+         dbo.Delivery_Master.Division,   
+         dbo.Delivery_Master.Vendor,   
+         dbo.Delivery_Master.Currency_Code,   
+         dbo.Delivery_Master.Order_Tax_Amt,   
+         dbo.Delivery_Master.Order_Discount_Amt,   
+         dbo.Delivery_Master.Shipping_Handling_Amt,   
+         dbo.Delivery_Master.Mobile_Pack_status_Ind,   
+         dbo.Delivery_Master.Mobile_Pack_User_Assigned,   
+         dbo.Delivery_Master.Mobile_Pack_Start_Time,   
+         dbo.Delivery_Master.Mobile_Pack_Complete_Time,   
+         dbo.Delivery_Master.Source_Type,   
+         dbo.Delivery_Master.Pick_Sort_Order,   
+         dbo.Delivery_Master.Pack_Start_Time,   
+         dbo.Delivery_Master.OM_Order_Type,   
+         dbo.Delivery_Master.OM_Confirmation_Type,   
+         dbo.Delivery_Master.OM_CHANGE_REQUEST_NBR,   
+         dbo.Delivery_Master.Load_Id,   
+         dbo.Delivery_Master.Shipment_Id,   
+         dbo.Delivery_Master.Stop_Id,   
+         dbo.Delivery_Master.Load_Lock,   
+         dbo.Delivery_Master.Master_BOL,   
+         dbo.Delivery_Master.Load_Sequence,   
+         dbo.Delivery_Master.Ready_By_Date  
+    FROM dbo.Delivery_Master   with(nolock)
+	WHERE (  dbo.Delivery_Master.DO_No = :a_order )
+" update="dbo.Delivery_Master" updatewhere=1 updatekeyinplace=no arguments=(("a_order", string)) )
+text(band=detail alignment="2" text="TMS Load Plan" border="0" color="33554432" x="677" y="28" height="96" width="1408" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-14" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+text(band=detail alignment="1" text="Load Id:" border="0" color="33554432" x="128" y="220" height="64" width="617" html.valueishtml="0"  name=load_id_t visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+column(band=detail id=194 alignment="0" tabsequence=1940 border="0" color="33554432" x="782" y="220" height="64" width="713" format="[general]" html.valueishtml="0" protect="0~t1"  name=load_id visible="1" edit.limit=12 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+text(band=detail alignment="1" text="Shipment Id:" border="0" color="33554432" x="128" y="312" height="64" width="617" html.valueishtml="0"  name=shipment_id_t visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+column(band=detail id=195 alignment="0" tabsequence=1950 border="0" color="33554432" x="782" y="312" height="64" width="713" format="[general]" html.valueishtml="0" protect="0~t1"  name=shipment_id visible="1" edit.limit=20 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+text(band=detail alignment="1" text="Stop Id:" border="0" color="33554432" x="128" y="404" height="64" width="617" html.valueishtml="0"  name=stop_id_t visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+column(band=detail id=196 alignment="0" tabsequence=1960 border="0" color="33554432" x="782" y="404" height="64" width="384" format="[general]" html.valueishtml="0" protect="0~t1"  name=stop_id visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+text(band=detail alignment="1" text="Load Lock:" border="0" color="33554432" x="128" y="496" height="64" width="617" html.valueishtml="0"  name=load_lock_t visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+column(band=detail id=197 alignment="0" tabsequence=1970 border="0" color="33554432" x="782" y="496" height="64" width="82" format="[general]" html.valueishtml="0" protect="0~t1"  name=load_lock visible="1" edit.limit=1 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+text(band=detail alignment="1" text="Master Bol:" border="0" color="33554432" x="128" y="588" height="64" width="617" html.valueishtml="0"  name=master_bol_t visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+column(band=detail id=198 alignment="0" tabsequence=1980 border="0" color="33554432" x="782" y="588" height="64" width="713" format="[general]" html.valueishtml="0" protect="0~t1"  name=master_bol visible="1" edit.limit=20 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+column(band=detail id=61 alignment="0" tabsequence=2010 border="0" color="33554432" x="782" y="676" height="60" width="713" html.valueishtml="0" protect="0~t1"  name=awb_bol_no visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+text(band=detail alignment="1" text="Child Bol:" border="0" color="33554432" x="128" y="676" height="60" width="617" html.valueishtml="0"  name=child_bol_t visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+text(band=detail alignment="1" text="Load Sequence:" border="0" color="33554432" x="133" y="760" height="64" width="617" html.valueishtml="0"  name=load_sequence_t visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+column(band=detail id=199 alignment="0" tabsequence=1990 border="0" color="33554432" x="782" y="760" height="64" width="384" format="[general]" html.valueishtml="0" protect="0~t1"  name=load_sequence visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+text(band=detail alignment="1" text="Ready By Date:" border="0" color="33554432" x="128" y="848" height="64" width="617" html.valueishtml="0"  name=ready_by_date_t visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+column(band=detail id=200 alignment="0" tabsequence=2000 border="0" color="33554432" x="782" y="848" height="64" width="704" format="[shortdate] [time]" html.valueishtml="0" protect="0~t1"  name=ready_by_date visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" pagingmethod=0 generatedddwframes="1" )
+xhtmlgen() cssgen(sessionspecific="0" )
+xmlgen(inline="0" )
+xsltgen()
+jsgen()
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )
+export.xhtml()

@@ -1,0 +1,33 @@
+﻿$PBExportHeader$d_inbound_detail.srd
+$PBExportComments$Datawindow object used for Inbound Order Report
+release 7;
+datawindow(units=0 timer_interval=0 color=16777215 processing=0 HTMLDW=no print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.prompt=no print.buttons=no print.preview.buttons=no )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=64 color="536870912" )
+table(column=(type=char(50) updatewhereclause=yes name=sku dbname="Receive_Detail.SKU" )
+ column=(type=decimal(0) updatewhereclause=yes name=req_qty dbname="Receive_Detail.Req_Qty" )
+ column=(type=decimal(3) updatewhereclause=yes name=item_master_weight_1 dbname="Item_Master.Weight_1" )
+ column=(type=char(16) updatewhereclause=yes name=receive_detail_ro_no dbname="Receive_Detail.RO_No" )
+ retrieve="  SELECT Receive_Detail.SKU,   
+         Receive_Detail.Req_Qty,   
+         Item_Master.Weight_1,   
+         Receive_Detail.RO_No  
+    FROM Item_Master,   
+         Receive_Detail  
+   WHERE ( Receive_Detail.SKU = Item_Master.SKU ) and  
+         ( Receive_Detail.supp_code = Item_Master.supp_code ) and
+         ( ( Receive_Detail.RO_No = :as_ro_no ) )   
+
+ 
+" arguments=(("as_ro_no", string)) )
+group(level=1 header.height=0 trailer.height=96 by=("receive_detail_ro_no" ) header.color="536870912" trailer.color="536870912" )
+compute(band=detail alignment="0" expression="getrow()"border="0" color="0" x="119" y="4" height="56" width="87" format="[general]"  name=cf_line_number  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=1 alignment="3" tabsequence=32766 border="0" color="0" x="215" y="4" height="56" width="690" format="[general]"  name=sku edit.limit=50 edit.case=any edit.focusrectangle=no edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+column(band=detail id=2 alignment="1" tabsequence=32766 border="0" color="0" x="919" y="4" height="56" width="343" format="#######.#####"  name=req_qty editmask.mask="#######.#####" editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=detail alignment="1" expression=" req_qty *  item_master_weight_1 "border="0" color="0" x="1275" y="4" height="56" width="224" format="##,###"  name=cf_weight  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=trailer.1 alignment="0" text="ORDER TOTAL" border="0" color="0" x="311" y="16" height="76" width="343"  name=t_1  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=trailer.1 alignment="1" expression="sum(req_qty for all)"border="0" color="0" x="919" y="12" height="76" width="343" format="#######.#####"  name=compute_1  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=trailer.1 alignment="1" expression="sum( req_qty *  item_master_weight_1  for all)"border="0" color="0" x="1275" y="16" height="76" width="224" format="##,###"  name=total_weight  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" )

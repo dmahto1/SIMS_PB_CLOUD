@@ -1,0 +1,62 @@
+HA$PBExportHeader$d_hillman_full_inventory_rpt_select.srd
+release 11;
+datawindow(units=0 timer_interval=0 color=67108864 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes print.preview.outline=yes hidegrayline=no showbackcoloronxp=no )
+header(height=0 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=164 color="536870912" )
+table(column=(type=char(50) updatewhereclause=yes name=fsku dbname="Item_Master.fsku" )
+ column=(type=char(50) updatewhereclause=yes name=tsku dbname="Item_Master.tsku" )
+ column=(type=char(70) updatewhereclause=yes name=description dbname="Item_Master.Description" )
+ column=(type=char(10) updatewhereclause=yes name=fl_code dbname="Item_Master.fl_code" )
+ column=(type=char(10) updatewhereclause=yes name=tl_code dbname="Item_Master.tl_code" )
+ column=(type=char(10) updatewhereclause=yes name=project_id dbname="Item_Master.project_id" )
+ column=(type=char(20) updatewhereclause=yes name=supp_code dbname="Item_Master.supp_code" )
+ column=(type=decimal(5) updatewhereclause=yes name=available_qty dbname="available_qty" )
+ column=(type=decimal(5) updatewhereclause=yes name=allocated_qty dbname="allocated_qty" )
+ column=(type=decimal(5) updatewhereclause=yes name=sit_qty dbname="sit_qty" )
+ retrieve="  SELECT dbo.Item_Master.SKU as fsku,
+		dbo.Item_Master.sku as tsku,   
+        dbo.Item_Master.Description,   
+    	dbo.Item_Master.L_Code as fl_code,
+	dbo.Item_Master.l_code as tl_code,
+	dbo.Item_Master.project_id,
+dbo.Item_Master.supp_code,
+  ( select isnull( sum( dbo.content_summary.avail_qty  ), 0)
+    from dbo.content_summary  
+   where (dbo.content_summary.project_id = dbo.Item_Master.project_id ) and
+			(dbo.content_summary.supp_code = dbo.Item_Master.supp_code ) and
+		( dbo.content_summary.sku = dbo.Item_Master.sku)  ) as ~"available_qty~",
+  ( select isnull(sum( dbo.content_summary.alloc_qty  ), 0)
+    from dbo.content_summary  
+   where (dbo.content_summary.project_id = dbo.Item_Master.project_id ) and
+			(dbo.content_summary.supp_code = dbo.Item_Master.supp_code ) and
+		( dbo.content_summary.sku = dbo.Item_Master.sku)  ) as ~"allocated_qty~",
+  ( select isnull(sum( dbo.content_summary.sit_qty  ), 0)
+    from dbo.content_summary  
+   where (dbo.content_summary.project_id = dbo.Item_Master.project_id ) and
+			(dbo.content_summary.supp_code = dbo.Item_Master.supp_code ) and
+		( dbo.content_summary.sku = dbo.Item_Master.sku)  ) as ~"sit_qty~"
+    FROM dbo.Item_Master
+ORDER BY dbo.Item_Master.SKU, dbo.Item_Master.l_code 
+
+" )
+text(band=detail alignment="1" text="From SKU:" border="0" color="33554432" x="23" y="8" height="56" width="311" html.valueishtml="0"  name=from_sku_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=detail alignment="1" text="To SKU:" border="0" color="33554432" x="23" y="88" height="56" width="311" html.valueishtml="0"  name=to_sku_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=1 alignment="0" tabsequence=10 border="5" color="33554432" x="361" y="8" height="56" width="1152" format="[general]" html.valueishtml="0"  name=fsku  tag="from" visible="1" edit.limit=50 edit.case=upper edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=detail alignment="1" text="From Location:" border="0" color="33554432" x="1545" y="8" height="56" width="375" html.valueishtml="0"  name=from_location_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="0" tabsequence=20 border="5" color="33554432" x="361" y="88" height="56" width="1152" format="[general]" html.valueishtml="0"  name=tsku  tag="to" visible="1" edit.limit=50 edit.case=upper edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=detail alignment="1" text="To Location:" border="0" color="33554432" x="1545" y="88" height="56" width="375" html.valueishtml="0"  name=to_location_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="0" tabsequence=30 border="5" color="33554432" x="1947" y="8" height="56" width="631" format="[general]" html.valueishtml="0"  name=fl_code  tag="from" visible="1" edit.limit=10 edit.case=upper edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=5 alignment="0" tabsequence=40 border="5" color="33554432" x="1947" y="88" height="56" width="631" format="[general]" html.valueishtml="0"  name=tl_code  tag="to" visible="1" edit.limit=10 edit.case=upper edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" pagingmethod=0 generatedddwframes="1" )
+xhtmlgen() cssgen(sessionspecific="0" )
+xmlgen(inline="0" )
+xsltgen()
+jsgen()
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )
+export.xhtml()
+ 

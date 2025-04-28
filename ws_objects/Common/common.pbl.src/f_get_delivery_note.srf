@@ -1,0 +1,43 @@
+﻿$PBExportHeader$f_get_delivery_note.srf
+$PBExportComments$Return delivery notes as string
+global type f_get_delivery_note from function_object
+end type
+
+forward prototypes
+global function string f_get_delivery_note (string asproject, ref string asdono)
+end prototypes
+
+global function string f_get_delivery_note (string asproject, ref string asdono);//GailM - 12/26/2017 - I362, F5736, S14307 PAN Display Notes in Picking List Print
+// Retrieve all delivery notes for a given project / DONO, concatenate and return as a strong
+
+Datastore ldsNotes
+String ls_notes, ls_filter
+Long llRowCount, llNotesCount
+Int n
+ls_notes = ""
+
+ldsNotes = Create Datastore
+ldsNotes.dataobject = 'd_dono_notes'
+ldsNotes.SetTransObject(SQLCA)
+
+llNotesCount = ldsNotes.Retrieve( asProject,asDoNo, 'EM' )	
+
+//Concatenate Note_text from Delivery_notes table for all rows for a single order
+If llNotesCount > 0 Then
+	ldsNotes.setSort( "Delivery_Notes.Note_Type, Delivery_Notes.Note_seq_no, Delivery_Notes.Line_Item_No" )
+	ldsNotes.Sort( )
+	For n= 1 to llNotesCount
+		ls_notes += ldsNotes.GetItemString(n, "note_text") + "~n"
+	Next
+End if
+
+Destroy ldsNotes
+
+Return ls_notes
+
+
+
+
+
+end function
+

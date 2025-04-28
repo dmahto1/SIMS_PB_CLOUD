@@ -1,0 +1,63 @@
+HA$PBExportHeader$d_viaware_conversion_po_cntnr_diebold.srd
+$PBExportComments$PO Containers to be exported to Vaiware for Diebold
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=1 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no grid.lines=0 )
+header(height=80 color="536870912" )
+summary(height=84 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=68 color="536870912" )
+table(column=(type=char(30) updatewhereclause=yes name=supp_invoice_no dbname="Supp_Invoice_No" )
+ column=(type=char(1) updatewhereclause=yes name=ord_type dbname="ord_type" )
+ column=(type=char(10) updatewhereclause=yes name=warehouse dbname="User_Field1" )
+ column=(type=char(50) updatewhereclause=yes name=user_field6 dbname="USer_Field6" )
+ column=(type=decimal(5) updatewhereclause=yes name=qty dbname="qty" )
+ column=(type=char(50) updatewhereclause=yes name=po_no2 dbname="po_no2" )
+ retrieve="  SELECT Distinct dbo.Receive_Master.Supp_Invoice_No,   
+         Case When ord_type = 'D' or Ord_type = 'Z' Then ~"S~" When Ord_Type = ~"S~" Then ~"C~" Else ord_type  End as ord_type,   
+         dbo.Warehouse.User_Field1, 
+			Receive_Detail.USer_Field6,
+			Sum(Receive_Detail.Req_qty) as qty, 
+			edi_inbound_Detail.po_no2 
+    FROM dbo.Receive_Master, 
+		   Receive_Detail,  
+         dbo.Warehouse,
+			edi_inbound_Detail   
+   WHERE ( dbo.Warehouse.WH_Code = dbo.Receive_Master.WH_Code )    and
+			Receive_master.Ro_no = Receive_detail.Ro_No and 
+			receive_master.Project_id = :asProject and
+			ord_status = 'N' and
+			ord_type in ( 'D','Z') and
+			Receive_master.Project_id = edi_inbound_Detail.Project_id and
+			Receive_master.supp_invoice_no = edi_inbound_Detail.order_no and
+			Receive_Detail.sku = edi_inbound_Detail.Sku and
+			Receive_Detail.line_item_No = edi_inbound_Detail.line_item_No and
+			edi_inbound_detail.edi_batch_seq_no = (select max(edi_batch_seq_no) from edi_inbound_Detail where project_id = :asProject and order_no = supp_invoice_no) and
+			edi_inbound_detail.po_no2 > '' and
+			(Receive_Detail.user_field1 is null or Receive_Detail.user_field1 = '')
+			Group By Supp_Invoice_No, 
+						ord_type, 
+						Warehouse.User_Field1,
+						Receive_Detail.USer_Field6, 
+						edi_inbound_Detail.po_no2
+" arguments=(("asProject", string))  sort="warehouse A supp_invoice_no A user_field6 A " )
+text(band=header alignment="2" text="PO" border="6" color="33554432" x="896" y="8" height="64" width="375" html.valueishtml="0"  name=receive_master_supp_invoice_no_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Ord Type" border="6" color="33554432" x="571" y="8" height="64" width="315" html.valueishtml="0"  name=receive_master_ord_type_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Warehouse" border="6" color="33554432" x="197" y="8" height="64" width="366" html.valueishtml="0"  name=warehouse_user_field1_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="" border="6" color="33554432" x="9" y="8" height="64" width="178" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="PO Line" border="6" color="33554432" x="1280" y="8" height="64" width="256" html.valueishtml="0"  name=user_field6_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Qty" border="6" color="33554432" x="1545" y="8" height="64" width="425" html.valueishtml="0"  name=qty_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Container" border="6" color="0" x="1979" y="8" height="64" width="366" html.valueishtml="0"  name=po_no2_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+compute(band=detail alignment="0" expression="getRow()"border="0" color="0" x="9" y="8" height="52" width="178" format="[GENERAL]" html.valueishtml="0"  name=compute_1 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="0" color="33554432" x="896" y="8" height="52" width="375" format="[general]" html.valueishtml="0"  name=supp_invoice_no visible="1" edit.limit=30 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="0" color="33554432" x="571" y="8" height="52" width="315" format="[general]" html.valueishtml="0"  name=ord_type visible="1" edit.limit=1 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="0" color="33554432" x="197" y="8" height="52" width="366" format="[general]" html.valueishtml="0"  name=warehouse visible="1" edit.limit=10 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="0" color="33554432" x="1280" y="8" height="52" width="256" format="[general]" html.valueishtml="0"  name=user_field6 visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="1" tabsequence=32766 border="0" color="33554432" x="1545" y="8" height="52" width="425" format="#########0" html.valueishtml="0"  name=qty visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="0" tabsequence=32766 border="0" color="33554432" x="1979" y="8" height="52" width="366" format="[general]" html.valueishtml="0"  name=po_no2 visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=summary alignment="1" expression="~"TOTAL:   ~" + sum(qty for all)"border="0" color="33554432" x="1545" y="4" height="56" width="425" format="[General]" html.valueishtml="0"  name=compute_2 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+
+sparse(names="warehouse	ord_type	supp_invoice_no	user_field6")htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

@@ -1,0 +1,60 @@
+﻿$PBExportHeader$d_do_serial_no_hidden.srd
+$PBExportComments$* Capturing outbound serial numbers
+release 9;
+datawindow(units=0 timer_interval=0 color=16777215 processing=1 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no grid.lines=0 )
+header(height=80 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=92 color="536870912" )
+table(column=(type=char(50) updatewhereclause=yes name=sku dbname="SKU" )
+ column=(type=char(20) updatewhereclause=yes name=supp_code dbname="Supp_Code" )
+ column=(type=decimal(0) updatewhereclause=yes identity=yes name=id_no dbname="ID_No" )
+ column=(type=char(1) updatewhereclause=yes name=component_ind dbname="Component_Ind" )
+ column=(type=decimal(0) updatewhereclause=yes name=component_no dbname="Component_No" )
+ column=(type=decimal(5) updatewhereclause=yes name=quantity dbname="Quantity" )
+ column=(type=char(50) updatewhereclause=yes name=sku_parent dbname="SKU_Parent" )
+ column=(type=decimal(0) updatewhereclause=yes name=line_item_no dbname="Line_Item_No" )
+ retrieve="SELECT  Delivery_Picking_Detail.SKU ,
+           Delivery_Picking_Detail.Supp_Code ,
+           Delivery_Picking_Detail.ID_No ,
+           Delivery_Picking_Detail.Component_Ind ,
+           Delivery_Picking_Detail.Component_No , 
+           Delivery_Picking_Detail.Quantity ,
+           Delivery_Picking_Detail.SKU_Parent ,
+           Delivery_Picking_Detail.Line_Item_No     
+        FROM Delivery_Picking_Detail      
+        WHERE ( Delivery_Picking_Detail.DO_No = :do_no ) and 
+         	( Delivery_Picking_Detail.SKU = :sku ) and 
+         ( Delivery_Picking_Detail.Supp_Code = :supp_code ) and 
+         ( Delivery_Picking_Detail.Owner_ID = :owner_id ) and   
+       	( Delivery_Picking_Detail.Country_of_Origin = :coo ) and   
+       	( Delivery_Picking_Detail.L_Code = :loc ) and  
+       	( Delivery_Picking_Detail.Inventory_Type = :inv_type ) and 
+         ( Delivery_Picking_Detail.Lot_No = :lot ) and 
+         ( Delivery_Picking_Detail.PO_No = :po ) and 
+         ( Delivery_Picking_Detail.PO_No2 = :po2 )   and 
+			( Delivery_Picking_Detail.Component_no = :comp_no ) and
+			( Delivery_Picking_Detail.line_item_no = :line_item ) and
+			(Delivery_Picking_detail.Container_ID = :asContainer) and 
+			(Delivery_Picking_Detail.Expiration_Date = :adtExpDt) " arguments=(("do_no", string),("sku", string),("supp_code", string),("owner_id", number),("coo", string),("loc", string),("inv_type", string),("lot", string),("po", string),("po2", string),("comp_no", number),("line_item", number),("asContainer", string),("adtExpDt", datetime))  sort="line_item_no A sku_parent A sku A component_no A " )
+text(band=header alignment="2" text="Sku" border="0" color="0" x="9" y="8" height="64" width="480" html.valueishtml="0"  name=sku_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Supp Code" border="0" color="0" x="498" y="8" height="64" width="393" html.valueishtml="0"  name=supp_code_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Id No" border="0" color="0" x="901" y="8" height="64" width="270" html.valueishtml="0"  name=id_no_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="Component Ind" border="0" color="0" x="1179" y="4" height="76" width="18" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-12" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="Component No" border="0" color="0" x="1207" y="4" height="76" width="1152" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-12" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="Quantity" border="0" color="0" x="2368" y="4" height="76" width="1147" html.valueishtml="0"  name=t_3 visible="1"  font.face="Arial" font.height="-12" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="Sku Parent" border="0" color="0" x="3525" y="4" height="76" width="1339" html.valueishtml="0"  name=t_4 visible="1"  font.face="Arial" font.height="-12" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="Line Item No" border="0" color="0" x="4873" y="4" height="76" width="2341" html.valueishtml="0"  name=t_5 visible="1"  font.face="Arial" font.height="-12" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="0" color="0" x="9" y="8" height="76" width="480" format="[general]" html.valueishtml="0"  name=sku visible="1" edit.limit=50 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="0" color="0" x="498" y="8" height="76" width="393" format="[general]" html.valueishtml="0"  name=supp_code visible="1" edit.limit=20 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="1" tabsequence=32766 border="0" color="0" x="901" y="8" height="76" width="270" format="[general]" html.valueishtml="0"  name=id_no visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="0" color="0" x="1179" y="0" height="64" width="18" format="[general]" html.valueishtml="0"  name=component_ind visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="0" tabsequence=32766 border="0" color="0" x="1207" y="0" height="64" width="1152" format="[general]" html.valueishtml="0"  name=component_no visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="0" tabsequence=32766 border="0" color="0" x="2368" y="0" height="64" width="1147" format="#######.#####" html.valueishtml="0"  name=quantity visible="1" editmask.mask="#######.#####" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=7 alignment="0" tabsequence=32766 border="0" color="0" x="3525" y="0" height="64" width="1339" format="[general]" html.valueishtml="0"  name=sku_parent visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=8 alignment="0" tabsequence=32766 border="0" color="0" x="4873" y="0" height="64" width="2341" format="[general]" html.valueishtml="0"  name=line_item_no visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

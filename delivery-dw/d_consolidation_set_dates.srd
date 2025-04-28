@@ -1,0 +1,16 @@
+HA$PBExportHeader$d_consolidation_set_dates.srd
+$PBExportComments$Consolidation global date update
+release 7;
+datawindow(units=0 timer_interval=0 color=79741120 processing=0 HTMLDW=no print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.prompt=no print.buttons=no print.preview.buttons=no )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=204 color="536870912" )
+table(column=(type=char(1) updatewhereclause=yes name=date_type dbname="date_type" values="Carrier Notified	C/" )
+ column=(type=datetime updatewhereclause=yes name=consol_date dbname="consol_date" )
+ )
+column(band=detail id=1 alignment="0" tabsequence=10 border="5" color="0" x="242" y="4" height="64" width="658" format="[general]"  name=date_type ddlb.limit=0 ddlb.allowedit=no ddlb.case=any  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1090519039" )
+text(band=detail alignment="1" text="Set:" border="0" color="0" x="64" y="4" height="64" width="155"  name=date_type_t  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="2" tabsequence=20 border="5" color="0" x="242" y="100" height="64" width="658" format="[shortdate] [time]"  name=consol_date editmask.spin=yes editmask.mask="[date] [time]" editmask.spinincr=0 editmask.focusrectangle=no  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=detail alignment="1" text="Date:" border="0" color="0" x="27" y="100" height="64" width="192"  name=consol_date_t  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" )

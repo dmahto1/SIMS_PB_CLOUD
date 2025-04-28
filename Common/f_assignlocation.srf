@@ -1,0 +1,53 @@
+HA$PBExportHeader$f_assignlocation.srf
+$PBExportComments$*
+global type f_assignlocation from function_object
+end type
+
+forward prototypes
+global function string f_assignlocation (string a_sku, string a_whcode, string a_type)
+end prototypes
+
+global function string f_assignlocation (string a_sku, string a_whcode, string a_type);// 05/00 PCONKL - Putaway logic modified!
+//If default location exists on Item Master, we will check to see if anything is already there.
+//If nothing there we will set the default for the item.
+//If this item already exists, we will see if there is enough room for the rest - based on total to store (user field2)
+//If the qty to store fits, we will set the default, Otherwise we will leave it blank and display the recommendation table
+//If no default, we will leave blank and pop the recommendation window.
+
+String ls_loc,lsQty
+decimal ld_qty
+
+SELECT L_Code, user_field2 Into :ls_loc, :lsQty
+	FROM Item_Master
+   WHERE Project_ID = :gs_project AND  
+         SKU = :a_sku ;
+
+If ls_loc = '' or IsNull(ls_loc) or sqlca.sqlcode <> 0 Then
+	If a_type = "D" Then
+		ls_loc = gs_damage_loc
+	Else
+		//ls_loc = gs_default_loc 
+		ls_loc = '' /*no default*/
+	End If
+	
+Else /*loc Exists*/
+	
+	//check for content at this location
+	Select count(*) into :ld_qty
+	From Content
+	Where Project_ID = :gs_project AND
+			wh_code = :a_whcode and
+			l_code = :ls_loc
+			and avail_qty > 0;
+	if sqlca.sqlcode = 0 Then /*content exists for location*/
+		if ld_qty > 0 Then /*qty exists at location*/
+			ls_loc = ''
+		End If
+	End if
+		
+End If
+
+		
+Return ls_loc
+end function
+

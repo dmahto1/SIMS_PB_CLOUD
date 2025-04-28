@@ -1,0 +1,75 @@
+HA$PBExportHeader$d_nike_orders_with_discrepancies.srd
+release 11;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 1 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes print.preview.outline=yes hidegrayline=no showbackcoloronxp=no )
+header(height=332 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=84 color="536870912" )
+table(column=(type=char(20) updatewhereclause=yes name=nike_delivery_no dbname="Nike_Delivery_No" )
+ column=(type=char(50) updatewhereclause=yes name=menlo_order_no dbname="Menlo_Order_No" )
+ column=(type=char(50) updatewhereclause=yes name=ship_to_name dbname="SHIP_TO_NAME" )
+ column=(type=datetime updatewhereclause=yes name=ship_date dbname="Ship_Date" )
+ column=(type=char(1) updatewhereclause=yes name=order_status dbname="Order_status" )
+ column=(type=decimal(5) updatewhereclause=yes identity=yes name=total_order_qty_for_dn dbname="Total_order_qty_for_DN" )
+ column=(type=decimal(5) updatewhereclause=yes identity=yes name=total_pick_qty_for_dn dbname="Total_Pick_Qty_for_DN" )
+ column=(type=decimal(5) updatewhereclause=yes identity=yes name=total_pack_qty_for_dn dbname="Total_Pack_Qty_for_DN" )
+ column=(type=decimal(5) updatewhereclause=yes identity=yes name=discrepancy dbname="Discrepancy" )
+ retrieve="  SELECT Delivery_Detail.User_Field1 As Nike_Delivery_No,              
+Delivery_Master.Invoice_No As Menlo_Order_No,              
+Delivery_Master.Cust_Name As SHIP_TO_NAME,                 
+Delivery_Master.Schedule_Date As Ship_Date,            
+Delivery_Master.Ord_Status As Order_status,       
+Sum(Delivery_Detail.Req_Qty) As Total_order_qty_for_DN,
+ISNULL((Select Sum(Quantity) FROM Delivery_Picking Where Delivery_Master.Do_No = Delivery_Picking.Do_No AND Delivery_Picking.Line_Item_No IN (Select line_item_no FROM Delivery_Detail DD WHERE DD.Do_No = Delivery_Master.Do_No AND DD.User_Field1 = Delivery_Detail.User_Field1  ) ), 0)  AS Total_Pick_Qty_for_DN,                 
+ISNULL((Select Sum(Quantity) FROM Delivery_Packing Where Delivery_Master.Do_No = Delivery_Packing.Do_No AND Delivery_Packing.Line_Item_No IN (Select line_item_no FROM Delivery_Detail DD WHERE DD.Do_No = Delivery_Master.Do_No AND DD.User_Field1 = Delivery_Detail.User_Field1  ) ), 0)  AS Total_Pack_Qty_for_DN ,               
+(ISNULL((Select Sum(Quantity) FROM Delivery_Picking Where Delivery_Master.Do_No = Delivery_Picking.Do_No AND Delivery_Picking.Line_Item_No IN (Select line_item_no FROM Delivery_Detail DD WHERE DD.Do_No = Delivery_Master.Do_No AND DD.User_Field1 = Delivery_Detail.User_Field1  ) ), 0) -  ISNULL((Select Sum(Quantity) FROM Delivery_Packing Where Delivery_Master.Do_No = Delivery_Packing.Do_No AND Delivery_Packing.Line_Item_No IN (Select line_item_no FROM Delivery_Detail DD WHERE DD.Do_No = Delivery_Master.Do_No AND DD.User_Field1 = Delivery_Detail.User_Field1  ) ),0))  As Discrepancy
+FROM Delivery_Master, Delivery_Detail 
+WHERE Delivery_Master.Do_No = Delivery_Detail.Do_No AND  project_id = :project_id AND
+		  Delivery_Master.Ord_Status in ( 'A', 'C','V') AND
+		 (ISNULL((Select Sum(Quantity) FROM Delivery_Picking Where Delivery_Master.Do_No = Delivery_Picking.Do_No AND Delivery_Picking.Line_Item_No IN (Select line_item_no FROM Delivery_Detail DD WHERE DD.Do_No = Delivery_Master.Do_No AND DD.User_Field1 = Delivery_Detail.User_Field1  ) ), 0) -  ISNULL((Select Sum(Quantity) FROM Delivery_Packing Where Delivery_Master.Do_No = Delivery_Packing.Do_No AND Delivery_Packing.Line_Item_No IN (Select line_item_no FROM Delivery_Detail DD WHERE DD.Do_No = Delivery_Master.Do_No AND DD.User_Field1 = Delivery_Detail.User_Field1  ) ),0))  > 0 AND
+		convert(smalldatetime,convert(varchar,schedule_date,107),107) between :ad_shpstrdt and :ad_shpenddt 
+
+GROUP BY
+Delivery_Detail.User_Field1,             
+Delivery_Master.Invoice_No,          
+Delivery_Master.Cust_Name,                 
+Delivery_Master.Schedule_Date,            
+Delivery_Master.Ord_Status,
+Delivery_Master.Do_No
+ORDER BY Schedule_DAte Desc;
+" arguments=(("project_id", string),("ad_shpstrdt", date),("ad_shpenddt", date)) )
+text(band=background alignment="0" text="Nike Orders with Discrepancies Report" border="0" color="0" x="0" y="12" height="64" width="1230" html.valueishtml="0"  name=t_6 visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=background alignment="1" text="Printed On:" border="0" color="0" x="5" y="88" height="64" width="352" html.valueishtml="0"  name=t_7 visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=background alignment="0" expression="String(Today(), 'mm/dd/yyyy hh:mm')"border="0" color="0" x="379" y="88" height="56" width="933" format="[general]" html.valueishtml="0"  name=compute_4 visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+text(band=header alignment="2" text="Nike Delivery No" border="2" color="33554432" x="5" y="192" height="136" width="526" html.valueishtml="0"  name=nike_delivery_no_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="XPO Order No" border="2" color="33554432" x="535" y="192" height="136" width="576" html.valueishtml="0"  name=menlo_order_no_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Ship To Name" border="2" color="33554432" x="1115" y="192" height="136" width="1211" html.valueishtml="0"  name=ship_to_name_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Ship Date" border="2" color="33554432" x="2331" y="192" height="136" width="370" html.valueishtml="0"  name=ship_date_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=1 alignment="2" tabsequence=32766 border="2" color="33554432" x="5" y="4" height="76" width="526" format="[general]" html.valueishtml="0"  name=nike_delivery_no visible="1" edit.limit=20 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="2" tabsequence=32766 border="2" color="33554432" x="535" y="4" height="76" width="576" format="[general]" html.valueishtml="0"  name=menlo_order_no visible="1" edit.limit=20 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="2" color="33554432" x="1115" y="4" height="76" width="1211" format="[general]" html.valueishtml="0"  name=ship_to_name visible="1" edit.limit=50 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="2" tabsequence=32766 border="2" color="33554432" x="2331" y="4" height="76" width="370" format="[shortdate]" html.valueishtml="0"  name=ship_date visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Order 
+Status" border="2" color="33554432" x="2706" y="192" height="136" width="384" html.valueishtml="0"  name=order_status_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="2" tabsequence=32766 border="2" color="33554432" x="2702" y="4" height="76" width="384" format="[general]" html.valueishtml="0"  name=order_status visible="1" dddw.name=dddw_ord_status dddw.displaycolumn=ord_status_desc dddw.datacolumn=ord_status dddw.percentwidth=0 dddw.lines=0 dddw.limit=0 dddw.allowedit=no dddw.useasborder=no dddw.case=any  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="2" tabsequence=32766 border="2" color="33554432" x="3090" y="4" height="76" width="379" format="#" html.valueishtml="0"  name=total_order_qty_for_dn visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=7 alignment="2" tabsequence=32766 border="2" color="33554432" x="3474" y="4" height="76" width="379" format="0" html.valueishtml="0"  name=total_pick_qty_for_dn visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=8 alignment="2" tabsequence=32766 border="2" color="33554432" x="3858" y="4" height="76" width="379" format="0" html.valueishtml="0"  name=total_pack_qty_for_dn visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=9 alignment="2" tabsequence=32766 border="2" color="33554432" x="4242" y="4" height="76" width="379" format="0" html.valueishtml="0"  name=discrepancy visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Total Order 
+Qty For Dn" border="2" color="33554432" x="3095" y="192" height="136" width="379" html.valueishtml="0"  name=total_order_qty_for_dn_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Total Pick 
+Qty For Dn" border="2" color="33554432" x="3479" y="192" height="136" width="379" html.valueishtml="0"  name=total_pick_qty_for_dn_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Total Pack
+Qty For Dn" border="2" color="33554432" x="3863" y="192" height="136" width="379" html.valueishtml="0"  name=total_pack_qty_for_dn_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Discrepancy" border="2" color="33554432" x="4247" y="192" height="136" width="379" html.valueishtml="0"  name=discrepancy_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" pagingmethod=0 generatedddwframes="1" )
+xhtmlgen() cssgen(sessionspecific="0" )
+xmlgen(inline="0" )
+xsltgen()
+jsgen()
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )
+export.xhtml()

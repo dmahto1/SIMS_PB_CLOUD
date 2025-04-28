@@ -1,0 +1,66 @@
+﻿$PBExportHeader$d_delivery_summary.srd
+$PBExportComments$delivery summary
+release 7;
+datawindow(units=0 timer_interval=0 color=12632256 processing=0 HTMLDW=no print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.prompt=no print.buttons=no print.preview.buttons=no )
+header(height=76 color="536870912" )
+summary(height=88 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=84 color="536870912" )
+table(column=(type=char(16) updatewhereclause=yes name=do_no dbname="DO_No" )
+ column=(type=datetime updatewhereclause=yes name=ord_date dbname="Ord_Date" )
+ column=(type=datetime updatewhereclause=yes name=complete_date dbname="Complete_Date" )
+ column=(type=char(1) updatewhereclause=yes name=inventory_type dbname="Inventory_Type" )
+ column=(type=char(50) updatewhereclause=yes name=sku dbname="SKU" )
+ column=(type=decimal(0) updatewhereclause=yes name=quantity dbname="Quantity" )
+ column=(type=decimal(2) updatewhereclause=yes name=cbm dbname="CBM" )
+ column=(type=decimal(2) updatewhereclause=yes name=weight dbname="Weight_Gross" )
+ retrieve="  SELECT Delivery_Master.DO_No,   
+         Delivery_Master.Ord_Date,   
+         Delivery_Master.Complete_Date,   
+         Delivery_Master.Inventory_Type,   
+         Delivery_Packing.SKU,   
+         Delivery_Packing.Quantity,   
+         Delivery_Packing.CBM,   
+         Delivery_Packing.Weight_Gross  
+    FROM Delivery_Master,   
+         Delivery_Packing  
+   WHERE ( Delivery_Packing.DO_No = Delivery_Master.DO_No ) and  
+         (Delivery_Master.Ord_Status = 'C' ) AND  
+         ( Delivery_Master.Project_id = :pid ) AND  
+         ( Delivery_Master.Complete_Date >= :start ) AND  
+         ( Delivery_Master.Complete_Date <= :end ) 
+" arguments=(("pid", string),("start", date),("end", date)) )
+group(level=1 header.height=0 trailer.height=0 by=("do_no" ) header.color="536870912" trailer.color="536870912" )
+group(level=2 header.height=84 trailer.height=88 by=("do_no" ) header.color="536870912" trailer.color="536870912" )
+text(band=header alignment="2" text="Delivery Master
+Do No" border="2" color="0" x="5" y="4" height="128" width="466"  name=delivery_master_do_no_t  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Delivery Master
+Ord Date" border="2" color="0" x="475" y="4" height="128" width="603"  name=delivery_master_ord_date_t  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Delivery Master
+Complete Date" border="2" color="0" x="1083" y="4" height="128" width="603"  name=delivery_master_complete_date_t  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Delivery Master
+Inventory Type" border="2" color="0" x="1691" y="4" height="128" width="407"  name=delivery_master_inventory_type_t  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Delivery Packing
+Sku" border="2" color="0" x="2103" y="4" height="128" width="576"  name=delivery_packing_sku_t  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Delivery Packing
+Quantity" border="2" color="0" x="2683" y="4" height="128" width="439"  name=delivery_packing_quantity_t  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Delivery Packing
+Cbm" border="2" color="0" x="3127" y="4" height="128" width="443"  name=delivery_packing_cbm_t  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Delivery Packing
+Weight Gross" border="2" color="0" x="3575" y="4" height="128" width="439"  name=delivery_packing_weight_gross_t  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.2 id=1 alignment="0" tabsequence=32766 border="2" color="0" x="27" y="4" height="76" width="430" format="[general]"  name=do_no edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="2" color="0" x="1083" y="4" height="76" width="603" format="[shortdate] [time]"  name=complete_date edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="2" color="0" x="1691" y="4" height="76" width="343" format="[general]"  name=inventory_type edit.limit=1 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="0" tabsequence=32766 border="2" color="0" x="2103" y="4" height="76" width="576" format="[general]"  name=sku edit.limit=20 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="1" tabsequence=32766 border="2" color="0" x="2683" y="4" height="76" width="366" format="#######.#####"  name=quantity editmask.mask="#######.#####" editmask.focusrectangle=no  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=7 alignment="1" tabsequence=32766 border="2" color="0" x="3127" y="4" height="76" width="329" format="[general]"  name=cbm edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=8 alignment="1" tabsequence=32766 border="2" color="0" x="3575" y="4" height="76" width="329" format="[general]"  name=weight edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="2" color="0" x="475" y="4" height="76" width="603" format="[shortdate] [time]"  name=ord_date edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=trailer.2 alignment="1" expression="sum(quantity for group 2)"border="2" color="0" x="2683" y="4" height="76" width="361" format="#######.#####"  name=groupqty  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=trailer.2 alignment="1" expression="sum(cbm for group 2)"border="2" color="0" x="3127" y="4" height="76" width="329" format="[general]"  name=groupcbm  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=trailer.2 alignment="1" expression="sum(weight for group 2)"border="2" color="0" x="3575" y="8" height="76" width="329" format="[general]"  name=groupweight  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=summary alignment="0" expression="sum(  quantity  for all )"border="2" color="0" x="2674" y="12" height="64" width="366" format="#######.#####"  name=sumqty  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=summary alignment="0" expression="sum(  cbm  for all )"border="2" color="0" x="3141" y="8" height="64" width="279" format="[general]"  name=sumcbm  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=summary alignment="0" expression="sum(  weight  for all )"border="2" color="0" x="3602" y="8" height="64" width="293" format="[general]"  name=sumweight  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" )

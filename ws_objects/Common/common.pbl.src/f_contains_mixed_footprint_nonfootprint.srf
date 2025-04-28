@@ -1,0 +1,39 @@
+﻿$PBExportHeader$f_contains_mixed_footprint_nonfootprint.srf
+$PBExportComments$Determine if datawindow contains mix of footprint and nonFootprint GPNs
+global type f_contains_mixed_footprint_nonfootprint from function_object
+end type
+
+forward prototypes
+global function boolean f_contains_mixed_footprint_nonfootprint (datawindow adw)
+end prototypes
+
+global function boolean f_contains_mixed_footprint_nonfootprint (datawindow adw);//GailM 11/3/2019 DE13103 Serial number tab has a mixture of footprint GPNs and nonFootprint GPN's - Should select which row to fill
+Boolean lbRtn, lbResult, lbFootprint, lbNonFootprint 
+Int liRow, liRows
+String lsSKU, lsSupplier
+
+lbRtn = FALSE
+liRows = adw.RowCount()
+
+If liRows = 0 Then
+	Return lbRtn
+End If
+
+For liRow = 1 to liRows
+	lsSKU = adw.GetItemString(liRow, 'sku')
+	lsSupplier = adw.GetItemString(liRow, 'supp_code')
+	lbResult = f_is_sku_foot_print(lsSKU, lsSupplier)
+	If lbResult Then
+		lbFootprint = TRUE
+	Else
+		lbNonFootprint = TRUE
+	End If
+Next
+
+If lbFootprint and lbNonFootprint Then
+	lbRtn = TRUE
+End If
+
+Return lbRtn
+end function
+

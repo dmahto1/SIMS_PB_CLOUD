@@ -1,0 +1,89 @@
+﻿$PBExportHeader$d_shipment_search_result.srd
+$PBExportComments$Shipment Search Criteria Results
+release 11;
+datawindow(units=0 timer_interval=0 color=16777215 processing=1 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes print.preview.outline=yes hidegrayline=no showbackcoloronxp=no grid.lines=0 )
+header(height=80 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=72 color="536870912" )
+table(column=(type=char(10) updatewhereclause=yes name=shipment_wh_code dbname="Shipment.WH_Code" )
+ column=(type=char(16) updatewhereclause=yes name=shipment_ship_no dbname="Shipment.Ship_No" )
+ column=(type=char(20) updatewhereclause=yes name=shipment_carrier_code dbname="Shipment.Carrier_Code" )
+ column=(type=datetime updatewhereclause=yes name=shipment_ord_date dbname="Shipment.Ord_Date" )
+ column=(type=datetime updatewhereclause=yes name=shipment_freight_etd dbname="Shipment.Freight_ETD" )
+ column=(type=datetime updatewhereclause=yes name=shipment_freight_eta dbname="Shipment.Freight_ETA" )
+ column=(type=char(22) updatewhereclause=yes name=shipment_pro_no dbname="Shipment.Pro_No" )
+ column=(type=char(1) updatewhereclause=yes name=shipment_ord_status dbname="Shipment.Ord_status" )
+ column=(type=char(1) updatewhereclause=yes name=shipment_ord_type dbname="Shipment.Ord_Type" )
+ column=(type=char(20) updatewhereclause=yes name=shipment_awb_bol_no dbname="Shipment.Awb_bol_no" )
+ column=(type=char(40) updatewhereclause=yes name=shipment_location_origin_name dbname="Shipment_Location.Origin_Name" )
+ column=(type=char(30) updatewhereclause=yes name=shipment_location_origin_city dbname="Shipment_Location.Origin_City" )
+ column=(type=char(35) updatewhereclause=yes name=shipment_location_origin_state dbname="Shipment_Location.Origin_State" )
+ column=(type=char(15) updatewhereclause=yes name=shipment_location_origin_zip dbname="Shipment_Location.Origin_Zip" )
+ column=(type=char(30) updatewhereclause=yes name=shipment_location_origin_country dbname="Shipment_Location.Origin_Country" )
+ column=(type=char(40) updatewhereclause=yes name=shipment_location_dest_name dbname="Shipment_Location.Dest_Name" )
+ column=(type=char(30) updatewhereclause=yes name=shipment_location_dest_city dbname="Shipment_Location.Dest_City" )
+ column=(type=char(35) updatewhereclause=yes name=shipment_location_dest_state dbname="Shipment_Location.Dest_State" )
+ column=(type=char(15) updatewhereclause=yes name=shipment_location_dest_zip dbname="Shipment_Location.Dest_Zip" )
+ column=(type=char(30) updatewhereclause=yes name=shipment_location_dest_country dbname="Shipment_Location.Dest_Country" )
+ retrieve="  SELECT Shipment.WH_Code,  
+			Shipment.Ship_No, 
+         Shipment.Carrier_Code,   
+         Shipment.Ord_Date,   
+         Shipment.Freight_ETD,   
+         Shipment.Freight_ETA,   
+         Shipment.Pro_No,
+			Shipment.Ord_status, 
+			Shipment.Ord_Type, 
+			Shipment.Awb_bol_no,    
+         O.Name as Origin_Name,   
+         O.City as Origin_City,   
+         O.State as Origin_State,   
+         O.Zip as Origin_Zip,   
+         O.Country as Origin_Country, 
+			D.Name as Dest_Name,   
+         D.City as Dest_City,   
+         D.State as Dest_State,   
+         D.Zip as Dest_Zip,   
+         D.Country as Dest_Country  
+    FROM Shipment,   
+         Shipment_Location  O,
+			Shipment_Location  D
+   WHERE Shipment.Ship_No = O.Ship_No and
+			O.Location_Type = 'O' and    
+			Shipment.Ship_No = D.Ship_No and
+			D.Location_Type = 'D'
+"  sort="shipment_ship_no D " )
+text(band=header alignment="2" text="Warehouse" border="6" color="0" x="955" y="8" height="60" width="370" html.valueishtml="0"  name=shipment_wh_code_t visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="79741120" )
+text(band=header alignment="2" text="Status" border="6" color="0" x="681" y="8" height="60" width="265" html.valueishtml="0"  name=status_t visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="79741120" )
+text(band=header alignment="2" text="Type" border="6" color="0" x="425" y="8" height="60" width="247" html.valueishtml="0"  name=type_t visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="79741120" )
+text(band=header alignment="2" text="AWB BOL Nbr" border="6" color="0" x="9" y="8" height="60" width="407" html.valueishtml="0"  name=awb_bol_nbr_t visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="79741120" )
+text(band=header alignment="2" text="Carrier" border="6" color="0" x="1335" y="8" height="60" width="357" html.valueishtml="0"  name=shipment_carrier_code_t visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="79741120" )
+text(band=header alignment="2" text="Ord Date" border="6" color="0" x="1701" y="8" height="60" width="443" html.valueishtml="0"  name=shipment_ord_date_t visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="79741120" )
+text(band=header alignment="2" text="Freight ETD" border="6" color="0" x="2153" y="8" height="60" width="434" html.valueishtml="0"  name=shipment_freight_etd_t visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="79741120" )
+text(band=header alignment="2" text="Freight ETA" border="6" color="0" x="2597" y="8" height="60" width="434" html.valueishtml="0"  name=shipment_freight_eta_t visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="79741120" )
+text(band=header alignment="2" text="Pro No" border="6" color="0" x="3040" y="8" height="60" width="375" html.valueishtml="0"  name=pro_no_t visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="79741120" )
+text(band=header alignment="2" text="Origin" border="6" color="0" x="3424" y="8" height="60" width="562" html.valueishtml="0"  name=origin_t visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="79741120" )
+text(band=header alignment="2" text="Destination" border="6" color="0" x="3995" y="8" height="60" width="599" html.valueishtml="0"  name=destination_t visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="79741120" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="0" color="0" x="955" y="8" height="56" width="370" format="[general]" html.valueishtml="0"  name=shipment_wh_code visible="1" edit.limit=10 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=10 alignment="0" tabsequence=32766 border="0" color="0" x="9" y="8" height="56" width="407" format="[general]" html.valueishtml="0"  name=shipment_awb_bol_no visible="1" edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=9 alignment="0" tabsequence=32766 border="0" color="0" x="425" y="8" height="56" width="247" format="[general]" html.valueishtml="0"  name=shipment_ord_type visible="1" dddw.name=dddw_shipment_order_type dddw.displaycolumn=ord_type_desc dddw.datacolumn=ord_type dddw.percentwidth=0 dddw.lines=0 dddw.limit=0 dddw.allowedit=no dddw.useasborder=no dddw.case=any  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=8 alignment="0" tabsequence=32766 border="0" color="0" x="681" y="8" height="56" width="265" format="[general]" html.valueishtml="0"  name=shipment_ord_status visible="1" dddw.name=dddw_shipment_order_status dddw.displaycolumn=description dddw.datacolumn=ord_status dddw.percentwidth=0 dddw.lines=0 dddw.limit=0 dddw.allowedit=no dddw.useasborder=no dddw.case=any  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="0" color="0" x="1335" y="8" height="56" width="357" format="[general]" html.valueishtml="0"  name=shipment_carrier_code visible="1" edit.limit=20 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="2" tabsequence=32766 border="0" color="0" x="1701" y="8" height="56" width="443" format="[shortdate] [time]" html.valueishtml="0"  name=shipment_ord_date visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=7 alignment="0" tabsequence=32766 border="0" color="0" x="3040" y="8" height="56" width="375" format="[general]" html.valueishtml="0"  name=shipment_pro_no visible="1" edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="2" tabsequence=32766 border="0" color="0" x="2153" y="8" height="56" width="434" format="[shortdate] [time]" html.valueishtml="0"  name=shipment_freight_etd visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="2" tabsequence=32766 border="0" color="0" x="2597" y="8" height="56" width="434" format="[shortdate] [time]" html.valueishtml="0"  name=shipment_freight_eta visible="1" edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=detail alignment="0" expression=" shipment_location_origin_name + ' - ' +  shipment_location_origin_city + ', ' +  shipment_location_origin_state + ' ' + shipment_location_origin_zip + ' ' +  shipment_location_origin_country "border="0" color="0" x="3424" y="8" height="56" width="562" format="[GENERAL]" html.valueishtml="0"  name=compute_1 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=detail alignment="0" expression=" shipment_location_Dest_name + ' - ' +  shipment_location_Dest_city + ', ' +  shipment_location_Dest_state + ' ' + shipment_location_Dest_zip + ' ' +  shipment_location_Dest_country "border="0" color="0" x="3995" y="8" height="56" width="599" format="[GENERAL]" html.valueishtml="0"  name=compute_2 visible="1"  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" pagingmethod=0 generatedddwframes="1" )
+xhtmlgen() cssgen(sessionspecific="0" )
+xmlgen(inline="0" )
+xsltgen()
+jsgen()
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )
+export.xhtml()
+ 

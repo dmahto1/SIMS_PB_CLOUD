@@ -1,0 +1,13 @@
+sims3.usr.opt
+sims.pbw
+*.png
+*.bmp
+*.JPG
+*.ini
+*.ico
+*.gif
+App/Reports/
+App/labels/
+*.pbd
+App/sims-mww.exe
+App/DuplicateObjectsAnalysis.txt

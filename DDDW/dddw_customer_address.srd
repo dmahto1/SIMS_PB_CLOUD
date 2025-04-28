@@ -1,0 +1,16 @@
+HA$PBExportHeader$dddw_customer_address.srd
+release 7;
+datawindow(units=0 timer_interval=0 color=16777215 processing=1 HTMLDW=no print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.prompt=no print.buttons=no print.preview.buttons=no grid.lines=0 )
+header(height=76 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=80 color="536870912" )
+table(column=(type=char(10) updatewhereclause=yes name=address_code dbname="Customer_Address.Address_Code" )
+ column=(type=char(40) updatewhereclause=yes name=address_1 dbname="Customer_Address.Address_1" )
+ retrieve="PBSELECT( VERSION(400) TABLE(NAME=~"Customer_Address~" ) COLUMN(NAME=~"Customer_Address.Address_Code~") COLUMN(NAME=~"Customer_Address.Address_1~")WHERE(    EXP1 =~"Customer_Address.Project_ID~"   OP =~"=~"    EXP2 =~":a_project~"    LOGIC =~"and~" ) WHERE(    EXP1 =~"Customer_Address.Cust_Code~"   OP =~"=~"    EXP2 =~":a_cust_code~" ) ) ORDER(NAME=~"Customer_Address.Address_Code~" ASC=yes ) ARG(NAME = ~"a_project~" TYPE = string)  ARG(NAME = ~"a_cust_code~" TYPE = string) " arguments=(("a_project", string),("a_cust_code", string)) )
+text(band=header alignment="0" text="Address Code" border="0" color="0" x="9" y="8" height="64" width="517"  name=address_code_t  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="0" color="0" x="9" y="4" height="72" width="517" format="[general]"  name=address_code edit.limit=10 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="Address" border="0" color="0" x="535" y="8" height="64" width="1422"  name=address_1_t  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="0" color="0" x="535" y="4" height="72" width="1422" format="[general]"  name=address_1 edit.limit=40 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" )

@@ -1,0 +1,90 @@
+﻿$PBExportHeader$d_do_soc_serial_tono.srd
+$PBExportComments$- Capture outbound serials
+release 11.5;
+datawindow(units=0 timer_interval=0 color=16777215 brushmode=0 transparency=0 gradient.angle=0 gradient.color=8421504 gradient.focus=0 gradient.repetition.count=0 gradient.repetition.length=100 gradient.repetition.mode=0 gradient.scale=100 gradient.spread=100 gradient.transparency=0 picture.blur=0 picture.clip.bottom=0 picture.clip.left=0 picture.clip.right=0 picture.clip.top=0 picture.mode=0 picture.scale.x=100 picture.scale.y=100 picture.transparency=0 processing=1 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes print.background=no print.preview.background=no print.preview.outline=yes hidegrayline=no showbackcoloronxp=no picture.file="" grid.lines=0 )
+header(height=124 color="536870912" transparency="0" gradient.color="8421504" gradient.transparency="0" gradient.angle="0" brushmode="0" gradient.repetition.mode="0" gradient.repetition.count="0" gradient.repetition.length="100" gradient.focus="0" gradient.scale="100" gradient.spread="100" )
+summary(height=0 color="536870912" transparency="0" gradient.color="8421504" gradient.transparency="0" gradient.angle="0" brushmode="0" gradient.repetition.mode="0" gradient.repetition.count="0" gradient.repetition.length="100" gradient.focus="0" gradient.scale="100" gradient.spread="100" )
+footer(height=16 color="536870912" transparency="0" gradient.color="8421504" gradient.transparency="0" gradient.angle="0" brushmode="0" gradient.repetition.mode="0" gradient.repetition.count="0" gradient.repetition.length="100" gradient.focus="0" gradient.scale="100" gradient.spread="100" )
+detail(height=68 color="536870912" transparency="0" gradient.color="8421504" gradient.transparency="0" gradient.angle="0" brushmode="0" gradient.repetition.mode="0" gradient.repetition.count="0" gradient.repetition.length="100" gradient.focus="0" gradient.scale="100" gradient.spread="100" )
+table(column=(type=char(1) updatewhereclause=yes name=c_select_ind dbname="c_select_Ind" values="	Y/	N" )
+ column=(type=decimal(0) update=yes updatewhereclause=yes key=yes identity=yes name=id_no dbname="Alternate_Serial_Capture.ID_NO" )
+ column=(type=char(50) update=yes updatewhereclause=yes name=sku_parent dbname="Alternate_Serial_Capture.SKU_Parent" )
+ column=(type=char(20) update=yes updatewhereclause=yes name=supp_code_parent dbname="Alternate_Serial_Capture.Supp_Code_Parent" )
+ column=(type=char(50) update=yes updatewhereclause=yes name=alt_sku_parent dbname="Alternate_Serial_Capture.Alt_SKU_Parent" )
+ column=(type=char(50) update=yes updatewhereclause=yes name=serial_no_parent dbname="Alternate_Serial_Capture.Serial_no_Parent" initial=" " )
+ column=(type=decimal(0) update=yes updatewhereclause=yes name=no_of_children_for_parent dbname="Alternate_Serial_Capture.No_of_Children_for_parent" )
+ column=(type=char(50) update=yes updatewhereclause=yes name=sku_child dbname="Alternate_Serial_Capture.SKU_Child" )
+ column=(type=char(20) update=yes updatewhereclause=yes name=supp_code_child dbname="Alternate_Serial_Capture.Supp_Code_Child" )
+ column=(type=char(50) update=yes updatewhereclause=yes name=alt_sku_child dbname="Alternate_Serial_Capture.Alt_SKU_Child" )
+ column=(type=decimal(0) update=yes updatewhereclause=yes name=report_seq_child dbname="Alternate_Serial_Capture.Report_Seq_Child" )
+ column=(type=decimal(0) update=yes updatewhereclause=yes name=total_sku_qty_child dbname="Alternate_Serial_Capture.Total_SKU_Qty_Child" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=missing_item_ind dbname="Alternate_Serial_Capture.Missing_Item_Ind" )
+ column=(type=decimal(0) update=yes updatewhereclause=yes name=total_sku_qty_included dbname="Alternate_Serial_Capture.Total_SKU_Qty_Included" )
+ column=(type=char(16) update=yes updatewhereclause=yes name=ro_no dbname="Alternate_Serial_Capture.Ro_No" )
+ column=(type=char(16) update=yes updatewhereclause=yes name=do_no dbname="Alternate_Serial_Capture.Do_No" )
+ column=(type=datetime update=yes updatewhereclause=yes name=create_date dbname="Alternate_Serial_Capture.Create_Date" )
+ column=(type=datetime update=yes updatewhereclause=yes name=last_update dbname="Alternate_Serial_Capture.Last_Update" )
+ column=(type=char(25) update=yes updatewhereclause=yes name=last_user dbname="Alternate_Serial_Capture.Last_User" )
+ column=(type=char(50) update=yes updatewhereclause=yes name=serial_no_child dbname="Alternate_Serial_Capture.Serial_no_Child" )
+ column=(type=decimal(0) update=yes updatewhereclause=yes name=do_line_item_no dbname="Alternate_Serial_Capture.do_line_item_No" )
+ column=(type=decimal(0) update=yes updatewhereclause=yes name=ro_line_item_no dbname="Alternate_Serial_Capture.ro_line_item_No" )
+ column=(type=char(16) update=yes updatewhereclause=yes name=to_no dbname="Alternate_Serial_Capture.to_no" )
+ column=(type=decimal(0) update=yes updatewhereclause=yes name=to_line_item_no dbname="Alternate_Serial_Capture.to_line_item_no" )
+ column=(type=char(1) updatewhereclause=yes name=datastatus dbname="DATASTATUS" )
+ column=(type=char(50) update=yes updatewhereclause=yes name=sku_substitute dbname="Alternate_Serial_Capture.sku_substitute" )
+ column=(type=char(20) update=yes updatewhereclause=yes name=supplier_substitute dbname="Alternate_Serial_Capture.supplier_substitute" )
+ column=(type=char(7) updatewhereclause=yes name=user_line_item_no dbname="User_Line_Item_No" )
+ retrieve="  SELECT ' ' as c_select_Ind,
+		dbo.Alternate_Serial_Capture.ID_NO,   
+         dbo.Alternate_Serial_Capture.SKU_Parent,   
+         dbo.Alternate_Serial_Capture.Supp_Code_Parent,   
+         dbo.Alternate_Serial_Capture.Alt_SKU_Parent,   
+         dbo.Alternate_Serial_Capture.Serial_no_Parent,   
+         dbo.Alternate_Serial_Capture.No_of_Children_for_parent,   
+         dbo.Alternate_Serial_Capture.SKU_Child,   
+         dbo.Alternate_Serial_Capture.Supp_Code_Child,   
+         dbo.Alternate_Serial_Capture.Alt_SKU_Child,   
+         dbo.Alternate_Serial_Capture.Report_Seq_Child,   
+         dbo.Alternate_Serial_Capture.Total_SKU_Qty_Child,   
+         dbo.Alternate_Serial_Capture.Missing_Item_Ind,   
+         dbo.Alternate_Serial_Capture.Total_SKU_Qty_Included,   
+         dbo.Alternate_Serial_Capture.Ro_No,   
+         dbo.Alternate_Serial_Capture.Do_No,   
+         dbo.Alternate_Serial_Capture.Create_Date,   
+         dbo.Alternate_Serial_Capture.Last_Update,   
+         dbo.Alternate_Serial_Capture.Last_User,   
+         dbo.Alternate_Serial_Capture.Serial_no_Child,   
+         dbo.Alternate_Serial_Capture.do_line_item_No,   
+         dbo.Alternate_Serial_Capture.ro_line_item_No,   
+         dbo.Alternate_Serial_Capture.to_no,
+           dbo.Alternate_Serial_Capture.to_line_item_no, ' ' as DATASTATUS,
+         dbo.Alternate_Serial_Capture.sku_substitute,
+         dbo.Alternate_Serial_Capture.supplier_substitute,
+	    '       ' as User_Line_Item_No 
+    FROM dbo.Alternate_Serial_Capture  
+   WHERE dbo.Alternate_Serial_Capture.To_No = :asToNo  and 
+  	        dbo.Alternate_Serial_Capture.SKU_Parent  			= dbo.Alternate_Serial_Capture.SKU_Child and
+         	dbo.Alternate_Serial_Capture.Supp_Code_Parent  = dbo.Alternate_Serial_Capture.Supp_Code_Child and 
+         	dbo.Alternate_Serial_Capture.Alt_SKU_Parent  	= dbo.Alternate_Serial_Capture.Alt_SKU_Child and 
+        	dbo.Alternate_Serial_Capture.Serial_No_Parent  		= dbo.Alternate_Serial_Capture.Serial_No_Child 
+
+	" update="dbo.Alternate_Serial_Capture" updatewhere=0 updatekeyinplace=yes arguments=(("asToNo", string))  sort="supp_code_parent A sku_parent A serial_no_parent A " )
+text(band=header alignment="2" text="Parent SKU" border="6" color="0" x="123" y="8" height="112" width="741" html.valueishtml="0"  name=sku_parent_1_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+text(band=header alignment="2" text="" border="6" color="0" x="5" y="8" height="112" width="110" html.valueishtml="0"  name=c_select_ind_1_t visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" background.transparency="0" background.gradient.color="0" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="0" background.gradient.focus="0" background.gradient.scale="0" background.gradient.spread="0" tooltip.backcolor="0" tooltip.delay.initial="0" tooltip.delay.visible="0" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="0" tooltip.transparency="0" transparency="0" )
+text(band=header alignment="2" text="Parent  Serial No" border="6" color="0" x="873" y="8" height="112" width="777" html.valueishtml="0"  name=serial_no_parent_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+text(band=header alignment="2" text="To Line Item No" border="6" color="0" x="1659" y="8" height="112" width="411" html.valueishtml="0"  name=to_line_item_no_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" background.transparency="0" background.gradient.color="0" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="0" background.gradient.focus="0" background.gradient.scale="0" background.gradient.spread="0" tooltip.backcolor="0" tooltip.delay.initial="0" tooltip.delay.visible="0" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="0" tooltip.transparency="0" transparency="0" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="5" color="0" x="128" y="12" height="56" width="736" format="[general]" html.valueishtml="0"  name=sku_parent visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+column(band=detail id=6 alignment="0" tabsequence=10 border="5" color="0" x="878" y="12" height="56" width="773" format="[general]" html.valueishtml="0"  name=serial_no_parent visible="1" edit.limit=0 edit.case=upper edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+column(band=detail id=24 alignment="0" tabsequence=60 border="5" color="0" x="1664" y="12" height="56" width="407" format="[general]" html.valueishtml="0" protect="0~t1"  name=to_line_item_no visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+column(band=detail id=1 alignment="0" tabsequence=50 border="0" color="0" x="9" y="12" height="56" width="105" format="[general]" html.valueishtml="0" protect="0~t1"  name=c_select_ind visible="1" checkbox.text="" checkbox.on="Y" checkbox.off="N" checkbox.scale=no checkbox.threed=yes  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" pagingmethod=0 generatedddwframes="1" )
+xhtmlgen() cssgen(sessionspecific="0" )
+xmlgen(inline="0" )
+xsltgen()
+jsgen()
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )
+export.xhtml()
+ 

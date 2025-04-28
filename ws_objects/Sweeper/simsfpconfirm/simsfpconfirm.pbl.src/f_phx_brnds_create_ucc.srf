@@ -1,0 +1,39 @@
+﻿$PBExportHeader$f_phx_brnds_create_ucc.srf
+global type f_phx_brnds_create_ucc from function_object
+end type
+
+forward prototypes
+global function string f_phx_brnds_create_ucc (string arg_unique_ucc)
+end prototypes
+
+global function string f_phx_brnds_create_ucc (string arg_unique_ucc);
+//Function needs work. Just a temp to get out.
+
+string ls_ucc
+
+
+string lsUccCarton
+
+
+
+string ls_check_digit, ls_rtn_digit, lsUccCarton_View, ls_carton
+
+// TAM 11/12/04 Emergancy fix?
+//ls_check_digit = "00885967" + arg_unique_ucc
+//ls_carton = fill('0', (4 - len(trim(arg_unique_ucc)))) + arg_unique_ucc 
+ls_carton = String(Long(arg_unique_ucc),'000000000')
+
+ls_check_digit = "00885967"  + Right(ls_carton,9)
+
+ls_rtn_digit = string(f_calc_uccs_check_Digit(ls_check_digit))
+
+// TAM 11/12/04 Emergancy fix?
+lsUccCarton = "00" + ls_check_digit + ls_rtn_digit
+//lsUccCarton =  ls_check_digit + ls_rtn_digit 
+
+//right(string(today(),"YYYY"),1) + string(today(),"MM") + string(today(),"DD") + string(li_inc_number, "0000") 
+
+return lsUccCarton
+
+end function
+

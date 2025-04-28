@@ -1,0 +1,110 @@
+HA$PBExportHeader$d_pandora_open_rma_po_receipt_report.srd
+release 11;
+datawindow(units=0 timer_interval=0 color=16777215 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes print.preview.outline=yes hidegrayline=no showbackcoloronxp=no )
+header(height=136 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=84 color="536870912" )
+table(column=(type=char(10) updatewhereclause=yes name=date dbname="Date" )
+ column=(type=char(30) updatewhereclause=yes name=po_number dbname="PO_Number" )
+ column=(type=char(50) updatewhereclause=yes name=sku dbname="SKU" )
+ column=(type=char(50) updatewhereclause=yes name=manufacturer_part_number dbname="Manufacturer_Part_Number" )
+ column=(type=char(70) updatewhereclause=yes name=part_description dbname="Part_Description" )
+ column=(type=char(20) updatewhereclause=yes name=rma_number dbname="RMA_Number" )
+ column=(type=char(255) updatewhereclause=yes name=vendor dbname="Vendor" )
+ column=(type=char(20) updatewhereclause=yes name=ship_to_location dbname="Ship_To_Location" )
+ column=(type=decimal(5) updatewhereclause=yes name=rma_quantity dbname="RMA Quantity" )
+ column=(type=decimal(5) updatewhereclause=yes name=rma_received_from_vendor dbname="RMA Received from Vendor" )
+ column=(type=decimal(5) updatewhereclause=yes identity=yes name=due dbname="Due" )
+ column=(type=decimal(4) updatewhereclause=yes identity=yes name=cost dbname="Cost" )
+ column=(type=long updatewhereclause=yes identity=yes name=days_outstanding dbname="Days_Outstanding" )
+ column=(type=char(30) updatewhereclause=yes name=disposition dbname="Disposition" )
+ column=(type=char(10) updatewhereclause=yes name=cust_code dbname="Cust_Code" )
+ column=(type=char(60) updatewhereclause=yes name=cust_name dbname="Cust_Name" )
+ column=(type=char(20) updatewhereclause=yes name=owner_cd dbname="Owner_CD" )
+ column=(type=char(30) updatewhereclause=yes name=inv_type_desc dbname="Inv_Type_Desc" )
+ retrieve="SELECT  CONVERT(VARCHAR(10), Receive_Master.ord_date, 101)  As 'Date',   
+	Receive_Master.Supp_Invoice_No As 'PO_Number' ,    
+	Receive_Detail.SKU as 'SKU', 
+	Receive_Detail.alternate_sku as 'Manufacturer_Part_Number',
+	Item_Master.Description as 'Part_Description',
+	Receive_Master.User_Field4 as 'RMA_Number',
+	Receive_Master.User_Field9 as 'Vendor',
+	Owner.Owner_cd as 'Ship_To_Location',
+	Receive_Detail.req_qty 'RMA Quantity',       
+	Receive_Detail.alloc_qty 'RMA Received from Vendor' , 
+	(ISNULL(Receive_Detail.req_qty,0) - ISNULL(Receive_Detail.alloc_qty,0)) as 'Due', 
+	(IsNull((SELECT Price_1  FROM Customer Cus, Price_Master WHERE Cus.Cust_Code = Owner.Owner_Cd AND Price_Master.Sku = Receive_Detail.SKU AND Price_Master.Supp_Code = Receive_Detail.Supp_Code  AND Price_Master.Price_Class = Cus.User_Field3 AND Price_Master.Project_ID = Receive_Master.Project_ID  ), IsNull((SELECT Max(Price_1)  FROM Customer Cus, Price_Master WHERE Cus.Cust_Code = Owner.Owner_Cd AND Price_Master.Sku = Receive_Detail.SKU AND Price_Master.Supp_Code = Receive_Detail.Supp_Code  AND Price_Master.Project_ID = Receive_Master.Project_ID AND (Price_Master.Price_Class = 'ZGA' OR Price_Master.Price_Class = 'ZNL' )), (SELECT Max(Price_1)  FROM Customer Cus, Price_Master WHERE Cus.Cust_Code = Owner.Owner_Cd AND Price_Master.Sku = Receive_Detail.SKU AND Price_Master.Supp_Code = Receive_Detail.Supp_Code  AND Price_Master.Project_ID = Receive_Master.Project_ID AND (Left(Price_Master.Price_Class,1) = 'Z')))))  as 'Cost',
+	DateDiff(dd, Receive_Master.Putaway_Start_time, (SELECT Max(Complete_Date) FROM Delivery_Master WHERE Receive_Master.User_Field4 = Delivery_Master.User_Field4 AND Delivery_Master.Project_ID = 'PANDORA' )) as  'Days_Outstanding',
+	Receive_Order_Type.Ord_Type_Desc as 'Disposition',
+	Receive_Master.User_Field3 As Cust_Code,
+	Customer.Cust_Name As Cust_Name,
+	Owner.Owner_cd As Owner_CD,
+	Inventory_Type.Inv_Type_Desc
+
+FROM Customer  (nolock) RIGHT JOIN Receive_Master (nolock) ON Customer.Project_ID = Receive_Master.Project_ID
+		AND Customer.Cust_Code = Receive_Master.User_Field3
+	INNER JOIN Receive_Detail (nolock) ON Receive_Master.RO_No = Receive_Detail.RO_No
+	INNER JOIN Owner (nolock) ON Owner.Owner_ID = Receive_Detail.Owner_ID 
+	INNER JOIN Item_Master (nolock) ON REceive_Detail.SKU = Item_Master.SKU
+		AND REceive_Detail.Supp_Code = Item_Master.Supp_Code
+	INNER JOIN Inventory_Type (nolock) ON Receive_Master.inventory_type = Inventory_Type.Inv_Type
+	INNER JOIN Receive_Order_Type (nolock) ON Receive_Master.Ord_Type = Receive_Order_Type.Ord_Type
+WHERE ( Receive_Master.project_id = 'PANDORA') AND
+	( Receive_Master.ord_status <> 'C' AND Receive_Master.ord_status <> 'V' ) AND
+	( Inventory_Type.project_id = 'PANDORA') AND
+	( Left(Receive_Master.Supp_Invoice_No,3) = 'RMA') AND
+	( Receive_Order_Type.project_id = 'PANDORA') 
+ORDER BY Receive_Master.ord_date, 
+	Receive_Master.Supp_Invoice_No;
+
+
+
+" )
+text(band=header alignment="2" text="Date" border="0" color="33554432" x="5" y="4" height="64" width="302" html.valueishtml="0"  name=date_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Po Number" border="0" color="33554432" x="311" y="4" height="64" width="850" html.valueishtml="0"  name=po_number_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Sku" border="0" color="33554432" x="1166" y="4" height="64" width="1399" html.valueishtml="0"  name=sku_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Manufacturer Part Number" border="0" color="33554432" x="2569" y="4" height="64" width="1399" html.valueishtml="0"  name=manufacturer_part_number_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Part Description" border="0" color="33554432" x="3977" y="4" height="64" width="1943" html.valueishtml="0"  name=part_description_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Rma Number" border="0" color="33554432" x="5929" y="4" height="64" width="576" html.valueishtml="0"  name=rma_number_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Vendor" border="0" color="33554432" x="6510" y="4" height="64" width="4389" html.valueishtml="0"  name=vendor_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Ship To Location" border="0" color="33554432" x="10903" y="4" height="64" width="576" html.valueishtml="0"  name=ship_to_location_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Rma Quantity" border="0" color="33554432" x="11483" y="4" height="64" width="366" html.valueishtml="0"  name=rma_quantity_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Rma Received From Vendor" border="0" color="33554432" x="11854" y="4" height="64" width="741" html.valueishtml="0"  name=rma_received_from_vendor_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Due" border="0" color="33554432" x="12599" y="4" height="64" width="329" html.valueishtml="0"  name=due_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Cost" border="0" color="33554432" x="12933" y="4" height="64" width="329" html.valueishtml="0"  name=cost_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Days Outstanding" border="0" color="33554432" x="13266" y="4" height="64" width="475" html.valueishtml="0"  name=days_outstanding_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Disposition" border="0" color="33554432" x="13746" y="4" height="64" width="850" html.valueishtml="0"  name=disposition_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Cust Code" border="0" color="33554432" x="14601" y="4" height="64" width="302" html.valueishtml="0"  name=cust_code_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Cust Name" border="0" color="33554432" x="14907" y="4" height="64" width="1125" html.valueishtml="0"  name=cust_name_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Owner Cd" border="0" color="33554432" x="16041" y="4" height="64" width="576" html.valueishtml="0"  name=owner_cd_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Inv Type Desc" border="0" color="33554432" x="16622" y="4" height="64" width="850" html.valueishtml="0"  name=inv_type_desc_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="0" color="33554432" x="5" y="4" height="76" width="302" format="[general]" html.valueishtml="0"  name=date visible="1" edit.limit=10 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="0" color="33554432" x="311" y="4" height="76" width="850" format="[general]" html.valueishtml="0"  name=po_number visible="1" edit.limit=30 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="0" color="33554432" x="1166" y="4" height="76" width="1399" format="[general]" html.valueishtml="0"  name=sku visible="1" edit.limit=50 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="0" color="33554432" x="2569" y="4" height="76" width="1399" format="[general]" html.valueishtml="0"  name=manufacturer_part_number visible="1" edit.limit=50 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="0" tabsequence=32766 border="0" color="33554432" x="3977" y="4" height="76" width="1943" format="[general]" html.valueishtml="0"  name=part_description visible="1" edit.limit=70 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="0" tabsequence=32766 border="0" color="33554432" x="5929" y="4" height="76" width="576" format="[general]" html.valueishtml="0"  name=rma_number visible="1" edit.limit=20 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=7 alignment="0" tabsequence=32766 border="0" color="33554432" x="6510" y="4" height="76" width="4389" format="[general]" html.valueishtml="0"  name=vendor visible="1" edit.limit=255 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=8 alignment="0" tabsequence=32766 border="0" color="33554432" x="10903" y="4" height="76" width="576" format="[general]" html.valueishtml="0"  name=ship_to_location visible="1" edit.limit=20 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=9 alignment="1" tabsequence=32766 border="0" color="33554432" x="11483" y="4" height="76" width="329" format="[general]" html.valueishtml="0"  name=rma_quantity visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=10 alignment="1" tabsequence=32766 border="0" color="33554432" x="11854" y="4" height="76" width="329" format="[general]" html.valueishtml="0"  name=rma_received_from_vendor visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=11 alignment="1" tabsequence=32766 border="0" color="33554432" x="12599" y="4" height="76" width="329" format="[general]" html.valueishtml="0"  name=due visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=12 alignment="1" tabsequence=32766 border="0" color="33554432" x="12933" y="4" height="76" width="329" format="[general]" html.valueishtml="0"  name=cost visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=13 alignment="1" tabsequence=32766 border="0" color="33554432" x="13266" y="4" height="76" width="329" format="[general]" html.valueishtml="0"  name=days_outstanding visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=14 alignment="0" tabsequence=32766 border="0" color="33554432" x="13746" y="4" height="76" width="850" format="[general]" html.valueishtml="0"  name=disposition visible="1" edit.limit=30 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=15 alignment="0" tabsequence=32766 border="0" color="33554432" x="14601" y="4" height="76" width="302" format="[general]" html.valueishtml="0"  name=cust_code visible="1" edit.limit=10 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=16 alignment="0" tabsequence=32766 border="0" color="33554432" x="14907" y="4" height="76" width="1125" format="[general]" html.valueishtml="0"  name=cust_name visible="1" edit.limit=40 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=17 alignment="0" tabsequence=32766 border="0" color="33554432" x="16041" y="4" height="76" width="576" format="[general]" html.valueishtml="0"  name=owner_cd visible="1" edit.limit=20 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=18 alignment="0" tabsequence=32766 border="0" color="33554432" x="16622" y="4" height="76" width="850" format="[general]" html.valueishtml="0"  name=inv_type_desc visible="1" edit.limit=30 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" pagingmethod=0 generatedddwframes="1" )
+xhtmlgen() cssgen(sessionspecific="0" )
+xmlgen(inline="0" )
+xsltgen()
+jsgen()
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )
+export.xhtml()
+ 

@@ -1,0 +1,35 @@
+﻿$PBExportHeader$f_serial_number_exists.srf
+global type f_serial_number_exists from function_object
+end type
+
+forward prototypes
+global function any f_serial_number_exists (any apserparms)
+end prototypes
+
+global function any f_serial_number_exists (any apserparms);//GailM 10/22/2019 S37769 - Footprints GPN Conversion Process - Added check by po_no2 and carton Id
+Str_parms	ipSerParms
+String lsSerialNo, lsWhCode, lsLocation, lsSKU, lsPoNo2, lsCartonId
+
+ipSerParms = apSerParms
+lsSerialNo = ipSerParms.String_Arg[1]
+
+select wh_code, l_code, sku, po_no2, carton_id 
+into :lsWhCode, :lsLocation, :lsSKU, :lsPoNo2, :lsCartonId
+from serial_number_inventory with (nolock) 
+where serial_no = :lsSerialNo 
+using sqlca;
+
+If IsNull(lsWhCode) or lsWhCode = '' Then
+	ipSerParms.Long_Arg[1] = 0
+Else
+	ipSerParms.Long_Arg[1] = 1
+	ipSerParms.String_Arg[2] = lsWhCode
+	ipSerParms.String_Arg[3] = lsLocation
+	ipSerParms.String_Arg[4] = lsSKU
+	ipSerParms.String_Arg[5] = lsPoNo2
+	ipSerParms.String_Arg[6] = lsCartonId
+End If
+
+return ipSerParms
+end function
+

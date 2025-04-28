@@ -1,0 +1,148 @@
+HA$PBExportHeader$f_epson_create_ucc.srf
+global type f_epson_create_ucc from function_object
+end type
+
+forward prototypes
+global function string f_epson_create_ucc (string arg_unique_ucc)
+global function string f_epson_create_ucc (boolean arg_is_pallet_order, boolean arg_is_package, string arg_ucc_prefix, string arg_unique_ucc, ref string arg_carton)
+end prototypes
+
+global function string f_epson_create_ucc (string arg_unique_ucc);
+//Function needs work. Just a temp to get out.
+
+string ls_ucc
+
+
+string lsUccCarton
+
+
+
+string ls_check_digit, ls_rtn_digit, lsUccCarton_View, ls_carton
+
+// TAM 11/12/04 Emergancy fix?
+//ls_check_digit = "00885967" + arg_unique_ucc
+//ls_carton = fill('0', (4 - len(trim(arg_unique_ucc)))) + arg_unique_ucc 
+ls_carton = String(Long(arg_unique_ucc),'000000000')
+
+ls_check_digit = "00885967" +  Right(ls_carton,9)
+
+ls_rtn_digit = string(f_calc_uccs_check_Digit(ls_check_digit))
+
+// TAM 11/12/04 Emergancy fix?
+lsUccCarton = "00" + ls_check_digit + ls_rtn_digit
+//lsUccCarton =  ls_check_digit + ls_rtn_digit 
+
+//right(string(today(),"YYYY"),1) + string(today(),"MM") + string(today(),"DD") + string(li_inc_number, "0000") 
+
+return lsUccCarton
+
+end function
+
+global function string f_epson_create_ucc (boolean arg_is_pallet_order, boolean arg_is_package, string arg_ucc_prefix, string arg_unique_ucc, ref string arg_carton);
+////Function needs work. Just a temp to get out.
+//
+//string ls_ucc
+//
+//
+//string lsUccCarton
+//
+//
+//
+//string ls_check_digit, ls_rtn_digit, lsUccCarton_View, ls_carton
+//
+//IF not isnull(arg_ucc_prefix) and trim(arg_ucc_prefix) <> '' THEN
+//
+//	// TAM 11/12/04 Emergancy fix?
+//	//ls_check_digit = "00885967" + arg_unique_ucc
+//	//ls_carton = fill('0', (4 - len(trim(arg_unique_ucc)))) + arg_unique_ucc 
+//	ls_carton = String(Long(Right(arg_unique_ucc,6)),'000000')
+//	
+//	MessageBox ("ok", ls_carton)
+//	
+//	ls_check_digit = arg_ucc_prefix + ls_carton
+//	
+//	ls_rtn_digit = string(f_calc_uccs_check_Digit(ls_check_digit))
+//	
+//	// TAM 11/12/04 Emergancy fix?
+//	lsUccCarton = "00" + ls_check_digit + ls_rtn_digit
+//	//lsUccCarton =  ls_check_digit + ls_rtn_digit 
+//	
+//	//right(string(today(),"YYYY"),1) + string(today(),"MM") + string(today(),"DD") + string(li_inc_number, "0000") 
+//
+//ELSE
+//	
+//	
+//	ls_carton = String(Long(arg_unique_ucc),'000000000')
+//
+//	ls_check_digit = "00885967" +  Right(ls_carton,9)
+//	
+//	ls_rtn_digit = string(f_calc_uccs_check_Digit(ls_check_digit))
+//
+//	lsUccCarton = "00" + ls_check_digit + ls_rtn_digit
+//
+//	
+//END IF
+//
+//
+//
+//return lsUccCarton
+//
+
+
+//Function needs work. Just a temp to get out.
+
+string ls_ucc
+
+
+string lsUccCarton
+
+decimal ldBatchSeq
+
+string ls_check_digit, ls_rtn_digit, lsUccCarton_View, ls_carton
+string ls_header
+
+// TAM 11/12/04 Emergancy fix?
+//ls_check_digit = "00885967" + arg_unique_ucc
+//ls_carton = fill('0', (4 - len(trim(arg_unique_ucc)))) + arg_unique_ucc 
+ls_carton = String(Long(arg_unique_ucc),'000000000')
+
+//ls_check_digit = "00885967" +  Right(ls_carton,9)
+
+
+
+if arg_is_pallet_order then
+	ls_header = "10885967"
+else
+	ls_header = "00885967"
+end if
+
+
+if not arg_is_package then
+
+	ls_check_digit =  ls_header +  Right(ls_carton,9)
+
+else
+
+	ldBatchSeq = g.of_next_db_seq(gs_project,'Partial_Pallet','SSCC')
+
+	ls_carton = String(Long(ldBatchSeq),'000000000')
+
+	ls_check_digit = ls_header +  Right(ls_carton,9)
+
+	arg_carton = ls_carton
+	
+end if
+
+
+ls_rtn_digit = string(f_calc_uccs_check_Digit(ls_check_digit))
+
+// TAM 11/12/04 Emergancy fix?
+lsUccCarton = "00" + ls_check_digit + ls_rtn_digit
+//lsUccCarton =  ls_check_digit + ls_rtn_digit 
+
+//right(string(today(),"YYYY"),1) + string(today(),"MM") + string(today(),"DD") + string(li_inc_number, "0000") 
+
+return lsUccCarton
+
+end function
+

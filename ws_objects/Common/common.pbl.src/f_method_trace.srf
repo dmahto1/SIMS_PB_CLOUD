@@ -1,0 +1,21 @@
+﻿$PBExportHeader$f_method_trace.srf
+global type f_method_trace from function_object
+end type
+
+forward prototypes
+global function long f_method_trace (ref long al_trans_id, string as_object_name, string as_method_desc)
+end prototypes
+
+global function long f_method_trace (ref long al_trans_id, string as_object_name, string as_method_desc);long		ll_trans_id
+
+IF gb_sqlca_connected = TRUE THEN
+
+	ll_trans_id = Sqlca.sp_method_trace_log_upd( al_trans_id, gs_project, gs_userid, as_object_name, as_method_desc )
+	
+END IF
+
+al_trans_id = ll_trans_id
+
+RETURN ll_trans_id
+end function
+

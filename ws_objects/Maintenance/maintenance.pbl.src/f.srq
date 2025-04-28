@@ -1,0 +1,2 @@
+﻿$PBExportHeader$f.srq
+PBSELECT( VERSION(400) TABLE(NAME="dbo.Lookup_Table" ) COLUMN(NAME="dbo.Lookup_Table.Project_Id") COLUMN(NAME="dbo.Lookup_Table.Code_Type") COLUMN(NAME="dbo.Lookup_Table.Code_Id") COLUMN(NAME="dbo.Lookup_Table.Code_Descript") COLUMN(NAME="dbo.Lookup_Table.User_Updateable_Ind") COLUMN(NAME="dbo.Lookup_Table.User_Field1") COLUMN(NAME="dbo.Lookup_Table.User_Field2") COLUMN(NAME="dbo.Lookup_Table.User_Field3")WHERE(    EXP1 ="dbo.Lookup_Table.Code_Type"   OP ="="    EXP2 =":code_type" ) ) ARG(NAME = "code_type" TYPE = string) 

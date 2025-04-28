@@ -1,0 +1,71 @@
+HA$PBExportHeader$d_comcast_eis_error_visibility_rpt.srd
+release 11;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=1 HTMLDW=no print.printername="" print.documentname="" print.orientation = 1 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes print.preview.outline=yes hidegrayline=no showbackcoloronxp=no grid.lines=0 )
+header(height=144 color="536870912" )
+summary(height=80 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=80 color="536870912" )
+table(column=(type=char(3) updatewhereclause=yes name=tran_type dbname="Tran_Type" )
+ column=(type=char(6) updatewhereclause=yes name=site_id dbname="Site_Id" )
+ column=(type=datetime updatewhereclause=yes name=last_update dbname="Last_Update" )
+ column=(type=char(40) updatewhereclause=yes name=ref_nbr dbname="Ref_Nbr" )
+ column=(type=char(15) updatewhereclause=yes name=tran_nbr dbname="Tran_Nbr" )
+ column=(type=char(1) updatewhereclause=yes name=detail_type dbname="Detail_Type" )
+ column=(type=char(3) updatewhereclause=yes name=result_cd dbname="Result_Cd" )
+ column=(type=decimal(0) updatewhereclause=yes name=total_tran_cnt dbname="Total_Tran_Cnt" )
+ column=(type=decimal(0) updatewhereclause=yes name=success_tran_cnt dbname="Success_Tran_Cnt" )
+ column=(type=decimal(0) updatewhereclause=yes name=fail_tran_cnt dbname="Fail_tran_Cnt" )
+ column=(type=char(100) updatewhereclause=yes name=result_msg dbname="Result_Msg" )
+ column=(type=char(50) updatewhereclause=yes name=serial_no dbname="Serial_No" )
+ retrieve=" SELECT Distinct  Tran_Type,
+				Site_Id, 
+				Last_Update,
+				Ref_Nbr,
+				Tran_Nbr,   
+				Detail_Type,
+				Result_Cd,   
+				Total_Tran_Cnt,
+				Success_Tran_Cnt, 
+				Fail_tran_Cnt, 
+				Result_Msg,   
+				Serial_No
+    FROM 	Comcast_EIS_Results   
+"  sort="last_update A ref_nbr A tran_nbr A serial_no A " )
+text(band=header alignment="2" text="LastUpdate" border="6" color="33554432" x="599" y="8" height="128" width="530" html.valueishtml="0"  name=last_update_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="RefNbr" border="6" color="33554432" x="1143" y="8" height="128" width="389" html.valueishtml="0"  name=ref_nbr_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="TranNbr" border="6" color="33554432" x="1545" y="8" height="128" width="366" html.valueishtml="0"  name=tran_nbr_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="DetailType" border="6" color="0" x="1925" y="8" height="128" width="325" html.valueishtml="0"  name=detail_type_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="ResultCd" border="6" color="33554432" x="2258" y="8" height="128" width="270" html.valueishtml="0"  name=result_cd_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Result Message" border="6" color="33554432" x="3447" y="8" height="128" width="1093" html.valueishtml="0"  name=result_msg_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="SerialNBR" border="6" color="33554432" x="4549" y="8" height="128" width="608" html.valueishtml="0"  name=serial_no_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="TotalTrans" border="6" color="33554432" x="2537" y="8" height="128" width="256" html.valueishtml="0"  name=total_tran_cnt_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="SuccessfulTrans" border="6" color="33554432" x="2802" y="8" height="128" width="393" html.valueishtml="0"  name=success_tran_cnt_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="FailedTrans" border="6" color="33554432" x="3205" y="8" height="128" width="247" html.valueishtml="0"  name=fail_tran_cnt_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="0" color="33554432" x="599" y="8" height="64" width="530" format="[shortdate] [time]" html.valueishtml="0"  name=last_update visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="0" color="33554432" x="1143" y="8" height="64" width="389" format="[general]" html.valueishtml="0"  name=ref_nbr visible="1" edit.limit=40 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="0" tabsequence=32766 border="0" color="33554432" x="1545" y="8" height="64" width="366" format="[general]" html.valueishtml="0"  name=tran_nbr visible="1" edit.limit=15 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="0" tabsequence=32766 border="0" color="33554432" x="1929" y="8" height="64" width="320" format="[general]" html.valueishtml="0"  name=detail_type visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=11 alignment="0" tabsequence=32766 border="0" color="33554432" x="3451" y="8" height="64" width="1088" format="[general]" html.valueishtml="0"  name=result_msg visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=12 alignment="0" tabsequence=32766 border="0" color="33554432" x="4553" y="8" height="64" width="603" format="[general]" html.valueishtml="0"  name=serial_no visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=7 alignment="0" tabsequence=32766 border="0" color="33554432" x="2263" y="8" height="64" width="265" format="[general]" html.valueishtml="0"  name=result_cd visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=8 alignment="1" tabsequence=32766 border="0" color="33554432" x="2542" y="8" height="64" width="251" format="[general]" html.valueishtml="0"  name=total_tran_cnt visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=9 alignment="1" tabsequence=32766 border="0" color="33554432" x="2807" y="8" height="64" width="389" format="[general]" html.valueishtml="0"  name=success_tran_cnt visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=10 alignment="1" tabsequence=32766 border="0" color="33554432" x="3209" y="8" height="64" width="242" format="[general]" html.valueishtml="0"  name=fail_tran_cnt visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=summary alignment="1" expression="sum(total_tran_cnt for all)"border="0" color="33554432" x="2537" y="4" height="64" width="256" format="[general]" html.valueishtml="0"  name=compute_1 visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=summary alignment="1" expression="sum(success_tran_cnt for all)"border="0" color="33554432" x="2802" y="4" height="64" width="393" format="[general]" html.valueishtml="0"  name=compute_2 visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=summary alignment="1" expression="sum(fail_tran_cnt for all)"border="0" color="33554432" x="3205" y="4" height="64" width="247" format="[general]" html.valueishtml="0"  name=compute_3 visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=1 alignment="0" tabsequence=0 border="0" color="33554432" x="9" y="8" height="64" width="219" format="[General]" html.valueishtml="0"  name=tran_type visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="TranType" border="6" color="33554432" x="5" y="8" height="128" width="224" html.valueishtml="0"  name=tran_type_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+column(band=detail id=2 alignment="0" tabsequence=0 border="0" color="33554432" x="242" y="8" height="64" width="347" format="[General]" html.valueishtml="0"  name=site_id visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="SiteId" border="6" color="33554432" x="238" y="8" height="128" width="352" html.valueishtml="0"  name=site_id_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" pagingmethod=0 generatedddwframes="1" )
+xhtmlgen() cssgen(sessionspecific="0" )
+xmlgen(inline="0" )
+xsltgen()
+jsgen()
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )
+export.xhtml()
+ 

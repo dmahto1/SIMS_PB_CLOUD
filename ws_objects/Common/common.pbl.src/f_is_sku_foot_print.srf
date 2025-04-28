@@ -1,0 +1,28 @@
+﻿$PBExportHeader$f_is_sku_foot_print.srf
+global type f_is_sku_foot_print from function_object
+end type
+
+forward prototypes
+global function boolean f_is_sku_foot_print (string assku, string assuppcode)
+end prototypes
+
+global function boolean f_is_sku_foot_print (string assku, string assuppcode);
+
+//10SEPT-2018 :MEA S23046 F9270 - I1304 - Google - SIMS Footprints Containerization - Outbound
+//Use Foot_Prints_Ind Flag - Added Function to check
+
+string ls_Foot_Prints_Ind
+
+SELECT Foot_Prints_Ind
+INTO :ls_Foot_Prints_Ind
+FROM  Item_Master with(nolock) 
+WHERE Project_Id =:gs_project and sku= :assku and supp_code=:assuppcode
+using SQLCA;
+
+If upper(ls_Foot_Prints_Ind) ='Y' Then
+	Return True
+Else
+	Return False
+End IF
+end function
+

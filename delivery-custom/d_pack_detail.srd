@@ -1,0 +1,60 @@
+HA$PBExportHeader$d_pack_detail.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=16777215 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=84 color="536870912" )
+table(column=(type=char(20) updatewhereclause=yes name=delivery_master_user_field6 dbname="user_field6" )
+ column=(type=char(50) updatewhereclause=yes name=delivery_master_invoice_no dbname="invoice_no" )
+ column=(type=decimal(0) updatewhereclause=yes name=delivery_detail_line_item_no dbname="line_item_no" )
+ column=(type=char(50) updatewhereclause=yes name=delivery_detail_sku dbname="sku" )
+ column=(type=char(50) updatewhereclause=yes name=alternate_sku dbname="alternate_sku" )
+ column=(type=decimal(5) updatewhereclause=yes name=delivery_detail_req_qty dbname="req_qty" )
+ column=(type=decimal(5) updatewhereclause=yes name=delivery_detail_alloc_qty dbname="alloc_qty" )
+ column=(type=char(30) updatewhereclause=yes name=delivery_detail_user_field8 dbname="user_field8" )
+ column=(type=char(30) updatewhereclause=yes name=delivery_detail_user_field5 dbname="user_field5" )
+ column=(type=char(30) updatewhereclause=yes name=delivery_detail_user_field3 dbname="user_field3" )
+ column=(type=char(30) updatewhereclause=yes name=delivery_detail_user_field6 dbname="user_field6" )
+ column=(type=char(30) updatewhereclause=yes name=delivery_detail_user_field4 dbname="user_field4" )
+ column=(type=char(30) updatewhereclause=yes name=delivery_detail_user_field7 dbname="user_field7" )
+ column=(type=char(20) updatewhereclause=yes name=delivery_detail_user_field1 dbname="user_field1" )
+ column=(type=char(16) updatewhereclause=yes name=delivery_detail_do_no dbname="do_no" )
+ retrieve="SELECT  delivery_master.user_field6 ,
+           delivery_master.invoice_no ,
+           delivery_detail.line_item_no ,
+           delivery_detail.sku ,
+			  delivery_detail.alternate_sku ,
+           delivery_detail.req_qty ,
+           delivery_detail.alloc_qty ,
+           delivery_detail.user_field8 ,
+           delivery_detail.user_field5 ,
+           delivery_detail.user_field3 ,
+           delivery_detail.user_field6 ,
+           delivery_detail.user_field4 ,
+           delivery_detail.user_field7 ,
+				delivery_detail.user_field1, 
+           delivery_detail.do_no     
+        FROM delivery_master ,
+           delivery_detail     
+        WHERE ( delivery_detail.do_no = delivery_master.do_no ) and          ( ( delivery_master.project_id = 'GM_MI_DAT'  ) and          ( delivery_master.do_no = :do_no ) ) 
+        ORDER BY delivery_detail.line_item_no          ASC  " arguments=(("do_no", string)) )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="0" color="0" x="471" y="0" height="76" width="640" format="[general]" html.valueishtml="0"  name=delivery_master_user_field6 visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-12" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="0" color="0" x="1111" y="0" height="76" width="640" format="[general]" html.valueishtml="0"  name=delivery_master_invoice_no visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-12" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="0" color="0" x="1751" y="0" height="76" width="1376" format="[general]" html.valueishtml="0"  name=delivery_detail_line_item_no visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-12" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="0" color="0" x="3127" y="0" height="76" width="1600" format="[general]" html.valueishtml="0"  name=delivery_detail_sku visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-12" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=6 alignment="0" tabsequence=32766 border="0" color="0" x="4727" y="0" height="76" width="1376" format="[general]" html.valueishtml="0"  name=delivery_detail_req_qty visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-12" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=7 alignment="0" tabsequence=32766 border="0" color="0" x="6103" y="0" height="76" width="1376" format="[general]" html.valueishtml="0"  name=delivery_detail_alloc_qty visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-12" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=8 alignment="0" tabsequence=32766 border="0" color="0" x="7479" y="0" height="76" width="960" format="[general]" html.valueishtml="0"  name=delivery_detail_user_field8 visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-12" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=9 alignment="0" tabsequence=32766 border="0" color="0" x="8439" y="0" height="76" width="960" format="[general]" html.valueishtml="0"  name=delivery_detail_user_field5 visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-12" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=10 alignment="0" tabsequence=32766 border="0" color="0" x="9399" y="0" height="76" width="960" format="[general]" html.valueishtml="0"  name=delivery_detail_user_field3 visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-12" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=11 alignment="0" tabsequence=32766 border="0" color="0" x="10359" y="0" height="76" width="960" format="[general]" html.valueishtml="0"  name=delivery_detail_user_field6 visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-12" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=12 alignment="0" tabsequence=32766 border="0" color="0" x="11319" y="0" height="76" width="960" format="[general]" html.valueishtml="0"  name=delivery_detail_user_field4 visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-12" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=13 alignment="0" tabsequence=32766 border="0" color="0" x="12279" y="0" height="76" width="960" format="[general]" html.valueishtml="0"  name=delivery_detail_user_field7 visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-12" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=15 alignment="0" tabsequence=32766 border="0" color="0" x="13239" y="0" height="76" width="512" format="[general]" html.valueishtml="0"  name=delivery_detail_do_no visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-12" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=14 alignment="0" tabsequence=32766 border="0" color="0" x="13751" y="0" height="76" width="649" format="[general]" html.valueishtml="0"  name=delivery_detail_user_field1 visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-12" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=5 alignment="0" tabsequence=0 border="0" color="0" x="14400" y="0" height="76" width="1600" html.valueishtml="0"  name=alternate_sku visible="1"  font.face="Arial" font.height="-12" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

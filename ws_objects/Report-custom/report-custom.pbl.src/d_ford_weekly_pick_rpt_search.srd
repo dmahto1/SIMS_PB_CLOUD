@@ -1,0 +1,20 @@
+﻿$PBExportHeader$d_ford_weekly_pick_rpt_search.srd
+$PBExportComments$Search Criteria for Ford Weekly Pick Report
+release 9;
+datawindow(units=0 timer_interval=0 color=78567654 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=76 color="536870912" )
+table(column=(type=datetime updatewhereclause=yes name=pick_from dbname="Order_date_from" )
+ column=(type=datetime updatewhereclause=yes name=pick_to dbname="Order_date_to" )
+ )
+text(band=detail alignment="1" text="Pick Complete Date: " border="0" color="0" x="23" y="4" height="64" width="608" html.valueishtml="0"  name=date_from_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=detail alignment="1" text="From:" border="0" color="0" x="713" y="4" height="64" width="169" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=1 alignment="2" tabsequence=10 border="5" color="0" x="901" y="4" height="64" width="626" format="[general]" html.valueishtml="0"  name=pick_from visible="1" editmask.spin=yes editmask.mask="mm/dd/yyyy hh:mm" editmask.imemode=0 editmask.spinincr=0 editmask.focusrectangle=no  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=detail alignment="1" text="To:" border="0" color="0" x="1563" y="4" height="64" width="123" html.valueishtml="0"  name=order_date_to_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="2" tabsequence=20 border="5" color="0" x="1710" y="4" height="64" width="626" format="[general]" html.valueishtml="0"  name=pick_to visible="1" editmask.spin=yes editmask.mask="mm/dd/yyyy hh:mm" editmask.imemode=0 editmask.spinincr=0 editmask.focusrectangle=no  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

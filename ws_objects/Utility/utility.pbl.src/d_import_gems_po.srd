@@ -1,0 +1,39 @@
+﻿$PBExportHeader$d_import_gems_po.srd
+$PBExportComments$* Import GE Medical Systems Item Master File
+release 7;
+datawindow(units=0 timer_interval=0 color=16777215 processing=1 HTMLDW=no print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.prompt=no print.buttons=no print.preview.buttons=no grid.lines=0 )
+header(height=144 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=76 color="536870912" )
+table(column=(type=char(100) updatewhereclause=no name=invoice_no dbname="invoice_no" )
+ column=(type=char(100) updatewhereclause=no name=po_release_nbr dbname="po_release_nbr" )
+ column=(type=char(100) updatewhereclause=no name=vendor_name dbname="vendor_name" )
+ column=(type=char(100) updatewhereclause=no name=vendor_nbr dbname="vendor_nbr" )
+ column=(type=char(100) updatewhereclause=no name=po_date dbname="po_date" )
+ column=(type=char(100) updatewhereclause=no name=sku dbname="sku" )
+ column=(type=char(100) updatewhereclause=no name=description dbname="description" )
+ column=(type=char(100) updatewhereclause=no name=qty dbname="qty" )
+  sort="invoice_no A " )
+text(band=header alignment="2" text="" border="6" color="0" x="9" y="8" height="128" width="133"  name=t_2  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="79741120" )
+text(band=header alignment="2" text="Description" border="6" color="0" x="2501" y="8" height="128" width="466"  name=description_t  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="79741120" )
+text(band=header alignment="2" text="Row #" border="6" color="0" x="151" y="8" height="128" width="206"  name=t_3  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="79741120" )
+text(band=header alignment="2" text="Sku" border="6" color="0" x="1929" y="8" height="128" width="562"  name=t_5  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="79741120" )
+text(band=header alignment="2" text="Qty" border="6" color="0" x="2976" y="8" height="128" width="594"  name=t_1  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="79741120" )
+text(band=header alignment="2" text="PODate" border="6" color="0" x="1595" y="8" height="128" width="325"  name=t_4  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="79741120" )
+text(band=header alignment="2" text="PONbr" border="6" color="0" x="366" y="8" height="128" width="407"  name=t_6  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="79741120" )
+text(band=header alignment="2" text="PO RelNbr" border="6" color="0" x="782" y="8" height="128" width="242"  name=t_7  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="79741120" )
+text(band=header alignment="2" text="VendorName" border="6" color="0" x="1033" y="8" height="128" width="293"  name=t_8  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="79741120" )
+text(band=header alignment="2" text="VendorNbr" border="6" color="0" x="1335" y="8" height="128" width="251"  name=t_9  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="79741120" )
+compute(band=detail alignment="0" expression="''"border="0" color="0" x="9" y="4" height="64" width="133" format="[general]"  name=compute_2  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+column(band=detail id=5 alignment="0" tabsequence=50 border="0" color="0" x="1595" y="4" height="64" width="325" format="[general]"  name=po_date edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=detail alignment="0" expression="getrow()"border="0" color="0" x="151" y="4" height="64" width="206" format="[general]"  name=compute_1  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+column(band=detail id=1 alignment="0" tabsequence=10 border="0" color="0" x="366" y="4" height="64" width="407" format="[general]"  name=invoice_no edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=7 alignment="0" tabsequence=70 border="0" color="0" x="2501" y="4" height="64" width="466" format="[general]"  name=description edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="0" tabsequence=60 border="0" color="0" x="1929" y="4" height="64" width="562" format="[general]"  name=sku edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=8 alignment="1" tabsequence=80 border="0" color="0" x="2981" y="4" height="64" width="590" format="#######.#####"  name=qty editmask.mask="#######.#####" editmask.focusrectangle=no  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=2 alignment="0" tabsequence=20 border="0" color="0" x="782" y="4" height="64" width="242" format="[general]"  name=po_release_nbr edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=3 alignment="0" tabsequence=30 border="0" color="0" x="1033" y="4" height="64" width="293" format="[general]"  name=vendor_name edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=4 alignment="0" tabsequence=40 border="0" color="0" x="1335" y="4" height="64" width="251" format="[general]"  name=vendor_nbr edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" )

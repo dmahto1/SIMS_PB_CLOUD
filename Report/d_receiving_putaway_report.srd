@@ -1,0 +1,103 @@
+HA$PBExportHeader$d_receiving_putaway_report.srd
+$PBExportComments$Receiving Report
+release 11;
+datawindow(units=0 timer_interval=0 color=16777215 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 1 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes print.preview.outline=yes hidegrayline=no showbackcoloronxp=no )
+header(height=120 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=92 color="553648127" height.autosize=yes )
+table(column=(type=char(10) updatewhereclause=yes name=receive_master_project_id dbname="Project_ID" )
+ column=(type=char(10) updatewhereclause=yes name=receive_master_wh_code dbname="WH_Code" )
+ column=(type=char(20) updatewhereclause=yes name=receive_master_supp_code dbname="Supp_Code" )
+ column=(type=char(30) updatewhereclause=yes name=receive_master_supp_invoice_no dbname="Supp_Invoice_No" )
+ column=(type=datetime updatewhereclause=yes name=receive_master_arrival_date dbname="Arrival_Date" )
+ column=(type=decimal(0) updatewhereclause=yes name=receive_detail_line_item_no dbname="Line_Item_No" )
+ column=(type=char(50) updatewhereclause=yes name=receive_detail_sku dbname="SKU" )
+ column=(type=decimal(5) updatewhereclause=yes name=receive_detail_req_qty dbname="Req_Qty" )
+ column=(type=char(10) updatewhereclause=yes name=item_master_grp dbname="GRP" )
+ column=(type=char(40) updatewhereclause=yes name=project_project_desc dbname="Project_Desc" )
+ column=(type=char(10) updatewhereclause=yes name=content_l_code dbname="L_Code" )
+ column=(type=char(10) updatewhereclause=yes name=item_master_inventory_class dbname="inventory_class" )
+ column=(type=decimal(5) updatewhereclause=yes name=compute_0013 dbname="compute_0013" )
+ retrieve="SELECT  Receive_Master.Project_ID ,
+           Receive_Master.WH_Code ,
+           Receive_Master.Supp_Code ,
+           Receive_Master.Supp_Invoice_No ,
+           Receive_Master.Arrival_Date ,
+           Receive_Detail.Line_Item_No ,
+           Receive_Detail.SKU ,
+           Receive_Detail.Req_Qty ,
+           Item_Master.GRP ,
+           Project.Project_Desc ,
+           Content.L_Code ,
+           Item_Master.inventory_class ,
+           sum(Content.Avail_Qty)    
+        FROM Receive_Master 
+       INNER JOIN Receive_Detail
+          ON Receive_Master.RO_No = Receive_Detail.RO_No 
+       INNER JOIN Item_Master
+          ON Receive_Master.Supp_Code = Item_Master.Supp_Code  
+         AND Receive_Master.Project_ID = Item_Master.Project_ID  
+         AND Receive_Detail.SKU = Item_Master.SKU
+        LEFT OUTER JOIN Content
+          ON Receive_Master.Project_ID = Content.Project_ID          
+         AND Receive_Detail.SKU = Content.SKU
+       INNER JOIN Project     
+          ON Receive_Master.Project_ID = Project.Project_ID
+        WHERE Receive_Master.Project_ID = :R_Project_ID  
+          And Receive_Master.RO_No = :R_RO_NO 
+        GROUP BY Receive_Master.Project_ID ,
+           Receive_Master.WH_Code ,
+           Receive_Master.Supp_Code ,
+           Receive_Master.Supp_Invoice_No ,
+           Receive_Master.Arrival_Date ,
+           Receive_Detail.Line_Item_No ,
+           Receive_Detail.SKU ,
+           Receive_Detail.Req_Qty ,
+           Item_Master.GRP ,
+           Project.Project_Desc ,
+           Content.L_Code ,
+           Item_Master.inventory_class  
+        ORDER BY Receive_Detail.Line_Item_No          ASC,
+           Receive_Detail.SKU          ASC  " arguments=(("R_Project_ID", string),("R_RO_NO", string))  sort="receive_master_wh_code A receive_master_arrival_date A receive_master_supp_invoice_no A receive_detail_sku A " )
+group(level=1 header.height=244 trailer.height=52 by=("R_Project_ID" , "R_RO_NO" ) header.color="536870912" trailer.color="536870912" )
+group(level=2 header.height=80 trailer.height=28 by=("R_Project_ID" , "R_RO_NO" , "receive_detail_line_item_no" , "receive_detail_sku" , "receive_detail_req_qty" , "item_master_inventory_class" , "item_master_grp" ) header.color="536870912" trailer.color="536870912" )
+compute(band=header alignment="2" expression="project_project_desc  + ' PUTAWAY'"border="0" color="0" x="0" y="12" height="92" width="4357" format="[GENERAL]" html.valueishtml="0"  name=compute_4 visible="1"  font.face="Arial" font.height="-14" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=header alignment="1" expression="'Page: ' + page() + ' of ' + pageCount()"border="0" color="0" x="3739" y="12" height="56" width="576" format="" html.valueishtml="0"  name=compute_2 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+text(band=header.1 alignment="1" text="Sched Arrival Date:" border="0" color="0" x="1239" y="108" height="56" width="567" html.valueishtml="0"  name=t_23 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.1 id=5 alignment="0" tabsequence=32766 border="0" color="0" x="1829" y="108" height="56" width="576" format="mm/dd/yyyy hh:mm" html.valueishtml="0"  name=receive_master_arrival_date visible="1" edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header.1 alignment="1" text="Warehouse:" border="0" color="0" x="32" y="104" height="64" width="361" html.valueishtml="0"  name=t_18 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.1 id=4 alignment="0" tabsequence=32766 border="0" color="0" x="416" y="56" height="64" width="421" format="[general]" html.valueishtml="0"  name=receive_master_supp_invoice_no visible="1" edit.limit=30 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header.1 alignment="1" text="Order Nbr:" border="0" color="0" x="46" y="56" height="56" width="347" html.valueishtml="0"  name=t_20 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.1 id=2 alignment="0" tabsequence=32766 border="0" color="0" x="416" y="104" height="64" width="571" format="[general]" html.valueishtml="0"  name=receive_master_wh_code visible="1" edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header.1 alignment="1" text="Date:" border="0" color="0" x="210" y="12" height="56" width="187" html.valueishtml="0"  name=t_4 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=header.1 alignment="0" expression="string(today(),'mm/dd/yyyy hh:mm')"border="0" color="0" x="416" y="12" height="56" width="402" format="[general]" html.valueishtml="0"  name=compute_1 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header.2 alignment="0" text="SKU" border="0" color="0" x="279" y="20" height="56" width="128" html.valueishtml="0"  name=t_6 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header.2 alignment="2" text="Inventory Group" border="0" color="0" x="2107" y="20" height="56" width="471" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header.2 alignment="2" text="Inventory Class" border="0" color="0" x="1600" y="20" height="56" width="407" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header.2 alignment="2" text="Current Locations" border="0" color="0" x="2606" y="20" height="56" width="471" html.valueishtml="0"  name=t_3 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header.2 alignment="2" text="LINE" border="0" color="0" x="46" y="20" height="56" width="174" html.valueishtml="0"  name=t_25 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header.2 alignment="2" text="QTY" border="0" color="0" x="1161" y="20" height="56" width="352" html.valueishtml="0"  name=t_10 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header.2 alignment="2" text="Putaway Qty" border="0" color="0" x="3511" y="20" height="56" width="357" html.valueishtml="0"  name=t_7 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header.2 alignment="2" text="Putaway Locations" border="0" color="0" x="3881" y="20" height="56" width="471" html.valueishtml="0"  name=t_8 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header.2 alignment="2" text="Current Qty" border="0" color="0" x="3099" y="20" height="56" width="384" html.valueishtml="0"  name=t_5 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=7 alignment="0" tabsequence=32766 border="0" color="0" x="270" y="8" height="56" width="855" format="[general]" html.valueishtml="0"  name=receive_detail_sku visible="1"  hidesnaked=1 edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=9 alignment="2" tabsequence=32766 border="0" color="0" x="2203" y="8" height="56" width="229" format="[general]" html.valueishtml="0"  name=item_master_grp visible="1" edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=12 alignment="2" tabsequence=32766 border="0" color="0" x="1595" y="8" height="56" width="407" format="[general]" html.valueishtml="0"  name=item_master_inventory_class visible="1" edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=11 alignment="2" tabsequence=32766 border="0" color="0" x="2601" y="8" height="56" width="471" format="[general]" html.valueishtml="0"  name=content_l_code visible="1" edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="2" tabsequence=32766 border="0" color="0" x="41" y="8" height="56" width="174" format="[general]" html.valueishtml="0"  name=receive_detail_line_item_no visible="1"  hidesnaked=1 edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=8 alignment="2" tabsequence=32766 border="0" color="0" x="1157" y="8" height="56" width="352" format="#######.##" html.valueishtml="0"  name=receive_detail_req_qty visible="1" editmask.mask="#######.##" editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=13 alignment="2" tabsequence=32766 border="0" color="0" x="3099" y="8" height="56" width="393" format="[general]" html.valueishtml="0"  name=compute_0013 visible="1" edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+line(band=trailer.2 x1="0" y1="12" x2="4347" y2="16"  name=l_3 visible="1" pen.style="0" pen.width="9" pen.color="0"  background.mode="1" background.color="553648127" )
+
+sparse(names="t_23	receive_master_arrival_date	t_18	receive_master_supp_invoice_no	t_20	receive_master_wh_code	t_4	compute_1	receive_detail_line_item_no	receive_detail_sku	receive_detail_req_qty	item_master_inventory_class	item_master_grp	t_25	t_6	t_10	t_1	t_2	t_3	t_5	t_7	t_8")htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" pagingmethod=0 generatedddwframes="1" )
+xhtmlgen() cssgen(sessionspecific="0" )
+xmlgen(inline="0" )
+xsltgen()
+jsgen()
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )
+export.xhtml()
+ 

@@ -1,0 +1,47 @@
+HA$PBExportHeader$d_emc.srd
+release 11;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=1 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes print.preview.outline=yes hidegrayline=no showbackcoloronxp=no grid.lines=0 )
+header(height=132 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=68 color="536870912" )
+table(column=(type=char(1) updatewhereclause=yes name=rowfocusindicator dbname="rowfocusindicator" )
+ column=(type=decimal(0) update=yes updatewhereclause=yes key=yes identity=yes name=id_no dbname="ID_NO" )
+ column=(type=char(10) update=yes updatewhereclause=yes name=project_id dbname="Project_ID" )
+ column=(type=char(16) update=yes updatewhereclause=yes name=do_no dbname="DO_NO" )
+ column=(type=char(16) update=yes updatewhereclause=yes name=ro_no dbname="RO_NO" )
+ column=(type=char(50) update=yes updatewhereclause=yes name=sku dbname="SKU" )
+ column=(type=char(50) update=yes updatewhereclause=yes name=emc_code dbname="EMC_Code" )
+ retrieve="SELECT  '' rowfocusindicator,
+		
+EMC_Capture.ID_NO, 
+EMC_Capture.Project_ID,   
+         EMC_Capture.DO_NO,   
+         EMC_Capture.RO_NO,   
+         EMC_Capture.SKU,   
+         EMC_Capture.EMC_Code
+
+        FROM 
+           emc_capture
+          
+        WHERE 1 = 1" update="emc_capture" updatewhere=0 updatekeyinplace=yes  sort="id_no A " )
+text(band=header alignment="2" text="" border="6" color="0" x="9" y="4" height="120" width="192" html.valueishtml="0"  name=rowfocusindicator_t visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Row
+#" border="6" color="0" x="210" y="4" height="120" width="251" html.valueishtml="0"  name=t_row visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="EMC Code" border="6" color="33554432" x="1687" y="8" height="116" width="1248" html.valueishtml="0"  name=emc_code_t visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="SKU Code" border="6" color="33554432" x="475" y="8" height="116" width="1202" html.valueishtml="0"  name=sku_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="0" color="33554432" x="9" y="4" height="60" width="192" format="[general]" html.valueishtml="0"  name=rowfocusindicator visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=detail alignment="2" expression="getrow()"border="0" color="0" x="210" y="4" height="60" width="251" format="[GENERAL]" html.valueishtml="0"  name=compute_1 visible="1"  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" )
+column(band=detail id=6 alignment="0" tabsequence=32766 border="0" color="33554432" x="475" y="4" height="60" width="1202" format="[general]" html.valueishtml="0"  name=sku visible="1" edit.limit=50 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=7 alignment="0" tabsequence=32766 border="0" color="33554432" x="1687" y="4" height="60" width="1248" format="[general]" html.valueishtml="0"  name=emc_code visible="1" edit.limit=50 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" pagingmethod=0 generatedddwframes="1" )
+xhtmlgen() cssgen(sessionspecific="0" )
+xmlgen(inline="0" )
+xsltgen()
+jsgen()
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )
+export.xhtml()
+ 

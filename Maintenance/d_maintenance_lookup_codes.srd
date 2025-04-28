@@ -1,0 +1,27 @@
+HA$PBExportHeader$d_maintenance_lookup_codes.srd
+$PBExportComments$Look-UP Default values
+release 7;
+datawindow(units=0 timer_interval=0 color=1090519039 processing=0 HTMLDW=no print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.prompt=no print.buttons=no print.preview.buttons=no )
+header(height=104 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=72 color="536870912" )
+table(column=(type=char(10) update=yes updatewhereclause=yes key=yes name=project_id dbname="Lookup_Table.Project_ID" )
+ column=(type=char(20) update=yes updatewhereclause=yes key=yes name=code_id dbname="Lookup_Table.Code_ID" )
+ column=(type=char(40) update=yes updatewhereclause=yes name=code_descript dbname="Lookup_Table.Code_Descript" )
+ column=(type=char(5) update=yes updatewhereclause=yes key=yes name=code_type dbname="Lookup_Table.Code_Type" )
+ retrieve="  SELECT dbo.Lookup_Table.Project_ID, 
+			dbo.Lookup_Table.Code_ID,  
+         dbo.Lookup_Table.Code_Descript,
+			dbo.Lookup_table.Code_Type  
+    FROM dbo.Lookup_Table  
+			Where project_ID = :asProject
+" update="Lookup_Table" updatewhere=1 updatekeyinplace=yes arguments=(("asProject", string))  sort="project_id A code_type A code_id A " )
+text(band=header alignment="0" text=" CODE TYPE" border="2" color="8388608" x="5" y="0" height="108" width="498"  name=t_2  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+text(band=header alignment="0" text="  CODE ID" border="2" color="8388608" x="507" y="0" height="108" width="1001"  name=t_3  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+text(band=header alignment="0" text="  CODE DESCRIPTION" border="2" color="8388608" x="1513" y="0" height="108" width="1298"  name=t_4  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+column(band=detail id=4 alignment="0" tabsequence=10 border="2" color="0" x="5" y="0" height="68" width="498" format="[general]"  name=code_type edit.limit=0 edit.case=upper edit.autoselect=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=2 alignment="0" tabsequence=20 border="2" color="0" x="507" y="0" height="68" width="1001" format="[general]"  name=code_id edit.limit=0 edit.case=upper edit.autoselect=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=3 alignment="0" tabsequence=30 border="2" color="0" x="1513" y="0" height="68" width="1298" format="[general]"  name=code_descript edit.limit=40 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" )

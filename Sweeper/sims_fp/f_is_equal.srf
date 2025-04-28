@@ -1,0 +1,23 @@
+HA$PBExportHeader$f_is_equal.srf
+global type f_is_equal from function_object
+end type
+
+forward prototypes
+global function boolean f_is_equal (any aa_first, any aa_second)
+end prototypes
+
+global function boolean f_is_equal (any aa_first, any aa_second);// LTK 20120430  Function to alleviate PowerBuilder's strange way of handling null value comparisons (if an argument is null, the expression returns a null and not a boolean!!!).
+// Function will always return true or false and never null (even if the parameters contain null values).
+boolean lb_return
+
+if IsNull(aa_first) or IsNull(aa_second) then
+	// Either both are null or a mismatch exists
+	lb_return = IsNull(aa_first) and IsNull(aa_second)
+else
+	lb_return = (aa_first = aa_second)
+end if
+
+return lb_return
+
+end function
+

@@ -1,0 +1,77 @@
+﻿$PBExportHeader$d_marcgt_boh_rpt.srd
+$PBExportComments$Marc GT Inventory Balance On Hand Report
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=456 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=8 color="536870912" )
+table(column=(type=char(10) updatewhereclause=yes name=content_summary_wh_code dbname="Content_Summary.WH_Code" )
+ column=(type=char(50) updatewhereclause=yes name=content_summary_sku dbname="Content_Summary.SKU" )
+ column=(type=char(20) updatewhereclause=yes name=content_summary_supp_code dbname="Content_Summary.Supp_Code" )
+ column=(type=char(3) updatewhereclause=yes name=content_coo dbname="COO" )
+ column=(type=decimal(5) updatewhereclause=yes name=quantity dbname="Quantity" )
+ retrieve="  SELECT a.WH_Code,   
+         a.SKU,   
+         a.Supp_Code,   
+			Case When  substring(a.Country_of_Origin,3,1 ) > ' ' Then b.Designating_Code Else a.Country_of_Origin  End as COO, 
+         SUM(a.Avail_Qty + a.Alloc_Qty) as Quantity
+    FROM dbo.Content_Summary A	LEFT OUTER JOIN dbo.Country B ON a.Country_of_Origin = b.ISO_Country_Cd,   
+         dbo.Item_Master c 
+   WHERE ( c.Project_ID = a.Project_ID ) and  
+         ( c.SKU = a.SKU ) and  
+         ( c.Supp_Code = a.Supp_Code ) and  
+         ( ( a.WH_Code = :as_wh_code ) AND  
+         (c.Component_Ind <> 'Y' ) AND  
+         (( a.Avail_Qty > 0 ) or ( a.Alloc_Qty > 0 )) )   
+GROUP BY a.WH_Code,   
+         a.SKU,   
+         a.Supp_Code,   
+         a.Country_of_Origin,   
+			b.Designating_Code
+
+Union All
+
+  SELECT a.WH_Code,   
+         b.SKU,   
+         b.Supp_Code,   
+         b.Country_of_Origin,   
+         sum(b.Quantity ) as Quantity  
+    FROM dbo.Delivery_Master A,   
+         dbo.Delivery_Picking B 
+   WHERE ( b.DO_No = a.DO_No ) and 
+			( b.Component_Ind <> 'Y' ) AND 
+         ( ( a.WH_Code = :as_wh_code ) AND  
+         ( a.Ord_Status = 'R' ) )   
+GROUP BY a.WH_Code,   
+         b.SKU,   
+         b.Supp_Code,   
+         b.Country_of_Origin  ;
+
+
+" arguments=(("as_wh_code", string)) )
+group(level=1 header.height=0 trailer.height=100 by=("content_summary_wh_code" , "content_summary_sku" , "content_summary_supp_code" , "content_coo" ) header.color="536870912" trailer.color="536870912" )
+text(band=header alignment="2" text="MARC GT Inventory Balance on Hand Report" border="0" color="33554432" x="14" y="8" height="92" width="2432" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-14" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Warehouse" border="2" color="33554432" x="0" y="284" height="128" width="347" html.valueishtml="0"  name=content_wh_code_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Sku" border="2" color="33554432" x="352" y="284" height="128" width="814" html.valueishtml="0"  name=content_sku_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Supplier" border="2" color="33554432" x="1170" y="284" height="128" width="576" html.valueishtml="0"  name=content_supp_code_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Country
+Of Origin" border="2" color="33554432" x="1751" y="284" height="128" width="302" html.valueishtml="0"  name=content_country_of_origin_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="1" text="Quantity " border="2" color="33554432" x="2057" y="284" height="128" width="329" html.valueishtml="0"  name=content_avail_qty_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="1" text="Date Run:" border="0" color="33554432" x="709" y="124" height="56" width="338" html.valueishtml="0"  name=t_4 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=header alignment="0" expression="String(Today(),'MM/DD/YYYY HH:MM')"border="0" color="33554432" x="1061" y="124" height="56" width="832" format="[General]" html.valueishtml="0"  name=compute_7 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="0" color="33554432" x="1783" y="4" height="76" width="219" format="[general]" html.valueishtml="0"  name=content_coo visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="0" color="33554432" x="0" y="8" height="64" width="352" format="[general]" html.valueishtml="0"  name=content_summary_wh_code visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="0" color="33554432" x="370" y="8" height="64" width="809" format="[general]" html.valueishtml="0"  name=content_summary_sku visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="0" color="33554432" x="1189" y="12" height="64" width="576" format="[general]" html.valueishtml="0"  name=content_summary_supp_code visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="0" tabsequence=32766 border="0" color="33554432" x="2117" y="4" height="64" width="306" format="[general]" html.valueishtml="0"  name=quantity visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=trailer.1 id=1 alignment="0" tabsequence=32766 border="0" color="33554432" x="0" y="4" height="76" width="347" format="[general]" html.valueishtml="0"  name=content_summary_wh_code_1 visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=trailer.1 id=2 alignment="0" tabsequence=32766 border="0" color="33554432" x="352" y="4" height="76" width="814" format="[general]" html.valueishtml="0"  name=content_summary_sku_1 visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=trailer.1 id=3 alignment="0" tabsequence=32766 border="0" color="33554432" x="1170" y="4" height="76" width="576" format="[general]" html.valueishtml="0"  name=content_summary_supp_code_1 visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=trailer.1 id=4 alignment="2" tabsequence=32766 border="0" color="33554432" x="1751" y="4" height="76" width="302" format="[general]" html.valueishtml="0"  name=content_coo_1 visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=trailer.1 alignment="1" expression="sum( quantity  for group 1)"border="0" color="33554432" x="2057" y="4" height="76" width="329" format="[general]" html.valueishtml="0"  name=compute_1 visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

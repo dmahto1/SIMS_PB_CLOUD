@@ -1,0 +1,78 @@
+﻿$PBExportHeader$d_logitech_iqc_status_rpt.srd
+$PBExportComments$IAE Shipping Transaction Report
+release 9;
+datawindow(units=0 timer_interval=0 color=16777215 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 2 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=460 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=64 color="536870912" )
+detail(height=64 color="536870912" )
+table(column=(type=char(50) updatewhereclause=yes name=receive_detail_part_number dbname="receive_iqc.Part_Number" )
+ column=(type=char(70) updatewhereclause=yes name=item_master_description dbname="Item_Master.Description" )
+ column=(type=char(1) updatewhereclause=yes name=receive_iqc_current_status dbname="Current_Status" )
+ column=(type=char(10) updatewhereclause=yes name=receive_master_warehouse dbname="Receive_Master.Warehouse" )
+ column=(type=long updatewhereclause=yes name=no_inspections dbname="No_Inspections" )
+ column=(type=long updatewhereclause=yes name=no_inspections_rejected dbname="No_Inspections_Rejected" )
+ column=(type=long updatewhereclause=yes name=no_inspections_last_level dbname="No_Inspections_Last_Level" )
+ column=(type=datetime updatewhereclause=yes name=last_inspection dbname="Last_Inspection" )
+ column=(type=long updatewhereclause=yes name=months_at_current_level dbname="Months_At_Current_Level" )
+ retrieve="  SELECT DISTINCT RD.SKU As Part_Number,   
+         dbo.Item_Master.Description,   
+			(Select Inspection_Level FROM receive_iqc, Receive_Detail WHERE receive_iqc.RO_NO = Receive_Detail.RO_NO and receive_iqc.line_item_no = Receive_Detail.Line_Item_NO AND Receive_Detail.SKU = RD.SKU  AND receive_iqc.IQC_Date = (SELECT Max(IQC_Date) FROM receive_iqc, Receive_Detail WHERE receive_iqc.RO_NO = Receive_Detail.RO_NO and receive_iqc.line_item_no = Receive_Detail.Line_Item_NO AND Receive_Detail.SKU = RD.SKU) ) as Current_Status,
+         dbo.Receive_Master.WH_Code As Warehouse,
+			(Select Count(*) FROM receive_iqc WHERE receive_iqc.RO_NO = RD.RO_NO and receive_iqc.line_item_no = RD.Line_Item_NO) as No_Inspections,
+			(Select Count(*) FROM receive_iqc WHERE receive_iqc.RO_NO = RD.RO_NO and receive_iqc.line_item_no = RD.Line_Item_NO AND receive_iqc.IQC_Pass_Fail = 'F') as No_Inspections_Rejected,
+			(Select Count(*) FROM receive_iqc WHERE receive_iqc.RO_NO = RD.RO_NO and receive_iqc.line_item_no = RD.Line_Item_NO ) as No_Inspections_Last_Level,
+			(Select DISTINCT Max(IQC_Date) FROM receive_iqc, Receive_Detail WHERE receive_iqc.RO_NO = Receive_Detail.RO_NO and receive_iqc.line_item_no = Receive_Detail.Line_Item_NO AND Receive_Detail.SKU = RD.SKU) as Last_Inspection,
+			DATEDIFF ( month , (Select Max(IQC_Date) FROM receive_iqc WHERE receive_iqc.RO_NO = RD.RO_NO and receive_iqc.line_item_no = RD.Line_Item_NO ) , GetDate() ) As Months_At_Current_Level
+
+    FROM dbo.receive_iqc AS RI,   
+         dbo.Receive_Master,   
+         dbo.Receive_Detail RD,   
+         dbo.Item_Master 
+   WHERE ( dbo.Receive_Master.RO_No = RD.RO_No ) and  
+         ( RD.RO_No = RI.RO_No ) and  
+         ( RD.Line_Item_No = RI.Line_Item_No ) and  
+         ( RD.SKU = dbo.Item_Master.SKU ) and  
+         ( dbo.Receive_Master.Project_ID = dbo.Item_Master.Project_ID ) and  
+         ( RD.Supp_Code = dbo.Item_Master.Supp_Code )    AND
+			( dbo.Receive_Master.Project_ID = 'LOGITECH')
+
+GROUP BY RD.RO_NO,
+			RD.LINE_ITEM_NO,
+			RD.SKU,   
+         dbo.Item_Master.Description,   
+         RI.Inspection_Level,   
+         dbo.Receive_Master.WH_Code;" )
+text(band=header alignment="2" text="No. of inspections
+at this level" border="0" color="0" x="1061" y="360" height="88" width="393" html.valueishtml="0"  name=t_10 visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="No. of inspections
+ rejected at this level" border="0" color="0" x="1477" y="356" height="88" width="425" html.valueishtml="0"  name=t_11 visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="No. of inspections
+at previous level" border="0" color="0" x="1911" y="364" height="88" width="622" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="No. Months at
+this level" border="0" color="0" x="2994" y="364" height="88" width="379" html.valueishtml="0"  name=t_4 visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Last Date
+of inspection" border="0" color="0" x="2574" y="364" height="88" width="379" html.valueishtml="0"  name=t_19 visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Current
+Status" border="0" color="0" x="841" y="360" height="88" width="201" html.valueishtml="0"  name=t_9 visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="IQC Status Report" border="0" color="0" x="983" y="144" height="48" width="1266" html.valueishtml="0"  name=t_3 visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=header alignment="2" expression=" String(Today(), 'mm/dd/yyyy')"border="0" color="0" x="983" y="208" height="56" width="1266" format="[GENERAL]" html.valueishtml="0"  name=compute_4 visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="LOGITECH" border="0" color="0" x="983" y="16" height="48" width="1266" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header id=4 alignment="2" tabsequence=32766 border="0" color="0" x="983" y="80" height="48" width="1266" format="[general]" html.valueishtml="0"  name=receive_master_warehouse visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="Part
+Number" border="0" color="0" x="9" y="360" height="88" width="315" html.valueishtml="0"  name=t_7 visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="Description" border="0" color="0" x="402" y="404" height="44" width="320" html.valueishtml="0"  name=t_8 visible="1"  font.face="Arial" font.height="-7" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="1" tabsequence=32766 border="0" color="0" x="1152" y="8" height="48" width="146" format="[general]" html.valueishtml="0"  name=no_inspections visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=8 alignment="1" tabsequence=32766 border="0" color="0" x="2560" y="8" height="48" width="293" format="[shortdate] " html.valueishtml="0"  name=last_inspection visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=9 alignment="1" tabsequence=32766 border="0" color="0" x="3081" y="8" height="48" width="133" format="[general]" html.valueishtml="0"  name=months_at_current_level visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="1" tabsequence=32766 border="0" color="0" x="1563" y="8" height="48" width="174" format="[general]" html.valueishtml="0"  name=no_inspections_rejected visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=7 alignment="1" tabsequence=32766 border="0" color="0" x="2048" y="8" height="48" width="224" format="[general]" html.valueishtml="0"  name=no_inspections_last_level visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="0" color="0" x="923" y="8" height="48" width="105" format="[general]" html.valueishtml="0"  name=receive_iqc_current_status visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="0" color="0" x="9" y="8" height="48" width="352" format="[general]" html.valueishtml="0"  name=receive_detail_part_number visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="0" color="0" x="402" y="8" height="56" width="439" format="[general]" html.valueishtml="0"  name=item_master_description visible="1" edit.limit=70 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=footer alignment="2" expression="'Page ' + page() + ' of ' + pageCount()"border="0" color="0" x="983" y="4" height="64" width="1266" format="[general]" html.valueishtml="0"  name=page_1 visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

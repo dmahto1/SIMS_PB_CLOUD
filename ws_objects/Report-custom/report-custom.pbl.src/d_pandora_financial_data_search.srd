@@ -1,0 +1,19 @@
+﻿$PBExportHeader$d_pandora_financial_data_search.srd
+$PBExportComments$Pandora Finance Data Search
+release 9;
+datawindow(units=0 timer_interval=0 color=67108864 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=192 color="536870912" )
+table(column=(type=datetime updatewhereclause=no name=finance_data_from_date dbname="from_arrival" )
+ column=(type=datetime updatewhereclause=no name=finance_data_to_date dbname="to_arrival" )
+ )
+text(band=detail alignment="0" text="To:" border="0" color="0" x="457" y="84" height="56" width="78" html.valueishtml="0"  name=o_date_to_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=detail alignment="1" text="Finance Data:   From:" border="0" color="0" x="14" y="0" height="56" width="521" html.valueishtml="0"  name=financial_data_from_date visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=1 alignment="0" tabsequence=50 border="5" color="0" x="558" y="8" height="56" width="613" format="[shortdate] [time]" html.valueishtml="0"  name=finance_data_from_date visible="1" editmask.spin=yes editmask.mask="mm/dd/yy hh:mm" editmask.imemode=0 editmask.spinincr=1 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=2 alignment="0" tabsequence=60 border="5" color="0" x="553" y="84" height="56" width="613" format="[shortdate] [time]" html.valueishtml="0"  name=finance_data_to_date visible="1" editmask.spin=yes editmask.mask="mm/dd/yy hh:mm" editmask.imemode=0 editmask.spinincr=1 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

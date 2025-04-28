@@ -1,0 +1,13 @@
+HA$PBExportHeader$d_find_order_type.srd
+$PBExportComments$Datawindow used for locating order type
+release 6;
+datawindow(units=0 timer_interval=0 color=16777215 processing=0 print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.prompt=no print.buttons=no print.preview.buttons=no )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=96 color="536870912" )
+table(column=(type=char(1) update=yes updatewhereclause=yes key=yes name=ord_type dbname="Receive_Order_Type.Ord_Type" )
+ column=(type=char(30) update=yes updatewhereclause=yes name=ord_type_desc dbname="Receive_Order_Type.Ord_Type_Desc" )
+ retrieve="PBSELECT(TABLE(NAME=~"Receive_Order_Type~") COLUMN(NAME=~"Receive_Order_Type.Ord_Type~")COLUMN(NAME=~"Receive_Order_Type.Ord_Type_Desc~"))" update="Receive_Order_Type" updatewhere=1 updatekeyinplace=no )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="0" color="0" x="407" y="4" height="76" width="850" format="[general]"  name=ord_type_desc edit.limit=30 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="0" color="0" x="32" y="4" height="76" width="297" format="[general]"  name=ord_type edit.limit=1 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" cellpadding="0" cellspacing="0" generatecss="no" nowrap="yes")

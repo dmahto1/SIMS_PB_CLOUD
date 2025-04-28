@@ -1,0 +1,16 @@
+﻿$PBExportHeader$d_max_completion_date_by_proj_loc.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=76 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=84 color="536870912" )
+table(column=(type=datetime updatewhereclause=yes name=max_complete_date dbname="Max_Complete_Date" )
+ retrieve="PBSELECT( VERSION(400) TABLE(NAME=~"dbo.Delivery_Master~" )  TABLE(NAME=~"dbo.Delivery_Picking~" ) COMPUTE(NAME=~"max( dbo.delivery_master.complete_date ) as ~~~"Max_Complete_Date~~~"~")    JOIN (LEFT=~"dbo.Delivery_Picking.DO_No~"    OP =~"=~"RIGHT=~"dbo.Delivery_Master.DO_No~" )WHERE(    EXP1 =~"(  dbo.Delivery_Master.Project_ID~"   OP =~"=~"    EXP2 =~":project )~"    LOGIC =~"and~" ) WHERE(    EXP1 =~"dbo.Delivery_Picking.SKU~"   OP =~"=~"    EXP2 =~":sku~" ) ) ARG(NAME = ~"project~" TYPE = string)  ARG(NAME = ~"sku~" TYPE = string) " arguments=(("project", string),("sku", string)) )
+text(band=header alignment="2" text="Max Complete Date" border="0" color="33554432" x="5" y="4" height="64" width="603" html.valueishtml="0"  name=max_complete_date_t visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="0" color="33554432" x="5" y="4" height="76" width="603" format="[shortdate] [time]" html.valueishtml="0"  name=max_complete_date visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

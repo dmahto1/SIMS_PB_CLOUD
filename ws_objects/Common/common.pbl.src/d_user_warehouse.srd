@@ -1,0 +1,32 @@
+﻿$PBExportHeader$d_user_warehouse.srd
+$PBExportComments$Warehouse dropdown for current project
+release 7;
+datawindow(units=0 timer_interval=0 color=16777215 processing=1 HTMLDW=no print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.prompt=no print.buttons=no print.preview.buttons=no grid.lines=0 )
+header(height=76 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=68 color="536870912" )
+table(column=(type=char(40) update=yes updatewhereclause=yes name=wh_name dbname="Warehouse.WH_Name" )
+ column=(type=char(10) update=yes updatewhereclause=yes name=wh_code dbname="Warehouse.WH_Code" )
+ column=(type=char(1) updatewhereclause=yes name=default_wh_ind dbname="User_WareHouse.default_wh_ind" )
+ retrieve="  SELECT Warehouse.WH_Name,   
+         Warehouse.WH_Code, 
+			User_warehouse.default_wh_ind
+    FROM Warehouse,   
+         User_Warehouse  
+   WHERE ( User_Warehouse.WH_Code = Warehouse.WH_Code )   and
+			Project_ID = :asProject and
+			Userid = :asUser
+ORDER BY Warehouse.WH_Code ASC   
+
+
+
+" arguments=(("asProject", string),("asUser", string)) )
+text(band=header alignment="0" text="Wh Code" border="6" color="0" x="9" y="8" height="60" width="411"  name=t_1  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="79741120" )
+text(band=header alignment="0" text=" Warehouse Name" border="6" color="0" x="430" y="8" height="60" width="686"  name=wh_name_t  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="79741120" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="0" color="0" x="9" y="4" height="56" width="411" format="[general]"  name=wh_code edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Default" border="6" color="0" x="1125" y="4" height="60" width="293"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="79741120" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="0" color="0" x="430" y="4" height="56" width="686" format="[general]"  name=wh_name edit.limit=40 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="2" tabsequence=0 border="0" color="0" x="1129" y="4" height="56" width="288"  name=default_wh_ind  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" )

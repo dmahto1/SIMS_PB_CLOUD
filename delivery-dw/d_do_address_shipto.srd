@@ -1,0 +1,379 @@
+HA$PBExportHeader$d_do_address_shipto.srd
+$PBExportComments$+ DElivery Order Ship Address - SHARED with d_do_master
+release 11.5;
+datawindow(units=0 timer_interval=0 color=79741120 brushmode=0 transparency=0 gradient.angle=0 gradient.color=8421504 gradient.focus=0 gradient.repetition.count=0 gradient.repetition.length=100 gradient.repetition.mode=0 gradient.scale=100 gradient.spread=100 gradient.transparency=0 picture.blur=0 picture.clip.bottom=0 picture.clip.left=0 picture.clip.right=0 picture.clip.top=0 picture.mode=0 picture.scale.x=100 picture.scale.y=100 picture.transparency=0 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes print.background=no print.preview.background=no print.preview.outline=yes hidegrayline=no showbackcoloronxp=no picture.file="" )
+header(height=0 color="536870912" transparency="0" gradient.color="8421504" gradient.transparency="0" gradient.angle="0" brushmode="0" gradient.repetition.mode="0" gradient.repetition.count="0" gradient.repetition.length="100" gradient.focus="0" gradient.scale="100" gradient.spread="100" )
+summary(height=0 color="536870912" transparency="0" gradient.color="8421504" gradient.transparency="0" gradient.angle="0" brushmode="0" gradient.repetition.mode="0" gradient.repetition.count="0" gradient.repetition.length="100" gradient.focus="0" gradient.scale="100" gradient.spread="100" )
+footer(height=4 color="536870912" transparency="0" gradient.color="8421504" gradient.transparency="0" gradient.angle="0" brushmode="0" gradient.repetition.mode="0" gradient.repetition.count="0" gradient.repetition.length="100" gradient.focus="0" gradient.scale="100" gradient.spread="100" )
+detail(height=740 color="536870912" transparency="0" gradient.color="8421504" gradient.transparency="0" gradient.angle="0" brushmode="0" gradient.repetition.mode="0" gradient.repetition.count="0" gradient.repetition.length="100" gradient.focus="0" gradient.scale="100" gradient.spread="100" )
+table(column=(type=char(16) update=yes updatewhereclause=yes name=do_no dbname="DO_No" )
+ column=(type=char(10) update=yes updatewhereclause=yes name=project_id dbname="Project_ID" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=ord_type dbname="Ord_Type" )
+ column=(type=decimal(0) update=yes updatewhereclause=yes name=priority dbname="Priority" initial="1" validation="Number(GetText()) >= 0 and Number(GetText()) <= 99" validationmsg="~"Please enter a value between 0 and 99~"" )
+ column=(type=datetime update=yes updatewhereclause=yes name=ord_date dbname="Ord_Date" )
+ column=(type=datetime update=yes updatewhereclause=yes name=complete_date dbname="Complete_Date" )
+ column=(type=datetime update=yes updatewhereclause=yes name=pick_start dbname="Pick_Start" )
+ column=(type=datetime update=yes updatewhereclause=yes name=pick_complete dbname="Pick_Complete" )
+ column=(type=datetime update=yes updatewhereclause=yes name=schedule_date dbname="Schedule_Date" )
+ column=(type=datetime update=yes updatewhereclause=yes name=request_date dbname="Request_Date" )
+ column=(type=datetime update=yes updatewhereclause=yes name=delivery_date dbname="Delivery_Date" )
+ column=(type=datetime update=yes updatewhereclause=yes name=receive_date dbname="Receive_Date" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=ord_status dbname="Ord_Status" initial="N" )
+ column=(type=char(10) update=yes updatewhereclause=yes name=wh_code dbname="WH_Code" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=inventory_type dbname="Inventory_Type" )
+ column=(type=char(20) update=yes updatewhereclause=yes name=cust_order_no dbname="Cust_Order_No" )
+ column=(type=decimal(0) update=yes updatewhereclause=yes name=back_order_no dbname="Back_Order_No" initial="0" validation="Number(GetText()) >= 0 and Number(GetText()) <= 99" validationmsg="~"Please enter a value between 0 and 99~"" )
+ column=(type=char(20) update=yes updatewhereclause=yes name=cust_code dbname="Cust_Code" )
+ column=(type=char(50) update=yes updatewhereclause=yes name=cust_name dbname="Cust_Name" )
+ column=(type=char(10) update=yes updatewhereclause=yes name=address_code dbname="Address_Code" )
+ column=(type=char(60) update=yes updatewhereclause=yes name=address_1 dbname="Address_1" )
+ column=(type=char(60) update=yes updatewhereclause=yes name=address_2 dbname="Address_2" )
+ column=(type=char(60) update=yes updatewhereclause=yes name=address_3 dbname="Address_3" )
+ column=(type=char(60) update=yes updatewhereclause=yes name=address_4 dbname="Address_4" )
+ column=(type=char(50) update=yes updatewhereclause=yes name=city dbname="City" )
+ column=(type=char(50) update=yes updatewhereclause=yes name=country dbname="Country" )
+ column=(type=char(50) update=yes updatewhereclause=yes name=contact_person dbname="Contact_Person" )
+ column=(type=char(20) update=yes updatewhereclause=yes name=tel dbname="Tel" )
+ column=(type=char(20) update=yes updatewhereclause=yes name=fax dbname="Fax" )
+ column=(type=char(250) update=yes updatewhereclause=yes name=remark dbname="Remark" )
+ column=(type=char(60) update=yes updatewhereclause=yes name=ship_via dbname="Ship_VIA" )
+ column=(type=char(40) update=yes updatewhereclause=yes name=ship_ref dbname="Ship_Ref" )
+ column=(type=char(50) update=yes updatewhereclause=yes name=invoice_no dbname="Invoice_No" )
+ column=(type=char(20) update=yes updatewhereclause=yes name=carrier dbname="Carrier" )
+ column=(type=char(20) update=yes updatewhereclause=yes name=freight_terms dbname="Freight_Terms" )
+ column=(type=datetime update=yes updatewhereclause=yes name=freight_etd dbname="Freight_ETD" )
+ column=(type=datetime update=yes updatewhereclause=yes name=freight_eta dbname="Freight_ETA" )
+ column=(type=datetime update=yes updatewhereclause=yes name=freight_atd dbname="Freight_ATD" )
+ column=(type=datetime update=yes updatewhereclause=yes name=freight_ata dbname="Freight_ATA" )
+ column=(type=decimal(3) update=yes updatewhereclause=yes name=freight_cost dbname="Freight_Cost" initial="0" )
+ column=(type=decimal(0) update=yes updatewhereclause=yes name=ctn_cnt dbname="Ctn_Cnt" initial="0" )
+ column=(type=decimal(5) update=yes updatewhereclause=yes name=weight dbname="Weight" initial="0" )
+ column=(type=char(255) update=yes updatewhereclause=yes name=user_field1 dbname="User_Field1" )
+ column=(type=char(255) update=yes updatewhereclause=yes name=user_field2 dbname="User_Field2" )
+ column=(type=char(255) update=yes updatewhereclause=yes name=user_field3 dbname="User_Field3" )
+ column=(type=char(255) update=yes updatewhereclause=yes name=user_field4 dbname="User_Field4" )
+ column=(type=char(255) update=yes updatewhereclause=yes name=user_field5 dbname="User_Field5" )
+ column=(type=char(255) update=yes updatewhereclause=yes name=user_field6 dbname="User_Field6" )
+ column=(type=char(255) update=yes updatewhereclause=yes name=user_field7 dbname="User_Field7" )
+ column=(type=char(255) update=yes updatewhereclause=yes name=user_field8 dbname="User_Field8" )
+ column=(type=char(255) update=yes updatewhereclause=yes name=user_field9 dbname="User_Field9" )
+ column=(type=char(255) update=yes updatewhereclause=yes name=user_field10 dbname="User_Field10" )
+ column=(type=char(255) update=yes updatewhereclause=yes name=user_field11 dbname="User_Field11" )
+ column=(type=char(255) update=yes updatewhereclause=yes name=user_field12 dbname="User_Field12" )
+ column=(type=char(255) update=yes updatewhereclause=yes name=user_field13 dbname="User_Field13" )
+ column=(type=char(255) update=yes updatewhereclause=yes name=user_field14 dbname="User_Field14" )
+ column=(type=char(255) update=yes updatewhereclause=yes name=user_field15 dbname="User_Field15" )
+ column=(type=char(255) update=yes updatewhereclause=yes name=user_field16 dbname="User_Field16" )
+ column=(type=char(255) update=yes updatewhereclause=yes name=user_field17 dbname="User_Field17" )
+ column=(type=char(255) update=yes updatewhereclause=yes name=user_field18 dbname="User_Field18" )
+ column=(type=char(255) update=yes updatewhereclause=yes name=user_field19 dbname="User_Field19" )
+ column=(type=char(255) update=yes updatewhereclause=yes name=user_field20 dbname="User_Field20" )
+ column=(type=char(255) update=yes updatewhereclause=yes name=user_field21 dbname="User_Field21" )
+ column=(type=char(255) update=yes updatewhereclause=yes name=user_field22 dbname="User_Field22" )
+ column=(type=char(25) update=yes updatewhereclause=yes name=last_user dbname="Last_User" )
+ column=(type=datetime update=yes updatewhereclause=yes name=last_update dbname="Last_Update" )
+ column=(type=char(50) update=yes updatewhereclause=yes name=state dbname="State" )
+ column=(type=char(50) update=yes updatewhereclause=yes name=zip dbname="Zip" )
+ column=(type=char(40) update=yes updatewhereclause=yes name=district dbname="District" )
+ column=(type=char(30) update=yes updatewhereclause=yes name=awb_bol_no dbname="AWB_BOL_No" )
+ column=(type=char(50) update=yes updatewhereclause=yes name=vics_bol_no dbname="Vics_BOL_No" )
+ column=(type=char(30) update=yes updatewhereclause=yes name=agent_info dbname="Agent_Info" )
+ column=(type=char(20) update=yes updatewhereclause=yes name=customs_doc dbname="Customs_Doc" )
+ column=(type=char(10) update=yes updatewhereclause=yes name=transport_mode dbname="Transport_Mode" )
+ column=(type=decimal(1) update=yes updatewhereclause=yes name=shipping_carton_volume dbname="Shipping_Carton_Volume" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=gemini_ind dbname="Gemini_Ind" initial="N" )
+ column=(type=char(28) update=yes updatewhereclause=yes name=description dbname="Description" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=type_of_product dbname="Type_of_Product" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=type_of_service dbname="Type_of_Service" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=type_of_payment dbname="Type_Of_Payment" )
+ column=(type=decimal(2) update=yes updatewhereclause=yes name=declared_value dbname="Declared_Value" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=delivery_confirm_ind dbname="Delivery_Confirm_Ind" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=confirmation_ind dbname="Confirmation_Ind" )
+ column=(type=char(1024) update=yes updatewhereclause=yes name=shipping_instructions dbname="shipping_instructions" )
+ column=(type=char(255) update=yes updatewhereclause=yes name=om_note_code_text dbname="Om_Note_code_text" )
+ column=(type=char(255) update=yes updatewhereclause=yes name=packlist_notes dbname="Packlist_Notes" )
+ column=(type=datetime update=yes updatewhereclause=yes name=edm_generate_datetime dbname="EDM_Generate_dateTime" )
+ column=(type=decimal(0) update=yes updatewhereclause=yes name=edi_batch_seq_no dbname="EDI_Batch_Seq_no" )
+ column=(type=char(20) update=yes updatewhereclause=yes name=gemini_order_no dbname="Gemini_order_no" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=vor_shipment_ind dbname="vor_shipment_ind" )
+ column=(type=decimal(0) update=yes updatewhereclause=yes name=batch_pick_id dbname="Batch_Pick_ID" )
+ column=(type=char(25) update=yes updatewhereclause=yes name=scanner_id dbname="Scanner_ID" initial="NONE" )
+ column=(type=char(10) update=yes updatewhereclause=yes name=scanner_status dbname="Scanner_Status" initial="READY" )
+ column=(type=char(10) update=yes updatewhereclause=yes name=line_of_business dbname="Line_of_Business" )
+ column=(type=char(30) update=yes updatewhereclause=yes name=consolidation_no dbname="Consolidation_No" )
+ column=(type=datetime update=yes updatewhereclause=yes name=carrier_notified_date dbname="Carrier_Notified_date" )
+ column=(type=char(20) update=yes updatewhereclause=yes name=trader_id dbname="Trader_ID" )
+ column=(type=char(20) update=yes updatewhereclause=yes name=contract_owner_id dbname="Contract_OWner_ID" )
+ column=(type=char(20) update=yes updatewhereclause=yes name=factory_id dbname="Factory_ID" )
+ column=(type=char(25) update=yes updatewhereclause=yes name=create_user dbname="Create_USer" )
+ column=(type=char(20) update=yes updatewhereclause=yes name=carrier_tracking_no dbname="carrier_tracking_no" )
+ column=(type=char(20) update=yes updatewhereclause=yes name=vat_id dbname="vat_id" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=crossdock_ind dbname="crossdock_ind" )
+ column=(type=char(50) update=yes updatewhereclause=yes name=trax_acct_no dbname="TRAX_ACCT_NO" )
+ column=(type=char(50) update=yes updatewhereclause=yes name=return_tracking_no dbname="Return_tracking_no" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=otm_status dbname="OTM_Status" )
+ column=(type=char(20) update=yes updatewhereclause=yes name=trax_duty_terms dbname="Trax_Duty_Terms" )
+ column=(type=char(50) update=yes updatewhereclause=yes name=trax_duty_acct_no dbname="Trax_Duty_Acct_No" )
+ column=(type=datetime update=yes updatewhereclause=yes name=otm_call_date dbname="OTM_Call_Date" )
+ column=(type=char(5) update=yes updatewhereclause=yes name=trax_pack_location dbname="Trax_Pack_Location" )
+ column=(type=char(25) update=yes updatewhereclause=yes name=pack_list_last_user dbname="Pack_List_Last_User" )
+ column=(type=datetime update=yes updatewhereclause=yes name=pack_list_last_update dbname="Pack_List_Last_Update" )
+ column=(type=char(25) update=yes updatewhereclause=yes name=confirmation_user dbname="Confirmation_User" )
+ column=(type=char(25) update=yes updatewhereclause=yes name=embargoed_override_user dbname="Embargoed_Override_User" )
+ column=(type=datetime update=yes updatewhereclause=yes name=embargoed_override_date dbname="Embargoed_Override_Date" )
+ column=(type=char(50) update=yes updatewhereclause=yes name=embargoed_override_license dbname="Embargoed_Override_License" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=otm_sent_ind dbname="OTM_Sent_Ind" )
+ column=(type=char(30) update=yes updatewhereclause=yes name=carrier_pro_no dbname="Carrier_Pro_No" )
+ column=(type=datetime update=yes updatewhereclause=yes name=pack_complete_date dbname="Pack_Complete_Date" )
+ column=(type=datetime update=yes updatewhereclause=yes name=authorized_to_ship_date dbname="authorized_to_Ship_Date" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=customer_order_status dbname="Customer_order_Status" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=ignore_shelflife_ind dbname="Ignore_Shelflife_ind" initial="N" )
+ column=(type=char(255) update=yes updatewhereclause=yes name=client_order_type dbname="Client_Order_Type" )
+ column=(type=decimal(0) update=yes updatewhereclause=yes name=ship_cnt dbname="Ship_Cnt" initial="1" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=mobile_enabled_ind dbname="Mobile_Enabled_Ind" )
+ column=(type=char(25) update=yes updatewhereclause=yes name=mobile_user_assigned dbname="Mobile_User_Assigned" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=mobile_status_ind dbname="Mobile_Status_Ind" )
+ column=(type=char(10) update=yes updatewhereclause=yes name=mobile_pack_location dbname="Mobile_Pack_Location" )
+ column=(type=datetime update=yes updatewhereclause=yes name=mobile_released_time dbname="Mobile_Released_Time" )
+ column=(type=datetime update=yes updatewhereclause=yes name=mobile_pick_start_time dbname="Mobile_Pick_Start_Time" )
+ column=(type=datetime update=yes updatewhereclause=yes name=mobile_pick_complete_time dbname="Mobile_Pick_Complete_Time" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=mobile_scan_all_units_req_ind dbname="Mobile_Scan_All_Units_Req_Ind" )
+ column=(type=char(50) update=yes updatewhereclause=yes name=email_address dbname="Email_Address" )
+ column=(type=char(20) update=yes updatewhereclause=yes name=account_nbr dbname="Account_Nbr" )
+ column=(type=char(20) update=yes updatewhereclause=yes name=asn_number dbname="ASN_Number" )
+ column=(type=char(20) update=yes updatewhereclause=yes name=client_cust_po_nbr dbname="Client_Cust_PO_Nbr" )
+ column=(type=char(20) update=yes updatewhereclause=yes name=client_cust_so_nbr dbname="Client_Cust_SO_Nbr" )
+ column=(type=char(20) update=yes updatewhereclause=yes name=container_nbr dbname="Container_Nbr" )
+ column=(type=char(10) update=yes updatewhereclause=yes name=dock_code dbname="Dock_Code" )
+ column=(type=char(255) update=yes updatewhereclause=yes name=document_codes dbname="Document_Codes" )
+ column=(type=decimal(0) update=yes updatewhereclause=yes name=equipment_nbr dbname="Equipment_Nbr" )
+ column=(type=char(3) update=yes updatewhereclause=yes name=fob dbname="FOB" )
+ column=(type=char(20) update=yes updatewhereclause=yes name=fob_bill_duty_acct dbname="FOB_Bill_Duty_Acct" )
+ column=(type=char(20) update=yes updatewhereclause=yes name=fob_bill_duty_party dbname="FOB_Bill_Duty_Party" )
+ column=(type=char(20) update=yes updatewhereclause=yes name=fob_bill_freight_party dbname="FOB_Bill_Freight_Party" )
+ column=(type=char(20) update=yes updatewhereclause=yes name=fob_bill_freight_to_acct dbname="FOB_Bill_Freight_To_Acct" )
+ column=(type=char(10) update=yes updatewhereclause=yes name=from_wh_loc dbname="From_Wh_Loc" )
+ column=(type=char(20) update=yes updatewhereclause=yes name=routing_nbr dbname="Routing_Nbr" )
+ column=(type=char(10) update=yes updatewhereclause=yes name=seal_nbr dbname="Seal_Nbr" )
+ column=(type=char(20) update=yes updatewhereclause=yes name=shipping_route dbname="Shipping_Route" )
+ column=(type=char(20) update=yes updatewhereclause=yes name=sli_nbr dbname="SLI_Nbr" )
+ column=(type=char(3) update=yes updatewhereclause=yes name=currency_code dbname="Currency_Code" )
+ column=(type=decimal(4) update=yes updatewhereclause=yes name=order_tax_amt dbname="Order_Tax_Amt" )
+ column=(type=decimal(4) update=yes updatewhereclause=yes name=order_discount_amt dbname="Order_Discount_Amt" )
+ column=(type=decimal(4) update=yes updatewhereclause=yes name=shipping_handling_amt dbname="Shipping_Handling_Amt" )
+ column=(type=char(20) update=yes updatewhereclause=yes name=source_type dbname="Source_Type" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=mobile_pack_status_ind dbname="Mobile_Pack_Status_Ind" )
+ column=(type=char(100) update=yes updatewhereclause=yes name=pick_sort_order dbname="Pick_Sort_Order" )
+ column=(type=datetime update=yes updatewhereclause=yes name=pack_start_time dbname="Pack_Start_Time" )
+ column=(type=char(12) updatewhereclause=yes name=load_id dbname="Load_Id" )
+ column=(type=char(20) updatewhereclause=yes name=shipment_id dbname="Shipment_Id" )
+ column=(type=decimal(0) updatewhereclause=yes name=stop_id dbname="Stop_Id" )
+ column=(type=char(1) updatewhereclause=yes name=load_lock dbname="Load_Lock" )
+ column=(type=char(20) updatewhereclause=yes name=master_bol dbname="Master_BOL" )
+ column=(type=decimal(0) updatewhereclause=yes name=load_sequence dbname="Load_Sequence" )
+ column=(type=datetime updatewhereclause=yes name=ready_by_date dbname="Ready_By_Date" )
+ retrieve="SELECT Delivery_Master.DO_No ,
+		Delivery_Master.Project_ID ,
+		Delivery_Master.Ord_Type ,
+		Delivery_Master.Priority ,
+		Delivery_Master.Ord_Date ,
+		Delivery_Master.Complete_Date , 
+		Delivery_Master.Pick_Start ,
+		Delivery_Master.Pick_Complete , 
+		Delivery_Master.Schedule_Date , 
+		Delivery_Master.Request_Date ,  
+		Delivery_Master.Delivery_Date , 
+		Delivery_Master.Receive_Date , 
+		Delivery_Master.Ord_Status , 
+		Delivery_Master.WH_Code ,  
+		Delivery_Master.Inventory_Type , 
+		Delivery_Master.Cust_Order_No ,   
+		Delivery_Master.Back_Order_No ,
+		Delivery_Master.Cust_Code ,
+		Delivery_Master.Cust_Name , 
+		Delivery_Master.Address_Code ,  
+		Delivery_Master.Address_1 , 
+		Delivery_Master.Address_2 , 
+		Delivery_Master.Address_3 , 
+		Delivery_Master.Address_4 , 
+		Delivery_Master.City ,  
+		Delivery_Master.Country ,  
+		Delivery_Master.Contact_Person , 
+		Delivery_Master.Tel ,
+		Delivery_Master.Fax ,  
+		Delivery_Master.Remark ,  
+		Delivery_Master.Ship_VIA , 
+		Delivery_Master.Ship_Ref ,  
+		Delivery_Master.Invoice_No , 
+		Delivery_Master.Carrier ,   
+		Delivery_Master.Freight_Terms ,  
+		Delivery_Master.Freight_ETD ,  
+		Delivery_Master.Freight_ETA ,  
+		Delivery_Master.Freight_ATD ,  
+		Delivery_Master.Freight_ATA ,  
+		Delivery_Master.Freight_Cost , 
+		Delivery_Master.Ctn_Cnt ,  
+		Delivery_Master.Weight ,
+		Delivery_Master.User_Field1 ,  
+		Delivery_Master.User_Field2 , 
+		Delivery_Master.User_Field3 , 
+		Delivery_Master.User_Field4 ,  
+		Delivery_Master.User_Field5 ,  
+		Delivery_Master.User_Field6 ,  
+		Delivery_Master.User_Field7 , 
+		Delivery_Master.User_Field8 , 
+		Delivery_Master.User_Field9 , 
+		Delivery_Master.User_Field10 , 
+		Delivery_Master.User_Field11 , 
+		Delivery_Master.User_Field12 , 
+		Delivery_Master.User_Field13 , 
+		Delivery_Master.User_Field14 , 
+		Delivery_Master.User_Field15 , 
+		Delivery_Master.User_Field16 , 
+		Delivery_Master.User_Field17 , 
+		Delivery_Master.User_Field18 , 
+		Delivery_Master.User_Field19 , 
+		Delivery_Master.User_Field20 , 
+		Delivery_Master.User_Field21 , 
+		Delivery_Master.User_Field22 , 
+		Delivery_Master.Last_User ,
+		Delivery_Master.Last_Update ,
+		Delivery_Master.State , 
+		Delivery_Master.Zip , 
+		Delivery_Master.District, 
+		Delivery_Master.AWB_BOL_No ,  Delivery_Master.Vics_BOL_No ,
+		Delivery_Master.Agent_Info ,
+		Delivery_Master.Customs_Doc ,
+		Delivery_Master.Transport_Mode ,
+		Delivery_Master.Shipping_Carton_Volume ,
+		Delivery_Master.Gemini_Ind, 
+		Delivery_Master.Description,
+		Delivery_Master.Type_of_Product,
+		Delivery_Master.Type_of_Service,
+		Delivery_Master.Type_Of_Payment,
+		Delivery_Master.Declared_Value,
+		Delivery_Master.Delivery_Confirm_Ind,
+		Delivery_Master.Confirmation_Ind, 
+		Delivery_Master.shipping_instructions, 
+		Delivery_Master.Om_Note_code_text, 
+		Delivery_Master.Packlist_Notes, 
+		Delivery_Master.EDM_Generate_dateTime, 
+		Delivery_Master.EDI_Batch_Seq_no, 
+		Delivery_Master.Gemini_order_no, 
+		Delivery_Master.vor_shipment_ind,	
+		Delivery_Master.Batch_Pick_ID, 
+		Delivery_Master.Scanner_ID, 
+		Delivery_Master.Scanner_Status,
+		Delivery_Master.Line_of_Business, 
+		Delivery_Master.Consolidation_No, 
+		Delivery_Master.Carrier_Notified_date, 
+		Delivery_Master.Trader_ID,
+		Delivery_Master.Contract_OWner_ID, 
+		Delivery_Master.Factory_ID,
+		Delivery_Master.Create_USer  ,
+		Delivery_Master.carrier_tracking_no ,
+		Delivery_Master.vat_id, 
+		Delivery_Master.crossdock_ind,
+		Delivery_Master.TRAX_ACCT_NO, 
+		Delivery_Master.Return_tracking_no, 
+		Delivery_Master.OTM_Status,
+		Delivery_Master.Trax_Duty_Terms,
+		Delivery_Master.Trax_Duty_Acct_No,
+		Delivery_Master.OTM_Call_Date,
+		Delivery_Master.Trax_Pack_Location,
+		Delivery_Master.Pack_List_Last_User,
+		Delivery_Master.Pack_List_Last_Update,
+		Delivery_Master.Confirmation_User,
+		Delivery_Master.Embargoed_Override_User,
+		Delivery_Master.Embargoed_Override_Date, 
+		Delivery_Master.Embargoed_Override_License,
+		Delivery_Master.OTM_Sent_Ind,
+		Delivery_Master.Carrier_Pro_No,
+		Delivery_Master.Pack_Complete_Date, 
+		Delivery_Master.authorized_to_Ship_Date, 
+		Delivery_Master.Customer_order_Status,
+	     Delivery_Master.Ignore_Shelflife_ind,
+		Delivery_Master.Client_Order_Type,
+		Delivery_Master.Ship_Cnt, 
+		Delivery_Master.Mobile_Enabled_Ind, 
+		Delivery_Master.Mobile_User_Assigned, 
+		Delivery_Master.Mobile_Status_Ind,
+		Delivery_Master.Mobile_Pack_Location, 
+		Delivery_Master.Mobile_Released_Time, 
+		Delivery_Master.Mobile_Pick_Start_Time,
+		Delivery_Master.Mobile_Pick_Complete_Time, 
+		Delivery_Master.Mobile_Scan_All_Units_Req_Ind,
+		Delivery_Master.Email_Address, 
+		Delivery_Master.Account_Nbr, 
+		Delivery_Master.ASN_Number,
+		Delivery_Master.Client_Cust_PO_Nbr,
+		Delivery_Master.Client_Cust_SO_Nbr,
+		Delivery_Master.Container_Nbr,
+		Delivery_Master.Dock_Code,
+		Delivery_Master.Document_Codes,
+		Delivery_Master.Equipment_Nbr,
+		Delivery_Master.FOB,
+		Delivery_Master.FOB_Bill_Duty_Acct,
+		Delivery_Master.FOB_Bill_Duty_Party,
+		Delivery_Master.FOB_Bill_Freight_Party,
+		Delivery_Master.FOB_Bill_Freight_To_Acct,
+		Delivery_Master.From_Wh_Loc,
+		Delivery_Master.Routing_Nbr,
+		Delivery_Master.Seal_Nbr,
+		Delivery_Master.Shipping_Route,
+		Delivery_Master.SLI_Nbr,
+		Delivery_Master.Currency_Code,
+		Delivery_Master.Order_Tax_Amt,
+		Delivery_Master.Order_Discount_Amt,    
+		Delivery_Master.Shipping_Handling_Amt,
+		Delivery_Master.Source_Type, 
+		Delivery_Master.Mobile_Pack_Status_Ind, 
+		Delivery_Master.Pick_Sort_Order, 
+		Delivery_Master.Pack_Start_Time,
+		Delivery_Master.Load_Id,
+		Delivery_Master.Shipment_Id,
+		Delivery_Master.Stop_Id,
+		Delivery_Master.Load_Lock,
+		Delivery_Master.Master_BOL,
+		Delivery_Master.Load_Sequence,
+		Delivery_Master.Ready_By_Date  
+FROM Delivery_Master   with(nolock)   
+WHERE ( Delivery_Master.DO_No = :a_order )   " arguments=(("a_order", string)) )
+text(band=detail alignment="1" text="Customer Name:" border="0" color="0" x="9" y="12" height="52" width="526" html.valueishtml="0"  name=cust_name_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+text(band=detail alignment="1" text="Address:" border="0" color="0" x="9" y="76" height="56" width="526" html.valueishtml="0"  name=address_1_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+text(band=detail alignment="1" text="District:" border="0" color="0" x="206" y="348" height="56" width="320" html.valueishtml="0"  name=district_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+text(band=detail alignment="1" text="City:" border="0" color="0" x="9" y="428" height="52" width="526" html.valueishtml="0"  name=city_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+text(band=detail alignment="1" text="State:" border="0" color="0" x="1664" y="428" height="52" width="366" html.valueishtml="0"  name=state_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+text(band=detail alignment="1" text="Zip:" border="0" color="0" x="9" y="492" height="56" width="526" html.valueishtml="0"  name=zip_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+text(band=detail alignment="1" text="Country:" border="0" color="0" x="1664" y="492" height="56" width="366" html.valueishtml="0"  name=country_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+text(band=detail alignment="1" text="Contact Person:" border="0" color="0" x="9" y="588" height="52" width="526" html.valueishtml="0"  name=contact_person_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+column(band=detail id=27 alignment="0" tabsequence=110 border="5" color="0" x="553" y="588" height="52" width="1070" format="[general]" html.valueishtml="0"  name=contact_person  tag="required" visible="1" edit.limit=40 edit.case=upper edit.focusrectangle=no edit.autoselect=yes edit.nilisnull=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1090519039" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+column(band=detail id=29 alignment="0" tabsequence=130 border="5" color="0" x="2043" y="588" height="52" width="923" format="[general]" html.valueishtml="0"  name=fax visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1090519039" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+text(band=detail alignment="1" text="Telephone:" border="0" color="0" x="9" y="668" height="52" width="526" html.valueishtml="0"  name=tel_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+column(band=detail id=69 alignment="0" tabsequence=60 border="5" color="0" x="553" y="348" height="56" width="928" format="[general]" html.valueishtml="0"  name=district visible="1" edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1090519039" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+column(band=detail id=25 alignment="0" tabsequence=70 border="5" color="0" x="553" y="428" height="52" width="928" format="[general]" html.valueishtml="0"  name=city  tag="required" visible="1" edit.limit=30 edit.case=upper edit.focusrectangle=no edit.autoselect=yes edit.nilisnull=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1090519039" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+column(band=detail id=68 alignment="0" tabsequence=90 border="5" color="0" x="553" y="492" height="56" width="681" format="[general]" html.valueishtml="0"  name=zip  tag="required" visible="1" edit.limit=0 edit.case=upper edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1090519039" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+column(band=detail id=67 alignment="0" tabsequence=80 border="5" color="0" x="2043" y="428" height="52" width="923" format="[general]" html.valueishtml="0"  name=state  tag="required" visible="1" edit.limit=2 edit.case=upper edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1090519039" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+column(band=detail id=26 alignment="0" tabsequence=100 border="5" color="0" x="2043" y="492" height="56" width="923" format="[general]" html.valueishtml="0"  name=country visible="1" dddw.name=dddw_country_2char dddw.displaycolumn=designating_code dddw.datacolumn=designating_code dddw.percentwidth=200 dddw.lines=0 dddw.limit=0 dddw.allowedit=no dddw.useasborder=yes dddw.case=upper dddw.nilisnull=yes dddw.autohscroll=yes dddw.vscrollbar=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1090519039" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+text(band=detail alignment="1" text="Address Code:" border="0" color="0" x="2542" y="212" height="56" width="334" html.valueishtml="0"  name=address_code_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+column(band=detail id=20 alignment="0" tabsequence=140 border="5" color="0" x="2898" y="212" height="56" width="517" format="[general]" html.valueishtml="0"  name=address_code visible="1" dddw.name=dddw_customer_address dddw.displaycolumn=address_code dddw.datacolumn=address_code dddw.percentwidth=200 dddw.lines=0 dddw.limit=0 dddw.allowedit=no dddw.useasborder=no dddw.case=any dddw.vscrollbar=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+column(band=detail id=24 alignment="0" tabsequence=50 border="5" color="0" x="553" y="284" height="52" width="1893" format="[general]" html.valueishtml="0"  name=address_4 visible="1" edit.limit=60 edit.case=upper edit.focusrectangle=no edit.autoselect=yes edit.nilisnull=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1090519039" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+column(band=detail id=23 alignment="0" tabsequence=40 border="5" color="0" x="553" y="212" height="56" width="1893" format="[general]" html.valueishtml="0"  name=address_3 visible="1" edit.limit=60 edit.case=upper edit.focusrectangle=no edit.autoselect=yes edit.nilisnull=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1090519039" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+column(band=detail id=22 alignment="0" tabsequence=30 border="5" color="0" x="553" y="144" height="60" width="1893" format="[general]" html.valueishtml="0"  name=address_2 visible="1" edit.limit=60 edit.case=upper edit.focusrectangle=no edit.autoselect=yes edit.nilisnull=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1090519039" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+column(band=detail id=21 alignment="0" tabsequence=20 border="5" color="0" x="553" y="76" height="56" width="1893" format="[general]" html.valueishtml="0"  name=address_1  tag="required" visible="1" edit.limit=60 edit.case=upper edit.focusrectangle=no edit.autoselect=yes edit.nilisnull=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1090519039" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+column(band=detail id=19 alignment="0" tabsequence=10 border="5" color="0" x="553" y="12" height="52" width="1893" format="[general]" html.valueishtml="0"  name=cust_name visible="1" edit.limit=40 edit.case=upper edit.focusrectangle=no edit.autoselect=yes edit.nilisnull=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1090519039" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+column(band=detail id=28 alignment="0" tabsequence=120 border="5" color="0" x="553" y="668" height="52" width="1070" format="[general]" html.valueishtml="0"  name=tel visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1090519039" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+text(band=detail alignment="1" text="Fax:" border="0" color="0" x="1664" y="588" height="52" width="366" html.valueishtml="0"  name=fax_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+text(band=detail alignment="1" text="Email Address:" border="0" color="33554432" x="1664" y="668" height="52" width="366" html.valueishtml="0"  name=email_address_t visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+column(band=detail id=133 alignment="0" tabsequence=150 border="5" color="0" x="2048" y="668" height="52" width="1152" format="[general]" html.valueishtml="0"  name=email_address visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1090519039" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+column(band=detail id=156 alignment="0" tabsequence=160 border="0" color="0" x="2839" y="28" height="56" width="462" format="[general]" html.valueishtml="0"  name=source_type visible="0" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1090519039" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" pagingmethod=0 generatedddwframes="1" )
+xhtmlgen() cssgen(sessionspecific="0" )
+xmlgen(inline="0" )
+xsltgen()
+jsgen()
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )
+export.xhtml()

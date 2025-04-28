@@ -1,0 +1,2 @@
+﻿$PBExportHeader$d_nike_delivery_no_list.srq
+PBSELECT( VERSION(400) TABLE(NAME="dbo.Delivery_Detail" ) COLUMN(NAME="dbo.Delivery_Detail.User_Field1")WHERE(    EXP1 ="dbo.Delivery_Detail.DO_No"   OP ="="    EXP2 =":do_no" ) ) ARG(NAME = "do_no" TYPE = string) 

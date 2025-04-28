@@ -1,0 +1,39 @@
+HA$PBExportHeader$f_is_non_tms.srf
+$PBExportComments$S25773 Identify NonTMS
+global type f_is_non_tms from function_object
+end type
+
+forward prototypes
+global function string f_is_non_tms (string asschcode, string asloadid, string aswh)
+end prototypes
+
+global function string f_is_non_tms (string asschcode, string asloadid, string aswh);//GailM 11/19/2018 S25773 Google TMS exception.  Return Y to indicate the order is excepted from TMS when normally it would not.
+//   Return Y is SchCd is not DOS, NOS, or PIU and LoadId is NA or na.
+//   Return T if this order is participating in TMS and has not been overriden by an NA in LoadId
+// TAM 2019/04/10 DE10036 - IF TMS enabled but Schcode is exempt return 'Z'
+
+String lsRtn = 'N'
+String lsTmsFlag = 'N'
+String lsTmsWHFlag = 'N'
+
+lsTmsFlag = f_retrieve_parm("PANDORA","FLAG","TMS")
+lsTmsWHFlag =  f_retrieve_parm("PANDORA","SKIP_TMS", asWH, "CODE_DESCRIPT")		//Return blank means this warehouse is participating in TMS
+
+//if lsTmsFlag = "Y" and lsTmsWHFlag = '' and asSchCode <> 'DOS' and asSchCode <> 'NOS' and asSchCode <> 'PIU' Then
+if lsTmsFlag = "Y" and lsTmsWHFlag = '' Then
+	if asSchCode <> 'DOS' and asSchCode <> 'NOS' and asSchCode <> 'PIU' and asSchCode <> 'GND' Then		//GailM 11/21/2019 Added GND DE13712
+		If Upper(asLoadId) = 'NA' Then
+			lsRtn = 'Z'
+		Else
+			lsRtn = 'T'		//Participating in TMS
+		End If
+	Else
+		lsRtn = 'Z'
+	End If
+
+End If
+
+Return lsRtn
+
+end function
+

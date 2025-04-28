@@ -1,0 +1,14 @@
+HA$PBExportHeader$d_workorder_report_instructions.srd
+$PBExportComments$- WorkOrder Report Instructions
+release 7;
+datawindow(units=0 timer_interval=0 color=16777215 processing=0 HTMLDW=no print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.prompt=no print.buttons=no print.preview.buttons=no )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=68 color="536870912"  height.autosize=yes)
+table(column=(type=decimal(0) updatewhereclause=yes name=workorder_bom_text_seq_no dbname="WorkOrder_BOM_Text.SEQ_NO" )
+ column=(type=char(250) updatewhereclause=yes name=bom_text_bom_text dbname="BOM_Text.BOM_TEXT" )
+ retrieve="PBSELECT( VERSION(400) TABLE(NAME=~"BOM_Text~" )  TABLE(NAME=~"WorkOrder_BOM_Text~" ) COLUMN(NAME=~"WorkOrder_BOM_Text.SEQ_NO~") COLUMN(NAME=~"BOM_Text.BOM_TEXT~")    JOIN (LEFT=~"WorkOrder_BOM_Text.Project_ID~"    OP =~"=~"RIGHT=~"BOM_Text.Project_ID~" )    JOIN (LEFT=~"WorkOrder_BOM_Text.BOM_TEXT_ID~"    OP =~"=~"RIGHT=~"BOM_Text.BOM_Text_ID~" )WHERE(    EXP1 =~"WorkOrder_BOM_Text.WO_NO~"   OP =~"=~"    EXP2 =~":asWONO~" ) ) ARG(NAME = ~"asWONO~" TYPE = string) " arguments=(("asWONO", string)) )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="0" color="0" x="9" y="4" height="60" width="155" format="[general]"  name=workorder_bom_text_seq_no edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="0" color="0" x="187" y="4" height="60" width="2651" format="[general]"  name=bom_text_bom_text height.autosize=yes edit.limit=250 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autovscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" )

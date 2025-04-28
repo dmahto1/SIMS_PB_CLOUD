@@ -1,0 +1,52 @@
+HA$PBExportHeader$d_do_serialno_ava.srd
+$PBExportComments$- Delivery Order Detail
+release 9;
+datawindow(units=0 timer_interval=0 color=16777215 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=4 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=72 color="536870912" )
+table(column=(type=char(10) updatewhereclause=yes name=project_id dbname="Project_ID" )
+ column=(type=char(50) updatewhereclause=yes name=sku dbname="SKU" )
+ column=(type=char(10) updatewhereclause=yes name=wh_code dbname="WH_Code" )
+ column=(type=char(10) updatewhereclause=yes name=l_code dbname="L_Code" )
+ column=(type=char(1) updatewhereclause=yes name=inventory_type dbname="Inventory_Type" )
+ column=(type=char(50) updatewhereclause=yes name=serial_no dbname="Serial_No" )
+ column=(type=char(50) updatewhereclause=yes name=lot_no dbname="Lot_No" )
+ column=(type=char(20) updatewhereclause=yes name=ro_no dbname="RO_No" )
+ column=(type=char(50) updatewhereclause=yes name=po_no dbname="PO_No" )
+ column=(type=decimal(5) updatewhereclause=yes name=avail_qty dbname="Avail_Qty" )
+ column=(type=decimal(0) updatewhereclause=yes name=owner_id dbname="Owner_id" )
+ column=(type=char(3) updatewhereclause=yes name=country_of_origin dbname="Country_of_origin" )
+ retrieve="  SELECT Content.Project_ID,   
+         Content.SKU,   
+         Content.WH_Code,   
+         Content.L_Code,   
+         Content.Inventory_Type,   
+         Content.Serial_No,   
+         Content.Lot_No,   
+         Content.RO_No,   
+         Content.PO_No,   
+         Content.Avail_Qty,  
+			Content.Owner_id , 
+			Content.Country_of_origin
+			
+    FROM Content  
+   WHERE ( Content.SKU = :as_sku ) AND  
+			(Content.Supp_Code = :as_supplier) And
+         ( Content.Avail_Qty > 0 )    
+" arguments=(("as_sku", string),("as_supplier", string)) )
+column(band=header id=1 alignment="0" tabsequence=32766 border="0" color="0" x="0" y="52" height="76" width="320" format="[general]" html.valueishtml="0"  name=project_id visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-12" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="0" color="0" x="279" y="300" height="76" width="320" format="[general]" html.valueishtml="0"  name=wh_code visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-12" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=5 alignment="0" tabsequence=32766 border="0" color="0" x="978" y="308" height="76" width="32" format="[general]" html.valueishtml="0"  name=inventory_type visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-12" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=7 alignment="0" tabsequence=32766 border="0" color="0" x="1051" y="292" height="76" width="640" format="[general]" html.valueishtml="0"  name=lot_no visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-12" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=8 alignment="0" tabsequence=32766 border="0" color="0" x="1769" y="300" height="76" width="640" format="[general]" html.valueishtml="0"  name=ro_no visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-12" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=9 alignment="0" tabsequence=32766 border="0" color="0" x="2441" y="300" height="76" width="640" format="[general]" html.valueishtml="0"  name=po_no visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-12" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=10 alignment="0" tabsequence=32766 border="0" color="0" x="3319" y="480" height="76" width="1376" format="[general]" html.valueishtml="0"  name=avail_qty visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-12" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=6 alignment="0" tabsequence=32766 border="0" color="0" x="9" y="4" height="64" width="581" format="[general]" html.valueishtml="0"  name=serial_no visible="1" edit.limit=0 edit.case=upper edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="0" color="0" x="599" y="4" height="64" width="384" format="[general]" html.valueishtml="0"  name=l_code visible="1" edit.limit=0 edit.case=upper edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

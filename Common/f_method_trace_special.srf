@@ -1,0 +1,34 @@
+HA$PBExportHeader$f_method_trace_special.srf
+global type f_method_trace_special from function_object
+end type
+
+forward prototypes
+global function long f_method_trace_special (string as_project, string as_object_name, string as_method_desc, string as_system_no, string as_ftp_file_name, string as_sql_string, string as_invoice_no)
+end prototypes
+
+global function long f_method_trace_special (string as_project, string as_object_name, string as_method_desc, string as_system_no, string as_ftp_file_name, string as_sql_string, string as_invoice_no);long		ll_trans_id
+string   as_version //21-Oct-2014  :Madhu added
+ulong lul_name_size = 32
+String	as_machine_name = Space (32)
+
+as_version = f_get_version() //21-Oct-2014  :Madhu added
+g.GetComputerNameA (as_machine_name, lul_name_size)
+//TimA 06/06/12
+//Get the gs_method_log_flag variable from lookup_table useing Project_ID and code_type = 'LOG_Trace'
+
+If gs_method_log_flag = 'Y' Then
+	IF gb_sqlca_connected = TRUE THEN
+
+		//ll_trans_id = Sqlca.sp_method_trace_log_upd( al_trans_id, as_project, 'sims3fp', as_object_name, as_method_desc )
+	//  ll_trans_id = Sqlca.sp_method_trace_sp_log_upd(as_project, 'SIMS', as_object_name, as_method_desc, as_system_no, as_FTP_File_Name,as_sql_string ) //08-Feb-2013  :Madhu commented	
+	//ll_trans_id = Sqlca.sp_method_trace_sp_log_upd (as_project, gs_userid, as_object_name, as_method_desc, as_system_no,as_FTP_File_Name,as_sql_string,as_invoice_no)  //08-Feb-2013  :Madhu added
+	ll_trans_id = Sqlca.sp_method_trace_sp_log_upd (as_project, gs_userid, as_object_name, as_method_desc, as_system_no,as_FTP_File_Name,as_sql_string,as_invoice_no,as_version, as_machine_name)  //21-Oct-2014  :Madhu added
+
+	END IF
+
+//	al_trans_id = ll_trans_id
+End if
+RETURN ll_trans_id
+
+end function
+

@@ -1,0 +1,141 @@
+﻿$PBExportHeader$d_klonelab_part_labels_nolock.srd
+$PBExportComments$Maquet Part Labels
+release 11.5;
+datawindow(units=0 timer_interval=0 color=1073741824 brushmode=0 transparency=0 gradient.angle=0 gradient.color=8421504 gradient.focus=0 gradient.repetition.count=0 gradient.repetition.length=100 gradient.repetition.mode=0 gradient.scale=100 gradient.spread=100 gradient.transparency=0 picture.blur=0 picture.clip.bottom=0 picture.clip.left=0 picture.clip.right=0 picture.clip.top=0 picture.mode=0 picture.scale.x=100 picture.scale.y=100 picture.transparency=0 processing=1 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes print.background=no print.preview.background=no print.preview.outline=yes hidegrayline=no showbackcoloronxp=no picture.file="" grid.lines=0 grid.columnmove=no )
+header(height=140 color="536870912" transparency="0" gradient.color="8421504" gradient.transparency="0" gradient.angle="0" brushmode="0" gradient.repetition.mode="0" gradient.repetition.count="0" gradient.repetition.length="100" gradient.focus="0" gradient.scale="100" gradient.spread="100" )
+summary(height=0 color="536870912" transparency="0" gradient.color="8421504" gradient.transparency="0" gradient.angle="0" brushmode="0" gradient.repetition.mode="0" gradient.repetition.count="0" gradient.repetition.length="100" gradient.focus="0" gradient.scale="100" gradient.spread="100" )
+footer(height=0 color="536870912" transparency="0" gradient.color="8421504" gradient.transparency="0" gradient.angle="0" brushmode="0" gradient.repetition.mode="0" gradient.repetition.count="0" gradient.repetition.length="100" gradient.focus="0" gradient.scale="100" gradient.spread="100" )
+detail(height=76 color="536870912" transparency="0" gradient.color="8421504" gradient.transparency="0" gradient.angle="0" brushmode="0" gradient.repetition.mode="0" gradient.repetition.count="0" gradient.repetition.length="100" gradient.focus="0" gradient.scale="100" gradient.spread="100" )
+table(column=(type=char(1) updatewhereclause=yes name=c_print_ind dbname="c_print_ind" values="	Y/	N" )
+ column=(type=decimal(5) updatewhereclause=yes name=no_of_copies dbname="Delivery_Detail.No_of_Copies" dbalias=".No_of_Copies" )
+ column=(type=decimal(5) updatewhereclause=yes name=delivery_detail_qty dbname="Delivery_Detail.QTY" dbalias=".QTY" )
+ column=(type=long updatewhereclause=yes identity=yes name=total_cartons dbname="Total_Cartons" )
+ column=(type=decimal(0) updatewhereclause=yes name=line_item_no dbname="Delivery_Detail.Line_Item_No" dbalias=".Line_Item_No" )
+ column=(type=char(50) updatewhereclause=yes name=sku dbname="sku" )
+ column=(type=char(87) updatewhereclause=yes name=label dbname="Label" values="CCS-Direct  ( 3 x 1 )	CCS-Direct/CCS-Retail  (3 x 1 )	CCS-Retail/Famous Footwear  (1.5x1.5 )	Famous Footwear/Stage Stores  (1.5x1.5 )	Stage Stores/Sportsman’s Guide  ( 3 x 1 )	Sportsman’s Guide/BlueStem  (3 x 1 )	BlueStem/Bob’s Stores  (1.7x2.5)	Bob’s Stores/Fred Meyer  (1.5x1.5 )	Fred Meyer/Mason Shoe Company  (2x1.5)	Mason Shoe Company/Genesco  (1.5x1.5 )	Genesco/Sears Canada  (4x6)	Sears Canada/" )
+ column=(type=char(50) updatewhereclause=yes name=cust_sku dbname="Cust_sku" )
+ column=(type=char(50) updatewhereclause=yes name=cust_size dbname="Cust_Size" )
+ column=(type=char(101) updatewhereclause=yes name=cust_sku_size dbname="Cust_sku_size" )
+ column=(type=char(222) updatewhereclause=yes name=klone_sku_desc_color dbname="Klone_sku_desc_color" )
+ column=(type=char(17) updatewhereclause=yes name=desc1 dbname="Desc1" )
+ column=(type=char(34) updatewhereclause=yes name=desc2 dbname="Desc2" )
+ column=(type=decimal(4) updatewhereclause=yes name=price dbname="Delivery_Detail.Price" dbalias=".Price" )
+ column=(type=char(41) updatewhereclause=yes name=upc dbname="Upc" )
+ column=(type=char(50) updatewhereclause=yes name=dept dbname="Dept" )
+ column=(type=char(20) updatewhereclause=yes name=class dbname="Class" )
+ column=(type=char(70) updatewhereclause=yes name=description dbname="Description" )
+ column=(type=char(20) updatewhereclause=yes name=season dbname="Season" )
+ column=(type=char(30) updatewhereclause=yes name=vendor_style dbname="Vendor_style" )
+ column=(type=char(100) updatewhereclause=yes name=color dbname="Color" )
+ column=(type=char(50) updatewhereclause=yes name=size dbname="Size" )
+ column=(type=char(30) updatewhereclause=yes name=shoebox_nbr dbname="Shoebox_nbr" )
+ column=(type=char(30) updatewhereclause=yes name=style dbname="Style" )
+ column=(type=char(20) updatewhereclause=yes name=cust_order_no dbname="cust_order_no" )
+ column=(type=char(40) updatewhereclause=yes name=addr1 dbname="Addr1" )
+ column=(type=char(40) updatewhereclause=yes name=addr2 dbname="Addr2" )
+ column=(type=char(40) updatewhereclause=yes name=addr3 dbname="Addr3" )
+ column=(type=char(84) updatewhereclause=yes name=wh_zip dbname="Wh_Zip" )
+ column=(type=char(1) updatewhereclause=yes name=ord_type dbname="ord_type" )
+ column=(type=char(50) updatewhereclause=yes name=cust_name dbname="cust_name" )
+ column=(type=char(60) updatewhereclause=yes name=cust_addr1 dbname="Cust_Addr1" )
+ column=(type=char(60) updatewhereclause=yes name=cust_addr2 dbname="cust_Addr2" )
+ column=(type=char(60) updatewhereclause=yes name=cust_addr3 dbname="cust_Addr3" )
+ column=(type=char(154) updatewhereclause=yes name=cust_zip dbname="cust_zip" )
+ column=(type=char(50) updatewhereclause=yes name=city dbname="city" )
+ column=(type=char(3) updatewhereclause=yes name=country_of_origin dbname="Country_Of_Origin" )
+ column=(type=decimal(2) updatewhereclause=yes identity=yes name=length dbname="length" )
+ column=(type=decimal(2) updatewhereclause=yes identity=yes name=width dbname="Width" )
+ column=(type=decimal(2) updatewhereclause=yes identity=yes name=height dbname="Height" )
+ column=(type=decimal(5) updatewhereclause=yes identity=yes name=weight_gross dbname="Weight_Gross" )
+ column=(type=char(50) updatewhereclause=yes name=po dbname="po" )
+ column=(type=char(100) updatewhereclause=yes name=carrier_load dbname="Carrier_load" )
+ retrieve="  SELECT Distinct
+			' ' as c_print_ind,
+			 dbo.Delivery_Detail.Req_Qty As No_of_Copies,
+			 dbo.Delivery_Detail.Alloc_Qty  As QTY,
+			(Select  Count(Distinct Carton_No) FROM Delivery_Packing Where  Delivery_Packing.DO_No = Delivery_Master.DO_No) As Total_Cartons ,
+
+			 dbo.Delivery_Detail.Line_Item_No,
+			rtrim(dbo.Delivery_Detail.Sku) as sku,
+			'                                                                                       ' As Label,
+			rtrim(dbo.Delivery_Detail.Customer_Sku) as Cust_sku,
+			rtrim(dbo.Item_Master.User_Field4) as Cust_Size,
+			rtrim(dbo.Delivery_Detail.Customer_Sku) + ' ' + rtrim(dbo.Item_Master.User_Field4)  as Cust_sku_size,
+			rtrim(dbo.Delivery_Detail.SKU) + '/' + rtrim(dbo.Item_Master.Description) + '/' + rtrim(dbo.Item_Master.User_Field1) as Klone_sku_desc_color,
+			rtrim(left(dbo.Delivery_Detail.Line_Item_Notes,17)) As Desc1,
+			rtrim(SubString(dbo.Delivery_Detail.Line_Item_Notes,18,34)) As Desc2,
+			dbo.Delivery_Detail.Price As Price,
+			rtrim(dbo.Item_Master.Part_UPC_Code) as Upc,
+			rtrim(dbo.Item_Master.User_Field5) as Dept,
+			rtrim(dbo.Delivery_Detail.User_Field1) as Class,
+			rtrim(dbo.Item_Master.Description) as Description,
+			rtrim(dbo.Delivery_Detail.User_Field2) as Season,
+			rtrim(dbo.Delivery_Detail.User_Field5) as Vendor_style,
+			rtrim(dbo.Item_Master.User_Field1) as Color,
+			rtrim(dbo.Item_Master.User_Field4) as Size,
+			rtrim(dbo.Delivery_Detail.User_Field8) as Shoebox_nbr,
+			rtrim(dbo.Delivery_Detail.User_Field6) as Style ,
+
+
+			rtrim(dbo.Delivery_Master.Cust_Order_No) AS cust_order_no ,
+			
+			rtrim(dbo.Warehouse.Address_1) AS Addr1 ,
+			rtrim(dbo.Warehouse.Address_2) AS Addr2 ,
+			rtrim(dbo.Warehouse.Address_3) AS Addr3 ,
+			rtrim(dbo.Warehouse.City) + SPACE(1)+ ',' + SPACE(1) + rtrim(dbo.Warehouse.State)+ SPACE(1)+ rtrim(dbo.Warehouse.Zip) as Wh_Zip ,
+		
+			rtrim(	dbo.Delivery_Master.ord_type) as ord_type,
+			rtrim(	dbo.Delivery_Master.Cust_Name) as cust_name ,
+			rtrim(dbo.Delivery_Master.Address_1) AS Cust_Addr1 ,
+			rtrim(dbo.Delivery_Master.Address_2) AS cust_Addr2 ,
+			rtrim(dbo.Delivery_Master.Address_3) AS cust_Addr3 ,
+			rtrim(dbo.Delivery_Master.City) + SPACE(1)+ ',' + SPACE(1) + rtrim(dbo.Delivery_Master.State)+ SPACE(1)+ rtrim(dbo.Delivery_Master.Zip) as cust_zip   ,
+			rtrim(dbo.Delivery_Master.City) as city ,			
+			
+			rtrim(dbo.Item_Master.Country_Of_Origin_Default) as Country_Of_Origin ,	
+			(Select  Distinct  TOP 1 Length FROM Delivery_Packing Where  Delivery_Packing.DO_No = Delivery_Master.DO_No) As length ,
+			(Select  Distinct TOP 1 Width FROM Delivery_Packing Where  Delivery_Packing.DO_No = Delivery_Master.DO_No) As Width,
+			(Select  Distinct TOP 1 Height FROM Delivery_Packing Where  Delivery_Packing.DO_No = Delivery_Master.DO_No) As Height,
+			(Select  Distinct  TOP 1 Weight_Gross FROM Delivery_Packing Where  Delivery_Packing.DO_No = Delivery_Master.DO_No) As Weight_Gross ,
+
+
+			rtrim(dbo.Delivery_Master.User_Field12) po,	
+			rtrim(dbo.Delivery_Master.User_Field20) Carrier_load
+		
+			
+			
+
+    FROM dbo.Delivery_Master WITH (NOLOCK) ,   
+         dbo.Delivery_Detail WITH (NOLOCK),   
+         dbo.Item_Master WITH (NOLOCK) ,
+		dbo.Warehouse WITH (NOLOCK)
+   WHERE ( dbo.Delivery_Detail.DO_No = dbo.Delivery_Master.DO_No ) and  
+         ( dbo.Delivery_Detail.Supp_Code = dbo.Item_Master.Supp_Code ) and  
+		( dbo.Delivery_Master.WH_Code = dbo.Warehouse.WH_Code) AND 
+         ( dbo.Delivery_Detail.SKU = dbo.Item_Master.SKU ) and  
+         ( dbo.Delivery_Master.Project_ID = dbo.Item_Master.Project_ID )    and
+			Delivery_Master.do_no = :asDONO  and
+			 Delivery_Master.Project_ID = 'KLONELAB'
+
+order by dbo.Delivery_Detail.Line_Item_No
+
+	" arguments=(("asDONO", string)) )
+text(band=header alignment="0" text="" border="6" color="33554432" x="9" y="4" height="124" width="151" html.valueishtml="0"  name=c_print_ind_t visible="1"  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+text(band=header alignment="2" text="Print # Labels" border="6" color="33554432" x="178" y="4" height="120" width="274" html.valueishtml="0"  name=delivery_detail_no_of_copies_t visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" background.transparency="0" background.gradient.color="0" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="0" background.gradient.focus="0" background.gradient.scale="0" background.gradient.spread="0" tooltip.backcolor="0" tooltip.delay.initial="0" tooltip.delay.visible="0" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="0" tooltip.transparency="0" transparency="0" )
+text(band=header alignment="2" text="Line Item No" border="6" color="33554432" x="462" y="4" height="120" width="411" html.valueishtml="0"  name=delivery_detail_line_item_no_t visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" background.transparency="0" background.gradient.color="0" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="0" background.gradient.focus="0" background.gradient.scale="0" background.gradient.spread="0" tooltip.backcolor="0" tooltip.delay.initial="0" tooltip.delay.visible="0" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="0" tooltip.transparency="0" transparency="0" )
+text(band=header alignment="2" text="Sku" border="6" color="33554432" x="882" y="4" height="120" width="1147" html.valueishtml="0"  name=delivery_detail_sku_t visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" background.transparency="0" background.gradient.color="0" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="0" background.gradient.focus="0" background.gradient.scale="0" background.gradient.spread="0" tooltip.backcolor="0" tooltip.delay.initial="0" tooltip.delay.visible="0" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="0" tooltip.transparency="0" transparency="0" )
+column(band=detail id=1 alignment="2" tabsequence=10 border="0" color="33554432~tIf(SKU=SKU_Parent,12632256,0)" x="9" y="8" height="60" width="151" format="[general]" html.valueishtml="0"  name=c_print_ind visible="1" checkbox.text="" checkbox.on="Y" checkbox.off="N" checkbox.scale=no checkbox.threed=yes  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+column(band=detail id=2 alignment="2" tabsequence=70 border="5" color="33554432" x="174" y="4" height="60" width="279" format="[general]" html.valueishtml="0"  name=no_of_copies visible="1" editmask.spin=yes editmask.mask="####0" editmask.spinincr=0 editmask.focusrectangle=no  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+column(band=detail id=5 alignment="2" tabsequence=80 border="5" color="33554432" x="466" y="4" height="60" width="407" format="[general]" html.valueishtml="0"  name=line_item_no visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+column(band=detail id=6 alignment="2" tabsequence=90 border="5" color="33554432" x="887" y="4" height="60" width="1143" format="[general]" html.valueishtml="0"  name=sku visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" background.transparency="0" background.gradient.color="8421504" background.gradient.transparency="0" background.gradient.angle="0" background.brushmode="0" background.gradient.repetition.mode="0" background.gradient.repetition.count="0" background.gradient.repetition.length="100" background.gradient.focus="0" background.gradient.scale="100" background.gradient.spread="100" tooltip.backcolor="134217752" tooltip.delay.initial="0" tooltip.delay.visible="32000" tooltip.enabled="0" tooltip.hasclosebutton="0" tooltip.icon="0" tooltip.isbubble="0" tooltip.maxwidth="0" tooltip.textcolor="134217751" tooltip.transparency="0" transparency="0" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" pagingmethod=0 generatedddwframes="1" )
+xhtmlgen() cssgen(sessionspecific="0" )
+xmlgen(inline="0" )
+xsltgen()
+jsgen()
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )
+export.xhtml()
+ 

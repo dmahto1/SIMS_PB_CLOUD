@@ -1,0 +1,96 @@
+HA$PBExportHeader$d_inventory_type.srd
+$PBExportComments$Data Window used for entering sku number
+release 11;
+datawindow(units=0 timer_interval=0 color=16777215 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 1 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes print.preview.outline=yes hidegrayline=no showbackcoloronxp=no )
+header(height=476 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=72 color="536870912" )
+table(column=(type=char(10) updatewhereclause=yes name=item_master_project_id dbname="Item_Master.Project_ID" dbalias=".Project_ID" )
+ column=(type=char(50) updatewhereclause=yes name=item_master_sku dbname="Item_Master.SKU" dbalias=".SKU" )
+ column=(type=char(20) updatewhereclause=yes name=item_master_supp_code dbname="Item_Master.Supp_Code" dbalias=".Supp_Code" )
+ column=(type=char(70) updatewhereclause=yes name=item_master_description dbname="Item_Master.Description" dbalias=".Description" )
+ column=(type=char(40) updatewhereclause=yes name=supplier_supp_name dbname="Supplier.Supp_Name" dbalias=".Supp_Name" )
+ column=(type=decimal(5) updatewhereclause=yes identity=yes name=qty dbname="qty" )
+ column=(type=decimal(5) updatewhereclause=yes name=weight dbname="Item_Master.weight" dbalias=".weight" )
+ column=(type=char(10) updatewhereclause=yes name=content_wh_code dbname="Content.WH_Code" dbalias=".WH_Code" )
+ column=(type=decimal(4) updatewhereclause=yes name=price dbname="Price_Master.price" dbalias=".price" )
+ retrieve=" SELECT dbo.Item_Master.Project_ID,   
+         dbo.Item_Master.SKU,   
+         dbo.Item_Master.Supp_Code,   
+         dbo.Item_Master.Description,   
+         dbo.Supplier.Supp_Name,   
+         sum(dbo.Content.Avail_Qty) as qty,   
+         dbo.Item_Master.Weight_1 as weight,   
+         dbo.Content.WH_Code,   
+         dbo.Price_Master.Price_1 as price
+    FROM dbo.Content,           
+         dbo.Supplier,                     
+         dbo.Price_Master right outer join dbo.Item_Master 
+         on dbo.Price_Master.Project_ID = dbo.Item_Master.Project_ID and                
+         dbo.Price_Master.SKU = dbo.Item_Master.SKU and         
+         dbo.Price_Master.Supp_Code = dbo.Item_Master.Supp_Code and
+         dbo.Price_Master.Price_Class in ('01', '1')                                                                                 
+  WHERE          
+         ( dbo.Item_Master.Project_ID = dbo.Content.Project_ID ) and  
+         ( dbo.Item_Master.SKU = dbo.Content.SKU ) and  
+         ( Item_Master.Supp_Code = dbo.Content.Supp_Code ) and  
+         ( dbo.Item_Master.Project_ID = dbo.Supplier.Project_ID ) and  
+         ( Item_Master.Supp_Code = dbo.Supplier.Supp_Code )          
+   Group by dbo.Item_Master.Project_ID,   
+         dbo.Item_Master.SKU,   
+         dbo.Item_Master.Supp_Code,   
+         dbo.Item_Master.Description,   
+         dbo.Supplier.Supp_Name,
+         dbo.Item_Master.Weight_1,    
+         dbo.Content.WH_Code,
+         dbo.Price_Master.Price_1;   
+"  sort="item_master_project_id A item_master_sku A item_master_supp_code A " )
+text(band=header alignment="0" text="INVENTORY BY TYPE" border="0" color="0" x="2025" y="124" height="80" width="759" html.valueishtml="0"  name=t_5 visible="1"  font.face="Arial" font.height="-12" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+line(band=header x1="0" y1="464" x2="4517" y2="464"  name=l_1 visible="1" pen.style="0" pen.width="5" pen.color="0"  background.mode="2" background.color="16777215" )
+text(band=header alignment="1" text="Report_id:" border="0" color="0" x="50" y="16" height="56" width="279" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="1" text="Project Id:" border="0" color="0" x="50" y="68" height="56" width="279" html.valueishtml="0"  name=item_master_project_id_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="1" text="Date:" border="0" color="0" x="50" y="120" height="56" width="279" html.valueishtml="0"  name=t_4 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="1" text="Warehouse:" border="0" color="0" x="27" y="172" height="56" width="302" html.valueishtml="0"  name=t_6 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="SIMS401" border="0" color="0" x="347" y="16" height="56" width="247" html.valueishtml="0"  name=t_3 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header id=1 alignment="0" tabsequence=32766 border="0" color="0" x="347" y="68" height="56" width="553" format="[general]" html.valueishtml="0"  name=item_master_project_id visible="1" edit.limit=10 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=header alignment="0" expression="today()"border="0" color="0" x="347" y="120" height="56" width="448" format="[SHORTDATE] [TIME]" html.valueishtml="0"  name=compute_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="" border="0" color="0" x="347" y="172" height="56" width="1083" html.valueishtml="0"  name=t_warehouse visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="
+SKU" border="0" color="0" x="5" y="340" height="112" width="699" html.valueishtml="0"  name=item_master_sku_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="
+DESCRIPTION" border="0" color="0" x="722" y="340" height="112" width="987" html.valueishtml="0"  name=item_master_description_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="
+SUPPLIER" border="0" color="0" x="1723" y="340" height="112" width="503" html.valueishtml="0"  name=item_master_supp_code_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="SUPPLIER
+NAME" border="0" color="0" x="2240" y="340" height="112" width="855" html.valueishtml="0"  name=supplier_supp_name_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="1" text="QTY" border="0" color="0" x="3360" y="340" height="112" width="119" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="1" text="WEIGHT" border="0" color="0" x="3506" y="340" height="112" width="238" html.valueishtml="0"  name=t_7 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="1" text="EXTENDED
+WEIGHT" border="0" color="0" x="3735" y="340" height="112" width="283" html.valueishtml="0"  name=t_8 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="1" text="
+PRICE" border="0" color="0" x="4037" y="340" height="112" width="215" html.valueishtml="0"  name=t_9 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="1" text="EXTENDED
+PRICE" border="0" color="0" x="4233" y="340" height="112" width="279" html.valueishtml="0"  name=t_10 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="Page:" border="0" color="0" x="4119" y="88" height="56" width="137" html.valueishtml="0"  name=t_11 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=header alignment="0" expression="page() + ' of ' + pagecount()"border="0" color="0" x="4270" y="88" height="56" width="219" format="[GENERAL]" html.valueishtml="0"  name=compute_4 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="0" color="0" x="9" y="4" height="56" width="699" format="[general]" html.valueishtml="0"  name=item_master_sku visible="1" edit.limit=50 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="0" color="0" x="722" y="4" height="56" width="987" format="[general]" html.valueishtml="0"  name=item_master_description visible="1" edit.limit=70 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="0" color="0" x="1723" y="4" height="56" width="503" format="[general]" html.valueishtml="0"  name=item_master_supp_code visible="1" edit.limit=20 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="0" tabsequence=32766 border="0" color="0" x="2240" y="4" height="56" width="855" format="[general]" html.valueishtml="0"  name=supplier_supp_name visible="1" edit.limit=40 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="1" tabsequence=32766 border="0" color="0" x="3109" y="4" height="56" width="370" format="#######.#####" html.valueishtml="0"  name=qty visible="1" editmask.mask="#######.#####" editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=7 alignment="1" tabsequence=32766 border="0" color="0" x="3502" y="4" height="56" width="242" format="[general]" html.valueishtml="0"  name=weight visible="1" edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=9 alignment="1" tabsequence=32766 border="0" color="0" x="4050" y="4" height="56" width="215" format="###,###.00" html.valueishtml="0"  name=price visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=detail alignment="1" expression=" qty * price "border="0" color="0" x="4283" y="4" height="56" width="238" format="#######.00" html.valueishtml="0"  name=compute_3 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=detail alignment="1" expression=" qty * weight "border="0" color="0" x="3762" y="4" height="56" width="247" format="[GENERAL]" html.valueishtml="0"  name=compute_2 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" pagingmethod=0 generatedddwframes="1" )
+xhtmlgen() cssgen(sessionspecific="0" )
+xmlgen(inline="0" )
+xsltgen()
+jsgen()
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )
+export.xhtml()
+ 

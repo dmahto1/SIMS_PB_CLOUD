@@ -1,0 +1,66 @@
+﻿$PBExportHeader$d_3com_rma_outbound_label.srd
+$PBExportComments$Pandora RMA Label
+release 9;
+datawindow(units=0 timer_interval=0 color=1090519039 processing=1 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no grid.lines=0 )
+header(height=132 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=76 color="536870912" )
+table(column=(type=char(20) updatewhereclause=yes name=cust_order_no dbname="Cust_Order_No" )
+ column=(type=char(16) updatewhereclause=yes name=delivery_master_do_no dbname="DO_No" )
+ column=(type=char(10) updatewhereclause=yes name=delivery_master_project_id dbname="Project_ID" )
+ column=(type=char(1) updatewhereclause=yes name=c_label_format dbname="c_label_format" )
+ column=(type=char(1) updatewhereclause=yes name=c_print_ind dbname="c_print_ind" values="	Y/	N" )
+ column=(type=char(50) updatewhereclause=yes name=invoice_no dbname="Invoice_No" )
+ column=(type=char(50) updatewhereclause=yes name=sku dbname="sku" )
+ column=(type=decimal(5) updatewhereclause=yes name=alloc_qty dbname="alloc_qty" )
+ column=(type=datetime updatewhereclause=yes name=complete_date dbname="Complete_Date" )
+ column=(type=char(50) updatewhereclause=yes name=alternate_sku dbname="Alternate_Sku" )
+ column=(type=char(30) updatewhereclause=yes name=user_field4 dbname="User_Field4" )
+ column=(type=char(30) updatewhereclause=yes name=user_field6 dbname="User_Field6" )
+ column=(type=char(100) updatewhereclause=yes name=country dbname="country" )
+ column=(type=long updatewhereclause=yes name=c_print_qty dbname="c_print_qty" )
+ retrieve="  SELECT DISTINCT    
+         Delivery_Master.Cust_Order_No,      
+         Delivery_Master.DO_No,   
+         Delivery_Master.Project_ID,   
+         ' ' as c_label_format,   
+         ' ' as c_print_ind,   
+         Delivery_Master.Invoice_No, 
+         Delivery_Detail.sku,  
+			Delivery_Detail.alloc_qty,
+         Delivery_Master.Complete_Date,
+			Item_Master.Alternate_Sku,
+			Delivery_Detail.User_Field4,
+			Delivery_Detail.User_Field6,
+         Delivery_Master.country,
+			1 as c_print_qty
+
+    FROM Delivery_Detail,   
+         Item_Master,   
+         Delivery_Master 
+   WHERE  Delivery_Master.Do_NO = Delivery_Detail.Do_NO And
+         ( Item_Master.sku = Delivery_Detail.sku ) and  
+         ( Item_Master.supp_code = Delivery_Detail.supp_code ) and  
+         ( Item_Master.project_id = Delivery_Master.Project_ID ) and 
+         ( ( Delivery_Master.Project_ID = :as_project_id ) AND  
+         ( Delivery_Master.do_No = :as_do_no ) ) 
+" arguments=(("as_project_id", string),("as_do_no", string)) )
+text(band=header alignment="2" text="Prt" border="6" color="0" x="9" y="8" height="112" width="96" html.valueishtml="0"  name=obj_53251992 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="80269524" )
+text(band=header alignment="2" text="Sku" border="6" color="0" x="480" y="8" height="112" width="818" html.valueishtml="0"  name=sku_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="134217750" )
+text(band=header alignment="2" text="RMA Number" border="6" color="0" x="1307" y="8" height="112" width="466" html.valueishtml="0"  name=user_field4_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="RMA Contract
+Warranty" border="6" color="0" x="1783" y="8" height="112" width="453" html.valueishtml="0"  name=user_field6_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Country" border="6" color="0" x="2245" y="8" height="112" width="421" html.valueishtml="0"  name=country_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="2" text="Copies" border="6" color="0" x="114" y="8" height="112" width="357" html.valueishtml="0"  name=c_print_qty_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+column(band=detail id=11 alignment="0" tabsequence=40 border="0" color="0" x="1307" y="8" height="60" width="466" format="[general]" html.valueishtml="0"  name=user_field4 visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1090519039" )
+column(band=detail id=12 alignment="0" tabsequence=50 border="0" color="0" x="1783" y="8" height="60" width="453" format="[general]" html.valueishtml="0"  name=user_field6 visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1090519039" )
+column(band=detail id=13 alignment="0" tabsequence=60 border="0" color="0" x="2245" y="8" height="60" width="421" format="[general]" html.valueishtml="0"  name=country visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1090519039" )
+column(band=detail id=7 alignment="2" tabsequence=30 border="0" color="0" x="480" y="8" height="60" width="818" format="[general]" html.valueishtml="0"  name=sku visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1090519039" )
+column(band=detail id=14 alignment="2" tabsequence=20 border="0" color="0" x="119" y="8" height="60" width="352" format="[general]" html.valueishtml="0"  name=c_print_qty visible="1" editmask.spin=yes editmask.mask="####" editmask.imemode=0 editmask.spinincr=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1090519039" )
+column(band=detail id=5 alignment="2" tabsequence=10 border="0" color="0" x="9" y="8" height="60" width="96" format="[general]" html.valueishtml="0"  name=c_print_ind visible="1" checkbox.text="" checkbox.on="Y" checkbox.off="N" checkbox.scale=no checkbox.threed=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1090519039" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

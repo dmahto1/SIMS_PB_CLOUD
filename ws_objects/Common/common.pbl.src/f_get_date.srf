@@ -1,0 +1,52 @@
+﻿$PBExportHeader$f_get_date.srf
+global type f_get_date from function_object
+end type
+
+forward prototypes
+global function datetime f_get_date (string as_what_date)
+end prototypes
+
+global function datetime f_get_date (string as_what_date);//*************************************************************************//
+//* This function will return the todays() date in format mm/dd/yyyy 00:00 //
+//*************************************************************************//
+
+// pvh 02.17.06 - gmt
+// reworked for GMT
+
+datetime ldt_begin_date
+datetime ldt_end_date
+
+datetime ldtToday
+
+time		lt_begin_time = 00:00:00
+time		lt_end_time = 23:59:59
+time		ltTime
+
+date		ld_date
+
+ldtToday = f_getlocalworldtime( gs_default_wh )
+
+ltTime = lt_end_time
+IF as_what_date = "BEGIN" THEN	ltTime = lt_begin_time
+ld_date = date( ldtToday )
+
+return datetime( ld_date, ltTime )
+//
+// old code
+//
+//ld_date = today()
+//IF as_what_date = "BEGIN" THEN
+//	lt_begin_time = 00:00:01
+//	ldt_begin_date = datetime(ld_date, lt_begin_time)
+//	return ldt_begin_date
+//ELSE
+//	lt_end_time = 23:59:59
+//	ldt_end_date = datetime(ld_date, lt_end_time)
+//	return ldt_end_date
+//END IF
+
+
+
+
+end function
+

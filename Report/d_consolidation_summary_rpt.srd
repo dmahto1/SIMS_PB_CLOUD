@@ -1,0 +1,124 @@
+HA$PBExportHeader$d_consolidation_summary_rpt.srd
+$PBExportComments$Inbound Consolidation Report
+release 11;
+datawindow(units=0 timer_interval=0 color=16777215 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 1 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes print.preview.outline=yes hidegrayline=no showbackcoloronxp=no )
+header(height=420 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=92 color="536870912" height.autosize=yes )
+table(column=(type=char(10) update=yes updatewhereclause=yes name=project_id dbname="Project_ID" )
+ column=(type=char(30) update=yes updatewhereclause=yes name=consolidation_no dbname="Consolidation_No" )
+ column=(type=char(10) update=yes updatewhereclause=yes name=from_wh_code dbname="From_wh_Code" )
+ column=(type=char(10) update=yes updatewhereclause=yes name=to_wh_code dbname="To_wh_Code" )
+ column=(type=datetime update=yes updatewhereclause=yes name=ord_date dbname="Ord_Date" )
+ column=(type=decimal(0) update=yes updatewhereclause=yes name=ctn_cnt dbname="Ctn_Cnt" )
+ column=(type=decimal(3) update=yes updatewhereclause=yes name=weight dbname="Weight" )
+ column=(type=datetime update=yes updatewhereclause=yes name=receive_date dbname="Receive_Date" )
+ column=(type=datetime updatewhereclause=yes name=consolidation_master_ship_date dbname="Ship_Date" )
+ column=(type=datetime updatewhereclause=yes name=crossdock_complete_date dbname="crossdock_Complete_Date" )
+ column=(type=char(20) update=yes updatewhereclause=yes name=awb_bol_nbr dbname="AWB_BOL_Nbr" )
+ column=(type=char(20) update=yes updatewhereclause=yes name=master_awb_bol_no dbname="Master_AWB_BOL_No" )
+ column=(type=datetime update=yes updatewhereclause=yes name=customs_clearance_date dbname="Customs_Clearance_Date" )
+ column=(type=char(250) update=yes updatewhereclause=yes name=remarks dbname="Remarks" )
+ column=(type=datetime updatewhereclause=yes name=port_arrival_date dbname="Port_Arrival_Date" )
+ column=(type=long updatewhereclause=yes name=final_order_count dbname="Final_Order_Count" )
+ retrieve="SELECT Distinct  Consolidation_Master.Project_ID,   
+         Consolidation_Master.Consolidation_No,   
+         Consolidation_Master.From_wh_Code,   
+         Consolidation_Master.To_wh_Code,   
+         Consolidation_Master.Ord_Date,   
+         Consolidation_Master.Ctn_Cnt,   
+         Consolidation_Master.Weight,   
+         Consolidation_Master.Receive_Date,
+			Consolidation_Master.Ship_Date,   
+         Consolidation_Master.crossdock_Complete_Date,   
+         Consolidation_Master.AWB_BOL_Nbr,   
+         Consolidation_Master.Master_AWB_BOL_No,   
+         Consolidation_Master.Customs_Clearance_Date,   
+         Consolidation_Master.Remarks,   
+         Consolidation_Master.Port_Arrival_Date, 
+			Count (do_no) as Final_Order_Count 
+    FROM Consolidation_Master
+    LEFT OUTER JOIN Delivery_Master  
+      ON Consolidation_Master.Project_ID = Delivery_Master.Project_ID and  
+         Consolidation_Master.Consolidation_No = Delivery_Master.Consolidation_No and
+		 Consolidation_Master.to_wh_code = Delivery_Master.wh_Code   
+   WHERE 1 = 1
+Group By Consolidation_Master.Project_ID,   
+         Consolidation_Master.Consolidation_No,   
+         Consolidation_Master.From_wh_Code,   
+         Consolidation_Master.To_wh_Code,   
+         Consolidation_Master.Ord_Date,   
+         Consolidation_Master.Ctn_Cnt,   
+         Consolidation_Master.Weight,   
+         Consolidation_Master.Receive_Date,   
+			Consolidation_Master.Ship_Date, 
+         Consolidation_Master.crossdock_Complete_Date,   
+         Consolidation_Master.AWB_BOL_Nbr,   
+         Consolidation_Master.Master_AWB_BOL_No,   
+         Consolidation_Master.Customs_Clearance_Date,   
+         Consolidation_Master.Remarks,   
+         Consolidation_Master.Port_Arrival_Date" )
+group(level=1 header.height=0 trailer.height=28 by=("consolidation_no" ) header.color="536870912" trailer.color="536870912" )
+text(band=header alignment="2" text="Consolidation Summary Report" border="0" color="0" x="5" y="8" height="100" width="4590" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-16" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=header alignment="1" expression="'Page: ' + Page() + ' of ' + PageCount()"border="0" color="0" x="3803" y="4" height="56" width="795" format="[GENERAL]" html.valueishtml="0"  name=compute_2 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="House" border="0" color="0" x="9" y="272" height="56" width="215" html.valueishtml="0"  name=t_3 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="AWB" border="0" color="0" x="9" y="320" height="56" width="215" html.valueishtml="0"  name=awb_bol_nbr_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Consolidation" border="0" color="0" x="846" y="272" height="56" width="407" html.valueishtml="0"  name=t_6 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Number" border="0" color="0" x="846" y="320" height="56" width="407" html.valueishtml="0"  name=consolidation_no_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="AWB" border="0" color="0" x="411" y="320" height="56" width="256" html.valueishtml="0"  name=master_awb_bol_no_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Master" border="0" color="0" x="411" y="272" height="56" width="256" html.valueishtml="0"  name=t_5 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="Origin" border="0" color="0" x="1294" y="320" height="56" width="251" html.valueishtml="0"  name=from_wh_code_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="Dest" border="0" color="0" x="1623" y="320" height="56" width="187" html.valueishtml="0"  name=to_wh_code_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="1" text="Weight" border="0" color="0" x="1934" y="320" height="56" width="283" html.valueishtml="0"  name=weight_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Carton" border="0" color="0" x="1801" y="272" height="56" width="242" html.valueishtml="0"  name=ctn_cnt_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Count" border="0" color="0" x="1801" y="320" height="56" width="242" html.valueishtml="0"  name=t_7 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Ship" border="0" color="0" x="2217" y="276" height="56" width="187" html.valueishtml="0"  name=t_14 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Count" border="0" color="0" x="2217" y="324" height="56" width="187" html.valueishtml="0"  name=t_15 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Shipped" border="0" color="0" x="2373" y="272" height="56" width="325" html.valueishtml="0"  name=t_9 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="From Fac" border="0" color="0" x="2368" y="320" height="56" width="329" html.valueishtml="0"  name=ord_date_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Arrived at" border="0" color="0" x="3086" y="272" height="56" width="334" html.valueishtml="0"  name=t_12 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Port" border="0" color="0" x="3086" y="320" height="56" width="334" html.valueishtml="0"  name=t_13 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="X-Dock" border="0" color="0" x="4256" y="272" height="56" width="274" html.valueishtml="0"  name=complete_date_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Complete" border="0" color="0" x="4256" y="320" height="56" width="274" html.valueishtml="0"  name=t_11 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Customs " border="0" color="0" x="3776" y="272" height="56" width="471" html.valueishtml="0"  name=customs_clearance_date_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Cleared" border="0" color="0" x="3776" y="320" height="56" width="471" html.valueishtml="0"  name=t_10 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Rcvd at" border="0" color="0" x="3451" y="268" height="56" width="251" html.valueishtml="0"  name=receive_date_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Dest WH" border="0" color="0" x="3419" y="320" height="56" width="315" html.valueishtml="0"  name=t_8 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Shipped" border="0" color="0" x="2688" y="272" height="56" width="325" html.valueishtml="0"  name=t_16 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Src WH" border="0" color="0" x="2688" y="312" height="56" width="325" html.valueishtml="0"  name=t_17 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="Project:" border="0" color="0" x="0" y="8" height="56" width="247" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+line(band=header x1="5" y1="380" x2="4585" y2="380"  name=l_1 visible="1" pen.style="0" pen.width="14" pen.color="0"  background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="Date:" border="0" color="0" x="0" y="52" height="56" width="247" html.valueishtml="0"  name=t_4 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header id=1 alignment="0" tabsequence=32766 border="0" color="0" x="210" y="8" height="56" width="411" format="[general]" html.valueishtml="0"  name=project_id visible="1" edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="0" expression="String(Today(),'mm/dd/yyyy hh:mm')"border="0" color="0" x="210" y="52" height="56" width="411" format="[GENERAL]" html.valueishtml="0"  name=compute_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="SIMS906" border="0" color="0" x="210" y="96" height="56" width="411" html.valueishtml="0"  name=t_19 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="Report:" border="0" color="0" x="0" y="96" height="56" width="247" html.valueishtml="0"  name=t_18 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=11 alignment="0" tabsequence=32766 border="0" color="0" x="9" y="4" height="60" width="393" format="[general]" html.valueishtml="0"  name=awb_bol_nbr visible="1" edit.limit=20 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=12 alignment="0" tabsequence=32766 border="0" color="0" x="425" y="8" height="60" width="393" format="[general]" html.valueishtml="0"  name=master_awb_bol_no visible="1" edit.limit=20 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="0" color="0" x="841" y="8" height="60" width="430" format="[general]" html.valueishtml="0"  name=consolidation_no visible="1" edit.limit=30 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="0" color="0" x="1294" y="8" height="60" width="302" format="[general]" html.valueishtml="0"  name=from_wh_code visible="1" edit.limit=10 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="0" color="0" x="1618" y="8" height="60" width="229" format="[general]" html.valueishtml="0"  name=to_wh_code visible="1" edit.limit=10 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="1" tabsequence=32766 border="0" color="0" x="1874" y="8" height="60" width="146" format="[general]" html.valueishtml="0"  name=ctn_cnt visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=7 alignment="1" tabsequence=32766 border="0" color="0" x="2048" y="8" height="60" width="174" format="#########.#####" html.valueishtml="0"  name=weight visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=16 alignment="1" tabsequence=32766 border="0" color="0" x="2245" y="8" height="60" width="133" format="#######" html.valueishtml="0"  name=final_order_count visible="1" edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="0" tabsequence=32766 border="0" color="0" x="2414" y="8" height="60" width="274" format="[shortdate]" html.valueishtml="0"  name=ord_date visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=9 alignment="0" tabsequence=32766 border="0" color="0" x="2711" y="8" height="60" width="357" format="[shortdate] hh:mm" html.valueishtml="0"  name=consolidation_master_ship_date visible="1" edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=15 alignment="0" tabsequence=32766 border="0" color="0" x="3090" y="8" height="60" width="357" format="[shortdate] hh:mm" html.valueishtml="0"  name=port_arrival_date visible="1" edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=8 alignment="0" tabsequence=32766 border="0" color="0" x="3470" y="8" height="60" width="357" format="[shortdate] hh:mm" html.valueishtml="0"  name=receive_date visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=detail alignment="0" text="Remarks:" border="0" color="0" x="146" y="92" height="56" width="315" html.valueishtml="0"  name=remarks_t visible="1~tIf( remarks >'',1,0)"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=14 alignment="0" tabsequence=32766 border="0" color="0" x="480" y="96" height="60" width="3877" format="[general]" html.valueishtml="0"  name=remarks visible="1~tIf( remarks >'',1,0)" height.autosize=yes edit.limit=250 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=13 alignment="0" tabsequence=32766 border="0" color="0" x="3849" y="8" height="60" width="357" format="[shortdate] hh:mm" html.valueishtml="0"  name=customs_clearance_date visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=10 alignment="0" tabsequence=32766 border="0" color="0" x="4229" y="8" height="60" width="357" format="[shortdate] hh:mm" html.valueishtml="0"  name=crossdock_complete_date visible="1" edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+line(band=trailer.1 x1="5" y1="4" x2="4585" y2="4"  name=l_2 visible="1" pen.style="0" pen.width="5" pen.color="0"  background.mode="2" background.color="16777215" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" pagingmethod=0 generatedddwframes="1" )
+xhtmlgen() cssgen(sessionspecific="0" )
+xmlgen(inline="0" )
+xsltgen()
+jsgen()
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )
+export.xhtml()
+ 

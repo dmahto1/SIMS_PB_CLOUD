@@ -1,0 +1,86 @@
+HA$PBExportHeader$d_batch_pick_orders.srd
+$PBExportComments$*Datastore for filling batch Pick Orders
+release 7;
+datawindow(units=0 timer_interval=0 color=16777215 processing=1 HTMLDW=no print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.prompt=no print.buttons=no print.preview.buttons=no grid.lines=0 )
+header(height=124 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=76 color="536870912" )
+table(column=(type=char(16) updatewhereclause=yes name=do_no dbname="Delivery_Master.DO_No" )
+ column=(type=char(10) updatewhereclause=yes name=project_id dbname="Delivery_Master.Project_ID" )
+ column=(type=char(10) updatewhereclause=yes name=wh_code dbname="Delivery_Master.WH_Code" )
+ column=(type=char(1) updatewhereclause=yes name=ord_status dbname="Delivery_Master.Ord_Status" )
+ column=(type=char(1) updatewhereclause=yes name=inventory_type dbname="Delivery_Master.Inventory_Type" )
+ column=(type=char(50) updatewhereclause=yes name=invoice_no dbname="Delivery_Master.Invoice_No" )
+ column=(type=decimal(0) updatewhereclause=yes name=edi_batch_seq_no dbname="Delivery_Master.EDI_Batch_Seq_No" )
+ column=(type=decimal(0) updatewhereclause=yes name=batch_pick_id dbname="Delivery_Master.Batch_Pick_ID" )
+ column=(type=char(50) updatewhereclause=yes name=sku dbname="Delivery_Detail.SKU" )
+ column=(type=char(20) updatewhereclause=yes name=supp_code dbname="Delivery_Detail.Supp_code" )
+ column=(type=decimal(0) updatewhereclause=yes name=owner_id dbname="Delivery_Detail.Owner_ID" )
+ column=(type=decimal(5) updatewhereclause=yes name=req_qty dbname="Delivery_Detail.Req_Qty" )
+ column=(type=decimal(5) updatewhereclause=yes name=alloc_qty dbname="Delivery_Detail.Alloc_Qty" )
+ column=(type=decimal(0) updatewhereclause=yes name=line_item_no dbname="Delivery_Detail.Line_Item_No" )
+ retrieve="  SELECT Delivery_Master.DO_No,   
+         Delivery_Master.Project_ID,   
+         Delivery_Master.WH_Code,   
+         Delivery_Master.Ord_Status,   
+         Delivery_Master.Inventory_Type,   
+         Delivery_Master.Invoice_No,   
+         Delivery_Master.EDI_Batch_Seq_No,   
+         Delivery_Master.Batch_Pick_ID,   
+         Delivery_Detail.SKU,   
+         Delivery_Detail.Supp_code,     
+         Delivery_Detail.Owner_ID,   
+         Delivery_Detail.Req_Qty,   
+         Delivery_Detail.Alloc_Qty,   
+         Delivery_Detail.Line_Item_No  
+    FROM Delivery_Detail,   
+         Delivery_Master  
+   WHERE ( Delivery_Master.DO_No = Delivery_Detail.DO_No )    and
+				Project_id = :asProject and
+				Invoice_no = :asInvoiceNo
+" arguments=(("asProject", string),("asInvoiceNo", string))  sort="do_no A sku A line_item_no A " )
+text(band=header alignment="2" text="Delivery Master
+Do No" border="0" color="0" x="9" y="8" height="112" width="466"  name=delivery_master_do_no_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Delivery Master
+Project Id" border="0" color="0" x="485" y="8" height="112" width="407"  name=delivery_master_project_id_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Delivery Master
+Wh Code" border="0" color="0" x="901" y="8" height="112" width="407"  name=delivery_master_wh_code_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Delivery Master
+Ord Status" border="0" color="0" x="1317" y="8" height="112" width="407"  name=delivery_master_ord_status_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Delivery Master
+Inventory Type" border="0" color="0" x="1733" y="8" height="112" width="407"  name=delivery_master_inventory_type_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Delivery Master
+Invoice No" border="0" color="0" x="2149" y="8" height="112" width="325"  name=delivery_master_invoice_no_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Delivery Master
+Edi Batch Seq No" border="0" color="0" x="2482" y="8" height="112" width="475"  name=delivery_master_edi_batch_seq_no_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Delivery Master
+Batch Pick Id" border="0" color="0" x="2967" y="8" height="112" width="343"  name=delivery_master_batch_pick_id_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Delivery Detail
+Sku" border="0" color="0" x="3319" y="8" height="112" width="338"  name=delivery_detail_sku_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Delivery Detail
+Supp Code" border="0" color="0" x="3666" y="8" height="112" width="338"  name=delivery_detail_supp_code_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Delivery Detail
+Owner Id" border="0" color="0" x="4014" y="8" height="112" width="334"  name=delivery_detail_owner_id_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Delivery Detail
+Req Qty" border="0" color="0" x="4357" y="8" height="112" width="475"  name=delivery_detail_req_qty_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Delivery Detail
+Alloc Qty" border="0" color="0" x="4841" y="8" height="112" width="503"  name=delivery_detail_alloc_qty_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Delivery Detail
+Line Item No" border="0" color="0" x="5353" y="8" height="112" width="375"  name=delivery_detail_line_item_no_t  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="0" color="0" x="9" y="8" height="60" width="466" format="[general]"  name=do_no edit.limit=16 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="0" color="0" x="485" y="8" height="60" width="407" format="[general]"  name=project_id edit.limit=10 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="0" color="0" x="901" y="8" height="60" width="407" format="[general]"  name=wh_code edit.limit=10 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="0" color="0" x="1317" y="8" height="60" width="407" format="[general]"  name=ord_status edit.limit=1 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="0" tabsequence=32766 border="0" color="0" x="1733" y="8" height="60" width="407" format="[general]"  name=inventory_type edit.limit=1 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="0" tabsequence=32766 border="0" color="0" x="2149" y="8" height="60" width="325" format="[general]"  name=invoice_no edit.limit=20 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=7 alignment="1" tabsequence=32766 border="0" color="0" x="2482" y="8" height="60" width="475" format="[general]"  name=edi_batch_seq_no edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=8 alignment="1" tabsequence=32766 border="0" color="0" x="2967" y="8" height="60" width="343" format="[general]"  name=batch_pick_id edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=9 alignment="0" tabsequence=32766 border="0" color="0" x="3319" y="8" height="60" width="338" format="[general]"  name=sku edit.limit=50 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=10 alignment="0" tabsequence=32766 border="0" color="0" x="3666" y="8" height="60" width="338" format="[general]"  name=supp_code edit.limit=20 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=11 alignment="1" tabsequence=32766 border="0" color="0" x="4014" y="8" height="60" width="334" format="[general]"  name=owner_id edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=12 alignment="1" tabsequence=32766 border="0" color="0" x="4357" y="8" height="60" width="475" format="######.#####"  name=req_qty editmask.mask="######.#####" editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=13 alignment="1" tabsequence=32766 border="0" color="0" x="4841" y="8" height="60" width="503" format="######.#####"  name=alloc_qty editmask.mask="######.#####" editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=14 alignment="1" tabsequence=32766 border="0" color="0" x="5353" y="8" height="60" width="375" format="[general]"  name=line_item_no edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" )

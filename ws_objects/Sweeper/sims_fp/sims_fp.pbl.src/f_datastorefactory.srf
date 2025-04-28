@@ -1,0 +1,23 @@
+﻿$PBExportHeader$f_datastorefactory.srf
+global type f_datastorefactory from function_object
+end type
+
+forward prototypes
+global function datastore f_datastorefactory (string adatasource)
+end prototypes
+
+global function datastore f_datastorefactory (string adatasource);// datastore = f_datastorefactory( string adatasource )
+//
+// call this when you want to create a datastore, pass in the datawindow object 
+// as the datasource string.  returns a datastore
+//
+
+datastore ads
+
+ads = create datastore
+ads.DataObject = adatasource
+ads.SetTransObject(SQLCA)
+
+return ads
+end function
+

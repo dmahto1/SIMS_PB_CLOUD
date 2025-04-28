@@ -1,0 +1,30 @@
+HA$PBExportHeader$f_method_trace.srf
+global type f_method_trace from function_object
+end type
+
+forward prototypes
+global function long f_method_trace (string as_project, string as_object_name, string as_method_desc, string as_system_no, string as_ftp_file_name)
+end prototypes
+
+global function long f_method_trace (string as_project, string as_object_name, string as_method_desc, string as_system_no, string as_ftp_file_name);long		ll_trans_id
+
+//TimA 03/07/13 *************** OLD FUNCTION Will be deleted soon***************
+
+
+//TimA 06/06/12
+//Get the gs_method_log_flag variable from lookup_table useing Project_ID and code_type = 'LOG_Trace'
+
+If gs_method_log_flag = 'Y' Then
+//	IF gb_sqlca_connected = TRUE THEN
+
+		//ll_trans_id = Sqlca.sp_method_trace_log_upd( al_trans_id, as_project, 'sims3fp', as_object_name, as_method_desc )
+		//ll_trans_id = Sqlca.sp_method_trace_sp_log_upd(  as_project, 'sims3fp', as_object_name, as_method_desc, as_system_no, as_FTP_File_Name )
+	
+
+//	END IF
+
+//	al_trans_id = ll_trans_id
+End if
+RETURN ll_trans_id
+end function
+

@@ -1,0 +1,14 @@
+HA$PBExportHeader$dddw_batch_pick_status.srd
+$PBExportComments$Batch Picking Status Codes
+release 7;
+datawindow(units=0 timer_interval=0 color=16777215 processing=0 HTMLDW=no print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.prompt=no print.buttons=no print.preview.buttons=no )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=72 color="536870912" )
+table(column=(type=char(1) updatewhereclause=yes name=batch_pick_status_cd dbname="batch_pick_status_cd" )
+ column=(type=char(10) updatewhereclause=yes name=batch_pick_status_desc dbname="batch_pick_status_desc" )
+ )
+data("N","New","P","Process","I","Picking","C","Complete","V","Void","A","Packing",) 
+column(band=detail id=2 alignment="0" tabsequence=20 border="0" color="0" x="14" y="4" height="64" width="539" format="[general]"  name=batch_pick_status_desc edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" )

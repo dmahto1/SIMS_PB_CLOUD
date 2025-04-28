@@ -1,0 +1,224 @@
+HA$PBExportHeader$f_delivery_advance_esd_configuration.srf
+$PBExportComments$*
+global type f_delivery_advance_esd_configuration from function_object
+end type
+
+forward prototypes
+global function datetime f_delivery_advance_esd_configuration (string aswhcode, datetime adtwhtime, datetime adtrdd, string asmimorder, string ascarrier, string ascust)
+end prototypes
+
+global function datetime f_delivery_advance_esd_configuration (string aswhcode, datetime adtwhtime, datetime adtrdd, string asmimorder, string ascarrier, string ascust);//GailM 0712/2017 SIMSPEVS-728 Defect: Current ESD logic does not include Weekend cutoff date
+//GailM 08/08/2017 SIMSPEVS-537 - SIMS to provide advance ESD cutoff configuration via GUI  Cut_Off_Time
+// This function and logic will also be in SIMS function f_delivery_advance_esd_configurarion
+// Checking for Wh Code is not necessary since query for idsESDConfig contains only the WH sent
+String  lsPanCutoffTime, lsWhCutoffTime, lsCutoffTime, lsCutoff, lsTime, lsDayName, lsFind, lsFilter, lsMessage
+DateTime ldtCutoffDate, ldtESD
+Date ldTemp
+Time ltTime, ltCutoffTime
+Long llRtn,llFindRow
+Boolean lbError = False
+u_ds_ancestor ldsESDConfig
+
+ltTime = Time( adtWHTime )
+If isNull( asCarrier ) Then asCarrier = "*all"
+If isNull( asMimOrder ) Then asMimOrder = "*all"
+If isNull( asCust ) Then asCust = "*all"
+
+IF NOT isvalid(ldsESDConfig) THEN							
+	ldsESDConfig = Create u_ds_ancestor
+	ldsESDConfig.dataobject= 'd_delivery_advance_esd_configuration'
+	ldsESDConfig.SetTransObject(SQLCA)
+END IF
+
+llRtn = ldsESDConfig.retrieve( asWHCode )
+
+/*************** GET DEFAULT DATE AND TIME *********************/
+If llRtn <= 0 Then
+	//Check lookup table for warehouse default time
+	Select  Code_Descript INTO  :lsPanCutoffTime 
+	FROM lookup_table with (NoLock) 
+	Where Project_ID = 'PANDORA' 
+	AND Code_Type = 'ESDDEFAULT' 
+	and Code_Id = :asWHCode 
+	USING SQLCA;
+			
+	If IsNull(lsPanCutoffTime) or lsPanCutoffTime = '' or Not isTime(lsPanCutoffTime) then lsPanCutoffTime ='14:00:00' //  - If not setup as Pandora default to 2pm
+Else
+	lsFind = "wh_code  = '*all' and carrier = '*all' and mim_order = '*all' and cust_code = '*all' "
+	llFindRow = ldsESDConfig.Find( lsFind, 1, ldsESDConfig.rowcount() )
+	If llFindRow > 0 Then 
+		lsPanCutoffTime = ldsESDConfig.getItemString( llFindRow, 'Cut_Off_Time' )
+	End If
+End If	
+/************ END OF GET DEFAULT DATE AND TIME ******************/
+
+/****** FILTER BY WAREHOUSE AND GET  DEFAULT DATE AND TIME IF AVAILABLE ********/
+lsFilter = "wh_code = '" + asWhCode + "' "
+ldsESDConfig.SetFilter( lsFilter )  //Filter notes for note type 'RM'
+ldsESDConfig.filter( )
+
+If ldsESDConfig.rowcount( ) >= 1 Then		// This warehouse has entries.  Check for warehouse default
+/****** GET WAREHOUSE DEFAULT DATE AND TIME IF AVAILABLE ********/
+	lsFind = "wh_code  = '" + asWhCode + "' and carrier = '*all' and mim_order = '*all' and cust_code = '*all' "
+	llFindRow = ldsESDConfig.Find( lsFind, 1, ldsESDConfig.rowcount() )
+	If llFindRow > 0 Then 
+		lsWhCutoffTime = ldsESDConfig.getItemString( llFindRow, 'Cut_Off_Time' )		// Replace Pandora default if WH passed
+	End If
+/****** END OFGET WAREHOUSE DEFAULT DATE AND TIME **************/
+End If
+
+If ldsESDConfig.rowcount( ) > 1 Then		// This warehouse has entries.  Check for warehouse default
+	// Is carrier available?
+	If asCarrier <> '*all' Then
+		lsFind = "wh_code = '" + asWhCode + "' and carrier = '" + asCarrier + "' "	
+		llFindRow = ldsESDConfig.Find( lsFind, 1, ldsESDConfig.rowcount() )
+		If llFindRow = 0 Then		// Carrier not available, change to default
+			asCarrier = '*all'
+		End If
+	End If
+/************ FILTER FOR ADDITIONAL  RECORDS ****************************/
+	If asCarrier <> '*all' Then
+		lsFind = "wh_code = '" + asWhCode + "' and carrier = '" + asCarrier + "' and mim_order = '" + "*all" + "' and cust_code = '" + "*all" + "' "					//Matches #1 Carrier Only
+		llFindRow = ldsESDConfig.Find( lsFind, 1, ldsESDConfig.rowcount() )
+		If llFindRow > 0 Then
+			lsCutoffTime = ldsESDConfig.GetItemString( llFindRow, "Cut_Off_Time" )
+			If asMIMOrder <> '*all' Then
+				lsFind = "wh_code = '" + asWhCode + "' and carrier = '" + asCarrier + "' and mim_order = '" + asMimOrder + "' and cust_code = '" + "*all" + "' "					//Matches #1 Carrier Only
+				llFindRow = ldsESDConfig.Find( lsFind, 1, ldsESDConfig.rowcount() )
+				If llFindRow > 0 Then
+					lsCutoffTime = ldsESDConfig.GetItemString( llFindRow, "Cut_Off_Time" )
+				End If
+			ElseIf asCust <> '*all' Then
+				lsFind = "wh_code = '" + asWhCode + "' and carrier = '" + asCarrier + "' and mim_order = '" + asMimOrder + "' and cust_code = '" + asCust + "' "					//Matches #1 Carrier Only
+				llFindRow = ldsESDConfig.Find( lsFind, 1, ldsESDConfig.rowcount() )
+				If llFindRow > 0 Then
+					lsCutoffTime = ldsESDConfig.GetItemString( llFindRow, "Cut_Off_Time" )
+				End If
+			End If
+		End If
+	End If
+	
+	If asMIMOrder <> '*all' And asCarrier = '*all' Then
+		lsFind = "wh_code = '" + asWhCode + "' and carrier = '" + "*all" + "' and mim_order = '" + asMimOrder + "' and cust_code = '" + "*all" + "' "				//Matches #2 MIM Order Only
+		llFindRow = ldsESDConfig.Find( lsFind, 1, ldsESDConfig.rowcount() )
+		If llFindRow > 0 Then
+			lsCutoffTime = ldsESDConfig.GetItemString( llFindRow, "Cut_Off_Time" )
+		End If
+	End If
+	
+	If asCust <> '*all' and asCarrier = '*all' Then
+		lsFind = "wh_code = '" + asWhCode + "' and carrier = '" + "*all" + "' and mim_order = '" + "*all" + "' and cust_code = '" + asCust + "' "					//Matches #3 CustCode Only
+		llFindRow = ldsESDConfig.Find( lsFind, 1, ldsESDConfig.rowcount() )
+		If llFindRow > 0 Then
+			lsCutoffTime = ldsESDConfig.GetItemString( llFindRow, "Cut_Off_Time" )
+		End If
+	End If
+	/*
+	lsFind = "wh_code = '" + asWhCode + "' and carrier = '" + asCarrier + "' and mim_order = '" + asMimOrder + "' and cust_code = '" + "*all" + "' "		//Matches #4 Carrier/MIM
+	llFindRow = ldsESDConfig.Find( lsFind, 1, ldsESDConfig.rowcount() )
+	If llFindRow > 0 Then
+		lsCutoffTime = ldsESDConfig.GetItemString( llFindRow, "Cut_Off_Time" )
+	End If
+	lsFind = "wh_code = '" + asWhCode + "' and carrier = '" + asCarrier + "' and mim_order = '" + "*all" + "' and cust_code = '" + asCust + "' "				//Matches #5 Carrier/CustCode
+	llFindRow = ldsESDConfig.Find( lsFind, 1, ldsESDConfig.rowcount() )
+	If llFindRow > 0 Then
+		lsCutoffTime = ldsESDConfig.GetItemString( llFindRow, "Cut_Off_Time" )
+	End If
+	*/
+	If asCust <> '*all' and asMIMOrder <> '*all' Then
+		lsFind = "wh_code = '" + asWhCode + "' and carrier = '" + "*all" + "' and mim_order = '" + asMimOrder + "' and cust_code = '" + asCust + "' "			//Matches #6 MIM/CustCode
+		llFindRow = ldsESDConfig.Find( lsFind, 1, ldsESDConfig.rowcount() )
+		If llFindRow > 0 Then
+			lsCutoffTime = ldsESDConfig.GetItemString( llFindRow, "Cut_Off_Time" )
+		End If
+	End If
+	/*
+	lsFind = "wh_code = '" + asWhCode + "' and carrier = '" + asCarrier + "' and mim_order = '" + asMimOrder + "' and cust_code = '" + asCust + "' "	  	//Matches #7 Carrier/MIM/CustCode
+	llFindRow = ldsESDConfig.Find( lsFind, 1, ldsESDConfig.rowcount() )
+	If llFindRow > 0 Then
+		lsCutoffTime = ldsESDConfig.GetItemString( llFindRow, "Cut_Off_Time" )
+	End If
+	*/
+	If isTime( lsCutoffTime ) Then
+		ltCutoffTime = Time( lsCutoffTime )
+		ldtCutoffDate = datetime(relativeDate(date( adtWHTime ),0 ), ltCutoffTime ) 		// Get default date
+	Else
+		/* Special conditions in CutoffTime field.  Add here if a new special instruction is added. */
+		Choose Case lsCutoffTime
+			Case 'If RDD Same Day use Cutoff time, otherwise use RDD'
+				// if RDD Same Day use Cutoff time, otherwise use RDD 
+				If Date( adtRDD ) > Date( adtWHTime ) Then
+					ldtESD = Datetime( adtRDD )		// Set the return ldtESD and do not go thru weekend change
+				Else
+					lsCutoffTime = ''		// Use default time
+				End If
+			Case 'Use default cutoff'
+				lsCutoffTime = ''		// Use default time
+			Case Else
+				lsCutoffTime = ''		// Use default time
+		End Choose
+	End If
+End If	
+/************ END OF FILTER FOR ONE RECORD ****************************/
+
+iF lsCutoffTime = '' Then
+	If lsWhCutoffTime = '' Then
+		lsCutoffTime = lsPanCutoffTime
+	Else
+		lsCutoffTime = lsWhCutoffTime
+	End If
+		ltCutoffTime = Time( lsCutoffTime )		/* Use default */
+		ldtCutoffDate = datetime(relativeDate(date( adtWHTime ),0 ), ltCutoffTime ) 		// Get default date
+End If
+	
+/******** CHANGE DATE BASED ON WEEKEND IF RETURN DATE HAS NOT BEEN SET **********/
+If ldtESD = Datetime('1900-01-01 00:00:00') Then		//ldtESD has not been set above
+	If adtWHTime > ldtCutoffDate Then
+		ldTemp = RelativeDate(Date(ldtCutoffDate),1 )
+	Else
+		ldTemp = RelativeDate(Date(ldtCutoffDate),0 )
+	End If
+	lsDayName = DayName( ldTemp )
+	
+	if lsDayName = 'Sunday' Then
+		ldTemp = relativeDate( ldTemp ,1 )	//One day to Monday
+	elseif lsDayName = 'Saturday' Then
+		ldTemp = relativeDate( ldTemp ,2 )	//Two days to Monday
+	End If	
+		
+	ldtESD = Datetime( ldTemp, ltTime )		
+End If
+
+/******************* END OF CHANGE DATE BASED ON WEEKEND *********************/
+//What custoff did you use?
+lsMessage = 'Cutoff used for this order: ' + lsCutoffTime + '.  Carrier: ' + asCarrier + '. MIMOrder: ' + asMIMOrder + '. CustCode: ' + asCust + '. Set ESD: ' + String( ldtESD ) 
+f_method_trace_special( 'PANDORA', 'Sweeper ESD calc - f_delivery_advance_esd_configuration', lsMessage, asWHCode, ' ',' ', 'PANDORA' ) 
+
+return ldtESD
+
+//GailM 08/08/2017 SIMSPEVS-537 - Enhance the ESD schedule date with below table business rules:
+/*  These are the rules as of 8/8/2017.  Coding above will reflect these rules
+______________________________________________________________________________________________________
+Warehouse		Carrier		MIM order	To Customer Code		Cutoff Time									Notes
+______________________________________________________________________________________________________
+*all				*all			*all			*all						2:00pm										Default for All
+PND_AMSTER	*all			*all			*all						10:00am										Default for AMSTER
+PND_ATLSKY	*all			*all			*all						1:00pm										Default for ATLSKY
+PND_BRUSSH	*all			*all			*all						3:00pm										Default for BRUSSH
+PND_AMSTER	Vendor Paid	*all			*all						12:00pm										Rule 3 From Rule ESD Rules
+PND_AMSTER	*all			Yes			*all						if RDD Same Day use Cutoff time,		Rule 4 From Rule ESD Rules
+																					 otherwise use RDD
+PND_AMSTER	FedEx		*all			*all						11:00am										Rule 1 From Rule ESD Rules
+PND_AMSTER	UPS			*all			*all						1:00pm										Rule 1 From Rule ESD Rules
+PND_AMSTER	Expeditors	*all			*all						use default cutoff							?
+PND_AMSTER	Expeditors	*all			some value				11:59am										Rule 2 From Rule ESD Rules
+PND_AMSTER	Expeditors	*all			some other value		1:59am										Rule 2 From Rule ESD Rules
+PND_AMSTER	FedEx		Yes			*all						if RDD Same Day use Cutoff time, 	?
+																					otherwise use RDD
+PND_AMSTER	Vendor Paid	Yes			*all						if RDD Same Day use Cutoff time,		?
+																					otherwise use RDD
+_____________________________________________________________________________________________________*/
+
+
+end function
+

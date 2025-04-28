@@ -1,0 +1,58 @@
+﻿$PBExportHeader$d_nike_ppl_detail.srd
+release 6;
+datawindow(units=0 timer_interval=0 color=16777215 processing=1 print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.prompt=no print.buttons=no print.preview.buttons=no grid.lines=0 )
+header(height=80 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=92 color="536870912" )
+table(column=(type=char(20) update=yes updatewhereclause=yes key=yes name=ppl_no dbname="PPL_Detail.PPL_No" )
+ column=(type=char(16) update=yes updatewhereclause=yes key=yes name=sku dbname="PPL_Detail.SKU" )
+ column=(type=decimal(0) update=yes updatewhereclause=yes name=quantity dbname="PPL_Detail.Quantity" )
+ column=(type=decimal(2) update=yes updatewhereclause=yes name=sell_price dbname="PPL_Detail.Sell_Price" )
+ column=(type=decimal(2) update=yes updatewhereclause=yes name=list_price dbname="PPL_Detail.List_Price" )
+ column=(type=decimal(3) update=yes updatewhereclause=yes name=discount dbname="PPL_Detail.Discount" )
+ column=(type=long updatewhereclause=yes name=alloc_qty dbname="PPL_Detail.alloc_qty" )
+ column=(type=decimal(0) update=yes updatewhereclause=yes name=upload_line dbname="PPL_Detail.Upload_line" )
+ column=(type=char(2) updatewhereclause=yes name=gpc dbname="Item_Master.GPC" )
+ column=(type=char(1) updatewhereclause=yes name=accessory_flag dbname="Item_Master.Accessory_Flag" )
+ column=(type=char(1) updatewhereclause=yes name=equipment_flag dbname="Item_Master.Equipment_Flag" )
+ retrieve="  SELECT PPL_Detail.PPL_No,   
+         PPL_Detail.SKU,   
+         PPL_Detail.Quantity,   
+         PPL_Detail.Sell_Price,   
+         PPL_Detail.List_Price,   
+         PPL_Detail.Discount,   
+         0 as alloc_qty,   
+         PPL_Detail.Upload_line,
+			Item_Master.GPC,
+			Item_Master.Accessory_Flag,
+			Item_Master.Equipment_Flag
+    FROM PPL_Detail,
+			Item_Master
+   WHERE PPL_Detail.PPL_No = :as_ppl AND
+			PPL_Detail.SKU = Item_Master.SKU
+ORDER BY PPL_Detail.SKU ASC   
+" update="PPL_Detail" updatewhere=0 updatekeyinplace=no arguments=(("as_ppl", string)) )
+text(band=header alignment="2" text="Ppl No"border="0" color="0" x="9" y="8" height="64" width="233"  name=ppl_no_t  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Sku"border="0" color="0" x="251" y="8" height="64" width="183"  name=sku_t  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Quantity"border="0" color="0" x="443" y="8" height="64" width="329"  name=quantity_t  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="Sell Price"border="0" color="0" x="782" y="8" height="64" width="302"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+text(band=header alignment="0" text="List Price"border="0" color="0" x="1093" y="8" height="64" width="265"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+text(band=header alignment="0" text="Discount"border="0" color="0" x="1367" y="8" height="64" width="265"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+text(band=header alignment="0" text="Alloc Qty"border="0" color="0" x="1641" y="8" height="64" width="251"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+text(band=header alignment="0" text="Upload Line"border="0" color="0" x="1902" y="4" height="76" width="338"  font.face="Arial" font.height="-12" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+column(band=detail id=1 alignment="0" tabsequence=10 border="0" color="0" x="9" y="8" height="76" width="233" format="[general]"  name=ppl_no edit.limit=20 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="0" tabsequence=20 border="0" color="0" x="251" y="8" height="76" width="183" format="[general]"  name=sku edit.limit=16 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="1" tabsequence=30 border="0" color="0" x="443" y="8" height="76" width="329" format="[general]"  name=quantity edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="0" color="0" x="782" y="8" height="76" width="302" format="[General]"  name=sell_price edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="0" tabsequence=32766 border="0" color="0" x="1093" y="8" height="76" width="265" format="[General]"  name=list_price edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="0" tabsequence=32766 border="0" color="0" x="1367" y="8" height="76" width="265" format="[General]"  name=discount edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=7 alignment="0" tabsequence=32766 border="0" color="0" x="1641" y="8" height="76" width="251" format="[general]"  name=alloc_qty edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=8 alignment="0" tabsequence=32766 border="0" color="0" x="1902" y="0" height="64" width="338" format="[general]"  name=upload_line edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=9 alignment="0" tabsequence=0 border="0" color="0" x="2254" y="0" height="64" width="128"  name=gpc  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="Item Master Gpc"border="0" color="0" x="2249" y="4" height="76" width="133"  font.face="Arial" font.height="-12" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+column(band=detail id=10 alignment="0" tabsequence=0 border="0" color="0" x="2395" y="0" height="64" width="425"  name=accessory_flag  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="Item Master Accessory Flag"border="0" color="0" x="2391" y="4" height="76" width="430"  font.face="Arial" font.height="-12" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+column(band=detail id=11 alignment="0" tabsequence=0 border="0" color="0" x="2834" y="0" height="64" width="425"  name=equipment_flag  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="Item Master Equipment Flag"border="0" color="0" x="2830" y="4" height="76" width="430"  font.face="Arial" font.height="-12" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+htmltable(border="1" cellpadding="0" cellspacing="0" generatecss="no" nowrap="yes")

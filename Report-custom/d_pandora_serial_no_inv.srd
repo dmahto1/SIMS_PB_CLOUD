@@ -1,0 +1,61 @@
+HA$PBExportHeader$d_pandora_serial_no_inv.srd
+$PBExportComments$Datawindow used for pandora serial number report
+release 11;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes print.preview.outline=yes hidegrayline=no showbackcoloronxp=no )
+header(height=100 color="536870912" )
+summary(height=104 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=88 color="536870912" )
+table(column=(type=char(10) updatewhereclause=yes name=content_summary_project_id dbname="Project_ID" )
+ column=(type=char(10) updatewhereclause=yes name=content_summary_wh_code dbname="WH_Code" )
+ column=(type=decimal(0) updatewhereclause=yes name=content_summary_owner_id dbname="Owner_ID" )
+ column=(type=char(50) updatewhereclause=yes name=content_summary_sku dbname="SKU" )
+ column=(type=char(20) updatewhereclause=yes name=serial_number_inventory_owner_cd dbname="Owner_CD" )
+ column=(type=char(50) updatewhereclause=yes name=serial_number_inventory_serial_no dbname="Serial_No" )
+ column=(type=decimal(5) updatewhereclause=yes name=content_summary_avail_qty dbname="Avail_Qty" )
+ column=(type=decimal(5) updatewhereclause=yes name=content_summary_alloc_qty dbname="Alloc_Qty" )
+ retrieve="  SELECT Content_Summary.Project_ID,   
+         Content_Summary.WH_Code,   
+         Content_Summary.Owner_ID,   
+         Content_Summary.SKU,   
+         Serial_Number_Inventory.Owner_CD,   
+         Serial_Number_Inventory.Serial_No,   
+         Content_Summary.Avail_Qty,   
+         Content_Summary.Alloc_Qty  
+    FROM Serial_Number_Inventory,   
+         Content_Summary  
+   WHERE ( Content_Summary.Project_ID = Serial_Number_Inventory.Project_Id ) and  
+         ( Content_Summary.WH_Code = Serial_Number_Inventory.Wh_Code ) and  
+         ( Content_Summary.Owner_ID = Serial_Number_Inventory.Owner_Id ) and  
+         ( Content_Summary.SKU = Serial_Number_Inventory.SKU ) and  
+         ( ( Content_Summary.Project_Id = 'PROJECT' ) )    
+" )
+group(level=1 header.height=0 trailer.height=296 by=("content_summary_project_id" , "content_summary_wh_code" , "content_summary_owner_id" , "content_summary_sku" , "serial_number_inventory_owner_cd" ) header.color="536870912" trailer.color="536870912" )
+text(band=header alignment="2" text="Sku" border="0" color="33554432" x="1207" y="4" height="80" width="1399" html.valueishtml="0"  name=content_summary_sku_t visible="1"  font.face="Arial" font.height="-12" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Warehouse" border="0" color="33554432" x="9" y="4" height="80" width="526" html.valueishtml="0"  name=content_summary_wh_code_t visible="1"  font.face="Arial" font.height="-12" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Owner" border="0" color="33554432" x="585" y="4" height="80" width="576" html.valueishtml="0"  name=serial_number_inventory_owner_cd_t visible="1"  font.face="Arial" font.height="-12" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Serial No" border="0" color="33554432" x="2610" y="4" height="80" width="1399" html.valueishtml="0"  name=serial_number_inventory_serial_no_t visible="1"  font.face="Arial" font.height="-12" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="0" color="33554432" x="1207" y="4" height="76" width="1399" format="[general]" html.valueishtml="0"  name=content_summary_sku visible="1" edit.limit=50 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="0" color="33554432" x="9" y="4" height="76" width="526" format="[general]" html.valueishtml="0"  name=content_summary_wh_code visible="1" edit.limit=10 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="0" tabsequence=32766 border="0" color="33554432" x="585" y="4" height="76" width="576" format="[general]" html.valueishtml="0"  name=serial_number_inventory_owner_cd visible="1" edit.limit=20 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="1" tabsequence=32766 border="0" color="33554432" x="2610" y="4" height="76" width="1399" format="[general]" html.valueishtml="0"  name=serial_number_inventory_serial_no visible="1" edit.limit=50 edit.case=any edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+line(band=trailer.1 x1="18" y1="4" x2="4014" y2="4"  name=l_1 visible="1" pen.style="0" pen.width="5" pen.color="0"  background.mode="2" background.color="16777215" )
+line(band=trailer.1 x1="18" y1="232" x2="4014" y2="232"  name=l_2 visible="1" pen.style="0" pen.width="5" pen.color="0"  background.mode="2" background.color="16777215" )
+text(band=trailer.1 alignment="1" text="Avail QTY" border="0" color="33554432" x="3017" y="40" height="80" width="489" html.valueishtml="0"  name=t_5 visible="1"  font.face="Arial" font.height="-12" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" font.underline="1" background.mode="1" background.color="536870912" )
+text(band=trailer.1 alignment="1" text="Alloc QTY" border="0" color="33554432" x="3511" y="40" height="80" width="489" html.valueishtml="0"  name=t_6 visible="1"  font.face="Arial" font.height="-12" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" font.underline="1" background.mode="1" background.color="536870912" )
+column(band=trailer.1 id=8 alignment="1" tabsequence=32766 border="0" color="33554432" x="3511" y="136" height="76" width="485" format="[general]" html.valueishtml="0"  name=content_summary_alloc_qty_1 visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=trailer.1 id=7 alignment="1" tabsequence=32766 border="0" color="33554432" x="3017" y="136" height="76" width="489" format="[general]" html.valueishtml="0"  name=content_summary_avail_qty_1 visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=trailer.1 alignment="0" text="TOTALS:" border="0" color="33554432" x="2327" y="136" height="76" width="256" html.valueishtml="0"  name=t_3 visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=trailer.1 alignment="1" expression="count(  serial_number_inventory_serial_no  for group 1 )"border="0" color="33554432" x="2647" y="136" height="76" width="366" format="[GENERAL]" html.valueishtml="0"  name=compute_2 visible="1"  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=trailer.1 alignment="1" text="Serial No" border="0" color="33554432" x="2647" y="40" height="80" width="366" html.valueishtml="0"  name=t_4 visible="1"  font.face="Arial" font.height="-12" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" font.underline="1" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" pagingmethod=0 generatedddwframes="1" )
+xhtmlgen() cssgen(sessionspecific="0" )
+xmlgen(inline="0" )
+xsltgen()
+jsgen()
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )
+export.xhtml()
+ 

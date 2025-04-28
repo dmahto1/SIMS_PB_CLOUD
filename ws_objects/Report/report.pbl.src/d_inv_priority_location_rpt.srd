@@ -1,0 +1,63 @@
+﻿$PBExportHeader$d_inv_priority_location_rpt.srd
+$PBExportComments$Data Window used for Empty Location Report
+release 9;
+datawindow(units=0 timer_interval=0 color=16777215 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=392 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=0 color="536870912" )
+table(column=(type=char(10) updatewhereclause=yes name=project_warehouse_project_desc dbname="project_desc" )
+ column=(type=char(10) update=yes updatewhereclause=yes name=wh_code dbname="wh_code" )
+ column=(type=char(50) updatewhereclause=yes name=sku dbname="sku" )
+ column=(type=char(20) updatewhereclause=yes name=supp_code dbname="supp_code" )
+ column=(type=char(1) updatewhereclause=yes name=inventory_type dbname="inventory_type" )
+ column=(type=decimal(5) updatewhereclause=yes name=avail_qty dbname="avail_qty" )
+ column=(type=char(10) update=yes updatewhereclause=yes name=l_code dbname="L_Code" )
+ column=(type=char(50) updatewhereclause=yes name=sku_reserved dbname="sku_reserved" )
+ retrieve="  SELECT 	distinct project_warehouse.project_id as project_desc,
+				location.wh_code,
+				rtrim(ltrim(content.sku)) as sku,
+				rtrim(ltrim(content.supp_code)) as supp_code,
+				content.inventory_type,
+				content.avail_qty,   
+        	   rtrim(ltrim(Location.L_Code)) as L_Code, 
+				Location.sku_reserved
+    FROM 	Location,  Content,  project_warehouse
+   WHERE  Location.L_Code = Content.L_Code AND
+			 Location.wh_Code = Content.wh_Code and
+			project_warehouse.wh_code = location.wh_code and
+			project_warehouse.project_id = :as_project and
+			project_warehouse.wh_code = :as_warehouse AND
+			(location.project_reserved = NULL OR location.project_reserved = :as_project) AND
+			content.avail_qty > 0  and
+         Location.Priority = 1" arguments=(("as_project", string),("as_warehouse", string))  sort="sku A l_code A " )
+group(level=1 header.height=72 trailer.height=0 by=("project_warehouse_project_desc" , "wh_code" , "sku" , "supp_code" , "l_code" ) header.color="536870912" trailer.color="536870912" )
+column(band=header id=1 alignment="0" tabsequence=32766 border="0" color="0" x="1842" y="128" height="64" width="78" format="[general]" html.valueishtml="0"  name=project_warehouse_project_desc visible="1~t0" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="1" text="Warehouse:" border="0" color="0" x="0" y="172" height="56" width="361" html.valueishtml="0"  name=wh_code_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="1" text="Project:" border="0" color="0" x="0" y="120" height="56" width="361" html.valueishtml="0"  name=t_6 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="1" text="Date:" border="0" color="0" x="0" y="68" height="56" width="361" html.valueishtml="0"  name=t_5 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="1" text="Report ID:" border="0" color="0" x="0" y="16" height="56" width="361" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="SIMS406" border="0" color="0" x="379" y="16" height="56" width="270" html.valueishtml="0"  name=t_3 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="0" expression="today()"border="0" color="0" x="379" y="68" height="56" width="530" format="mm/dd/yyyy hh:mm" html.valueishtml="0"  name=cf_date visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="" border="0" color="0" x="379" y="120" height="56" width="1102" html.valueishtml="0"  name=t_project visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text=" " border="0" color="0" x="379" y="172" height="56" width="1102" html.valueishtml="0"  name=t_warehouse visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=header id=2 alignment="0" tabsequence=32766 border="0" color="0" x="1733" y="124" height="76" width="91" format="[general]" html.valueishtml="0"  name=wh_code visible="1~t0" edit.limit=10 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="SKU" border="0" color="0" x="96" y="332" height="56" width="96" html.valueishtml="0"  name=t_7 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="Supplier" border="0" color="0" x="827" y="332" height="56" width="210" html.valueishtml="0"  name=t_10 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="Inv Type" border="0" color="0" x="1307" y="332" height="56" width="210" html.valueishtml="0"  name=l_type_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="1" text="QTY" border="0" color="0" x="1728" y="328" height="56" width="101" html.valueishtml="0"  name=t_11 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="Location" border="0" color="0" x="1957" y="332" height="56" width="215" html.valueishtml="0"  name=t_8 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="SKU RESERVED" border="0" color="0" x="2318" y="332" height="56" width="357" html.valueishtml="0"  name=t_4 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="INVENTORY PRIORITY LOCATION  REPORT" border="0" color="0" x="937" y="16" height="92" width="2240" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-14" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="1" expression="'Page ' + page() + ' of ' + pagecount()"border="0" color="0" x="3099" y="16" height="124" width="297" format="[general]" html.valueishtml="0"  name=compute_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=header.1 id=3 alignment="0" tabsequence=32766 border="0" color="0" x="96" y="4" height="56" width="709" format="[general]" html.valueishtml="0"  name=sku visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.1 id=4 alignment="0" tabsequence=32766 border="0" color="0" x="827" y="8" height="56" width="462" format="[general]" html.valueishtml="0"  name=supp_code visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.1 id=5 alignment="0" tabsequence=32766 border="0" color="0" x="1307" y="8" height="56" width="210" format="[general]" html.valueishtml="0"  name=inventory_type visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=header.1 alignment="0" expression="sum(  avail_qty  for group 1)"border="0" color="0" x="1728" y="8" height="56" width="183" format="[GENERAL]" html.valueishtml="0"  name=compute_3 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.1 id=7 alignment="0" tabsequence=32766 border="0" color="0" x="1957" y="4" height="56" width="347" format="[general]" html.valueishtml="0"  name=l_code visible="1" edit.limit=10 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.1 id=8 alignment="0" tabsequence=32766 border="0" color="0" x="2318" y="8" height="56" width="347" format="[general]" html.valueishtml="0"  name=sku_reserved visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0  template=(comment="" encoding="UTF-8" name="d_inv_priority__location_rpt" xml="<?xml version=~"1.0~" encoding=~"UTF-8~" standalone=~"no~"?><d_empty_location_rpt><d_empty_location_rpt_row><wh_code>wh_code</wh_code><d_empty_location_rpt_group1 __pbband=~"detail~"><project_warehouse_project_desc>project_warehouse_project_desc</project_warehouse_project_desc><compute_0003>compute_0003</compute_0003><l_code>l_code</l_code><location_type_l_type_desc/><l_type>l_type</l_type><length/><width/><height/><cbm/><weight_capacity/><zone_id/><location_project_reserved>location_project_reserved</location_project_reserved><sku_reserved>sku_reserved</sku_reserved></d_empty_location_rpt_group1></d_empty_location_rpt_row></d_empty_location_rpt>"))
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

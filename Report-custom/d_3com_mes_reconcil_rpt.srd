@@ -1,0 +1,65 @@
+HA$PBExportHeader$d_3com_mes_reconcil_rpt.srd
+$PBExportComments$3COM MES Reconciliation Report
+release 7;
+datawindow(units=0 timer_interval=0 color=16777215 processing=0 HTMLDW=no print.documentname="" print.orientation = 1 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.prompt=no print.buttons=no print.preview.buttons=no )
+header(height=344 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=76 color="536870912" )
+table(column=(type=datetime updatewhereclause=yes name=ship_date dbname="Delivery_Master.Ship_Date" )
+ column=(type=char(50) updatewhereclause=yes name=sap_delivery_note dbname="Delivery_Master.sap_delivery_Note" )
+ column=(type=char(20) updatewhereclause=yes name=carrier dbname="Delivery_Master.Carrier" )
+ column=(type=char(20) updatewhereclause=yes name=asn_number dbname="Delivery_Master.asn_Number" )
+ column=(type=char(20) updatewhereclause=yes name=awb_bol_no dbname="Delivery_Master.AWB_BOL_No" )
+ column=(type=char(50) updatewhereclause=yes name=sku dbname="Delivery_Picking.SKU" )
+ column=(type=char(20) updatewhereclause=yes name=import_permit dbname="Delivery_Picking.import_Permit" )
+ column=(type=decimal(5) updatewhereclause=yes name=quantity dbname="Delivery_Picking.Quantity" )
+ column=(type=decimal(9) updatewhereclause=yes name=c_value dbname="c_value" )
+ retrieve="  SELECT dbo.Delivery_Master.Complete_Date as Ship_Date,   
+         dbo.Delivery_Master.Invoice_No as sap_delivery_Note,   
+         dbo.Delivery_Master.Carrier,   
+         dbo.Delivery_Master.User_Field6 as asn_Number,   
+         dbo.Delivery_Master.AWB_BOL_No,   
+         dbo.Delivery_Picking.SKU,   
+         dbo.Delivery_Picking.Lot_No as import_Permit,   
+         dbo.Delivery_Picking.Quantity, 
+			dbo.Delivery_Detail.Price * dbo.Delivery_Picking.Quantity as c_value
+    FROM dbo.Delivery_Master,   
+			dbo.Delivery_Detail, 
+         dbo.Delivery_Picking  
+   WHERE dbo.Delivery_detail.DO_No = dbo.Delivery_Master.DO_No    and 
+			Delivery_detail.do_no = Delivery_Picking.Do_no and
+			Delivery_Detail.Line_ITem_no = Delivery_Picking.Line_Item_No and
+			Delivery_Detail.SKU = Delivery_Picking.SKU and
+			Project_id = :asProject and 
+			Complete_Date >= :adFrom and
+			Complete_Date <= :adTo and
+			Lot_no Not in ('-', 'N/A') and 
+			ord_status in ('C', 'D') and
+			wh_Code = '3com-SIN'
+" arguments=(("asproject", string),("adFrom", datetime),("adTo", datetime)) )
+text(band=header alignment="2" text="3COM MES Reconciliation Report" border="0" color="0" x="5" y="8" height="120" width="4576"  name=t_11  font.face="Arial" font.height="-18" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=1 alignment="0" tabsequence=0 border="0" color="0" x="14" y="4" height="60" width="453" format="[shortdate] hh:mm"  name=ship_date  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=2 alignment="0" tabsequence=0 border="0" color="0" x="489" y="4" height="60" width="599"  name=sap_delivery_note  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=3 alignment="0" tabsequence=0 border="0" color="0" x="1111" y="4" height="60" width="507"  name=carrier  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=4 alignment="0" tabsequence=0 border="0" color="0" x="1641" y="4" height="60" width="384"  name=asn_number  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=5 alignment="0" tabsequence=0 border="0" color="0" x="2048" y="4" height="60" width="640"  name=awb_bol_no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=6 alignment="0" tabsequence=0 border="0" color="0" x="2711" y="4" height="60" width="704"  name=sku  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=7 alignment="0" tabsequence=0 border="0" color="0" x="3438" y="4" height="60" width="425"  name=import_permit  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=8 alignment="1" tabsequence=0 border="0" color="0" x="3881" y="4" height="60" width="274" format="######0"  name=quantity  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=9 alignment="1" tabsequence=0 border="0" color="0" x="4174" y="4" height="60" width="398"  name=c_value  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="Ship Date" border="0" color="0" x="18" y="276" height="60" width="320"  name=t_1  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="Carrier" border="0" color="0" x="1111" y="276" height="60" width="224"  name=t_4  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="ASN Number" border="0" color="0" x="1641" y="276" height="60" width="384"  name=t_5  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="AWB Nbr" border="0" color="0" x="2048" y="276" height="60" width="302"  name=t_6  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="SKU" border="0" color="0" x="2711" y="276" height="60" width="151"  name=t_7  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="Import Permit" border="0" color="0" x="3438" y="276" height="60" width="425"  name=t_8  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="1" text="Quantity" border="0" color="0" x="3904" y="276" height="60" width="256"  name=t_9  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="1" text="Value" border="0" color="0" x="4370" y="276" height="60" width="183"  name=t_10  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Delivery Note" border="0" color="0" x="489" y="276" height="60" width="425"  name=t_3  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="SAP" border="0" color="0" x="489" y="224" height="60" width="425"  name=t_2  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+line(band=header x1="9" y1="336" x2="4562" y2="336"  name=l_1 pen.style="0" pen.width="5" pen.color="0"  background.mode="2" background.color="16777215" )
+compute(band=header alignment="0" expression="'Date:  ' + String(today(), 'mm/dd/yyyy hh:mm')"border="0" color="0" x="9" y="8" height="68" width="768" format="[GENERAL]"  name=compute_1  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="1" expression="'Page ' + Page() + ' of ' + PageCount()"border="0" color="0" x="3941" y="20" height="56" width="640" format="[GENERAL]"  name=compute_2  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" )

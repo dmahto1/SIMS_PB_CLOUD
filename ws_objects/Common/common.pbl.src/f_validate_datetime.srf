@@ -1,0 +1,29 @@
+﻿$PBExportHeader$f_validate_datetime.srf
+global type f_validate_datetime from function_object
+end type
+
+forward prototypes
+global function integer f_validate_datetime (datetime adt_datetime)
+end prototypes
+
+global function integer f_validate_datetime (datetime adt_datetime);
+//Created by TimA 09/18/15
+//This just validates that the data is a valid datetime format.
+date ld_Date
+time lt_Time
+
+ld_Date = Date(adt_DateTime )
+lt_Time = Time(adt_DateTime )
+
+If IsDate(String(ld_Date )  ) then
+	If IsTime(String(lt_Time )  ) then
+		Return 1
+	Else
+		Return 0
+	End if
+Else
+	Return 0
+End if
+
+end function
+

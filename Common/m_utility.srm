@@ -1,0 +1,39 @@
+HA$PBExportHeader$m_utility.srm
+forward
+global type m_utility from m_main
+end type
+end forward
+
+global type m_utility from m_main
+end type
+global m_utility m_utility
+
+on m_utility.create
+m_utility=this
+call super::create
+end on
+
+on m_utility.destroy
+call super::destroy
+end on
+
+on m_save.create
+call super::create
+this.ToolBarItemName="Custom008!"
+this.ToolBarItemOrder=1
+end on
+
+on m_retrieve.create
+call super::create
+this.ToolBarItemName="Custom007!"
+this.Enabled=true
+this.ToolBarItemOrder=2
+end on
+
+on m_close.create
+call super::create
+this.ToolBarItemName="Exit!"
+this.Enabled=true
+this.ToolBarItemOrder=99
+end on
+

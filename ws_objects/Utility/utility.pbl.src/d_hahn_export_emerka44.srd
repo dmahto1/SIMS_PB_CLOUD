@@ -1,0 +1,71 @@
+﻿$PBExportHeader$d_hahn_export_emerka44.srd
+$PBExportComments$Export GM Hahn Order confirmations (EMERINV.TXT)
+release 7;
+datawindow(units=0 timer_interval=0 color=16777215 processing=1 HTMLDW=no print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.prompt=no print.buttons=no print.preview.buttons=no grid.lines=0 )
+header(height=148 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=80 color="536870912" )
+table(column=(type=char(1) updatewhereclause=yes name=c_export_ind dbname="c_export_ind" values="	Y/	N" )
+ column=(type=char(16) updatewhereclause=yes name=do_no dbname="Delivery_Master.do_no" )
+ column=(type=char(20) updatewhereclause=yes name=cust_code dbname="Delivery_Master.Cust_Code" )
+ column=(type=char(50) updatewhereclause=yes name=invoice_no dbname="Delivery_Master.Invoice_No" )
+ column=(type=char(20) updatewhereclause=yes name=cust_order_no dbname="Delivery_Master.Cust_Order_no" )
+ column=(type=char(10) updatewhereclause=yes name=user_field2 dbname="Delivery_Master.User_Field2" )
+ column=(type=char(20) updatewhereclause=yes name=user_field4 dbname="Delivery_Master.User_Field4" )
+ column=(type=decimal(0) updatewhereclause=yes name=req_qty dbname="Receive_Detail.req_qty" )
+ column=(type=decimal(0) updatewhereclause=yes name=alloc_qty dbname="Receive_Detail.alloc_qty" )
+ column=(type=char(50) updatewhereclause=yes name=sku dbname="Receive_Detail.SKU" )
+ column=(type=decimal(0) updatewhereclause=yes name=line_item_no dbname="Receive_Detail.Line_Item_no" )
+ column=(type=char(1) update=yes updatewhereclause=yes name=confirmation_ind dbname="Delivery_Master.Confirmation_Ind" )
+ column=(type=char(1) updatewhereclause=yes name=cancelation_code dbname="cancelation_code" )
+ retrieve="  SELECT ' ' as c_export_ind, 
+			dbo.Delivery_Master.do_no, 
+			dbo.Delivery_Master.Cust_Code,   
+         dbo.Delivery_Master.Invoice_No,
+			dbo.Delivery_Master.Cust_Order_no,
+			dbo.Delivery_Master.User_Field2,   
+         dbo.Delivery_Master.User_Field4,   
+			dbo.Receive_Detail.req_qty, 
+			dbo.Receive_Detail.alloc_qty,
+			dbo.Receive_Detail.SKU, 
+			dbo.Receive_Detail.Line_Item_no, 
+			dbo.DElivery_MASter.Confirmation_Ind, 
+			' ' as cancelation_code  
+         
+    FROM dbo.Delivery_Master,   
+			dbo.Receive_MAster, 
+         dbo.Receive_Detail  
+   WHERE dbo.Receive_master.Project_id = dbo.Delivery_MAster.Project_ID and
+			dbo.REceive_MASter.supp_invoice_no = dbo.Delivery_MAster.Invoice_NO and 
+			dbo.Receive_Detail.RO_No = dbo.Receive_Master.RO_No    and
+			Receive_master.Project_id = :asProject and
+			Delivery_MAster.ord_status in ('C', 'D') and
+			(confirmation_ind is null or confirmation_ind <> 'Y') and
+			alloc_qty <> req_qty
+" arguments=(("asProject", string))  sort="invoice_no A " )
+group(level=1 header.height=0 trailer.height=8 by=("do_no" ) header.color="536870912" trailer.color="12632256" )
+column(band=detail id=1 alignment="0" tabsequence=10 border="0" color="0" x="9" y="8" height="64" width="105" format="[general]"  name=c_export_ind checkbox.text="" checkbox.on="Y" checkbox.off="N" checkbox.scale=no checkbox.threed=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="0" color="0" x="123" y="8" height="64" width="453" format="[general]"  name=invoice_no edit.limit=20 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=7 alignment="0" tabsequence=32766 border="0" color="0" x="2057" y="8" height="64" width="210" format="[general]"  name=user_field4 edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="0" tabsequence=32766 border="0" color="0" x="2994" y="8" height="64" width="87" format="[general]"  name=user_field2 edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="0" tabsequence=32766 border="0" color="0" x="2286" y="8" height="64" width="466" format="[general]"  name=cust_order_no edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=13 alignment="0" tabsequence=20 border="5" color="0" x="2761" y="8" height="64" width="224" format="[general]"  name=cancelation_code editmask.mask="#" editmask.focusrectangle=no  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="15780518" )
+text(band=header alignment="2" text="" border="6" color="0" x="9" y="8" height="128" width="105"  name=c_export_ind_t  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="78567654" )
+text(band=header alignment="2" text="Opel Order #(Invoice #)" border="6" color="0" x="123" y="8" height="128" width="453"  name=delivery_master_invoice_no_t  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="78567654" )
+text(band=header alignment="2" text="Dealer#" border="6" color="0" x="585" y="8" height="128" width="306"  name=delivery_master_cust_code_t  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="78567654" )
+text(band=header alignment="2" text="OrderType" border="6" color="0" x="2057" y="8" height="128" width="210"  name=t_2  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="78567654" )
+text(band=header alignment="2" text="B/O" border="6" color="0" x="2994" y="8" height="128" width="87"  name=t_1  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="78567654" )
+text(band=header alignment="2" text="Dealer Order #(Cust Order)" border="6" color="0" x="2286" y="8" height="128" width="466"  name=t_5  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="78567654" )
+text(band=header alignment="2" text="CancelCode" border="6" color="0" x="2761" y="8" height="128" width="224"  name=t_7  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="80269524" )
+text(band=header alignment="2" text="LineItem" border="6" color="0" x="901" y="8" height="128" width="306"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="80269524" )
+text(band=header alignment="2" text="Part#" border="6" color="0" x="1216" y="8" height="128" width="393"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="80269524" )
+text(band=header alignment="2" text="ReqQty" border="6" color="0" x="1618" y="8" height="128" width="219"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="80269524" )
+text(band=header alignment="2" text="ShipQty" border="6" color="0" x="1847" y="8" height="128" width="219"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="80269524" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="0" color="0" x="585" y="8" height="64" width="306" format="[general]"  name=cust_code edit.limit=20 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=11 alignment="0" tabsequence=0 border="0" color="0" x="905" y="8" height="64" width="302"  name=line_item_no  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=10 alignment="0" tabsequence=0 border="0" color="0" x="1221" y="8" height="64" width="389"  name=sku  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=8 alignment="1" tabsequence=0 border="0" color="0" x="1623" y="8" height="64" width="215"  name=req_qty  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=9 alignment="1" tabsequence=0 border="0" color="0" x="1851" y="8" height="64" width="215"  name=alloc_qty  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" )

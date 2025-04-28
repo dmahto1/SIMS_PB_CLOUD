@@ -1,0 +1,68 @@
+HA$PBExportHeader$f_getprice.srf
+global type f_getprice from function_object
+end type
+
+forward prototypes
+global function integer f_getprice (ref datawindow adw_main, ref datawindow adw_detail)
+end prototypes
+
+global function integer f_getprice (ref datawindow adw_main, ref datawindow adw_detail);String ls_tcode, ls_tclass, ls_pclass, ls_sku, ls_cust, ls_Supplier
+Decimal ld_price, ld_tax, ld_discount
+Long ll_cnt, i
+ls_cust = adw_main.Getitemstring(1, "cust_code")
+Select tax_class, price_class, discount Into :ls_tclass, :ls_pclass, :ld_discount
+	From customer 
+	Where cust_code = :ls_cust and project_id = :gs_project;
+
+If sqlca.sqlcode <> 0 Then Return 0
+
+If IsNull(ld_discount) Then ld_discount = 0
+
+ll_cnt = adw_detail.RowCount()
+For i = 1 to ll_cnt
+	If adw_detail.getitemnumber(i, "price") = 0 Then
+		ls_sku = adw_detail.GetItemString(i, "sku")
+		ls_supplier = adw_detail.GetItemString(i, "supp_code")
+		
+		//BCR 21-JUN-2011: SQL 2008 Compatibility Project to convert "*=" to LEFT JOIN
+		
+//		SELECT Price_Master.Price_1,   
+//				(IsNull(Tax_Master.Tax_1,0) + IsNull(Tax_Master.Tax_2,0) +    
+//				IsNull(Tax_Master.Tax_3,0) + IsNull(Tax_Master.Tax_4,0) +    
+//				IsNull(Tax_Master.Tax_5,0)) Into :ld_price, :ld_tax     
+//			FROM Item_Master, Price_Master, Tax_Master  
+//			WHERE ( Item_Master.Tax_Code *= Tax_Master.Tax_Code) and  
+//				( Price_Master.Project_ID = Item_Master.Project_ID ) and  
+//				( Price_Master.SKU = Item_Master.SKU ) and  
+//				( Price_Master.Supp_code = Item_Master.Supp_code ) and
+//				( ( Price_Master.Project_ID = :gs_project ) AND  
+//				( Price_Master.SKU = :ls_sku ) AND  
+//				( Price_Master.Supp_code = :ls_supplier ) AND
+//				( Price_Master.Price_Class = :ls_pclass ) AND  
+//				( Tax_Master.Tax_Class = :ls_tclass ) ) ;
+				
+		SELECT PM.Price_1,   
+			(IsNull(TM.Tax_1,0) + IsNull(TM.Tax_2,0) +    
+			IsNull(TM.Tax_3,0) + IsNull(TM.Tax_4,0) +    
+			IsNull(TM.Tax_5,0)) Into :ld_price, :ld_tax  
+		FROM Item_Master IM LEFT JOIN Tax_Master TM ON IM.Tax_Code = TM.Tax_Code 
+			 INNER JOIN Price_Master PM ON IM.Project_ID = PM.Project_ID
+			 AND IM.SKU = PM.SKU
+			 AND IM.Supp_code = PM.Supp_code
+		WHERE PM.Project_ID = :gs_project 
+		AND PM.SKU = :ls_sku 
+		AND PM.Supp_Code = :ls_supplier
+		AND PM.Price_Class = :ls_pclass
+		AND TM.Tax_Class = :ls_tclass;
+		//****************************************
+				
+		If sqlca.sqlcode = 0 Then
+			adw_detail.setitem(i, "price", ld_price * (1 - ld_discount))
+			adw_detail.setitem(i, "tax", ld_tax)
+		End If
+	End If
+Next
+
+Return 0
+end function
+

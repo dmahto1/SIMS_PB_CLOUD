@@ -1,0 +1,9 @@
+﻿$PBExportHeader$str_embargoed_country.srs
+$PBExportComments$For passing embargoed country override
+global type str_embargoed_country from structure
+	string		sembargoed_override_user		descriptor "comment" = "Authenticated user authorized to issue override"
+	string		sembargoed_override_license		descriptor "comment" = "State Department Issued License"
+	datetime		dtembargoed_override_date		descriptor "comment" = "DateTime the override was recorded"
+	integer		nReturn		descriptor "comment" = "Return value"
+end type
+

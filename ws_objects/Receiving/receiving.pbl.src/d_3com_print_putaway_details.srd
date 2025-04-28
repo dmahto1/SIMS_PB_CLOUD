@@ -1,0 +1,42 @@
+﻿$PBExportHeader$d_3com_print_putaway_details.srd
+$PBExportComments$*+Receiving Putaway
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 1 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 9 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=124 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=2700 color="536870912" )
+table(column=(type=char(30) updatewhereclause=yes name=supp_invoice_no dbname="Supp_Invoice_No" )
+ column=(type=datetime updatewhereclause=yes name=putaway_start_time dbname="Putaway_Start_Time" )
+ column=(type=char(20) updatewhereclause=yes name=supp_code dbname="Supp_Code" )
+ column=(type=char(50) updatewhereclause=yes name=sku dbname="SKU" )
+ column=(type=decimal(5) updatewhereclause=yes name=quantity dbname="Quantity" )
+ column=(type=char(10) updatewhereclause=yes name=l_code dbname="L_Code" )
+ retrieve="SELECT 	Supp_Invoice_No,   
+			case 	when complete_date is not null
+					then complete_date
+					else 	case	when putaway_start_time is not null
+									then putaway_start_time
+									else getdate()
+							end
+			end Putaway_Start_Time,
+        	rp.Supp_Code,
+        	SKU,   
+        	Quantity,   
+        	L_Code  
+FROM 		Receive_Master rm, Receive_Putaway rp
+WHERE 	rp.RO_No = rm.RO_No 
+		 	and  rm.RO_No = :ro_no
+" arguments=(("ro_no", string)) )
+group(level=1 header.height=52 trailer.height=0 by=("sku" , "supp_code" , "l_code" ) newpage=yes header.color="536870912" trailer.color="536870912" )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="0" color="33554432" x="361" y="1364" height="384" width="4302" format="[general]" html.valueishtml="0"  name=sku visible="1" edit.limit=50 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-72" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="0" tabsequence=32766 border="0" color="33554432" x="361" y="1812" height="384" width="4302" format="#" html.valueishtml="0"  name=quantity visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-72" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="0" tabsequence=32766 border="2" color="33554432" x="361" y="2280" height="384" width="4302" format="[general]" html.valueishtml="0"  name=l_code visible="1" edit.limit=10 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-72" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="0" color="0" x="361" y="20" height="384" width="4302" format="[general]" html.valueishtml="0"  name=supp_invoice_no visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-72" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="0" color="33554432" x="361" y="916" height="384" width="4302" format="[general]" html.valueishtml="0"  name=supp_code visible="1" edit.limit=20 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-72" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="0" color="0" x="361" y="464" height="384" width="4302" format="[shortdate]" html.valueishtml="0"  name=putaway_start_time visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-72" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

@@ -1,0 +1,18 @@
+﻿$PBExportHeader$f_setfocus.srf
+global type f_setfocus from function_object
+end type
+
+forward prototypes
+global subroutine f_setfocus (ref datawindow a_dw, long a_row, string a_column)
+end prototypes
+
+global subroutine f_setfocus (ref datawindow a_dw, long a_row, string a_column);a_dw.SetFocus()
+a_dw.ScrollToRow(a_row)
+a_dw.SetRow(a_row)
+If Len(a_column) > 0 Then
+	a_dw.SetColumn(a_column)
+End If
+
+Return
+end subroutine
+

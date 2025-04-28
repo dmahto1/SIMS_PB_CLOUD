@@ -1,0 +1,12 @@
+﻿$PBExportHeader$d_gemini_returnxml.srd
+$PBExportComments$Displays XML string
+release 7;
+datawindow(units=0 timer_interval=0 color=16777215 processing=0 HTMLDW=no print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.prompt=no print.buttons=no print.preview.buttons=no )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=24 color="536870912"  height.autosize=yes)
+table(column=(type=char(9999) updatewhereclause=yes name=returnxml dbname="returnXML" )
+ )
+column(band=detail id=1 alignment="0" tabsequence=10 border="5" color="0" x="5" y="4" height="20" width="3675" format="[general]"  name=returnxml height.autosize=yes edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.autovscroll=yes edit.hscrollbar=yes edit.vscrollbar=yes  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" )

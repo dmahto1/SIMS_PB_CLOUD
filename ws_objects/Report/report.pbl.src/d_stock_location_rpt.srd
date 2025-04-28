@@ -1,0 +1,160 @@
+﻿$PBExportHeader$d_stock_location_rpt.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=16777215 processing=1 HTMLDW=no print.printername="" print.documentname="" print.orientation = 1 print.margin.left = 90 print.margin.right = 90 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no grid.lines=2 grid.columnmove=no selected.mouse=no )
+header(height=296 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=72 color="536870912" )
+table(column=(type=char(10) updatewhereclause=yes name=l_code dbname="Content_Summary.L_Code" )
+ column=(type=char(50) updatewhereclause=yes name=sku dbname="Content_Summary.SKU" )
+ column=(type=char(30) updatewhereclause=yes name=inventory_type_inventory_type dbname="Content_Summary.Inventory_Type" )
+ column=(type=char(50) updatewhereclause=yes name=serial_no dbname="Content_Summary.Serial_No" )
+ column=(type=char(50) updatewhereclause=yes name=lot_no dbname="Content_Summary.Lot_No" )
+ column=(type=char(50) updatewhereclause=yes name=po_no dbname="Content_Summary.PO_No" )
+ column=(type=char(50) updatewhereclause=yes name=po_no2 dbname="Content_Summary.PO_No2" )
+ column=(type=char(25) updatewhereclause=yes name=content_summary_container_id dbname="Content_Summary.Container_ID" )
+ column=(type=datetime updatewhereclause=yes name=content_summary_expiration_date dbname="Content_Summary.Expiration_Date" )
+ column=(type=char(20) updatewhereclause=yes name=ro_no dbname="Content_Summary.RO_No" )
+ column=(type=decimal(5) updatewhereclause=yes name=avail_qty dbname="Content_Summary.Avail_Qty" )
+ column=(type=decimal(5) updatewhereclause=yes name=alloc_qty dbname="Content_Summary.Alloc_Qty" )
+ column=(type=decimal(5) updatewhereclause=yes name=sit_qty dbname="Content_Summary.SIT_Qty" )
+ column=(type=decimal(5) updatewhereclause=yes name=tfr_in dbname="Content_Summary.Tfr_In" )
+ column=(type=decimal(5) updatewhereclause=yes name=tfr_out dbname="Content_Summary.Tfr_Out" )
+ column=(type=decimal(5) updatewhereclause=yes name=wip_qty dbname="Content_Summary.wip_qty" )
+ column=(type=char(20) updatewhereclause=yes name=content_summary_supp_code dbname="Content_Summary.supp_code" )
+ column=(type=char(3) updatewhereclause=yes name=country_of_origin dbname="Content_Summary.country_of_origin" )
+ column=(type=char(30) updatewhereclause=yes name=receive_master_supp_invoice_no dbname="Content_Summary.supp_invoice_no" )
+ column=(type=char(20) updatewhereclause=yes name=owner_owner_cd dbname="Content_Summary.Owner_cd" )
+ column=(type=char(1) updatewhereclause=yes name=owner_owner_type dbname="Content_Summary.Owner_type" )
+ column=(type=char(10) updatewhereclause=yes name=item_master_grp dbname="Content_Summary.grp" )
+ retrieve="  SELECT Content_Summary.L_Code,   
+         Content_Summary.SKU,   
+         Inventory_Type.Inv_Type_Desc as Inventory_Type,   
+         Content_Summary.Serial_No,   
+         Content_Summary.Lot_No,   
+		Content_Summary.PO_No, 
+		Content_Summary.PO_No2,
+		Content_Summary.Container_ID,
+		Content_Summary.Expiration_Date,
+         Content_Summary.RO_No,   
+         Content_Summary.Avail_Qty,    
+         Content_Summary.Alloc_Qty,   
+         Content_Summary.SIT_Qty,   
+         Content_Summary.Tfr_In,    
+         Content_Summary.Tfr_Out,
+			Content_Summary.wip_qty, 
+		content_summary.supp_code,
+         content_summary.country_of_origin, 
+		receive_master.supp_invoice_no,
+         Owner.Owner_cd,
+         Owner.Owner_type,
+	Item_Master.grp  
+    FROM {oj dbo.Content_Summary LEFT OUTER JOIN dbo.Item_Master ON dbo.Content_Summary.Project_ID = dbo.Item_Master.Project_ID AND dbo.Content_Summary.SKU = dbo.Item_Master.SKU AND dbo.Content_Summary.Supp_Code = dbo.Item_Master.Supp_Code AND dbo.Content_Summary.Owner_ID = dbo.Item_Master.Owner_ID},   
+         dbo.Inventory_Type,   
+         dbo.Receive_Master,   
+         dbo.Owner  
+   WHERE ( dbo.Content_Summary.Owner_ID = dbo.Owner.Owner_ID ) and  
+         ( dbo.Content_Summary.RO_No = dbo.Receive_Master.RO_No ) and  
+         ( dbo.Content_Summary.Project_ID = dbo.Inventory_Type.Project_ID ) and  
+         ( dbo.Content_Summary.Inventory_Type = dbo.Inventory_Type.Inv_Type )  and
+	 ( Content_Summary.Project_ID = :a_project ) AND  
+         ( Content_Summary.WH_Code = :a_whcode ) AND
+         ( Content_Summary.L_Code between :a_start and :a_end )  
+
+union
+
+  SELECT Content_Summary.L_Code,   
+         Content_Summary.SKU,   
+         Inventory_Type.Inv_Type_Desc as Inventory_Type,   
+         Content_Summary.Serial_No,   
+         Content_Summary.Lot_No,   
+		Content_Summary.PO_No, 
+		Content_Summary.PO_No2,
+		Content_Summary.Container_ID,
+		Content_Summary.Expiration_Date,
+         Content_Summary.RO_No,   
+         Content_Summary.Avail_Qty,    
+         Content_Summary.Alloc_Qty,   
+         Content_Summary.SIT_Qty,   
+         Content_Summary.Tfr_In,    
+         Content_Summary.Tfr_Out,
+			Content_Summary.wip_qty, 
+		content_summary.supp_code,
+         content_summary.country_of_origin, 
+		workorder_master.wo_no,
+         Owner.Owner_cd,
+         Owner.Owner_type,
+			Item_Master.Grp  
+    FROM {oj dbo.Content_Summary LEFT OUTER JOIN dbo.Item_Master ON dbo.Content_Summary.Project_ID = dbo.Item_Master.Project_ID AND dbo.Content_Summary.SKU = dbo.Item_Master.SKU AND dbo.Content_Summary.Supp_Code = dbo.Item_Master.Supp_Code AND dbo.Content_Summary.Owner_ID = dbo.Item_Master.Owner_ID},   
+         dbo.Inventory_Type,   
+         dbo.workorder_master,   
+         dbo.Owner  
+   WHERE ( dbo.Content_Summary.Owner_ID = dbo.Owner.Owner_ID ) and  
+         ( dbo.Content_Summary.RO_No = dbo.workorder_master.WO_No ) and  
+         ( dbo.Content_Summary.Project_ID = dbo.Inventory_Type.Project_ID ) and  
+         ( dbo.Content_Summary.Inventory_Type = dbo.Inventory_Type.Inv_Type )   and
+			( Content_Summary.Project_ID = :a_project ) AND  
+         ( Content_Summary.WH_Code = :a_whcode ) AND
+         ( Content_Summary.L_Code between :a_start and :a_end )   
+ORDER BY Content_Summary.L_Code ASC,   
+         Content_Summary.SKU ASC,   
+         Inventory_Type.Inv_Type_Desc ASC,   
+         Content_Summary.Serial_No ASC,   
+         Content_Summary.Lot_No ASC,   
+         Content_Summary.RO_No ASC   
+
+" filter="l_code > ~" ~"  AND ( avail_qty > 0  OR  alloc_qty > 0 OR  sit_qty > 0 or wip_qty > 0)"arguments=(("a_project", string),("a_whcode", string),("a_start", string),("a_end", string)) )
+text(band=header alignment="2" text="LOCATION" border="2" color="0" x="9" y="236" height="56" width="293" html.valueishtml="0"  name=l_code_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="SKU" border="2" color="0" x="311" y="236" height="56" width="498" html.valueishtml="0"  name=sku_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="SERIAL NBR" border="2" color="0" x="1847" y="236" height="56" width="320" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+text(band=header alignment="2" text="LOT NBR" border="2" color="0" x="2176" y="236" height="56" width="311" html.valueishtml="0"  name=lot_no_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+text(band=header alignment="2" text="OWNER" border="2" color="0" x="1454" y="236" height="56" width="261" html.valueishtml="0"  name=cf_name_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="COO" border="2" color="0" x="1723" y="236" height="56" width="114" html.valueishtml="0"  name=country_of_origin_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="PO NBR" border="2" color="0" x="2496" y="236" height="56" width="343" html.valueishtml="0"  name=po_no_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+text(band=header alignment="2" text="PO NBR 2" border="2" color="0" x="2848" y="236" height="56" width="265" html.valueishtml="0"  name=po_no2_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+text(band=header alignment="2" text="Container Id" border="2" color="0" x="3122" y="236" height="56" width="320" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+text(band=header alignment="2" text="Exp Date" border="2" color="0" x="3451" y="236" height="56" width="261" html.valueishtml="0"  name=t_10 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+text(band=header alignment="2" text="AVAIL" border="2" color="0" x="3721" y="236" height="56" width="137" html.valueishtml="0"  name=t_4 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+text(band=header alignment="2" text="ALLOC" border="2" color="0" x="3867" y="236" height="56" width="165" html.valueishtml="0"  name=t_7 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+text(band=header alignment="2" text="SIT" border="2" color="0" x="4041" y="236" height="56" width="101" html.valueishtml="0"  name=t_8 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+text(band=header alignment="2" text="TRF IN" border="2" color="0" x="4151" y="180" height="112" width="137" html.valueishtml="0"  name=t_5 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+text(band=header alignment="2" text="TFR OUT" border="2" color="0" x="4297" y="180" height="112" width="133" html.valueishtml="0"  name=t_6 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+text(band=header alignment="2" text="Wip Qty" border="2" color="0" x="4439" y="180" height="112" width="119" html.valueishtml="0"  name=wip_qty_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="0" color="0" x="9" y="0" height="64" width="293" format="[general]" html.valueishtml="0"  name=l_code visible="1" edit.limit=10 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="0" color="0" x="311" y="4" height="64" width="498" format="[general]" html.valueishtml="0"  name=sku visible="1" edit.limit=20 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="0" color="0" x="1847" y="4" height="64" width="320" format="[general]" html.valueishtml="0"  name=serial_no visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+column(band=detail id=5 alignment="0" tabsequence=32766 border="0" color="0" x="2176" y="4" height="64" width="311" format="[general]" html.valueishtml="0"  name=lot_no visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+column(band=detail id=6 alignment="0" tabsequence=32766 border="0" color="0" x="2496" y="4" height="64" width="343" format="[general]" html.valueishtml="0"  name=po_no visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+column(band=detail id=7 alignment="0" tabsequence=32766 border="0" color="0" x="2848" y="4" height="64" width="265" format="[general]" html.valueishtml="0"  name=po_no2 visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=14 alignment="1" tabsequence=32766 border="0" color="0" x="4151" y="4" height="64" width="137" format="#######.#####" html.valueishtml="0"  name=tfr_in visible="1" editmask.mask="#######.#####" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+column(band=detail id=13 alignment="1" tabsequence=32766 border="0" color="0" x="4041" y="4" height="64" width="101" format="#######.#####" html.valueishtml="0"  name=sit_qty visible="1" editmask.mask="#######.#####" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+column(band=detail id=12 alignment="1" tabsequence=32766 border="0" color="0" x="3867" y="4" height="64" width="165" format="#######.#####" html.valueishtml="0"  name=alloc_qty visible="1" editmask.mask="#######.#####" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+column(band=detail id=11 alignment="1" tabsequence=32766 border="0" color="0" x="3721" y="4" height="64" width="137" format="#######.#####" html.valueishtml="0"  name=avail_qty visible="1" editmask.mask="#######.#####" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+column(band=detail id=17 alignment="0" tabsequence=32766 border="0" color="0" x="818" y="4" height="64" width="306" format="[general]" html.valueishtml="0"  name=content_summary_supp_code visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=18 alignment="0" tabsequence=32766 border="0" color="0" x="1723" y="4" height="64" width="114" format="[general]" html.valueishtml="0"  name=country_of_origin visible="1" edit.limit=3 edit.case=upper edit.focusrectangle=no edit.autoselect=no edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=8 alignment="0" tabsequence=32766 border="0" color="0" x="3122" y="4" height="64" width="320" format="[general]" html.valueishtml="0"  name=content_summary_container_id visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+column(band=detail id=9 alignment="0" tabsequence=32766 border="0" color="0" x="3451" y="4" height="64" width="261" format="[shortdate] " html.valueishtml="0"  name=content_summary_expiration_date visible="1" editmask.mask="mm/dd/yyyy" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+column(band=detail id=15 alignment="1" tabsequence=32766 border="0" color="0" x="4297" y="4" height="64" width="133" format="#######.#####" html.valueishtml="0"  name=tfr_out visible="1" editmask.mask="#######.#####" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+column(band=detail id=16 alignment="1" tabsequence=32766 border="0" color="0" x="4439" y="4" height="64" width="119" format="#######.#####" html.valueishtml="0"  name=wip_qty visible="1" editmask.mask="#######.#####" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=foreground alignment="0" text="Report ID:" border="0" color="0" x="14" y="8" height="56" width="233" html.valueishtml="0"  name=t_11 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+text(band=foreground alignment="0" text="SIMS302" border="0" color="0" x="261" y="8" height="56" width="206" html.valueishtml="0"  name=t_12 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+text(band=foreground alignment="0" text="STOCK LOCATION REPORT" border="0" color="0" x="1609" y="12" height="56" width="846" html.valueishtml="0"  name=t_13 visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=foreground alignment="0" text="Date:" border="0" color="0" x="14" y="68" height="56" width="114" html.valueishtml="0"  name=t_14 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+compute(band=foreground alignment="0" expression="String(Today(), 'mm/dd/yyyy hh:mm')"border="0" color="0" x="466" y="68" height="56" width="983" format="[general]" html.valueishtml="0"  name=compute_1 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+text(band=foreground alignment="0" text="Location From:" border="0" color="0" x="2139" y="152" height="56" width="375" html.valueishtml="0"  name=t_16 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+text(band=foreground alignment="0" text="Project:" border="0" color="0" x="14" y="152" height="56" width="192" html.valueishtml="0"  name=t_17 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+compute(band=foreground alignment="0" expression=" a_project "border="0" color="0" x="224" y="152" height="56" width="704" format="[general]" html.valueishtml="0"  name=compute_3 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+compute(band=foreground alignment="0" expression=" a_start "border="0" color="0" x="2528" y="152" height="56" width="219" format="[general]" html.valueishtml="0"  name=compute_5 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+text(band=foreground alignment="0" text="Warehouse:" border="0" color="0" x="1257" y="152" height="56" width="306" html.valueishtml="0"  name=t_18 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+compute(band=foreground alignment="0" expression=" a_whcode "border="0" color="0" x="1577" y="152" height="56" width="503" format="[general]" html.valueishtml="0"  name=compute_4 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+text(band=foreground alignment="0" text="To:" border="0" color="0" x="2766" y="152" height="56" width="87" html.valueishtml="0"  name=t_19 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+compute(band=foreground alignment="0" expression=" a_end "border="0" color="0" x="2857" y="152" height="56" width="370" format="[general]" html.valueishtml="0"  name=compute_6 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+text(band=header alignment="2" text="SUPPLIER" border="2" color="0" x="818" y="236" height="56" width="306" html.valueishtml="0"  name=t_9 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+text(band=header alignment="2" text="GRP" border="2" color="0" x="1134" y="236" height="56" width="315" html.valueishtml="0"  name=item_master_grp_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=detail alignment="0" expression=" owner_owner_cd  + '(' + owner_owner_type  + ')'"border="0" color="0" x="1454" y="4" height="64" width="261" format="[general]" html.valueishtml="0"  name=cf_owner_name visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=22 alignment="0" tabsequence=0 border="0" color="0" x="1138" y="4" height="64" width="311" html.valueishtml="0"  name=item_master_grp visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

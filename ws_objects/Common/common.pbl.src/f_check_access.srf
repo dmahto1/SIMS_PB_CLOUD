@@ -1,0 +1,73 @@
+﻿$PBExportHeader$f_check_access.srf
+global type f_check_access from function_object
+end type
+
+forward prototypes
+global function integer f_check_access (string process_id, string right)
+end prototypes
+
+global function integer f_check_access (string process_id, string right);// f_check_access( string process_id, string right )
+
+
+String ls_action
+
+// 02/08 - PCONKL - Adding "-1" as Super Duper user
+
+If gs_role = '-1' or gs_role = '0' or gs_role = '1' Then
+	Return 1
+End If
+
+if g.getFunctionRights( process_id, right ) then return 1
+
+MessageBox("Security Check", "You have no access to this function!",StopSign!)
+return 0
+
+//
+// pvh - 08/18/06 - moved logic to app manager...load rights into datastore during login...ONCE!
+// old code...
+//ls_action = '0'
+//choose case right
+//	case 'S'
+//		Select p_save 
+//			Into :ls_action 
+//			From Function_Rights
+//			Where userid = :gs_userid and child_id = :process_id and project_id = :gs_project;
+//	case 'D'
+//		Select p_delete 
+//			Into :ls_action 
+//			From Function_Rights
+//			Where userid = :gs_userid and child_id = :process_id and project_id = :gs_project;
+//	case 'N'
+//		Select p_new 
+//			Into :ls_action 
+//			From Function_Rights
+//			Where userid = :gs_userid and child_id = :process_id and project_id = :gs_project;
+//	case 'C'
+//		Select p_confirm 
+//			Into :ls_action 
+//			From Function_Rights
+//			Where userid = :gs_userid and child_id = :process_id and project_id = :gs_project;
+//// pvh - 08/17/06			
+//	//case 'E', ''
+//	case 'E'
+//		Select p_edit 
+//			Into :ls_action 
+//			From Function_Rights
+//			Where userid = :gs_userid and child_id = :process_id and project_id = :gs_project;
+//	case ''
+//		Select p_window
+//			Into :ls_action 
+//			From Function_Rights
+//			Where userid = :gs_userid and child_id = :process_id and project_id = :gs_project;	
+//// pvh - 08/17/06
+//end choose	
+//
+//If ls_action = '1' Then
+//	Return 1
+//Else
+//	MessageBox("Security Check", "You have no access to this function!",StopSign!)
+//	Return 0
+//End If
+//
+end function
+

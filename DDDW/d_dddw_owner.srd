@@ -1,0 +1,28 @@
+HA$PBExportHeader$d_dddw_owner.srd
+release 11;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes print.preview.outline=yes hidegrayline=no showbackcoloronxp=no )
+header(height=0 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=76 color="536870912" )
+table(column=(type=decimal(0) update=yes updatewhereclause=yes key=yes identity=yes name=owner_id dbname="Owner.Owner_ID" dbalias=".Owner_ID" )
+ column=(type=char(20) update=yes updatewhereclause=yes name=owner_cd dbname="Owner.Owner_Cd" dbalias=".Owner_Cd" values="owner_pls_type	owner_cd/" )
+ column=(type=char(23) updatewhereclause=yes name=owner_pls_type dbname="Owner_Pls_Type" values="owner_pls_type	owner_cd/" )
+ retrieve="SELECT dbo.Owner.Owner_ID,  dbo.Owner.Owner_Cd , 
+       rtrim(dbo.Owner.Owner_Cd)
+		+'('+ dbo.Owner.Owner_type + ')' as Owner_Pls_Type
+    FROM dbo.Owner  
+   WHERE upper(dbo.Owner.Project_ID) = :project_id    
+" update="dbo.Owner" updatewhere=1 updatekeyinplace=no arguments=(("project_id", string))  sort="owner_cd A " )
+column(band=detail id=3 alignment="0" tabsequence=0 border="0" color="33554432" x="5" y="0" height="68" width="855" html.valueishtml="0"  name=owner_pls_type visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.codetable=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" pagingmethod=0 generatedddwframes="1" )
+xhtmlgen() cssgen(sessionspecific="0" )
+xmlgen(inline="0" )
+xsltgen()
+jsgen()
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0  template=(comment="" encoding="UTF-16LE" name="d_ddw_owner" xml="<?xml version=~"1.0~" encoding=~"UTF-16LE~" standalone=~"no~"?><d_dddw_owner><d_dddw_owner_row __pbband=~"detail~"><owner_id>owner_id</owner_id><owner_cd/></d_dddw_owner_row></d_dddw_owner>"))
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )
+export.xhtml()
+ 

@@ -1,0 +1,96 @@
+HA$PBExportHeader$d_shipto_comcast_sik.srd
+release 11;
+datawindow(units=0 timer_interval=0 color=67108864 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes print.preview.outline=yes hidegrayline=no showbackcoloronxp=no )
+header(height=0 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=896 color="536870912" )
+table(column=(type=char(16) updatewhereclause=yes key=yes name=do_no dbname="Delivery_Master.DO_No" )
+ column=(type=char(10) updatewhereclause=yes name=project_id dbname="Delivery_Master.Project_ID" )
+ column=(type=datetime updatewhereclause=yes name=ord_date dbname="Delivery_Master.Ord_Date" )
+ column=(type=char(50) updatewhereclause=yes name=cust_name dbname="Delivery_Master.Cust_Name" )
+ column=(type=char(60) updatewhereclause=yes name=address_1 dbname="Delivery_Master.Address_1" )
+ column=(type=char(60) updatewhereclause=yes name=address_2 dbname="Delivery_Master.Address_2" )
+ column=(type=char(50) updatewhereclause=yes name=city dbname="Delivery_Master.City" )
+ column=(type=char(50) updatewhereclause=yes name=state dbname="Delivery_Master.State" )
+ column=(type=char(50) updatewhereclause=yes name=zip dbname="Delivery_Master.Zip" )
+ column=(type=char(20) updatewhereclause=yes name=carrier dbname="Delivery_Master.Carrier" )
+ column=(type=char(30) updatewhereclause=yes name=awb_bol_no dbname="Delivery_Master.AWB_BOL_No" )
+ column=(type=char(10) updatewhereclause=yes name=wh_code dbname="Delivery_Master.WH_Code" )
+ column=(type=char(1) updatewhereclause=yes name=ord_status dbname="Delivery_Master.Ord_Status" )
+ column=(type=char(20) updatewhereclause=yes name=user_field5 dbname="Delivery_Master.User_Field5" )
+ column=(type=char(20) updatewhereclause=yes name=user_field4 dbname="Delivery_Master.User_Field4" )
+ column=(type=char(50) updatewhereclause=yes name=invoice_no dbname="Delivery_Master.Invoice_No" )
+ column=(type=char(100) update=yes updatewhereclause=yes name=user_field2 dbname="Delivery_Master.User_Field2" )
+ column=(type=decimal(0) updatewhereclause=yes name=batch_pick_id dbname="Delivery_Master.Batch_Pick_ID" )
+ column=(type=char(1) updatewhereclause=yes name=ord_type dbname="Delivery_Master.Ord_Type" values="SALE	S/RMA	R/" )
+ column=(type=char(50) updatewhereclause=yes name=return_tracking_no dbname="Delivery_Master.return_tracking_no" )
+ retrieve="  SELECT dbo.Delivery_Master.DO_No,   
+         dbo.Delivery_Master.Project_ID,   
+         dbo.Delivery_Master.Ord_Date,   
+         dbo.Delivery_Master.Cust_Name,   
+         dbo.Delivery_Master.Address_1,   
+         dbo.Delivery_Master.Address_2,   
+         dbo.Delivery_Master.City,   
+         dbo.Delivery_Master.State,   
+         dbo.Delivery_Master.Zip,   
+         dbo.Delivery_Master.Carrier,   
+         dbo.Delivery_Master.AWB_BOL_No,   
+         dbo.Delivery_Master.WH_Code,   
+         dbo.Delivery_Master.Ord_Status,   
+         dbo.Delivery_Master.User_Field5,   
+         dbo.Delivery_Master.User_Field4,   
+         dbo.Delivery_Master.Invoice_No,   
+         dbo.Delivery_Master.User_Field2, 
+		dbo.Delivery_Master.Batch_Pick_ID,
+		dbo.DElivery_MAster.Ord_Type, 
+		dbo.Delivery_MAster.return_tracking_no    
+    FROM dbo.Delivery_Master  with (nolock)
+   WHERE ( dbo.Delivery_Master.Project_ID = 'COMCAST' ) AND  
+         ((dbo.Delivery_Master.AWB_BOL_No = :as_do_no) OR  
+         (dbo.Delivery_Master.Invoice_No = :as_do_no ))    
+" update="dbo.Delivery_Master" updatewhere=0 updatekeyinplace=yes arguments=(("as_do_no", string)) )
+text(band=detail alignment="0" text="Ship To:" border="0" color="0" x="23" y="12" height="64" width="530" html.valueishtml="0"  name=shipto_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" font.underline="1" background.mode="2" background.color="67108864" )
+text(band=detail alignment="1" text="Customer Name:" border="0" color="0" x="78" y="100" height="76" width="475" html.valueishtml="0"  name=cust_name_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=detail alignment="1" text="Address:" border="0" color="0" x="78" y="188" height="76" width="475" html.valueishtml="0"  name=address_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=detail alignment="1" text="City:" border="0" color="0" x="78" y="364" height="76" width="475" html.valueishtml="0"  name=city_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=detail alignment="1" text="State:" border="0" color="0" x="78" y="452" height="76" width="475" html.valueishtml="0"  name=state_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=detail alignment="1" text="Zip:" border="0" color="0" x="78" y="540" height="76" width="475" html.valueishtml="0"  name=zip_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+column(band=detail id=17 alignment="0" tabsequence=32766 border="0" color="0" x="585" y="16" height="64" width="270" format="[general]" html.valueishtml="0"  name=user_field2 visible="0" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="2" color="0" x="571" y="100" height="76" width="1399" format="[general]" html.valueishtml="0"  name=cust_name visible="1" edit.limit=50 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" )
+column(band=detail id=6 alignment="0" tabsequence=32766 border="2" color="0" x="571" y="276" height="76" width="1399" format="[general]" html.valueishtml="0"  name=address_2 visible="1" edit.limit=60 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" )
+column(band=detail id=7 alignment="0" tabsequence=32766 border="2" color="0" x="571" y="364" height="76" width="1399" format="[general]" html.valueishtml="0"  name=city visible="1" edit.limit=50 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" )
+column(band=detail id=8 alignment="0" tabsequence=32766 border="2" color="0" x="571" y="452" height="76" width="1399" format="[general]" html.valueishtml="0"  name=state visible="1" edit.limit=50 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" )
+column(band=detail id=9 alignment="0" tabsequence=32766 border="2" color="0" x="571" y="540" height="76" width="1399" format="[general]" html.valueishtml="0"  name=zip visible="1" edit.limit=50 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" )
+column(band=detail id=5 alignment="0" tabsequence=32766 border="2" color="0" x="571" y="188" height="76" width="1399" format="[general]" html.valueishtml="0"  name=address_1 visible="1" edit.limit=60 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="2" color="0" x="2825" y="276" height="76" width="1019" format="[shortdate] [time]" html.valueishtml="0"  name=ord_date visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" )
+text(band=detail alignment="1" text="Order Date:" border="0" color="0" x="2199" y="276" height="76" width="599" html.valueishtml="0"  name=ord_date_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+column(band=detail id=10 alignment="0" tabsequence=32766 border="2" color="0" x="2825" y="364" height="76" width="1019" format="[general]" html.valueishtml="0"  name=carrier visible="1" edit.limit=20 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" )
+text(band=detail alignment="1" text="Carrier:" border="0" color="0" x="2199" y="364" height="76" width="599" html.valueishtml="0"  name=carrier_t visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+column(band=detail id=12 alignment="0" tabsequence=32766 border="2" color="0" x="2825" y="452" height="76" width="1019" format="[general]" html.valueishtml="0"  name=wh_code visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" )
+text(band=detail alignment="1" text="Warehouse:" border="0" color="0" x="2199" y="452" height="76" width="599" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+column(band=detail id=13 alignment="0" tabsequence=32766 border="2" color="0" x="2825" y="540" height="76" width="1019" format="[general]" html.valueishtml="0"  name=ord_status  tag="" visible="1" dddw.name=dddw_ord_status dddw.displaycolumn=ord_status_desc dddw.datacolumn=ord_status dddw.percentwidth=0 dddw.lines=0 dddw.limit=0 dddw.allowedit=no dddw.useasborder=no dddw.case=any dddw.vscrollbar=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" )
+text(band=detail alignment="1" text="Order Status:" border="0" color="0" x="2199" y="540" height="76" width="599" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+column(band=detail id=14 alignment="0" tabsequence=32766 border="2" color="0" x="2825" y="628" height="76" width="1019" format="[general]" html.valueishtml="0"  name=user_field5 visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" )
+text(band=detail alignment="1" text="Account Number:" border="0" color="0" x="2199" y="628" height="76" width="599" html.valueishtml="0"  name=t_3 visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+column(band=detail id=15 alignment="0" tabsequence=32766 border="2" color="0" x="2825" y="716" height="76" width="1019" format="[general]" html.valueishtml="0"  name=user_field4 visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" )
+text(band=detail alignment="1" text="Unique Customer ID:" border="0" color="0" x="2199" y="716" height="76" width="599" html.valueishtml="0"  name=t_4 visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+column(band=detail id=16 alignment="0" tabsequence=32766 border="2" color="0" x="2825" y="188" height="76" width="1019" format="[general]" html.valueishtml="0"  name=invoice_no visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" )
+text(band=detail alignment="1" text="Order Number:" border="0" color="0" x="2199" y="188" height="76" width="599" html.valueishtml="0"  name=t_5 visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+column(band=detail id=19 alignment="0" tabsequence=32766 border="2" color="0~tif (ord_type='R',255,0)" x="2825" y="100" height="76" width="1019" format="[general]" html.valueishtml="0"  name=ord_type visible="1" ddlb.limit=0 ddlb.allowedit=no ddlb.case=any  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" )
+text(band=detail alignment="1" text="Order Type:" border="0" color="0" x="2199" y="100" height="76" width="599" html.valueishtml="0"  name=t_7 visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=detail alignment="0" text="System Number:" border="0" color="0" x="78" y="628" height="76" width="475" html.valueishtml="0"  name=t_6 visible="1"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="2" color="0" x="571" y="628" height="76" width="1399" format="[general]" html.valueishtml="0"  name=do_no visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Tahoma" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12639424" )
+column(band=detail id=20 alignment="0" tabsequence=32766 border="2" color="0" x="567" y="756" height="128" width="1399" format="[general]" html.valueishtml="0"  name=return_tracking_no visible="1~tif( ord_type = 'R',1,0)" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-14" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="0" background.color="16777215~tif( return_tracking_no > '',16777215,255)" )
+text(band=detail alignment="1" text="Return Tracking" border="0" color="0" x="78" y="756" height="64" width="475" html.valueishtml="0"  name=t_8 visible="1~tif( ord_type = 'R',1,0)"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=detail alignment="1" text="Number:" border="0" color="0" x="78" y="820" height="64" width="475" html.valueishtml="0"  name=t_9 visible="1~tif( ord_type = 'R',1,0)"  font.face="Arial" font.height="-10" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" pagingmethod=0 generatedddwframes="1" )
+xhtmlgen() cssgen(sessionspecific="0" )
+xmlgen(inline="0" )
+xsltgen()
+jsgen()
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )
+export.xhtml()

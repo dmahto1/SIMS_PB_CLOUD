@@ -1,0 +1,43 @@
+﻿$PBExportHeader$f_consolidated_shipment_message.srf
+$PBExportComments$Used in delivery order to show consolidated shipment message
+global type f_consolidated_shipment_message from function_object
+end type
+
+forward prototypes
+global function integer f_consolidated_shipment_message (string asdono)
+end prototypes
+
+global function integer f_consolidated_shipment_message (string asdono);//GailM 1/21/2018 - S14940 F5829 I469 - PAN SIMS to provide message on consolidation shipment at outbound
+//lsDoNo = tab_main.tabpage_main.dw_main.GetItemString(1, "do_no" )
+String lsDoNo, lsShipNo, lsSyntax, lsErrors, lsList
+Int liCnt, i
+
+Select ship_no  into :lsShipNo from Shipment_line_item where rodo_no = :asDoNo using SQLCA;
+If Not isNull( lsShipNo ) and  lsShipNo <> '' Then
+
+	Datastore ldsShipmentLineItem
+	ldsShipmentLineItem = create Datastore
+	ldsShipmentLineItem.DataObject = 'd_shipment_detail'
+	if ldsShipmentLineItem.SetTransObject(SQLCA) <> 1 then
+		MessageBox("Error","Error setting datastore's transaction object to retreive invoice numbers.")
+		return -1
+	end if
+	
+	liCnt = ldsShipmentLineItem.retrieve( lsShipNo )
+	If liCnt > 0 Then
+		For i = 1 to liCnt
+//			if i = liCnt Then
+//				lsList += " and "
+//			end if
+			lsList += ldsShipmentLineItem.Object.invoice_no[ i ]
+			if i <> liCnt then
+				lsList += ", "
+			end if
+		Next
+		messagebox("Consolidated Shipment Information","This is a consolidated shipment.~n" + lsList + "~nare part of this consolidation.")
+	End If
+End If
+
+return 0
+end function
+

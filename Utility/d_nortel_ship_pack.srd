@@ -1,0 +1,33 @@
+HA$PBExportHeader$d_nortel_ship_pack.srd
+$PBExportComments$Nortel Ship Label Packing Info
+release 7;
+datawindow(units=0 timer_interval=0 color=16777215 processing=1 HTMLDW=no print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.prompt=no print.buttons=no print.preview.buttons=no grid.lines=0 )
+header(height=80 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=92 color="536870912" )
+table(column=(type=char(9) updatewhereclause=yes name=carton_no dbname="Delivery_Packing.Carton_No" )
+ column=(type=char(50) updatewhereclause=yes name=sku dbname="Delivery_Packing.SKU" )
+ column=(type=decimal(0) updatewhereclause=yes name=quantity dbname="Delivery_Packing.Quantity" )
+ column=(type=decimal(2) updatewhereclause=yes name=weight_gross dbname="Delivery_Packing.Weight_Gross" )
+ column=(type=char(1) updatewhereclause=yes name=standard_of_measure dbname="Delivery_Packing.Standard_of_Measure" )
+ retrieve="  SELECT dbo.Delivery_Packing.Carton_No,   
+         dbo.Delivery_Packing.SKU,   
+         dbo.Delivery_Packing.Quantity,   
+         dbo.Delivery_Packing.Weight_Gross,   
+         dbo.Delivery_Packing.Standard_of_Measure
+    FROM dbo.Delivery_Packing   
+	Where Do_no = :asDoNo
+" arguments=(("asDoNo", string))  sort="carton_no A " )
+text(band=header alignment="2" text="Carton No" border="0" color="0" x="9" y="8" height="64" width="315"  name=carton_no_t  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Sku" border="0" color="0" x="334" y="8" height="64" width="201"  name=sku_t  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Quantity" border="0" color="0" x="544" y="8" height="64" width="329"  name=quantity_t  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Weight Gross" border="0" color="0" x="882" y="8" height="64" width="366"  name=weight_gross_t  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Standard Of Measure" border="0" color="0" x="1257" y="8" height="64" width="562"  name=standard_of_measure_t  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="0" color="0" x="9" y="8" height="76" width="315" format="[general]"  name=carton_no edit.limit=9 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="0" color="0" x="334" y="8" height="76" width="201" format="[general]"  name=sku edit.limit=50 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="1" tabsequence=32766 border="0" color="0" x="544" y="8" height="76" width="329" format="[general]"  name=quantity edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="1" tabsequence=32766 border="0" color="0" x="882" y="8" height="76" width="366" format="[general]"  name=weight_gross edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="0" tabsequence=32766 border="0" color="0" x="1257" y="8" height="76" width="562" format="[general]"  name=standard_of_measure edit.limit=1 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" )

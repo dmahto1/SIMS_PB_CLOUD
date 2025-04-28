@@ -1,0 +1,29 @@
+HA$PBExportHeader$d_siemens_content_by_project_id.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=16777215 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 0 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=76 color="536870912" )
+table(column=(type=char(10) updatewhereclause=yes name=wh_code dbname="Content.wh_code" )
+ column=(type=char(50) updatewhereclause=yes name=sku dbname="Content.SKU" )
+ column=(type=char(20) updatewhereclause=yes name=supp_code dbname="Content.Supp_Code" )
+ column=(type=char(1) updatewhereclause=yes name=inventory_type dbname="Content.Inventory_Type" )
+ column=(type=decimal(5) updatewhereclause=yes name=avail_qty dbname="Content.Avail_Qty" )
+ retrieve="  SELECT   dbo.Content.wh_code,
+				dbo.Content.SKU,
+				dbo.Content.Supp_Code,
+				dbo.Content.Inventory_Type,
+        			dbo.Content.Avail_Qty
+    FROM  dbo.Content 
+   Where	  ( dbo.Content.Project_ID = Upper(ltrim(rtrim(:projectid ))) )
+order by  dbo.Content.wh_code,dbo.Content.Inventory_Type" arguments=(("projectid", string)) )
+column(band=detail id=5 alignment="1" tabsequence=32766 border="0" color="33554432" x="2290" y="12" height="56" width="325" format="###,###,##0" html.valueishtml="0"  name=avail_qty visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400~tif(avail_qty = 0, 700, 400 )"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="0" color="33554432" x="1893" y="12" height="56" width="375" format="[general]" html.valueishtml="0"  name=inventory_type visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no edit.imemode=0 edit.displayonly=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="0" color="33554432" x="27" y="8" height="56" width="233" format="[general]" html.valueishtml="0"  name=wh_code visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="0" color="33554432" x="261" y="8" height="56" width="1152" format="[general]" html.valueishtml="0"  name=sku visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="0" color="33554432" x="1413" y="8" height="56" width="462" format="[general]" html.valueishtml="0"  name=supp_code visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

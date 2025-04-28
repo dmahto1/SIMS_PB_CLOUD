@@ -1,0 +1,54 @@
+﻿$PBExportHeader$d_prior_day_receipt_report.srd
+release 9;
+datawindow(units=0 timer_interval=60000 color=1073741824 processing=1 HTMLDW=no print.printername="" print.documentname="" print.orientation = 1 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no grid.lines=0 )
+header(height=444 color="536870912" )
+summary(height=68 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=92 color="536870912" )
+table(column=(type=char(10) updatewhereclause=yes name=warehouse dbname="Warehouse" )
+ column=(type=char(30) updatewhereclause=yes name=order_no dbname="Order_No" )
+ column=(type=char(1) updatewhereclause=yes name=order_type dbname="Order_Type" )
+ column=(type=datetime updatewhereclause=yes name=completed_date dbname="completed_Date" )
+ column=(type=decimal(0) updatewhereclause=yes name=pallets dbname="Pallets" )
+ column=(type=decimal(0) updatewhereclause=yes name=cases dbname="Cases" )
+ column=(type=char(30) updatewhereclause=yes name=shipped_from dbname="Shipped_From" )
+ retrieve="Select  	Receive_master.WH_Code As Warehouse,
+	Receive_master.supp_invoice_no As Order_No,
+	Receive_master.Ord_Type As Order_Type,
+		Receive_master.Complete_Date As completed_Date,
+			CAST(Receive_master.User_Field7 As Decimal) As Pallets,
+		CAST(Receive_master.User_Field1  As Decimal) As 	Cases,
+			Receive_master.User_Field8  As Shipped_From
+FROM Receive_master
+WHERE  Receive_Master.ord_status = 'C' AND Project_ID = :Project_ID
+ORDER BY Receive_master.WH_Code, Receive_master.Complete_Date, Receive_master.supp_invoice_no	
+	
+" arguments=(("Project_ID", string)) )
+text(band=header alignment="2" text="Completed Date" border="0" color="33554432" x="2002" y="372" height="56" width="603" html.valueishtml="0"  name=completed_date_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Pallets" border="0" color="33554432" x="2615" y="372" height="56" width="329" html.valueishtml="0"  name=pallets_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Cases" border="0" color="33554432" x="2953" y="372" height="56" width="329" html.valueishtml="0"  name=cases_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Shipped From" border="0" color="33554432" x="3291" y="372" height="56" width="603" html.valueishtml="0"  name=shipped_from_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Warehouse" border="0" color="33554432" x="9" y="372" height="56" width="800" html.valueishtml="0"  name=warehouse_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+compute(band=header alignment="1" expression="'Report Date: '"border="0" color="33554432" x="9" y="148" height="56" width="800" format="[GENERAL]" html.valueishtml="0"  name=compute_2 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+compute(band=header alignment="1" expression="'Project: '"border="0" color="33554432" x="9" y="220" height="56" width="800" format="[GENERAL]" html.valueishtml="0"  name=compute_3 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+compute(band=header alignment="0" expression=" Project_ID "border="0" color="33554432" x="818" y="220" height="56" width="850" format="[GENERAL]" html.valueishtml="0"  name=compute_6 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+compute(band=header alignment="2" expression="'Prior Day Receipts'"border="0" color="33554432" x="2002" y="32" height="56" width="603" format="[GENERAL]" html.valueishtml="0"  name=compute_4 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+compute(band=header alignment="0" expression="today()"border="0" color="33554432" x="818" y="148" height="56" width="850" format="[SHORTDATE]" html.valueishtml="0"  name=compute_5 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+compute(band=header alignment="0" expression="'Page ' + page() + ' of ' + pageCount()"border="0" color="33554432" x="3291" y="148" height="56" width="603" format="[general]" html.valueishtml="0"  name=page_2 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+column(band=detail id=4 alignment="2" tabsequence=32766 border="0" color="33554432" x="2002" y="8" height="76" width="603" format="[shortdate] [time]" html.valueishtml="0"  name=completed_date visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="2" tabsequence=32766 border="0" color="33554432" x="2615" y="8" height="76" width="329" format="[general]" html.valueishtml="0"  name=pallets visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="2" tabsequence=32766 border="0" color="33554432" x="2953" y="8" height="76" width="329" format="[general]" html.valueishtml="0"  name=cases visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=7 alignment="2" tabsequence=32766 border="0" color="33554432" x="3291" y="8" height="76" width="603" format="[general]" html.valueishtml="0"  name=shipped_from visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="2" tabsequence=32766 border="0" color="33554432" x="818" y="8" height="76" width="850" format="[general]" html.valueishtml="0"  name=order_no visible="1" edit.limit=30 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=1 alignment="2" tabsequence=32766 border="0" color="33554432" x="9" y="8" height="76" width="800" format="[general]" html.valueishtml="0"  name=warehouse visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="2" tabsequence=32766 border="0" color="33554432" x="1678" y="8" height="76" width="315" format="[general]" html.valueishtml="0"  name=order_type visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=summary alignment="2" expression="sum(cases for all)"border="0" color="33554432" x="2953" y="4" height="56" width="329" format="[general]" html.valueishtml="0"  name=compute_7 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=summary alignment="2" expression="sum(pallets for all)"border="0" color="33554432" x="2615" y="4" height="56" width="329" format="[general]" html.valueishtml="0"  name=compute_1 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=summary alignment="1" text="Total: " border="0" color="33554432" x="2002" y="4" height="56" width="603" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+text(band=header alignment="2" text="Order No" border="0" color="33554432" x="818" y="372" height="56" width="850" html.valueishtml="0"  name=order_no_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Order Type" border="0" color="33554432" x="1678" y="372" height="56" width="315" html.valueishtml="0"  name=order_type_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

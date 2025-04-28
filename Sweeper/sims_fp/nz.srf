@@ -1,0 +1,21 @@
+HA$PBExportHeader$nz.srf
+global type nz from function_object
+end type
+
+forward prototypes
+global function any nz (any an_varable, any an_replace)
+end prototypes
+
+global function any nz (any an_varable, any an_replace);//TimA 11/05/12
+//Nz function lets you return a value when a variant is null
+
+//Arguments:	an_varable  (Type Any)
+//					an_replace  (Type Any)
+If IsNull(an_varable) Then
+	return an_replace
+else
+	return an_varable
+end if
+
+end function
+

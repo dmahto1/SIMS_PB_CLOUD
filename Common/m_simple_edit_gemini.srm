@@ -1,0 +1,1486 @@
+HA$PBExportHeader$m_simple_edit_gemini.srm
+forward
+global type m_simple_edit_gemini from m_simple_edit
+end type
+type m_gemini from menu within m_simple_edit_gemini
+end type
+type m_submit from menu within m_gemini
+end type
+type m_cancel from menu within m_gemini
+end type
+type m_04 from menu within m_gemini
+end type
+type m_printlabel from menu within m_gemini
+end type
+type m_previewlabel from menu within m_gemini
+end type
+type m_08 from menu within m_gemini
+end type
+type m_viewxml from menu within m_gemini
+end type
+type m_webtracking from menu within m_gemini
+end type
+type m_startgemini from menu within m_gemini
+end type
+type m_09 from menu within m_gemini
+end type
+type m_clearreset from menu within m_gemini
+end type
+type m_connect from menu within m_gemini
+end type
+type m_gemini from menu within m_simple_edit_gemini
+m_submit m_submit
+m_cancel m_cancel
+m_04 m_04
+m_printlabel m_printlabel
+m_previewlabel m_previewlabel
+m_08 m_08
+m_viewxml m_viewxml
+m_webtracking m_webtracking
+m_startgemini m_startgemini
+m_09 m_09
+m_clearreset m_clearreset
+m_connect m_connect
+end type
+global type m_simple_edit_gemini from m_simple_edit
+m_gemini m_gemini
+end type
+end forward
+
+global type m_simple_edit_gemini from m_simple_edit
+m_gemini m_gemini
+end type
+global m_simple_edit_gemini m_simple_edit_gemini
+
+type variables
+//GAP1003
+inet iiMWW_Gemini
+any ai_returnXML
+
+end variables
+
+on m_simple_edit_gemini.create
+m_simple_edit_gemini=this
+call super::create
+this.m_gemini=create m_gemini
+this.Item[UpperBound(this.Item)+1]=this.m_gemini
+end on
+
+on m_simple_edit_gemini.destroy
+call super::destroy
+destroy(this.m_gemini)
+end on
+
+type m_file from m_simple_edit`m_file within m_simple_edit_gemini
+end type
+
+on m_file.create
+call super::create
+end on
+
+on m_file.destroy
+call super::destroy
+end on
+
+type m_save from m_simple_edit`m_save within m_file
+end type
+
+on m_save.create
+call super::create
+end on
+
+on m_save.destroy
+call super::destroy
+end on
+
+type m_saveas from m_simple_edit`m_saveas within m_file
+end type
+
+on m_saveas.create
+call super::create
+end on
+
+on m_saveas.destroy
+call super::destroy
+end on
+
+type m_06 from m_simple_edit`m_06 within m_file
+end type
+
+on m_06.create
+call super::create
+end on
+
+on m_06.destroy
+call super::destroy
+end on
+
+type m_retrieve from m_simple_edit`m_retrieve within m_file
+end type
+
+on m_retrieve.create
+call super::create
+end on
+
+on m_retrieve.destroy
+call super::destroy
+end on
+
+type m_refresh from m_simple_edit`m_refresh within m_file
+end type
+
+on m_refresh.create
+call super::create
+end on
+
+on m_refresh.destroy
+call super::destroy
+end on
+
+type m_sort from m_simple_edit`m_sort within m_file
+end type
+
+on m_sort.create
+call super::create
+end on
+
+on m_sort.destroy
+call super::destroy
+end on
+
+type m_clear from m_simple_edit`m_clear within m_file
+end type
+
+on m_clear.create
+call super::create
+end on
+
+on m_clear.destroy
+call super::destroy
+end on
+
+type m_07 from m_simple_edit`m_07 within m_file
+end type
+
+on m_07.create
+call super::create
+end on
+
+on m_07.destroy
+call super::destroy
+end on
+
+type m_close from m_simple_edit`m_close within m_file
+end type
+
+on m_close.create
+call super::create
+end on
+
+on m_close.destroy
+call super::destroy
+end on
+
+type m_30 from m_simple_edit`m_30 within m_file
+end type
+
+on m_30.create
+call super::create
+end on
+
+on m_30.destroy
+call super::destroy
+end on
+
+type m_printpreview from m_simple_edit`m_printpreview within m_file
+end type
+
+on m_printpreview.create
+call super::create
+end on
+
+on m_printpreview.destroy
+call super::destroy
+end on
+
+type m_print from m_simple_edit`m_print within m_file
+end type
+
+on m_print.create
+call super::create
+end on
+
+on m_print.destroy
+call super::destroy
+end on
+
+type m_printsetup from m_simple_edit`m_printsetup within m_file
+end type
+
+on m_printsetup.create
+call super::create
+end on
+
+on m_printsetup.destroy
+call super::destroy
+end on
+
+type m_01 from m_simple_edit`m_01 within m_file
+end type
+
+on m_01.create
+call super::create
+end on
+
+on m_01.destroy
+call super::destroy
+end on
+
+type m_changepassword from m_simple_edit`m_changepassword within m_file
+end type
+
+on m_changepassword.create
+call super::create
+end on
+
+on m_changepassword.destroy
+call super::destroy
+end on
+
+type m_logonoff from m_simple_edit`m_logonoff within m_file
+end type
+
+on m_logonoff.create
+call super::create
+end on
+
+on m_logonoff.destroy
+call super::destroy
+end on
+
+type m_02 from m_simple_edit`m_02 within m_file
+end type
+
+on m_02.create
+call super::create
+end on
+
+on m_02.destroy
+call super::destroy
+end on
+
+type m_exit from m_simple_edit`m_exit within m_file
+end type
+
+on m_exit.create
+call super::create
+end on
+
+on m_exit.destroy
+call super::destroy
+end on
+
+type m_31 from m_simple_edit`m_31 within m_file
+end type
+
+on m_31.create
+call super::create
+end on
+
+on m_31.destroy
+call super::destroy
+end on
+
+type m_inbound from m_simple_edit`m_inbound within m_simple_edit_gemini
+end type
+
+on m_inbound.create
+call super::create
+end on
+
+on m_inbound.destroy
+call super::destroy
+end on
+
+type m_receive_order from m_simple_edit`m_receive_order within m_inbound
+end type
+
+on m_receive_order.create
+call super::create
+end on
+
+on m_receive_order.destroy
+call super::destroy
+end on
+
+type m_assignscanner from m_simple_edit`m_assignscanner within m_inbound
+end type
+
+on m_assignscanner.create
+call super::create
+end on
+
+on m_assignscanner.destroy
+call super::destroy
+end on
+
+type m_11 from m_simple_edit`m_11 within m_inbound
+end type
+
+on m_11.create
+call super::create
+end on
+
+on m_11.destroy
+call super::destroy
+end on
+
+type m_outbound from m_simple_edit`m_outbound within m_simple_edit_gemini
+end type
+
+on m_outbound.create
+call super::create
+end on
+
+on m_outbound.destroy
+call super::destroy
+end on
+
+type m_delivery_order from m_simple_edit`m_delivery_order within m_outbound
+end type
+
+on m_delivery_order.create
+call super::create
+end on
+
+on m_delivery_order.destroy
+call super::destroy
+end on
+
+type m_batchpicking from m_simple_edit`m_batchpicking within m_outbound
+end type
+
+on m_batchpicking.create
+call super::create
+end on
+
+on m_batchpicking.destroy
+call super::destroy
+end on
+
+type m_3assignscanner from m_simple_edit`m_3assignscanner within m_outbound
+end type
+
+on m_3assignscanner.create
+call super::create
+end on
+
+on m_3assignscanner.destroy
+call super::destroy
+end on
+
+type m_12 from m_simple_edit`m_12 within m_outbound
+end type
+
+on m_12.create
+call super::create
+end on
+
+on m_12.destroy
+call super::destroy
+end on
+
+type m_inventorymgmt from m_simple_edit`m_inventorymgmt within m_simple_edit_gemini
+end type
+
+on m_inventorymgmt.create
+call super::create
+end on
+
+on m_inventorymgmt.destroy
+call super::destroy
+end on
+
+type m_stock_transfer from m_simple_edit`m_stock_transfer within m_inventorymgmt
+end type
+
+on m_stock_transfer.create
+call super::create
+end on
+
+on m_stock_transfer.destroy
+call super::destroy
+end on
+
+type m_stock_adjustment from m_simple_edit`m_stock_adjustment within m_inventorymgmt
+end type
+
+on m_stock_adjustment.create
+call super::create
+end on
+
+on m_stock_adjustment.destroy
+call super::destroy
+end on
+
+type m_stockinquiry from m_simple_edit`m_stockinquiry within m_inventorymgmt
+end type
+
+on m_stockinquiry.create
+call super::create
+end on
+
+on m_stockinquiry.destroy
+call super::destroy
+end on
+
+type m_cyclecount from m_simple_edit`m_cyclecount within m_inventorymgmt
+end type
+
+on m_cyclecount.create
+call super::create
+end on
+
+on m_cyclecount.destroy
+call super::destroy
+end on
+
+type m_5 from m_simple_edit`m_5 within m_inventorymgmt
+end type
+
+on m_5.create
+call super::create
+end on
+
+on m_5.destroy
+call super::destroy
+end on
+
+type m_maintenance from m_simple_edit`m_maintenance within m_simple_edit_gemini
+end type
+
+on m_maintenance.create
+call super::create
+end on
+
+on m_maintenance.destroy
+call super::destroy
+end on
+
+type m_product from m_simple_edit`m_product within m_maintenance
+end type
+
+on m_product.create
+call super::create
+end on
+
+on m_product.destroy
+call super::destroy
+end on
+
+type m_projectmaster from m_simple_edit`m_projectmaster within m_maintenance
+end type
+
+on m_projectmaster.create
+call super::create
+end on
+
+on m_projectmaster.destroy
+call super::destroy
+end on
+
+type m_warehousemaster from m_simple_edit`m_warehousemaster within m_maintenance
+end type
+
+on m_warehousemaster.create
+call super::create
+end on
+
+on m_warehousemaster.destroy
+call super::destroy
+end on
+
+type m_suppliermaster from m_simple_edit`m_suppliermaster within m_maintenance
+end type
+
+on m_suppliermaster.create
+call super::create
+end on
+
+on m_suppliermaster.destroy
+call super::destroy
+end on
+
+type m_customermaster from m_simple_edit`m_customermaster within m_maintenance
+end type
+
+on m_customermaster.create
+call super::create
+end on
+
+on m_customermaster.destroy
+call super::destroy
+end on
+
+type m_6carriermaster from m_simple_edit`m_6carriermaster within m_maintenance
+end type
+
+on m_6carriermaster.create
+call super::create
+end on
+
+on m_6carriermaster.destroy
+call super::destroy
+end on
+
+type m_6taxtable from m_simple_edit`m_6taxtable within m_maintenance
+end type
+
+on m_6taxtable.create
+call super::create
+end on
+
+on m_6taxtable.destroy
+call super::destroy
+end on
+
+type m_6codetables from m_simple_edit`m_6codetables within m_maintenance
+end type
+
+on m_6codetables.create
+call super::create
+end on
+
+on m_6codetables.destroy
+call super::destroy
+end on
+
+type m_1inventorytype from m_simple_edit`m_1inventorytype within m_6codetables
+end type
+
+on m_1inventorytype.create
+call super::create
+end on
+
+on m_1inventorytype.destroy
+call super::destroy
+end on
+
+type m_2warehousetype from m_simple_edit`m_2warehousetype within m_6codetables
+end type
+
+on m_2warehousetype.create
+call super::create
+end on
+
+on m_2warehousetype.destroy
+call super::destroy
+end on
+
+type m_3locationtype from m_simple_edit`m_3locationtype within m_6codetables
+end type
+
+on m_3locationtype.create
+call super::create
+end on
+
+on m_3locationtype.destroy
+call super::destroy
+end on
+
+type m_4deliveryordertype from m_simple_edit`m_4deliveryordertype within m_6codetables
+end type
+
+on m_4deliveryordertype.create
+call super::create
+end on
+
+on m_4deliveryordertype.destroy
+call super::destroy
+end on
+
+type m_5receiveordertype from m_simple_edit`m_5receiveordertype within m_6codetables
+end type
+
+on m_5receiveordertype.create
+call super::create
+end on
+
+on m_5receiveordertype.destroy
+call super::destroy
+end on
+
+type m_6transferordertype from m_simple_edit`m_6transferordertype within m_6codetables
+end type
+
+on m_6transferordertype.create
+call super::create
+end on
+
+on m_6transferordertype.destroy
+call super::destroy
+end on
+
+type m_7itemgroup from m_simple_edit`m_7itemgroup within m_6codetables
+end type
+
+on m_7itemgroup.create
+call super::create
+end on
+
+on m_7itemgroup.destroy
+call super::destroy
+end on
+
+type m_8customer_type from m_simple_edit`m_8customer_type within m_6codetables
+end type
+
+on m_8customer_type.create
+call super::create
+end on
+
+on m_8customer_type.destroy
+call super::destroy
+end on
+
+type m_9transportationmodes from m_simple_edit`m_9transportationmodes within m_6codetables
+end type
+
+on m_9transportationmodes.create
+call super::create
+end on
+
+on m_9transportationmodes.destroy
+call super::destroy
+end on
+
+type m_2 from m_simple_edit`m_2 within m_6codetables
+end type
+
+on m_2.create
+call super::create
+end on
+
+on m_2.destroy
+call super::destroy
+end on
+
+type m_4 from m_simple_edit`m_4 within m_6codetables
+end type
+
+on m_4.create
+call super::create
+end on
+
+on m_4.destroy
+call super::destroy
+end on
+
+type m_6 from m_simple_edit`m_6 within m_6codetables
+end type
+
+on m_6.create
+call super::create
+end on
+
+on m_6.destroy
+call super::destroy
+end on
+
+type m_13cootranslate from m_simple_edit`m_13cootranslate within m_6codetables
+end type
+
+on m_13cootranslate.create
+call super::create
+end on
+
+on m_13cootranslate.destroy
+call super::destroy
+end on
+
+type m_14itemserial from m_simple_edit`m_14itemserial within m_6codetables
+end type
+
+on m_14itemserial.create
+call super::create
+end on
+
+on m_14itemserial.destroy
+call super::destroy
+end on
+
+type m_15 from m_simple_edit`m_15 within m_6codetables
+end type
+
+on m_15.create
+call super::create
+end on
+
+on m_15.destroy
+call super::destroy
+end on
+
+type m_05 from m_simple_edit`m_05 within m_maintenance
+end type
+
+on m_05.create
+call super::create
+end on
+
+on m_05.destroy
+call super::destroy
+end on
+
+type m_user from m_simple_edit`m_user within m_maintenance
+end type
+
+on m_user.create
+call super::create
+end on
+
+on m_user.destroy
+call super::destroy
+end on
+
+type m_reports from m_simple_edit`m_reports within m_simple_edit_gemini
+end type
+
+on m_reports.create
+call super::create
+end on
+
+on m_reports.destroy
+call super::destroy
+end on
+
+type m_utilities from m_simple_edit`m_utilities within m_simple_edit_gemini
+end type
+
+on m_utilities.create
+call super::create
+end on
+
+on m_utilities.destroy
+call super::destroy
+end on
+
+type m_1shippinglabel from m_simple_edit`m_1shippinglabel within m_utilities
+end type
+
+on m_1shippinglabel.create
+call super::create
+end on
+
+on m_1shippinglabel.destroy
+call super::destroy
+end on
+
+type m_2partlabel from m_simple_edit`m_2partlabel within m_utilities
+end type
+
+on m_2partlabel.create
+call super::create
+end on
+
+on m_2partlabel.destroy
+call super::destroy
+end on
+
+type m_2import from m_simple_edit`m_2import within m_utilities
+end type
+
+on m_2import.create
+call super::create
+end on
+
+on m_2import.destroy
+call super::destroy
+end on
+
+type m_1 from m_simple_edit`m_1 within m_utilities
+end type
+
+on m_1.create
+call super::create
+end on
+
+on m_1.destroy
+call super::destroy
+end on
+
+type m_3mesurementconversion from m_simple_edit`m_3mesurementconversion within m_utilities
+end type
+
+on m_3mesurementconversion.create
+call super::create
+end on
+
+on m_3mesurementconversion.destroy
+call super::destroy
+end on
+
+type m_6serialnumberlabels from m_simple_edit`m_6serialnumberlabels within m_utilities
+end type
+
+on m_6serialnumberlabels.create
+call super::create
+end on
+
+on m_6serialnumberlabels.destroy
+call super::destroy
+end on
+
+type m_7receivinglabels from m_simple_edit`m_7receivinglabels within m_utilities
+end type
+
+on m_7receivinglabels.create
+call super::create
+end on
+
+on m_7receivinglabels.destroy
+call super::destroy
+end on
+
+type m_10 from m_simple_edit`m_10 within m_utilities
+end type
+
+on m_10.create
+call super::create
+end on
+
+on m_10.destroy
+call super::destroy
+end on
+
+type m_addresslabels from m_simple_edit`m_addresslabels within m_utilities
+end type
+
+on m_addresslabels.create
+call super::create
+end on
+
+on m_addresslabels.destroy
+call super::destroy
+end on
+
+type m_window from m_simple_edit`m_window within m_simple_edit_gemini
+end type
+
+on m_window.create
+call super::create
+end on
+
+on m_window.destroy
+call super::destroy
+end on
+
+type m_tilevertical from m_simple_edit`m_tilevertical within m_window
+end type
+
+on m_tilevertical.create
+call super::create
+end on
+
+on m_tilevertical.destroy
+call super::destroy
+end on
+
+type m_tilehorizontal from m_simple_edit`m_tilehorizontal within m_window
+end type
+
+on m_tilehorizontal.create
+call super::create
+end on
+
+on m_tilehorizontal.destroy
+call super::destroy
+end on
+
+type m_cascade from m_simple_edit`m_cascade within m_window
+end type
+
+on m_cascade.create
+call super::create
+end on
+
+on m_cascade.destroy
+call super::destroy
+end on
+
+type m_layer from m_simple_edit`m_layer within m_window
+end type
+
+on m_layer.create
+call super::create
+end on
+
+on m_layer.destroy
+call super::destroy
+end on
+
+type m_03 from m_simple_edit`m_03 within m_window
+end type
+
+on m_03.create
+call super::create
+end on
+
+on m_03.destroy
+call super::destroy
+end on
+
+type m_arrange_icons from m_simple_edit`m_arrange_icons within m_window
+end type
+
+on m_arrange_icons.create
+call super::create
+end on
+
+on m_arrange_icons.destroy
+call super::destroy
+end on
+
+type m_help from m_simple_edit`m_help within m_simple_edit_gemini
+end type
+
+on m_help.create
+call super::create
+end on
+
+on m_help.destroy
+call super::destroy
+end on
+
+type m_contents from m_simple_edit`m_contents within m_help
+end type
+
+on m_contents.create
+call super::create
+end on
+
+on m_contents.destroy
+call super::destroy
+end on
+
+type m_index from m_simple_edit`m_index within m_help
+end type
+
+on m_index.create
+call super::create
+end on
+
+on m_index.destroy
+call super::destroy
+end on
+
+type m_aboutsims from m_simple_edit`m_aboutsims within m_help
+end type
+
+on m_aboutsims.create
+call super::create
+end on
+
+on m_aboutsims.destroy
+call super::destroy
+end on
+
+type m_record from m_simple_edit`m_record within m_simple_edit_gemini
+end type
+
+on m_record.create
+call super::create
+end on
+
+on m_record.destroy
+call super::destroy
+end on
+
+type m_new from m_simple_edit`m_new within m_record
+end type
+
+on m_new.create
+call super::create
+end on
+
+on m_new.destroy
+call super::destroy
+end on
+
+type m_delete from m_simple_edit`m_delete within m_record
+end type
+
+on m_delete.create
+call super::create
+end on
+
+on m_delete.destroy
+call super::destroy
+end on
+
+type m_edit1 from m_simple_edit`m_edit1 within m_record
+end type
+
+on m_edit1.create
+call super::create
+end on
+
+on m_edit1.destroy
+call super::destroy
+end on
+
+type m_filter from m_simple_edit`m_filter within m_record
+end type
+
+on m_filter.create
+call super::create
+end on
+
+on m_filter.destroy
+call super::destroy
+end on
+
+type m_gemini from menu within m_simple_edit_gemini
+m_submit m_submit
+m_cancel m_cancel
+m_04 m_04
+m_printlabel m_printlabel
+m_previewlabel m_previewlabel
+m_08 m_08
+m_viewxml m_viewxml
+m_webtracking m_webtracking
+m_startgemini m_startgemini
+m_09 m_09
+m_clearreset m_clearreset
+m_connect m_connect
+end type
+
+on m_gemini.create
+call super::create
+this.text = "&GEMINI"
+this.enabled = false
+this.microhelp = "Process Gemini Orders"
+this.m_submit=create m_submit
+this.m_cancel=create m_cancel
+this.m_04=create m_04
+this.m_printlabel=create m_printlabel
+this.m_previewlabel=create m_previewlabel
+this.m_08=create m_08
+this.m_viewxml=create m_viewxml
+this.m_webtracking=create m_webtracking
+this.m_startgemini=create m_startgemini
+this.m_09=create m_09
+this.m_clearreset=create m_clearreset
+this.m_connect=create m_connect
+this.Item[UpperBound(this.Item)+1]=this.m_submit
+this.Item[UpperBound(this.Item)+1]=this.m_cancel
+this.Item[UpperBound(this.Item)+1]=this.m_04
+this.Item[UpperBound(this.Item)+1]=this.m_printlabel
+this.Item[UpperBound(this.Item)+1]=this.m_previewlabel
+this.Item[UpperBound(this.Item)+1]=this.m_08
+this.Item[UpperBound(this.Item)+1]=this.m_viewxml
+this.Item[UpperBound(this.Item)+1]=this.m_webtracking
+this.Item[UpperBound(this.Item)+1]=this.m_startgemini
+this.Item[UpperBound(this.Item)+1]=this.m_09
+this.Item[UpperBound(this.Item)+1]=this.m_clearreset
+this.Item[UpperBound(this.Item)+1]=this.m_connect
+end on
+
+on m_gemini.destroy
+call super::destroy
+destroy(this.m_submit)
+destroy(this.m_cancel)
+destroy(this.m_04)
+destroy(this.m_printlabel)
+destroy(this.m_previewlabel)
+destroy(this.m_08)
+destroy(this.m_viewxml)
+destroy(this.m_webtracking)
+destroy(this.m_startgemini)
+destroy(this.m_09)
+destroy(this.m_clearreset)
+destroy(this.m_connect)
+end on
+
+type m_submit from menu within m_gemini
+end type
+
+on m_submit.create
+call super::create
+this.text = "Submit Order to Gemini"
+this.enabled = false
+this.microhelp = "Submit Gemini Order"
+this.toolbaritemname = "SingletonReturn!"
+this.toolbaritemtext = "Submit Gemini Order"
+this.toolbaritemorder = 50
+this.toolbaritemspace = 1
+end on
+
+on m_submit.destroy
+call super::destroy
+end on
+
+event clicked;//GAP1003 Submit Order information to Gemini
+SetPointer(HourGlass!)
+if isvalid(w_do) then 
+// if w_do.tab_main.tabpage_gemini.dw_gemini.rowcount() > 0 then 
+//	if w_do.ib_gemini then
+//		messagebox("GEMINI CHANGES SAVED?",'Please save changes before submitting Gemini Order!')
+//		return
+//	End If		
+//
+//	this.microhelp = "SUBMITTING ORDER......"
+//	
+//	ai_returnXML = g.i_gemini.of_ordersubmit(w_do.tab_main.tabpage_gemini.dw_gemini,w_do.tab_main.tabpage_main.dw_main,w_do.tab_main.tabpage_other.dw_other, w_do.tab_main.tabpage_pack.dw_pack)
+//
+//	if left(string(ai_returnXML),2) <> "-1" then 
+//		this.microhelp = "ORDER SUBMITTED TO GEMINI"
+//		//check for autoprint option
+//		if w_do.tab_main.tabpage_gemini.cbx_autoprint.checked then m_printlabel.triggerevent(clicked!)
+//		w_do.tab_main.tabpage_gemini.dw_gemini.enabled = false
+//		w_do.ib_gemini = true
+//		w_do.ib_changed = true
+//	else
+//		this.microhelp = "ORDER  NOT SUBMITTED, VIEW XML FOR ERROR MESSAGES"
+//	end if
+//  end if
+end if
+SetPointer(Arrow!)
+end event
+
+type m_cancel from menu within m_gemini
+end type
+
+on m_cancel.create
+call super::create
+this.text = "Cancel Gemini Order"
+this.enabled = false
+this.microhelp = "Cancel Gemini Order"
+this.toolbaritemname = "RetrieveCancel!"
+this.toolbaritemtext = "Cancel Gemini Order"
+this.toolbaritemorder = 51
+end on
+
+on m_cancel.destroy
+call super::destroy
+end on
+
+event clicked;//GAP1003 Cancel Order information to Gemini
+SetPointer(HourGlass!)
+if isvalid(w_do) then 
+	
+// if w_do.tab_main.tabpage_gemini.dw_gemini.rowcount() > 0 then 
+//	this.microhelp = "CANCELLING ORDER......"
+//	ai_returnXML = g.i_gemini.of_ordercancel(w_do.tab_main.tabpage_gemini.dw_gemini)
+//	
+//	if left(string(ai_returnXML),2) <> "-1" then 
+//		this.microhelp = "ORDER CANCELLED FROM GEMINI"
+//		w_do.tab_main.tabpage_gemini.dw_gemini.enabled = true
+//		w_do.ib_gemini = true
+//		w_do.ib_changed = true		
+//	else
+//		this.microhelp = "VIEW XML FOR ERROR MESSAGES"
+//		w_do.tab_main.tabpage_gemini.dw_gemini.enabled = false		
+//	end if
+//	
+// end if
+ 
+end if
+SetPointer(Arrow!)
+end event
+
+type m_04 from menu within m_gemini
+end type
+
+on m_04.create
+call super::create
+this.text = "-"
+end on
+
+on m_04.destroy
+call super::destroy
+end on
+
+type m_printlabel from menu within m_gemini
+end type
+
+on m_printlabel.create
+call super::create
+this.text = "Print Gemini Label"
+this.enabled = false
+this.microhelp = "Print Gemini Label"
+this.toolbaritemname = "RunReport!"
+this.toolbaritemtext = "Print Gemini Label"
+this.toolbaritemorder = 52
+this.toolbaritemspace = 1
+end on
+
+on m_printlabel.destroy
+call super::destroy
+end on
+
+event clicked;//GAP1003 Print Gemini label for the current Order 
+string ls_case
+
+SetPointer(HourGlass!)
+
+if isvalid(w_do) then 
+	
+// if w_do.tab_main.tabpage_gemini.dw_gemini.rowcount() > 0 then
+//	
+//	this.microhelp = "PRINTING GEMINI LABEL......"
+//	w_do.tab_main.tabpage_gemini.lb_printformat.triggerevent(doubleclicked!)
+//	ls_case = w_do.tab_main.tabpage_gemini.lb_printformat.SelectedItem() //GET PRINT FORMAT
+//	ai_returnXML = g.i_gemini.of_printlabel(ai_returnXML,ls_case, w_do.tab_main.tabpage_gemini.dw_gemini, w_do.tab_main.tabpage_gemini.dw_gemini_label)
+//	
+//	if left(string(ai_returnXML),2) <> "-1" then 
+//		this.microhelp = "GEMINI LABEL PRINTED"
+//		w_do.tab_main.tabpage_gemini.dw_gemini_label.visible = true
+//	else
+//		w_do.tab_main.tabpage_gemini.dw_gemini_label.visible = false
+//		this.microhelp = "VIEW XML FOR ERROR MESSAGES"
+//	end if
+//	
+// end if
+ 
+end if
+
+SetPointer(Arrow!)
+end event
+
+type m_previewlabel from menu within m_gemini
+end type
+
+on m_previewlabel.create
+call super::create
+this.text = "Preview Gemini Label"
+this.enabled = false
+this.microhelp = "Preview Gemini Label"
+this.toolbaritemname = "Report5!"
+this.toolbaritemtext = "Preview Gemini Label"
+this.toolbaritemorder = 53
+end on
+
+on m_previewlabel.destroy
+call super::destroy
+end on
+
+event clicked;///GAP1003 Preview Gemini label for the current Order 
+SetPointer(HourGlass!)
+
+if isvalid(w_do) then 
+	
+// if w_do.tab_main.tabpage_gemini.dw_gemini.rowcount() > 0 then 
+//	
+//	this.microhelp = "GENERATING LABEL......"
+//	ai_returnXML = g.i_gemini.of_printlabel(ai_returnXML,"SHOW", w_do.tab_main.tabpage_gemini.dw_gemini, w_do.tab_main.tabpage_gemini.dw_gemini_label)
+//	
+//	if left(string(ai_returnXML),2) <> "-1" then 
+//		this.microhelp = "GEMINI LABEL CREATED"
+//		w_do.tab_main.tabpage_gemini.dw_gemini_label.visible = true
+//	else
+//		w_do.tab_main.tabpage_gemini.dw_gemini_label.visible = false
+//		this.microhelp = "VIEW XML FOR ERROR MESSAGES"
+//	end if
+//	
+// end if
+ 
+end if
+
+SetPointer(Arrow!)
+end event
+
+type m_08 from menu within m_gemini
+end type
+
+on m_08.create
+call super::create
+this.text = "-"
+end on
+
+on m_08.destroy
+call super::destroy
+end on
+
+type m_viewxml from menu within m_gemini
+end type
+
+on m_viewxml.create
+call super::create
+this.text = "View XML Messages"
+this.enabled = false
+this.microhelp = "View XML Messages"
+this.toolbaritemname = "Custom090!"
+this.toolbaritemtext = "View XML Messages"
+this.toolbaritemorder = 54
+this.toolbaritemspace = 1
+end on
+
+on m_viewxml.destroy
+call super::destroy
+end on
+
+event clicked;//GAP1003 VIEW XML MESSAGES
+SetPointer(HourGlass!)
+
+if isvalid(w_do) then 
+	
+// if w_do.tab_main.tabpage_gemini.dw_gemini.rowcount() > 0 then 
+//	li_rc = g.i_gemini.of_showxml(ai_returnXML,w_do.tab_main.tabpage_gemini.dw_returnxml)
+//	w_do.tab_main.tabpage_gemini.dw_returnxml.visible = true
+// end if
+// 
+end if
+
+SetPointer(Arrow!)
+end event
+
+type m_webtracking from menu within m_gemini
+end type
+
+on m_webtracking.create
+call super::create
+this.text = "WEB Tracking"
+this.enabled = false
+this.microhelp = "Track Gemini Orders via the WEB Browser"
+this.toolbaritemname = "Globals!"
+this.toolbaritemtext = "WEB Tracking"
+this.toolbaritemorder = 55
+end on
+
+on m_webtracking.destroy
+call super::destroy
+end on
+
+event clicked;//GAP1103 Opens the default Web browser, displaying the specified URL
+GetContextService("Internet", iiMWW_Gemini)
+iiMWW_Gemini.HyperlinkToURL("http://www.emeryworld.com/eww/emeryapplications/tracking/trackform.asp")
+end event
+
+type m_startgemini from menu within m_gemini
+end type
+
+on m_startgemini.create
+call super::create
+this.text = "Start Gemini"
+this.enabled = false
+this.microhelp = "Start Gemini Application on a seprate window"
+this.toolbaritemname = "RunWindow!"
+this.toolbaritemtext = "Start Gemini Application"
+this.toolbaritemorder = 56
+end on
+
+on m_startgemini.destroy
+call super::destroy
+end on
+
+event clicked;//GAP1103 Starts Gemini application 
+boolean lb_result
+//g.of_start_gemini()
+Idle(3)
+end event
+
+type m_09 from menu within m_gemini
+end type
+
+on m_09.create
+call super::create
+this.text = "-"
+end on
+
+on m_09.destroy
+call super::destroy
+end on
+
+type m_clearreset from menu within m_gemini
+end type
+
+on m_clearreset.create
+call super::create
+this.text = "Clear/Reset All Gemini Data"
+this.enabled = false
+this.microhelp = "Clear/Reset All Gemini Data"
+this.toolbaritemname = "Custom094!"
+this.toolbaritemtext = "ClearReset Gemini Data"
+this.toolbaritemorder = 57
+this.toolbaritemspace = 1
+end on
+
+on m_clearreset.destroy
+call super::destroy
+end on
+
+event clicked;//GAP1003 RESET GEMINI DATAWINDOW
+
+SetPointer(HourGlass!)
+//if isvalid(w_do) then 
+	
+//  if w_do.tab_main.tabpage_gemini.dw_gemini.rowcount() > 0 then 
+//	
+//	this.microhelp = "CLEARING ALL GEMINI DATA......"
+//	
+//	if w_do.tab_main.tabpage_gemini.dw_gemini.object.delivery_confirm_ind[1] = 'Y' then
+//		messagebox("RESET GEMINI DATA", "CANNOT RESET, THIS ORDER HAS ALREADY BEEN SUBMITTED!")
+//		this.microhelp = "CANNOT RESET, THIS ORDER HAS ALREADY BEEN SUBMITTED!"
+//	else
+//		li_rc = MessageBox("RESET GEMINI DATA", "Are you sure you want to CLEAR/RESET all GEMINI DATA on this screen?", Exclamation!, OKCancel!, 2)
+//		IF li_rc = 1 THEN
+//			w_do.tab_main.tabpage_gemini.dw_gemini.object.delivery_confirm_ind[1] = 'N'
+//			w_do.tab_main.tabpage_gemini.dw_gemini.object.shipment_no[1] = ' '			
+//			w_do.tab_main.tabpage_gemini.dw_gemini.object.order_no[1] = ' '	
+//			w_do.tab_main.tabpage_gemini.dw_gemini.object.export_date[1] = today()	
+//			w_do.tab_main.tabpage_gemini.dw_gemini.object.type_of_product[1] = 0
+//			w_do.tab_main.tabpage_gemini.dw_gemini.object.type_of_payment[1] = 0	
+//			w_do.tab_main.tabpage_gemini.dw_gemini.object.type_of_service[1] = 0	
+//			w_do.tab_main.tabpage_gemini.dw_gemini.object.description[1] = ' '
+//			w_do.tab_main.tabpage_gemini.dw_gemini.object.currency_code[1] = 'USD'	
+//			w_do.tab_main.tabpage_gemini.dw_gemini.object.declared_value[1] = 0	
+//			w_do.tab_main.tabpage_gemini.dw_gemini.object.custom_value[1] = 0
+//			w_do.tab_main.tabpage_gemini.dw_gemini.object.insured_value[1] = 0	
+//			w_do.tab_main.tabpage_gemini.dw_gemini.object.cts_value[1] = 0	
+//			w_do.tab_main.tabpage_gemini.dw_gemini.triggerevent(getfocus!)
+//			w_do.ib_changed = true
+//			w_do.ib_gemini = true
+//			this.microhelp = "GEMINI DATA CLEARED/RESET!"			
+//		END IF
+//		
+//	end if
+//	
+//  end if
+//  
+//end if
+
+SetPointer(Arrow!)
+end event
+
+type m_connect from menu within m_gemini
+end type
+
+on m_connect.create
+call super::create
+this.text = "Check Connection to Gemini API"
+this.enabled = false
+this.microhelp = "Connect to Gemini API"
+this.toolbaritemname = "Custom052!"
+this.toolbaritemtext = "Check Connection to Gemini API"
+this.toolbaritemorder = 58
+end on
+
+on m_connect.destroy
+call super::destroy
+end on
+
+event clicked;//GAP1003
+SetPointer(HourGlass!)	
+
+	this.microhelp = "CHECKING GEMINI CONNECTION......"
+	li_rc = g.i_gemini.of_dbconnect()	
+	
+	if li_rc = 0 then 
+		this.microhelp = "CONNECTED TO GEMINI"
+	else
+		this.microhelp = "CANNOT CONNECT TO GEMINI!"
+	end if
+	
+SetPointer(Arrow!)
+end event
+

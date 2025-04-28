@@ -1,0 +1,75 @@
+HA$PBExportHeader$d_ro_edi_serial.srd
+$PBExportComments$+ Serial NUmbers for EDI Receive Orders
+release 9;
+datawindow(units=0 timer_interval=0 color=16777215 processing=1 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no grid.lines=0 )
+header(height=80 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=92 color="536870912" )
+table(column=(type=char(50) updatewhereclause=yes name=serial_no dbname="EDI_Inbound_Detail.Serial_No" )
+ column=(type=char(50) updatewhereclause=yes name=lot_no dbname="EDI_Inbound_Detail.Lot_No" )
+ column=(type=char(50) updatewhereclause=yes name=po_no dbname="EDI_Inbound_Detail.PO_No" )
+ column=(type=char(50) updatewhereclause=yes name=po_no2 dbname="PO_No2" )
+ column=(type=char(25) updatewhereclause=yes name=container_id dbname="EDI_Inbound_Detail.Container_ID" )
+ column=(type=datetime updatewhereclause=yes name=expiration_date dbname="EDI_Inbound_Detail.Expiration_Date" )
+ column=(type=char(50) updatewhereclause=yes name=inventory_type dbname="EDI_Inbound_Detail.inventory_type" )
+ column=(type=char(50) updatewhereclause=yes name=owner_id dbname="EDI_Inbound_Detail.Owner_ID" )
+ column=(type=char(10) updatewhereclause=yes name=l_code dbname="EDI_Inbound_Detail.L_code" )
+ column=(type=decimal(0) updatewhereclause=yes name=quantity dbname="Quantity" )
+ retrieve="  SELECT dbo.EDI_Inbound_Detail.Serial_No,   
+         dbo.EDI_Inbound_Detail.Lot_No,   
+         dbo.EDI_Inbound_Detail.PO_No,   
+         dbo.EDI_Inbound_Detail.PO_No2, 
+         dbo.EDI_Inbound_Detail.Container_ID,  
+         dbo.EDI_Inbound_Detail.Expiration_Date, 
+		dbo.EDI_Inbound_Detail.inventory_type, 
+		dbo.Edi_Inbound_Detail.Owner_ID,
+		dbo.Edi_Inbound_Detail.L_code, 
+		SUM(CAST (quantity as decimal)) Quantity
+    FROM dbo.EDI_Inbound_Detail
+   WHERE Project_id = :project_id and
+			order_no = :order_no and
+			sku = :sku and
+			line_item_no = :line_item_no
+
+			and edi_batch_seq_no = (select max(edi_batch_seq_no) from EDI_Inbound_Detail   
+			WHERE Project_id = :project_id and
+			order_no = :order_no
+			and sku = :sku
+			and line_item_no = :line_item_no)
+
+Group By	dbo.EDI_Inbound_Detail.Serial_No,   
+         dbo.EDI_Inbound_Detail.Lot_No,   
+         dbo.EDI_Inbound_Detail.PO_No,   
+         dbo.EDI_Inbound_Detail.PO_No2, 
+         dbo.EDI_Inbound_Detail.Container_ID,  
+         dbo.EDI_Inbound_Detail.Expiration_Date, 
+			dbo.EDI_Inbound_Detail.inventory_type, 
+			dbo.Edi_Inbound_Detail.Owner_ID,
+		dbo.Edi_Inbound_Detail.L_code   
+" arguments=(("project_id", string),("batch_no", number),("order_no", string),("sku", string),("line_item_no", number)) )
+text(band=header alignment="0" text="Serial No" border="0" color="0" x="9" y="4" height="76" width="599" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-12" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="Lot No" border="0" color="0" x="617" y="4" height="76" width="229" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-12" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="Po No" border="0" color="0" x="855" y="4" height="76" width="238" html.valueishtml="0"  name=t_3 visible="1"  font.face="Arial" font.height="-12" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="Po No2" border="0" color="0" x="1102" y="4" height="76" width="297" html.valueishtml="0"  name=t_4 visible="1"  font.face="Arial" font.height="-12" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="Inventory Type" border="0" color="0" x="2473" y="4" height="76" width="489" html.valueishtml="0"  name=t_5 visible="1"  font.face="Arial" font.height="-12" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="Edi Inbound Detail Container Id" border="0" color="0" x="1408" y="4" height="76" width="448" html.valueishtml="0"  name=obj_17912316 visible="1"  font.face="Arial" font.height="-12" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="Edi Inbound Detail Expiration Date" border="0" color="0" x="1865" y="4" height="76" width="599" html.valueishtml="0"  name=obj_17920137 visible="1"  font.face="Arial" font.height="-12" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="Edi Inbound Detail Owner Id" border="0" color="0" x="2971" y="4" height="76" width="325" html.valueishtml="0"  name=t_6 visible="1"  font.face="Arial" font.height="-12" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="L Code" border="0" color="0" x="3305" y="4" height="76" width="311" html.valueishtml="0"  name=l_code_t visible="1"  font.face="Arial" font.height="-12" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="0" color="0" x="9" y="0" height="76" width="599" format="[general]" html.valueishtml="0"  name=serial_no visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-12" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="0" color="0" x="617" y="0" height="76" width="229" format="[general]" html.valueishtml="0"  name=lot_no visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-12" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="0" color="0" x="855" y="0" height="76" width="238" format="[general]" html.valueishtml="0"  name=po_no visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-12" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="0" color="0" x="1102" y="0" height="76" width="297" format="[general]" html.valueishtml="0"  name=po_no2 visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-12" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=7 alignment="0" tabsequence=32766 border="0" color="0" x="2473" y="0" height="76" width="489" format="[general]" html.valueishtml="0"  name=inventory_type visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-12" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=5 alignment="0" tabsequence=32766 border="0" color="0" x="1408" y="0" height="76" width="448" format="[general]" html.valueishtml="0"  name=container_id visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-12" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=6 alignment="0" tabsequence=32766 border="0" color="0" x="1865" y="0" height="76" width="599" format="[shortdate] [time]" html.valueishtml="0"  name=expiration_date visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-12" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=8 alignment="0" tabsequence=32766 border="0" color="0" x="2971" y="0" height="76" width="325" format="[general]" html.valueishtml="0"  name=owner_id visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-12" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=9 alignment="0" tabsequence=32766 border="0" color="0" x="3305" y="0" height="76" width="311" format="[general]" html.valueishtml="0"  name=l_code visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-12" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=10 alignment="0" tabsequence=0 border="0" color="0" x="3630" y="0" height="76" width="2775" html.valueishtml="0"  name=quantity visible="1"  font.face="Arial" font.height="-12" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="Quantity" border="0" color="0" x="3625" y="4" height="76" width="2779" html.valueishtml="0"  name=quantity_t visible="1"  font.face="Arial" font.height="-12" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

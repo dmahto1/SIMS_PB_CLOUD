@@ -1,0 +1,39 @@
+﻿$PBExportHeader$d_sears_bol_prt_a.srd
+$PBExportComments$- Printed Bill of Lading
+release 7;
+datawindow(units=0 timer_interval=0 color=16777215 processing=0 HTMLDW=no print.documentname="" print.orientation = 0 print.margin.left = 70 print.margin.right = 0 print.margin.top = 0 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 9 print.prompt=no print.buttons=no print.preview.buttons=no )
+header(height=1436 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=1744 color="536870912" )
+detail(height=80 color="536870912"  height.autosize=yes)
+table(column=(type=char(50) updatewhereclause=yes name=invoice_no dbname="invoice_no" )
+ column=(type=decimal(5) updatewhereclause=yes name=alloc_qty dbname="alloc_qty" )
+ column=(type=decimal(0) updatewhereclause=yes name=quantity dbname="quantity" )
+ retrieve=" SELECT  Delivery_Master.Invoice_No+'  STORE FIXTURES' as Invoice_no, 
+         sum(Delivery_Detail.Alloc_Qty) as alloc_qty,
+         sum(convert(decimal,Delivery_Detail.User_Field1)) as quantity
+    FROM Delivery_Master,
+         Delivery_Detail
+   WHERE ( Delivery_Master.Do_no = Delivery_Detail.Do_No) and
+         ( Delivery_Master.Cust_Code = :As_CustCode ) and
+         ( Delivery_Master.Cust_Order_No = :As_CustOrderNo ) and
+         ( Delivery_Master.Project_Id = :As_ProjectId ) and 
+         ( Delivery_Master.Ord_Status <> 'N') and
+         ( Delivery_Master.Ord_Status <> 'P')
+group by Delivery_Master.Invoice_No
+          " arguments=(("as_projectid", string),("as_custcode", string),("as_custorderno", string),("as_po", string)) )
+report(band=header dataobject="d_sears_bol_prt_h" x="27" y="36" height="1396" width="3378" border="0"  height.autosize=yes criteria="" nest_arguments=((" as_projectid "),(" as_custcode "),(" as_custorderno "),(" as_po ")) trail_footer = yes  name=dw_1 )
+text(band=detail alignment="0" text="" border="2" color="0" x="2386" y="0" height="76" width="507"  name=t_1  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+line(band=detail x1="3406" y1="0" x2="3406" y2="92"  name=l_1 pen.style="0" pen.width="9" pen.color="0"  background.mode="2" background.color="16777215" )
+line(band=detail x1="55" y1="0" x2="55" y2="92"  name=l_2 pen.style="0" pen.width="9" pen.color="0"  background.mode="2" background.color="16777215" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="2" color="0" x="334" y="0" height="76" width="2048" format="[general]"  name=invoice_no edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=2 alignment="2" tabsequence=32766 border="2" color="0" x="64" y="0" height="76" width="265" format="[general]"  name=alloc_qty editmask.mask="###,###" editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=3 alignment="1" tabsequence=32766 border="2" color="0" x="2898" y="0" height="76" width="503" format="[General]"  name=quantity edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+report(band=footer dataobject="d_sears_bol_prt_f" x="32" y="80" height="1660" width="3387" border="0"  height.autosize=yes criteria="" nest_arguments=((" as_projectid "),(" as_custcode "),(" as_custorderno ")) trail_footer = yes  name=dw_2 )
+compute(band=footer alignment="1" expression="sum(  quantity  for all )"border="2" color="0" x="2898" y="4" height="64" width="503" format="[GENERAL]"  name=compute_2  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+line(band=footer x1="55" y1="0" x2="55" y2="92"  name=l_3 pen.style="0" pen.width="9" pen.color="0"  background.mode="2" background.color="16777215" )
+line(band=footer x1="3406" y1="0" x2="3406" y2="92"  name=l_4 pen.style="0" pen.width="9" pen.color="0"  background.mode="2" background.color="16777215" )
+compute(band=footer alignment="1" expression="sum(  alloc_qty  for all )"border="2" color="0" x="64" y="4" height="64" width="265" format="[GENERAL]"  name=compute_1  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=footer alignment="2" text="<-----------------------------------------------TOTAL----------------------------------------------->" border="2" color="0" x="334" y="4" height="64" width="2560"  name=t_2  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" )

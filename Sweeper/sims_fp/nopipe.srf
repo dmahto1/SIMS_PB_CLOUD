@@ -1,0 +1,35 @@
+HA$PBExportHeader$nopipe.srf
+global type noPipe from function_object
+end type
+
+forward prototypes
+global function string nopipe (string asstring)
+end prototypes
+
+global function string nopipe (string asstring);//GailM 02/26/15
+//Remove special characters from a string - A pipe symbol will add and element to the file that is not wanted
+//NoPipe will also be used to remove line feeds from string.
+
+String lsReturn, lsSym01, lsSym02, lsSpace
+int i, li_Nbr, li_Nbr2
+
+lsSym01 = '|'							//Pipe delimiter not allowing in elects
+lsSpace = char(32)					//Add a space to replace the CR/LF
+
+li_Nbr = 0
+
+	lsReturn = TRIM(asString)
+	IF len(asString) > 1 THEN
+		For i = 1 to len(asString)
+			if ( mid(asString,i,1) = lsSym01 or mid(asString,i,1) = char(13) or mid(asString,i,1) = char(10)) then
+				li_Nbr++
+				lsReturn = LEFT(lsReturn, i - li_Nbr - li_Nbr2) + RIGHT(lsReturn, len(lsReturn) - i + li_nbr + li_nbr2 - 1)
+			end if
+		next
+	END IF
+
+//Returns the asString without special characters
+Return lsReturn
+
+end function
+

@@ -1,0 +1,86 @@
+HA$PBExportHeader$d_coty_summary_inventory_rpt.srd
+$PBExportComments$Data Window object for displaying summary information for inventory
+release 9;
+datawindow(units=0 timer_interval=0 color=16777215 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 1 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=408 color="536870912" )
+summary(height=104 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=60 color="536870912" )
+table(column=(type=char(40) updatewhereclause=yes name=wh_name dbname="wh_name" )
+ column=(type=char(50) updatewhereclause=yes name=sku dbname="sku" )
+ column=(type=decimal(5) updatewhereclause=yes name=cases_per_pllt dbname="Cases_Per_Pllt" )
+ column=(type=char(70) updatewhereclause=yes name=description dbname="description" )
+ column=(type=decimal(5) updatewhereclause=yes name=avail_qty dbname="avail_qty" )
+ column=(type=decimal(5) updatewhereclause=yes name=alloc_qty dbname="alloc_qty" )
+ column=(type=decimal(5) updatewhereclause=yes name=sit_qty dbname="sit_qty" )
+ column=(type=decimal(5) updatewhereclause=yes name=wip_qty dbname="wip_qty" )
+ column=(type=decimal(5) updatewhereclause=yes name=total_cases dbname="Total_Cases" )
+ column=(type=decimal(0) updatewhereclause=yes name=total_pllts dbname="Total_Pllts" )
+ retrieve="SELECT DISTINCT 	wh_name,
+						cs.sku,
+						isnull(itm.qty_2, 0) as Cases_Per_Pllt,
+						itm.description,
+						sum(cs.avail_qty) as avail_qty,
+						sum(cs.alloc_qty) as alloc_qty,
+						sum(cs.sit_qty) as sit_qty, 
+						sum(cs.wip_qty) as wip_qty,
+						sum(avail_qty + alloc_qty + sit_qty + wip_qty) as Total_Cases,
+						ceiling(sum(avail_qty + alloc_qty + sit_qty + wip_qty)/(case isnull(itm.qty_2, 0) when 0 then 1 else itm.qty_2 end)) as Total_Pllts
+
+FROM					content_summary cs With (NoLock),
+						inventory_type inv With (NoLock),
+						item_master itm With (NoLock),
+						warehouse wh with (NoLock)
+
+WHERE					cs.sku = itm.sku and
+						cs.inventory_type = inv.inv_type and
+						cs.project_id = inv.project_id and 
+						cs.supp_code = itm.supp_code and 
+						cs.project_id = itm.project_id and
+						cs.wh_code = wh.wh_code and
+						cs.project_id = 'COTY'
+		
+GROUP BY				cs.project_id,
+						wh_name, 
+						cs.sku, 
+						itm.description, 
+						itm.qty_2
+order by wh_name, cs.sku
+" filter=" avail_qty > 0  OR  alloc_qty > 0 OR  sit_qty > 0")
+group(level=1 header.height=0 trailer.height=0 by=("sku" ) header.color="536870912" trailer.color="536870912" )
+compute(band=header alignment="1" expression="'Page ' + page() + ' of ' + pagecount()"border="0" color="0" x="3995" y="88" height="60" width="457" format="[general]" html.valueishtml="0"  name=compute_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Coty Summary Inventory Report" border="0" color="0" x="14" y="0" height="80" width="4430" html.valueishtml="0"  name=t_6 visible="1"  font.face="Arial" font.height="-12" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="Date:" border="0" color="0" x="23" y="88" height="56" width="155" html.valueishtml="0"  name=t_3 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="0" expression="today()"border="0" color="0" x="201" y="92" height="56" width="535" format="mm/dd/yy" html.valueishtml="0"  name=compute_2 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="Warehouse:" border="0" color="0" x="23" y="348" height="56" width="416" html.valueishtml="0"  name=content_summary_wh_code_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" font.underline="1" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="SKU" border="0" color="0" x="1042" y="348" height="56" width="128" html.valueishtml="0"  name=content_summary_sku_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" font.underline="1" background.mode="1" background.color="536870912" )
+text(band=header alignment="1" text="WIP Qty" border="0" color="0" x="3666" y="348" height="56" width="187" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" font.underline="1" background.mode="1" background.color="536870912" )
+text(band=header alignment="1" text="SIT Qty" border="0" color="0" x="3355" y="348" height="56" width="219" html.valueishtml="0"  name=content_summary_sit_qty_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" font.underline="1" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="DESCRIPTION" border="0" color="0" x="1669" y="348" height="56" width="421" html.valueishtml="0"  name=item_master_description_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" font.underline="1" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Alloc
+Qty" border="0" color="0" x="2958" y="292" height="112" width="229" html.valueishtml="0"  name=content_summary_alloc_qty_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" font.underline="1" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Avail
+Qty" border="0" color="0" x="2615" y="292" height="112" width="233" html.valueishtml="0"  name=content_summary_avail_qty_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" font.underline="1" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Cases/
+Pallet" border="0" color="0" x="1426" y="292" height="112" width="206" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" font.underline="1" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Total
+Cases" border="0" color="0" x="3909" y="292" height="112" width="274" html.valueishtml="0"  name=t_4 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" font.underline="1" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Total
+Pallets" border="0" color="0" x="4247" y="292" height="112" width="274" html.valueishtml="0"  name=t_5 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" font.underline="1" background.mode="1" background.color="536870912" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="0" color="0" x="9" y="4" height="56" width="997" format="[general]" html.valueishtml="0"  name=wh_name visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="0" color="0" x="1033" y="4" height="52" width="357" format="[general]" html.valueishtml="0"  name=sku visible="1" edit.limit=20 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=8 alignment="1" tabsequence=32766 border="0" color="0" x="3625" y="4" height="52" width="215" format="0" html.valueishtml="0"  name=wip_qty visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=7 alignment="1" tabsequence=32766 border="0" color="0" x="3296" y="4" height="52" width="265" format="0" html.valueishtml="0"  name=sit_qty visible="1" editmask.useformat=yes editmask.mask="#######.#####" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="1" tabsequence=32766 border="0" color="0" x="2885" y="4" height="52" width="270" format="0" html.valueishtml="0"  name=alloc_qty visible="1" editmask.useformat=yes editmask.mask="#######.#####" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="1" tabsequence=32766 border="0" color="0" x="2519" y="4" height="52" width="279" format="0" html.valueishtml="0"  name=avail_qty visible="1" editmask.useformat=yes editmask.mask="#######.#####" editmask.imemode=0 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="1" tabsequence=32766 border="0" color="0" x="1413" y="4" height="56" width="165" format="0" html.valueishtml="0"  name=cases_per_pllt visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="0" color="0" x="1650" y="4" height="52" width="850" format="[general]" html.valueishtml="0"  name=description visible="1" edit.limit=50 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=9 alignment="1" tabsequence=32766 border="0" color="0" x="3867" y="0" height="56" width="247" format="0" html.valueishtml="0"  name=total_cases visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=10 alignment="1" tabsequence=32766 border="0" color="0" x="4215" y="0" height="56" width="242" format="0" html.valueishtml="0"  name=total_pllts visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=summary alignment="0" text=" END OF REPORT" border="0" color="0" x="1952" y="44" height="56" width="407" html.valueishtml="0"  name=t_8 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+
+sparse(names="sku	description")htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0  template=(comment="" encoding="UTF-8" name="123" xml="<?xml version=~"1.0~" encoding=~"UTF-8~" standalone=~"no~"?><d_summary_inventory_rpt><d_summary_inventory_rpt_row><wh_code>wh_code</wh_code><d_summary_inventory_rpt_group1 __pbband=~"group~"><sku>sku</sku><d_summary_inventory_rpt_group2 __pbband=~"detail~"><content_summary_project_id>content_summary_project_id</content_summary_project_id><content_summary_supp_code>content_summary_supp_code</content_summary_supp_code><description>description</description><alternate_sku>alternate_sku</alternate_sku><inv_type_desc>inv_type_desc</inv_type_desc><project_name>project_name</project_name><avail_qty>avail_qty</avail_qty><alloc_qty>alloc_qty</alloc_qty><sit_qty>sit_qty</sit_qty><wip_qty>wip_qty</wip_qty><c_total/></d_summary_inventory_rpt_group2></d_summary_inventory_rpt_group1></d_summary_inventory_rpt_row></d_summary_inventory_rpt>"))
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

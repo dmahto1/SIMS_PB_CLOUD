@@ -1,0 +1,46 @@
+﻿$PBExportHeader$d_workorder_report_bom.srd
+$PBExportComments$- Work Order Report - BOM sub report
+release 11;
+datawindow(units=0 timer_interval=0 color=16777215 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes print.preview.outline=yes hidegrayline=no showbackcoloronxp=no )
+header(height=0 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=64 color="536870912" )
+table(column=(type=char(50) updatewhereclause=yes name=item_component_sku_child dbname="SKU_Child" )
+ column=(type=char(20) updatewhereclause=yes name=item_component_supp_code_child dbname="Supp_Code_Child" )
+ column=(type=decimal(5) updatewhereclause=yes name=item_component_child_qty dbname="Child_Qty" )
+ column=(type=char(70) updatewhereclause=yes name=item_master_description dbname="Description" )
+ column=(type=decimal(5) updatewhereclause=yes identity=yes name=reserved_qty dbname="Reserved_Qty" )
+ retrieve="  SELECT Item_Component.SKU_Child,   
+         Item_Component.Supp_Code_Child,   
+         Item_Component.Child_Qty,   
+         Item_Master.Description, 
+			Sum(avail_qty) as Reserved_Qty
+FROM Item_Component INNER JOIN Item_Master ON Item_Component.Project_ID = Item_Master.Project_ID
+		AND Item_Component.SKU_Child = Item_Master.SKU
+		AND Item_Component.Supp_Code_Child = Item_Master.Supp_Code
+	LEFT JOIN Content ON Item_master.Project_ID = Content.Project_ID
+		AND Item_Master.Sku = Content.Sku
+		AND Item_MAster.Supp_Code = Content.Supp_Code
+		AND Content.Lot_no = :asWONO
+WHERE  ITem_Master.Project_ID = :asProject 
+	AND SKU_Parent = :asParentSKU 
+	AND Supp_code_PArent = :asParentSupplier
+Group By Item_Component.SKU_Child,   
+         Item_Component.Supp_Code_Child,   
+         Item_Component.Child_Qty,   
+         Item_Master.Description
+" arguments=(("asProject", string),("asParentSKU", string),("asparentSupplier", string),("alParentQty", number),("asWONO", string)) )
+compute(band=detail alignment="0" expression="item_component_sku_child + ' (' +  item_master_description + ')  -  ' + String( item_component_child_qty ) + ' Each'"border="0" color="0" x="18" y="4" height="56" width="1568" format="[GENERAL]" html.valueishtml="0"  name=compute_1 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912"  height.autosize=yes)
+compute(band=detail alignment="0" expression="If(reserved_qty >0, ~"      ~" + String(reserved_qty,~"#####~") + ~"  reserved for this WO~",~"~")"border="0" color="0" x="1605" y="4" height="56" width="974" format="[GENERAL]" html.valueishtml="0"  name=compute_2 visible="1"  slideleft=yes  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" pagingmethod=0 generatedddwframes="1" )
+xhtmlgen() cssgen(sessionspecific="0" )
+xmlgen(inline="0" )
+xsltgen()
+jsgen()
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )
+export.xhtml()
+ 

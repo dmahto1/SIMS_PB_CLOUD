@@ -1,0 +1,60 @@
+HA$PBExportHeader$d_random_cc_report.srd
+$PBExportComments$Random Cycle Count Report
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 25 print.margin.right = 25 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=208 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=116 color="536870912" )
+detail(height=72 color="536870912" )
+table(column=(type=char(10) updatewhereclause=yes name=project_warehouse_project_id dbname="Project_Warehouse.Project_id" )
+ column=(type=decimal(0) updatewhereclause=yes name=freq dbname="Project_Warehouse.CC_Rnd_Cnt_Freq" values="Monthly	12/Quarterly	4/Yearly	1/" )
+ column=(type=decimal(0) updatewhereclause=yes name=num_wrk_days dbname="Project_Warehouse.CC_Rnd_Num_Wrk_Days" )
+ column=(type=datetime updatewhereclause=yes name=cycle_start_date dbname="Project_Warehouse.CC_Rnd_Freq_start_DT" )
+ column=(type=decimal(0) updatewhereclause=yes name=project_warehouse_cc_rnd_loc_cnt dbname="Project_Warehouse.CC_Rnd_loc_Cnt" )
+ column=(type=char(1) updatewhereclause=yes name=counted_this_cycle dbname="Location.CC_Rnd_Cnt_Ind" values="Yes	Y/No	N/In-Progress	X/" )
+ column=(type=datetime updatewhereclause=yes name=last_rnd_cnt_date dbname="Location.Last_Rnd_Cycle_Count_Date" )
+ column=(type=char(10) updatewhereclause=yes name=warehouse dbname="Project_Warehouse.WH_Code" )
+ column=(type=char(10) updatewhereclause=yes name=location dbname="Location.L_Code" )
+ retrieve="  SELECT dbo.Project_Warehouse.Project_id, 
+			dbo.Project_Warehouse.CC_Rnd_Cnt_Freq,   
+         dbo.Project_Warehouse.CC_Rnd_Num_Wrk_Days,   
+         dbo.Project_Warehouse.CC_Rnd_Freq_start_DT,   
+         dbo.Project_Warehouse.CC_Rnd_loc_Cnt,   
+         dbo.Location.CC_Rnd_Cnt_Ind,   
+         dbo.Location.Last_Rnd_Cycle_Count_Date,   
+         dbo.Project_Warehouse.WH_Code,   
+         dbo.Location.L_Code  
+    FROM dbo.Location,   
+         dbo.Project_Warehouse  
+   WHERE ( dbo.Location.WH_Code = dbo.Project_Warehouse.WH_Code )    and
+			Location_Available_ind = 'Y' 
+		"  sort="warehouse A location A " )
+group(level=1 header.height=336 trailer.height=64 by=("warehouse" ) header.color="536870912" trailer.color="536870912" )
+text(band=header alignment="2" text="Random Cycle Count Report" border="0" color="33554432" x="23" y="20" height="132" width="3442" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-20" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=header alignment="1" expression="'Page ' + Page() + ~" of ~" + PageCount()"border="0" color="33554432" x="3045" y="24" height="60" width="416" format="[GENERAL]" html.valueishtml="0"  name=compute_3 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="1" text="Date:" border="0" color="33554432" x="64" y="68" height="60" width="165" html.valueishtml="0"  name=t_3 visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="1" text="Project:" border="0" color="33554432" x="9" y="16" height="60" width="219" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=header alignment="0" expression="string(today(),'mm/dd/yyyy hh:mm')"border="0" color="33554432" x="247" y="68" height="60" width="530" format="[GENERAL]" html.valueishtml="0"  name=compute_2 visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header id=1 alignment="0" tabsequence=32766 border="0" color="33554432" x="247" y="16" height="60" width="398" format="[general]" html.valueishtml="0"  name=project_warehouse_project_id_1 visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header.1 alignment="0" text="Warehouse:" border="0" color="33554432" x="23" y="20" height="60" width="343" html.valueishtml="0"  name=t_4 visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.1 id=8 alignment="0" tabsequence=32766 border="0" color="33554432" x="366" y="20" height="60" width="416" format="[general]" html.valueishtml="0"  name=warehouse visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header.1 alignment="1" text="Current Cycle Start Dt:" border="0" color="33554432" x="800" y="20" height="60" width="599" html.valueishtml="0"  name=project_warehouse_cc_rnd_freq_start_dt_t visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header.1 alignment="1" text="Random Count Freq:" border="0" color="33554432" x="1797" y="20" height="60" width="558" html.valueishtml="0"  name=project_warehouse_cc_rnd_cnt_freq_t visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header.1 alignment="2" text="AvailableLocations" border="0" color="33554432" x="233" y="192" height="120" width="489" html.valueishtml="0"  name=t_5 visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+line(band=header.1 x1="270" y1="324" x2="1833" y2="324"  name=l_1 visible="1" pen.style="0" pen.width="9" pen.color="0"  background.mode="2" background.color="16777215" )
+column(band=header.1 id=2 alignment="0" tabsequence=32766 border="0" color="33554432" x="2373" y="20" height="60" width="347" format="[general]" html.valueishtml="0"  name=freq visible="1" ddlb.limit=0 ddlb.allowedit=no ddlb.case=any ddlb.imemode=0  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.1 id=4 alignment="0" tabsequence=32766 border="0" color="33554432" x="1417" y="20" height="60" width="357" format="[shortdate]" html.valueishtml="0"  name=cycle_start_date visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header.1 alignment="2" text="Last RandomCount DT" border="0" color="33554432" x="1184" y="192" height="120" width="626" html.valueishtml="0"  name=t_6 visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header.1 alignment="2" text="CountedThis Cycle" border="0" color="33554432" x="773" y="192" height="120" width="325" html.valueishtml="0"  name=t_7 visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=9 alignment="0" tabsequence=32766 border="0" color="33554432" x="306" y="8" height="56" width="338" format="[general]" html.valueishtml="0"  name=location visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=7 alignment="2" tabsequence=32766 border="0" color="33554432" x="1193" y="8" height="56" width="603" format="[shortdate] " html.valueishtml="0"  name=last_rnd_cnt_date visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="0" tabsequence=32766 border="0" color="33554432" x="791" y="8" height="56" width="347" format="[general]" html.valueishtml="0"  name=counted_this_cycle visible="1" ddlb.limit=0 ddlb.allowedit=no ddlb.case=any ddlb.imemode=0  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.1 id=3 alignment="0" tabsequence=32766 border="0" color="33554432" x="3273" y="20" height="60" width="155" format="[general]" html.valueishtml="0"  name=num_wrk_days visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header.1 alignment="1" text="Yearly Work Days:" border="0" color="33554432" x="2761" y="20" height="60" width="494" html.valueishtml="0"  name=project_warehouse_cc_rnd_num_wrk_days_t visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header.1 alignment="1" text="Locs to Count per day:" border="0" color="33554432" x="2606" y="80" height="60" width="649" html.valueishtml="0"  name=t_8 visible="1"  font.face="Arial" font.height="-9" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header.1 id=5 alignment="0" tabsequence=0 border="0" color="0" x="3273" y="80" height="60" width="155" html.valueishtml="0"  name=project_warehouse_cc_rnd_loc_cnt visible="1"  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

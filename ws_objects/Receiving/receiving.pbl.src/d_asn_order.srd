@@ -1,0 +1,64 @@
+﻿$PBExportHeader$d_asn_order.srd
+$PBExportComments$- ASN for an Order
+release 7;
+datawindow(units=0 timer_interval=0 color=16777215 processing=1 HTMLDW=no print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.prompt=no print.buttons=no print.preview.buttons=no grid.lines=0 )
+header(height=132 color="536870912" )
+summary(height=92 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=68 color="536870912" )
+table(column=(type=char(10) updatewhereclause=yes name=asn_header_project_id dbname="ASN_Header.Project_ID" )
+ column=(type=char(16) updatewhereclause=yes key=yes name=asn_no dbname="ASN_Header.ASN_No" )
+ column=(type=char(35) updatewhereclause=yes name=shipment_id dbname="ASN_Header.Shipment_ID" )
+ column=(type=char(35) updatewhereclause=yes name=awb_bol_nbr dbname="ASN_Header.awb_bol_nbr" )
+ column=(type=char(35) updatewhereclause=yes key=yes name=container_id dbname="ASN_Item.Container_ID" )
+ column=(type=char(35) updatewhereclause=yes key=yes name=asn_item_order_no dbname="ASN_Item.Order_No" )
+ column=(type=decimal(0) updatewhereclause=yes key=yes name=line_item_no dbname="ASN_Item.Line_Item_No" )
+ column=(type=char(50) updatewhereclause=yes key=yes name=sku dbname="ASN_Item.SKU" )
+ column=(type=decimal(0) updatewhereclause=yes name=ship_qty dbname="ASN_Item.Ship_Qty" )
+ column=(type=decimal(0) update=yes updatewhereclause=yes name=rcv_qty dbname="ASN_Item.Rcv_Qty" )
+ column=(type=char(3) updatewhereclause=yes name=country_of_origin dbname="ASN_Item.Country_of_origin" )
+ column=(type=char(1) updatewhereclause=yes name=c_apply_ind dbname="c_apply_ind" values="	Y/	N" )
+ column=(type=long updatewhereclause=yes name=c_work_qty dbname="ASN_Item.c_work_qty" )
+ retrieve="  SELECT dbo.ASN_Header.Project_ID,   
+			dbo.ASN_Header.ASN_No, 
+         dbo.ASN_Header.Shipment_ID,   
+			dbo.Asn_header.awb_bol_nbr, 
+         dbo.ASN_Item.Container_ID,   
+         dbo.ASN_Item.Order_No,   
+         dbo.ASN_Item.Line_Item_No,   
+         dbo.ASN_Item.SKU,   
+         dbo.ASN_Item.Ship_Qty,   
+         dbo.ASN_Item.Rcv_Qty, 
+			dbo.ASN_Item.Country_of_origin, 
+			' ' as c_apply_ind, 
+			0000000000 as c_work_qty  
+    FROM dbo.ASN_Item,   
+         dbo.ASN_Header  
+   WHERE ( dbo.ASN_Header.ASN_No = dbo.ASN_Item.ASN_No )   and 
+			project_id = :asProject and
+			Order_no = :asOrderNo
+" update="dbo.ASN_Item" updatewhere=0 updatekeyinplace=yes arguments=(("asProject", string),("asOrderNo", string))  sort="asn_header_project_id A shipment_id A asn_no A container_id A line_item_no A " )
+text(band=header alignment="2" text="LineItem" border="6" color="0" x="1371" y="12" height="112" width="169"  name=asn_item_line_item_no_t  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="ContainerId" border="6" color="0" x="987" y="12" height="112" width="375"  name=asn_item_container_id_t  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Apply" border="6" color="0" x="9" y="12" height="112" width="146"  name=t_1  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="ShipmentID" border="6" color="0" x="617" y="12" height="112" width="361"  name=asn_header_shipment_id_t  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="AWB" border="6" color="0" x="165" y="12" height="112" width="443"  name=t_3  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Sku" border="6" color="0" x="1550" y="12" height="112" width="375"  name=asn_item_sku_t  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="ShipQty" border="6" color="0" x="1934" y="12" height="112" width="475"  name=asn_item_ship_qty_t  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Qty PrevRcvd" border="6" color="0" x="2418" y="12" height="112" width="439"  name=t_4  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=header alignment="2" text="Qty toRcv" border="6" color="0" x="2866" y="12" height="112" width="453"  name=t_2  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+compute(band=summary alignment="1" expression="sum( ship_qty for all) "border="0" color="0" x="1934" y="24" height="56" width="475" format="#######.#####"  name=compute_1  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=summary alignment="1" expression="sum(rcv_qty for all)"border="0" color="0" x="2418" y="24" height="56" width="439" format="#######.#####"  name=compute_2  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=summary alignment="1" expression="Sum( c_work_qty for all)"border="0" color="0" x="2866" y="24" height="56" width="453" format="#######.#####"  name=compute_3  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=12 alignment="2" tabsequence=10 border="0" color="0" x="9" y="4" height="56" width="146" format="[general]"  name=c_apply_ind checkbox.text="" checkbox.on="Y" checkbox.off="N" checkbox.scale=no checkbox.threed=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="0" background.color="536870912~tIf( rcv_qty >0,rgb(192,192,192),rgb(255,255,255))" )
+column(band=detail id=13 alignment="1" tabsequence=20 border="5" color="0" x="2871" y="4" height="56" width="448" format="#######.#####"  name=c_work_qty editmask.mask="#######.#####" editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="0" background.color="16777215~tIf(  c_apply_ind = 'Y',12639424,If(rcv_qty > 0,rgb(192,192,192),rgb(255,255,255)))" )
+column(band=detail id=4 alignment="0" tabsequence=32766 border="0" color="0" x="165" y="4" height="56" width="443" format="[general]"  name=awb_bol_nbr edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="0" background.color="16777215~tIf( rcv_qty >0,rgb(192,192,192),rgb(255,255,255))" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="0" color="0" x="617" y="4" height="56" width="361" format="[general]"  name=shipment_id edit.limit=35 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="0" background.color="536870912~tIf( rcv_qty >0,rgb(192,192,192),rgb(255,255,255))" )
+column(band=detail id=5 alignment="0" tabsequence=32766 border="0" color="0" x="987" y="4" height="56" width="375" format="[general]"  name=container_id edit.limit=35 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="0" background.color="536870912~tIf( rcv_qty >0,rgb(192,192,192),rgb(255,255,255))" )
+column(band=detail id=7 alignment="0" tabsequence=32766 border="0" color="0" x="1371" y="4" height="56" width="169" format="[general]"  name=line_item_no edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="0" background.color="536870912~tIf( rcv_qty >0,rgb(192,192,192),rgb(255,255,255))" )
+column(band=detail id=8 alignment="0" tabsequence=32766 border="0" color="0" x="1550" y="4" height="56" width="375" format="[general]"  name=sku edit.limit=50 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="0" background.color="536870912~tIf( rcv_qty >0,rgb(192,192,192),rgb(255,255,255))" )
+column(band=detail id=9 alignment="1" tabsequence=32766 border="0" color="0" x="1934" y="4" height="56" width="475" format="#######.#####"  name=ship_qty editmask.mask="#######.#####" editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="0" background.color="536870912~tIf( rcv_qty >0,rgb(192,192,192),rgb(255,255,255))" )
+column(band=detail id=10 alignment="1" tabsequence=32766 border="0" color="0" x="2418" y="4" height="56" width="439" format="#######.#####"  name=rcv_qty editmask.mask="#######.#####" editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="0" background.color="16777215~tIf( rcv_qty >0,rgb(192,192,192),rgb(255,255,255))" )
+
+sparse(names="awb_bol_nbr	shipment_id	container_id")htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" )

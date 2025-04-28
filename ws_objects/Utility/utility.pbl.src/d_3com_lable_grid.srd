@@ -1,0 +1,254 @@
+﻿$PBExportHeader$d_3com_lable_grid.srd
+release 11;
+datawindow(units=0 timer_interval=0 color=1090519039 processing=1 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes print.preview.outline=yes hidegrayline=no showbackcoloronxp=no grid.lines=0 )
+header(height=124 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=76 color="536870912" )
+table(column=(type=char(70) updatewhereclause=yes name=item_master_description dbname="Description" )
+ column=(type=decimal(0) updatewhereclause=yes name=delivery_packing_packing_list_no dbname="Packing_List_No" )
+ column=(type=char(25) updatewhereclause=yes name=delivery_packing_carton_no dbname="Carton_No" )
+ column=(type=char(10) updatewhereclause=yes name=carton_type dbname="Carton_Type" )
+ column=(type=char(50) updatewhereclause=yes name=delivery_master_cust_name dbname="Delivery_Master_Cust_Name" )
+ column=(type=char(60) updatewhereclause=yes name=delivery_master_address_1 dbname="Delivery_Master_Address_1" )
+ column=(type=char(60) updatewhereclause=yes name=delivery_master_address_2 dbname="Delivery_Master_Address_2" )
+ column=(type=char(60) updatewhereclause=yes name=delivery_master_address_3 dbname="Delivery_Master_Address_3" )
+ column=(type=char(60) updatewhereclause=yes name=delivery_master_address_4 dbname="Delivery_Master_Address_4" )
+ column=(type=char(50) updatewhereclause=yes name=delivery_master_city dbname="DElivery_MAster_City" )
+ column=(type=char(50) updatewhereclause=yes name=delivery_master_state dbname="Delivery_MAster_State" )
+ column=(type=char(50) updatewhereclause=yes name=delivery_master_zip dbname="Delivery_MAster_Zip" )
+ column=(type=char(50) updatewhereclause=yes name=delivery_master_country dbname="Delivery_Master_Country" )
+ column=(type=char(20) updatewhereclause=yes name=delivery_master_cust_order_no dbname="Cust_Order_No" )
+ column=(type=char(50) updatewhereclause=yes name=delivery_detail_alternate_sku dbname="Alternate_SKU" )
+ column=(type=char(4) updatewhereclause=yes name=delivery_detail_uom dbname="uom" )
+ column=(type=decimal(5) updatewhereclause=yes name=delivery_packing_weight_gross dbname="Weight_Gross" )
+ column=(type=decimal(5) updatewhereclause=yes name=delivery_detail_alloc_qty dbname="Alloc_Qty" )
+ column=(type=char(30) updatewhereclause=yes name=dd_user_field4 dbname="DD_user_Field4" )
+ column=(type=char(30) updatewhereclause=yes name=dd_user_field5 dbname="DD_User_Field5" )
+ column=(type=char(16) updatewhereclause=yes name=delivery_master_do_no dbname="DO_No" )
+ column=(type=char(10) updatewhereclause=yes name=delivery_master_project_id dbname="Project_ID" )
+ column=(type=char(1) updatewhereclause=yes name=c_label_format dbname="c_label_format" )
+ column=(type=char(9) updatewhereclause=yes name=c_starting_carton_nbr dbname="c_starting_carton_nbr" )
+ column=(type=char(50) updatewhereclause=yes name=project_country dbname="Country" )
+ column=(type=char(20) updatewhereclause=yes name=delivery_master_carrier dbname="Carrier" )
+ column=(type=char(10) updatewhereclause=yes name=delivery_master_user_field1 dbname="User_Field1" )
+ column=(type=char(20) updatewhereclause=yes name=delivery_master_user_field4 dbname="User_Field4" )
+ column=(type=char(30) updatewhereclause=yes name=awb_bol_no dbname="awb_bol_no" )
+ column=(type=char(50) updatewhereclause=yes name=item_master_sku dbname="SKU" )
+ column=(type=char(1) updatewhereclause=yes name=c_print_ind dbname="c_print_ind" values="	Y/	N" )
+ column=(type=long updatewhereclause=yes identity=yes name=c_qty_per_carton dbname="c_qty_per_carton" initial="1" )
+ column=(type=decimal(5) updatewhereclause=yes identity=yes name=delivery_packing_quantity dbname="Quantity" )
+ column=(type=char(20) updatewhereclause=yes name=delivery_master_cust_code dbname="Cust_Code" )
+ column=(type=char(1) updatewhereclause=yes name=item_master_standard_of_measure dbname="Standard_of_Measure" )
+ column=(type=char(3) updatewhereclause=yes name=delivery_packing_country_of_origin dbname="Country_of_Origin" )
+ column=(type=char(20) updatewhereclause=yes name=customer_user_field2 dbname="User_Field2" )
+ column=(type=char(50) updatewhereclause=yes name=delivery_master_invoice_no dbname="Invoice_No" )
+ column=(type=char(20) updatewhereclause=yes name=delivery_master_user_field5 dbname="User_Field5" )
+ column=(type=char(20) updatewhereclause=yes name=delivery_master_user_field6 dbname="User_Field6" )
+ column=(type=decimal(0) updatewhereclause=yes name=item_master_part_upc_code dbname="Part_UPC_Code" )
+ column=(type=char(10) updatewhereclause=yes name=grp dbname="Grp" )
+ column=(type=char(50) updatewhereclause=yes name=delivery_packing_shipper_tracking_id dbname="Shipper_Tracking_ID" )
+ column=(type=decimal(0) updatewhereclause=yes name=delivery_packing_line_item_no dbname="Line_Item_No" )
+ column=(type=char(1) updatewhereclause=yes name=delivery_packing_standard_of_measure dbname="Standard_of_Measure" )
+ column=(type=char(50) updatewhereclause=yes name=boxcount dbname="BoxCount" )
+ column=(type=char(40) updatewhereclause=yes name=warehouse_wh_name dbname="Warehouse_Wh_Name" )
+ column=(type=char(40) updatewhereclause=yes name=warehouse_address_1 dbname="Warehouse_Address_1" )
+ column=(type=char(40) updatewhereclause=yes name=warehouse_address_2 dbname="Warehouse_Address_2" )
+ column=(type=char(40) updatewhereclause=yes name=warehouse_address_3 dbname="Warehouse_Address_3" )
+ column=(type=char(40) updatewhereclause=yes name=warehouse_address_4 dbname="Warehouse_Address_4" )
+ column=(type=char(30) updatewhereclause=yes name=warehouse_city dbname="Warehouse_City" )
+ column=(type=char(35) updatewhereclause=yes name=warehouse_state dbname="Warehouse_State" )
+ column=(type=char(15) updatewhereclause=yes name=warehouse_zip dbname="Warehouse_Zip" )
+ column=(type=char(30) updatewhereclause=yes name=warehouse_country dbname="Warehouse_Country" )
+ column=(type=char(1) updatewhereclause=yes name=c_processed_ind dbname="c_processed_ind" )
+ column=(type=long updatewhereclause=yes identity=yes name=c_carton_of dbname="c_carton_of" )
+ column=(type=long updatewhereclause=yes identity=yes name=c_carton_count dbname="c_carton_Count" )
+ column=(type=char(70) updatewhereclause=yes name=item_master_user_field15 dbname="User_Field15" )
+ column=(type=char(70) updatewhereclause=yes name=item_master_description dbname="item_master_description" )
+ column=(type=char(20) updatewhereclause=yes name=delivery_master_freight_terms dbname="Delivery_Master_Freight_Terms" )
+ column=(type=char(40) updatewhereclause=yes name=delivery_master_ship_ref dbname="Delivery_Master_Ship_Ref" )
+ retrieve="  SELECT Item_Master.Description,   
+         Delivery_Packing.Packing_List_No,   
+         Delivery_Packing.Carton_No,   
+         Delivery_Packing.Carton_Type as Carton_Type,
+         Delivery_Master.Cust_Name as  Delivery_Master_Cust_Name,   
+         Delivery_Master.Address_1 as Delivery_Master_Address_1,   
+         Delivery_Master.Address_2 as Delivery_Master_Address_2,   
+         Delivery_Master.Address_3 as Delivery_Master_Address_3, 
+         Delivery_Master.Address_4 as Delivery_Master_Address_4,  
+         Delivery_Master.City as DElivery_MAster_City,   
+         Delivery_Master.State as Delivery_MAster_State,   
+         Delivery_Master.Zip as Delivery_MAster_Zip, 
+         Delivery_Master.Country as Delivery_Master_Country,   
+         Delivery_Master.Cust_Order_No,   
+         Delivery_Detail.Alternate_SKU,
+         Delivery_Detail.uom,   
+         Delivery_Packing.Weight_Gross,   
+         Delivery_Detail.Alloc_Qty,     
+         Delivery_Detail.User_Field4 as DD_user_Field4, 
+         Delivery_Detail.User_Field5 as DD_User_Field5, 
+         Delivery_Master.DO_No,   
+         Delivery_Master.Project_ID,   
+         ' ' as c_label_format,   
+         '         ' as c_starting_carton_nbr,   
+         Delivery_Master.Country,   
+         Delivery_Master.Carrier,   
+         Delivery_Master.User_Field1,   
+         Delivery_Master.User_Field4,   
+         Delivery_Master.awb_bol_no, 
+         Item_Master.SKU,   
+         ' ' as c_print_ind,   
+         0 as c_qty_per_carton,   
+         sum(Delivery_Packing.Quantity) Quantity,
+         Delivery_Master.Cust_Code,   
+         Item_Master.Standard_of_Measure,   
+         Delivery_Packing.Country_of_Origin,   
+         Customer.User_Field2,   
+         Delivery_Master.Invoice_No,   
+         Delivery_Master.User_Field5,   
+         Delivery_Master.User_Field6,   
+         Item_Master.Part_UPC_Code,   
+         Item_Master.Grp, 
+         Delivery_Packing.Shipper_Tracking_ID,   
+         Delivery_Packing.Line_Item_No,
+         Delivery_Packing.Standard_of_Measure,
+         Delivery_Packing.User_Field1 as BoxCount,
+         Warehouse.wh_Name as Warehouse_Wh_Name, 
+         Warehouse.Address_1 as Warehouse_Address_1,   
+         Warehouse.Address_2 as Warehouse_Address_2,   
+         Warehouse.Address_3 as Warehouse_Address_3, 
+         Warehouse.Address_4 as Warehouse_Address_4,  
+         Warehouse.City as Warehouse_City,   
+         Warehouse.State as Warehouse_State,   
+         Warehouse.Zip as Warehouse_Zip, 
+         Warehouse.Country as Warehouse_Country, 
+         'N' as c_processed_ind, 
+         000 as c_carton_of, 
+         000 as c_carton_Count,
+   	     Item_Master.User_Field15 As User_Field15,
+		 Item_Master.Description As item_master_description,
+	     Delivery_Master.Freight_Terms As Delivery_Master_Freight_Terms,
+         Delivery_Master.Ship_Ref  AS Delivery_Master_Ship_Ref 
+
+    FROM Delivery_Packing,   
+         Item_Master,   
+         Warehouse,            
+         Delivery_Detail,   
+         Customer right outer join Delivery_Master
+         on Customer.Project_ID = Delivery_MAster.Project_ID and
+         Customer.Cust_Code = Delivery_Master.Cust_Code
+   WHERE  
+         ( Delivery_Detail.DO_No = Delivery_Master.DO_No ) and  
+         ( Warehouse.wh_Code = Delivery_Master.wh_Code ) and          
+         ( Delivery_Packing.DO_No = Delivery_Detail.DO_No ) and  
+         ( Delivery_Packing.Line_Item_No = Delivery_Detail.Line_Item_No ) and  
+         ( Delivery_Packing.SKU = Delivery_Detail.SKU ) and  
+         ( Delivery_Master.Project_ID = Item_Master.Project_ID ) and
+         ( Delivery_Packing.Supp_Code = Item_Master.Supp_Code ) and  
+         ( Delivery_Packing.SKU = Item_Master.SKU ) and  
+         ( ( Delivery_Master.Project_ID = :as_project_id ) AND  
+         ( Delivery_Master.do_No = :as_do_no ) ) 
+group by
+         Item_Master.Description,   
+         Delivery_Packing.Packing_List_No,   
+         Delivery_Packing.Carton_No,   
+         Delivery_Packing.Carton_Type,
+         Delivery_Master.Cust_Name,
+         Delivery_Master.Address_1,   
+         Delivery_Master.Address_2,   
+         Delivery_Master.Address_3, 
+         Delivery_Master.Address_4,  
+         Delivery_Master.City,   
+         Delivery_Master.State,   
+         Delivery_Master.Zip, 
+         Delivery_Master.Country,   
+         Delivery_Master.Cust_Order_No,   
+         Delivery_Detail.Alternate_SKU,
+         Delivery_Detail.uom,   
+         Delivery_Packing.Weight_Gross,   
+         Delivery_Detail.Alloc_Qty,   
+         Delivery_Detail.User_Field4, 
+         Delivery_Detail.User_Field5, 
+         Delivery_Master.DO_No,   
+         Delivery_Master.Project_ID,   
+         Delivery_Master.Country,   
+         Delivery_Master.Carrier,   
+         Delivery_Master.User_Field1,   
+         Delivery_Master.User_Field4,   
+         Delivery_Master.awb_bol_no, 
+         Item_Master.SKU,   
+         Delivery_Packing.Quantity,   
+         Delivery_Master.Cust_Code,   
+         Item_Master.Standard_of_Measure,   
+         Delivery_Packing.Country_of_Origin,   
+         Customer.User_Field2,   
+         Delivery_Master.Invoice_No,   
+         Delivery_Master.User_Field5,   
+         Delivery_Master.User_Field6,   
+         Item_Master.Part_UPC_Code,   
+         Item_Master.Grp, 
+         Delivery_Packing.Shipper_Tracking_ID,   
+         Delivery_Packing.Line_Item_No,
+         Delivery_Packing.Standard_of_Measure,
+         Delivery_Packing.User_Field1,
+         Warehouse.wh_Name, 
+         Warehouse.Address_1,   
+         Warehouse.Address_2,   
+         Warehouse.Address_3, 
+         Warehouse.Address_4,  
+         Warehouse.City,   
+         Warehouse.State,   
+         Warehouse.Zip,
+         Warehouse.Country,
+ 		  Item_Master.User_Field15,
+ 		  Item_Master.Description,
+ Delivery_Master.Freight_Terms,
+ Delivery_Master.Ship_Ref
+" arguments=(("as_project_id", string),("as_do_no", string))  sort="delivery_packing_carton_no A item_master_sku A " )
+text(band=header alignment="2" text="No of
+ Copies" border="6" color="0" x="114" y="8" height="112" width="251" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="80269524" )
+text(band=header alignment="2" text="Prt" border="6" color="0" x="9" y="8" height="112" width="96" html.valueishtml="0"  name=obj_53251992 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="80269524" )
+text(band=header alignment="2" text="Gross
+Weight" border="6" color="0" x="2752" y="8" height="112" width="279" html.valueishtml="0"  name=delivery_packing_weight_gross_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="80269524" )
+text(band=header alignment="2" text="SKU" border="6" color="0" x="928" y="8" height="112" width="553" html.valueishtml="0"  name=item_master_sku_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="80269524" )
+text(band=header alignment="2" text="Alloc
+Qty" border="6" color="0" x="3040" y="8" height="112" width="197" html.valueishtml="0"  name=delivery_detail_alloc_qty_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="80269524" )
+text(band=header alignment="2" text="Carton
+Nbr" border="6" color="0" x="375" y="8" height="112" width="462" html.valueishtml="0"  name=delivery_packing_carton_no_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="80269524" )
+text(band=header alignment="2" text="B
+U" border="6" color="0" x="846" y="8" height="112" width="73" html.valueishtml="0"  name=t_3 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="80269524" )
+text(band=header alignment="2" text="Sales
+Order Nbr" border="6" color="0" x="2121" y="8" height="112" width="320" html.valueishtml="0"  name=t_4 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="80269524" )
+text(band=header alignment="2" text="Cust
+Order Nbr" border="6" color="0" x="2450" y="8" height="112" width="293" html.valueishtml="0"  name=t_5 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="80269524" )
+text(band=header alignment="2" text="Alternate
+SKU" border="6" color="0" x="1490" y="8" height="112" width="384" html.valueishtml="0"  name=delivery_detail_alternate_sku_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="80269524" )
+text(band=header alignment="2" text="QTY" border="6" color="0" x="1883" y="8" height="112" width="229" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="80269524" )
+text(band=header alignment="2" text="Box
+Count" border="6" color="0" x="3246" y="4" height="112" width="197" html.valueishtml="0"  name=boxcount_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="67108864" )
+text(band=header alignment="0" text="Item Master Description" border="0" color="33554432" x="3451" y="4" height="76" width="992" html.valueishtml="0"  name=item_master_description_t visible="0"  font.face="Arial" font.height="-12" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+text(band=header alignment="0" text="Item Master User Field15" border="0" color="33554432" x="4453" y="4" height="76" width="1207" html.valueishtml="0"  name=item_master_user_field15_t visible="0"  font.face="Arial" font.height="-12" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+column(band=detail id=32 alignment="1" tabsequence=20 border="5" color="0" x="114" y="8" height="60" width="251" format="[general]" html.valueishtml="0"  name=c_qty_per_carton visible="1" editmask.spin=yes editmask.mask="###,###" editmask.spinrange="1~~300" editmask.spinincr=1 editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1090519039" )
+column(band=detail id=31 alignment="2" tabsequence=10 border="0" color="0" x="9" y="8" height="60" width="96" format="[general]" html.valueishtml="0"  name=c_print_ind visible="1" checkbox.text="" checkbox.on="Y" checkbox.off="N" checkbox.scale=no checkbox.threed=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1090519039" )
+column(band=detail id=17 alignment="2" tabsequence=32766 border="0" color="0" x="2752" y="8" height="60" width="279" format="[general]" html.valueishtml="0"  name=delivery_packing_weight_gross visible="1" edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1090519039" )
+column(band=detail id=18 alignment="1" tabsequence=32766 border="0" color="0" x="3040" y="8" height="60" width="197" format="[general]" html.valueishtml="0"  name=delivery_detail_alloc_qty visible="1" editmask.mask="###,###" editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1090519039" )
+column(band=detail id=30 alignment="0" tabsequence=32766 border="0" color="0" x="928" y="8" height="60" width="553" format="[general]" html.valueishtml="0"  name=item_master_sku visible="1" edit.limit=50 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1090519039" )
+column(band=detail id=15 alignment="0" tabsequence=32766 border="0" color="0" x="1490" y="8" height="60" width="384" format="[general]" html.valueishtml="0"  name=delivery_detail_alternate_sku visible="1" edit.limit=50 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1090519039" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="0" color="0" x="375" y="8" height="60" width="462" format="[general]" html.valueishtml="0"  name=delivery_packing_carton_no visible="1" edit.limit=25 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1090519039" )
+compute(band=detail alignment="2" expression="If(grp='B','Y','N')"border="0" color="0" x="846" y="8" height="60" width="73" format="[GENERAL]" html.valueishtml="0"  name=c_bundled_ind visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=33 alignment="1" tabsequence=32766 border="0" color="0" x="1883" y="8" height="60" width="229" format="[general]" html.valueishtml="0"  name=delivery_packing_quantity visible="1" editmask.mask="###,###" editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1090519039" )
+compute(band=detail alignment="0" expression="If( dd_user_field4 > '', dd_user_field4 , delivery_master_user_field4 )"border="0" color="0" x="2121" y="8" height="60" width="320" format="[GENERAL]" html.valueishtml="0"  name=c_sales_order visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1090519039" )
+compute(band=detail alignment="0" expression="If(dd_user_field5 > '',dd_user_Field5, delivery_master_cust_order_no )"border="0" color="0" x="2450" y="8" height="60" width="293" format="[GENERAL]" html.valueishtml="0"  name=c_cust_order visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1090519039" )
+column(band=detail id=46 alignment="0" tabsequence=30 border="5" color="0" x="3246" y="8" height="56" width="197" format="[general]" html.valueishtml="0"  name=boxcount visible="1~tif(upper(carton_type) = 'PALLET', 1, 0)" editmask.mask="##0" editmask.focusrectangle=no  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1090519039" )
+column(band=detail id=1 alignment="0" tabsequence=40 border="0" color="33554432" x="3451" y="4" height="76" width="992" format="[general]" html.valueishtml="0"  name=item_master_description visible="0" edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-12" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+column(band=detail id=59 alignment="0" tabsequence=50 border="0" color="33554432" x="4453" y="8" height="76" width="1207" format="[general]" html.valueishtml="0"  name=item_master_user_field15 visible="0" edit.limit=0 edit.case=any edit.autoselect=yes  font.face="Arial" font.height="-12" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="1073741824" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" pagingmethod=0 generatedddwframes="1" )
+xhtmlgen() cssgen(sessionspecific="0" )
+xmlgen(inline="0" )
+xsltgen()
+jsgen()
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )
+export.xhtml()

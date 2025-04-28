@@ -1,0 +1,161 @@
+﻿$PBExportHeader$d_ibm_pondicherry_invoice_master.srd
+release 9;
+datawindow(units=3 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 1 print.margin.left = 1000 print.margin.right = 396 print.margin.top = 635 print.margin.bottom = 635 print.paper.source = 0 print.paper.size = 9 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=9128 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=423 color="536870912" )
+detail(height=952 color="536870912"  height.autosize=yes)
+table(column=(type=char(40) updatewhereclause=yes name=cust_name dbname="cust_name" )
+ column=(type=char(20) updatewhereclause=yes name=cust_code dbname="cust_code" )
+ column=(type=char(10) updatewhereclause=yes name=address_code dbname="address_code" )
+ column=(type=char(60) updatewhereclause=yes name=address_1 dbname="address_1" )
+ column=(type=char(60) updatewhereclause=yes name=address_2 dbname="address_2" )
+ column=(type=char(60) updatewhereclause=yes name=address_3 dbname="address_3" )
+ column=(type=char(60) updatewhereclause=yes name=address_4 dbname="address_4" )
+ column=(type=char(30) updatewhereclause=yes name=city dbname="city" )
+ column=(type=char(35) updatewhereclause=yes name=state dbname="state" )
+ column=(type=char(15) updatewhereclause=yes name=zip dbname="zip" )
+ column=(type=char(30) updatewhereclause=yes name=country dbname="country" )
+ column=(type=char(15) updatewhereclause=yes name=ship_via dbname="ship_via" )
+ column=(type=char(20) updatewhereclause=yes name=carrier dbname="carrier" )
+ column=(type=char(20) updatewhereclause=yes name=awb_bol_no dbname="awb_bol_no" )
+ column=(type=decimal(5) updatewhereclause=yes name=weight dbname="weight" )
+ column=(type=char(10) updatewhereclause=yes name=wh_code dbname="wh_code" )
+ column=(type=char(20) updatewhereclause=yes name=cust_order_no dbname="Cust_Order_No" )
+ column=(type=datetime updatewhereclause=yes name=request_date dbname="Request_Date" )
+ column=(type=char(40) updatewhereclause=yes name=customer_cust_name dbname="cust_name" )
+ column=(type=char(40) updatewhereclause=yes name=address_1 dbname="address_1" )
+ column=(type=char(50) updatewhereclause=yes name=carrier_master_carrier_name dbname="carrier_name" )
+ column=(type=char(20) updatewhereclause=yes name=user_field2 dbname="user_field2" )
+ column=(type=char(50) updatewhereclause=yes name=delivery_master_invoice_no dbname="invoice_no" )
+ column=(type=datetime updatewhereclause=yes name=delivery_master_complete_date dbname="complete_date" )
+ retrieve="SELECT  delivery_master.cust_name ,
+           delivery_master.cust_code ,
+           delivery_master.address_code ,
+           delivery_master.address_1 ,
+           delivery_master.address_2 ,
+           delivery_master.address_3 ,
+           delivery_master.address_4 ,
+           delivery_master.city ,
+           delivery_master.state ,
+           delivery_master.zip ,
+           delivery_master.country ,
+           delivery_master.ship_via ,
+           delivery_master.carrier ,
+           delivery_master.awb_bol_no ,
+           delivery_master.weight ,
+           delivery_master.wh_code ,
+				delivery_master.Cust_Order_No, 
+				delivery_master.Request_Date, 
+           customer.cust_name , 
+           warehouse.address_1 ,
+           carrier_master.carrier_name ,
+           warehouse.user_field2 ,
+           delivery_master.invoice_no ,
+           delivery_master.complete_date  
+        FROM {oj delivery_master LEFT OUTER JOIN carrier_master ON delivery_master.carrier = carrier_master.carrier_code AND delivery_master.project_id = carrier_master.project_id 
+					LEFT OUTER JOIN dbo.Customer ON dbo.Delivery_Master.Cust_Code = dbo.Customer.Cust_Code and delivery_master.project_id = Customer.project_id } ,
+          
+           warehouse    
+        WHERE  ( warehouse.wh_code = delivery_master.wh_code ) and 
+       ( delivery_master.do_no = :asdono ) and
+		 ( delivery_master.ord_status in ('C','D') ) " arguments=(("asDONO", string),("asUser", string),("asAmountText", string)) )
+text(band=header alignment="0" text=" Ship To:" border="2" color="0" x="238" y="6799" height="343" width="4656" html.valueishtml="0"  name=t_9 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="CST No." border="2" color="0" x="4894" y="6746" height="846" width="4497" html.valueishtml="0"  name=t_10 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="" border="2" color="0" x="9392" y="6746" height="846" width="4286" html.valueishtml="0"  name=t_12 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="Central Excise Registration No
+" border="2" color="0" x="238" y="3624" height="740" width="4656" html.valueishtml="0"  name=t_3 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="Transit Insurance No" border="2" color="0" x="13705" y="5318" height="317" width="5741" html.valueishtml="0"  name=t_18 visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text=" PO No/Date:" border="2" color="0" x="4894" y="6244" height="529" width="8784" html.valueishtml="0"  name=t_13 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="COMMISSIONARATE:" border="2" color="0" x="13705" y="5000" height="317" width="5741" html.valueishtml="0"  name=t_17 visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="PAN No:" border="2" color="0" x="13705" y="4683" height="317" width="5741" html.valueishtml="0"  name=t_16 visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="PGST NO:" border="2" color="0" x="13705" y="4365" height="343" width="5741" html.valueishtml="0"  name=t_15 visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="Pondicherry Central Excise Commissionarate Code No." border="2" color="0" x="4894" y="5635" height="635" width="8784" html.valueishtml="0"  name=t_14 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="
+ CST No:" border="2" color="0" x="13705" y="3624" height="740" width="5741" html.valueishtml="0"  name=t_6 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="INVOICE NO:" border="2" color="0" x="19446" y="3624" height="740" width="7328" html.valueishtml="0"  name=t_7 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="
+  Range" border="2" color="0" x="4894" y="3624" height="740" width="4497" html.valueishtml="0"  name=t_4 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="
+  Central Excise Division" border="2" color="0" x="9392" y="3624" height="740" width="4312" html.valueishtml="0"  name=t_5 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text=" Invoice Date:" border="2" color="0" x="19446" y="4365" height="687" width="7328" html.valueishtml="0"  name=t_19 visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="INVOICE CUM DELIVERY CHALLAN" border="0" color="0" x="238" y="2619" height="952" width="26537" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-12" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+line(band=header x1="211" y1="2619" x2="26775" y2="2619"  name=l_1 visible="1" pen.style="0" pen.width="52" pen.color="0"  background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="(Under Rule 11 of Central Excise(no.2)Rules,2001)" border="0" color="0" x="10318" y="3148" height="370" width="6455" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+line(band=header x1="211" y1="2619" x2="211" y2="10239"  name=l_3 visible="1" pen.style="0" pen.width="52" pen.color="0"  background.mode="2" background.color="16777215" )
+line(band=header x1="26802" y1="2619" x2="26802" y2="10080"  name=l_7 visible="1" pen.style="0" pen.width="52" pen.color="0"  background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="" border="0" color="0" x="899" y="3968" height="343" width="3386" html.valueishtml="0"  name=t_inv1 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="" border="0" color="0" x="5953" y="3942" height="343" width="1031" html.valueishtml="0"  name=t_inv2 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="" border="0" color="0" x="12673" y="3942" height="343" width="846" html.valueishtml="0"  name=t_inv7 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="" border="0" color="0" x="5212" y="5953" height="238" width="3492" html.valueishtml="0"  name=t_inv12 visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="" border="0" color="0" x="15398" y="3968" height="317" width="3492" html.valueishtml="0"  name=t_inv13 visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=header id=23 alignment="0" tabsequence=32766 border="0" color="0" x="22860" y="3677" height="661" width="3889" format="[general]" html.valueishtml="0"  name=delivery_master_invoice_no visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=header id=24 alignment="0" tabsequence=32766 border="0" color="0" x="22860" y="4445" height="476" width="3889" format="dd/mm/yy" html.valueishtml="0"  name=delivery_master_complete_date visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="" border="0" color="0" x="15398" y="4418" height="238" width="3492" html.valueishtml="0"  name=t_inv14 visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="" border="0" color="0" x="15398" y="4788" height="185" width="3492" html.valueishtml="0"  name=t_inv15 visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="" border="0" color="0" x="16245" y="5053" height="185" width="2222" html.valueishtml="0"  name=t_inv16 visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=header id=22 alignment="0" tabsequence=32766 border="0" color="0" x="16377" y="5371" height="238" width="3069" format="[general]" html.valueishtml="0"  name=user_field2 visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text=" Bill To:" border="2" color="0" x="238" y="4365" height="343" width="4656" html.valueishtml="0"  name=t_8 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="" border="2" color="0" x="4894" y="4365" height="343" width="4497" html.valueishtml="0"  name=t_inv3 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="" border="2" color="0" x="4894" y="4683" height="317" width="4497" html.valueishtml="0"  name=t_inv4 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="" border="2" color="0" x="4894" y="5000" height="317" width="4497" html.valueishtml="0"  name=t_inv5 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="" border="2" color="0" x="4894" y="5318" height="317" width="4497" html.valueishtml="0"  name=t_inv6 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="" border="0" color="0" x="13811" y="5820" height="3201" width="12832" html.valueishtml="0"  name=t_23 visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="" border="2" color="0" x="9392" y="4365" height="343" width="4312" html.valueishtml="0"  name=t_inv8 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="" border="2" color="0" x="9392" y="4683" height="317" width="4312" html.valueishtml="0"  name=t_inv9 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="" border="2" color="0" x="9392" y="5000" height="317" width="4312" html.valueishtml="0"  name=t_inv10 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="" border="2" color="0" x="9392" y="5318" height="317" width="4312" html.valueishtml="0"  name=t_inv11 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="Date and time of removal of goods:" border="2" color="0" x="19446" y="5000" height="317" width="7328" html.valueishtml="0"  name=t_20 visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="" border="2" color="0" x="19446" y="5318" height="317" width="7328" html.valueishtml="0"  name=t_21 visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="0" expression="   if (len(trim(  cust_name    )) > 0,    cust_name  + '~~r~~n','') 
++ if (len(trim(  address_1  )) > 0,   address_1   + '~~r~~n','') 
++ if (len(trim(  address_2  )) > 0,   address_2 + '~~r~~n','') 
++ if (len(trim(  address_3  )) > 0,   address_3   + '~~r~~n','') 
++ if (len(trim(  address_4  )) > 0,   address_4   + '~~r~~n','') 
++  if (not isnull( city ),  city ,'') +    if (not isnull( state ),   
+', ' + state ,'')  + if (not isnull(zip  ),   ' , ' +  zip  ,'') + if (not isnull(  country   ),    ', ' + country   ,'')
+"border="0" color="0" x="343" y="4815" height="1799" width="4445" format="[GENERAL]" html.valueishtml="0"  name=compute_2 visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="0" expression="   if (len(trim(  cust_name    )) > 0,    cust_name  + '~~r~~n','') 
++ if (len(trim(  address_1  )) > 0,   address_1   + '~~r~~n','') 
++ if (len(trim(  address_2  )) > 0,   address_2 + '~~r~~n','') 
++ if (len(trim(  address_3  )) > 0,   address_3   + '~~r~~n','') 
++ if (len(trim(  address_4  )) > 0,   address_4   + '~~r~~n','') 
++  if (not isnull( city ),  city ,'') +    if (not isnull( state ),   
+', ' + state ,'')  + if (not isnull(zip  ),   ' , ' +  zip  ,'') + if (not isnull(  country   ),    ', ' + country   ,'')
+"border="0" color="0" x="343" y="7223" height="1799" width="4445" format="[GENERAL]" html.valueishtml="0"  name=compute_1 visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="PGST No." border="2" color="0" x="4894" y="7567" height="846" width="4497" html.valueishtml="0"  name=t_11 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="" border="2" color="0" x="9392" y="7567" height="846" width="4286" html.valueishtml="0"  name=t_37 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="PAN No." border="2" color="0" x="4894" y="8387" height="740" width="4497" html.valueishtml="0"  name=t_31 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="2" text="" border="2" color="0" x="9392" y="8387" height="740" width="4286" html.valueishtml="0"  name=t_38 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="" border="0" color="0" x="10001" y="6958" height="370" width="3042" html.valueishtml="0"  name=t_inv17 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="" border="0" color="0" x="10001" y="7805" height="370" width="3042" html.valueishtml="0"  name=t_inv18 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="" border="0" color="0" x="10001" y="8572" height="370" width="3042" html.valueishtml="0"  name=t_inv19 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="0" expression="If (Not isnull( cust_order_no ), cust_order_no + ' - ' ,'') + If(not isnull(request_date),String(Request_Date,'dd/mm/yy'),'')"border="0" color="0" x="7117" y="6350" height="317" width="6111" format="[GENERAL]" html.valueishtml="0"  name=compute_3 visible="1"  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+report(band=detail dataobject="d_ibm_pondicherry_invoice_detail" x="0" y="0" height="978" width="26855" border="0"  height.autosize=yes criteria="" nest_arguments=(("asdono"),("asuser"),("asamounttext")) trail_footer = yes  name=dw_detail visible="1"  hidesnaked=1  slideup=directlyabove )
+line(band=summary x1="211" y1="4418" x2="26828" y2="4366"  name=l_5 visible="1"  moveable=1 pen.style="0" pen.width="52" pen.color="0"  background.mode="2" background.color="16777215" )
+text(band=summary alignment="0" text="Checked By" border="2" color="0" x="4894" y="2090" height="952" width="4471" html.valueishtml="0"  name=t_30 visible="1"  moveable=1  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=summary alignment="0" text="Prepared by" border="2" color="0" x="238" y="2090" height="952" width="4630" html.valueishtml="0"  name=t_29 visible="1"  moveable=1  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=summary alignment="0" text="Weight:" border="2" color="0" x="238" y="1773" height="317" width="9128" html.valueishtml="0"  name=t_28 visible="1"  moveable=1  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=summary alignment="0" text="Way Bill No." border="2" color="0" x="238" y="1402" height="317" width="9128" html.valueishtml="0"  name=t_27 visible="1"  moveable=1  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=summary alignment="0" text="Carrier Name" border="2" color="0" x="238" y="1058" height="317" width="9128" html.valueishtml="0"  name=t_26 visible="1"  moveable=1  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=summary alignment="0" text="Vehicle No" border="2" color="0" x="238" y="714" height="317" width="9128" html.valueishtml="0"  name=t_25 visible="1"  moveable=1  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=summary alignment="2" text="Authorised Signatory" border="0" color="0" x="17806" y="2408" height="343" width="2883" html.valueishtml="0"  name=t_33 visible="1"  moveable=1  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" font.italic="1" background.mode="2" background.color="16777215" )
+text(band=summary alignment="0" text="Received the goods in good condition" border="2" color="0" x="238" y="3069" height="1296" width="26537" html.valueishtml="0"  name=t_34 visible="1"  moveable=1  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=summary alignment="0" text="Receiver's Stamp & Signature" border="0" color="0" x="291" y="3889" height="317" width="3810" html.valueishtml="0"  name=t_35 visible="1"  moveable=1  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=summary alignment="0" text="B & O.E" border="0" color="0" x="21854" y="3254" height="423" width="1613" html.valueishtml="0"  name=t_36 visible="1"  moveable=1  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+line(band=summary x1="211" y1="0" x2="211" y2="4418"  name=l_4 visible="1"  moveable=1 pen.style="0" pen.width="52" pen.color="0"  background.mode="2" background.color="16777215" )
+line(band=summary x1="26802" y1="0" x2="26802" y2="4418"  name=l_6 visible="1"  moveable=1 pen.style="0" pen.width="52" pen.color="0"  background.mode="2" background.color="16777215" )
+column(band=summary id=4 alignment="0" tabsequence=32766 border="0" color="0" x="18018" y="767" height="317" width="4180" format="[general]" html.valueishtml="0"  name=address_1 visible="1"  moveable=1 edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+column(band=summary id=12 alignment="0" tabsequence=32766 border="0" color="0" x="2831" y="741" height="291" width="6535" format="[general]" html.valueishtml="0"  name=ship_via visible="1"  moveable=1 edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+column(band=summary id=21 alignment="0" tabsequence=32766 border="0" color="0" x="2831" y="1085" height="264" width="6535" format="[general]" html.valueishtml="0"  name=carrier_master_carrier_name_1 visible="1"  moveable=1 edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+column(band=summary id=14 alignment="0" tabsequence=32766 border="0" color="0" x="2831" y="1455" height="238" width="6535" format="[general]" html.valueishtml="0"  name=awb_bol_no visible="1"  moveable=1 edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+column(band=summary id=15 alignment="1" tabsequence=32766 border="0" color="0" x="2831" y="1773" height="264" width="6535" format="##,###,###.##" html.valueishtml="0"  name=weight visible="1"  moveable=1 edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="12632256" )
+text(band=summary alignment="0" text="Amount in Words(INR)" border="2" color="0" x="211" y="26" height="317" width="26564" html.valueishtml="0"  name=t_22 visible="1"  moveable=1  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=summary alignment="2" text="For                                     " border="2" color="0" x="9419" y="714" height="2328" width="17356" html.valueishtml="0"  name=t_32 visible="1"  moveable=1  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=summary alignment="0" text="Payment Terms:As per the Agreement" border="2" color="0" x="291" y="397" height="317" width="26484" html.valueishtml="0"  name=t_24 visible="1"  moveable=1  font.face="Arial" font.height="-7" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=footer alignment="1" expression="'Page ' + Page() + ' of ' + pageCount()"border="0" color="0" x="22516" y="0" height="343" width="4259" format="[GENERAL]" html.valueishtml="0"  name=compute_4 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

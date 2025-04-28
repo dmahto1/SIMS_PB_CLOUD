@@ -1,0 +1,64 @@
+﻿$PBExportHeader$d_gm_inv_priority_location_rpt.srd
+$PBExportComments$Data Window used for GM Prioroty Inv Location Report
+release 9;
+datawindow(units=0 timer_interval=0 color=16777215 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=404 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=68 color="536870912" )
+table(column=(type=char(50) updatewhereclause=yes name=sku dbname="Item_Forward_Pick.SKU" )
+ column=(type=char(20) updatewhereclause=yes name=supp_code dbname="Item_Forward_Pick.Supp_Code" )
+ column=(type=char(10) update=yes updatewhereclause=yes name=wh_code dbname="Item_Forward_Pick.WH_Code" )
+ column=(type=char(10) updatewhereclause=yes name=item_forward_pick_project_id dbname="Item_Forward_Pick.Project_ID" )
+ column=(type=char(10) update=yes updatewhereclause=yes name=l_code dbname="Item_Forward_Pick.L_Code" )
+ column=(type=char(1) updatewhereclause=yes name=content_inventory_type dbname="Content.Inventory_type" )
+ column=(type=decimal(5) updatewhereclause=yes name=avail_qty dbname="avail_qty" )
+ retrieve="
+SELECT dbo.Item_Forward_Pick.SKU,   
+         dbo.Item_Forward_Pick.Supp_Code,   
+         dbo.Item_Forward_Pick.WH_Code,   
+         dbo.Item_Forward_Pick.Project_ID,   
+         dbo.Item_Forward_Pick.L_Code,   
+         dbo.Content.Inventory_type, 
+         Sum(dbo.Content.Avail_Qty  ) as avail_qty
+    FROM dbo.Item_Forward_Pick LEFT OUTER JOIN dbo.Content ON dbo.Item_Forward_Pick.Project_ID = dbo.Content.Project_ID AND dbo.Item_Forward_Pick.SKU = dbo.Content.SKU AND dbo.Item_Forward_Pick.Supp_Code = dbo.Content.Supp_Code AND dbo.Item_Forward_Pick.WH_Code = dbo.Content.WH_Code AND dbo.Item_Forward_Pick.L_Code = dbo.Content.L_Code
+			
+Where 	dbo.Item_Forward_Pick.Project_ID = :as_project and
+			dbo.Item_Forward_Pick.WH_Code = :as_warehouse 
+Group By dbo.Item_Forward_Pick.SKU,   
+         dbo.Item_Forward_Pick.Supp_Code,   
+         dbo.Item_Forward_Pick.WH_Code,   
+         dbo.Item_Forward_Pick.Project_ID,   
+         dbo.Item_Forward_Pick.L_Code,   
+   		dbo.Content.Inventory_type
+	
+
+
+" arguments=(("as_project", string),("as_warehouse", string))  sort="sku A l_code A " )
+text(band=header alignment="2" text="INVENTORY PRIORITY LOCATION  REPORT" border="0" color="0" x="18" y="16" height="92" width="3456" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-14" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+compute(band=header alignment="1" expression="'Page ' + page() + ' of ' + pagecount()"border="0" color="0" x="2848" y="16" height="84" width="549" format="[general]" html.valueishtml="0"  name=compute_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="FWD Pick" border="0" color="0" x="1243" y="284" height="56" width="256" html.valueishtml="0"  name=t_4 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="Date:" border="0" color="0" x="0" y="68" height="56" width="320" html.valueishtml="0"  name=t_5 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="Report ID:" border="0" color="0" x="0" y="16" height="56" width="320" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+text(band=header alignment="0" text="SKU" border="0" color="0" x="96" y="332" height="56" width="174" html.valueishtml="0"  name=t_7 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="Supplier" border="0" color="0" x="827" y="332" height="56" width="270" html.valueishtml="0"  name=t_10 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="Location" border="0" color="0" x="1243" y="332" height="56" width="256" html.valueishtml="0"  name=t_8 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="Warehouse:" border="0" color="0" x="0" y="172" height="56" width="320" html.valueishtml="0"  name=wh_code_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="Project:" border="0" color="0" x="0" y="120" height="56" width="320" html.valueishtml="0"  name=t_6 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="" border="0" color="0" x="334" y="172" height="56" width="741" html.valueishtml="0"  name=t_warehouse visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="QTY" border="0" color="0" x="1696" y="332" height="56" width="142" html.valueishtml="0"  name=t_11 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Avail" border="0" color="0" x="1696" y="284" height="56" width="142" html.valueishtml="0"  name=t_9 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="Inv Type" border="0" color="0" x="1961" y="332" height="56" width="315" html.valueishtml="0"  name=l_type_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="0" color="0" x="23" y="4" height="56" width="773" format="[general]" html.valueishtml="0"  name=sku visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="0" color="0" x="818" y="4" height="56" width="411" format="[general]" html.valueishtml="0"  name=supp_code visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=5 alignment="0" tabsequence=32766 border="0" color="0" x="1248" y="4" height="56" width="347" format="[general]" html.valueishtml="0"  name=l_code visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=7 alignment="1" tabsequence=32766 border="0" color="0" x="1632" y="4" height="56" width="210" format="#######" html.valueishtml="0"  name=avail_qty visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=6 alignment="0" tabsequence=32766 border="0" color="0" x="1947" y="4" height="56" width="325" format="[general]" html.valueishtml="0"  name=content_inventory_type visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="SIMS406" border="0" color="0" x="270" y="16" height="56" width="270" html.valueishtml="0"  name=t_3 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=header alignment="0" expression="today()"border="0" color="0" x="270" y="68" height="56" width="530" format="mm/dd/yyyy hh:mm" html.valueishtml="0"  name=cf_date visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="553648127" )
+text(band=header alignment="0" text="" border="0" color="0" x="270" y="120" height="56" width="475" html.valueishtml="0"  name=t_project visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0  template=(comment="" encoding="UTF-8" name="d_inv_priority__location_rpt" xml="<?xml version=~"1.0~" encoding=~"UTF-8~" standalone=~"no~"?><d_empty_location_rpt><d_empty_location_rpt_row><wh_code>wh_code</wh_code><d_empty_location_rpt_group1 __pbband=~"detail~"><project_warehouse_project_desc>project_warehouse_project_desc</project_warehouse_project_desc><compute_0003>compute_0003</compute_0003><l_code>l_code</l_code><location_type_l_type_desc/><l_type>l_type</l_type><length/><width/><height/><cbm/><weight_capacity/><zone_id/><location_project_reserved>location_project_reserved</location_project_reserved><sku_reserved>sku_reserved</sku_reserved></d_empty_location_rpt_group1></d_empty_location_rpt_row></d_empty_location_rpt>"))
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

@@ -1,0 +1,41 @@
+﻿$PBExportHeader$f_functionality_manager.srf
+global type f_functionality_manager from function_object
+end type
+
+forward prototypes
+global function string f_functionality_manager (string asprojectid, string asfunctionalityid, string astierdesc, string asparm1, string asparm2, string asparm3)
+end prototypes
+
+global function string f_functionality_manager (string asprojectid, string asfunctionalityid, string astierdesc, string asparm1, string asparm2, string asparm3);//TimA 02/10/15
+//New type of lookup table.  Now we can control a date and time and return a Y or N to turn on or off.
+
+DateTime  ldtToday
+String lsReturn
+
+//GMT right now.  Is this valid in the Functionality_Manager table.  We have to have a from clause so I chose the table with one record
+SELECT GETDATE() INTO :ldtToday FROM Websphere_Settings ;
+//ldtToday = DateTime(Today(),Now())
+
+//There is a unique index on the Functionality_Manager table including these 3 fields.
+If IsNull(asProjectId) Then asProjectId=Nz(asProjectId,'')
+If IsNull(asFunctionalityID) Then asFunctionalityID =Nz(asFunctionalityID,'')
+If IsNull(asTierDesc) Then asTierDesc =Nz(asTierDesc,'')
+If IsNull(asparm1) Then asparm1 = Nz(asparm1,'')
+If IsNull(asparm2) Then asparm2 = Nz(asparm2,'')
+If IsNull(asparm3) Then asparm3 = Nz(asparm3,'')
+
+select Y_N into :lsReturn from Functionality_Manager 
+where project_id = :asProjectId
+and Tier_Desc = :asTierDesc
+and Functionality_ID = :asFunctionalityID 
+and Parm1 = :asparm1 
+and Parm2 = :asparm2
+and Parm3 = :asparm3
+and Effective_Start <= :ldtToday
+and Effective_End >= :ldtToday;
+
+//Returns Y = yes , N = No
+Return lsReturn
+
+end function
+

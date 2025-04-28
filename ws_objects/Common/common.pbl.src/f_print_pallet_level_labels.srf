@@ -1,0 +1,67 @@
+﻿$PBExportHeader$f_print_pallet_level_labels.srf
+$PBExportComments$S22208 Print Pandora footprint pallet level labels
+global type f_print_pallet_level_labels from function_object
+end type
+
+forward prototypes
+global function integer f_print_pallet_level_labels (string asorigcontainers[], string asnewcontainers[], string assku, string aswhcode, string asorigpallet, string asnewpallet)
+end prototypes
+
+global function integer f_print_pallet_level_labels (string asorigcontainers[], string asnewcontainers[], string assku, string aswhcode, string asorigpallet, string asnewpallet);//GailM 1/14/2019 S22208 Print pallet level labels for Pandora footprint dynamic breaking when all containers are full.
+Int liRtn, liSerialRows, liSerialRow, li_print_option
+Long llReturn
+String lsOrigContainers[], lsNewContainers[]
+String lsSqlSyntax, lsWhere, lsSql
+datastore ldsSerial 
+str_parms lstr_PalletSerialList1
+str_parms lstr_PalletSerialList2
+
+
+ldsSerial = Create datastore
+ldsSerial.dataobject = 'd_serial_inventory_validate'
+ldsSerial.SetTransObject(SQLCA)
+//GailM 10/2/2019 S37769 F17337 I1304 Google Footprint GPN Conversion - removed parameters to allow multiple where clause
+lsSqlSyntax = ldsSerial.GetSqlSelect()
+lsWhere   = " WHERE Serial_Number_Inventory.Project_id = '" + gs_project + "' and Serial_Number_Inventory.po_no2 = '" + asOrigPallet + "' "  
+lsSql = lsSqlSyntax + lsWhere
+
+liRtn = ldsSerial.SetSqlSelect(lsSql)
+If liRtn <> 1 Then
+	MessageBox("Error in Function f_print_pallet_level_labels","An error has been encountered when setting the serial number validate query. ~r~n~r~n" + lsSql)
+	This.TriggerEvent("ue_close")
+End If
+		
+liSerialRows = ldsSerial.Retrieve( gs_Project, asOrigPallet )
+For liSerialRow = 1 to liSerialRows
+	lstr_PalletSerialList1.String_Arg[liSerialRow] = ldsSerial.GetItemString(liSerialRow, 'serial_no')
+Next
+
+w_pick_pallet lw_pick_pallet
+lw_pick_pallet = create w_pick_pallet
+
+//n_labels_pandora lu_pandora_labels
+//lu_pandora_labels = create n_labels_pandora
+
+//n_adjust_pallet_parms lu_pallet_parm
+//lu_pallet_parm = create n_adjust_pallet_parms
+
+li_print_option = 1
+
+//Print Pallet 2D Barcode Label
+lw_pick_pallet.wf_print_2d_barcode_label( lstr_PalletSerialList1, asSKU, asWhCode, asOrigPallet , 'PALLET LABEL', li_print_option )
+		//llReturn = lu_pandora_labels.uf_print_2d_barcode_label( lstr_PalletSerialList1, asSKU, asWhCode, asOrigPallet, 'PALLET LABEL')
+
+li_print_option = 0
+ldsSerial.Reset()
+liSerialRows = ldsSerial.Retrieve( gs_Project, asNewPallet )
+For liSerialRow = 1 to liSerialRows
+	lstr_PalletSerialList2.String_Arg[liSerialRow] = ldsSerial.GetItemString(liSerialRow, 'serial_no')
+Next
+lw_pick_pallet.wf_print_2d_barcode_label( lstr_PalletSerialList2, asSKU, asWhCode, asNewPallet , 'PALLET LABEL', li_print_option )
+
+liRtn = 0
+
+return liRtn
+
+end function
+

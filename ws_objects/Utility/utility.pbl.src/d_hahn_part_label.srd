@@ -1,0 +1,30 @@
+﻿$PBExportHeader$d_hahn_part_label.srd
+$PBExportComments$HAHN Part Label
+release 7;
+datawindow(units=0 timer_interval=0 color=16777215 processing=0 HTMLDW=no print.documentname="" print.orientation = 2 print.margin.left = 0 print.margin.right = 0 print.margin.top = 0 print.margin.bottom = 0 print.paper.source = 0 print.paper.size = 0 print.prompt=no print.buttons=no print.preview.buttons=no )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=516 color="536870912" )
+table(column=(type=char(50) updatewhereclause=yes name=sku dbname="Item_Master.SKU" )
+ column=(type=decimal(0) updatewhereclause=yes name=qty_2 dbname="Item_Master.Qty_2" )
+ column=(type=char(50) updatewhereclause=yes name=alternate_sku dbname="Item_Master.Alternate_SKU" )
+ column=(type=char(10) updatewhereclause=yes name=user_field4 dbname="Item_Master.User_Field4" )
+ column=(type=char(10) updatewhereclause=yes name=user_field1 dbname="Item_Master.User_field1" )
+ column=(type=char(3) updatewhereclause=yes name=country_of_origin_default dbname="Item_Master.Country_of_Origin_Default" )
+ retrieve="  SELECT Item_Master.SKU,   
+         Item_Master.Qty_2,   
+         Item_Master.Alternate_SKU,   
+         Item_Master.User_Field4,  
+			Item_Master.User_field1,  
+         Item_Master.Country_of_Origin_Default  
+    FROM Item_Master   
+" )
+group(level=1 header.height=0 trailer.height=0 by=("sku" ) newpage=yes header.color="536870912" trailer.color="536870912" )
+compute(band=detail alignment="2" expression="'*' + Trim(sku ) + '*'"border="0" color="0" x="9" y="0" height="96" width="672" format="[GENERAL]"  name=compute_1  font.face="3 of 9 Barcode" font.height="-17" font.weight="400"  font.family="1" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=detail alignment="2" expression="'*' + Trim(User_Field4) + '*'"border="0" color="0" x="9" y="416" height="88" width="672" format="[GENERAL]"  name=compute_7 visible="1~tIf(user_field4 > '',1,0)"  resizeable=1  font.face="3 of 9 Barcode" font.height="-17" font.weight="400"  font.family="1" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=detail alignment="0" expression="If( Trim(user_field1) = '1','D.O.T','')"border="0" color="0" x="27" y="200" height="44" width="151" format="[GENERAL]"  name=compute_5  font.face="Helvetica" font.height="-8" font.weight="700"  font.family="0" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=detail alignment="1" expression=" If(Qty_2 >0,qty_2,1)  + ' #  ' +  Trim(sku )"border="0" color="0" x="64" y="188" height="56" width="571" format="[GENERAL]"  name=compute_2  font.face="Helvetica" font.height="-9" font.weight="700"  font.family="0" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=detail alignment="1" text="" border="0" color="0" x="9" y="304" height="32" width="626"  name=made_in_t  font.face="Haettenschweiler" font.height="-6" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+compute(band=detail alignment="1" expression="If( Not isnull(user_field4),Left(user_field4,2) + ' ' + Mid(user_field4,3,2) + ' ' + Right(user_field4,3) + '   ' ,'') + If(not isnull(Alternate_sku), 'GR.' + If(Left(alternate_sku,1) = '0',Mid(alternate_sku,2,1),Left(alternate_Sku,2)) + '.' + Right(alternate_sku,3),'')"border="0" color="0" x="14" y="248" height="56" width="622" format="[GENERAL]"  name=compute_6  font.face="Helvetica" font.height="-9" font.weight="700"  font.family="0" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" )

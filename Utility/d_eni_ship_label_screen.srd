@@ -1,0 +1,97 @@
+HA$PBExportHeader$d_eni_ship_label_screen.srd
+$PBExportComments$Nike Shipping label (screen visible - not how printed)
+release 9;
+datawindow(units=0 timer_interval=0 color=16777215 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+header(height=756 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=72 color="536870912" )
+table(column=(type=char(16) updatewhereclause=yes name=delivery_master_do_no dbname="Do_NO" )
+ column=(type=char(20) updatewhereclause=yes name=cust_order_no dbname="Cust_Order_no" )
+ column=(type=char(40) updatewhereclause=yes name=delivery_master_cust_name dbname="Cust_Name" )
+ column=(type=char(60) updatewhereclause=yes name=delivery_master_address_1 dbname="delivery_master_Address_1" )
+ column=(type=char(60) updatewhereclause=yes name=delivery_master_address_2 dbname="delivery_master_Address_2" )
+ column=(type=char(60) updatewhereclause=yes name=delivery_master_address_3 dbname="delivery_master_Address_3" )
+ column=(type=char(60) updatewhereclause=yes name=delivery_master_address_4 dbname="delivery_master_Address_4" )
+ column=(type=char(30) updatewhereclause=yes name=delivery_master_city dbname="Delivery_MAster_City" )
+ column=(type=char(35) updatewhereclause=yes name=delivery_master_state dbname="delivery_MAster_State" )
+ column=(type=char(15) updatewhereclause=yes name=delivery_master_zip dbname="Delivery_MASter_Zip" )
+ column=(type=char(30) updatewhereclause=yes name=delivery_master_country dbname="Country" )
+ column=(type=char(50) updatewhereclause=yes name=sku dbname="DElivery_PAcking_SKU" )
+ column=(type=char(25) updatewhereclause=yes name=carton_no dbname="Carton_no" )
+ column=(type=decimal(5) updatewhereclause=yes name=quantity dbname="Quantity" )
+ column=(type=char(40) updatewhereclause=yes name=client_name dbname="Client_Name" )
+ column=(type=char(40) updatewhereclause=yes name=project_address_1 dbname="project_address_1" )
+ column=(type=char(40) updatewhereclause=yes name=project_address_2 dbname="project_address_2" )
+ column=(type=char(40) updatewhereclause=yes name=project_address_3 dbname="project_address_3" )
+ column=(type=char(40) updatewhereclause=yes name=project_address_4 dbname="project_address_4" )
+ column=(type=char(30) updatewhereclause=yes name=project_city dbname="project_City" )
+ column=(type=char(35) updatewhereclause=yes name=project_state dbname="project_State" )
+ column=(type=char(15) updatewhereclause=yes name=project_zip dbname="project_Zip" )
+ column=(type=char(1) updatewhereclause=yes name=c_print_ind dbname="c_print_Ind" values="	Y/	N" )
+ retrieve="  SELECT Delivery_MAster.Do_NO, 
+			Delivery_MAster.Cust_Order_no, 
+         Delivery_Master.Cust_Name,   
+         Delivery_Master.Address_1 as delivery_master_Address_1,   
+         Delivery_Master.Address_2 as delivery_master_Address_2,   
+         Delivery_Master.Address_3 as delivery_master_Address_3,   
+         Delivery_Master.Address_4 as delivery_master_Address_4,   
+         Delivery_Master.City as Delivery_MAster_City,   
+         Delivery_Master.State as delivery_MAster_State,   
+         Delivery_Master.Zip as Delivery_MASter_Zip,   
+         Delivery_Master.Country,
+			Delivery_PAcking.SKU as DElivery_PAcking_SKU, 
+			Delivery_PAcking.Carton_no, 
+			Delivery_PAcking.Quantity,
+			Project.Client_Name, 
+			Project.Address_1 as project_address_1,   
+			Project.Address_2 as project_address_2, 
+			Project.Address_3 as project_address_3, 
+			Project.Address_4 as project_address_4,
+			Project.City as project_City, 
+			Project.State as project_State, 
+			Project.Zip as project_Zip, 
+			'Y' as c_print_Ind   
+FROM    	Delivery_Master,  
+			Delivery_Packing,  
+         Project
+   WHERE ( Delivery_Master.DO_No = Delivery_Packing.DO_No ) and  
+        	Delivery_Master.Project_id = Project.Project_ID and 
+			Delivery_Master.Project_id = :asProject and
+			Delivery_MAster.Invoice_No = :asOrder 
+
+" arguments=(("asProject", string),("asOrder", string))  sort="delivery_master_do_no A carton_no A sku A " )
+group(level=1 header.height=0 trailer.height=12 by=("delivery_master_do_no" , "carton_no" ) header.color="536870912" trailer.color="553648127" )
+text(band=header alignment="0" text="" border="2" color="0" x="14" y="4" height="508" width="2578" html.valueishtml="0"  name=t_2 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="" border="2" color="0" x="9" y="4" height="508" width="1307" html.valueishtml="0"  name=t_5 visible="1"  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="1" text="Ship To:" border="0" color="0" x="1339" y="36" height="56" width="270" html.valueishtml="0"  name=t_1 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="1" text="Ship From:" border="0" color="0" x="32" y="36" height="56" width="320" html.valueishtml="0"  name=warehouse_wh_name_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=header alignment="0" expression="If(not isnull(  delivery_master_city ),  delivery_master_city + ', ','') + If(not isnull(  delivery_master_state ),  delivery_master_state + ' ','') + If(not isnull(  delivery_master_zip ),  delivery_master_zip ,'') "border="0" color="0" x="1641" y="116" height="4" width="901" format="[GENERAL]" html.valueishtml="0"  name=compute_2 visible="1"  slideup=directlyabove  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912"  height.autosize=yes)
+text(band=header alignment="1" text="Carton #" border="0" color="0" x="0" y="0" height="8" width="9" html.valueishtml="0"  name=t_8 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" font.underline="1" background.mode="1" background.color="536870912" )
+column(band=header id=5 alignment="0" tabsequence=32766 border="0" color="0" x="1641" y="68" height="4" width="901" format="[general]" html.valueishtml="0"  name=delivery_master_address_2 visible="1"  slideup=directlyabove height.autosize=yes edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header id=6 alignment="0" tabsequence=32766 border="0" color="0" x="1641" y="84" height="4" width="901" format="[general]" html.valueishtml="0"  name=delivery_master_address_3 visible="1"  slideup=directlyabove height.autosize=yes edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header id=7 alignment="0" tabsequence=32766 border="0" color="0" x="1641" y="100" height="4" width="901" format="[general]" html.valueishtml="0"  name=delivery_master_address_4 visible="1"  slideup=directlyabove height.autosize=yes edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header id=11 alignment="0" tabsequence=32766 border="0" color="0" x="1641" y="132" height="4" width="901" format="[general]" html.valueishtml="0"  name=delivery_master_country visible="1"  slideup=directlyabove height.autosize=yes edit.limit=30 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header id=3 alignment="0" tabsequence=32766 border="0" color="0" x="1641" y="36" height="4" width="901" format="[general]" html.valueishtml="0"  name=delivery_master_cust_name visible="1" height.autosize=yes edit.limit=40 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header id=4 alignment="0" tabsequence=32766 border="0" color="0" x="1641" y="52" height="4" width="901" format="[general]" html.valueishtml="0"  name=delivery_master_address_1 visible="1"  slideup=directlyabove height.autosize=yes edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header id=15 alignment="0" tabsequence=32766 border="0" color="0" x="366" y="36" height="4" width="919" format="[general]" html.valueishtml="0"  name=client_name visible="1"  slideup=directlyabove height.autosize=yes edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header id=16 alignment="0" tabsequence=32766 border="0" color="0" x="366" y="52" height="4" width="919" format="[general]" html.valueishtml="0"  name=project_address_1 visible="1"  slideup=directlyabove height.autosize=yes edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header id=17 alignment="0" tabsequence=32766 border="0" color="0" x="366" y="68" height="4" width="919" format="[general]" html.valueishtml="0"  name=project_address_2 visible="1"  slideup=directlyabove height.autosize=yes edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header id=18 alignment="0" tabsequence=32766 border="0" color="0" x="366" y="84" height="4" width="919" format="[general]" html.valueishtml="0"  name=project_address_3 visible="1"  slideup=directlyabove height.autosize=yes edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header id=19 alignment="0" tabsequence=32766 border="0" color="0" x="366" y="100" height="4" width="919" format="[general]" html.valueishtml="0"  name=project_address_4 visible="1"  slideup=directlyabove height.autosize=yes edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+compute(band=header alignment="0" expression="If(not isnull(  project_city ),  project_city + ', ','') + If(not isnull(  project_state ),  project_state + ' ','') + If(not isnull(  project_zip ),  project_zip ,'') "border="0" color="0" x="366" y="116" height="4" width="919" format="[GENERAL]" html.valueishtml="0"  name=compute_1 visible="1"  slideup=directlyabove  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912"  height.autosize=yes)
+text(band=header alignment="1" text="Cust Order Nbr:" border="0" color="0" x="18" y="556" height="56" width="393" html.valueishtml="0"  name=t_4 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=header id=2 alignment="0" tabsequence=32766 border="0" color="0" x="434" y="556" height="56" width="827" format="[general]" html.valueishtml="0"  name=cust_order_no visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="Carton" border="0" color="0" x="27" y="688" height="56" width="169" html.valueishtml="0"  name=t_3 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" font.underline="1" background.mode="1" background.color="536870912" )
+text(band=header alignment="0" text="Sku" border="0" color="0" x="407" y="688" height="56" width="357" html.valueishtml="0"  name=item_master_sku_t visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" font.underline="1" background.mode="1" background.color="536870912" )
+text(band=header alignment="1" text="QTY" border="0" color="0" x="1431" y="688" height="56" width="274" html.valueishtml="0"  name=t_6 visible="1"  font.face="Arial" font.height="-8" font.weight="700"  font.family="2" font.pitch="2" font.charset="0" font.underline="1" background.mode="1" background.color="536870912" )
+column(band=detail id=13 alignment="0" tabsequence=32766 border="0" color="0" x="27" y="8" height="56" width="329" format="[general]" html.valueishtml="0"  name=carton_no visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=12 alignment="0" tabsequence=32766 border="0" color="0" x="407" y="8" height="56" width="773" format="[general]" html.valueishtml="0"  name=sku visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="2" background.color="16777215" )
+column(band=detail id=14 alignment="1" tabsequence=32766 border="0" color="0" x="1234" y="8" height="56" width="494" format="#######.#####" html.valueishtml="0"  name=quantity visible="1" edit.limit=0 edit.case=any edit.autoselect=yes edit.imemode=0  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+line(band=trailer.1 x1="0" y1="4" x2="1714" y2="4"  name=l_1 visible="1" pen.style="0" pen.width="5" pen.color="0"  background.mode="2" background.color="16777215" )
+
+sparse(names="carton_no")htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

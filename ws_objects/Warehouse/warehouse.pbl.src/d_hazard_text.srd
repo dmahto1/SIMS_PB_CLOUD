@@ -1,0 +1,24 @@
+﻿$PBExportHeader$d_hazard_text.srd
+$PBExportComments$Retrive Hazard Text for haz code/ship method
+release 7;
+datawindow(units=0 timer_interval=0 color=16777215 processing=1 HTMLDW=no print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.prompt=no print.buttons=no print.preview.buttons=no grid.lines=0 )
+header(height=80 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=92 color="536870912" )
+table(column=(type=decimal(0) updatewhereclause=yes name=line_no dbname="Haz_Mat_Info.Line_No" )
+ column=(type=char(250) updatewhereclause=yes name=hazard_text dbname="Haz_Mat_Info.Hazard_Text" )
+ retrieve="  SELECT dbo.Haz_Mat_Info.Line_No,   
+         dbo.Haz_Mat_Info.Hazard_Text  
+    FROM dbo.Haz_Mat_Info  
+   WHERE ( dbo.Haz_Mat_Info.Project_ID = :project ) AND  
+         ( dbo.Haz_Mat_Info.Hazard_Text_Cd = :code ) AND  
+         ( dbo.Haz_Mat_Info.Transport_Mode = :mode )   
+            
+" arguments=(("project", string),("code", string),("mode", string)) )
+text(band=header alignment="2" text="Line No" border="0" color="0" x="9" y="8" height="64" width="329"  name=line_no_t  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Hazard Text" border="0" color="0" x="347" y="8" height="64" width="1582"  name=hazard_text_t  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=1 alignment="1" tabsequence=32766 border="0" color="0" x="9" y="8" height="76" width="329" format="[general]"  name=line_no edit.limit=0 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="0" color="0" x="347" y="8" height="76" width="1582" format="[general]"  name=hazard_text edit.limit=250 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" )

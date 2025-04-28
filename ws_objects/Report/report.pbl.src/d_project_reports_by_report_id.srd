@@ -1,0 +1,17 @@
+﻿$PBExportHeader$d_project_reports_by_report_id.srd
+release 9;
+datawindow(units=0 timer_interval=0 color=1073741824 processing=0 HTMLDW=no print.printername="" print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.canusedefaultprinter=yes print.prompt=no print.buttons=no print.preview.buttons=no print.cliptext=no print.overrideprintjob=no print.collate=yes hidegrayline=no )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=72 color="536870912" )
+table(column=(type=char(10) updatewhereclause=yes name=project_id dbname="Project_Reports.Project_ID" )
+ column=(type=char(40) updatewhereclause=yes name=project_desc dbname="Project.Project_Desc" )
+ column=(type=char(40) updatewhereclause=yes name=project_client_name dbname="Project.Client_Name" )
+ retrieve="PBSELECT( VERSION(400) TABLE(NAME=~"dbo.Project_Reports~" )  TABLE(NAME=~"dbo.Project~" ) COLUMN(NAME=~"dbo.Project_Reports.Project_ID~") COLUMN(NAME=~"dbo.Project.Project_Desc~") COLUMN(NAME=~"dbo.Project.Client_Name~")    JOIN (LEFT=~"dbo.Project.Project_ID~"    OP =~"=~"RIGHT=~"dbo.Project_Reports.Project_ID~" )WHERE(    EXP1 =~"dbo.Project_Reports.Report_ID~"   OP =~"=~"    EXP2 =~":id~" ) ) ARG(NAME = ~"id~" TYPE = string) " arguments=(("id", string)) )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="2" color="33554432" x="14" y="4" height="60" width="425" format="[general]" html.valueishtml="0"  name=project_id visible="1" edit.limit=10 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="2" color="33554432" x="457" y="4" height="60" width="2030" format="[general]" html.valueishtml="0"  name=project_desc visible="1" edit.limit=40 edit.case=any edit.autoselect=yes edit.autohscroll=yes edit.imemode=0  font.face="Arial" font.height="-9" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" encodeselflinkargs="1" netscapelayers="0" )
+export.xml(headgroups="1" includewhitespace="0" metadatatype=0 savemetadata=0 )
+import.xml()
+export.pdf(method=0 distill.custompostscript="0" xslfop.print="0" )

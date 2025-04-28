@@ -1,0 +1,16 @@
+HA$PBExportHeader$dddw_receive_order_type.srd
+release 7;
+datawindow(units=0 timer_interval=0 color=16777215 processing=1 HTMLDW=no print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.prompt=no print.buttons=no print.preview.buttons=no grid.lines=1 selected.mouse=no )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=64 color="536870912" )
+table(column=(type=char(1) update=yes updatewhereclause=yes name=ord_type dbname="Ord_Type" )
+ column=(type=char(30) update=yes updatewhereclause=yes name=ord_type_desc dbname="Ord_Type_Desc" )
+ retrieve="SELECT  Receive_Order_Type.Ord_Type ,
+           Receive_Order_Type.Ord_Type_Desc     
+        FROM Receive_Order_Type   
+			Where project_id = :asProject
+        ORDER BY Receive_Order_Type.Ord_Type_Desc          ASC  " arguments=(("asProject", string)) )
+column(band=detail id=2 alignment="0" tabsequence=10 border="0" color="0" x="9" y="4" height="56" width="649" format="[general]"  name=ord_type_desc edit.limit=30 edit.case=any edit.autoselect=yes edit.nilisnull=yes edit.autohscroll=yes  font.face="Arial" font.height="-8" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" )

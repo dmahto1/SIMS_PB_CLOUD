@@ -1,0 +1,24 @@
+﻿$PBExportHeader$d_ds_coo_translate.srd
+$PBExportComments$Global DS for COO Translations
+release 7;
+datawindow(units=0 timer_interval=0 color=16777215 processing=1 HTMLDW=no print.documentname="" print.orientation = 0 print.margin.left = 110 print.margin.right = 110 print.margin.top = 96 print.margin.bottom = 96 print.paper.source = 0 print.paper.size = 0 print.prompt=no print.buttons=no print.preview.buttons=no grid.lines=0 )
+header(height=80 color="536870912" )
+summary(height=0 color="536870912" )
+footer(height=0 color="536870912" )
+detail(height=92 color="536870912" )
+table(column=(type=char(1) updatewhereclause=yes name=serial_supplier dbname="COO_Translate.Serial_Supplier" )
+ column=(type=char(1) updatewhereclause=yes name=serial_division dbname="COO_Translate.Serial_Division" )
+ column=(type=char(3) updatewhereclause=yes name=designating_code dbname="COO_Translate.Designating_Code" )
+ retrieve="  SELECT dbo.COO_Translate.Serial_Supplier,   
+         dbo.COO_Translate.Serial_Division,   
+         dbo.COO_Translate.Designating_Code  
+    FROM dbo.COO_Translate   
+	Where Project_id = :asProject" arguments=(("asProject", string)) )
+text(band=header alignment="2" text="Serial Supplier" border="0" color="0" x="9" y="8" height="64" width="384"  name=serial_supplier_t  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Serial Division" border="0" color="0" x="402" y="8" height="64" width="370"  name=serial_division_t  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+text(band=header alignment="2" text="Designating Code" border="0" color="0" x="782" y="8" height="64" width="466"  name=designating_code_t  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=1 alignment="0" tabsequence=32766 border="0" color="0" x="9" y="8" height="76" width="384" format="[general]"  name=serial_supplier edit.limit=1 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=2 alignment="0" tabsequence=32766 border="0" color="0" x="402" y="8" height="76" width="370" format="[general]"  name=serial_division edit.limit=1 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+column(band=detail id=3 alignment="0" tabsequence=32766 border="0" color="0" x="782" y="8" height="76" width="466" format="[general]"  name=designating_code edit.limit=3 edit.case=any edit.focusrectangle=no edit.autoselect=yes edit.autohscroll=yes  font.face="Arial" font.height="-10" font.weight="400"  font.family="2" font.pitch="2" font.charset="0" background.mode="1" background.color="536870912" )
+htmltable(border="1" )
+htmlgen(clientevents="1" clientvalidation="1" clientcomputedfields="1" clientformatting="0" clientscriptable="0" generatejavascript="1" )

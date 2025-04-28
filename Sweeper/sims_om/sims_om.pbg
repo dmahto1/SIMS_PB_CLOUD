@@ -1,0 +1,32 @@
+Save Format v3.0(19990112)
+@begin Libraries
+ "sweeper\\sims_om\\sims_om.pbl" "";
+@end;
+@begin Objects
+ "sweeper\\sims_om\\d_oma_inventory_qtyonhand.srd" "sweeper\\sims_om\\sims_om.pbl";
+ "sweeper\\sims_om\\d_omq_inventory_transaction.srd" "sweeper\\sims_om\\sims_om.pbl";
+ "sweeper\\sims_om\\d_omq_inventory_txn_sernum.srd" "sweeper\\sims_om\\sims_om.pbl";
+ "sweeper\\sims_om\\d_omc_item.srd" "sweeper\\sims_om\\sims_om.pbl";
+ "sweeper\\sims_om\\d_omc_receipt.srd" "sweeper\\sims_om\\sims_om.pbl";
+ "sweeper\\sims_om\\d_omc_item_attr.srd" "sweeper\\sims_om\\sims_om.pbl";
+ "sweeper\\sims_om\\d_omc_receipt_detail.srd" "sweeper\\sims_om\\sims_om.pbl";
+ "sweeper\\sims_om\\d_omq_receipt.srd" "sweeper\\sims_om\\sims_om.pbl";
+ "sweeper\\sims_om\\d_omq_receipt_detail_sernum.srd" "sweeper\\sims_om\\sims_om.pbl";
+ "sweeper\\sims_om\\d_omc_receiptdetail_sernum.srd" "sweeper\\sims_om\\sims_om.pbl";
+ "sweeper\\sims_om\\d_oma_receipt_queue.srd" "sweeper\\sims_om\\sims_om.pbl";
+ "sweeper\\sims_om\\d_omc_message.srd" "sweeper\\sims_om\\sims_om.pbl";
+ "sweeper\\sims_om\\d_omq_receipt_detail.srd" "sweeper\\sims_om\\sims_om.pbl";
+ "sweeper\\sims_om\\d_oma_item_queue.srd" "sweeper\\sims_om\\sims_om.pbl";
+ "sweeper\\sims_om\\d_om_update_receipt_order_list.srd" "sweeper\\sims_om\\sims_om.pbl";
+ "sweeper\\sims_om\\d_om_expansion.srd" "sweeper\\sims_om\\sims_om.pbl";
+ "sweeper\\sims_om\\d_oma_warehouse_order_queue.srd" "sweeper\\sims_om\\sims_om.pbl";
+ "sweeper\\sims_om\\d_omc_warehouse_orderdetail.srd" "sweeper\\sims_om\\sims_om.pbl";
+ "sweeper\\sims_om\\d_omq_warehouse_order_attr.srd" "sweeper\\sims_om\\sims_om.pbl";
+ "sweeper\\sims_om\\d_omq_warehouse_order_detail_attr.srd" "sweeper\\sims_om\\sims_om.pbl";
+ "sweeper\\sims_om\\d_omc_warehouse_order.srd" "sweeper\\sims_om\\sims_om.pbl";
+ "sweeper\\sims_om\\d_omc_warehouse_orderattr.srd" "sweeper\\sims_om\\sims_om.pbl";
+ "sweeper\\sims_om\\d_omq_warehouse_order_detail_sernum.srd" "sweeper\\sims_om\\sims_om.pbl";
+ "sweeper\\sims_om\\d_oma_warehouse_order_queue_update.srd" "sweeper\\sims_om\\sims_om.pbl";
+ "sweeper\\sims_om\\d_omq_warehouse_order_detail.srd" "sweeper\\sims_om\\sims_om.pbl";
+ "sweeper\\sims_om\\d_omq_warehouse_order.srd" "sweeper\\sims_om\\sims_om.pbl";
+@end;
