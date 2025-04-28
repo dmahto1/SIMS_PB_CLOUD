@@ -1,9 +1,0 @@
-﻿$PBExportHeader$str_physio_scan.srs
-global type str_physio_scan from structure
-	string		UPN
-	string		lot
-	string		SN
-	date		expiry
-	long		qty
-end type
-

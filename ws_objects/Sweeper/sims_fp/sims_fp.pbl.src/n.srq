@@ -1,2 +1,0 @@
-﻿$PBExportHeader$n.srq
-PBSELECT( VERSION(400) TABLE(NAME="omc_wh_orderdetail_attr" ) COLUMN(NAME="omc_wh_orderdetail_attr.refchar1")WHERE(    EXP1 ="~"OMC_WH_ORDERDETAIL_ATTR~".~"REFCHAR1~""   OP ="="    EXP2 ="'BSCP1001'" ) ) 
