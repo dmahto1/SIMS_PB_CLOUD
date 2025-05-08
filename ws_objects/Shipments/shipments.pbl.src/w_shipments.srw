@@ -5070,6 +5070,7 @@ fontcharset fontcharset = ansi!
 fontpitch fontpitch = variable!
 fontfamily fontfamily = swiss!
 string facename = "Arial"
+boolean enabled = false
 string text = "<<<"
 end type
 
@@ -5353,7 +5354,7 @@ Long ll_row,ll_countrow,i
 string ls_invoice_no,ls_shipmentid
 tab_main.tabpage_order.dw_shipment.SetFocus()
 If tab_main.tabpage_order.dw_shipment.AcceptText() = -1 Then Return	
-Execute Immediate "Begin Transaction" using SQLCA;
+//Execute Immediate "Begin Transaction" using SQLCA; //  Dinesh - 04/30/2024- SIMS-705 - Google - SIMS - Shuttle Shipments Screen Causing Blocking
 If this.GetRow() > 0 Then
 	is_invoice= tab_main.tabpage_order.dw_consolidated_shipment.GetITemString(This.GetRow(),'invoice_no')
 	if messagebox('WARNING','Do you really want to remove the Shuttle order: ' + is_invoice + ' from shuttle Consolidation window?' ,question!, yesno! ) = 2 THEN  // Dinesh - 02/19/2024- SIMS-378- Google - Consolidated Shipment orders
