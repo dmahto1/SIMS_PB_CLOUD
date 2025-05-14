@@ -1229,7 +1229,7 @@ lsFormat = uf_Replace(lsFormat,"~~Weight~~",ls_weight )
 //lsFormat = uf_Replace(lsFormat,"~~Weight_kgs_no~~",String(lstrparms.Long_Arg[6])) // Dinesh - 04/07/2025- SIMS-646- Development for Google - SIMS -Weight in Packing list not matching on Shipping Label 
 lsFormat = uf_Replace(lsFormat,"~~Weight_lbs_no~~",String(lstrparms.Decimal_Arg[1],'#######.##')) // Dinesh - 04/07/2025- SIMS-646- Development for Google - SIMS -Weight in Packing list not matching on Shipping Label 
 lsFormat = uf_Replace(lsFormat,"~~Weight_kgs_no~~",String(lstrparms.Decimal_Arg[2],'#######.##')) // Dinesh - 04/07/2025- SIMS-646- Development for Google - SIMS -Weight in Packing list not matching on Shipping Label 
-lsFormat = uf_Replace(lsFormat,"~~Weight~~",String(lstrparms.Long_Arg[5]) + " LBs / " + String(lstrparms.Long_Arg[6]) + " KGs") //Weight
+//lsFormat = uf_Replace(lsFormat,"~~Weight~~",String(lstrparms.Long_Arg[5]) + " LBs / " + String(lstrparms.Long_Arg[6]) + " KGs") //Weight
 	
 lsFormat = uf_Replace(lsFormat,"~~carton_nbr_barcode~~",lstrparms.String_Arg[23])
 lsFormat = uf_Replace(lsFormat,"~~carton_nbr~~",Right(lstrparms.String_Arg[23],18))

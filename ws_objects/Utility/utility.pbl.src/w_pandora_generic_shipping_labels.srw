@@ -615,8 +615,8 @@ lstrparms.boolean_arg[2] =rb_2.checked //300 DPI
 Select Count(distinct Carton_NO) Into :llLabelCount
 From Delivery_Packing with(nolock)
 Where do_no = :lsDONO
-And Carton_No > 0;
-//And Carton_No is not null; // Dinesh - 03/20/2025-  SIMS-688-Google - SIMS - Shipping Label
+//And Carton_No > 0; // Dinesh - 03/20/2025-  SIMS-688-Google - SIMS - Shipping Label- Commented out this line and added the below line.
+And Carton_No is not null; // Dinesh - 03/20/2025-  SIMS-688-Google - SIMS - Shipping Label- Print number at the bottom on each printing labels are not correct.
 
 
 //Print each detail Row 
