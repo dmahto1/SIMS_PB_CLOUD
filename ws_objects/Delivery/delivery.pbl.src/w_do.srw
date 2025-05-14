@@ -25369,21 +25369,25 @@ End if
 //GailM 10/15/2018 Temporarily use flag to disable this function until other testing is done
 //05-FEB-2019 :Madhu DE8493 - Pass Do_No to Trans Param
 // Begin - Dinesh - 05/11/2023- SIMS-53- Loading status and Load lock
-if lsordstat = 'P' and gs_project='PANDORA' Then 
-	UPdate Delivery_master Set Load_Lock = 'N' Where load_id = :isLoadId;
+//if lsordstat = 'P' and gs_project='PANDORA' then // commented this line and added the below line - Dinesh - 05/02/2025- SIMS-700-Google - SIMS - Load Lock Update
+if lsordstat = 'P' and gs_project='PANDORA'  and len(isLoadId)=10 then  // Dinesh - 05/02/2025- SIMS-700-Google - SIMS - Load Lock Update
+	UPdate Delivery_master Set Load_Lock = 'N' Where load_id = :isLoadId using sqlca; // The above conditions were added to restrict loadid 'NA' while updating the load lock
 end if
 // End - Dinesh - 05/11/2023- SIMS-53- Loading status and Load lock
 	
 If f_retrieve_parm("PANDORA","FLAG","TMS") = "Y" and  f_retrieve_parm("PANDORA","SKIP_TMS", isWareHouse, "CODE_DESCRIPT")  <> "SKIP_IT"tHEN
 
 If isLoad_Status = 'LOCK_ON_SAVE' then
-Execute Immediate "Begin Transaction" using SQLCA;
-UPdate Delivery_master
-Set Load_Lock = 'Y'
-Where load_id = :isLoadId;
-Insert Into batch_Transaction (project_ID, Trans_Type, Trans_Order_ID, Trans_Status, Trans_Create_Date, Trans_Parm)
-Values(:gs_Project, 'LWON', :isLoadId,'N', :ldtToday, :is_dono);
-Execute Immediate "COMMIT" using SQLCA;
+	
+if  len(isLoadId)=10 Then //Dinesh - 05/02/2025- SIMS-700-Google - SIMS - Load Lock Update 
+		Execute Immediate "Begin Transaction" using SQLCA;
+		UPdate Delivery_master
+		Set Load_Lock = 'Y'
+		Where load_id = :isLoadId;
+		Insert Into batch_Transaction (project_ID, Trans_Type, Trans_Order_ID, Trans_Status, Trans_Create_Date, Trans_Parm)
+		Values(:gs_Project, 'LWON', :isLoadId,'N', :ldtToday, :is_dono);
+		Execute Immediate "COMMIT" using SQLCA;
+	end if
 isLoad_Status = 'NOLOCK'
 icb_lock_load.Text = 'Unlock Load' 
 icb_lock_load_google.Text = 'Unlock Load'    // Dinesh - 03/17/2023- SIMS-53- Google - SIMS - Load Lock and New Loading Status
@@ -25402,13 +25406,15 @@ icb_lock_load_google.Enabled = True // DINESH - 03/16/2023- sims-53- Google - SI
 f_method_trace_special( gs_project, this.ClassName() + ' - ue_Save', 'load locked:' ,is_dono, ' ',' ',isLoadId)
 End if
 If isLoad_Status = 'UNLOCK_ON_SAVE' then
-Execute Immediate "Begin Transaction" using SQLCA;
-UPdate Delivery_master
-Set Load_Lock = 'N'
-Where load_id = :isLoadId;
-Insert Into batch_Transaction (project_ID, Trans_Type, Trans_Order_ID, Trans_Status, Trans_Create_Date, Trans_Parm)
-Values(:gs_Project, 'LLOCK', :isLoadId,'C', :ldtToday, :is_dono);
-Execute Immediate "COMMIT" using SQLCA;
+if len(isLoadId)=10 then //Dinesh - 05/02/2025- SIMS-700-Google - SIMS - Load Lock Update 
+	Execute Immediate "Begin Transaction" using SQLCA;
+	UPdate Delivery_master
+	Set Load_Lock = 'N'
+	Where load_id = :isLoadId;
+	Insert Into batch_Transaction (project_ID, Trans_Type, Trans_Order_ID, Trans_Status, Trans_Create_Date, Trans_Parm)
+	Values(:gs_Project, 'LLOCK', :isLoadId,'C', :ldtToday, :is_dono);
+	Execute Immediate "COMMIT" using SQLCA;
+End if
 isLoad_Status = 'LOCK'
 icb_lock_load.Text = 'Lock Load'
 icb_lock_load_google.Text = 'Lock Load'

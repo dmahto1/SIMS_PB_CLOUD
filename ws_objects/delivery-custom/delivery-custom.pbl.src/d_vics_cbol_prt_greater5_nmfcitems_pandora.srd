@@ -32,14 +32,15 @@ count(distinct(dp.Carton_No)) as carton_count,
 		ELSE 'NONHAZARDOUS' END as hazard_tag,
 	CASE WHEN Max(IM.Hazard_Cd) IS NOT NULL AND Rtrim(LTRIM(Max(IM.Hazard_Cd))) <> '' AND (Max(LU.Code_Id) is null or Max(LU.Code_Id) = '')
 		--THEN Max(IM.Hazard_Cd) + ',' + Max(IM.Hazard_Class) +',' + IsNull(Max(IM.Proper_Shipping_Name),'')
-		THEN Max(Hazard_Text_Cd) + ', ' + Max(IM.Hazard_Cd) + ', ' + Max(IM.Proper_Shipping_Name) +', ' + IsNull(Max(IM.Hazard_Class),'') 
+		--THEN Max(Hazard_Text_Cd) + ', ' + Max(IM.Hazard_Cd) + ', ' + Max(IM.Proper_Shipping_Name) +', ' + IsNull(Max(IM.Hazard_Class),'') // Dinesh - 04/25/2025-SIMS-699-Development for Google - SIMS - BOL Printing for Restricted GPN's 
+         THEN IsNull(Max(Hazard_Text_Cd),'') + ', ' + Max(IM.Hazard_Cd) + ', ' + Max(IM.Proper_Shipping_Name) +', ' + IsNull(Max(IM.Hazard_Class),'') -- // Dinesh - 04/25/2025-SIMS-699-Development for Google - SIMS - BOL Printing for Restricted GPN's 
 -- + ',' + IsNull(Max(HM.Class),'') + ',' + IsNull(Max(HM.Packing_Group),'')
 		ELSE
-			--CASE WHEN (Max(LU.User_Field2) is null or Max(LU.User_Field2) = '')
-				--THEN IsNull( Max(CC.Commodity_Description), ISNULL( Max( IM.User_Field5 ), '') ) 
-				--ELSE Max(LU.User_Field2)
-			--END
-		'Electronics'
+			CASE WHEN (Max(LU.User_Field2) is null or Max(LU.User_Field2) = '') --Un-commented these lines-  Dinesh - 04/25/2025-SIMS-699-Development for Google - SIMS - BOL Printing for Restricted GPN's 
+				THEN IsNull( Max(CC.Commodity_Description), ISNULL( Max( IM.User_Field5 ), '') ) 
+				ELSE Max(LU.User_Field2)
+			END
+		--'Electronics' // Dinesh - 04/25/2025-SIMS-699-Development for Google - SIMS - BOL Printing for Restricted GPN's 
 		END as hazmat_commodity_description,
 	DP.DO_No, 
 	DP.Carton_No, 
