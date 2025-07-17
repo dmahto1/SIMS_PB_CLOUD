@@ -31,6 +31,7 @@ public function integer uf_process_files (string asproject, string aspath, strin
 public function integer uf_process_so (string aspath, string asproject)
 public function integer uf_process_inventory_snapshot (string asproject, string asinifile)
 public function integer uf_process_dboh (string asproject, string asinifile)
+public function integer uf_process_outbnd_monthly_gi_rpt (string asinifile, string asemail)
 end prototypes
 
 public function integer uf_process_files (string asproject, string aspath, string asfile, string asinifile);
@@ -529,6 +530,89 @@ next /*next output record */
 
 //Write the Outbound File - no need to save and re-retrieve - just use the currently loaded DW
 gu_nvo_process_files.uf_process_flatfile_outbound(ldsOut,"NYCSP")
+
+Return 0
+end function
+
+public function integer uf_process_outbnd_monthly_gi_rpt (string asinifile, string asemail);
+//Akash Baghel...07/07/2025: Process the NYCSP Outbound Order GI monthly Report Function.
+// Akash Baghel....SIMS-750 Development for IFB-NYCEM-SIMS-Outbound Report Request .......07/07/2025
+
+Datastore	lds_Rpt
+				
+Long			llRowPos, llRowCount, llFindRow,	llNewRow
+				
+String			lsFind, lsOutString, lslogOut, lsProject, lsNextRunTime, lsNextRunDate,	&
+				lsRunFreq, lsFileName, lsFileNamePath,lsemailsubject
+
+String			ls_PacificTime
+String 		ERRORS, sql_syntax, lsTemp, ls_parm_string, ls_formatted_next_date,ls_formatted_file,ls_formatted_name_file, ls_formatted_from_Completedate, ls_formatted_to_Completedate
+
+Decimal		ldBatchSeq, ldBatchSeq_NonGIG
+Integer		liRC
+DateTime	ldtNextRunTime
+Date			ldtNextRunDate , ld_from_complete_date, ld_to_complete_date, ld_next_run_time, ld_last_run_time
+
+ //Select getdate() INTO : ld_last_run_time from sys.Dummy;
+ Select Dateadd(Day, 1 , EOMONTH(getdate())) INTO :ld_next_run_time from sysobjects;
+ ls_formatted_next_date = String( ld_next_run_time, "yyyy-mm-dd") + " 08:00:000 "
+ //ld_next_run_time = dateTime(ls_formatted_next_date)
+ 
+ Select DateADD(month, -1,DATEFROMPARTS(year(getdate()),month(getdate()),1)) INTO :ld_from_complete_date from sysobjects;
+  
+ Select EOMONTH(getdate(), -1) INTO : ld_to_complete_date from sysobjects;
+ ls_formatted_file = String( ld_to_complete_date, "yyyy-mm")
+ ls_formatted_name_file = String( ld_to_complete_date, "yyyy-mm-dd")
+// Select DateName(month, DateAdd(month, -1, getdate())) INTO :ls_parm_string from sysobjects;
+
+lds_Rpt = Create Datastore
+lds_Rpt.Dataobject = 'd_nycsp_outbound_order'
+lirc = lds_Rpt.SetTransobject(sqlca)
+
+lsLogOut = ""
+FileWrite(gilogFileNo,lsLogOut)
+gu_nvo_process_files.uf_write_log(lsLogOut) /*display msg to screen*/
+lsLogOut = "- PROCESSING FUNCTION:  NYCSP Outbound Order GI Monthly Report!"
+FileWrite(gilogFileNo,lsLogOut)
+gu_nvo_process_files.uf_write_log(lsLogOut) /*display msg to screen*/
+lsLogOut = ""
+FileWrite(gilogFileNo,lsLogOut)
+gu_nvo_process_files.uf_write_log(lsLogOut) /*display msg to screen*/
+
+lsProject = "NYCSP"
+
+//Retrieve the Data
+lsLogout = 'Retrieving  NYCSP Outbound Order GI Monthly Report Data.....'
+gu_nvo_process_files.uf_write_log(lsLogOut) /*display msg to screen*/
+FileWrite(giLogFileNo,lsLogOut)
+
+llRowCount = lds_Rpt.Retrieve(ld_from_complete_date, ld_to_complete_date)
+
+lsLogOut = String(llRowCount) + ' Rows were retrieved for processing.'
+gu_nvo_process_files.uf_write_log(lsLogOut) /*display msg to screen*/
+FileWrite(gilogFileNo,lsLogOut)
+
+//Write the rows to the generic output table - delimited by '~t'
+lsLogOut = 'Processing NYCSP Outbound Order GI Monthly Report Data.....'
+gu_nvo_process_files.uf_write_log(lsLogOut) /*display msg to screen*/
+FileWrite(gilogFileNo,lsLogOut)
+
+//lsFileName =  'Monthly_Outbound_Order_Report.' + String(DateTime( today(), now()), "yyyy.mm.dd") + '.csv'
+lsFileName =  'Monthly_Outbound_Order_Report.' + ls_formatted_name_file + '.csv'
+lsFileNamePath = ProfileString(asInifile, lsProject, "archivedirectory","") + '\' + lsFileName
+
+lds_Rpt.SaveAs ( lsFileNamePath, csv!	, true )
+
+lsemailsubject = lsFileName
+//Send email...	
+gu_nvo_process_files.uf_send_email("NYCSP","CUSTVAL", lsemailsubject, "Please find the attached outbound order report for " + ls_formatted_file , lsFileNamePath)
+
+Update Activity_Schedule 
+Set     Next_Run_Time = :ls_formatted_next_date 
+          //Parm_string = :ls_parm_string
+		// Last_Run_Time = :ld_last_run_time	 
+where function_name = 'u_nvo_proc_nycsp.uf_process_outbnd_monthly_gi_rpt' and project_id = 'NYCSP' 
+Commit;
 
 Return 0
 end function

@@ -217,7 +217,8 @@ string is_project_uf1
 String is_bonded // TAM W&S 2012/12
 string is_Inbound_ord_Ind,is_order_new,isinvoice_no,is_display_name
 boolean ib_search=True
-boolean ib_adj = False
+//boolean ib_adj = False // Dinesh - 06/17/2025- SIMS-739- PH - Google – SIMS-Fix to SIMS-572 - MM Transactions (Receipts)
+boolean ib_adj = True // Dinesh - 06/17/2025- SIMS-739- PH - Google – SIMS-Fix to SIMS-572 - MM Transactions (Receipts)
 
 
 String	isScanColumn
@@ -344,7 +345,6 @@ Boolean ib_puaway_gen =FALSE// SIMS-55 -Dhirendra for trace log for putaway gene
 Boolean ib_AutoFill_Shift_Select = false
 Long 	   il_AutoFill_Start_Row = 0
 end variables
-
 forward prototypes
 public function integer wf_set_comp_filter (string as_action)
 public function string wf_generate_pulse_imi ()
@@ -1578,10 +1578,12 @@ If lbReconfirm = False Then
 	
 		END IF  // Project Pandora (chainof custody)
 		
-		// Begin - Dinesh - 03/22/2021- S54935- Google - SIMS – 947 change needed for Google SAP
+		// 
 		
+		// Begin - Dinesh - 03/22/2021- S54935- Google - SIMS – 947 change needed for Google SAP		
 		if gs_Project='PANDORA' and liAdj > 0 then 
-				ib_adj= false //10/21/2024 Dinesh -SIMS-572- Google - Completed Inbound orders and GR transactions not sent
+				//ib_adj= false //10/21/2024 Dinesh -SIMS-572- Google - Completed Inbound orders and GR transactions not sent //Dinesh - 06/17/2025    - SIMS-739- PH - Google – SIMS-Fix to SIMS-572 - MM Transactions (Receipts)
+				ib_adj= True //Dinesh - 06/17/2025    - SIMS-739- PH - Google – SIMS-Fix to SIMS-572 - MM Transactions (Receipts)
 			// Begin - 10/21/2024 Dinesh -SIMS-572- commented the below insert statement and placed in the ue_Save event
 			//  - 10/21/2024 - Dinesh - SIMS-572- Google - Completed Inbound orders and GR transactions not sent - 
 //				Execute Immediate "Begin Transaction" using SQLCA; /* 11/04 - PCONKL - Auto Commit Turned on to eliminate DB locks*/
@@ -1592,7 +1594,8 @@ If lbReconfirm = False Then
 			//End - 10/21/2024 - Dinesh - 572- Google - Completed Inbound orders and GR transactions not sent - commented the below insert statement and placed in the ue_Save event
 			
 		else
-				ib_adj= true //10/21/2024 Dinesh -SIMS-572- Google - Completed Inbound orders and GR transactions not sent
+				//ib_adj= true //10/21/2024 Dinesh -SIMS-572- Google - Completed Inbound orders and GR transactions not sent //Dinesh - 06/17/2025    - SIMS-739- PH - Google – SIMS-Fix to SIMS-572 - MM Transactions (Receipts)
+				ib_adj= False //Dinesh - 06/17/2025    - SIMS-739- PH - Google – SIMS-Fix to SIMS-572 - MM Transactions (Receipts)
 				if gs_Project <> 'PANDORA'  then // 10/21/2024 - Dinesh - 572- Google - Completed Inbound orders and GR transactions not sent - It will remain for non Pandora.
 					// End - Dinesh - 03/22/2021- S54935- Google - SIMS – 947 change needed for Google SAP
 					// 12/08 - PCONKL - Want to write the record before we show confirmation msgbox
@@ -11959,25 +11962,38 @@ select count(*) into :liAdj from lookup_table with(nolock) where code_type='ORDE
 	
 	ls_ord_status=idw_main.GetItemString(1,'ord_status')
 	
-	select count(*) into :ll_trans from batch_transaction where trans_order_id= :is_rono and trans_type='GR' using sqlca;
+	//select count(*) into :ll_trans from batch_transaction where trans_order_id= :is_rono and trans_type='GR' using sqlca; // Dinesh - 05/23/2025 - SIMS-739- PH - Google – SIMS-Fix to SIMS-572 - MM Transactions (Receipts)
+	//IF  li_ret = 1 and gs_Project = 'PANDORA'  and ls_ord_status='C'  and ll_trans < 1 then // Dinesh - 05/23/2025 - SIMS-739- PH - Google – SIMS-Fix to SIMS-572 - MM Transactions (Receipts)
 	
-	IF  li_ret = 1 and gs_Project = 'PANDORA'  and ls_ord_status='C'  and ll_trans < 1 then
-		
-		 if ib_adj= false and liAdj > 0 then
-			Execute Immediate "Begin Transaction" using SQLCA;
-				Insert Into batch_Transaction (project_ID, Trans_Type, Trans_Order_ID, Trans_Status, Trans_Create_Date, Trans_Parm)
-				Values(:gs_Project, 'MM', :lsRONO,'N', :ldtToday, '');
-			Execute Immediate "COMMIT" using SQLCA;
-		elseif  ib_adj= True then
-			Execute Immediate "Begin Transaction" using SQLCA;
-				Insert Into batch_Transaction (project_ID, Trans_Type, Trans_Order_ID, Trans_Status, Trans_Create_Date, Trans_Parm)
-				Values(:gs_Project, 'GR', :lsRONO,'N', :ldtToday, '');
-			Execute Immediate "COMMIT" using SQLCA;
-		end if
-		
-		//ib_adj= False
-				
+	 select count(*) into :ll_trans from batch_transaction where trans_order_id= :is_rono and trans_type = 'MM' using sqlca; // Dinesh - 05/23/2025 - SIMS-739- PH - Google – SIMS-Fix to SIMS-572 - MM Transactions (Receipts)
+	        
+    //select count(*) into :ll_trans from batch_transaction where trans_order_id= :is_rono and trans_type= 'GR'using sqlca; // Dinesh - 05/23/2025    - SIMS-739- PH - Google – SIMS-Fix to SIMS-572 - MM Transactions (Receipts)
+ 
+    IF  li_ret = 1 and gs_Project = 'PANDORA'  and ls_ord_status='C'  and ll_trans < 1 then 
+        // if ib_adj= false and liAdj > 0 then //Dinesh - 06/17/2025    - SIMS-739- PH - Google – SIMS-Fix to SIMS-572 - MM Transactions (Receipts)
+		if ib_adj= True and liAdj > 0 then //Dinesh - 06/17/2025    - SIMS-739- PH - Google – SIMS-Fix to SIMS-572 - MM Transactions (Receipts)
+            Execute Immediate "Begin Transaction" using SQLCA;
+            Insert Into batch_Transaction (project_ID, Trans_Type, Trans_Order_ID, Trans_Status, Trans_Create_Date, Trans_Parm) Values(:gs_Project, 'MM', :lsRONO,'N', :ldtToday, 'Inbound');
+            Execute Immediate "COMMIT" using SQLCA;
+		// Begin - Dinesh - 05/23/2025    - SIMS-739- PH - Google – SIMS-Fix to SIMS-572 - MM Transactions (Receipts)
+//		 if ib_adj= false and liAdj > 0 then
+//			Execute Immediate "Begin Transaction" using SQLCA;
+//				Insert Into batch_Transaction (project_ID, Trans_Type, Trans_Order_ID, Trans_Status, Trans_Create_Date, Trans_Parm)
+//				Values(:gs_Project, 'MM', :lsRONO,'N', :ldtToday, '');
+//			Execute Immediate "COMMIT" using SQLCA;
+ 		// End - Dinesh - 05/23/2025    - SIMS-739- PH - Google – SIMS-Fix to SIMS-572 - MM Transactions (Receipts)
+		//elseif  ib_adj= True then //Dinesh - 06/17/2025    - SIMS-739- PH - Google – SIMS-Fix to SIMS-572 - MM Transactions (Receipts)
+		elseif  ib_adj= False then //Dinesh - 06/17/2025    - SIMS-739- PH - Google – SIMS-Fix to SIMS-572 - MM Transactions (Receipts)
+			select count(*) into :ll_trans from batch_transaction where trans_order_id= :is_rono and trans_type = 'GR' using sqlca; // Dinesh - 06/17/2025 - SIMS-739- PH - Google – SIMS-Fix to SIMS-572 - MM Transactions (Receipts)
+			if ll_trans < 1 then  //Dinesh - 06/17/2025    - SIMS-739- PH - Google – SIMS-Fix to SIMS-572 - MM Transactions (Receipts)
+				Execute Immediate "Begin Transaction" using SQLCA;
+					Insert Into batch_Transaction (project_ID, Trans_Type, Trans_Order_ID, Trans_Status, Trans_Create_Date, Trans_Parm)
+					Values(:gs_Project, 'GR', :lsRONO,'N', :ldtToday, '');
+				Execute Immediate "COMMIT" using SQLCA;
+			end if 
 		End if
+				
+	End if
 // End 10/18/2024 - Dinesh - SIMS-572- Google - Completed Inbound orders and GR transactions not sent 	
 
 //if li_ret = 1 then li_ret = idw_rma_serial.Update() /* 05/05 - PCONKL */  GailM 9/17/2019 Replace with call to function.  DE11788

@@ -37,10 +37,11 @@ count(distinct(dp.Carton_No)) as carton_count,
 -- + ',' + IsNull(Max(HM.Class),'') + ',' + IsNull(Max(HM.Packing_Group),'')
 		ELSE
 			CASE WHEN (Max(LU.User_Field2) is null or Max(LU.User_Field2) = '') --Un-commented these lines-  Dinesh - 04/25/2025-SIMS-699-Development for Google - SIMS - BOL Printing for Restricted GPN's 
-				THEN IsNull( Max(CC.Commodity_Description), ISNULL( Max( IM.User_Field5 ), '') ) 
-				ELSE Max(LU.User_Field2)
+				--THEN IsNull( Max(CC.Commodity_Description), ISNULL( Max( IM.User_Field5 ), '') ) 
+				Then 'Electronics' -- Dinesh - 06/24/2025- SIMS-758-SIMS - Google - SIMS-699 Bug - SIM BOL commodity description field not populated with the correct information
+				ELSE Max(LU.User_Field2)  --Dinesh - 06/24/2025- SIMS-758-SIMS - Google - SIMS-699 Bug - SIM BOL commodity description field not populated with the correct information
 			END
-		--'Electronics' // Dinesh - 04/25/2025-SIMS-699-Development for Google - SIMS - BOL Printing for Restricted GPN's 
+		--'Electronics' // Dinesh - 04/25/2025-SIMS-699-Development for Google - SIMS - BOL Printing for Restricted GPN's  // Dinesh - 06/24/2025- SIMS-758-SIMS - Google - SIMS-699 Bug - SIM BOL commodity description field not populated with the correct information
 		END as hazmat_commodity_description,
 	DP.DO_No, 
 	DP.Carton_No, 

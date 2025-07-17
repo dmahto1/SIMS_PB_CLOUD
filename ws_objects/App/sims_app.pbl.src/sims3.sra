@@ -74,7 +74,7 @@ string themestylename = "Do Not Use Themes"
 long richtextedittype = 2
 long richtexteditversion = 1
 string richtexteditkey = ""
-string appruntimeversion = "19.2.0.2803"
+string appruntimeversion = "19.2.0.2703"
 end type
 global sims3 sims3
 

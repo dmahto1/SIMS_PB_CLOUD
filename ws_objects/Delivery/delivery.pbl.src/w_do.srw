@@ -5774,7 +5774,7 @@ if li_update_rc = 1 then
 			// 04/14 - PCONKL - If project enabled, post a GI transaction to Websphere - unless we are confirming at the shipment level, then we will generate a single transaction for the shipment at the end of the shipment process
 			If g.ibSendWebSphereGoodsIssue and not ibConfirmShipment Then	
 // 2014/11/25 TAM if Bosch, Don't send a GI for manual orders.
-				If gs_project = 'BOSCH'  and( idw_Main.GetItemNumber(1,'edi_batch_seq_no') = 0 or isNull(idw_Main.GetITemNumber(1,'edi_batch_seq_no')))Then
+				If gs_project = 'BOSCH'  and ( idw_Main.GetItemNumber(1,'edi_batch_seq_no') = 0 or isNull(idw_Main.GetITemNumber(1,'edi_batch_seq_no')))Then
 				else
 					uf_send_websphere_GI("ORDER")
 				End If
@@ -10522,14 +10522,12 @@ For i = 1 to ll_cnt
 		k = 0
 		If idw_pick.GetItemString(i, "sku_pickable_ind") = 'Y' Then /*if sku is non pickable, location will be set to N/A - dont validate*/
 			ls_loc = idw_pick.GetItemString(i, "l_code")
-			
-			If ls_loc = '' or  IsNull(ls_loc) Then
-				MessageBox(is_title, "Location is required!", StopSign!)	
-				tab_main.SelectTab(4) 
-				f_setfocus(idw_pick, i, "l_code")
-				Return -1				
-			End If
-		
+				If ls_loc = '' or  IsNull(ls_loc) Then
+						MessageBox(is_title, "Location is required!", StopSign!)	
+						tab_main.SelectTab(4) 
+						f_setfocus(idw_pick, i, "l_code")
+						Return -1				
+				End If
 		End If /* Pickable SKU*/
 	Else
 	End If
@@ -11126,7 +11124,7 @@ for i = 1 to idw_pick.rowcount()
 	
 		j = 0
 	
-		Do while ld_req > 0 and j < ids_content.RowCount() and ids_content.RowCount() > 0
+		Do while ld_req > 0 and j < ids_content.RowCount() and ids_content.RowCount() > 0 
 		
 			j += 1
 			// 10/00 PCONKL - If This is a component Child, we are using component qty, other wise available qty
@@ -12040,6 +12038,7 @@ For i = 1 to llCount /*For each Pick Row*/
 		lsXML += "<SKU>" + idw_pick.getitemstring(i,'sku') + "</SKU>"
 		lsXML += "<SupplierCode>" + idw_pick.getitemstring(i,'supp_code') + "</SupplierCode>"
 		lsXML += "<OwnerID>" + nz(String(idw_pick.getitemnumber(i,'owner_id')),'') + "</OwnerID>"   //Use nz function to ensure not null
+//		end if
 		lsXML += "<Quantity>" + nz(String(idw_pick.getitemnumber(i,'Quantity')),'') + "</Quantity>"
 		
 //		f_method_trace_special( gs_project, this.ClassName() + ' - wf_update_content_server', 'New Pick record XML:  ' + lsXML,is_dono, ' ',' ',isinvoice_no) //08-May-2014 :Madhu- Added
@@ -22026,13 +22025,15 @@ For i = 1 to ll_cnt /*each Pick*/
 	If idw_pick.GetItemString(i,'component_ind') = '*' or idw_pick.GetItemString(i,'component_ind') = 'B'  Then Continue
 	
 	//Quantiy must be > 0 
-	If ((isnull(idw_pick.GetItemNumber(i,"quantity"))) or (not idw_pick.GetItemNumber(i,"quantity") > 0)) Then
-		Messagebox(is_title,"Quantity Must be > 0!",StopSign!)
-		tab_main.selecttab(4)
-		f_setfocus(idw_pick, i, "quantity")
-		return -1
-	End If
-	
+	if gs_project = 'BOSCH' then // Dinesh - 07/08/2025-SIMS-738-Development for IFB-SIMS Bosch - Handle 0 picked/shipped qty for 945 		
+	else
+		If ((isnull(idw_pick.GetItemNumber(i,"quantity"))) or (not idw_pick.GetItemNumber(i,"quantity") > 0)) Then
+			Messagebox(is_title,"Quantity Must be > 0!",StopSign!)
+			tab_main.selecttab(4)
+			f_setfocus(idw_pick, i, "quantity")
+			return -1
+		End If
+	End if // Dinesh - 07/08/2025-SIMS-738 -Development for IFB-SIMS Bosch - Handle 0 picked/shipped qty for 945 
 	//If Outbound Serialized, sum up the qty so we can validate below if necessary
 	//02/09 - PCONKL - added Type B to denote capture at IB and OB
 	If idw_pick.GetItemString(i, "Serialized_Ind") = 'O' or idw_pick.GetItemString(i, "Serialized_Ind") = 'B' Then
@@ -22292,12 +22293,12 @@ For i = 1 to ll_cnt
 		k = 0
 		If idw_pick.GetItemString(i, "sku_pickable_ind") = 'Y' Then /*if sku is non pickable, location will be set to N/A - dont validate*/
 			ls_loc = idw_pick.GetItemString(i, "l_code")
-			If ls_loc = '' or  IsNull(ls_loc) Then
-				MessageBox(is_title, "Location is required!", StopSign!)	
-				tab_main.SelectTab(4) 
-				f_setfocus(idw_pick, i, "l_code")
-				Return -1				
-			End If
+				If ls_loc = '' or  IsNull(ls_loc) Then
+						MessageBox(is_title, "Location is required!", StopSign!)	
+						tab_main.SelectTab(4) 
+						f_setfocus(idw_pick, i, "l_code")
+						Return -1				
+				End If
 		End If /* Pickable SKU*/
 	End If
 NEXT
@@ -28454,9 +28455,9 @@ inewindex=newIndex // Dinesh
 end event
 
 type tabpage_main from w_std_master_detail`tabpage_main within tab_main
-integer y = 108
+integer y = 116
 integer width = 4544
-integer height = 2564
+integer height = 2556
 long backcolor = 67108864
 string text = " Order Info "
 cb_readonly cb_readonly
@@ -28575,9 +28576,9 @@ end if
 end event
 
 type tabpage_search from w_std_master_detail`tabpage_search within tab_main
-integer y = 108
+integer y = 116
 integer width = 4544
-integer height = 2564
+integer height = 2556
 long backcolor = 67108864
 cb_print_passout_note cb_print_passout_note
 cb_combine_gsin cb_combine_gsin
@@ -30243,9 +30244,9 @@ end event
 
 type tabpage_shipto from userobject within tab_address
 integer x = 18
-integer y = 108
+integer y = 116
 integer width = 3520
-integer height = 736
+integer height = 728
 long backcolor = 79741120
 string text = "Ship To"
 long tabtextcolor = 33554432
@@ -30424,9 +30425,9 @@ end event
 
 type tabpage_bt from userobject within tab_address
 integer x = 18
-integer y = 108
+integer y = 116
 integer width = 3520
-integer height = 736
+integer height = 728
 long backcolor = 79741120
 string text = "Bill To"
 long tabtextcolor = 33554432
@@ -30462,9 +30463,9 @@ end event
 
 type tabpage_it from userobject within tab_address
 integer x = 18
-integer y = 108
+integer y = 116
 integer width = 3520
-integer height = 736
+integer height = 728
 long backcolor = 79741120
 string text = "Intermed"
 long tabtextcolor = 33554432
@@ -30499,9 +30500,9 @@ end event
 
 type tabpage_st from userobject within tab_address
 integer x = 18
-integer y = 108
+integer y = 116
 integer width = 3520
-integer height = 736
+integer height = 728
 long backcolor = 79741120
 string text = "Sold To"
 long tabtextcolor = 33554432
@@ -30537,9 +30538,9 @@ end event
 type tabpage_trax_3rd_party from userobject within tab_address
 boolean visible = false
 integer x = 18
-integer y = 108
+integer y = 116
 integer width = 3520
-integer height = 736
+integer height = 728
 long backcolor = 79741120
 string text = "ConnectShip 3rd Party"
 long tabtextcolor = 33554432
@@ -30597,9 +30598,9 @@ end event
 
 type tabpage_rt from userobject within tab_address
 integer x = 18
-integer y = 108
+integer y = 116
 integer width = 3520
-integer height = 736
+integer height = 728
 long backcolor = 79741120
 string text = "Return To"
 long tabtextcolor = 33554432
@@ -33358,9 +33359,9 @@ end event
 
 type tabpage_other from userobject within tab_main
 integer x = 18
-integer y = 108
+integer y = 116
 integer width = 4544
-integer height = 2564
+integer height = 2556
 long backcolor = 79741120
 string text = " Other Info "
 long tabtextcolor = 33554432
@@ -33976,9 +33977,9 @@ end event
 
 type tabpage_detail from userobject within tab_main
 integer x = 18
-integer y = 108
+integer y = 116
 integer width = 4544
-integer height = 2564
+integer height = 2556
 long backcolor = 79741120
 string text = " Order Detail"
 long tabtextcolor = 33554432
@@ -35096,9 +35097,9 @@ end event
 
 type tabpage_pick from userobject within tab_main
 integer x = 18
-integer y = 108
+integer y = 116
 integer width = 4544
-integer height = 2564
+integer height = 2556
 long backcolor = 79741120
 string text = " Picking List"
 long tabtextcolor = 33554432
@@ -36302,7 +36303,7 @@ end event
 type dw_pickdetail from u_dw_ancestor within tabpage_pick
 boolean visible = false
 integer x = 3392
-integer y = 860
+integer y = 1184
 integer width = 411
 integer height = 316
 integer taborder = 50
@@ -38608,9 +38609,9 @@ end event
 
 type tabpage_pack from userobject within tab_main
 integer x = 18
-integer y = 108
+integer y = 116
 integer width = 4544
-integer height = 2564
+integer height = 2556
 long backcolor = 79741120
 string text = " Packing List"
 long tabtextcolor = 33554432
@@ -41500,9 +41501,9 @@ event ue_process_barcodes ( )
 event ue_generate ( )
 event ue_process_barcodes_sku_only ( )
 integer x = 18
-integer y = 108
+integer y = 116
 integer width = 4544
-integer height = 2564
+integer height = 2556
 long backcolor = 79741120
 string text = "Serial #"
 long tabtextcolor = 33554432
@@ -45898,9 +45899,9 @@ end event
 
 type tabpage_bol from userobject within tab_main
 integer x = 18
-integer y = 108
+integer y = 116
 integer width = 4544
-integer height = 2564
+integer height = 2556
 long backcolor = 79741120
 string text = "BOL"
 long tabtextcolor = 33554432
@@ -46137,9 +46138,9 @@ end type
 type tabpage_carrier from userobject within tab_main
 boolean visible = false
 integer x = 18
-integer y = 108
+integer y = 116
 integer width = 4544
-integer height = 2564
+integer height = 2556
 long backcolor = 79741120
 string text = "Carrier"
 long tabtextcolor = 33554432
@@ -46374,9 +46375,9 @@ end event
 
 type tabpage_trax from userobject within tab_main
 integer x = 18
-integer y = 108
+integer y = 116
 integer width = 4544
-integer height = 2564
+integer height = 2556
 long backcolor = 79741120
 string text = "ConnectShip"
 long tabtextcolor = 33554432
@@ -46875,9 +46876,9 @@ end event
 type tabpage_shipments from userobject within tab_main
 string tag = "Shipments"
 integer x = 18
-integer y = 108
+integer y = 116
 integer width = 4544
-integer height = 2564
+integer height = 2556
 long backcolor = 79741120
 string text = "Shipments"
 long tabtextcolor = 33554432
@@ -47175,9 +47176,9 @@ end event
 type tabpage_load_plan from userobject within tab_main
 string tag = "TMS"
 integer x = 18
-integer y = 108
+integer y = 116
 integer width = 4544
-integer height = 2564
+integer height = 2556
 long backcolor = 79741120
 string text = "TMS"
 long tabtextcolor = 33554432

@@ -407,6 +407,7 @@ u_nvo_proc_phoenix lu_nvo_proc_phoenix
 u_nvo_proc_pandora	lu_nvo_proc_Pandora	
 u_nvo_proc_pandora2 lu_nvo_proc_Pandora2
 u_nvo_edi_confirmations_pandora	lu_nvo_edi_confirmations_pandora
+//u_nvo_edi_confirmations_nycsp lu_nvo_edi_confirmations_nycsp
 u_nvo_proc_philips_sg lu_nvo_proc_philips_sg
 u_nvo_proc_philips_th lu_nvo_proc_philips_th
 u_nvo_proc_philips_cls lu_nvo_proc_philips_cls //TAM 2019/02/14 S29551
@@ -983,7 +984,20 @@ For llFunctionRowPos = 1 to llFunctionRowCOunt
 				End If
 				liRC =  lu_nvo_proc_puma.uf_process_outbound_order_rpt(asinifile, lsEmailString) 	
 				
-			//BCR 20-MAR-2012: Process the DANA-TH Summary Inventory Report.	
+			//BCR 20-MAR-2012: Process the DANA-TH Summary Inventory Report.
+			
+			
+			//Begin...Akash baghel  -07/07/2025...SIMS-750 Development for IFB-NYCEM-SIMS-Outbound Report Request
+			
+		     Case 'u_nvo_proc_nycsp.uf_process_outbnd_monthly_gi_rpt'
+				
+				If Not isvalid(u_nvo_proc_nycsp) Then	
+					lu_nvo_proc_nycsp = Create u_nvo_proc_nycsp
+				End If
+				liRC =  lu_nvo_proc_nycsp.uf_process_outbnd_monthly_gi_rpt(asinifile, lsEmailString)
+
+			//End...Akash baghel...07/07/2025.....SIMS-750 Development for IFB-NYCEM-SIMS-Outbound Report Request
+			
 			Case 'u_nvo_proc_dana_th.uf_process_sum_inv_rpt'
 				
 				If Not isvalid(u_nvo_proc_dana_th) Then	
@@ -1433,7 +1447,9 @@ For llFunctionRowPos = 1 to llFunctionRowCOunt
 	If liReturn <> 2 THEN
 		lsnextruntime = string(llhour) + ':' + String(llmin,'##') + ':00.000'
 		ldtnextRunTime= datetime(relativeDate(today(),1),time(LsNextRunTime))
-		ldsFunctions.SetItem(llFunctionRowPos,'Next_Run_Time', ldtnextRunTime)
+	  If lsfunctionname <>  'u_nvo_proc_nycsp.uf_process_outbnd_monthly_gi_rpt' Then    // Akash Baghel...07/09/2025...SIMS-750 Development for IFB-NYCEM-SIMS-Outbound Report Request
+		 ldsFunctions.SetItem(llFunctionRowPos,'Next_Run_Time', ldtnextRunTime)
+	   End if        // Akash Baghel...07/09/2025...SIMS-750 Development for IFB-NYCEM-SIMS-Outbound Report Request
 	END IF
 	//05-Oct-2015 :Madhu- If Pandora DBOH Return value is 2, instead to change Next Run Time Date, retry to generate BOH in next Loop -END
 

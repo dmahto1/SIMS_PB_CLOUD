@@ -581,6 +581,18 @@ For llRowPos = 1 to llRowCOunt
 
 next /*next Delivery Detail record */
 
+//Begin......Akash Baghel....07/02/2025....SIMS-750 Development for IFB-NYCEM-SIMS-Outbound Report Request
+String  lsFileNamePath, lsEmailSubject, lsattachmentfile, ls_subject
+
+lsFileNamePath = ProfileString(gsInifile, 'NYCSP', 'archivedirectory','') + lsFileName
+lsattachmentfile = lsFileNamePath
+//
+lsEmailSubject = 'Ship Confirmation file for ' + lsFileName
+//ls_subject = lsEmailSubject 
+gu_nvo_process_files.uf_send_email("NYCSP","CUSTVAL",lsEmailSubject,"Please find the attached ship confirmation file attached for. ", lsattachmentfile) 
+	
+//End......Akash Baghel Testing....07/02/2025....SIMS-750 Development for IFB-NYCEM-SIMS-Outbound Report Request
+
 //Write the Outbound File - no need to save and re-retrieve - just use the currently loaded DW
 gu_nvo_process_files.uf_process_flatfile_outbound_unicode(idsOut,asProject)
 

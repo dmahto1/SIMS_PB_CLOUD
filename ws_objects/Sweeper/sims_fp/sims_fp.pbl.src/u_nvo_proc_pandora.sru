@@ -14735,7 +14735,8 @@ IF ll_receipt_queue_count > 0 Then
 			//WH*P will capture containers for only '-R' parts. WH*PM/PD/RK will be configurable for '-R' only or all parts
 			if ls_SAP_Enabled = 'Y' then
 				//dts 03/10/2021 - S54963
-				If left(ls_OrderNo, 1)='X' OR left(ls_OrderNo, 3)='SID' OR left(ls_OrderNo, 10)='SYNWHGAFB1' or left(ls_om_client_cust_po_no, 3)='X' OR left(ls_om_client_cust_po_no, 3)='SID' OR left(ls_om_client_cust_po_no, 10)='SYNWHGAFB1' or left(ls_om_vendor_invoice_nbr, 3)='X' OR left(ls_om_vendor_invoice_nbr, 3)='SID' OR left(ls_om_vendor_invoice_nbr, 10)='SYNWHGAFB1' THEN
+				//If left(ls_OrderNo, 1)='X' OR left(ls_OrderNo, 3)='SID' OR left(ls_OrderNo, 10)='SYNWHGAFB1' or left(ls_om_client_cust_po_no, 3)='X' OR left(ls_om_client_cust_po_no, 3)='SID' OR left(ls_om_client_cust_po_no, 10)='SYNWHGAFB1' or left(ls_om_vendor_invoice_nbr, 3)='X' OR left(ls_om_vendor_invoice_nbr, 3)='SID' OR left(ls_om_vendor_invoice_nbr, 10)='SYNWHGAFB1' THEN
+				If left(ls_OrderNo, 1)='X'  OR left(ls_OrderNo, 10)='SYNWHGAFB1' or left(ls_om_client_cust_po_no, 3)='X' OR left(ls_om_client_cust_po_no, 3)='SID' OR left(ls_om_client_cust_po_no, 10)='SYNWHGAFB1' or left(ls_om_vendor_invoice_nbr, 3)='X' OR left(ls_om_vendor_invoice_nbr, 3)='SID' OR left(ls_om_vendor_invoice_nbr, 10)='SYNWHGAFB1' THEN // Dinesh/dts- 06/30/2025 - SIMS-756-SIMS-Google - SID inbound order prefixes to stop loading in container and pallet IDs 
 					lbCaptureContainers=True
 				// in addition to the order prefixes driving container capture, some Owner Codes will capture containers...
 				//dts 03/10/2021 - S54657 - adding WH*SC and WH*Q (and MultiLeg portion of WH*P)    elseif left(lsOwnerCD,2)='WH' and right(lsOwnerCD,1)='P' and right(lsSKU,2)='-R' then

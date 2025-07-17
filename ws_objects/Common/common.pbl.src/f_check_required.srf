@@ -34,15 +34,14 @@ IF ll_row <> 0 THEN
 	End If
 
 //SARUN2014Apr08 : There were '!' mark in messagebox if checkbox emty, capture text for checkbox too
-	If 	ls_coltype = 'checkbox' then ls_collabelname = adw_control.Describe(ls_colname + ".checkbox.text"		)
-
+	If 	ls_coltype = 'checkbox' then ls_collabelname = adw_control.Describe(ls_colname + ".checkbox.text"	)
 // Tell the user which row and column to fill in
+		if len(ls_collabelname) <=3 then
+			MessageBox(as_title, "Please enter a value for '" + ls_colname + "'", StopSign! )
+		else
+			MessageBox(as_title, "Please enter a value for '" + ls_collabelname + "'", StopSign! )
+		End if
 
-	if len(ls_collabelname) <=3 then
-		MessageBox(as_title, "Please enter a value for '" + ls_colname + "'", StopSign! )
-	else
-		MessageBox(as_title, "Please enter a value for '" + ls_collabelname + "'", StopSign! )
-	end if
 	adw_control.SetColumn(li_colnbr)
 	adw_control.ScrollToRow(ll_row)
 	adw_control.SetFocus()

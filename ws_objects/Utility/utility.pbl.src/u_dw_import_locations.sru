@@ -229,7 +229,9 @@ Choose Case iscurrvalcolumn
 	case "zone_id"
 		goto lzone_id		
 	case "sku_reserved"
-		goto lsku_reserved		
+		goto lsku_reserved
+	case "user_field2"	     //Added by Akash Baghel....06/17/2025..SIMS-752..Google - Customer Import validation error
+		goto luser_field2   ///Added by Akash Baghel both line part of....06/17/2025..SIMS-752..Google - Customer Import validation error
 End Choose
 
 //Validate warehouse
@@ -403,6 +405,19 @@ If len(trim(This.getItemString(al_row,"zone_id"))) > 5 Then
 	iscurrvalcolumn = "zone_id"
 	Return "zone_id is > 5 digits"
 End If
+
+////Begin.....06/17/2025......Akash Baghel....SIMS-752.....Google - Customer Import validation error
+luser_field2:
+IF gs_project='PANDORA' then
+    If len(trim(This.getItemString(al_row,"user_field2"))) > 3 Then	
+	    This.Setfocus()
+	    This.SetColumn("user_field2")
+	    iscurrvalcolumn = "user_field2"
+	    Return "Please enter the pallet qty less than or equal to 3 digit."
+     End If
+ END IF
+  
+ ////End.....06/17/2025......Akash Baghel.....SIMS-752.....Google - Customer Import validation error
 
 lsku_reserved:
 If len(trim(This.getItemString(al_row,"sku_reserved"))) > 50 Then

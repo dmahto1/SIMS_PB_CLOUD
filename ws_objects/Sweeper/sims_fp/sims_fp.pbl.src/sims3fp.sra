@@ -42,7 +42,7 @@ end variables
 
 global type sims3fp from application
 string appname = "sims3fp"
-string appruntimeversion = "19.2.0.2803"
+string appruntimeversion = "19.2.0.2703"
 end type
 global sims3fp sims3fp
 
