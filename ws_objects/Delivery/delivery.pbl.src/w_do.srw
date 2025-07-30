@@ -3957,6 +3957,7 @@ String ls_SerializedInd		//GailM - 01/04/2014 - LPN GPN is serialized B plus po_
 String ls_VicsBolNo			//GailM - 01/04/2014 - LPN GPN with and withou serialized B must have a VicBolNo to confirm.  Hard stop if not assigned.
 Long llSerialCount
 String	lsShipment
+long  ll_zero //Dinesh - 07/29/2025 - SIMS-774-IFB-SIMS Bosch - Unable to delete the picking list after saving for 0 qty pick
 Long ll_CI_Exception,liAdj
 //TimA 04/15/2011 - capture the error message in of_Error_on_serial_no_exists for possible locking issues in SIMS
 //Pandora
@@ -4519,12 +4520,7 @@ if is_Ready_Or_Confirm = 'READY' or is_Ready_Or_Confirm = 'BOTH'  then
 	//							KA44 discrepancy file if nothing was shipped for order
 	//							We will confirm this in wf_check confirm that they really want to do this
 	// 07/04 - PCONKL - Linksys as well, 08/04 - Logitech, 01/10 - Warner
-	
-//	  If upper(gs_project) = 'BOSCH' then // Dinesh - 07/29/2025- SIMS-774-IFB-SIMS Bosch - Unable to delete the picking list after saving for 0 qty pick
-//			wf_check_confirm()
-//	  End If
 		
-		long ll_zero
 	If  upper(gs_project) =  'LOGITECH' or  upper(gs_project) =  'WARNER' then
 	Else
 			If idw_pick.RowCount() <= 0 Then
