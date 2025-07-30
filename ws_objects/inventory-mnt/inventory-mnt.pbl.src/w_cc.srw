@@ -8959,9 +8959,9 @@ end choose
 end event
 
 type tabpage_main from w_std_master_detail`tabpage_main within tab_main
-integer y = 104
+integer y = 116
 integer width = 4814
-integer height = 1916
+integer height = 1904
 string text = "Order Information"
 cb_readonly cb_readonly
 cb_commodity cb_commodity
@@ -9101,9 +9101,9 @@ end if
 end event
 
 type tabpage_search from w_std_master_detail`tabpage_search within tab_main
-integer y = 104
+integer y = 116
 integer width = 4814
-integer height = 1916
+integer height = 1904
 cb_search cb_search
 dw_search dw_search
 cb_clear cb_clear
@@ -12672,9 +12672,9 @@ type tabpage_si from userobject within tab_main
 event create ( )
 event destroy ( )
 integer x = 18
-integer y = 104
+integer y = 116
 integer width = 4814
-integer height = 1916
+integer height = 1904
 long backcolor = 79741120
 string text = " System Inventory "
 long tabtextcolor = 33554432
@@ -13173,9 +13173,9 @@ end event
 
 type tabpage_result1 from userobject within tab_main
 integer x = 18
-integer y = 104
+integer y = 116
 integer width = 4814
-integer height = 1916
+integer height = 1904
 long backcolor = 79741120
 string text = " Count Result 1 "
 long tabtextcolor = 33554432
@@ -13752,9 +13752,9 @@ type tabpage_result2 from userobject within tab_main
 event create ( )
 event destroy ( )
 integer x = 18
-integer y = 104
+integer y = 116
 integer width = 4814
-integer height = 1916
+integer height = 1904
 long backcolor = 79741120
 string text = " Count Result 2 "
 long tabtextcolor = 33554432
@@ -14178,9 +14178,9 @@ type tabpage_result3 from userobject within tab_main
 event create ( )
 event destroy ( )
 integer x = 18
-integer y = 104
+integer y = 116
 integer width = 4814
-integer height = 1916
+integer height = 1904
 long backcolor = 79741120
 string text = " Count Result 3 "
 long tabtextcolor = 33554432
@@ -14622,9 +14622,9 @@ end event
 
 type tabpage_mobile from userobject within tab_main
 integer x = 18
-integer y = 104
+integer y = 116
 integer width = 4814
-integer height = 1916
+integer height = 1904
 long backcolor = 79741120
 string text = "Mobile"
 long tabtextcolor = 33554432
@@ -14774,9 +14774,9 @@ end event
 
 type tabpage_system_generated from userobject within tab_main
 integer x = 18
-integer y = 104
+integer y = 116
 integer width = 4814
-integer height = 1916
+integer height = 1904
 long backcolor = 79741120
 string text = "System_Generated"
 long tabtextcolor = 33554432
@@ -14888,9 +14888,9 @@ end event
 type tabpage_serial_numbers from userobject within tab_main
 event ue_import ( )
 integer x = 18
-integer y = 104
+integer y = 116
 integer width = 4814
-integer height = 1916
+integer height = 1904
 long backcolor = 79741120
 string text = "Serial No"
 long tabtextcolor = 33554432
@@ -15327,9 +15327,9 @@ end event
 
 type tabpage_container from userobject within tab_main
 integer x = 18
-integer y = 104
+integer y = 116
 integer width = 4814
-integer height = 1916
+integer height = 1904
 long backcolor = 79741120
 string text = "FP_Container"
 long tabtextcolor = 33554432

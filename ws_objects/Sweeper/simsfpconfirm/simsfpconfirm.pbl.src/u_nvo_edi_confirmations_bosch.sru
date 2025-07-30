@@ -18,48 +18,53 @@ public function integer uf_gi (string as_project, long al_trans_id);//16-Jan-201
 String ls_trans_parm, ls_email, ls_xml_request, ls_xml_response
 String lsLogOut, ls_return_value, ls_trans_order, ls_error_msg
 long ll_rc, ll_pos1, ll_pos2, ll_return_code, ll_count
-string ls_trans_order_id,ls_ro_no,ls_sku ,ls_coo,ls_uf1,lsZone,ls_po_no2,lsCont,ls_sku_parent// Dinesh - 07/03/2025- SIMS-738-Development for IFB-SIMS Bosch - Handle 0 picked/shipped qty for 945 
+string ls_trans_order_id,ls_ro_no,ls_sku ,ls_coo,ls_uf1,lsZone,ls_po_no2,lsCont,ls_sku_parent,ls_zone// Dinesh - 07/03/2025- SIMS-738-Development for IFB-SIMS Bosch - Handle 0 picked/shipped qty for 945 
 datetime ldtExpDate
 decimal ld_ro_no,ldOwnerID
-string ls_rono_next_seq,ls_error_message,ls_supp_code,ls_loc,ls_serial,ls_lot,ls_po,ls_type,ls_Owner_Id // Dinesh - 07/03/2025- SIMS-738-Development for IFB-SIMS Bosch - Handle 0 picked/shipped qty for 945 
-long ll_cnt,i,ll_owner_id,llLineItemNo,llCompNo,ll_owner,ll_count_pick // Dinesh - 07/03/2025- SIMS-738-Development for IFB-SIMS Bosch - Handle 0 picked/shipped qty for 945 
-datastore lds_pick  // Dinesh - 07/03/2025- SIMS-738-Development for IFB-SIMS Bosch - Handle 0 picked/shipped qty for 945 
-
+string ls_rono_next_seq,ls_error_message,ls_supp_code,ls_loc,ls_serial,ls_lot,ls_po,ls_type,ls_Owner_Id,ls_sku_alternate // Dinesh - 07/03/2025- SIMS-738-Development for IFB-SIMS Bosch - Handle 0 picked/shipped qty for 945 
+long ll_cnt,i,ll_owner_id,llLineItemNo,llCompNo,ll_owner,ll_count_pick,ll_alloc_qty// Dinesh - 07/03/2025- SIMS-738-Development for IFB-SIMS Bosch - Handle 0 picked/shipped qty for 945 
+//datastore lds_pick  // Dinesh - 07/03/2025- SIMS-738-Development for IFB-SIMS Bosch - Handle 0 picked/shipped qty for 945 - commented this as to obsolete this approach for inserting 0 Qty record
+datastore lds_details // Dinesh - 07/28/2025- SIMS-774-IFB-SIMS Bosch - Unable to delete the picking list after saving for 0 qty pick
 lsLogOut = '      - Bosch GI Confirmation- Start Processing of uf_gi() for Trans_Id: ' + string(al_trans_Id)
 FileWrite(giLogFileNo,lsLogOut)
 gu_nvo_process_files.uf_write_log(lsLogOut)
 
 // Begin - Dinesh- 03/07/2025- SIMS-738-Development for IFB-SIMS Bosch - Handle 0 picked/shipped qty for 945 
+long llFindRow,ll_lineitem,ll_allocated_qty
 select trans_order_id into :ls_trans_order_id from batch_transaction where project_id=:as_project and trans_id = :al_trans_Id and trans_type='GI' using sqlca;
-lds_pick = create datastore 
-lds_pick.dataobject ="d_do_picking"
-lds_pick.SetTransObject(SQLCA)
-lds_pick.retrieve(ls_trans_order_id)
-	select count(*) into : ll_count from Delivery_Picking where do_no= :ls_trans_order_id and quantity = 0 using sqlca;
+lds_details = create datastore 
+lds_details.dataobject ="d_do_detail"  
+lds_details.SetTransObject(SQLCA)
+lds_details.retrieve(ls_trans_order_id)
+ll_allocated_qty =0 
+	lds_details.setfilter("alloc_qty = " + string(ll_allocated_qty)) // Dinesh - 07/29/2025- SIMS-774-IFB-SIMS Bosch - Unable to delete the picking list after saving for 0 qty pick
+	lds_details.filter() // Dinesh - 07/29/2025- SIMS-774-IFB-SIMS Bosch - Unable to delete the picking list after saving for 0 qty pick
+	ll_count = lds_details.rowcount()
 	Do While ll_count > 0
-		ld_ro_no = gu_nvo_process_files.uf_get_next_seq_no(as_project,'Receive_Master',"RO_No")
-		ls_rono_next_seq = "BOSCH" + '' + string(ld_ro_no)
-		ls_sku = lds_pick.GetItemString(ll_count, "sku")
-		ls_sku_parent = lds_pick.GetItemString(ll_count, "sku_parent")
-		ls_supp_code = lds_pick.GetItemString(ll_count, "supp_code")
-		ls_loc = lds_pick.GetItemString(ll_count, "l_code")
-		ls_serial = lds_pick.GetItemString(ll_count, "serial_no")
-		ls_lot = lds_pick.GetItemstring(ll_count, "lot_no")	
-		ls_po = lds_pick.GetItemstring(ll_count, "po_no")	
-		ls_type = lds_pick.GetItemstring(ll_count, "inventory_type")
-		ll_Owner_Id =lds_pick.getItemnumber(ll_count, "owner_id")
-		llLineItemNo = lds_pick.getitemnumber(ll_count,"line_item_no")
-		llCompNo = lds_pick.getitemnumber(ll_count,"Component_no")
-		ls_coo = lds_pick.getitemstring(ll_count,"country_of_origin")
-		ls_po_no2 = lds_pick.getitemstring(ll_count,"po_no2")
-		lsCont = lds_pick.getitemstring(ll_count,"container_id")
-		ldtExpDate = lds_pick.getitemDateTIme(ll_count,"expiration_date")
-		select count(*) into :ll_count_pick from delivery_picking_detail where do_no= :ls_trans_order_id and sku=:ls_sku and supp_code=:ls_supp_code and owner_id=:ll_Owner_Id and l_code= :ls_loc and country_of_origin=:ls_coo and line_item_no=:llLineItemNo and inventory_type=:ls_type  using sqlca; 
+		ls_sku = lds_details.GetItemString(ll_count, "sku")
+		ls_sku_alternate= lds_details.GetItemString(ll_count, "alternate_sku")
+		ls_supp_code = lds_details.GetItemString(ll_count, "supp_code")
+		ll_alloc_qty = lds_details.GetItemnumber(ll_count, "alloc_qty")
+		llLineItemNo = lds_details.getitemnumber(ll_count,"line_item_no")
+		ll_owner = lds_details.getitemnumber(ll_count,"owner_id")
+		select count(*) into :ll_count_pick from delivery_picking where do_no= :ls_trans_order_id and sku=:ls_sku and supp_code=:ls_supp_code and owner_id=:ll_Owner_Id and l_code= :ls_loc and country_of_origin=:ls_coo and line_item_no=:llLineItemNo and inventory_type = 'N'  using sqlca; 
 		if ll_count_pick > 0 then
-		else
-			insert into delivery_picking_detail(do_no,sku,supp_code,owner_id,country_of_origin,l_code,inventory_type,lot_no,po_no,po_no2,sku_parent,line_item_no,serial_no,ro_no)
-			values (:ls_trans_order_id,:ls_sku,:ls_supp_code,:ll_Owner_Id,:ls_coo,:ls_loc,:ls_type,:ls_lot,:ls_po,:ls_po_no2,:ls_sku_parent,:llLineItemNo,:ls_serial,:ls_rono_next_seq) using sqlca;
+		else			
+			insert into delivery_picking(do_no,sku,quantity,line_item_no,supp_code,owner_id,country_of_origin,l_code,inventory_type,serial_no,lot_no,po_no,po_no2,component_no,container_id,expiration_date,zone_id)
+			values(:ls_trans_order_id,:ls_sku,0,:llLineItemNo,'BH',:ll_owner,'XXX','NA','N','-','-','-','-',0,'-','2999-12-31','-') using sqlca;
 			commit using sqlca;
+			
+			if sqlca.SQlcode <> 0 then
+				ls_error_message = SQLCA.SQLErrText
+				lsLogOut = '      - Bosch GI (Entry for the quantity Zero in the delivery_picking) - Processing of uf_gi() for Trans_Id: ' + string(al_trans_Id) + " - Order "+ls_trans_order_id+" has been rejected due to this reason "+ls_error_message+"."
+				FileWrite(giLogFileNo,lsLogOut)
+				gu_nvo_process_files.uf_write_log(lsLogOut)
+			end if
+						
+			insert into delivery_picking_detail(do_no,sku,quantity,line_item_no,supp_code,owner_id,country_of_origin,l_code,inventory_type,serial_no,lot_no,po_no,po_no2,component_no,container_id,expiration_date,zone_id,ro_no)
+			values (:ls_trans_order_id,:ls_sku,0,:llLineItemNo,'BH',:ll_owner,'XXX','NA','N','-','-','-','-',0,'-','2999-12-31','-','-')
+			commit using sqlca;
+			
 			if sqlca.SQlcode <> 0 then
 				ls_error_message = SQLCA.SQLErrText
 				lsLogOut = '      - Bosch GI (Entry for the quantity Zero in the delivery_pick_details) - Processing of uf_gi() for Trans_Id: ' + string(al_trans_Id) + " - Order "+ls_trans_order_id+" has been rejected due to this reason "+ls_error_message+"."

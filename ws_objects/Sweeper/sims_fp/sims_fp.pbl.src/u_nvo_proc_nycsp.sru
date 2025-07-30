@@ -599,13 +599,17 @@ FileWrite(gilogFileNo,lsLogOut)
 
 //lsFileName =  'Monthly_Outbound_Order_Report.' + String(DateTime( today(), now()), "yyyy.mm.dd") + '.csv'
 lsFileName =  'Monthly_Outbound_Order_Report.' + ls_formatted_name_file + '.csv'
-lsFileNamePath = ProfileString(asInifile, lsProject, "archivedirectory","") + '\' + lsFileName
+lsFileNamePath = ProfileString(asInifile, lsProject, "archivedirectory","") + '\' + lsFileName 
 
 lds_Rpt.SaveAs ( lsFileNamePath, csv!	, true )
 
 lsemailsubject = lsFileName
 //Send email...	
 gu_nvo_process_files.uf_send_email("NYCSP","CUSTVAL", lsemailsubject, "Please find the attached outbound order report for " + ls_formatted_file , lsFileNamePath)
+// Begin.....Akash Baghel.....07/28/2025.....SIMS-778 - IFB-NYCEM-SIMS Email not sent after Ship Confirmation
+gu_nvo_process_files.uf_write_log(lsLogOut) /*display msg to screen*/
+FileWrite(giLogFileNo,lsLogOut)	
+// End......Akash Baghel.....07/28/2025.....SIMS-778 - IFB-NYCEM-SIMS Email not sent after Ship Confirmation
 
 Update Activity_Schedule 
 Set     Next_Run_Time = :ls_formatted_next_date 

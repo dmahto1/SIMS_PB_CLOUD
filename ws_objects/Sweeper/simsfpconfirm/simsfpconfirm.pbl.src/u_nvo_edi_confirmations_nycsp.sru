@@ -582,15 +582,21 @@ For llRowPos = 1 to llRowCOunt
 next /*next Delivery Detail record */
 
 //Begin......Akash Baghel....07/02/2025....SIMS-750 Development for IFB-NYCEM-SIMS-Outbound Report Request
-String  lsFileNamePath, lsEmailSubject, lsattachmentfile, ls_subject
+String  lsFileNamePath, lsEmailSubject, lsattachmentfile, ls_subject, ls_orderno
 
-lsFileNamePath = ProfileString(gsInifile, 'NYCSP', 'archivedirectory','') + lsFileName
-lsattachmentfile = lsFileNamePath
-//
-lsEmailSubject = 'Ship Confirmation file for ' + lsFileName
-//ls_subject = lsEmailSubject 
-gu_nvo_process_files.uf_send_email("NYCSP","CUSTVAL",lsEmailSubject,"Please find the attached ship confirmation file attached for. ", lsattachmentfile) 
-	
+//lsFileNamePath = ProfileString(gsInifile, 'NYCSP', 'archivedirectory','') + lsFileName 
+ // Begin....Akash Baghel.....07/28/2025.....SIMS-778 - IFB-NYCEM-SIMS Email not sent after Ship Confirmation
+lsFileNamePath = ProfileString(gsInifile, 'NYCSP', 'archivedirectory','') + '\'+ lsFileName    
+ls_orderno=idsDoDetail.GetItemString(1,'Invoice_no')
+idsDoDetail.saveas(lsFileNamePath, Text!, true)   
+
+//lsEmailSubject = 'Ship Confirmation file for ' + lsFileName 
+lsEmailSubject = 'Ship Confirmation file for ' + ls_orderno
+//gu_nvo_process_files.uf_send_email("NYCSP","CUSTVAL",lsEmailSubject,"Please find the attached ship confirmation file attached for." , lsFileNamePath) 
+gu_nvo_process_files.uf_send_email("NYCSP","CUSTVAL",lsEmailSubject,"Please find the attached ship confirmation file attached for. "+ ls_orderno + "" , lsFileNamePath) 
+gu_nvo_process_files.uf_write_log(lsLogOut) /*display msg to screen*/
+FileWrite(giLogFileNo,lsLogOut)	
+// End......Akash Baghel.....07/28/2025.....SIMS-778 - IFB-NYCEM-SIMS Email not sent after Ship Confirmation
 //End......Akash Baghel Testing....07/02/2025....SIMS-750 Development for IFB-NYCEM-SIMS-Outbound Report Request
 
 //Write the Outbound File - no need to save and re-retrieve - just use the currently loaded DW

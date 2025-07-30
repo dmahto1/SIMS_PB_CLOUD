@@ -4520,17 +4520,36 @@ if is_Ready_Or_Confirm = 'READY' or is_Ready_Or_Confirm = 'BOTH'  then
 	//							We will confirm this in wf_check confirm that they really want to do this
 	// 07/04 - PCONKL - Linksys as well, 08/04 - Logitech, 01/10 - Warner
 	
-	If  upper(gs_project) =  'LOGITECH' or  upper(gs_project) =  'WARNER' Then
+//	  If upper(gs_project) = 'BOSCH' then // Dinesh - 07/29/2025- SIMS-774-IFB-SIMS Bosch - Unable to delete the picking list after saving for 0 qty pick
+//			wf_check_confirm()
+//	  End If
+		
+		long ll_zero
+	If  upper(gs_project) =  'LOGITECH' or  upper(gs_project) =  'WARNER' then
 	Else
-		If idw_pick.RowCount() <= 0 Then
-			wf_display_message('You must generate the Pick List before confirming this order!')    //MEA - 5/13 - Added Multi-Confirm
-//			Messagebox(is_title,'You must generate the Pick List before confirming this order!')
-			//f_method_trace( ll_method_trace_id, this.ClassName(), 'End ue_confirm' + ' You must generate the Pick List before confirming this order' )	//08-Feb-2013  :Madhu commented
-			f_method_trace_special( gs_project, this.ClassName() + ' - ue_confirm', 'End ue_confirm' + ' You must generate the Pick List before confirming this order' ,is_dono, ' ',' ',isinvoice_no) //08-Feb-2013  :Madhu added				
-			Return -1
-		End If
+			If idw_pick.RowCount() <= 0 Then
+				// Begin - Dinesh - 07/29/2025- SIMS-774-IFB-SIMS Bosch - Unable to delete the picking list after saving for 0 qty pick	
+				if upper(gs_project) = 'BOSCH' then 
+						ll_zero = wf_check_confirm()
+						if ll_zero = 0 then
+						elseif ll_zero = 1 then // Dinesh - 07/29/2025- SIMS-774-IFB-SIMS Bosch - Unable to delete the picking list after saving for 0 qty pick					
+							wf_display_message('You must generate the Pick List before confirming this order!')    //MEA - 5/13 - Added Multi-Confirm
+							f_method_trace_special( gs_project, this.ClassName() + ' - ue_confirm', 'End ue_confirm' + ' You must generate the Pick List before confirming this order' ,is_dono, ' ',' ',isinvoice_no) //08-Feb-2013  :Madhu added				
+							Return -1
+						end if
+						if ll_zero < 0 then return -1
+				else
+				// End - Dinesh - 07/29/2025- SIMS-774-IFB-SIMS Bosch - Unable to delete the picking list after saving for 0 qty pick		
+					wf_display_message('You must generate the Pick List before confirming this order!')    //MEA - 5/13 - Added Multi-Confirm
+					//Messagebox(is_title,'You must generate the Pick List before confirming this order!')
+					//f_method_trace( ll_method_trace_id, this.ClassName(), 'End ue_confirm' + ' You must generate the Pick List before confirming this order' )	//08-Feb-2013  :Madhu commented
+					f_method_trace_special( gs_project, this.ClassName() + ' - ue_confirm', 'End ue_confirm' + ' You must generate the Pick List before confirming this order' ,is_dono, ' ',' ',isinvoice_no) //08-Feb-2013  :Madhu added				
+					Return -1
+				 End if // Dinesh - 07/29/2025- SIMS-774-IFB-SIMS Bosch - Unable to delete the picking list after saving for 0 qty pick					
+			End If
 	End If
 	
+ 
 	//Jxlim 08/14/2013 Ariens prevent confirmation without pack generated
 	If  Upper(gs_project) =  'ARIENS' or Upper(gs_project) =  'GEISTLICH' Then // Dinesh- 10/07/2020- S50329- Geistlich 4075 - Making Pack List confirmation mandatory while shipping order
 		If idw_pack.RowCount() <= 0 Then
@@ -4739,8 +4758,10 @@ if is_Ready_Or_Confirm = 'READY' or is_Ready_Or_Confirm = 'BOTH'  then
 	End If
 	
 	//09/01 - PCONKL - check project specific required fields before confirmation
-	If wf_check_confirm() < 0 Then Return -1
-
+	//Just to stop double call of this function for BOSCH  Dinesh - 07/29/2025- SIMS-774-IFB-SIMS Bosch - Unable to delete the picking list after saving for 0 qty pick
+	If  upper(gs_project) <> 'BOSCH' then //Dinesh - 07/29/2025- SIMS-774-IFB-SIMS Bosch - Unable to delete the picking list after saving for 0 qty pick
+	 	If wf_check_confirm() < 0 Then Return -1
+	End if
 	//02/08 - MA - For order type Z check that Delivery_Master.Cust_Code is a valid warehouse code.  It must be one of the warehouse codes found in Warehouse.WH_Code.  
  
 	IF idw_main.GetItemString(1,'ord_type') = 'Z' THEN
@@ -5294,7 +5315,6 @@ if is_Ready_Or_Confirm = 'READY' or is_Ready_Or_Confirm = 'BOTH'  then
 	end if
 
 end if //is_Ready_Or_Confirm is 'READY' or 'BOTH'
-
 
 //MEA - 10/15/12 - Added CONFIRM because the custom validation was not being called for Confirm.
 
@@ -22025,15 +22045,15 @@ For i = 1 to ll_cnt /*each Pick*/
 	If idw_pick.GetItemString(i,'component_ind') = '*' or idw_pick.GetItemString(i,'component_ind') = 'B'  Then Continue
 	
 	//Quantiy must be > 0 
-	if gs_project = 'BOSCH' then // Dinesh - 07/08/2025-SIMS-738-Development for IFB-SIMS Bosch - Handle 0 picked/shipped qty for 945 		
-	else
+	//if gs_project = 'BOSCH' then // Dinesh - 07/08/2025-SIMS-738-Development for IFB-SIMS Bosch - Handle 0 picked/shipped qty for 945 	
+	//else 
 		If ((isnull(idw_pick.GetItemNumber(i,"quantity"))) or (not idw_pick.GetItemNumber(i,"quantity") > 0)) Then
 			Messagebox(is_title,"Quantity Must be > 0!",StopSign!)
 			tab_main.selecttab(4)
 			f_setfocus(idw_pick, i, "quantity")
 			return -1
 		End If
-	End if // Dinesh - 07/08/2025-SIMS-738 -Development for IFB-SIMS Bosch - Handle 0 picked/shipped qty for 945 
+	//End if // Dinesh - 07/08/2025-SIMS-738 -Development for IFB-SIMS Bosch - Handle 0 picked/shipped qty for 945 
 	//If Outbound Serialized, sum up the qty so we can validate below if necessary
 	//02/09 - PCONKL - added Type B to denote capture at IB and OB
 	If idw_pick.GetItemString(i, "Serialized_Ind") = 'O' or idw_pick.GetItemString(i, "Serialized_Ind") = 'B' Then

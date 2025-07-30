@@ -17,7 +17,7 @@ end prototypes
 
 public function integer uf_check_confirm ();Long	llRowCOunt,	llRowPos, llRoNo,	llLineItem,	llOwner, ll_line_item_no, llcount, ll_row, ll_idx,ll_findrow
 
-
+long ll_qty // Dinesh - 07/29/2025-SIMS-774-IFB-SIMS Bosch - Unable to delete the picking list after saving for 0 qty pick
 String	lsOrdStatus,  	ls_user_field1, lsTemp, ls_cust_order_no, ls_carrier, &
 			ls_user_field8, ls_Supp_Code, ls_SKU, lsCustomer, lsTermsCode, lsProject, lsWarehouse, lsRateInd, lsWarehouseType, lsUF1
 Boolean	lbNotCarton 
@@ -134,8 +134,22 @@ Choose Case Upper(gs_project)
 			End If
 			
 		Next
-		
-		
+	//Begin- Dinesh- 07/29/2025- SIMS-774-IFB-SIMS Bosch - Unable to delete the picking list after saving for 0 qty pick
+	Case 'BOSCH' 				//Warning message for allocated qty '0'
+		llRowCount = w_do.idw_detail.RowCount()
+		For llRowPos = 1 to llRowCount
+				ll_qty = w_do.idw_detail.GetITemnumber(llRowPos,'alloc_qty')
+				 IF ll_qty = 0 then
+						If Messagebox(w_do.is_title,'Are you sure you want to confirm this order as 0-picked?',Question!,YesNo!,2) = 2 Then
+							Return -1
+						End If
+					exit
+				else
+					return 1
+				  End If
+			NEXT
+	//End- Dinesh- 07/29/2025- SIMS-774-IFB-SIMS Bosch - Unable to delete the picking list after saving for 0 qty pick
+	
 // TAM 08/04 - Added Logitech Validation
 	Case 'LOGITECH'
 		

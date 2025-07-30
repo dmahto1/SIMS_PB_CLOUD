@@ -813,18 +813,19 @@ if dw_import.event ue_pre_validate() =1  then
 return 
 end if 
 
-// Begin....12/05/2024....Akash Baghel....SIMS-588.....Development for Google – SIMS- Bulk Locations Utilization
-	long ll_row 
-	ll_row = dw_import.getrow()
-	ls_data = dw_import.getitemstring(ll_row, 'user_field2')
-	     IF gs_project='PANDORA' then
-	       if long(len(ls_data)) > 3 then
-		    messagebox('Information','Please enter the pallet qty less than or equal to 3 digit.')
-		     return 
-	        end if
-	      END IF
-// End....12/05/2024...SIMS-588..Akash Baghel.... Development for Google – SIMS- Bulk Locations Utilization
-
+// Akash Baghel-07/29/2025- SIMS-952-SIMS - Google - Customer Import validation error - The below lines for SIMS-588 are no longer needed.
+//// Begin....12/05/2024....Akash Baghel....SIMS-588.....Development for Google – SIMS- Bulk Locations Utilization
+//	long ll_row 
+//	ll_row = dw_import.getrow()
+//	ls_data = dw_import.getitemstring(ll_row, 'user_field2')
+//	     IF gs_project='PANDORA' then
+//	       if long(len(ls_data)) > 3 then
+//		    messagebox('Information','Please enter the pallet qty less than or equal to 3 digit.')
+//		     return 
+//	        end if
+//	      END IF
+//// End....12/05/2024...SIMS-588..Akash Baghel.... Development for Google – SIMS- Bulk Locations Utilization
+//
 
 
 If ilCurrvalrow = 0 or isnull(ilCurrValRow) or ilCurrValRow > llRowCount Then
@@ -968,18 +969,19 @@ if dw_import.RowCount() <=0 Then Return
 
  li_save_return = dw_import.wf_save()
  
- // Begin....12/05/2024....Akash Baghel....SIMS-588.....Development for Google – SIMS- Bulk Locations Utilization
-	long ll_row 
-	ll_row = dw_import.getrow()
-	ls_data = dw_import.getitemstring(ll_row, 'user_field2')
-	     IF gs_project='PANDORA' then
-	       if long(len(ls_data)) > 3 then
-		    messagebox('','Please enter the pallet qty less than or equal to 3 digit.')
-		     return 
-	        end if
-	      END IF
-// End....12/05/2024...SIMS-588..Akash Baghel.... Development for Google – SIMS- Bulk Locations Utilization
-
+ // Akash Baghel-07/29/2025- SIMS-952-SIMS - Google - Customer Import validation error - The below lines for SIMS-588 are no longer needed.
+// // Begin....12/05/2024....Akash Baghel....SIMS-588.....Development for Google – SIMS- Bulk Locations Utilization
+//	long ll_row 
+//	ll_row = dw_import.getrow()
+//	ls_data = dw_import.getitemstring(ll_row, 'user_field2')
+//	     IF gs_project='PANDORA' then
+//	       if long(len(ls_data)) > 3 then
+//		    messagebox('','Please enter the pallet qty less than or equal to 3 digit.')
+//		     return 
+//	        end if
+//	      END IF
+//// End....12/05/2024...SIMS-588..Akash Baghel.... Development for Google – SIMS- Bulk Locations Utilization
+//
 CHOOSE CASE  li_save_return
 
    CASE -87 /* FInancial Data NOT Saved*/
