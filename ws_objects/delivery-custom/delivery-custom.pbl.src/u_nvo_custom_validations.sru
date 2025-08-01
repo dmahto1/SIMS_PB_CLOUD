@@ -24,7 +24,7 @@ Boolean	lbNotCarton
 DateTime ldt_schedule_datetime, ldtToday
 String ls_country_code, lsSiteID, lsFind
 int blank_emc_codes
-string ls_do_no,ls_Cust_code
+string ls_do_no,ls_Cust_code,ls_qty
 Datastore	lds_compare
 String ls_DWG_UPLOAD
 Decimal ldReqQty,ldAllocQty //29-Apr-2015 :Madhu- Added for FRIEDRICH
@@ -138,8 +138,10 @@ Choose Case Upper(gs_project)
 	Case 'BOSCH' 				//Warning message for allocated qty '0'
 		llRowCount = w_do.idw_detail.RowCount()
 		For llRowPos = 1 to llRowCount
-				ll_qty = w_do.idw_detail.GetITemnumber(llRowPos,'alloc_qty')
-				 IF ll_qty = 0 then
+				//ll_qty = w_do.idw_detail.GetITemnumber(llRowPos,'alloc_qty') //Dinesh- 07/30/2025- SIMS-774-IFB-SIMS Bosch - Unable to delete the picking list after saving for 0 qty pick
+				ls_qty = string(w_do.idw_detail.GetITemnumber(llRowPos,'alloc_qty')) //Dinesh- 07/30/2025- SIMS-774-IFB-SIMS Bosch - Unable to delete the picking list after saving for 0 qty pick
+				// IF ll_qty = 0 then //Dinesh- 07/20/2025- SIMS-774-IFB-SIMS Bosch - Unable to delete the picking list after saving for 0 qty pick
+				 IF ls_qty = "" or isnull(ls_qty) or ls_qty= "0" then //Dinesh- 07/30/2025- SIMS-774-IFB-SIMS Bosch - Unable to delete the picking list after saving for 0 qty pick
 						If Messagebox(w_do.is_title,'Are you sure you want to confirm this order as 0-picked?',Question!,YesNo!,2) = 2 Then
 							Return -1
 						End If
