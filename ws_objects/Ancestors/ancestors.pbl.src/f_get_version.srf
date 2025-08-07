@@ -14,8 +14,8 @@ global function string f_get_version ();// string = getVersion()
 //
 
 //Return '6020230907-QA 23.8 C02'
-//Return '20250227-PRD 25.01'
-Return '20250730-QA 25.06 C03'
+Return '20250805-PRD 25.04'
+//Return '20250730-QA 25.06 C03'
 //Return '20250508-PRD 25.01.2'
 //Return '6020230927-PRD 23.9'
 end function

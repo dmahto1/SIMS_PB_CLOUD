@@ -29,7 +29,7 @@ lsLogOut = '      - Bosch GI Confirmation- Start Processing of uf_gi() for Trans
 FileWrite(giLogFileNo,lsLogOut)
 gu_nvo_process_files.uf_write_log(lsLogOut)
 
-// Begin - Dinesh- 03/07/2025- SIMS-738-Development for IFB-SIMS Bosch - Handle 0 picked/shipped qty for 945 
+// Begin - Dinesh- 07/03/2025- SIMS-738-Development for IFB-SIMS Bosch - Handle 0 picked/shipped qty for 945 
 long llFindRow,ll_lineitem,ll_allocated_qty
 select trans_order_id into :ls_trans_order_id from batch_transaction where project_id=:as_project and trans_id = :al_trans_Id and trans_type='GI' using sqlca;
 lds_details = create datastore 
