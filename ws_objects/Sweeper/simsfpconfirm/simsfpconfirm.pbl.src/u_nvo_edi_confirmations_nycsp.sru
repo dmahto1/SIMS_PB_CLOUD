@@ -471,7 +471,7 @@ For llRowPos = 1 to llRowCOunt
 	lsSku = idsdoDetail.GetITEmString(llRowPos,'sku')
 
 	
-	
+	lsDelimitChar = ',' // Dinesh - 08/12/2025- SIMS-792-Change the format of GI File to CSV
 	lsOutString = 'GI' + lsDelimitChar
 	lsOutString = idsDoDetail.GetItemString(1,'wh_code') + lsDelimitChar 	//Warehouse	C(10)	Yes		Shipping Warehouse
 	lsOutString += lsSku  + lsDelimitChar		//SKU
@@ -575,7 +575,8 @@ For llRowPos = 1 to llRowCOunt
 	idsOut.SetItem(llNewRow,'edi_batch_seq_no', Long(ldBatchSeq))
 	idsOut.SetItem(llNewRow,'line_seq_no', llNewRow)
 	idsOut.SetItem(llNewRow,'batch_data', lsOutString)
-	lsFileName = 'GI' + String(ldBatchSeq,'000000') + '.RNM'
+	//lsFileName = 'GI' + String(ldBatchSeq,'000000') + '.RNM' // Dinesh - 08/12/2025- SIMS-792-Change the format of GI File to CSV
+	lsFileName = 'GI' + String(ldBatchSeq,'000000') + '.CSV' // Dinesh - 08/12/2025- SIMS-792-Change the format of GI File to CSV
 	idsOut.SetItem(llNewRow,'file_name', lsFileName)
 	
 
@@ -588,7 +589,9 @@ String  lsFileNamePath, lsEmailSubject, lsattachmentfile, ls_subject, ls_orderno
  // Begin....Akash Baghel.....07/28/2025.....SIMS-778 - IFB-NYCEM-SIMS Email not sent after Ship Confirmation
 lsFileNamePath = ProfileString(gsInifile, 'NYCSP', 'archivedirectory','') + '\'+ lsFileName    
 ls_orderno=idsDoDetail.GetItemString(1,'Invoice_no')
-idsDoDetail.saveas(lsFileNamePath, Text!, true)   
+//idsDoDetail.saveas(lsFileNamePath, Text!, true)  // Dinesh - 08/28/2025- SIMS-792-Change the format of GI File to CSV- for generating the file in .csv  instead of .txt
+idsDoDetail.saveas(lsFileNamePath, CSV!, true)  // Dinesh - 08/28/2025- SIMS-792-Change the format of GI File to CSV
+
 
 //lsEmailSubject = 'Ship Confirmation file for ' + lsFileName 
 lsEmailSubject = 'Ship Confirmation file for ' + ls_orderno
@@ -600,8 +603,8 @@ FileWrite(giLogFileNo,lsLogOut)
 //End......Akash Baghel Testing....07/02/2025....SIMS-750 Development for IFB-NYCEM-SIMS-Outbound Report Request
 
 //Write the Outbound File - no need to save and re-retrieve - just use the currently loaded DW
-gu_nvo_process_files.uf_process_flatfile_outbound_unicode(idsOut,asProject)
-
+//gu_nvo_process_files.uf_process_flatfile_outbound_unicode(idsOut,asProject)   // Dinesh - 08/28/2025- SIMS-792-Change the format of GI File to CSV- It does not require to save .csv txt file in the archive
+ 
 
 
 Return 0
@@ -2508,6 +2511,7 @@ TriggerEvent( this, "destructor" )
 call super::destroy
 end on
 
-event constructor;lsDelimitChar = char(9)
+event constructor;//lsDelimitChar = char(9)// Dinesh - 08/12/2025- SIMS-792-Change the format of GI File to CSV
+lsDelimitChar = ',' // Dinesh - 08/12/2025- SIMS-792-Change the format of GI File to CSV
 end event
 

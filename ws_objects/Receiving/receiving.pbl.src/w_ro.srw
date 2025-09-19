@@ -345,6 +345,7 @@ Boolean ib_puaway_gen =FALSE// SIMS-55 -Dhirendra for trace log for putaway gene
 Boolean ib_AutoFill_Shift_Select = false
 Long 	   il_AutoFill_Start_Row = 0
 end variables
+
 forward prototypes
 public function integer wf_set_comp_filter (string as_action)
 public function string wf_generate_pulse_imi ()
@@ -13170,9 +13171,9 @@ end if
 end event
 
 type tabpage_main from w_std_master_detail`tabpage_main within tab_main
-integer y = 108
+integer y = 116
 integer width = 3895
-integer height = 1972
+integer height = 1964
 string text = " Order Information "
 cb_readonly cb_readonly
 cb_custom2 cb_custom2
@@ -13258,9 +13259,9 @@ end if
 end event
 
 type tabpage_search from w_std_master_detail`tabpage_search within tab_main
-integer y = 108
+integer y = 116
 integer width = 3895
-integer height = 1972
+integer height = 1964
 cb_ro_search cb_ro_search
 cb_ro_clear cb_ro_clear
 dw_search dw_search
@@ -15811,9 +15812,9 @@ end event
 
 type tabpage_other_info from userobject within tab_main
 integer x = 18
-integer y = 108
+integer y = 116
 integer width = 3895
-integer height = 1972
+integer height = 1964
 long backcolor = 79741120
 string text = "Other Info"
 long tabtextcolor = 33554432
@@ -15867,9 +15868,9 @@ end event
 
 type tabpage_orderdetail from userobject within tab_main
 integer x = 18
-integer y = 108
+integer y = 116
 integer width = 3895
-integer height = 1972
+integer height = 1964
 long backcolor = 79741120
 string text = "Order Detail"
 long tabtextcolor = 33554432
@@ -17054,9 +17055,9 @@ end event
 
 type tabpage_putaway from userobject within tab_main
 integer x = 18
-integer y = 108
+integer y = 116
 integer width = 3895
-integer height = 1972
+integer height = 1964
 long backcolor = 79741120
 string text = " Put Away List "
 long tabtextcolor = 33554432
@@ -20856,9 +20857,9 @@ end event
 
 type tabpage_notes from userobject within tab_main
 integer x = 18
-integer y = 108
+integer y = 116
 integer width = 3895
-integer height = 1972
+integer height = 1964
 long backcolor = 79741120
 string text = "Notes"
 long tabtextcolor = 33554432
@@ -20892,9 +20893,9 @@ type tabpage_rma_serial from userobject within tab_main
 event ue_mode_switch ( )
 event ue_process_barcodes ( )
 integer x = 18
-integer y = 108
+integer y = 116
 integer width = 3895
-integer height = 1972
+integer height = 1964
 long backcolor = 79741120
 string text = "Serial #"
 long tabtextcolor = 33554432

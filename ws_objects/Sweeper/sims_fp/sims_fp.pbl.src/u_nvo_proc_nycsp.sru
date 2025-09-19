@@ -601,7 +601,7 @@ FileWrite(gilogFileNo,lsLogOut)
 lsFileName =  'Monthly_Outbound_Order_Report.' + ls_formatted_name_file + '.csv'
 lsFileNamePath = ProfileString(asInifile, lsProject, "archivedirectory","") + '\' + lsFileName 
 
-lds_Rpt.SaveAs ( lsFileNamePath, csv!	, true )
+lds_Rpt.SaveAs ( lsFileNamePath, csv!, true )
 
 lsemailsubject = lsFileName
 //Send email...	
@@ -613,6 +613,7 @@ FileWrite(giLogFileNo,lsLogOut)
 
 Update Activity_Schedule 
 Set     Next_Run_Time = :ls_formatted_next_date 
+
           //Parm_string = :ls_parm_string
 		// Last_Run_Time = :ld_last_run_time	 
 where function_name = 'u_nvo_proc_nycsp.uf_process_outbnd_monthly_gi_rpt' and project_id = 'NYCSP' 

@@ -115,7 +115,7 @@ table(column=(type=char(10) updatewhereclause=yes name=delivery_master_project_i
 		And Delivery_Detail.Sku = Item_MAster.SKU
 		and Delivery_Detail.Supp_Code = Item_Master.Supp_Code
 		Where delivery_master.Project_id = 'NYCSP' 
-		--AND delivery_master.WH_Code IN ('NYCSP-DAY','NYCSP-GVLE')// Akash- 08/07/2025- SIMS-750 Development for IFB-NYCEM-SIMS-Outbound Report Request .......07/07/2025
+		--AND delivery_master.WH_Code IN ('NYCSP-DAY','NYCSP-GVLE')// Dinesh- 08/13/2025- SIMS-791- IFB-NYCEM-SIMS-Outbound Report Request-Remove the Warehouse condition from the monthly report5
          AND Delivery_Master.Complete_Date  > :from_complete_date and  Delivery_Master.Complete_Date < :to_complete_date
          Order by Delivery_Master.WH_code, Delivery_Master.Complete_Date
 " arguments=(("from_complete_date", date),("to_complete_date", date))  sort="delivery_master_project_id A do_no A warehouse_wh_name A invoice_no A delivery_master_ord_type A delivery_detail_line_item_no A delivery_detail_sku A " )

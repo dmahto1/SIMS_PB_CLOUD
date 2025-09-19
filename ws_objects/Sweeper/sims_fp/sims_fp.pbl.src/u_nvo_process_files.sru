@@ -1160,7 +1160,7 @@ For llDirPos = 1 to Upperbound(lsDir)
 			lu_pulse = Create u_nvo_proc_pulse	
 		Case 'FLEX-SIN'
 			lu_nvo_proc_flextronics = Create u_nvo_proc_flextronics	
-		Case 'CHINASTD' , 'BABYCARE', 'GEISTLICH', 'KARCHER','FRIEDRICH','BOSCH'//MSTUART 080811 added babycare //BCR 23-NOV-2011...added Geistlich //TAM 2012/07 added Karcher//TAM 2013/10 Addred Friedrich//TAM 2014/08 Addred BOSCH
+		Case 'CHINASTD' , 'BABYCARE', 'GEISTLICH', 'KARCHER','FRIEDRICH','BOSCH' //MSTUART 080811 added babycare //BCR 23-NOV-2011...added Geistlich //TAM 2012/07 added Karcher//TAM 2013/10 Addred Friedrich//TAM 2014/08 Addred BOSCH
 			lu_nvo_proc_baseline_unicode = Create u_nvo_proc_baseline_unicode		
 		Case 'ASPEN'//TAM 2016/02 Moved Aspen to Custom Object
 			lu_nvo_proc_aspen = Create u_nvo_proc_aspen		
@@ -1447,7 +1447,7 @@ For llDirPos = 1 to Upperbound(lsDir)
 					liRC = lu_pulse.uf_process_files(lsProject, lsFileToProc, lsFiles[llFilePos], gsinifile)
 				Case 'FLEX-SIN'
 					liRC = lu_nvo_proc_flextronics.uf_process_files(lsProject, lsFileToProc, lsFiles[llFilePos], gsinifile)					
-				Case 'CHINASTD' , 'BABYCARE', 'GEISTLICH', 'KARCHER' , 'FRIEDRICH','BOSCH'//MSTUART 080811 added babycare //BCR 23-NOV-2011...added Geistlich //TAM 2012/07 added Karcher //TAM 2013/10 Added Friedrich//TAM 2014/08 Addred BOSCH
+				Case 'CHINASTD' , 'BABYCARE', 'GEISTLICH', 'KARCHER' , 'FRIEDRICH','BOSCH' //MSTUART 080811 added babycare //BCR 23-NOV-2011...added Geistlich //TAM 2012/07 added Karcher //TAM 2013/10 Added Friedrich//TAM 2014/08 Addred BOSCH
 					liRC = lu_nvo_proc_baseline_unicode.uf_process_files(lsProject, lsFileToProc, lsFiles[llFilePos], gsinifile)					
 				Case 'ASPEN'//TAM 2016/02 Moved Aspen to Custom Object
 					liRC = lu_nvo_proc_aspen.uf_process_files(lsProject, lsFileToProc, lsFiles[llFilePos], gsinifile)					
@@ -5663,7 +5663,7 @@ For llTranPos = 1 to llTranCount
 	
 	//If lsStatus <> 'N' Then Continue // Dinesh - 08/29/2022
 	
-	//If lsStatus <> 'D' Then Continue // Dinesh - 07/04/2025
+//	If lsStatus <> 'D' Then Continue // Dinesh - 07/04/2025
 
 
 	//SEPT 2019 - MikeA : S38259 Feature F18585: Change Sweeper to Limit 945s from Site to 10 per Cycle  (Bosch only)
