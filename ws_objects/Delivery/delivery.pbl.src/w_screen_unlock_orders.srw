@@ -439,6 +439,8 @@ Long ll_userspid,i
 
 //Make sure it's not being used before deleting
 
+dw_avail.SelectRow(0, FALSE) // Dinesh - 09/22/2025-SIMS-846-Google – SIMS- Google - SIMS – Session Unlock issue
+//This.SelectRow(row, TRUE)
 llRow = dw_avail.GetRow()
 
 if llRow=0 then

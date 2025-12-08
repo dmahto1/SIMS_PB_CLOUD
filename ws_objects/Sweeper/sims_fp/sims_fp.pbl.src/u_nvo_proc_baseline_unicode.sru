@@ -4176,7 +4176,10 @@ for llFileRowPos = 1 to llFilerowCount
 		llNewRow = ldsItem.InsertRow(0)
 
 		ldsItem.SetItem(1,'SKU',lsSKU)
-		ldsItem.SetItem(1,'project_id', lsProject)		
+		ldsItem.SetItem(1,'project_id', lsProject)	
+		// Begin - Dinesh - 10/01/2025 - SIMS-806-Development for IFB - SIMS Bosch - New EDI interface setup for 888 
+		ldsItem.SetItem(1,'create_time', dateTime(today(),now()))	
+		// End - Dinesh - 10/01/2025 - SIMS-806-Development for IFB - SIMS Bosch - New EDI interface setup for 888 
 
 //TAM 2013/11/01  Added default for Component Indicator
 

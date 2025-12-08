@@ -4826,9 +4826,9 @@ END CHOOSE
 end event
 
 type tabpage_main from w_std_master_detail`tabpage_main within tab_main
-integer y = 104
+integer y = 116
 integer width = 3776
-integer height = 1916
+integer height = 1904
 string text = " Transfer Information "
 cb_readonly cb_readonly
 rb_replenishment rb_replenishment
@@ -4934,9 +4934,9 @@ end if
 end event
 
 type tabpage_search from w_std_master_detail`tabpage_search within tab_main
-integer y = 104
+integer y = 116
 integer width = 3776
-integer height = 1916
+integer height = 1904
 cb_search cb_search
 dw_search dw_search
 cb_clear cb_clear
@@ -5280,7 +5280,8 @@ borderstyle borderstyle = stylelowered!
 end type
 
 event modified;String ls_order, ls_wh_code, ls_serial_ind,ls_edit_moderead
-Integer	lirc
+Integer	lirc 
+int	li_mes// Added - 24/09/2025 - Nisha Nair - SIMS-853-SIMS- Google - SIMS – Session Unlock issue
 long  ll_row, ll_detailcount 			//03-APR-2017 :Madhu -PEVS-424 - Stock Transfer Serial No.
 DatawindowChild	dwcFromLoc, ldwc
 String ls_User_Id,ls_Order_No,ls_screen_name,ls_Edit_Mode,ls_Edit_ModeW,ls_User_IdW,ls_Order_NoW,lsFind,ls_order_read,ls_invoice_no,ls_Edit_ModeR,ls_User_IdR,ls_Order_NoR
@@ -5374,10 +5375,23 @@ if gs_project='PANDORA' then
 						lb_selfuser= False
 				
 				elseif gs_System_No=ls_Order_NoW and gs_userid = ls_User_IdW and ll_spid <>il_userspid and gs_System_No <> '' then
-						messagebox(is_title,'Hey!! You have already opened another session: ' +string(ll_userspid)+ ' for~r~nthe same Order Number ' + isToNo + '.~r~n~r~nPlease close all your current/previous session first and then re-open the order.', Stopsign! )
-						lb_readonly=True
-						lb_selfuser= False
-				
+						//messagebox(is_title,'Hey!! You have already opened another session: ' +string(ll_userspid)+ ' for~r~nthe same Order Number ' + isToNo + '.~r~n~r~nPlease close all your current/previous session first and then re-open the order.', Stopsign! )// Commented - 24/09/2025 - Nisha Nair - SIMS-853-SIMS- Google - SIMS – Session Unlock issue
+						//Begin - 24/09/2025 - Nisha Nair - SIMS-853-SIMS- Google - SIMS – Session Unlock issue
+						li_mes=messagebox(is_title,'Hey!! You have already opened another session: ' +string(ll_userspid)+ ' for~r~nthe same Order Number ' + ls_order + '.~r~n~r~nDo you want to change the previous session to Read Mode only and open the current session in Write Mode ?', Question!,YesNo!,1 )//nisha2 commented.
+						if li_mes = 1 then
+							Update screen_lock set Edit_Mode ='R'	where User_Id=:gs_userid and screen_name='Stock Transfer' and UserSPID=:ll_spid using SQLCA;
+							f_method_trace_special( gs_project, this.ClassName() , 'Locking order to R by ' +gs_userid+' for session :' + String(ll_spid),isToNo, '','',isOrderNo) 	//nisha2-update added
+						
+							delete from screen_lock where User_Id=:gs_userid and screen_name='Stock Transfer' and UserSPID=:gl_userspid using sqlca; 
+							insert into Screen_Lock (User_Id,Order_No,Screen_Name,Entry_Date,Out_Date,Edit_Mode,UserSPID) values(:gs_userid,:gs_System_No,:is_title,getdate(),NULL,'W',:gl_userspid) using sqlca;
+							commit;
+							lb_selfuser= True
+							lb_readonly=false
+						else
+						//End - 24/09/2025 - Nisha Nair - SIMS-853-SIMS- Google - SIMS – Session Unlock issue
+							lb_readonly=True
+							lb_selfuser= False
+						end if //Added - 24/09/2025 - Nisha Nair - SIMS-853-SIMS- Google - SIMS – Session Unlock issue
 				elseif gs_System_No=ls_Order_NoW and gs_userid = ls_User_IdW and  ll_spid = il_userspid and gs_System_No <> '' then
 						//messagebox(is_title,'Hey!! You have already opened the same order in the same session with SPID ID: ' +string(ll_userspid)+ ' for~r for the Order number ' + ls_bol + '.~r~n~r~n', Stopsign! )
 						lb_readonly=False
@@ -5573,6 +5587,7 @@ if gs_project='PANDORA' then
 	
 		End if
 	//End -Dinesh - 11/06/2023- SIMS-328- Google- Read only PART 2
+	f_method_trace_special( gs_project, this.ClassName() , 'Opened Order in Stock Transfer - '+ls_edit_moderead ,isToNo, '','',isOrderNo )//Added - 24/09/2025 - Nisha Nair - SIMS-853-SIMS- Google - SIMS – Session Unlock issue
 
 	//03-APR-2017 :Madhu -PEVS-424 - Stock Transfer Serial No. - START
 	For ll_row =1 to ll_detailcount
@@ -6137,9 +6152,9 @@ event create ( )
 event destroy ( )
 event ue_transferall ( )
 integer x = 18
-integer y = 104
+integer y = 116
 integer width = 3776
-integer height = 1916
+integer height = 1904
 long backcolor = 79741120
 string text = "Transfer Detail"
 long tabtextcolor = 33554432

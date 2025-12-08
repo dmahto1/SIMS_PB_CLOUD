@@ -29221,6 +29221,7 @@ lb_readonly=False
 lb_selfuser=False
 //ib_search= False // Dinesh - 11/02/2023- SIMS-328 - Google  - Read only part 2
 //ib_search=True
+int	li_mes  //24/09/2025 - Nisha Nair - SIMS-853-SIMS- Google - SIMS – Session Unlock issue
 
 
 
@@ -29414,11 +29415,23 @@ if gs_project='PANDORA' then
 						lb_selfuser= False
 				
 				elseif gs_System_No=ls_Order_NoW and gs_userid = ls_User_IdW and ll_spid <>gl_userspid and gs_System_No <> '' then
-						
-						messagebox(is_title,'Hey!! You have already opened another session: ' +string(ll_userspid)+ ' for~r~nthe same Order Number ' + ls_order + '.~r~n~r~nPlease close all your current/previous session first and then re-open the order.', Stopsign! )
-						lb_readonly=True
-						lb_selfuser= False
-				
+					//	messagebox(is_title,'Hey!! You have already opened another session: ' +string(ll_userspid)+ ' for~r~nthe same Order Number ' + ls_order + '.~r~n~r~nPlease close all your current/previous session first and then re-open the order.', Stopsign! ) // Commented - 24/09/2025 - Nisha Nair - SIMS-853-SIMS- Google - SIMS – Session Unlock issue
+						// Begin - 24/09/2025 - Nisha Nair - SIMS-853-SIMS- Google - SIMS – Session Unlock issue
+						li_mes=messagebox(is_title,'Hey!! You have already opened another session: ' +string(ll_userspid)+ ' for~r~nthe same Order Number ' + ls_order + '.~r~n~r~nDo you want to change the previous session to Read Mode only and open the current session in Write Mode ?', Question!,YesNo!,1 )//nisha2 commented.
+						if li_mes = 1 then 
+							Update screen_lock set Edit_Mode ='R'	where User_Id=:gs_userid and screen_name='Delivery Order' and UserSPID=:ll_spid using SQLCA;
+							f_method_trace_special( gs_project, this.ClassName() , 'Locking order to R by ' +gs_userid+' for session :' + String(ll_spid),is_dono, '','',isinvoice_no) 	//nisha2-update added
+							
+							delete from screen_lock where User_Id=:gs_userid and screen_name='Delivery Order' and UserSPID=:gl_userspid using sqlca; 
+							insert into Screen_Lock (User_Id,Order_No,Screen_Name,Entry_Date,Out_Date,Edit_Mode,UserSPID) values(:gs_userid,:gs_System_No,:is_title,getdate(),NULL,'W',:gl_userspid) using sqlca;
+							commit;
+							lb_selfuser= True
+							lb_readonly=false						
+						else 
+							// Commented Begin - 24/09/2025 - Nisha Nair - SIMS-853-SIMS- Google - SIMS – Session Unlock issue
+							lb_readonly=True
+							lb_selfuser= False
+						end if //24/09/2025 - Nisha Nair - SIMS-853-SIMS- Google - SIMS – Session Unlock issue		
 				elseif gs_System_No=ls_Order_NoW and gs_userid = ls_User_IdW and  ll_spid = gl_userspid and gs_System_No <> '' then
 						//messagebox(is_title,'Hey!! You have already opened the same order in the same session with SPID ID: ' +string(ll_userspid)+ ' for~r for the Order number ' + ls_order + '.~r~n~r~n', Stopsign! )
 						lb_readonly=False
@@ -29640,7 +29653,8 @@ If idw_main.RowCount() > 0 Then
 	isinvoice_no = idw_main.GetItemString(1,'invoice_no')
 	//TimA 08/13/15 Global gs_System_No for logging database errors if they happen
 	gs_System_No = is_dono
-	f_method_trace_special( gs_project, this.ClassName() , 'Opened Outbound order ' ,is_dono, '','',isinvoice_no) 		
+//	f_method_trace_special( gs_project, this.ClassName() , 'Opened Outbound order ' ,is_dono, '','',isinvoice_no) 	// Commented - 24/09/2025 - Nisha Nair - SIMS-853-SIMS- Google - SIMS – Session Unlock issue
+	f_method_trace_special( gs_project, this.ClassName() , 'Opened Outbound order - ' + ls_edit_moderead ,is_dono, '','',isinvoice_no) //24/09/2025 - Nisha Nair - SIMS-853-SIMS- Google - SIMS – Session Unlock issue
 	ls_wh_code= idw_main.object.wh_code[1]
 	
 	If Pos(iw_window.Title, '[') = 0 Then
@@ -40209,13 +40223,23 @@ If idw_Pack.RowCount() > 0 Then
 				llLIneItemNo = idw_Pick.GetITemNumber(llRowPos,'Line_Item_No')
 				lsFind =  "Line_item_no = " + string(llLIneItemNo)
 				ll_row = idw_Pack.Find(lsFind, 1, idw_Pack.RowCount())
-	
-				If ll_row < 1 Then
-					Messagebox(is_title,"Packing List information missing for Line Item " + string(llLIneItemNo) + ". Please check!",StopSign!)
-					tab_main.selecttab(5)
-					return 
-				End If	
-			Next
+			 // Begin- Dinesh - 10/17/2025- SIMS-864-Development for IFB-SIMS Bosch-Pack List not printing a line is 0 picked 	
+				If gs_project = 'BOSCH' then
+					llPickQty =  idw_Pick.GetITemNumber(llRowPos,'quantity') 
+					If ll_row < 1  and  llPickQty > 0 Then
+						Messagebox(is_title,"Packing List information missing for Line Item " + string(llLIneItemNo) + ". Please check!",StopSign!)
+						tab_main.selecttab(5)
+						return 
+					end if
+				Else
+				// End - 10/17/2025- SIMS-864-Development for IFB-SIMS Bosch-Pack List not printing a line is 0 picked 
+					If ll_row < 1 Then
+						Messagebox(is_title,"Packing List information missing for Line Item " + string(llLIneItemNo) + ". Please check!",StopSign!)
+						tab_main.selecttab(5)
+						return 
+					End If	
+				End If // Dinesh - 10/17/2025- SIMS-864-Development for IFB-SIMS Bosch-Pack List not printing a line is 0 picked 
+		Next
 
 		//24-APR-2019 :Madhu S32730 Picking and Packing Quantity Validation
 		IF wf_pick_pack_qty_comparision() < 0 THEN Return -1

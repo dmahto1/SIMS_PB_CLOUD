@@ -534,6 +534,14 @@ event close;DateTIme	ldtLogout
 
 If gs_userid > '' Then
 	
+	// Begin - 24/09/2025 - Nisha Nair - SIMS-853-SIMS- Google - SIMS – Session Unlock issue
+	if gs_project = 'PANDORA' then
+		delete from Screen_Lock where user_id=:gs_userid and userspid=:gl_userspid using sqlca;
+		commit;
+		f_method_trace_special( gs_project, this.ClassName() , 'Closing Main SIMS Application ' ,'', '','','') 						
+	end if
+	// End - 24/09/2025 - Nisha Nair - SIMS-853-SIMS- Google - SIMS – Session Unlock issue
+	
 	ldtLogout = DateTime(today(),Now())
 
 	Execute Immediate "Begin Transaction" using SQLCA; /* 11/04 - PCONKL - Auto Commit Turned on to eliminate DB locks*/

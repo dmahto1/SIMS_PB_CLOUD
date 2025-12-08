@@ -4716,9 +4716,9 @@ END CHOOSE
 end event
 
 type tabpage_main from w_std_master_detail`tabpage_main within tab_main
-integer y = 104
+integer y = 116
 integer width = 4247
-integer height = 2744
+integer height = 2732
 string text = "Owner Change Information "
 cb_readonly cb_readonly
 cb_set_new cb_set_new
@@ -4780,9 +4780,9 @@ end if
 end event
 
 type tabpage_search from w_std_master_detail`tabpage_search within tab_main
-integer y = 104
+integer y = 116
 integer width = 4247
-integer height = 2744
+integer height = 2732
 cb_search cb_search
 dw_search dw_search
 cb_clear cb_clear
@@ -4933,6 +4933,7 @@ end type
 
 event modified;String ls_order, ls_wh_code, ls_code,ls_OrderNbr
 Integer	lirc, llCount, ll_Serialized_Indacator, li_row,ll_userspid,ll_spid,j,k
+Integer	li_mes//24/09/2025 - Nisha Nair - SIMS-853-SIMS- Google - SIMS – Session Unlock issue
 DatawindowChild	dwcFromLoc, ldwc
 datastore lds_screen_lockR,lds_screen_lockW
 boolean lb_locked,lb_multiple_ord_search,lb_readonly,lb_selfuser
@@ -5102,10 +5103,25 @@ if gs_project='PANDORA' then
 				
 				elseif gs_System_No=ls_Order_NoW and gs_userid = ls_User_IdW and ll_spid <>gl_userspid and gs_System_No <> '' then
 						
-						messagebox(is_title,'Hey!! You have already opened another session: ' +string(ll_userspid)+ ' for~r~nthe same Order Number ' + ls_order + '.~r~n~r~nPlease close all your current/previous session first and then re-open the order.', Stopsign! )
-						lb_readonly=True
-						lb_selfuser= False
-				
+						//messagebox(is_title,'Hey!! You have already opened another session: ' +string(ll_userspid)+ ' for~r~nthe same Order Number ' + ls_order + '.~r~n~r~nPlease close all your current/previous session first and then re-open the order.', Stopsign! )// Commented - 24/09/2025 - Nisha Nair - SIMS-853-SIMS- Google - SIMS – Session Unlock issue
+						//Begin - 24/09/2025 - Nisha Nair - SIMS-853-SIMS- Google - SIMS – Session Unlock issue
+						li_mes=messagebox(is_title,'Hey!! You have already opened another session: ' +string(ll_userspid)+ ' for~r~nthe same Order Number ' + ls_order + '.~r~n~r~nDo you want to change the previous session to Read Mode only and open the current session in Write Mode ?', Question!,YesNo!,1 )
+						if li_mes = 1 then 
+							lb_selfuser= True
+							Update screen_lock set Edit_Mode ='R'	where User_Id=:gs_userid and screen_name='Stock Owner Change' and UserSPID=:ll_spid using SQLCA;
+							f_method_trace_special( gs_project, this.ClassName() , 'Locking order to R by ' +gs_userid+' for session :' + String(ll_spid),isToNo, '','',isOrderNo) 	//nisha2-update added
+							
+							delete from screen_lock where User_Id=:gs_userid and screen_name='Stock Owner Change' and UserSPID=:gl_userspid using sqlca; 
+							insert into Screen_Lock (User_Id,Order_No,Screen_Name,Entry_Date,Out_Date,Edit_Mode,UserSPID) values(:gs_userid,:gs_System_No,:is_title,getdate(),NULL,'W',:gl_userspid) using sqlca;
+							commit;
+							lb_readonly=false
+						else 
+						// End - 24/09/2025 - Nisha Nair - SIMS-853-SIMS- Google - SIMS – Session Unlock issue
+
+							lb_readonly=True
+							lb_selfuser= False
+						end if//24/09/2025 - Nisha Nair - SIMS-853-SIMS- Google - SIMS – Session Unlock issue
+
 				elseif gs_System_No=ls_Order_NoW and gs_userid = ls_User_IdW and  ll_spid = gl_userspid and gs_System_No <> '' then
 						//messagebox(is_title,'Hey!! You have already opened the same order in the same session with SPID ID: ' +string(ll_userspid)+ ' for~r for the Order number ' + ls_order + '.~r~n~r~n', Stopsign! )
 						lb_readonly=False
@@ -5303,8 +5319,8 @@ if gs_project='PANDORA' then
 			//End - Dinesh - 11/06/2023 - SIMS-328 - Google - SIMS - Google - SIMS - Read Only Access part 2
 		
 	 End if
-//End - Dinesh - 07/25/2023 - SIMS-198 - Google - SIMS - Google - SIMS - Read Only Access 
-
+//End - Dinesh - 07/25/2023 - SIMS-198 - Google - SIMS - Google - SIMS - Read Only Access
+f_method_trace_special( gs_project, this.ClassName() , 'Opened - Stock Owner Change - '+ls_edit_moderead ,isToNo, '','',isOrderNo)// Added - 24/09/2025 - Nisha Nair - SIMS-853-SIMS- Google - SIMS – Session Unlock issue
 		
 		//*Begin................... Akash Baghel - 08/09/2023...- SIMS 243- Match the project code in order detail tab to project code table */
         String  ls_pono, ls_new_pono, ls_pono_code, ls_new_pono_code, lsFindpono, lsFindpononew
@@ -5983,9 +5999,9 @@ event create ( )
 event destroy ( )
 event ue_transferall ( )
 integer x = 18
-integer y = 104
+integer y = 116
 integer width = 4247
-integer height = 2744
+integer height = 2732
 long backcolor = 79741120
 string text = "Owner Change Detail"
 long tabtextcolor = 33554432
@@ -7763,9 +7779,9 @@ event ue_clear ( )
 event ue_save ( )
 event ue_delete ( )
 integer x = 18
-integer y = 104
+integer y = 116
 integer width = 4247
-integer height = 2744
+integer height = 2732
 long backcolor = 79741120
 string text = "Serial Numbers"
 long tabtextcolor = 33554432
@@ -9135,9 +9151,9 @@ event ue_clear ( )
 string tag = "P/C Capture"
 boolean visible = false
 integer x = 18
-integer y = 104
+integer y = 116
 integer width = 4247
-integer height = 2744
+integer height = 2732
 long backcolor = 79741120
 string text = "P/C Capture"
 long tabtextcolor = 33554432

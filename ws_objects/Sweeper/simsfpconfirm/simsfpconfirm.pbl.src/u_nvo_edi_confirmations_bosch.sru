@@ -36,8 +36,8 @@ lds_details = create datastore
 lds_details.dataobject ="d_do_detail"  
 lds_details.SetTransObject(SQLCA)
 lds_details.retrieve(ls_trans_order_id)
-//lds_details.setfilter("alloc_qty = " + string(ll_allocated_qty)) // Dinesh - 07/29/2025- SIMS-774-IFB-SIMS Bosch - Unable to delete the picking list after saving for 0 qty pick
-lds_details.setfilter("alloc_qty ="+string(ll_allocated_qty)+" or alloc_qty="+""+" or alloc_qty="+"NULL"+"") // Dinesh - 07/29/2025- SIMS-774-IFB-SIMS Bosch - Unable to delete the picking list after saving for 0 qty pick
+//lds_details.setfilter("alloc_qty ="+string(ll_allocated_qty)+" or alloc_qty="+""+" or alloc_qty="+"NULL"+"") // Dinesh - 07/29/2025- SIMS-774-IFB-SIMS Bosch - Unable to delete the picking list after saving for 0 qty pick  //Dinesh - 10/17/2025- SIMS-864-Development for IFB-SIMS Bosch-Pack List not printing a line is 0 picked - commented out this line of code to fix the duplicate entry.
+lds_details.setfilter("alloc_qty = 0")  //Dinesh - 10/17/2025- SIMS-864-Development for IFB-SIMS Bosch-Pack List not printing a line is 0 picked - commented out the above setfilter() and added this to fix the duplicate entry.
 lds_details.filter() // Dinesh - 07/29/2025- SIMS-774-IFB-SIMS Bosch - Unable to delete the picking list after saving for 0 qty pick
 	ll_count = lds_details.rowcount()
 	Do While ll_count > 0

@@ -43,27 +43,30 @@ ldsDD.settransobject( SQLCA)
 
 ll_rowcount = this.rowcount( ) //DW rowcount
 
-string ls_code_desc
-
 For ll_row =3 to ll_rowcount
 	
 	ls_WhName = this.getitemstring( ll_row, 'col2')   //Warehouse
-	
-	//Begin - Dinesh - 08/28/2025- SIMS-803-IFB-SIMS-NYCEM-Update the Warehouse ID's
-	select Code_Descript into :ls_code_desc from Lookup_Table where Project_id='NYCSP' and Code_Type='WAVE_WH' and code_id=:ls_WhName using sqlca;
-	ls_whcode = ls_code_desc
-	//End - Dinesh- 08/28/2025- SIMS-803-IFB-SIMS-NYCEM-Update the Warehouse ID's
-//Begin - Dinesh- 08/28/2025- SIMS-803-IFB-SIMS-NYCEM-Update the Warehouse ID's // Get rid of Hard coded 
-//	choose case upper(ls_WhName)
-//		case 'EDGEWOOD'
-//			ls_whcode ='NYCSP-EDGE'
-//		case 'MONROE'
-//			ls_whcode ='NYCSP-MONR'
-//		//dts - 07/28/2021 - S59828 - Add Dayton warehouse to case statement.
-//		case 'DAYTON'
-//			ls_whcode='NYCSC-DAYT'
-//	end choose
-//End - Dinesh-  08/28/2025- SIMS-803-IFB-SIMS-NYCEM-Update the Warehouse ID's // Get rid of Hard coded 
+  	
+	// Begin - 01/09/2025 - Nisha Nair - SIMS-819-SIMS-NYCEM-Update the Warehouse ID's	
+		
+		select Code_Descript  into : ls_whcode
+		from dbo.Lookup_Table with (nolock)
+		where project_id ='NYCSP' and code_type ='WAVE_WH' and code_id = :ls_WhName
+		using sqlca;
+	// End - 01/09/2025 - Nisha Nair - SIMS-819-SIMS-NYCEM-Update the Warehouse ID's	
+		
+	// Commented Begin - 01/09/2025 - Nisha Nair - SIMS-819-SIMS-NYCEM-Update the Warehouse ID's	
+	/*choose case upper(ls_WhName)
+		case 'EDGEWOOD'
+			ls_whcode ='NYCSP-EDGE'
+		case 'MONROE'
+			ls_whcode ='NYCSP-MONR'
+		//dts - 07/28/2021 - S59828 - Add Dayton warehouse to case statement.
+		case 'DAYTON'
+			ls_whcode='NYCSC-DAYT'
+	end choose*/
+	// Commented Ends - 01/09/2025 - Nisha Nair - SIMS-819-SIMS-NYCEM-Update the Warehouse ID's	
+
 	ls_dono = of_get_sequenceNo() //get DoNo
 
 	i =ldsDM.insertrow( 0)

@@ -10903,7 +10903,7 @@ event modified;String ls_order, ls_customer, ls_Max, ls_filter_str, ls_encoded_i
 String ls_user_id,ls_order_no,ls_screen_name,ls_edit_mode,ls_user_idw,ls_order_now,ls_edit_moderead
 datetime ldt_entry_date,ldt_out_date
 boolean lb_readonly, lb_selfuser
-
+int	li_mes// 24/09/2025 - Nisha Nair - SIMS-853-SIMS- Google - SIMS – Session Unlock issue
 Long rows, ll_Result1Rows, ll_Result2Rows, ll_Result3Rows, ll_SIRows,ll_row,ll_row1,ll_spid,ll_userspid
 datastore lds_screen_lockW,lds_screen_lockR
 
@@ -10995,10 +10995,26 @@ if gs_project='PANDORA' then
 						lb_selfuser= False
 				
 				elseif gs_System_No=ls_Order_NoW and gs_userid = ls_User_IdW and ll_spid <>gl_userspid and gs_System_No <> '' then
-						messagebox(is_title,'Hey!! You have already opened another session: ' +string(ll_userspid)+ ' for~r~nthe same Order Number ' + ls_order + '.~r~n~r~nPlease close all your current/previous session first and then re-open the order.', Stopsign! )
-						
-						lb_readonly=True
-						lb_selfuser= False
+						//messagebox(is_title,'Hey!! You have already opened another session: ' +string(ll_userspid)+ ' for~r~nthe same Order Number ' + ls_order + '.~r~n~r~nPlease close all your current/previous session first and then re-open the order.', Stopsign! )// Commented Begin - 24/09/2025 - Nisha Nair - SIMS-853-SIMS- Google - SIMS – Session Unlock issue
+
+						// Begin - 24/09/2025 - Nisha Nair - SIMS-853-SIMS- Google - SIMS – Session Unlock issue
+						setCCOrder( ls_order )
+						li_mes=messagebox(is_title,'Hey!! You have already opened another session: ' +string(ll_userspid)+ ' for~r~nthe same Order Number ' + ls_order + '.~r~n~r~nDo you want to change the previous session to Read Mode only and open the current session in Write Mode ?', Question!,YesNo!,1 )//nisha2 commented.
+						if li_mes = 1 then 
+							lb_selfuser= True
+							Update screen_lock set Edit_Mode ='R'	where User_Id=:gs_userid and screen_name='Cycle Count' and UserSPID=:ll_spid using SQLCA;
+							f_method_trace_special( gs_project, this.ClassName() , 'Locking order to R by ' +gs_userid+' for session :' + String(ll_spid),isCCOrder, '','',isCCOrder) 	//nisha2-update added
+													
+							delete from screen_lock where User_Id=:gs_userid and screen_name='Cycle Count' and UserSPID=:gl_userspid using sqlca; 
+							insert into Screen_Lock (User_Id,Order_No,Screen_Name,Entry_Date,Out_Date,Edit_Mode,UserSPID) values(:gs_userid,:gs_System_No,:is_title,getdate(),NULL,'W',:gl_userspid) using sqlca;
+							commit;
+							lb_readonly=false
+						else
+						// End - 24/09/2025 - Nisha Nair - SIMS-853-SIMS- Google - SIMS – Session Unlock issue
+							lb_readonly=True
+							lb_selfuser= False
+						end if //24/09/2025 - Nisha Nair - SIMS-853-SIMS- Google - SIMS – Session Unlock issue
+
 				
 				elseif gs_System_No=ls_Order_NoW and gs_userid = ls_User_IdW and  ll_spid = gl_userspid and gs_System_No <> '' then
 						//messagebox(is_title,'Hey!! You have already opened the same order in the same session with SPID ID: ' +string(ll_userspid)+ ' for~r for the Order number ' + ls_order + '.~r~n~r~n', Stopsign! )
@@ -11240,7 +11256,9 @@ If idw_main.RowCount() > 0 Then
 	
 	setCCOrder( ls_order )
 	
-	f_method_trace_special( gs_project, 'w_cc' , 'START of sle_no.modified()' ,isCCOrder, '','',isCCOrder)
+	//f_method_trace_special( gs_project, 'w_cc' , 'START of sle_no.modified()' ,isCCOrder, '','',isCCOrder)// commeneted - 24/09/2025 - Nisha Nair - SIMS-853-SIMS- Google - SIMS – Session Unlock issue
+	f_method_trace_special( gs_project, 'w_cc' , 'START of sle_no.modified() - '+ls_edit_moderead ,isCCOrder, '','',isCCOrder)// 24/09/2025 - Nisha Nair - SIMS-853-SIMS- Google - SIMS – Session Unlock issue
+
 
 	//TimA 05/04/12 Pandora issue #405 change the sort order to l_code to match reports
 //	setCCOrder( 'l_code','sku' )

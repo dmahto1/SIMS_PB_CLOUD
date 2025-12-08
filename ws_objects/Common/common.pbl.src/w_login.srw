@@ -981,6 +981,19 @@ g.GetComputerNameA (ls_machine_name, lul_name_size)
 lsVersion = f_get_Version() 
 g.idt_user_Login_Time = DateTime(Today(),Now()) /* saved so we can re-retrieve and update logout time*/
 
+//Begin - Dinesh - 11/03/2025- sims-874-Display a Message to the User when a new SIMS Version is Deployed
+string ls_sims_version,ls_message,ls_update_ind
+select top 1 sims_version into :ls_sims_version from User_Login_History where UserId= :gs_userid order by login_time desc using sqlca;
+SELECT  Code_Descript,User_Updateable_Ind into :ls_message, :ls_update_ind  from Lookup_Table where Code_Type='SIMSNEWVERSION' and Code_Id='NOTIFICATION' and User_Updateable_Ind='Y' using sqlca;
+IF (ls_message <> '' or not isnull(ls_message)) and ls_update_ind ='Y' then
+	if  ls_sims_version <> lsVersion  then
+		  openwithparm(w_sims_update,ls_message)
+		 // sleep(10)
+	else
+	end if
+ELSE
+End IF
+//End - Dinesh - 11/03/2025- sims-874-Display a Message to the User when a new SIMS Version is Deployed
 
 //TimA 07/23/15 Look for the PBD files for SIMS and compare the dates to the sims-mww.exe file.
 lsPbdListFiles = 'ancestors.pbd,china-reports.pbd,common.pbd,DDDW.pbd,delivery-custom.pbd,delivery-dw.pbd,delivery.pbd,inventory-mnt.pbd,maintenance.pbd,receiving.pbd,report-custom.pbd,report.pbd,shipments.pbd,sims_app.pbd,utility.pbd,warehouse.pbd,'

@@ -13699,6 +13699,7 @@ event modified;String ls_bol,	lsOrder, lsModify, lsRC, ls_wh_code, ls_ordertype,
 String ls_wh_type // TAM W&S,
 String ls_User_Id,ls_Order_No,ls_screen_name,ls_Edit_Mode,ls_Edit_ModeW,ls_User_IdW,ls_Order_NoW,lsFind,ls_edit_moderead
 Long	llCount, ll_rownum, ll_numrows, ll_edibatchseqno,j,ll_spid,k,ll_userspid,ll_userspidR,llFindRow
+Int	li_mes// Added - 24/09/2025 - Nisha Nair - SIMS-853-SIMS- Google - SIMS – Session Unlock issue
 DatawindowChild ldwc
 boolean lb_multi_ord_search
 String ls_User_Field13,ls_User_Field15
@@ -13916,10 +13917,24 @@ if gs_project='PANDORA' then
 				
 				elseif gs_System_No=ls_Order_NoW and gs_userid = ls_User_IdW and ll_spid <>gl_userspid and gs_System_No <> '' then
 						
-						messagebox(is_title,'Hey!! You have already opened another session: ' +string(ll_userspid)+ ' for~r~nthe same Order Number ' + is_order_new + '.~r~n~r~nPlease close all your current/previous session first and then re-open the order.', Stopsign! )
-						lb_readonly=True
-						lb_selfuser= False
-				
+						//messagebox(is_title,'Hey!! You have already opened another session: ' +string(ll_userspid)+ ' for~r~nthe same Order Number ' + is_order_new + '.~r~n~r~nPlease close all your current/previous session first and then re-open the order.', Stopsign! )// Commented - 24/09/2025 - Nisha Nair - SIMS-853-SIMS- Google - SIMS – Session Unlock issue
+						//Begin - 24/09/2025 - Nisha Nair - SIMS-853-SIMS- Google - SIMS – Session Unlock issue
+						li_mes=messagebox(is_title,'Hey!! You have already opened another session: ' +string(ll_userspid)+ ' for~r~nthe same Order Number ' + is_order_new + '.~r~n~r~nDo you want to change the previous session to Read Mode only and open the current session in Write Mode ?', Question!,YesNo!,1 )//nisha2 commented.
+						if li_mes = 1 then 
+							Update screen_lock set Edit_Mode ='R'	where User_Id=:gs_userid and screen_name='Receiving Order' and UserSPID=:ll_spid using SQLCA;
+							f_method_trace_special( gs_project, this.ClassName() , 'Locking order to R by ' +gs_userid+' for session :' + String(ll_spid),is_rono, '','',is_suppinvoiceno) 	//nisha2-update added
+
+							delete from screen_lock where User_Id=:gs_userid and screen_name='Receiving Order' and UserSPID=:gl_userspid using sqlca; 
+							insert into Screen_Lock (User_Id,Order_No,Screen_Name,Entry_Date,Out_Date,Edit_Mode,UserSPID) values(:gs_userid,:gs_System_No,:is_title,getdate(),NULL,'W',:gl_userspid) using sqlca;
+							commit;
+							lb_selfuser= True
+							lb_readonly=false
+						else
+						//End - 24/09/2025 - Nisha Nair - SIMS-853-SIMS- Google - SIMS – Session Unlock issue
+							lb_readonly=True
+							lb_selfuser= False
+						End if//Begin - 24/09/2025 - Nisha Nair - SIMS-853-SIMS- Google - SIMS – Session Unlock issue
+						
 				elseif gs_System_No=ls_Order_NoW and gs_userid = ls_User_IdW and  ll_spid = gl_userspid and gs_System_No <> '' then
 						//messagebox(is_title,'Hey!! You have already opened the same order in the same session with SPID ID: ' +string(ll_userspid)+ ' for~r for the Order number ' + ls_order + '.~r~n~r~n', Stopsign! )
 						lb_readonly=False
@@ -14124,7 +14139,8 @@ ll_result = idw_main.Retrieve(is_rono)
 if  Upper(gs_project) ="PANDORA" THEN 
 		f_crossdock() // Dinesh - 28/06/2021 - S52817- Google - SIMS QA - Last leg of a multileg is flagged as crossdock
 end if
-f_method_trace_special( gs_project, this.ClassName() , 'Opened Inbound order ' ,is_rono, '','',is_suppinvoiceno ) 
+//f_method_trace_special( gs_project, this.ClassName() , 'Opened Inbound order ' ,is_rono, '','',is_suppinvoiceno ) // Commented - 24/09/2025 - Nisha Nair - SIMS-853-SIMS- Google - SIMS – Session Unlock issue
+f_method_trace_special( gs_project, this.ClassName() , 'Opened Inbound order - '+ls_edit_moderead ,is_rono, '','',is_suppinvoiceno )// Added - 24/09/2025 - Nisha Nair - SIMS-853-SIMS- Google - SIMS – Session Unlock issue
 IF idw_main.RowCount() > 0 Then
 	is_suppinvoiceno = ls_bol
 	

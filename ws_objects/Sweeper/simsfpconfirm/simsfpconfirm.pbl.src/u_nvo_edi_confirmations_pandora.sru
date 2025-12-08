@@ -10674,11 +10674,9 @@ String		lsFind, lsOutString,	lslogOut, lsProject,	lsNextRunTime,	lsNextRunDate,	
 				
 String lsSaveSku,lsSavePoNo, lsSaveNewPoNo, lsSaveLineNumber, lsPndser, ls_whcode, ls_gmt_offset
 string lsCurrentSku, lsCurrentPoNo, lsCurrentNewPoNo, lsCurrentLineNumber, lsWriteLineNumber, ls_client_id,ls_Owner_code_new,lsToWarehouse,ls_custcode
-
-Decimal		ldBatchSeq, ldownerid, ldnewownerid, ldOMQ_Inv_Tran
+Decimal		ldBatchSeq, ldownerid, ldnewownerid, ldOMQ_Inv_Tran 
 Integer		liRC
 DateTime	ldtToday, ldtTemp
-
 Long lldetailfindrow, ll_change_req_no,ll_detail_row,  ll_serial_row, ll_rc, ll_inv_row, ll_attr_row
 String lsLineParm, ls_line_no
 Boolean lbParmFound
@@ -10969,7 +10967,7 @@ For llRowPos = 1 to llRowCount
 			 Return -1
 		End If
 
-//TAM 11/01/2017 - ll_change_req_no does not have a value then this was created by a cycle count SOC.  We don't create the OMQ_Warehouse_Order or Detail(Only the OMQ Inventory Transactions)
+		//TAM 11/01/2017 - ll_change_req_no does not have a value then this was created by a cycle count SOC.  We don't create the OMQ_Warehouse_Order or Detail(Only the OMQ Inventory Transactions)
 		If ll_change_req_no > 0 Then //Only write if Change request nbr > 0 - Start
 			ll_detail_row =idsOMQWhDODetail.insertrow( 0)
 			idsOMQWhDODetail.setitem( ll_detail_row, 'CHANGE_REQUEST_NBR',ll_change_req_no)
@@ -11035,8 +11033,7 @@ For llRowPos = 1 to llRowCount
 		//4. Write records into OMQ_Inventory_Transaction Table
 
 		//Decrement Adjustment Record
-		ll_Inv_Row = idsOMQInvTran.insertrow(0)
-	
+		ll_Inv_Row = idsOMQInvTran.insertrow(0)	
 		idsOMQInvTran.setitem( ll_Inv_Row,'CLIENT_ID',ls_client_id)
 		idsOMQInvTran.setitem( ll_Inv_Row, 'QACTION', 'I') //Action
 		idsOMQInvTran.setitem( ll_Inv_Row, 'QSTATUS', 'NEW') //Status
@@ -11094,11 +11091,11 @@ For llRowPos = 1 to llRowCount
 //TAM 11/01/2017 - We only set the the OMQ_Inventory_transaction.SOURCETYPE = 'ntrTransferDetailAdd' for SOCs created by a CC(ll_change_req_no = 0)
 //		If lsSaveNewPoNo = 'RESEARCH' then 
 		//If lsSaveNewPoNo = 'RESEARCH' and ll_change_req_no = 0 then  // Dinesh - 04/18/2023- SIMS-197- Google - SIMS - Cycle Count Adjustment Changes
-		If lsSaveNewPoNo = 'MAIN'   AND Right(lsNewOwnerCD,2) ='PR' and ll_change_req_no = 0 then // Dinesh - 04/18/2023- SIMS-197- Google - SIMS - Cycle Count Adjustment Changes
-			idsOMQInvTran.setitem( ll_Inv_Row, 'SOURCETYPE', 'ntrTransferDetailAdd') //ntrTransferDetailAdd
-		Else 
-			idsOMQInvTran.setitem( ll_Inv_Row, 'SOURCETYPE', 'SOC') //ntrTransferDetailAdd
-		End If
+			If lsSaveNewPoNo = 'MAIN'   AND Right(lsNewOwnerCD,2) ='PR' and ll_change_req_no = 0 then // Dinesh - 04/18/2023- SIMS-197- Google - SIMS - Cycle Count Adjustment Changes
+				idsOMQInvTran.setitem( ll_Inv_Row, 'SOURCETYPE', 'ntrTransferDetailAdd') //ntrTransferDetailAdd
+			Else 
+				idsOMQInvTran.setitem( ll_Inv_Row, 'SOURCETYPE', 'SOC') //ntrTransferDetailAdd
+			End If
 			
 		//Increment Adjustment Record
 		ll_Inv_Row = idsOMQInvTran.insertrow(0)
@@ -12627,6 +12624,7 @@ Decimal ld_adj_No
 boolean lbAutoSOC =FALSE
 string ls_custcode,lsToWarehouse,ls_CodeDesc
 String ls_new_po_no_main='MAIN',ls_cc_class_Code,ls_dc_class_Code
+long ll_count_wh_pr  // Dinesh - 11/12/2025- SIMS-872-Development for Google - SIMS - WH*PR SOC change \
 
 Str_Parms ls_serial_Parms, ls_Trans_Id_Parms
 
@@ -12857,11 +12855,8 @@ IF ll_Qty > ll_QtyCount THEN
 								:ls_lot_No) Using SQLCA;
 						
 						update  Adjustment set po_no=:ls_New_Po_No_Main, owner_id=:ll_Owner_Id_new where project_id = 'PANDORA' and ro_no=:ls_Ro_No and wh_code=:ls_wh and sku=:ls_sku and Owner_id=:ll_Owner_Id and l_code=:ls_lcode and old_quantity=0 using sqlca;
-						//update content set po_no=:ls_New_Po_No_Main, Owner_id=:ll_Owner_Id_new where project_id = 'PANDORA' and ro_no=:ls_Ro_No and wh_code=:ls_wh and sku=:ls_sku and Owner_id=:ll_Owner_Id and l_code=:ls_lcode using sqlca;                               
 						
 						commit;
-						
-						
 						
 				 //End - Dinesh - 04/11/2023- SIMS-197-Google- SIMS- Cycle count adjustment changes
 									
@@ -12918,14 +12913,31 @@ IF ll_Qty > ll_QtyCount THEN
 		Next
 		End IF
 	END IF // Dinesh - 02/13/2024 - SIMS-341-Google - SIMS Bug on auto decrement from Cycle Count
+	long ll_count_old,ll_count_new
 		 if ls_ToNo <> '' or not isnull(ls_ToNo) then
-			update Transfer_Detail set New_PO_No='MAIN',New_Owner_Id=:ll_Owner_Id_new
-			where To_No= :ls_ToNo and sku =:ls_sku and S_Location =:ls_lcode and Owner_Id =:ll_Owner_Id
-			using sqlca;
+			SELECT count(*) into :ll_count_old FROM Transfer_Detail with(nolock) where (Owner_Id in (select owner_id from owner where owner_cd like 'WH%PR') and New_Owner_Id in (select owner_id from owner where owner_cd like 'WH%PR')) and PO_No='MAIN' and New_PO_No='RESEARCH' and sku=:ls_sku  and To_No = :ls_ToNo using sqlca; //Dinesh - 11/19/2025- SIMS-872-Development for Google - SIMS - WH*PR SOC change 				
+			update Transfer_Detail set New_PO_No='MAIN',New_Owner_Id=:ll_Owner_Id_new 
+			//where To_No= :ls_ToNo and sku =:ls_sku and S_Location =:ls_lcode and Owner_Id =:ll_Owner_Id using sqlca;
+			where To_No= :ls_ToNo and sku =:ls_sku and S_Location =:ls_lcode and Owner_Id =:ll_Owner_Id and new_po_no ='RESEARCH' using sqlca;
 			commit;
+			SELECT count(*) into :ll_count_new  FROM Transfer_Detail with(nolock) where (Owner_Id in (select owner_id from owner where owner_cd like 'WH%PR') and New_Owner_Id in (select owner_id from owner where owner_cd like 'WH%PR')) and PO_No='MAIN' and New_PO_No='MAIN'  and sku=:ls_sku  and To_No = :ls_ToNo using sqlca; //Dinesh - 11/19/2025- SIMS-872-Development for Google - SIMS - WH*PR SOC change 				
 		end if
 		update  Adjustment set po_no=:ls_New_Po_No_Main, owner_id=:ll_Owner_Id_new where project_id = 'PANDORA'  and wh_code=:ls_wh and sku=:ls_sku and Owner_id=:ll_Owner_Id and l_code=:ls_lcode and old_quantity=0 using sqlca;
 		commit; 
+		
+		//Begin - Dinesh - 11/19/2025- SIMS-872-Development for Google - SIMS - WH*PR SOC change 				
+		 IF ll_count_old = ll_count_new and ( ll_count_old <> 0 and ll_count_new <> 0)  then
+			DELETE from adjustment where project_id = 'PANDORA' and ref_no=:ls_ToNo using sqlca;
+			COMMIT using sqlca;
+			//Write to File and Screen
+			lsLogOut = '      - 3PL Cycle Count- Auto SOC Adjustment is deleted for the CC_No: '+ls_cc_no+ ' as the owner and pono is already WH*PR with MAIN. '
+			FileWrite(giLogFileNo,lsLogOut)
+			gu_nvo_process_files.uf_write_log(lsLogOut)
+
+		ELSE
+		END IF
+		//End - Dinesh - 11/19/2025- SIMS-872-Development for Google - SIMS - WH*PR SOC change 		
+		
 		// End - Dinesh - 07/13/2023- SIMS-246- Google- Down Count not managing Adjustments and Inventory Correctly
 		// Dinesh - 02/13/2024 - SIMS-341-Google - SIMS Bug on auto decrement from Cycle Count
 		update Content Set po_No=:ls_New_Po_No_Main,Owner_Id=:ll_Owner_Id_new
