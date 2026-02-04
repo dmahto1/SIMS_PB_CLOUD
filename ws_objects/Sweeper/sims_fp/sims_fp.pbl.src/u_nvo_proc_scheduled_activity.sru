@@ -19,6 +19,7 @@ public function integer uf_send_email (string asproject, string asdistriblist, s
 public function integer uf_process_functions (string asinifile)
 public function integer uf_process_trax_eod (string asproject, string aswarehouse, string asparmstring, datetime adtlastruntime, string asemailstring, string asemailsubject)
 public function string uf_method_trace_archive ()
+public function string uf_sweeper_cycle_log_archive ()
 end prototypes
 
 public function integer uf_process_reports (string asinifile);
@@ -650,6 +651,14 @@ For llFunctionRowPos = 1 to llFunctionRowCOunt
 				 	FileWrite(gilogFileNo,lsMessage_archive)
 				end if
 			// End -Dinesh - 11/21/2022- SIMS-125-    METHOD_TRACE_ARCHIVE to Archive method_trace_log_archive table
+			// Begin -Dinesh - 12/17/2025- SIMS-894-Sweeper_Cycle_log to Archive Sweeper_Cycle_log_archive table                             
+			case 'uf_sweeper_cycle_log_archive'
+				 if lsproject='DEMO' or lsproject='PANDORA' then
+					lsMessage_archive=uf_sweeper_cycle_log_archive()
+				 	gu_nvo_process_files.uf_write_log(lsMessage_archive) /*display msg to screen*/
+				 	FileWrite(gilogFileNo,lsMessage_archive)
+				end if
+			// End -Dinesh - 12/17/2025- SIMS-894- Sweeper_Cycle_log to Archive Sweeper_Cycle_log_archive table                             
 			// pvh - Ford
 			Case 'u_nvo_proc_ford.uf_process_inventory_snapshot'
 				If Not isvalid(u_nvo_proc_ncr) Then	
@@ -1615,6 +1624,34 @@ select count(*) into :ll_count from method_trace_SP_log where Method_Enter_Dt < 
 
 return ls_msg
 // End -Dinesh - 11/23/2022- SIMS-125 -   METHOD_TRACE_ARCHIVE to Archive method_trace_log_archive table
+end function
+
+public function string uf_sweeper_cycle_log_archive ();// Begin -Dinesh - 12/17/2025- SIMS-894 to Archive Sweeper_Cycle_log table
+long ll_count,ll_days,llrc,lirc1,llcount
+string ls_msg
+date ldate_method_trace
+datastore lds_Method_Trace_Log
+datastore lds_Method_Trace_Log_archive
+long ll_Trans_Id,ll_Spid,i,llcountarchive
+string ls_Project_ID,ls_UserId,ls_Login_Name,ls_Application_Name,ls_Object_Name
+String ls_Method_Desc_Enter,ls_System_No
+date ld_Method_Enter_Dt,ld_Method_Exit_Dt,ld_calculate_date_to
+string ls_Method_Desc_Exit,ls_Purge_Flg
+select count(*) into :ll_count from Sweeper_Cycle_log where Next_Sweep_time < getdate() - 30 ;
+		DECLARE lsp_Sweeper_Cycle_log_archive PROCEDURE FOR dbo.sp_Sweeper_Cycle_log_archive
+		USING SQLCA;
+		
+		EXECUTE lsp_Sweeper_Cycle_log_archive;
+		 
+		IF SQLCA.SQLCode = -1 THEN
+			ls_msg = 'Sweeper_Cycle_log ARCHIVE is unsuccessful with this error' + ' ' + SQLCA.SQLErrText
+		ELSE
+			ls_msg ='Sweeper_Cycle_log ARCHIVE is successfully completed, Total record(s) ' + String(ll_count) + ' is/are archived on Sweeper_Cycle_log_archive table.'
+			
+		END IF
+
+return ls_msg
+// End -Dinesh - 12/17/2025- SIMS-894  to Archive Sweeper_Cycle_log table
 end function
 
 on u_nvo_proc_scheduled_activity.create

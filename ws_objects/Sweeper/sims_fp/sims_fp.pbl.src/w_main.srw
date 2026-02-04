@@ -188,9 +188,12 @@ li_ScreenW = PixelsToUnits(le_Env.ScreenWidth, XPixelsToUnits!)
 
 This.Y = (li_ScreenH - This.Height) / 2
 This.X = (li_ScreenW - This.Width) / 2
+
+gdtToday = DateTime(Today(), Now()) // Dinesh - 12/08/2025- SIMS-894- to Archive Sweeper_Cycle_log table
 end event
 
-event timer;// If the remaining time is greater than 0,
+event timer;Datetime ldtToday //Dinesh - 12/08/2025- SIMS-894- to Archive Sweeper_Cycle_log table
+// If the remaining time is greater than 0,
 If il_remaining > 0 then
 	
 	// Decrement the time remaining.
@@ -207,6 +210,12 @@ Else
 	
 	// If the last sweeper cycle has completed,
 	If gbReady Then
+		// Begin -Dinesh - 12/08/2025- SIMS-894- to Archive Sweeper_Cycle_log table
+		ldtToday = DateTime(Today(), Now()) // Dinesh - 12/08/2025
+		Insert Into Sweeper_Cycle_log (Sweeper_Name,Sweeper_Start_time, Next_Sweep_time,Sweeper_Stop_time, Status) 
+ 		Values(:gsEnvironment,:gdtToday,:ldtToday,NULL,'R') using sqlca;
+		commit using sqlca;
+		// End -Dinesh - 12/08/2025- SIMS-894- to Archive Sweeper_Cycle_log table
 		
 		// Disable the timer while were processing files.
 		timer(0)

@@ -262,6 +262,8 @@ SingleLineEdit isle_code
 long il_find_matchW,il_find_matchR
 String is_display_name,is_matched
 
+string is_sku_difference[] //Nisha-02/03/2026 - SIMS-913 - Cycle-count process to keeps discrepancy locked until sweeper runs to complete the move - starts*/
+
 string is_sql
 string is_max_lcode,is_min_lcode
 string is_max_sku,is_min_sku
@@ -349,7 +351,6 @@ Boolean ib_SuperDuper_Asked
 string is_SuperDuper_BlindKnown
 
 end variables
-
 forward prototypes
 public subroutine wf_clear_screen ()
 public subroutine wf_sort ()
@@ -6844,6 +6845,11 @@ String ls_SQLError
 long ll_CurLine, ll_SI_Line, ll_DeleteLine //dts - 2/27/2013 - 556-2; Setting the System Inventory location to ALLOCATED if deleting a line from counts
  long ll_row1
  string ls_location1
+ /*Added by Nisha-02/03/2026 - SIMS-913 - Cycle-count process to keeps discrepancy locked until sweeper runs to complete the move - starts*/
+string ls_where_in,ls_sql
+long ll_for_row
+ /*Added by Nisha-02/03/2026 - SIMS-913 - Cycle-count process to keeps discrepancy locked until sweeper runs to complete the move - ends*/
+
  
 // Acess Rights
 If f_check_access(is_process,"S") = 0 Then return -1
@@ -7820,18 +7826,32 @@ end if
 			//MEA - Moved outside of Loop to use CC_No instead
 			//2017/11 - TAM - 3PL CC - If confirmed then Update the Last Counted Date(New field)  Otherwise don't update(Split the update into 2 statement for "C" and "V"
 			If idw_main.GetItemString(1,"ord_status")  = "C" Then
-				UPDATE CONTENT
-					SET 	inventory_type = old_inventory_type,	
-							Country_of_Origin = old_country_of_origin,
-							old_inventory_type = null, 
-							old_country_of_origin = null,
-							CC_No = null,
-							last_user = :gs_userid,
-							last_update = :ldtToday,
-							last_cycle_count = :ldtToday
-					WHERE project_id = :gs_project AND
-								CC_No = :ls_cc_no
-								USING SQLCA;
+				 /*Added by Nisha-02/03/2026 - SIMS-913 - Cycle-count process to keeps discrepancy locked until sweeper runs to complete the move - starts*/
+				if UPPER(gs_project) = 'PANDORA' then
+					ls_where_in= ""
+					FOR  ll_for_row = 1 TO UpperBound(is_sku_difference[])
+						IF ll_for_row > 1 THEN ls_where_in += ","
+							ls_where_in += "'" + is_sku_difference[ll_for_row]   + "'"
+					NEXT
+	                   
+					ls_sql= "UPDATE CONTENT SET inventory_type = old_inventory_type, Country_of_Origin = old_country_of_origin, old_inventory_type = null, old_country_of_origin = null, CC_No = null, last_user ='" + gs_userid +"', last_update = getdate(), last_cycle_count = getdate() WHERE  project_id ='" + gs_project + "'AND (Rtrim(Ltrim(sku)) +Rtrim(Ltrim(L_code))+Rtrim(Ltrim(po_no))) NOT IN ( "+ ls_where_in + ") and CC_No = '"+ls_cc_no+ "'"
+		
+					EXECUTE IMMEDIATE :ls_sql;
+				else
+				 /*Added by Nisha-02/03/2026 - SIMS-913 - Cycle-count process to keeps discrepancy locked until sweeper runs to complete the move - ends*/
+					UPDATE CONTENT
+						SET 	inventory_type = old_inventory_type,	
+								Country_of_Origin = old_country_of_origin,
+								old_inventory_type = null, 
+								old_country_of_origin = null,
+								CC_No = null,
+								last_user = :gs_userid,
+								last_update = :ldtToday,
+								last_cycle_count = :ldtToday
+						WHERE project_id = :gs_project AND
+									CC_No = :ls_cc_no
+									USING SQLCA;
+				end if /*Added by Nisha-1/28/2026 - SIMS-913 - Cycle-count process to keeps discrepancy locked until sweeper runs to complete the move*/
 			Else ////2017/11 - TAM - 3PL CC - Not confirm so don't set Last Cycle Count Date
 				UPDATE CONTENT
 					SET 	inventory_type = old_inventory_type,	
@@ -10739,6 +10759,8 @@ datetime ldtToday
 string ls_order, ls_msg, ls_ord_status, lsOrdStatus
 
 integer liSerialMatch // TAM 2017/11
+long li_row,li_sku_array/*Added by Nisha-02/03/2026 - SIMS-913 - Cycle-count process to keeps discrepancy locked until sweeper runs to complete the move*/
+String ls_difference/*Added by Nisha-02/03/2026 - SIMS-913 - Cycle-count process to keeps discrepancy locked until sweeper runs to complete the move*/
 
 f_method_trace_special( gs_project, this.ClassName() , 'Start confirm CC Order ' ,isCCOrder, '','',isCCOrder) //18-Jun-2014 :Madhu- Added Method Trace calls.
 
@@ -10826,6 +10848,27 @@ If gs_project = 'PANDORA' Then
 	END IF
 
 	//22-Jan-2019 :Madhu S28292 - Don't confirm CC, if discrepancy occur on 1st and 2nd counts - END
+	/*Added by Nisha-02/03/2026 - SIMS-913 - Cycle-count process to keeps discrepancy locked until sweeper runs to complete the move - starts*/
+	li_row =1
+	li_sku_array= 0
+	DO WHILE li_row >0
+		if li_row<=  idw_si.RowCount() then 
+			li_row=idw_si.Find("(Not IsNull(difference)) AND difference <> 0", li_row, idw_si.RowCount())
+			IF li_row > 0 THEN 
+				ls_difference =""
+				li_sku_array = li_sku_array+1
+				ls_difference = trim( idw_si.getitemstring(li_row,"sku")) +trim(idw_si.getitemstring(li_row,"l_code")) +trim(idw_si.getitemstring(li_row,"po_no"))
+				is_sku_difference[li_sku_array] = ls_difference
+				li_row= li_row+1
+			else 
+				li_row= 0
+			END IF 
+		else
+			li_row=0
+		end if
+	LOOP			
+	 /*Added by Nisha-02/03/2026 - SIMS-913 - Cycle-count process to keeps discrepancy locked until sweeper runs to complete the move - ends*/ 
+
 	
 	if idw_si.Find("(Not IsNull(difference)) AND difference <> 0", 1, idw_si.RowCount()) > 0 then
 		Open(w_cc_adjust_create)

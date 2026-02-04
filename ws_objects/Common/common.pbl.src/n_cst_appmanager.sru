@@ -2204,7 +2204,7 @@ IF ids_Custom_dw.Rowcount() > 0 THEN
 
 	ls_syntax=  "Datawindow = '"+ string(adw_name.DataObject) + "'" //and (column_label <> " + "'' or Required_ind = 'Y')"
 		
-	ll_foundrow = ids_Custom_dw.Find(ls_syntax,	ll_foundrow, ids_Custom_dw.RowCount()) 				
+	ll_foundrow = ids_Custom_dw.Find(ls_syntax,	ll_foundrow, ids_Custom_dw.RowCount()) 
 		
 	IF ll_foundrow > 0 THEN
 		il_DataWindowNo = ids_Custom_dw.getitemnumber(ll_foundrow,"Custom_Datawindow_No")

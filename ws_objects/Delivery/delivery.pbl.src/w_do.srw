@@ -27627,12 +27627,14 @@ i_nwarehouse = Create n_warehouse
 tab_main.MoveTab(2, 13)
 tab_main.tabpage_main.cb_do_select_customer.visible=false
 tab_main.tabpage_load_plan.visible =false
-//Begin -Dinesh -08/01/2024- SIMS-576-Flextronics ( SHW ) Unable to amend the Carton # at the Packing List Tab in SIMS
-If gs_project <> 'PANDORA' Then
+//Commented by Nisha - 02/04/2026- SIMS-920- Fix to the DataWindow Column Re-Order Functionality-Starts
+//Begin -Dinesh -08/01/2024- SIMS-526-Flextronics ( SHW ) Unable to amend the Carton # at the Packing List Tab in SIMS
+/*If gs_project <> 'PANDORA' Then
 	tab_main.tabpage_pack.dw_pack.dataobject = 'd_do_packing_grid_non_pandora'
 	tab_main.tabpage_pack.dw_pack.SetTransObject(SQLCA)
-End If
-//End -Dinesh -08/01/2024- SIMS-576-Flextronics ( SHW ) Unable to amend the Carton # at the Packing List Tab in SIMS
+End If*/
+//End -Dinesh -08/01/2024- SIMS-526-Flextronics ( SHW ) Unable to amend the Carton # at the Packing List Tab in SIMS
+//Commented by Nisha - 02/04/2026- SIMS-920- Fix to the DataWindow Column Re-Order Functionality-ends
 // 09/05 - PCONKL - Hide TRAX tab if project not enabled
 If not g.ibTraxEnabled Then
 	tab_main.tabpage_trax.visible = False
@@ -47253,7 +47255,6 @@ boolean visible = false
 integer x = 9
 integer y = 1580
 integer width = 1906
-integer height = 364
 integer taborder = 20
 boolean titlebar = true
 string title = "Assign Scanner ID:"

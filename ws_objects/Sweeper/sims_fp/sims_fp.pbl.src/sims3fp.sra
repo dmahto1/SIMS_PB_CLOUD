@@ -33,13 +33,13 @@ String gs_OTM_Flag, gsOTMSendInboundOrder, gsOTMSendOutboundOrder
 //TimA 06/06/12
 //Global flag to turn on or off method log tracing
 String gs_method_log_flag
+datetime  gdtToday // Dinesh - 12/08/2025- SIMS- to Archive Sweeper_Cycle_log table
 
 String gsDoNo,gsRoNo //29-Sep-2014 :Madhu -KLN B2B Conversion to SPS
 
 String gsEmailSubject //2019/05/31  - S33973  - Added a global email subjuct line to allow customization within a process
 
 end variables
-
 global type sims3fp from application
 string appname = "sims3fp"
 string appruntimeversion = "19.2.0.2703"

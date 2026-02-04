@@ -104,6 +104,7 @@ ulong	il_hConnection, Il_hopen
 Boolean	lbRestartRequested, ibAlreadyRunning, lbRestartScheduled
 Private constant long MAX_PATH = 260
 Date	idtLogChangeDate
+Boolean ib_connection= True// Dinesh - 12/08/2025- SIMS- to Archive Sweeper_Cycle_log table
 
 // pvh gmt 12/27/05
 u_nvo_dst_setdates	dstUtil
@@ -5502,6 +5503,11 @@ datastore lds_screen_lock, lds_gr_transaction
  string ls_user_id,ls_order_no ,ls_entry_date_new
  Datetime ldt_entry_date
  long ll_ret,ll_count
+/*Added by Nisha-1/28/2026 - SIMS-913 - Cycle-count process to keeps discrepancy locked until sweeper runs to complete the move - starts*/
+date  ldtToday
+string lsUser
+ldtToday =today()
+ /*Added by Nisha-1/28/2026 - SIMS-913 - Cycle-count process to keeps discrepancy locked until sweeper runs to complete the move - ends*/
 
 lsLogOut = ''
 FileWrite(giLogFileNo,lsLogOut)
@@ -5659,11 +5665,11 @@ For llTranPos = 1 to llTranCount
 	Where trans_id = :llTransID
 	using sqlca;
 	
-	//If lsStatus <> 'N' Then Continue
+	If lsStatus <> 'N' Then Continue
 	
 	//If lsStatus <> 'N' Then Continue // Dinesh - 08/29/2022
 	
-	If lsStatus <> 'D' Then Continue // Dinesh - 07/04/2025
+	//If lsStatus <> 'D' Then Continue // Dinesh - 07/04/2025
 
 
 	//SEPT 2019 - MikeA : S38259 Feature F18585: Change Sweeper to Limit 945s from Site to 10 per Cycle  (Bosch only)
@@ -5751,7 +5757,30 @@ For llTranPos = 1 to llTranCount
 			llRC = lu_edi_Confirm.uf_proof_of_delivery_Confirmation(lsProject, lsOrderID, llTransID)
 			
 		Case 'CC' /* 06/10  dts - Cycle Count confirmation for Pandora */
+			/*Added by Nisha-1/28/2026 - SIMS-913 - Cycle-count process to keeps discrepancy locked until sweeper runs to complete the move - starts*/
+			Select last_user into :lsUser from CC_master(nolock) 
+			where CC_No= :lsOrderID 
+			USING SQLCA;
 			
+			if Upper(lsTranType) = 'CC' then 
+				UPDATE CONTENT
+				SET 	inventory_type = old_inventory_type,	
+						Country_of_Origin = old_country_of_origin,
+						old_inventory_type = null, 
+						old_country_of_origin = null,
+						CC_No = null,
+						last_user = :lsUser, 
+						last_update = :ldtToday,
+						last_cycle_count = :ldtToday
+				WHERE project_id = :lsProject AND
+							CC_No = :lsOrderID AND
+							inventory_type ='*'  AND
+							((old_inventory_type is not null) and old_inventory_type <> '') AND
+							((Old_Country_Of_Origin is not null) and Old_Country_Of_Origin <> '')
+							USING SQLCA;
+			end if			
+			/*Added by Nisha-1/28/2026 - SIMS-913 - Cycle-count process to keeps discrepancy locked until sweeper runs to complete the move - Ends*/
+
 			llRC = lu_edi_Confirm.uf_cycle_count_Confirmation(lsProject, lsOrderID, llTransID)
 			
 		Case 'SN' /* 06/10  dts - Serial Number Change confirmation for Pandora */
@@ -6088,6 +6117,17 @@ uf_write_Log(lsOutput) /*display msg to screen*/
 	
 	//TimA 12/22/11
 	yield()
+	
+// Begin -Dinesh - 12/08/2025- SIMS-894- To Archive Sweeper_Cycle_log table
+  if  ib_connection= True then
+	  connect using sqlca;
+	  Insert Into Sweeper_Cycle_log (Sweeper_Name,Sweeper_Start_time, Next_Sweep_time,Sweeper_Stop_time, Status) 
+	  Values(:gsEnvironment,:gdtToday,NULL, NULL,'R');
+	  commit using sqlca;
+	  ib_connection = False
+  end if
+  // End -Dinesh - 12/08/2025- SIMS-894- to Archive Sweeper_Cycle_log table
+
 
 //14-May-2014 :Madhu- Added code for Auto-Start/Shutoff sweepers -START
 String sql_syntax,lserrors
@@ -6131,6 +6171,7 @@ Long		llRC,	&
 			llSweepTime
 Long 		ll_WaitTime,llSweeperAlertThreshold,ll_flag,ll_threshold
 DateTime ldtLastRunTime
+Datetime ldtToday //Dinesh - 12/08/2025- SIMS-894- to Archive Sweeper_Cycle_log table
 
 //14-May-2014 :Madhu- Added code for Auto-Start/Shutoff sweepers -START
 Datastore ldssweeper 
@@ -6211,6 +6252,12 @@ end if
 			lsOutput ='  -***  Sweeper ' +lsSweeperName + ' has exceeded Sweep Time Threshold!!! Last Time stamp was ' + string(llMinutes) + ' minutes ago (as of ' + String(Today(), "mm/dd/yyyy hh:mm:ss") +')'
 			FileWrite(gilogFileNo,lsOutput)
 			uf_write_Log(lsOutput)
+			// Begin -Dinesh - 12/08/2025- SIMS-894- to Archive Sweeper_Cycle_log table
+			ldtToday = DateTime(Today(), Now()) // Dinesh - 12/08/2025
+			Insert Into Sweeper_Cycle_log (Sweeper_Name,Sweeper_Start_time, Next_Sweep_time,Sweeper_Stop_time, Status) 
+ 			Values(:gsEnvironment,:gdtToday,NULL, :ldtToday,'S') using sqlca;
+			commit using sqlca;
+			//End -Dinesh - 12/08/2025- SIMS-894- to Archive Sweeper_Cycle_log table
 //			if ls_sweeper_status= 'R' then
 //				Update Sweeper_Running_Status set Alert_sent='' where sweeper_name= :lsSweeperName using sqlca ; // added- alert_sent field -Dinesh - 07/04/2024- SIMS-502- CORE Sweeper System Alert Modification
 //			end if

@@ -7,7 +7,7 @@ end forward
 
 global type u_dw_ancestor from datawindow
 integer width = 494
-integer height = 362
+integer height = 364
 integer taborder = 10
 boolean livescroll = true
 borderstyle borderstyle = stylelowered!
@@ -207,7 +207,15 @@ public function integer getoriginalheight ();// integer = getOriginalHeight()
 return iiOriginalHeight
 end function
 
-event constructor;This.SetTransObject(Sqlca)
+event constructor;//Added by Nisha - 02/04/2026- SIMS-920- Fix to the DataWindow Column Re-Order Functionality-starts
+If gs_project <> 'PANDORA' and this.dataobject = 'd_do_packing_grid' Then 
+	this.dataobject = 'd_do_packing_grid_non_pandora'
+End If
+//Added by Nisha - 02/04/2026- SIMS-920- Fix to the DataWindow Column Re-Order Functionality-ends
+
+
+
+This.SetTransObject(Sqlca)
 //IF g.ib_label_access THEN g.POST of_lable_insert(this)
 g.of_check_label(this) 
 

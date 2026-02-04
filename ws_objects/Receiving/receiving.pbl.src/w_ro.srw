@@ -217,6 +217,7 @@ string is_project_uf1
 String is_bonded // TAM W&S 2012/12
 string is_Inbound_ord_Ind,is_order_new,isinvoice_no,is_display_name
 boolean ib_search=True
+boolean ib_void //Added by Nisha - 12/29/2025- SIMS-895- Voiding manual IB orders with invalid Project Code
 //boolean ib_adj = False // Dinesh - 06/17/2025- SIMS-739- PH - Google – SIMS-Fix to SIMS-572 - MM Transactions (Receipts)
 boolean ib_adj = True // Dinesh - 06/17/2025- SIMS-739- PH - Google – SIMS-Fix to SIMS-572 - MM Transactions (Receipts)
 
@@ -345,7 +346,6 @@ Boolean ib_puaway_gen =FALSE// SIMS-55 -Dhirendra for trace log for putaway gene
 Boolean ib_AutoFill_Shift_Select = false
 Long 	   il_AutoFill_Start_Row = 0
 end variables
-
 forward prototypes
 public function integer wf_set_comp_filter (string as_action)
 public function string wf_generate_pulse_imi ()
@@ -13620,10 +13620,20 @@ If lsordStat <> 'N' Then
 	isle_code.TriggerEvent('Modified')
 	Return
 End If
-
-if messagebox(is_title,'Are you sure you want to void this order?',Question!,YesNo!,2) = 2 then
-	return
-End if
+//Begin- Commented by Nisha - 12/29/2025- SIMS-895- Voiding manual IB orders with invalid Project Code
+//if messagebox(is_title,'Are you sure you want to void this order?',Question!,YesNo!,2) = 2 then
+//	return
+//End if
+//End- Commented by Nisha - 12/29/2025- SIMS-895- Voiding manual IB orders with invalid Project Code
+if ib_void =  FALSE then //Added by Nisha - 12/29/2025- SIMS-895- Voiding manual IB orders with invalid Project Code
+	if messagebox(is_title,'Are you sure you want to void this order?',Question!,YesNo!,2) = 2 then
+		return
+	End if
+//Added by Nisha - 12/29/2025- SIMS-895- Voiding manual IB orders with invalid Project Code-starts
+else 
+	 ib_void =  FALSE
+end if
+//Added by Nisha - 12/29/2025- SIMS-895- Voiding manual IB orders with invalid Project Code-ends
 
 idw_main.setitem(1,'ord_status','V')
 
@@ -13712,7 +13722,8 @@ boolean lb_readonly=False,lb_selfuser=False
  Long   i, ll_EDIBatch, llfindrow1, llcount1
  int      rowcount1
 //Nxjain Trim the Bol value and udpate the where clause with like function. -20160211
-
+string ls_from_projectcode,lsFind2 //Added by Nisha - 12/29/2025- SIMS-895- Voiding manual IB orders with invalid Project Code
+long llFindRow2  //Added by Nisha - 12/29/2025- SIMS-895- Voiding manual IB orders with invalid Project Code
 //Set bol = current text
 ls_bol = trim(This.Text)
 
@@ -14304,15 +14315,40 @@ IF idw_main.RowCount() > 0 Then
 		      lsFind = "project_code = '" +ls_projectcode + "'"
                llFindRow1 = ldsProjectCode.Find(lsFind, 1, llcount1)
 					
-	           If  llFindRow1 > 0 then 
-		       Elseif llFindRow1 <= 0  Then 
-	               messagebox("Project Code Not Match","This order of PO No "+ls_projectcode+" has an invalid Project Code. Processing of this order is not allowed.")		
-	              	lb_readonly=True
-					  wf_receive_order_readonly(lb_readonly) // Dinesh - 08/22/2023- SIMS-243 - Match the project code in order detail tab to project code table */
-				       Return -1  
-			 End if
-		  Next			 
-   End if 	 
+//	           If  llFindRow1 > 0 then 
+//		       Elseif llFindRow1 <= 0  Then 
+//	               messagebox("Project Code Not Match","This order of PO No "+ls_projectcode+" has an invalid Project Code. Processing of this order is not allowed.")		
+//	              	lb_readonly=True
+//					  wf_receive_order_readonly(lb_readonly) // Dinesh - 08/22/2023- SIMS-243 - Match the project code in order detail tab to project code table */
+//				       Return -1  
+//			 End if
+			//commented and added by Nisha - 12/29/2025- SIMS-895- Voiding manual IB orders with invalid Project Code - starts
+						 ls_from_projectcode= ldsponocode.GetItemString(i,'user_field2')
+						 lsFind2 = "project_code = '" +ls_from_projectcode + "'"
+						 llFindRow2 = ldsProjectCode.Find(lsFind2, 1, llcount1)
+							 
+						 If  llFindRow1 > 0 and llFindRow2 >0  then 
+						 Elseif llFindRow1 <= 0 and llFindRow2<=0  Then
+						/* If  llFindRow1 > 0 then 
+						 Elseif llFindRow1 <= 0  Then */
+							if idw_main.GetItemString(1, "ord_status") <> "V" then 
+								If left (trim(is_suppinvoiceno),4) <> "GWPS" then 
+						//commented and added by Nisha - 12/29/2025- SIMS-895- Voiding manual IB orders with invalid Project Code - ends
+								   messagebox("Project Code Not Match","This order of PO No "+ls_projectcode+" has an invalid Project Code. Processing of this order is not allowed.")
+						//Added by Nisha - 12/29/2025- SIMS-895- Voiding manual IB orders with invalid Project Code - starts	
+								else 
+								  messagebox("Project Code Not Match","This order of PO No "+ls_projectcode+" has an invalid Project Code. Processing of this order is not allowed,hence it will be voided.")
+								  ib_void = True
+								  cb_void.TriggerEvent(Clicked!)
+								end if
+						//Added by Nisha - 12/29/2025- SIMS-895- Voiding manual IB orders with invalid Project Code - end
+								 lb_readonly=True
+								  wf_receive_order_readonly(lb_readonly) // Dinesh - 08/22/2023- SIMS-243 - Match the project code in order detail tab to project code table */
+								// Return -1   //Commented by Nisha - 12/29/2025- SIMS-895- Voiding manual IB orders with invalid Project Code
+							end if //added by Nisha - 12/29/2025- SIMS-895- Voiding manual IB orders with invalid Project Code
+						end if 
+				 Next	
+		   End if 	 
    //* End.........Akash Baghel - 08/07/2023...- SIMS 243- Match the project code in order detail tab to project code table */
 	
 	//30-Jan-2019 :Madhu S28685 PHILIPSCLS BlueHeart Minimum Shelf Life Inbound Validation
