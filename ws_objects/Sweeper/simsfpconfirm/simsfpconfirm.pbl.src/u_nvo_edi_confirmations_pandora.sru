@@ -27,6 +27,7 @@ Boolean ibDejaVu
 n_string_util in_string_util
 String is_ToNo_List[],is_trans_parm
 long il_LineNo
+Boolean ib_whpr_main //Dinesh- 02/18/2026-SIMS-930-Google-SIMS-Bug for SIMS-869 - SIMS still sending SOC
 end variables
 
 forward prototypes
@@ -8536,7 +8537,8 @@ End IF
 
 	
 //Decrement Adjustment Record	
-If (lbDecrementTrans = TRUE) Then
+If (lbDecrementTrans = TRUE)  Then 
+
 	ll_Inv_Row = idsOMQInvTran.insertrow(0)
 	
 	idsOMQInvTran.setitem( ll_Inv_Row,'CLIENT_ID',ls_client_id)
@@ -8572,6 +8574,7 @@ If (lbDecrementTrans = TRUE) Then
 	idsOMQInvTran.setitem( ll_Inv_Row, 'RECEIPTLINENUMBER', '0')
 	idsOMQInvTran.setitem( ll_Inv_Row, 'SOURCEKEY', string(aladjustid)) //Adjustment.Adjustment Id
 	idsOMQInvTran.setitem( ll_Inv_Row, 'SOURCETYPE', 'ADJUSTMENT') //Adjustment
+
 End If
 
 //Increment Adjustment Record
@@ -11096,6 +11099,12 @@ For llRowPos = 1 to llRowCount
 			Else 
 				idsOMQInvTran.setitem( ll_Inv_Row, 'SOURCETYPE', 'SOC') //ntrTransferDetailAdd
 			End If
+	// Begin -Dinesh- 02/18/2026-SIMS-930-Google-SIMS-Bug for SIMS-869 - SIMS still sending SOC
+	lsLogOut = '      - OMQ_Inventory_transaction for Auto SOC : ' + string(asTono) +"  is inserted into OM Tables: " + om_sqlca.SQLErrText
+	FileWrite(giLogFileNo,lsLogOut)
+	gu_nvo_process_files.uf_write_log(lsLogOut)
+	//End if
+	// End -Dinesh- 02/18/2026-SIMS-930-Google-SIMS-Bug for SIMS-869 - SIMS still sending SOC	
 			
 		//Increment Adjustment Record
 		ll_Inv_Row = idsOMQInvTran.insertrow(0)
@@ -12625,6 +12634,7 @@ boolean lbAutoSOC =FALSE
 string ls_custcode,lsToWarehouse,ls_CodeDesc
 String ls_new_po_no_main='MAIN',ls_cc_class_Code,ls_dc_class_Code
 long ll_count_wh_pr  // Dinesh - 11/12/2025- SIMS-872-Development for Google - SIMS - WH*PR SOC change \
+ib_whpr_main= False //Dinesh- 02/18/2026-SIMS-930-Google-SIMS-Bug for SIMS-869 - SIMS still sending SOC
 
 Str_Parms ls_serial_Parms, ls_Trans_Id_Parms
 
@@ -12927,10 +12937,10 @@ IF ll_Qty > ll_QtyCount THEN
 		
 		//Begin - Dinesh - 11/19/2025- SIMS-872-Development for Google - SIMS - WH*PR SOC change 				
 		 IF ll_count_old = ll_count_new and ( ll_count_old <> 0 and ll_count_new <> 0)  then
-			DELETE from adjustment where project_id = 'PANDORA' and ref_no=:ls_ToNo using sqlca;
-			COMMIT using sqlca;
+			//DELETE from adjustment where project_id = 'PANDORA' and ref_no=:ls_ToNo using sqlca;
+			//COMMIT using sqlca;
 			//Write to File and Screen
-			lsLogOut = '      - 3PL Cycle Count- Auto SOC Adjustment is deleted for the CC_No: '+ls_cc_no+ ' as the owner and pono is already WH*PR with MAIN. '
+			lsLogOut = '      - 3PL Cycle Count- OC transaction '+ls_ToNo+ ' is stopped for the CC_No: '+ls_cc_no+ ' as the owner and pono is already WH*PR with MAIN. '
 			FileWrite(giLogFileNo,lsLogOut)
 			gu_nvo_process_files.uf_write_log(lsLogOut)
 

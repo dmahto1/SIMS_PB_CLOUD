@@ -351,6 +351,7 @@ Boolean ib_SuperDuper_Asked
 string is_SuperDuper_BlindKnown
 
 end variables
+
 forward prototypes
 public subroutine wf_clear_screen ()
 public subroutine wf_sort ()
@@ -7834,7 +7835,15 @@ end if
 							ls_where_in += "'" + is_sku_difference[ll_for_row]   + "'"
 					NEXT
 	                   
-					ls_sql= "UPDATE CONTENT SET inventory_type = old_inventory_type, Country_of_Origin = old_country_of_origin, old_inventory_type = null, old_country_of_origin = null, CC_No = null, last_user ='" + gs_userid +"', last_update = getdate(), last_cycle_count = getdate() WHERE  project_id ='" + gs_project + "'AND (Rtrim(Ltrim(sku)) +Rtrim(Ltrim(L_code))+Rtrim(Ltrim(po_no))) NOT IN ( "+ ls_where_in + ") and CC_No = '"+ls_cc_no+ "'"
+					//ls_sql= "UPDATE CONTENT SET inventory_type = old_inventory_type, Country_of_Origin = old_country_of_origin, old_inventory_type = null, old_country_of_origin = null, CC_No = null, last_user ='" + gs_userid +"', last_update = getdate(), last_cycle_count = getdate() WHERE  project_id ='" + gs_project + "'AND (Rtrim(Ltrim(sku)) +Rtrim(Ltrim(L_code))+Rtrim(Ltrim(po_no))) NOT IN ( "+ ls_where_in + ") and CC_No = '"+ls_cc_no+ "'" //commented by Nisha for SIMS-Bug for SIMS-929 - SQL Error on Equal counts
+		
+					//Added by Nisha for SIMS-Bug for SIMS-907 - SQL Error on Equal counts - starts
+					ls_sql= "UPDATE CONTENT SET inventory_type = old_inventory_type, Country_of_Origin = old_country_of_origin, old_inventory_type = null, old_country_of_origin = null, CC_No = null, last_user ='" + gs_userid +"', last_update = getdate(), last_cycle_count = getdate() WHERE  project_id ='" + gs_project + "' and CC_No = '" +ls_cc_no+ "'"
+					if ls_where_in<> "" then
+						ls_sql = ls_sql + " and (Rtrim(Ltrim(sku)) +Rtrim(Ltrim(L_code))+Rtrim(Ltrim(po_no))) NOT IN ( " + ls_where_in + ")"
+					end if
+					//Added by Nisha for SIMS-Bug for SIMS-929 - SQL Error on Equal counts - ends
+
 		
 					EXECUTE IMMEDIATE :ls_sql;
 				else

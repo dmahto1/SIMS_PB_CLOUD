@@ -5665,12 +5665,11 @@ For llTranPos = 1 to llTranCount
 	Where trans_id = :llTransID
 	using sqlca;
 	
-	//If lsStatus <> 'N' Then Continue
+	If lsStatus <> 'N' Then Continue
 	
 	//If lsStatus <> 'N' Then Continue // Dinesh - 08/29/2022
 	
-	If lsStatus <> 'D' Then Continue // Dinesh - 07/04/2025
-
+	//If lsStatus <> 'D' Then Continue // Dinesh - 07/04/2025
 
 	//SEPT 2019 - MikeA : S38259 Feature F18585: Change Sweeper to Limit 945s from Site to 10 per Cycle  (Bosch only)
 
