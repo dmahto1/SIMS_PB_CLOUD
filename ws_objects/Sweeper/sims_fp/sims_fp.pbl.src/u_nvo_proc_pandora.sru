@@ -14325,6 +14325,14 @@ AND code_type = 'FLAG'
 AND code_id = 'SAP_ENABLED'
 USING SQLCA;
 
+/* added by nisha943 - starts*/
+String ls_tradepartner
+SELECT code_id INTO :ls_tradepartner
+FROM lookup_table with(nolock)
+WHERE project_id = 'PANDORA'
+AND code_type = 'TRADEPARTNER'
+USING SQLCA;
+/* added by nisha943 - ends*/
 FOR ll_Row_Pos =1 to ll_receipt_queue_count
 	
 	ll_change_request_nbr = idsOMAReceiptQueue.getitemnumber(ll_Row_Pos, 'CHANGE_REQUEST_NBR') 
@@ -14730,7 +14738,17 @@ IF ll_receipt_queue_count > 0 Then
 				idsPODetail.SetItem(llNewDetailRow, 'Status_Message', 'SKU should not be NULL. Record will not be processed.')
 				lbDetailError = True
 			End If
-
+			
+			/*nisha943 - starts*/
+			boolean lb_tradepartner
+			lb_tradepartner = False
+			if ls_SAP_Enabled = 'Y' then
+				if right(lsOwnerCD,2)=ls_tradepartner then
+					lb_tradepartner =True//if it is false then container and pono2 details will be captured in user_field4 and user_field45 respectively
+				end if
+			end if
+			/*nisha943- ends*/
+			
 			// dts 02/23/2021 - S54137 
 			//WH*P will capture containers for only '-R' parts. WH*PM/PD/RK will be configurable for '-R' only or all parts
 			if ls_SAP_Enabled = 'Y' then
@@ -14752,6 +14770,7 @@ IF ll_receipt_queue_count > 0 Then
 					lbCaptureContainers=False
 				End If
 			end if
+		
 			//Write to Log File and Screen
 			lsLogOut = "      - OM Inbound - Processing uf_process_om_receipt - Owner CD: " + lsOwnerCD +". CaptureContainers is " +string(lbCaptureContainers)
 			FileWrite(giLogFileNo,lsLogOut)
@@ -14877,7 +14896,14 @@ gu_nvo_process_files.uf_write_log(lsLogOut)
 lsLogOut = "TEMPORARY MSG 0.1 -  lsPNO2: " + lsPONO2
 FileWrite(giLogFileNo,lsLogOut)
 gu_nvo_process_files.uf_write_log(lsLogOut)
-			idsPODetail.SetItem(llNewDetailRow,'po_no2',lsPONO2)
+			//idsPODetail.SetItem(llNewDetailRow,'po_no2',lsPONO2) //nisha943- have a look
+			if lb_tradepartner then //added lb_tradepartner by nisha943
+						idsPODetail.SetItem(llNewDetailRow, 'po_no2',lsPONO2) //container Id
+						 //added lb_tradepartner by nisha943 - starts
+					else
+						idsPODetail.SetItem(llNewDetailRow, 'user_field5',lsPONO2)
+					end if //added lb_tradepartner by nisha943- ends
+		
 			
 			If lsPONO2Prev = "" Then
 				lsPONO2Prev = lsPONO2
@@ -15020,15 +15046,20 @@ FileWrite(giLogFileNo,lsLogOut)
 					//29-MAY-2019 :Madhu S34063 Exclude Container Tracking Ind Condition
 					//dts 02/24/2021 - S54137 now using lbCaptureContainers instead of lbExcludeOrder
 					//IF ls_container_tracking_ind ='Y'  OR lbExcludeOrder THEN
-					IF ls_container_tracking_ind ='Y'  OR lbCaptureContainers THEN
-						idsPODetail.SetItem(llNewDetailRow, 'container_id', idsOMCReceiptDetail.getitemstring(ll_Row_Pos_RD, 'SUSR4')) //container Id
-//Write to Log File and Screen
-lsLogOut = "TEMPORARY MSG 1 - Owner CD: " + lsOwnerCD +". CaptureContainers is " +string(lbCaptureContainers)
-FileWrite(giLogFileNo,lsLogOut)
-gu_nvo_process_files.uf_write_log(lsLogOut)
-lsLogOut = "TEMPORARY MSG 1.2 - SUSR4: " + nz(idsOMCReceiptDetail.getitemstring(ll_Row_Pos_RD, 'SUSR4'),'null') // nz(ls_OrderNo,'-')
-FileWrite(giLogFileNo,lsLogOut)
-gu_nvo_process_files.uf_write_log(lsLogOut)
+					IF ls_container_tracking_ind ='Y'  OR lbCaptureContainers THEN 
+					 	if lb_tradepartner then //added lb_tradepartner by nisha943
+							idsPODetail.SetItem(llNewDetailRow, 'container_id', idsOMCReceiptDetail.getitemstring(ll_Row_Pos_RD, 'SUSR4')) //container Id
+							 //added lb_tradepartner by nisha943 - starts
+						else
+							idsPODetail.SetItem(llNewDetailRow, 'user_field4',  idsOMCReceiptDetail.getitemstring(ll_Row_Pos_RD, 'SUSR4'))
+						end if //added lb_tradepartner by nisha943- ends
+						//Write to Log File and Screen
+						lsLogOut = "TEMPORARY MSG 1 - Owner CD: " + lsOwnerCD +". CaptureContainers is " +string(lbCaptureContainers)
+						FileWrite(giLogFileNo,lsLogOut)
+						gu_nvo_process_files.uf_write_log(lsLogOut)
+						lsLogOut = "TEMPORARY MSG 1.2 - SUSR4: " + nz(idsOMCReceiptDetail.getitemstring(ll_Row_Pos_RD, 'SUSR4'),'null') // nz(ls_OrderNo,'-')
+						FileWrite(giLogFileNo,lsLogOut)
+						gu_nvo_process_files.uf_write_log(lsLogOut)
 					ELSE
 						//OCT 2019 - MikeA - DE12998
 						idsPODetail.SetItem(llNewDetailRow, 'container_id', '') //container Id
@@ -15038,17 +15069,22 @@ gu_nvo_process_files.uf_write_log(lsLogOut)
 					//GailM 2/21/2020 S42902 F21477 Google - Suppress Pallet ID's on IB orders 
 					//dts 02/24/2021 - S54137 now using lbCaptureContainers instead of lbExcludeOrder
 					//IF lsPoNo2Controlled ='Y' OR lbExcludeOrder THEN
-					IF lsPoNo2Controlled ='Y' OR lbCaptureContainers THEN
-						idsPODetail.SetItem(llNewDetailRow, 'po_no2', idsOMCReceiptDetail.getitemstring(ll_Row_Pos_RD, 'SUSR5')) //container Id
-//Write to Log File and Screen
-lsLogOut = "TEMPORARY MSG 1.3 - Owner CD: " + lsOwnerCD +". CaptureContainers is " +string(lbCaptureContainers)
-FileWrite(giLogFileNo,lsLogOut)
-gu_nvo_process_files.uf_write_log(lsLogOut)
-lsLogOut = "TEMPORARY MSG 1.4 - SUSR5: " + nz(idsOMCReceiptDetail.getitemstring(ll_Row_Pos_RD, 'SUSR5'),'null')
-FileWrite(giLogFileNo,lsLogOut)
-gu_nvo_process_files.uf_write_log(lsLogOut)
+					IF lsPoNo2Controlled ='Y' OR lbCaptureContainers THEN //nisha
+						if lb_tradepartner then //added lb_tradepartner by nisha943
+							idsPODetail.SetItem(llNewDetailRow, 'po_no2', idsOMCReceiptDetail.getitemstring(ll_Row_Pos_RD, 'SUSR5')) //po_no2
+						//added lb_tradepartner by nisha943
+						else 
+							idsPODetail.SetItem(llNewDetailRow, 'user_field5', idsOMCReceiptDetail.getitemstring(ll_Row_Pos_RD, 'SUSR5'))
+						end if //added lb_tradepartner by nisha943- ends
+						//Write to Log File and Screen
+						lsLogOut = "TEMPORARY MSG 1.3 - Owner CD: " + lsOwnerCD +". CaptureContainers is " +string(lbCaptureContainers)
+						FileWrite(giLogFileNo,lsLogOut)
+						gu_nvo_process_files.uf_write_log(lsLogOut)
+						lsLogOut = "TEMPORARY MSG 1.4 - SUSR5: " + nz(idsOMCReceiptDetail.getitemstring(ll_Row_Pos_RD, 'SUSR5'),'null')
+						FileWrite(giLogFileNo,lsLogOut)
+						gu_nvo_process_files.uf_write_log(lsLogOut)
 					ELSE
-						idsPODetail.SetItem(llNewDetailRow, 'po_no2', '') //Pallet Id
+						idsPODetail.SetItem(llNewDetailRow, 'po_no2', '') //Pallet Id 
 					END IF
 					
 				End If
@@ -15110,11 +15146,16 @@ gu_nvo_process_files.uf_write_log(lsLogOut)
 					//dts 02/24/2021 - S54137 now using lbCaptureContainers instead of lbExcludeOrder
 					//IF ls_container_tracking_ind ='Y' OR lbExcludeOrder THEN
 					IF ls_container_tracking_ind ='Y' OR lbCaptureContainers THEN
-						idsPODetail.SetItem(llNewDetailRow, 'container_id', lsContainer) //container Id
-//Write to Log File and Screen
-lsLogOut = "TEMPORARY MSG 2 - Owner CD: " + lsOwnerCD +". CaptureContainers is " +string(lbCaptureContainers)
-FileWrite(giLogFileNo,lsLogOut)
-gu_nvo_process_files.uf_write_log(lsLogOut)
+						if lb_tradepartner then //added lb_tradepartner by nisha943
+							idsPODetail.SetItem(llNewDetailRow, 'container_id', lsContainer) //container Id
+						//added lb_tradepartner by nisha943 - starts
+						else 
+							idsPODetail.SetItem(llNewDetailRow, 'user_field4', lsContainer) //container Id
+						end if //added lb_tradepartner by nisha943- ends
+						//Write to Log File and Screen
+						lsLogOut = "TEMPORARY MSG 2 - Owner CD: " + lsOwnerCD +". CaptureContainers is " +string(lbCaptureContainers)
+						FileWrite(giLogFileNo,lsLogOut)
+						gu_nvo_process_files.uf_write_log(lsLogOut)
 					ELSE
 						//OCT 2019 - MikeA - DE12998
 						idsPODetail.SetItem(llNewDetailRow, 'container_id', '') //container Id
@@ -15124,14 +15165,19 @@ gu_nvo_process_files.uf_write_log(lsLogOut)
 					//dts 02/24/2021 - S54137 now using lbCaptureContainers instead of lbExcludeOrder
 					//IF lsPoNo2Controlled ='Y' OR lbExcludeOrder THEN
 					IF lsPoNo2Controlled ='Y' OR lbCaptureContainers THEN
-						idsPODetail.SetItem(llNewDetailRow, 'po_no2', lsPONO2) //container Id
-//Write to Log File and Screen
-lsLogOut = "TEMPORARY MSG 2.PONO2 - Owner CD: " + lsOwnerCD +". CaptureContainers is " +string(lbCaptureContainers)
-FileWrite(giLogFileNo,lsLogOut)
-gu_nvo_process_files.uf_write_log(lsLogOut)
-lsLogOut = "TEMPORARY MSG 2.PONO2 - Owner CD: " + lsOwnerCD +". lsPONO2: " +lsPONO2
-FileWrite(giLogFileNo,lsLogOut)
-gu_nvo_process_files.uf_write_log(lsLogOut)
+						if lb_tradepartner then //added lb_tradepartner by nisha943
+							idsPODetail.SetItem(llNewDetailRow, 'po_no2', lsPONO2) //po_no2
+							//added lb_tradepartner by nisha943 - starts
+						else 
+							idsPODetail.SetItem(llNewDetailRow, 'user_field5', lsPONO2) //po_no2
+						end if //added lb_tradepartner by nisha943- ends
+						//Write to Log File and Screen
+						lsLogOut = "TEMPORARY MSG 2.PONO2 - Owner CD: " + lsOwnerCD +". CaptureContainers is " +string(lbCaptureContainers)
+						FileWrite(giLogFileNo,lsLogOut)
+						gu_nvo_process_files.uf_write_log(lsLogOut)
+						lsLogOut = "TEMPORARY MSG 2.PONO2 - Owner CD: " + lsOwnerCD +". lsPONO2: " +lsPONO2
+						FileWrite(giLogFileNo,lsLogOut)
+						gu_nvo_process_files.uf_write_log(lsLogOut)
 					ELSE
 						idsPODetail.SetItem(llNewDetailRow, 'po_no2', '') //Pallet Id
 					END IF
@@ -15191,12 +15237,18 @@ gu_nvo_process_files.uf_write_log(lsLogOut)
 						//29-MAY-2019 :Madhu S34063 Exclude Container Tracking Ind Condition
 						//dts 02/24/2021 - S54137 now using lbCaptureContainers instead of lbExcludeOrder
 						//IF ls_container_tracking_ind ='Y' OR lbExcludeOrder THEN
-//Write to Log File and Screen
-lsLogOut = "TEMPORARY MSG 3 - Owner CD: " + lsOwnerCD +". CaptureContainers is " +string(lbCaptureContainers)
-FileWrite(giLogFileNo,lsLogOut)
-gu_nvo_process_files.uf_write_log(lsLogOut)
+						//Write to Log File and Screen
+						lsLogOut = "TEMPORARY MSG 3 - Owner CD: " + lsOwnerCD +". CaptureContainers is " +string(lbCaptureContainers)
+						FileWrite(giLogFileNo,lsLogOut)
+						gu_nvo_process_files.uf_write_log(lsLogOut)
 						IF ls_container_tracking_ind ='Y' OR lbCaptureContainers THEN
-							idsPODetail.SetItem(llNewDetailRow, 'container_id', lsContainer) //container Id
+							if lb_tradepartner then //added lb_tradepartner by nisha943
+								idsPODetail.SetItem(llNewDetailRow, 'container_id', lsContainer) //container Id
+							//added lb_tradepartner by nisha943 - starts
+							else 
+								idsPODetail.SetItem(llNewDetailRow, 'user_field4', lsContainer) //container Id
+							end if //added lb_tradepartner by nisha943- ends
+								
 //Write to Log File and Screen
 lsLogOut = "TEMPORARY MSG 3.2 - Owner CD: " + lsOwnerCD +". CaptureContainers is " +string(lbCaptureContainers)
 FileWrite(giLogFileNo,lsLogOut)
@@ -15211,7 +15263,13 @@ gu_nvo_process_files.uf_write_log(lsLogOut)
 						//dts 02/24/2021 - S54137 now using lbCaptureContainers instead of lbExcludeOrder
 						//IF lsPoNo2Controlled ='Y' OR lbExcludeOrder THEN
 						IF lsPoNo2Controlled ='Y' OR lbCaptureContainers THEN
-							idsPODetail.SetItem(llNewDetailRow,'po_no2', lsPONO2)
+							if lb_tradepartner then //added lb_tradepartner by nisha943
+								idsPODetail.SetItem(llNewDetailRow,'po_no2', lsPONO2)
+							//added lb_tradepartner by nisha943 - starts
+							else 
+								idsPODetail.SetItem(llNewDetailRow, 'user_field5', lsPONO2) 
+							end if //added lb_tradepartner by nisha943- ends
+							
 //Write to Log File and Screen
 lsLogOut = "TEMPORARY MSG 3.3 - Owner CD: " + lsOwnerCD
 FileWrite(giLogFileNo,lsLogOut)
@@ -15277,15 +15335,21 @@ gu_nvo_process_files.uf_write_log(lsLogOut)
 				idsPODetail.SetItem(llNewDetailRow, 'Lot_no', '-')
 				idsPODetail.SetItem(llNewDetailRow, 'PO_NO', lsPoNo)
 				idsPODetail.SetItem(llNewDetailRow, 'user_field2', idsOMCReceiptDetail.getitemstring(ll_Row_Pos_RD, 'SUSR1')) //UF2
-//Write to Log File and Screen
-lsLogOut = "TEMPORARY MSG 4 - Owner CD: " + lsOwnerCD
-FileWrite(giLogFileNo,lsLogOut)
-gu_nvo_process_files.uf_write_log(lsLogOut)
-//Write to Log File and Screen
-lsLogOut = "TEMPORARY MSG 4.2 - Owner CD: " + lsOwnerCD +". lsPONO2: " +lsPONO2
-FileWrite(giLogFileNo,lsLogOut)
-gu_nvo_process_files.uf_write_log(lsLogOut)
-				idsPODetail.SetItem(llNewDetailRow,'po_no2', lsPONO2)
+				//Write to Log File and Screen
+				lsLogOut = "TEMPORARY MSG 4 - Owner CD: " + lsOwnerCD
+				FileWrite(giLogFileNo,lsLogOut)
+				gu_nvo_process_files.uf_write_log(lsLogOut)
+				//Write to Log File and Screen
+				lsLogOut = "TEMPORARY MSG 4.2 - Owner CD: " + lsOwnerCD +". lsPONO2: " +lsPONO2
+				FileWrite(giLogFileNo,lsLogOut)
+				gu_nvo_process_files.uf_write_log(lsLogOut)
+				//idsPODetail.SetItem(llNewDetailRow,'po_no2', lsPONO2) //nisha 943- have a look 
+				if lb_tradepartner then //added lb_tradepartner by nisha943
+					idsPODetail.SetItem(llNewDetailRow,'po_no2', lsPONO2)//Po_no2
+				//added lb_tradepartner by nisha943
+				else 
+					idsPODetail.SetItem(llNewDetailRow, 'user_field5', lsPONO2)
+				end if //added lb_tradepartner by nisha943- ends
 				idsPODetail.SetItem(llNewDetailRow,'Serial_No', '-')
 				idsPODetail.SetItem(llNewDetailRow, 'owner_id', lsOwnerID)
 				idsPODetail.SetItem(llNewDetailRow, 'Inventory_Type', 'N')
@@ -15294,16 +15358,21 @@ gu_nvo_process_files.uf_write_log(lsLogOut)
 				//29-MAY-2019 :Madhu S34063 Exclude Container Tracking Ind Condition
 				//dts 02/24/2021 - S54137 now using lbCaptureContainers instead of lbExcludeOrder
 				//IF ls_container_tracking_ind ='Y' OR lbExcludeOrder THEN
-//Write to Log File and Screen
-lsLogOut = "TEMPORARY MSG 4 - Owner CD: " + lsOwnerCD +". CaptureContainers is " +string(lbCaptureContainers)
-FileWrite(giLogFileNo,lsLogOut)
-gu_nvo_process_files.uf_write_log(lsLogOut)
+				//Write to Log File and Screen
+				lsLogOut = "TEMPORARY MSG 4 - Owner CD: " + lsOwnerCD +". CaptureContainers is " +string(lbCaptureContainers)
+				FileWrite(giLogFileNo,lsLogOut)
+				gu_nvo_process_files.uf_write_log(lsLogOut)
 				IF ls_container_tracking_ind ='Y' OR lbCaptureContainers THEN
-					idsPODetail.SetItem(llNewDetailRow, 'container_id', lsContainer) //container Id
-//Write to Log File and Screen
-lsLogOut = "TEMPORARY MSG 4.2 - Owner CD: " + lsOwnerCD +". lsContainer " +lsContainer
-FileWrite(giLogFileNo,lsLogOut)
-gu_nvo_process_files.uf_write_log(lsLogOut)
+					if lb_tradepartner then //added lb_tradepartner by nisha943
+							idsPODetail.SetItem(llNewDetailRow, 'container_id', lsContainer) //container Id
+						//added lb_tradepartner by nisha943 - starts
+						else 
+							idsPODetail.SetItem(llNewDetailRow, 'user_field4', lsContainer) 
+						end if //added lb_tradepartner by nisha943- ends					
+					//Write to Log File and Screen
+					lsLogOut = "TEMPORARY MSG 4.2 - Owner CD: " + lsOwnerCD +". lsContainer " +lsContainer
+					FileWrite(giLogFileNo,lsLogOut)
+					gu_nvo_process_files.uf_write_log(lsLogOut)
 				ELSE
 					//OCT 2019 - MikeA - DE12998
 					idsPODetail.SetItem(llNewDetailRow, 'container_id', '') //container Id

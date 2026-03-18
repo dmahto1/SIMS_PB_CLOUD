@@ -5698,6 +5698,7 @@ String ls_inventory_type_desc,ls_etom, lsSupplierName, lsDONO
 String lsWHCode,lsaddr1,lsaddr2,lsaddr3,lsaddr4,lscity,lsstate,lszip,lscountry,lsname,lsVAT, lsUPC, lsPrinter, lsVol, lsNativeDesc, lsGrp
 String ls_d_packing_prt, lsim_uf11, ls_dono,ls_Serialized_Ind
 Long llim_qty2, llRowCount, llRowPOs, llNewRow,llRowserial
+string ls_lob //Dinesh- 03/16/2026-SIMS-944-Development for Geistlich - New LOB support 
 
 Datastore       ldsHazmat, ld_packprint
 
@@ -5715,10 +5716,13 @@ If llRowCount = 0 Then
 End If
 
 SetPointer(Hourglass!)
-
+ls_lob = w_do.idw_pack.getitemstring(1,'Supp_Code')  //Dinesh- 03/16/2026-SIMS-944-Development for Geistlich - New LOB support 
 ld_packprint = Create Datastore
-ld_packprint.dataobject ='d_geistlich_packing_prt'
-
+IF  ls_lob='BIONNOVA' THEN  //Dinesh- 03/18/2026-SIMS-944-Development for Geistlich - New LOB support 
+	ld_packprint.dataobject ='d_bionnova_packing_prt'  //Dinesh- 03/18/2026-SIMS-944-Development for Geistlich - New LOB support 
+ELSE  //Dinesh- 03/16/2026-SIMS-944-Development for Geistlich - New LOB support 
+	ld_packprint.dataobject ='d_geistlich_packing_prt'
+END IF  //Dinesh- 03/18/2026-SIMS-944-Development for Geistlich - New LOB support 
 //Get Ship From info from Warehouse table...
 lsWHCode = w_do.idw_main.getitemstring(1,"wh_code")
 
@@ -5744,8 +5748,7 @@ For llRowPOs = 1 to llRowCount
         ls_sku = w_do.idw_pack.getitemstring(llRowPOs,"sku")
         ls_supplier = w_do.idw_pack.getitemstring(llRowPOs,"supp_code")
         llLineItemNo = w_do.idw_pack.GetITemNumber(llRowPOs,'line_item_no')
-        
-        If ls_SKU <> lsSKUHold Then
+		  If ls_SKU <> lsSKUHold Then
                 
                 select description, weight_1, hazard_text_cd, part_upc_Code, user_field8, native_description, grp, qty_2, user_field11    /* 05/09 - PCONKL - UF8 = Volume for Philips */ /* TAM W&S 2011/03 added qty2 and uf11 */
                 into :ls_description, :ld_weight, :lshazCode, :lsUPC, :lsVol, :lsnativeDesc, :lsGrp, :llim_qty2, :lsim_uf11
