@@ -5698,7 +5698,8 @@ String ls_inventory_type_desc,ls_etom, lsSupplierName, lsDONO
 String lsWHCode,lsaddr1,lsaddr2,lsaddr3,lsaddr4,lscity,lsstate,lszip,lscountry,lsname,lsVAT, lsUPC, lsPrinter, lsVol, lsNativeDesc, lsGrp
 String ls_d_packing_prt, lsim_uf11, ls_dono,ls_Serialized_Ind
 Long llim_qty2, llRowCount, llRowPOs, llNewRow,llRowserial
-string ls_lob //Dinesh- 03/16/2026-SIMS-944-Development for Geistlich - New LOB support 
+string ls_lob,ls_Code_Id,ls_User_Updateable_Ind //Dinesh- 03/16/2026-SIMS-944-Development for Geistlich - New LOB support 
+
 
 Datastore       ldsHazmat, ld_packprint
 
@@ -5718,23 +5719,22 @@ End If
 SetPointer(Hourglass!)
 ls_lob = w_do.idw_pack.getitemstring(1,'Supp_Code')  //Dinesh- 03/16/2026-SIMS-944-Development for Geistlich - New LOB support 
 ld_packprint = Create Datastore
-IF  ls_lob='BIONNOVA' THEN  //Dinesh- 03/18/2026-SIMS-944-Development for Geistlich - New LOB support 
-	ld_packprint.dataobject ='d_bionnova_packing_prt'  //Dinesh- 03/18/2026-SIMS-944-Development for Geistlich - New LOB support 
-ELSE  //Dinesh- 03/16/2026-SIMS-944-Development for Geistlich - New LOB support 
+//IF  UPPER(ls_lob)='BIONNOVA' THEN  //Dinesh- 03/18/2026-SIMS-944-Development for Geistlich - New LOB support 
+//	ld_packprint.dataobject ='d_bionnova_packing_prt'  //Dinesh- 03/18/2026-SIMS-944-Development for Geistlich - New LOB support 
+//ELSE  //Dinesh- 03/16/2026-SIMS-944-Development for Geistlich - New LOB support 
 	ld_packprint.dataobject ='d_geistlich_packing_prt'
-END IF  //Dinesh- 03/18/2026-SIMS-944-Development for Geistlich - New LOB support 
+//END IF  //Dinesh- 03/18/2026-SIMS-944-Development for Geistlich - New LOB support 
 //Get Ship From info from Warehouse table...
 lsWHCode = w_do.idw_main.getitemstring(1,"wh_code")
 
 If upper(lsWHCode) ='GEIST-SPA' Then lsWHCode ='GEIST-DAY' //03-May-2017 :Madhu PEVS-535 -Print Pack List with Dayton Address.
- 
-        
+
         Select WH_name, Address_1, Address_2, Address_3, Address_4, city, state, zip, country
         Into    :lsName, :lsaddr1, :lsAddr2, :lsaddr3, :lsaddr4, :lsCity, :lsState, :lsZip, :lsCountry
         From warehouse
         Where WH_Code = :lsWHCode
         Using Sqlca;
-
+ 
 //For each detail row, generate the pack data
 
 //llRowCount = w_do.idw_detail.RowCount() //5-Dec-2016 Madhu - commented to get rowcount from pack list.
@@ -5906,8 +5906,24 @@ For llRowPOs = 1 to llRowCount
         ld_packprint.setitem(llNewRow,"delivery_zip",w_do.idw_main.getitemstring(1,"zip"))
         ld_packprint.setitem(llNewRow,"remark",w_do.idw_main.getitemstring(1,"remark"))
         
-        // 07/00 PCONKL - Ship from info is coming from Project Table  
+        // 07/00 PCONKL - Ship from info is coming from Project Table 
+	 //Begin- Dinesh- 03/23/2026-SIMS-944-Development for Geistlich - New LOB support 		 
+	select Code_Id,User_Updateable_Ind into :ls_Code_Id,:ls_User_Updateable_Ind from Lookup_Table where Project_Id = 'GEISTLICH' and Code_Type = 'BIONNOVA_SHIP_FROM' and User_Updateable_Ind='Y'  using sqlca;
+	IF UPPER(ls_lob) = 'BIONNOVA' and ls_User_Updateable_Ind='Y' THEN 
+	    	ld_packprint.setitem(llNewRow,"ship_from_name",ls_Code_Id)
+		ELSE
+	 //End- Dinesh- 03/23/2026-SIMS-944-Development for Geistlich - New LOB support 		 		
         ld_packprint.setitem(llNewRow,"ship_from_name",lsName)
+	END IF // Dinesh- 03/23/2026-SIMS-944-Development for Geistlich - New LOB support 	
+	// Begin - Dinesh- 03/23/2026-SIMS-944-Development for Geistlich - New LOB support 	
+	    IF UPPER(ls_lob) = 'BIONNOVA' THEN
+			ld_packprint.Modify("p_2.Visible='1'")
+			ld_packprint.Modify("p_1.Visible='0'")
+		ELSE
+			ld_packprint.Modify("p_2.Visible='0'")
+			ld_packprint.Modify("p_1.Visible='1'")
+		END IF
+	// End - Dinesh- 03/23/2026-SIMS-944-Development for Geistlich - New LOB support 	
         ld_packprint.setitem(llNewRow,"ship_from_address1",lsaddr1)
         ld_packprint.setitem(llNewRow,"ship_from_address2",lsaddr2)
         ld_packprint.setitem(llNewRow,"ship_from_address3",lsaddr3)

@@ -1667,7 +1667,12 @@ else
 				lsTemp = Trim(ldsImport.GetItemString(llFileRowPos, "col63"))
 		
 				If NOT(IsNull(lsTemp) OR trim(lsTemp) = '') Then
-					ldsSOheader.SetItem(liNewRow,'ship_ref', lsTemp)
+				//Begin- Dinesh- 03/23/2026-SIMS-944-Development for Geistlich - New LOB support 
+					IF upper(asproject) ='GEISTLICH' then
+						 ldsSOheader.SetItem(liNewRow,'Line_Of_Business', UPPER(lsTemp))
+					END IF
+				//End- Dinesh- 03/23/2026-SIMS-944-Development for Geistlich - New LOB support 
+				    ldsSOheader.SetItem(liNewRow,'ship_ref', lsTemp)
 				End If			
 				
 				//2015/05/01 - TAM - Added Department Code
@@ -1873,15 +1878,6 @@ else
 				If NOT(IsNull(lsTemp) OR trim(lsTemp) = '') Then
 					ldsSOheader.SetItem(liNewRow,'Consolidation_No', lsTemp)
 				End If	
-				
-				//Begin- Dinesh- 03/16/2026-SIMS-944-Development for Geistlich - New LOB support 
-				IF upper(asproject) ='GEISTLICH' then
-					lsTemp = Trim(ldsImport.GetItemString(llFileRowPos, "col63"))
-					 If NOT(IsNull(lsTemp) OR trim(lsTemp) = '') Then
-						 ldsSOheader.SetItem(liNewRow,'Line_Of_Business', lsTemp)
-					 end if
-				END IF
-				//End- Dinesh- 03/16/2026-SIMS-944-Development for Geistlich - New LOB support 
 				
 				//If we have Bill To Information, create the Alt Address record
 				If lbBillToAddress Then

@@ -220,7 +220,9 @@ boolean ib_search=True
 boolean ib_void //Added by Nisha - 12/29/2025- SIMS-895- Voiding manual IB orders with invalid Project Code
 //boolean ib_adj = False // Dinesh - 06/17/2025- SIMS-739- PH - Google – SIMS-Fix to SIMS-572 - MM Transactions (Receipts)
 boolean ib_adj = True // Dinesh - 06/17/2025- SIMS-739- PH - Google – SIMS-Fix to SIMS-572 - MM Transactions (Receipts)
-
+boolean ib_insert_mm = True // Dinesh - 04/07/2026-SIMS-954-Google - SIMS - Bug from SIMS-739 - GR transactions not inserted for orders
+boolean ib_insert_gr = True // Dinesh - 04/07/2026-SIMS-954-Google - SIMS - Bug from SIMS-739 - GR transactions not inserted for orders
+integer ii_ret 
 
 String	isScanColumn
  
@@ -470,6 +472,9 @@ String 	ls_uf2CustType, ls_uf6CustType //TAM - 3/18 - S13945 -  For Pandora, Don
 String		lsPutawayContainer, lsPutawayPONO2
 Boolean	lbPandoraPharmacyLocation
 int liAdj
+long ll_trans_mm,ll_trans_gr // Dinesh - 04/01/2026 - SIMS-954-Google - SIMS - Bug from SIMS-739 - GR transactions not inserted for orders
+string ls_ord_status // Dinesh - 04/01/2026 - SIMS-954-Google - SIMS - Bug from SIMS-739 - GR transactions not inserted for orders
+//ib_adj= False 
 
 /* GailM - 03/01/2018 - S16211 - PAN SIMS to validate Arrival Date upon confirmation on Inbound - START */
 Date ldToday
@@ -1579,46 +1584,59 @@ If lbReconfirm = False Then
 			end if
 	
 		END IF  // Project Pandora (chainof custody)
+		 
 		
-		// 
-		
-		// Begin - Dinesh - 03/22/2021- S54935- Google - SIMS – 947 change needed for Google SAP		
-		if gs_Project='PANDORA' and liAdj > 0 then 
-				//ib_adj= false //10/21/2024 Dinesh -SIMS-572- Google - Completed Inbound orders and GR transactions not sent //Dinesh - 06/17/2025    - SIMS-739- PH - Google – SIMS-Fix to SIMS-572 - MM Transactions (Receipts)
-				ib_adj= True //Dinesh - 06/17/2025    - SIMS-739- PH - Google – SIMS-Fix to SIMS-572 - MM Transactions (Receipts)
-			// Begin - 10/21/2024 Dinesh -SIMS-572- commented the below insert statement and placed in the ue_Save event
-			//  - 10/21/2024 - Dinesh - SIMS-572- Google - Completed Inbound orders and GR transactions not sent - 
-//				Execute Immediate "Begin Transaction" using SQLCA; /* 11/04 - PCONKL - Auto Commit Turned on to eliminate DB locks*/
-//				
-//				Insert Into batch_Transaction (project_ID, Trans_Type, Trans_Order_ID, Trans_Status, Trans_Create_Date, Trans_Parm)
-//					Values(:gs_Project, 'MM', :lsRONO,'N', :ldtToday, 'Inbound');
-//				Execute Immediate "COMMIT" using SQLCA;
-			//End - 10/21/2024 - Dinesh - 572- Google - Completed Inbound orders and GR transactions not sent - commented the below insert statement and placed in the ue_Save event
-			
-		else
-				//ib_adj= true //10/21/2024 Dinesh -SIMS-572- Google - Completed Inbound orders and GR transactions not sent //Dinesh - 06/17/2025    - SIMS-739- PH - Google – SIMS-Fix to SIMS-572 - MM Transactions (Receipts)
-				ib_adj= False //Dinesh - 06/17/2025    - SIMS-739- PH - Google – SIMS-Fix to SIMS-572 - MM Transactions (Receipts)
-				if gs_Project <> 'PANDORA'  then // 10/21/2024 - Dinesh - 572- Google - Completed Inbound orders and GR transactions not sent - It will remain for non Pandora.
+		// Begin - Dinesh - 03/22/2021- S54935- Google - SIMS – 947 change needed for Google SAP	
+		ls_ord_status=idw_main.GetItemString(1,'ord_status')
+		IF gs_Project='PANDORA' and liAdj > 0 then 
+			 // Begin- Dinesh - 04/07/2026 - SIMS-954-Google - SIMS - Bug from SIMS-739 - GR transactions not inserted for orders 
+			 select count(*) into :ll_trans_mm from batch_transaction where trans_order_id= :is_rono and trans_type = 'MM' and Trans_Parm='Inbound' using sqlca; // Dinesh - 04/01/2026 - SIMS-954-Google - SIMS - Bug from SIMS-739 - GR transactions not inserted for orders
+				//ib_adj= false //10/21/2024 Dinesh -SIMS-572- Google - Completed Inbound orders and GR transactions not sent //Dinesh - 06/17/2025    - SIMS-739- PH - Google – SIMS-Fix to SIMS-572 - MM Transactions (Receipts)	
+			//Begin- Dinesh - 06/17/2025    - SIMS-739- PH - Google – SIMS-Fix to SIMS-572 - MM Transactions (Receipts)//Dinesh- 04/06/2026-SIMS-954-Google - SIMS - Bug from SIMS-739 - GR transactions not inserted for orders
+				if ib_insert_mm = True  then
+				 elseif ib_insert_mm= false and  ii_ret=1 and ls_ord_status='C'  and ll_trans_mm < 1 then 
+					Execute Immediate "Begin Transaction" using SQLCA; /* 11/04 - PCONKL - Auto Commit Turned on to eliminate DB locks*/
+					Insert Into batch_Transaction (project_ID, Trans_Type, Trans_Order_ID, Trans_Status, Trans_Create_Date, Trans_Parm)
+						Values(:gs_Project, 'MM', :lsRONO,'N', :ldtToday, 'Inbound');
+					Execute Immediate "COMMIT" using SQLCA;
+				end if
+			   //End - 10/21/2024 - Dinesh - 572- Google - Completed Inbound orders and GR transactions not sent - commented the below insert statement and pGlaced in the ue_Save event
+			   //End- Dinesh - 06/17/2025    - SIMS-739- PH - Google – SIMS-Fix to SIMS-572 - MM Transactions (Receipts)//Dinesh- 04/06/2026-SIMS-954-Google - SIMS - Bug from SIMS-739 - GR transactions not inserted for orders
+		else 
+			     if gs_project= 'PANDORA' then
+					select count(*) into :ll_trans_gr from batch_transaction where trans_order_id= :is_rono and trans_type = 'GR' using sqlca; // Dinesh - 06/17/2025 - SIMS-739- PH - Google – SIMS-Fix to SIMS-572 - MM Transactions (Receipts)
+					if ib_insert_gr = True then
+						
+					elseif ib_insert_gr= false and  ii_ret=1 and ls_ord_status='C'  and ll_trans_gr < 1 then 
+						Execute Immediate "Begin Transaction" using SQLCA; /* 11/04 - PCONKL - Auto Commit Turned on to eliminate DB locks*/
+						Insert Into batch_Transaction (project_ID, Trans_Type, Trans_Order_ID, Trans_Status, Trans_Create_Date, Trans_Parm)
+						Values(:gs_Project, 'GR', :lsRONO,'N', :ldtToday, '');
+						Execute Immediate "COMMIT" using SQLCA;
+						//inserting a record with GT into Batch Transaction table
+						Execute Immediate "Begin Transaction" using SQLCA;
+			     		Insert Into batch_Transaction (project_ID, Trans_Type, Trans_Order_ID, Trans_Status, Trans_Create_Date, Trans_Parm)
+						Values(:gs_Project, 'GT', :lsRONO,'N', :ldtToday, '');
+			     		Execute Immediate "COMMIT" using SQLCA;
+					  end if
+					end if	
+					// End - Dinesh - 04/07/2026 - SIMS-954-Google - SIMS - Bug from SIMS-739 - GR transactions not inserted for orders //BE
+				if gs_Project <> 'PANDORA'  then // 10/21/2024 - Dinesh - 572- Google - Completed Inbound orders and GR transactions not sent - It will remain for non Pandora. //Dinesh - 06/17/2025    - SIMS-739- PH - Google – SIMS-Fix to SIMS-572 - MM Transactions (Receipts) //Dinesh- 04/06/2026-SIMS-954-Google - SIMS - Bug from SIMS-739 - GR transactions not inserted for orders
 					// End - Dinesh - 03/22/2021- S54935- Google - SIMS – 947 change needed for Google SAP
 					// 12/08 - PCONKL - Want to write the record before we show confirmation msgbox
 					Execute Immediate "Begin Transaction" using SQLCA; /* 11/04 - PCONKL - Auto Commit Turned on to eliminate DB locks*/
-					
 					Insert Into batch_Transaction (project_ID, Trans_Type, Trans_Order_ID, Trans_Status, Trans_Create_Date, Trans_Parm)
 						Values(:gs_Project, 'GR', :lsRONO,'N', :ldtToday, '');
 					Execute Immediate "COMMIT" using SQLCA;
-				
-				End if
-				
-//				17-Feb-2014 :Madhu- C13-135 - PHC - Split re-trigger interface files (SIMS- MARC GT) -START
+				//End if //Dinesh- 04/06/2026-SIMS-954-Google - SIMS - Bug from SIMS-739 - GR transactions not inserted for orders	
+			     //17-Feb-2014 :Madhu- C13-135 - PHC - Split re-trigger interface files (SIMS- MARC GT) -START
 				//inserting a record with GT into Batch Transaction table
 				Execute Immediate "Begin Transaction" using SQLCA;
-				
-				Insert Into batch_Transaction (project_ID, Trans_Type, Trans_Order_ID, Trans_Status, Trans_Create_Date, Trans_Parm)
+			     Insert Into batch_Transaction (project_ID, Trans_Type, Trans_Order_ID, Trans_Status, Trans_Create_Date, Trans_Parm)
 					Values(:gs_Project, 'GT', :lsRONO,'N', :ldtToday, '');
-				
-				Execute Immediate "COMMIT" using SQLCA;
+			     Execute Immediate "COMMIT" using SQLCA;
+			end if
 				//17-Feb-2014 :Madhu- C13-135 - PHC - Split re-trigger interface files (SIMS- MARC GT) -END	
-		end if
+		End IF
 		
 		w_main.SetMicrohelp("Record Confirmed!")
 		if not ib_batchconfirmmode then	// LTK 20150130 batch confirm
@@ -1663,12 +1681,15 @@ ELSE
 	// Begin - Dinesh - 03/22/2021- S54935- Google - SIMS – 947 change needed for Google SAP
 	//if ((gs_Project='PANDORA') and (ls_uf6='GPN_CHANGE' or ls_uf6='GCD_PACKAGING_USAGE' or ls_uf6='SCRAP' or ls_uf6='R_CHANGE' or ls_uf6='PO_FIX')) then
 	if  gs_Project='PANDORA' and liAdj > 0 then
+		ib_adj= True //Dinesh- 04/06/2026-SIMS-954-Google - SIMS - Bug from SIMS-739 - GR transactions not inserted for orders
 		Execute Immediate "Begin Transaction" using SQLCA; /* 11/04 - PCONKL - Auto Commit Turned on to eliminate DB locks*/
 		Insert Into batch_Transaction (project_ID, Trans_Type, Trans_Order_ID, Trans_Status, Trans_Create_Date, Trans_Parm )
 		Values(:gs_Project, 'MM', :lsRONO,'N', :ldtToday, 'Inbound' );
 		Execute Immediate "COMMIT" using SQLCA;
+
 	else
 		// End - Dinesh - 03/22/2021- S54935- Google - SIMS – 947 change needed for Google SAP
+		ib_adj= False //Dinesh- 04/06/2026-SIMS-954-Google - SIMS - Bug from SIMS-739 - GR transactions not inserted for orders
 		//Messagebox(is_title,isDetailRecordsToReConfirm )
 		//TimA 04/09/14 Order Re-Confirmed only send the new batch transactions
 		Execute Immediate "Begin Transaction" using SQLCA; /* 11/04 - PCONKL - Auto Commit Turned on to eliminate DB locks*/
@@ -11536,15 +11557,16 @@ long putaway_delete_row,ll_line_item_no,ll_max,ll_i, ll_method_trace_id
 datastore lds_screen_lock,lds_gr_transaction
 setnull(ll_method_trace_id)
 datetime ldtToday
-long ll_trans,liAdj
+long ll_trans,liAdj,ll_trans_mm,ll_trans_gr // Dinesh - 04/07/2026-SIMS-954-Google - SIMS - Bug from SIMS-739 - GR transactions not inserted for orders
 string ls_uf6
-
+ib_insert_mm = False // Dinesh - 04/07/2026-SIMS-954-Google - SIMS - Bug from SIMS-739 - GR transactions not inserted for orders
+ib_insert_gr= False // Dinesh - 04/07/2026-SIMS-954-Google - SIMS - Bug from SIMS-739 - GR transactions not inserted for orders
 //SIMS-55 Added by Dhirendra-END 
 integer li_save_Failed
 //TimA 04/07/13 Pandora issue #560
 Long llCooCount,c
 String lsCoo
-
+ii_ret = 0 // Dinesh - 04/07/2026-SIMS-954-Google - SIMS - Bug from SIMS-739 - GR transactions not inserted for orders
 //TimA 02/12/14 Added new Method Trace calls
 is_suppinvoiceno= idw_main.getitemstring(1,'supp_invoice_no')
 f_method_trace_special( gs_project,this.ClassName() + ' -ue_save','start ue_save: ',is_rono,' ',' ' ,is_suppinvoiceno) 
@@ -11964,39 +11986,39 @@ select count(*) into :liAdj from lookup_table with(nolock) where code_type='ORDE
 	
 	ls_ord_status=idw_main.GetItemString(1,'ord_status')
 	
-	//select count(*) into :ll_trans from batch_transaction where trans_order_id= :is_rono and trans_type='GR' using sqlca; // Dinesh - 05/23/2025 - SIMS-739- PH - Google – SIMS-Fix to SIMS-572 - MM Transactions (Receipts)
-	//IF  li_ret = 1 and gs_Project = 'PANDORA'  and ls_ord_status='C'  and ll_trans < 1 then // Dinesh - 05/23/2025 - SIMS-739- PH - Google – SIMS-Fix to SIMS-572 - MM Transactions (Receipts)
-	
-	 select count(*) into :ll_trans from batch_transaction where trans_order_id= :is_rono and trans_type = 'MM' using sqlca; // Dinesh - 05/23/2025 - SIMS-739- PH - Google – SIMS-Fix to SIMS-572 - MM Transactions (Receipts)
-	        
-    //select count(*) into :ll_trans from batch_transaction where trans_order_id= :is_rono and trans_type= 'GR'using sqlca; // Dinesh - 05/23/2025    - SIMS-739- PH - Google – SIMS-Fix to SIMS-572 - MM Transactions (Receipts)
- 
-    IF  li_ret = 1 and gs_Project = 'PANDORA'  and ls_ord_status='C'  and ll_trans < 1 then 
-        // if ib_adj= false and liAdj > 0 then //Dinesh - 06/17/2025    - SIMS-739- PH - Google – SIMS-Fix to SIMS-572 - MM Transactions (Receipts)
-		if ib_adj= True and liAdj > 0 then //Dinesh - 06/17/2025    - SIMS-739- PH - Google – SIMS-Fix to SIMS-572 - MM Transactions (Receipts)
+	 //select count(*) into :ll_trans from batch_transaction where trans_order_id= :is_rono and trans_type = 'MM' using sqlca; // Dinesh - 05/23/2025 - SIMS-739- PH - Google – SIMS-Fix to SIMS-572 - MM Transactions (Receipts)
+	  //Begin - Dinesh - 04/07/2026-SIMS-954-Google - SIMS - Bug from SIMS-739 - GR transactions not inserted for orders
+	  select count(*) into :ll_trans_mm from batch_transaction where trans_order_id= :is_rono and trans_type = 'MM' and Trans_Parm='Inbound' using sqlca; // Dinesh - 04/01/2026 - SIMS-954-Google - SIMS - Bug from SIMS-739 - GR transactions not inserted for orders
+	  ii_ret = li_ret
+	  IF  li_ret = 1 and gs_Project = 'PANDORA'  and ls_ord_status='C'  and ll_trans_mm < 1 then 
+         if  liAdj > 0 then //Dinesh- 04/06/2026-SIMS-954-Google - SIMS - Bug from SIMS-739 - GR transactions not inserted for orders  //Dinesh - 06/17/2025    - SIMS-739- PH - Google – SIMS-Fix to SIMS-572 - MM Transactions (Receipts)
             Execute Immediate "Begin Transaction" using SQLCA;
             Insert Into batch_Transaction (project_ID, Trans_Type, Trans_Order_ID, Trans_Status, Trans_Create_Date, Trans_Parm) Values(:gs_Project, 'MM', :lsRONO,'N', :ldtToday, 'Inbound');
             Execute Immediate "COMMIT" using SQLCA;
-		// Begin - Dinesh - 05/23/2025    - SIMS-739- PH - Google – SIMS-Fix to SIMS-572 - MM Transactions (Receipts)
-//		 if ib_adj= false and liAdj > 0 then
-//			Execute Immediate "Begin Transaction" using SQLCA;
-//				Insert Into batch_Transaction (project_ID, Trans_Type, Trans_Order_ID, Trans_Status, Trans_Create_Date, Trans_Parm)
-//				Values(:gs_Project, 'MM', :lsRONO,'N', :ldtToday, '');
-//			Execute Immediate "COMMIT" using SQLCA;
- 		// End - Dinesh - 05/23/2025    - SIMS-739- PH - Google – SIMS-Fix to SIMS-572 - MM Transactions (Receipts)
-		//elseif  ib_adj= True then //Dinesh - 06/17/2025    - SIMS-739- PH - Google – SIMS-Fix to SIMS-572 - MM Transactions (Receipts)
-		elseif  ib_adj= False then //Dinesh - 06/17/2025    - SIMS-739- PH - Google – SIMS-Fix to SIMS-572 - MM Transactions (Receipts)
-			select count(*) into :ll_trans from batch_transaction where trans_order_id= :is_rono and trans_type = 'GR' using sqlca; // Dinesh - 06/17/2025 - SIMS-739- PH - Google – SIMS-Fix to SIMS-572 - MM Transactions (Receipts)
-			if ll_trans < 1 then  //Dinesh - 06/17/2025    - SIMS-739- PH - Google – SIMS-Fix to SIMS-572 - MM Transactions (Receipts)
+		   ib_insert_mm = True
+		else
+		   ib_insert_mm = false
+		 end if
+
+	END IF
+		select count(*) into :ll_trans_gr from batch_transaction where trans_order_id= :is_rono and trans_type = 'GR' using sqlca; // Dinesh - 06/17/2025 - SIMS-739- PH - Google – SIMS-Fix to SIMS-572 - MM Transactions (Receipts)
+		IF li_ret = 1 and gs_Project = 'PANDORA'  and ls_ord_status='C'  and ll_trans_gr < 1 then 
+			If  liAdj < 1 then //Dinesh- 04/06/2026-SIMS-954-Google - SIMS - Bug from SIMS-739 - GR transactions not inserted for orders  //Dinesh - 06/17/2025    - SIMS-739- PH - Google – SIMS-Fix to SIMS-572 - MM Transactions (Receipts)
 				Execute Immediate "Begin Transaction" using SQLCA;
 					Insert Into batch_Transaction (project_ID, Trans_Type, Trans_Order_ID, Trans_Status, Trans_Create_Date, Trans_Parm)
 					Values(:gs_Project, 'GR', :lsRONO,'N', :ldtToday, '');
 				Execute Immediate "COMMIT" using SQLCA;
+				Execute Immediate "Begin Transaction" using SQLCA;
+			     		Insert Into batch_Transaction (project_ID, Trans_Type, Trans_Order_ID, Trans_Status, Trans_Create_Date, Trans_Parm)
+						Values(:gs_Project, 'GT', :lsRONO,'N', :ldtToday, '');
+			     		Execute Immediate "COMMIT" using SQLCA;
+				ib_insert_gr = True 
+			else
+				ib_insert_gr= false
 			end if 
 		End if
-				
-	End if
-// End 10/18/2024 - Dinesh - SIMS-572- Google - Completed Inbound orders and GR transactions not sent 	
+		 //End - Dinesh - 04/07/2026-SIMS-954-Google - SIMS - Bug from SIMS-739 - GR transactions not inserted for orders	
+		// End 10/18/2024 - Dinesh - SIMS-572- Google - Completed Inbound orders and GR transactions not sent 	
 
 //if li_ret = 1 then li_ret = idw_rma_serial.Update() /* 05/05 - PCONKL */  GailM 9/17/2019 Replace with call to function.  DE11788
 if li_ret = 1 then 
