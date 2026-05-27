@@ -123,6 +123,7 @@ public function datetime convert_string_to_datetime (string as_data)
 public function integer uf_sync_om_inventory (string asproject, string aswarehouse)
 public function integer uf_process_boh_sap ()
 public function integer uf_process_projectcode (string aspath)
+public function integer uf_process_customer (string aspath, string asproject)
 end prototypes
 
 public function integer uf_process_so (string aspath, string asproject);//Process Material Transfer (Sales Order) for PANDORA (used SIKA as a template)
@@ -804,6 +805,7 @@ String 	ls_description, ls_uom1, ls_weight1, ls_length1, ls_width1, ls_height1, 
 String 	ls_part_upc, ls_freight_class, ls_storage_code, ls_inv_class, ls_alt_sku, ls_coo, ls_shelf_life
 String 	ls_item_delete_ind, ls_uf1, ls_uf4, ls_uf5, ls_uf15, ls_sn_track, ls_cc_class_code, ls_foot_print_ind
 string		ls_HriCageTrack_ind, ls_class_dc_code, ls_dc_freq //dhirendra (SIMS-80)
+String     ls_MHE //Added  - 04/29/2026 - Nisha Nair - SIMS-962-SIMS – Adding MHE into SIMS.
 
 Integer	liRC,	liFileNo
 
@@ -1218,6 +1220,19 @@ For llfileRowPos = 1 to llFileRowCount
 	End If
 	   //d
 	 // Dhirendra-SIMS-80//Google 
+	 
+	 // Begin - 04/29/2026 - Nisha Nair - SIMS-962-SIMS – Adding MHE into SIMS.
+	lsData = Right(lsData,(len(lsData) - (Len(ls_HRIcagetrack_ind) + 1)))
+	IF Pos(lsData,'|') > 0 Then
+		ls_MHE = Left(lsData,(pos(lsData,'|') - 1))
+	Else
+		if lsData = '' then 
+			SetNull(ls_MHE)
+		else
+			ls_MHE =lsData
+		end if
+	End If
+	//Ends  - 04/29/2026 - Nisha Nair - SIMS-962-SIMS – Adding MHE into SIMS.
 
 	//20-Dec-2018 :Madhu S27372 - Update all Item Master Record attribute values
 	llCount = ldsItem.RowCount() //get Item's count
@@ -1354,6 +1369,8 @@ For llfileRowPos = 1 to llFileRowCount
 		END IF
 		//Added BY Dhirendra  SIMS-80 -END
 		
+		ldsItem.SetItem(llPos,'MHE',ls_MHE) //Added  - 04/29/2026 - Nisha Nair - SIMS-962-SIMS – Adding MHE into SIMS.
+		
 		IF ls_foot_print_ind > '' THEN						//Foot Prints Ind
 			ldsItem.SetItem(llPos, 'Foot_Prints_Ind', ls_foot_print_ind)
 
@@ -1441,7 +1458,6 @@ For llfileRowPos = 1 to llFileRowCount
 			FileWrite(gilogFileNo,lsLogOut)
 			llLoopCount=0
 		end if
-	
 Next /*File row to Process */
 
 lsLogOut = Space(10) + String(llNew) + ' Item Records were successfully added and ' + String(llExist) + ' Records were updated.' + String(Today(), "mm/dd/yyyy hh:mm:ss.fff")
@@ -1482,6 +1498,10 @@ Choose Case Upper(Left(asFile,2))
 		liRC = uf_Process_Item_Cost(asPath, asProject)	
 	Case 'PC' /*  Project code File*/	    // Akash Baghel - 07/26/2023...- SIMS-243 calling function for project code
 	     liRC = uf_Process_ProjectCode(asPath)	 // Akash Baghel - 07/26/2023...- SIMS-243 calling function for project code
+  //Begin- Dinesh-SIMS-976-Development for Google – SIMS – Automation of SIMS   Customer Code. 
+    Case 'CC' /*  Customer code File*/	   
+	     liRC = uf_Process_Customer(asPath,asProject)
+  //End- Dinesh-SIMS-976-Development for Google – SIMS – Automation of SIMS   Customer Code. 
 	Case 'PO' /* Processed PO File */ // TAM 2009/06/16 - Added Rosettanet Mapping
 		Choose Case Upper(Left(asFile,3))
 			Case 'POR' /* Receive Order Files */
@@ -14702,6 +14722,7 @@ IF ll_receipt_queue_count > 0 Then
 				lsOwnerCD_Prev = lsOwnerCD
 			end if //lsOwnerCD <> lsOwnerCD_Prev 
 			
+		
 			//29-MAY-2019 :Madhu S34063 Exclude Container Tracking Ind Condition for Orders 'MTR', CMTR', 'FMTR'
 			// 07/20 - PCONKL - Needs to apply to Client Cust PO Nbr as well
 			// dts 02/23/2021 - S54137 - For SAP, no longer getting order prefixes so Container Tracking logic is now governed by Owner Codes (WH*PM, WH*PD, WH*RK and WH*P (-R only)			
@@ -14730,20 +14751,23 @@ IF ll_receipt_queue_count > 0 Then
 				idsPODetail.SetItem(llNewDetailRow, 'Status_Message', 'SKU should not be NULL. Record will not be processed.')
 				lbDetailError = True
 			End If
-
+			
 			// dts 02/23/2021 - S54137 
 			//WH*P will capture containers for only '-R' parts. WH*PM/PD/RK will be configurable for '-R' only or all parts
 			if ls_SAP_Enabled = 'Y' then
 				//dts 03/10/2021 - S54963
 				//If left(ls_OrderNo, 1)='X' OR left(ls_OrderNo, 3)='SID' OR left(ls_OrderNo, 10)='SYNWHGAFB1' or left(ls_om_client_cust_po_no, 3)='X' OR left(ls_om_client_cust_po_no, 3)='SID' OR left(ls_om_client_cust_po_no, 10)='SYNWHGAFB1' or left(ls_om_vendor_invoice_nbr, 3)='X' OR left(ls_om_vendor_invoice_nbr, 3)='SID' OR left(ls_om_vendor_invoice_nbr, 10)='SYNWHGAFB1' THEN
-				If left(ls_OrderNo, 1)='X'  OR left(ls_OrderNo, 10)='SYNWHGAFB1' or left(ls_om_client_cust_po_no, 3)='X' OR left(ls_om_client_cust_po_no, 3)='SID' OR left(ls_om_client_cust_po_no, 10)='SYNWHGAFB1' or left(ls_om_vendor_invoice_nbr, 3)='X' OR left(ls_om_vendor_invoice_nbr, 3)='SID' OR left(ls_om_vendor_invoice_nbr, 10)='SYNWHGAFB1' THEN // Dinesh/dts- 06/30/2025 - SIMS-756-SIMS-Google - SID inbound order prefixes to stop loading in container and pallet IDs 
-					lbCaptureContainers=True
+			//commented by Nisha SIMS 943 :Google-Change Container ID mapping in Receiving Order download in SIMS - starts
+			//	If left(ls_OrderNo, 1)='X'  OR left(ls_OrderNo, 10)='SYNWHGAFB1' or left(ls_om_client_cust_po_no, 3)='X' OR left(ls_om_client_cust_po_no, 3)='SID' OR left(ls_om_client_cust_po_no, 10)='SYNWHGAFB1' or left(ls_om_vendor_invoice_nbr, 3)='X' OR left(ls_om_vendor_invoice_nbr, 3)='SID' OR left(ls_om_vendor_invoice_nbr, 10)='SYNWHGAFB1' THEN // Dinesh/dts- 06/30/2025 - SIMS-756-SIMS-Google - SID inbound order prefixes to stop loading in container and pallet IDs 
+			//		lbCaptureContainers=True
 				// in addition to the order prefixes driving container capture, some Owner Codes will capture containers...
 				//dts 03/10/2021 - S54657 - adding WH*SC and WH*Q (and MultiLeg portion of WH*P)    elseif left(lsOwnerCD,2)='WH' and right(lsOwnerCD,1)='P' and right(lsSKU,2)='-R' then
-				elseif left(lsOwnerCD,2)='WH' and ( (right(lsOwnerCD,1)='P' and lsMultiLeg='Y') or right(lsOwnerCD,2)='SC' or right(lsOwnerCD,1)='Q') and right(lsSKU,2)='-R' then
-					lbCaptureContainers=True
-				elseif left(lsOwnerCD,2)='WH' and (right(lsOwnerCD,2)='PM' or right(lsOwnerCD,2)='PD' or right(lsOwnerCD,2)='RK' ) then
-					if lbDashR_Only=False or right(lsSKU,2)='-R' then
+				//else
+				//commented by Nisha SIMS 943 :Google-Change Container ID mapping in Receiving Order download in SIMS - ends
+					if left(lsOwnerCD,2)='WH' and ( (right(lsOwnerCD,1)='P' and lsMultiLeg='Y') or right(lsOwnerCD,2)='SC' or right(lsOwnerCD,1)='Q') and right(lsSKU,2)='-R' then
+						lbCaptureContainers=True
+					elseif left(lsOwnerCD,2)='WH' and (right(lsOwnerCD,2)='PM' or right(lsOwnerCD,2)='PD' or right(lsOwnerCD,2)='RK' ) then
+					//	if lbDashR_Only=False or right(lsSKU,2)='-R' then //commented by Nisha SIMS 943 :Google-Change Container ID mapping in Receiving Order download in SIMS - starts
 						lbCaptureContainers=True
 					else
 						lbCaptureContainers=False
@@ -14751,7 +14775,7 @@ IF ll_receipt_queue_count > 0 Then
 				else
 					lbCaptureContainers=False
 				End If
-			end if
+		
 			//Write to Log File and Screen
 			lsLogOut = "      - OM Inbound - Processing uf_process_om_receipt - Owner CD: " + lsOwnerCD +". CaptureContainers is " +string(lbCaptureContainers)
 			FileWrite(giLogFileNo,lsLogOut)
@@ -14877,8 +14901,15 @@ gu_nvo_process_files.uf_write_log(lsLogOut)
 lsLogOut = "TEMPORARY MSG 0.1 -  lsPNO2: " + lsPONO2
 FileWrite(giLogFileNo,lsLogOut)
 gu_nvo_process_files.uf_write_log(lsLogOut)
-			idsPODetail.SetItem(llNewDetailRow,'po_no2',lsPONO2)
-			
+
+				IF lsPoNo2Controlled ='Y' OR lbCaptureContainers THEN //Added by Nisha SIMS 943 :Google-Change Container ID mapping in Receiving Order download in SIMS
+					idsPODetail.SetItem(llNewDetailRow,'po_no2',lsPONO2) //po_no2
+				//Added by Nisha SIMS 943 :Google-Change Container ID mapping in Receiving Order download in SIMS - starts
+				ELSE
+					idsPODetail.SetItem(llNewDetailRow,'user_field5',lsPONO2) //Pallet Id
+				END IF
+				//Added by Nisha SIMS 943 :Google-Change Container ID mapping in Receiving Order download in SIMS - ends
+		
 			If lsPONO2Prev = "" Then
 				lsPONO2Prev = lsPONO2
 				lbFirst = TRUE
@@ -15020,35 +15051,37 @@ FileWrite(giLogFileNo,lsLogOut)
 					//29-MAY-2019 :Madhu S34063 Exclude Container Tracking Ind Condition
 					//dts 02/24/2021 - S54137 now using lbCaptureContainers instead of lbExcludeOrder
 					//IF ls_container_tracking_ind ='Y'  OR lbExcludeOrder THEN
-					IF ls_container_tracking_ind ='Y'  OR lbCaptureContainers THEN
+				IF ls_container_tracking_ind ='Y'  OR lbCaptureContainers THEN 
 						idsPODetail.SetItem(llNewDetailRow, 'container_id', idsOMCReceiptDetail.getitemstring(ll_Row_Pos_RD, 'SUSR4')) //container Id
-//Write to Log File and Screen
-lsLogOut = "TEMPORARY MSG 1 - Owner CD: " + lsOwnerCD +". CaptureContainers is " +string(lbCaptureContainers)
-FileWrite(giLogFileNo,lsLogOut)
-gu_nvo_process_files.uf_write_log(lsLogOut)
-lsLogOut = "TEMPORARY MSG 1.2 - SUSR4: " + nz(idsOMCReceiptDetail.getitemstring(ll_Row_Pos_RD, 'SUSR4'),'null') // nz(ls_OrderNo,'-')
-FileWrite(giLogFileNo,lsLogOut)
-gu_nvo_process_files.uf_write_log(lsLogOut)
+						//Write to Log File and Screen
+						lsLogOut = "TEMPORARY MSG 1 - Owner CD: " + lsOwnerCD +". CaptureContainers is " +string(lbCaptureContainers)
+						FileWrite(giLogFileNo,lsLogOut)
+						gu_nvo_process_files.uf_write_log(lsLogOut)
+						lsLogOut = "TEMPORARY MSG 1.2 - SUSR4: " + nz(idsOMCReceiptDetail.getitemstring(ll_Row_Pos_RD, 'SUSR4'),'null') // nz(ls_OrderNo,'-')
+						FileWrite(giLogFileNo,lsLogOut)
+						gu_nvo_process_files.uf_write_log(lsLogOut)
 					ELSE
 						//OCT 2019 - MikeA - DE12998
-						idsPODetail.SetItem(llNewDetailRow, 'container_id', '') //container Id
+						//	idsPODetail.SetItem(llNewDetailRow, 'container_id', '') //container Id //commented by Nisha SIMS 943 :Google-Change Container ID mapping in Receiving Order download in SIMS
+						idsPODetail.SetItem(llNewDetailRow, 'user_field4',  idsOMCReceiptDetail.getitemstring(ll_Row_Pos_RD, 'SUSR4'))//commented by Nisha SIMS 943 :Google-Change Container ID mapping in Receiving Order download in SIMS					
 					END IF
 					//20-MAY-2019 :Madhu S33850 Container Tracked Items. - END
 					
 					//GailM 2/21/2020 S42902 F21477 Google - Suppress Pallet ID's on IB orders 
 					//dts 02/24/2021 - S54137 now using lbCaptureContainers instead of lbExcludeOrder
 					//IF lsPoNo2Controlled ='Y' OR lbExcludeOrder THEN
-					IF lsPoNo2Controlled ='Y' OR lbCaptureContainers THEN
-						idsPODetail.SetItem(llNewDetailRow, 'po_no2', idsOMCReceiptDetail.getitemstring(ll_Row_Pos_RD, 'SUSR5')) //container Id
-//Write to Log File and Screen
-lsLogOut = "TEMPORARY MSG 1.3 - Owner CD: " + lsOwnerCD +". CaptureContainers is " +string(lbCaptureContainers)
-FileWrite(giLogFileNo,lsLogOut)
-gu_nvo_process_files.uf_write_log(lsLogOut)
-lsLogOut = "TEMPORARY MSG 1.4 - SUSR5: " + nz(idsOMCReceiptDetail.getitemstring(ll_Row_Pos_RD, 'SUSR5'),'null')
-FileWrite(giLogFileNo,lsLogOut)
-gu_nvo_process_files.uf_write_log(lsLogOut)
+					IF lsPoNo2Controlled ='Y' OR lbCaptureContainers THEN 
+							idsPODetail.SetItem(llNewDetailRow, 'po_no2', idsOMCReceiptDetail.getitemstring(ll_Row_Pos_RD, 'SUSR5')) //po_no2
+						//Write to Log File and Screen
+						lsLogOut = "TEMPORARY MSG 1.3 - Owner CD: " + lsOwnerCD +". CaptureContainers is " +string(lbCaptureContainers)
+						FileWrite(giLogFileNo,lsLogOut)
+						gu_nvo_process_files.uf_write_log(lsLogOut)
+						lsLogOut = "TEMPORARY MSG 1.4 - SUSR5: " + nz(idsOMCReceiptDetail.getitemstring(ll_Row_Pos_RD, 'SUSR5'),'null')
+						FileWrite(giLogFileNo,lsLogOut)
+						gu_nvo_process_files.uf_write_log(lsLogOut)
 					ELSE
-						idsPODetail.SetItem(llNewDetailRow, 'po_no2', '') //Pallet Id
+						//idsPODetail.SetItem(llNewDetailRow, 'po_no2', '') //Pallet Id//commented by Nisha SIMS 943 :Google-Change Container ID mapping in Receiving Order download in SIMS
+						idsPODetail.SetItem(llNewDetailRow, 'user_field5', idsOMCReceiptDetail.getitemstring(ll_Row_Pos_RD, 'SUSR5')) //Added by Nisha SIMS 943 :Google-Change Container ID mapping in Receiving Order download in SIMS 
 					END IF
 					
 				End If
@@ -15111,29 +15144,31 @@ gu_nvo_process_files.uf_write_log(lsLogOut)
 					//IF ls_container_tracking_ind ='Y' OR lbExcludeOrder THEN
 					IF ls_container_tracking_ind ='Y' OR lbCaptureContainers THEN
 						idsPODetail.SetItem(llNewDetailRow, 'container_id', lsContainer) //container Id
-//Write to Log File and Screen
-lsLogOut = "TEMPORARY MSG 2 - Owner CD: " + lsOwnerCD +". CaptureContainers is " +string(lbCaptureContainers)
-FileWrite(giLogFileNo,lsLogOut)
-gu_nvo_process_files.uf_write_log(lsLogOut)
+						//Write to Log File and Screen
+						lsLogOut = "TEMPORARY MSG 2 - Owner CD: " + lsOwnerCD +". CaptureContainers is " +string(lbCaptureContainers)
+						FileWrite(giLogFileNo,lsLogOut)
+						gu_nvo_process_files.uf_write_log(lsLogOut)
 					ELSE
 						//OCT 2019 - MikeA - DE12998
-						idsPODetail.SetItem(llNewDetailRow, 'container_id', '') //container Id
+						//idsPODetail.SetItem(llNewDetailRow, 'container_id', '') //container Id  //commented by Nisha SIMS 943 :Google-Change Container ID mapping in Receiving Order download in SIMS - starts
+						idsPODetail.SetItem(llNewDetailRow, 'user_field4', lsContainer) //container Id//added by Nisha SIMS 943 :Google-Change Container ID mapping in Receiving Order download in SIMS - starts
 					END IF
 					
 					//GailM 2/21/2020 S42902 F21477 Google - Suppress Pallet ID's on IB orders 
 					//dts 02/24/2021 - S54137 now using lbCaptureContainers instead of lbExcludeOrder
 					//IF lsPoNo2Controlled ='Y' OR lbExcludeOrder THEN
 					IF lsPoNo2Controlled ='Y' OR lbCaptureContainers THEN
-						idsPODetail.SetItem(llNewDetailRow, 'po_no2', lsPONO2) //container Id
-//Write to Log File and Screen
-lsLogOut = "TEMPORARY MSG 2.PONO2 - Owner CD: " + lsOwnerCD +". CaptureContainers is " +string(lbCaptureContainers)
-FileWrite(giLogFileNo,lsLogOut)
-gu_nvo_process_files.uf_write_log(lsLogOut)
-lsLogOut = "TEMPORARY MSG 2.PONO2 - Owner CD: " + lsOwnerCD +". lsPONO2: " +lsPONO2
-FileWrite(giLogFileNo,lsLogOut)
-gu_nvo_process_files.uf_write_log(lsLogOut)
+						idsPODetail.SetItem(llNewDetailRow, 'po_no2', lsPONO2) //po_no2
+						//Write to Log File and Screen
+						lsLogOut = "TEMPORARY MSG 2.PONO2 - Owner CD: " + lsOwnerCD +". CaptureContainers is " +string(lbCaptureContainers)
+						FileWrite(giLogFileNo,lsLogOut)
+						gu_nvo_process_files.uf_write_log(lsLogOut)
+						lsLogOut = "TEMPORARY MSG 2.PONO2 - Owner CD: " + lsOwnerCD +". lsPONO2: " +lsPONO2
+						FileWrite(giLogFileNo,lsLogOut)
+						gu_nvo_process_files.uf_write_log(lsLogOut)
 					ELSE
-						idsPODetail.SetItem(llNewDetailRow, 'po_no2', '') //Pallet Id
+						//idsPODetail.SetItem(llNewDetailRow, 'po_no2', '') //Pallet Id//commented by Nisha SIMS 943 :Google-Change Container ID mapping in Receiving Order download in SIMS 
+						idsPODetail.SetItem(llNewDetailRow, 'user_field5', lsPONO2) //po_no2 //added by Nisha SIMS 943 :Google-Change Container ID mapping in Receiving Order download in SIMS 
 					END IF
 					
 					idsPODetail.SetItem(llNewDetailRow, 'OM_CHANGE_REQUEST_NBR', ll_change_request_nbr)  	//CHANGE_REQUEST_NBR
@@ -15191,19 +15226,21 @@ gu_nvo_process_files.uf_write_log(lsLogOut)
 						//29-MAY-2019 :Madhu S34063 Exclude Container Tracking Ind Condition
 						//dts 02/24/2021 - S54137 now using lbCaptureContainers instead of lbExcludeOrder
 						//IF ls_container_tracking_ind ='Y' OR lbExcludeOrder THEN
-//Write to Log File and Screen
-lsLogOut = "TEMPORARY MSG 3 - Owner CD: " + lsOwnerCD +". CaptureContainers is " +string(lbCaptureContainers)
-FileWrite(giLogFileNo,lsLogOut)
-gu_nvo_process_files.uf_write_log(lsLogOut)
+						//Write to Log File and Screen
+						lsLogOut = "TEMPORARY MSG 3 - Owner CD: " + lsOwnerCD +". CaptureContainers is " +string(lbCaptureContainers)
+						FileWrite(giLogFileNo,lsLogOut)
+						gu_nvo_process_files.uf_write_log(lsLogOut)
 						IF ls_container_tracking_ind ='Y' OR lbCaptureContainers THEN
 							idsPODetail.SetItem(llNewDetailRow, 'container_id', lsContainer) //container Id
+								
 //Write to Log File and Screen
 lsLogOut = "TEMPORARY MSG 3.2 - Owner CD: " + lsOwnerCD +". CaptureContainers is " +string(lbCaptureContainers)
 FileWrite(giLogFileNo,lsLogOut)
 gu_nvo_process_files.uf_write_log(lsLogOut)
 						ELSE
 							//OCT 2019 - MikeA - DE12998
-							idsPODetail.SetItem(llNewDetailRow, 'container_id', '') //container Id
+						//	idsPODetail.SetItem(llNewDetailRow, 'container_id', '') //container Id //commented by Nisha SIMS 943 :Google-Change Container ID mapping in Receiving Order download in SIMS 
+							idsPODetail.SetItem(llNewDetailRow, 'user_field4', lsContainer) //container Id //commented by Nisha SIMS 943 :Google-Change Container ID mapping in Receiving Order download in SIMS
 						END IF
 						//20-MAY-2019 :Madhu S33850 Container Tracked Items. - END
 						
@@ -15212,6 +15249,7 @@ gu_nvo_process_files.uf_write_log(lsLogOut)
 						//IF lsPoNo2Controlled ='Y' OR lbExcludeOrder THEN
 						IF lsPoNo2Controlled ='Y' OR lbCaptureContainers THEN
 							idsPODetail.SetItem(llNewDetailRow,'po_no2', lsPONO2)
+							
 //Write to Log File and Screen
 lsLogOut = "TEMPORARY MSG 3.3 - Owner CD: " + lsOwnerCD
 FileWrite(giLogFileNo,lsLogOut)
@@ -15221,7 +15259,8 @@ lsLogOut = "TEMPORARY MSG 3.4 - Owner CD: " + lsOwnerCD +". lsPONO2: " +lsPONO2
 FileWrite(giLogFileNo,lsLogOut)
 gu_nvo_process_files.uf_write_log(lsLogOut)
 						Else
-							idsPODetail.SetItem(llNewDetailRow,'po_no2', '')
+							//idsPODetail.SetItem(llNewDetailRow,'po_no2', '')//commented by Nisha SIMS 943 :Google-Change Container ID mapping in Receiving Order download in SIMS - starts
+							idsPODetail.SetItem(llNewDetailRow, 'user_field5', lsPONO2) //added by Nisha SIMS 943 :Google-Change Container ID mapping in Receiving Order download in SIMS - starts
 						End If
 						
 						idsPODetail.SetItem(llNewDetailRow, 'Client_Cust_PO_NBR', ls_om_client_cust_po_no) //Client_cust_Po_No
@@ -15266,6 +15305,8 @@ gu_nvo_process_files.uf_write_log(lsLogOut)
 					idsPODetail.SetItem(llNewDetailRow,'line_item_no', llLineNum)					
 				End If
 				//20-MAR-2019 :Madhu Assign existing Line_Item_No - END
+				
+				
 							
 				idsPODetail.SetItem(llNewDetailRow,'action_cd',lsAction) 
 				idsPODetail.SetItem(llNewDetailRow,'supp_code', 'PANDORA')
@@ -15277,15 +15318,23 @@ gu_nvo_process_files.uf_write_log(lsLogOut)
 				idsPODetail.SetItem(llNewDetailRow, 'Lot_no', '-')
 				idsPODetail.SetItem(llNewDetailRow, 'PO_NO', lsPoNo)
 				idsPODetail.SetItem(llNewDetailRow, 'user_field2', idsOMCReceiptDetail.getitemstring(ll_Row_Pos_RD, 'SUSR1')) //UF2
-//Write to Log File and Screen
-lsLogOut = "TEMPORARY MSG 4 - Owner CD: " + lsOwnerCD
-FileWrite(giLogFileNo,lsLogOut)
-gu_nvo_process_files.uf_write_log(lsLogOut)
-//Write to Log File and Screen
-lsLogOut = "TEMPORARY MSG 4.2 - Owner CD: " + lsOwnerCD +". lsPONO2: " +lsPONO2
-FileWrite(giLogFileNo,lsLogOut)
-gu_nvo_process_files.uf_write_log(lsLogOut)
-				idsPODetail.SetItem(llNewDetailRow,'po_no2', lsPONO2)
+				//Write to Log File and Screen
+				lsLogOut = "TEMPORARY MSG 4 - Owner CD: " + lsOwnerCD
+				FileWrite(giLogFileNo,lsLogOut)
+				gu_nvo_process_files.uf_write_log(lsLogOut)
+				//Write to Log File and Screen
+				lsLogOut = "TEMPORARY MSG 4.2 - Owner CD: " + lsOwnerCD +". lsPONO2: " +lsPONO2
+				FileWrite(giLogFileNo,lsLogOut)
+				gu_nvo_process_files.uf_write_log(lsLogOut)
+				
+				IF lsPoNo2Controlled ='Y' OR lbCaptureContainers THEN //Added by Nisha SIMS 943 :Google-Change Container ID mapping in Receiving Order download in SIMS
+					idsPODetail.SetItem(llNewDetailRow,'po_no2', lsPONO2)//Po_no2  
+				 //Added by Nisha SIMS 943 :Google-Change Container ID mapping in Receiving Order download in SIMS - starts
+				ELSE
+					idsPODetail.SetItem(llNewDetailRow,'user_field5', lsPONO2)//Po_no2  
+				END IF
+				 //Added by Nisha SIMS 943 :Google-Change Container ID mapping in Receiving Order download in SIMS - ends
+				 
 				idsPODetail.SetItem(llNewDetailRow,'Serial_No', '-')
 				idsPODetail.SetItem(llNewDetailRow, 'owner_id', lsOwnerID)
 				idsPODetail.SetItem(llNewDetailRow, 'Inventory_Type', 'N')
@@ -15294,19 +15343,20 @@ gu_nvo_process_files.uf_write_log(lsLogOut)
 				//29-MAY-2019 :Madhu S34063 Exclude Container Tracking Ind Condition
 				//dts 02/24/2021 - S54137 now using lbCaptureContainers instead of lbExcludeOrder
 				//IF ls_container_tracking_ind ='Y' OR lbExcludeOrder THEN
-//Write to Log File and Screen
-lsLogOut = "TEMPORARY MSG 4 - Owner CD: " + lsOwnerCD +". CaptureContainers is " +string(lbCaptureContainers)
-FileWrite(giLogFileNo,lsLogOut)
-gu_nvo_process_files.uf_write_log(lsLogOut)
+				//Write to Log File and Screen
+				lsLogOut = "TEMPORARY MSG 4 - Owner CD: " + lsOwnerCD +". CaptureContainers is " +string(lbCaptureContainers)
+				FileWrite(giLogFileNo,lsLogOut)
+				gu_nvo_process_files.uf_write_log(lsLogOut)
 				IF ls_container_tracking_ind ='Y' OR lbCaptureContainers THEN
-					idsPODetail.SetItem(llNewDetailRow, 'container_id', lsContainer) //container Id
-//Write to Log File and Screen
-lsLogOut = "TEMPORARY MSG 4.2 - Owner CD: " + lsOwnerCD +". lsContainer " +lsContainer
-FileWrite(giLogFileNo,lsLogOut)
-gu_nvo_process_files.uf_write_log(lsLogOut)
+					idsPODetail.SetItem(llNewDetailRow, 'container_id', lsContainer) //container Id			
+					//Write to Log File and Screen
+					lsLogOut = "TEMPORARY MSG 4.2 - Owner CD: " + lsOwnerCD +". lsContainer " +lsContainer
+					FileWrite(giLogFileNo,lsLogOut)
+					gu_nvo_process_files.uf_write_log(lsLogOut)
 				ELSE
 					//OCT 2019 - MikeA - DE12998
-					idsPODetail.SetItem(llNewDetailRow, 'container_id', '') //container Id
+					//idsPODetail.SetItem(llNewDetailRow, 'container_id', '') //container Id//commented by Nisha SIMS 943 :Google-Change Container ID mapping in Receiving Order download in SIMS 
+					idsPODetail.SetItem(llNewDetailRow, 'user_field4', lsContainer)   //added by Nisha SIMS 943 :Google-Change Container ID mapping in Receiving Order download in SIMS 
 				END IF
 				//20-MAY-2019 :Madhu S33850 Container Tracked Items. - END
 				
@@ -19716,6 +19766,322 @@ Else
   End If
 
 Return 0
+end function
+
+public function integer uf_process_customer (string aspath, string asproject);
+//Begin - Dinesh- 05/11/2026-SIMS-976-Development for Google – SIMS – Automation of SIMS   Customer Code. 
+//Process Customer Master Transaction for Pandora
+string lscust_type,lsproject
+
+u_ds_datastore	ldsCustomer
+DAtastore	lu_DS
+
+String	lsData,			&
+			lsTemp,			&
+			lsLogOut, 		&
+			lsStringData,	&
+			lsCustomer
+			
+Integer	liRC,	&
+			liFileNo
+			
+Long		llCount,				&
+			llNew,				&
+			llExist,				&
+			llNewRow,			&
+			llFileRowCount,	&
+			llFileRowPos
+
+Boolean	lbError
+Blob		lblb_wide_chars
+
+ldsCustomer = Create u_ds_datastore
+ldsCustomer.dataobject= 'd_Customer_master'
+ldsCustomer.SetTransObject(SQLCA)
+
+lu_ds = Create datastore
+lu_ds.dataobject = 'd_generic_import'
+
+//Open and read the FIle In
+lsLogOut = '      - Opening Pandora Customer Master File: ' + asPath
+FileWrite(giLogFileNo,lsLogOut)
+gu_nvo_process_files.uf_write_log(lsLogOut) /*write to Screen*/
+
+liFileNo = FileOpen(asPath,LineMode!,Read!,LockReadWrite!)
+If liFileNo < 0 Then
+	lsLogOut = "-       ***Unable to Open Customer Master File for Pandora Processing: " + asPath
+	FileWrite(giLogFileNo,lsLogOut)
+	gu_nvo_process_files.uf_write_log(lsLogOut) /*write to Screen*/
+	Return -99 /* we wont move to error directory if we can't open the file here*/
+End If
+
+//read file and load to datastore for processing
+liRC = FileRead(liFileNo,lsStringData)
+
+Do While liRC > 0
+	llNewRow = lu_ds.InsertRow(0)
+	lu_ds.SetItem(llNewRow,'rec_data',Trim(lsStringData))
+	liRC = FileRead(liFileNo,lsStringData)
+Loop /*Next File record*/
+
+FileClose(liFileNo)
+//Process each Row
+llFileRowCOunt = lu_ds.RowCount()
+
+For llfileRowPos = 1 to llFileRowCOunt
+	
+	w_main.SetMicroHelp("Processing Customer Master Record " + String(llFileRowPos) + " of " + String(llFilerowCOunt))
+	
+	lsData = Trim(lu_ds.GetITemString(llFileRowPos,'rec_Data'))
+		
+	//Make sure first Char is not a delimiter
+	If Left(lsData,1) = '|' Then
+		lsData = Right(lsDAta,Len(lsData) - 1)
+	End If
+	//Validate Rec Type is CC 
+	lsTemp = Left(lsData,(pos(lsData,'|') - 1))
+	If lsTemp <> 'CC' Then
+		gu_nvo_process_files.uf_writeError("Row: " + string(llFileRowPos) + " - Invalid Record Type: '" + lsTemp + "'. Record will not be processed.")
+		lbError = True
+		Continue /*Process Next Record */
+	End If
+		
+	lsData = Right(lsData,(len(lsData) - (Len(lsTemp) + 1))) //Strip off until the next delimeter
+	
+	
+	//Validate Customer and retrieve existing or Create new Row
+	If Pos(lsData,'|') > 0 Then
+	
+		lsTemp = Left(lsData,(pos(lsData,'|') - 1))
+		lsproject = lsTemp
+		
+		lsData = Right(lsData,(len(lsData) - (Len(lsTemp) + 1))) //Strip off until the next delimeter
+		
+		//Customer Code 
+		If Pos(lsData,'|') > 0 Then
+			lsTemp = Left(lsData,(pos(lsData,'|') - 1))
+			lsCustomer=lsTemp
+			Else
+			lsTemp = lsData
+		End If
+		
+			lsData = Right(lsData,(len(lsData) - (Len(lsTemp) + 1))) //Strip off until the next delimeter
+		
+		//Customer Type 
+		If Pos(lsData,'|') > 0 Then
+			lsTemp = Left(lsData,(pos(lsData,'|') - 1))
+			lscust_type=lsTemp
+			Else
+			lsTemp = lsData
+		End If
+	
+		//Retrieve the DS to pupulate existing SKU if it exists, other wise insert new
+		llCount = ldsCustomer.Retrieve(asProject, lsCustomer)
+		If llCount <= 0 Then
+			
+			llNew ++ /*add to new count*/
+			ldsCustomer.InsertRow(0)
+			ldsCustomer.SetItem(1,'project_id',asProject)
+			ldsCustomer.SetItem(1,'cust_code',lsCustomer)
+			ldsCustomer.SetItem(1,'customer_Type',lscust_type) 
+				
+		Else /*Customer Master exists */
+		
+			llExist += llCount /*add to existing Count*/
+					
+		End If
+			
+	Else /*error*/
+		
+		gu_nvo_process_files.uf_writeError("Row: " + string(llFileRowPos) + " - Data expected after 'Customer' field. Record will not be processed.")
+		lbError = True
+		Continue /*Process Next Record */
+		
+	End If
+		
+	lsData = Right(lsData,(len(lsData) - (Len(lsTemp) + 1))) //Strip off until the next delimeter
+		
+	//Customer Name 
+	If Pos(lsData,'|') > 0 Then
+		lsTemp = Left(lsData,(pos(lsData,'|') - 1))
+	Else
+		lsTEmp = lsDAta
+	End If
+
+	ldsCustomer.SetItem(1,'cust_name',lsTemp)
+			
+	lsData = Right(lsData,(len(lsData) - (Len(lsTemp) + 1))) //Strip off until the next delimeter
+	
+	//Address 1
+	If Pos(lsData,'|') > 0 Then
+		lsTemp = Left(lsData,(pos(lsData,'|') - 1))
+	Else
+		lsTemp = lsData
+	End If
+	
+	ldsCustomer.SetItem(1,'address_1',lsTemp)
+			
+	lsData = Right(lsData,(len(lsData) - (Len(lsTemp) + 1))) //Strip off until the next delimeter
+	
+	//Address 2
+	If Pos(lsData,'|') > 0 Then
+		lsTemp = Left(lsData,(pos(lsData,'|') - 1))
+	Else 
+		lsTemp = lsData
+	End If
+	
+	ldsCustomer.SetItem(1,'address_2',lsTemp)
+			
+	lsData = Right(lsData,(len(lsData) - (Len(lsTemp) + 1))) //Strip off until the next delimeter
+	
+	//Address 3
+	If Pos(lsData,'|') > 0 Then
+		lsTemp = Left(lsData,(pos(lsData,'|') - 1))
+	Else
+		lsTemp = lsData
+	End If
+	
+	ldsCustomer.SetItem(1,'address_3',lsTemp)
+			
+	lsData = Right(lsData,(len(lsData) - (Len(lsTemp) + 1))) //Strip off until the next delimeter
+		
+	//City
+	If Pos(lsData,'|') > 0 Then
+		lsTemp = Left(lsData,(pos(lsData,'|') - 1))
+	Else
+		lsTemp = lsData
+	End If
+	
+	ldsCustomer.SetItem(1,'City',lsTemp)
+			
+	lsData = Right(lsData,(len(lsData) - (Len(lsTemp) + 1))) //Strip off until the next delimeter
+	
+	//State
+	If Pos(lsData,'|') > 0 Then
+		lsTemp = Left(lsData,(pos(lsData,'|') - 1))
+	Else
+		lsTemp = lsData
+	End If
+	
+	ldsCustomer.SetItem(1,'State',lsTemp)
+			
+	lsData = Right(lsData,(len(lsData) - (Len(lsTemp) + 1))) //Strip off until the next delimeter
+	
+	//Zip
+	If Pos(lsData,'|') > 0 Then
+		lsTemp = Left(lsData,(pos(lsData,'|') - 1))
+	Else 
+		lsTemp = lsData
+	End If
+	
+	ldsCustomer.SetItem(1,'Zip',lsTemp)
+			
+	lsData = Right(lsData,(len(lsData) - (Len(lsTemp) + 1))) //Strip off until the next delimeter
+	
+	
+	//Country
+	If Pos(lsData,'|') > 0 Then
+		lsTemp = Left(lsData,(pos(lsData,'|') - 1))
+	Else
+		lsTemp = lsData
+	End If
+	
+	ldsCustomer.SetItem(1,'Country',lsTemp)
+			
+	lsData = Right(lsData,(len(lsData) - (Len(lsTemp) + 1))) //Strip off until the next delimeter
+	
+	
+	//Remark
+	If Pos(lsData,'|') > 0 Then
+		lsTemp = Left(lsData,(pos(lsData,'|') - 1))
+	Else 
+		lsTemp = lsData
+	End If
+	
+	ldsCustomer.SetItem(1,'Remark',lsTemp)
+			
+	lsData = Right(lsData,(len(lsData) - (Len(lsTemp) + 1))) //Strip off until the next delimeter
+	
+	//User_Field1 - Group
+	If Pos(lsData,'|') > 0 Then
+		lsTemp = Left(lsData,(pos(lsData,'|') - 1))
+	Else 
+		lsTemp = lsData
+	End If
+	
+	ldsCustomer.SetItem(1,'User_Field1',lsTemp)
+			
+	lsData = Right(lsData,(len(lsData) - (Len(lsTemp) + 1))) //Strip off until the next delimeter
+	
+	//User_Field4- GooglewarehouseID
+	If Pos(lsData,'|') > 0 Then
+		lsTemp = Left(lsData,(pos(lsData,'|') - 1))
+	Else
+		lsTemp = lsData
+	End If
+	
+	ldsCustomer.SetItem(1,'User_Field4',lsTemp)
+			
+	lsData = Right(lsData,(len(lsData) - (Len(lsTemp) + 1))) //Strip off until the next delimeter
+	
+	// UF9- Web Desc
+	If Pos(lsData,'|') > 0 Then
+		lsTemp = Left(lsData,(pos(lsData,'|') - 1))
+	Else 
+		lsTemp = lsData
+	End If
+	
+	ldsCustomer.SetItem(1,'User_Field9',lsTemp)
+			
+	lsData = Right(lsData,(len(lsData) - (Len(lsTemp) + 1))) //Strip off until the next delimeter
+	
+	
+	// UF5-Oracle Integrated
+	If Pos(lsData,'|') > 0 Then
+		lsTemp = Left(lsData,(pos(lsData,'|') - 1))
+	Else 
+		lsTemp = lsData
+	End If
+	
+	ldsCustomer.SetItem(1,'User_Field5',lsTemp)
+			
+	lsData = Right(lsData,(len(lsData) - (Len(lsTemp) + 1))) //Strip off until the next delimeter
+
+	
+	//Update any record defaults
+	ldsCustomer.SetItem(1,'Last_user','SIMSFP')
+	ldsCustomer.SetItem(1,'last_update',today())
+
+	//Save Customer to DB
+	SQLCA.DBParm = "disablebind =0"
+	lirc = ldsCustomer.Update()
+	SQLCA.DBParm = "disablebind =1"
+	If liRC = 1 then
+		Commit;
+	Else
+		Rollback;
+		lsLogOut = Space(17) + "- ***System Error!  Unable to Save Customer Master Record to database!"
+		FileWrite(gilogFileNo,lsLogOut)
+		gu_nvo_process_files.uf_writeError("- ***System Error!  Unable to Save Customer Master Record to database!")
+		//Return -1
+		Continue
+	End If
+
+Next /*File row to Process */
+
+w_main.SetMicroHelp("")
+
+lsLogOut = Space(10) + String(llNew) + ' Customer Records were successfully added and ' + String(llExist) + ' Records were updated.'
+FileWrite(gilogFileNo,lsLogOut)
+
+Destroy ldsCustomer
+
+If lbError then
+	Return -1
+Else
+	Return 0
+End If
+//End - Dinesh- 05/112026-SIMS-976-Development for Google – SIMS – Automation of SIMS   Customer Code. 
 end function
 
 on u_nvo_proc_pandora.create

@@ -5717,7 +5717,7 @@ If llRowCount = 0 Then
 End If
 
 SetPointer(Hourglass!)
-ls_lob = w_do.idw_pack.getitemstring(1,'Supp_Code')  //Dinesh- 03/16/2026-SIMS-944-Development for Geistlich - New LOB support 
+ls_lob = w_do.idw_main.getitemstring(1,'line_of_business')  //Dinesh- 03/16/2026-SIMS-944-Development for Geistlich - New LOB support 
 ld_packprint = Create Datastore
 //IF  UPPER(ls_lob)='BIONNOVA' THEN  //Dinesh- 03/18/2026-SIMS-944-Development for Geistlich - New LOB support 
 //	ld_packprint.dataobject ='d_bionnova_packing_prt'  //Dinesh- 03/18/2026-SIMS-944-Development for Geistlich - New LOB support 

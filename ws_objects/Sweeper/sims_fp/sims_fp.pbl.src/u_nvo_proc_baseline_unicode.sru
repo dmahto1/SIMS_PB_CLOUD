@@ -1036,6 +1036,7 @@ BOOLEAN lbBillToAddress
 STRING lsBillToAddr1, lsBillToAddr2, lsBillToAddr3, lsBillToAddr4, lsBillToCity
 STRING	lsBillToState, lsBillToZip, lsBillToCountry, lsBillToTel, lsBillToName
 STRING ls_InventoryType, lsNoteType, lsNoteText
+string ls_bionova
 //Start..Akash baghel...02/26/2025...SIMS-667 Development for Geistlich - 3rd Party Address Mapping in Delivery Order
 BOOLEAN lb3PAddress
 STRING ls3PAddr1, ls3PAddr2, ls3PAddr3, ls3PAddr4, ls3PCity
@@ -1665,7 +1666,6 @@ else
 				
 				// 02/13 - PCONKL - Added SHip Ref
 				lsTemp = Trim(ldsImport.GetItemString(llFileRowPos, "col63"))
-		
 				If NOT(IsNull(lsTemp) OR trim(lsTemp) = '') Then
 				//Begin- Dinesh- 03/23/2026-SIMS-944-Development for Geistlich - New LOB support 
 					IF upper(asproject) ='GEISTLICH' then
@@ -2094,8 +2094,15 @@ else
 				ldsSODetail.SetItem(llNewDetailRow,'invoice_no',lsOrderNumber)			
 	//			ldsSODetail.SetItem(llNewDetailRow,'action_cd',lsChangeID) /*Supplier Order*/	
 	
-				ldsSODetail.SetItem(llNewDetailRow,'sku',lsSku) /*Sku*/	
-				ldsSODetail.SetItem(llNewDetailRow,'Supp_Code',lsSupplier) /*Supplier Code*/	
+				ldsSODetail.SetItem(llNewDetailRow,'sku',lsSku) /*Sku*/
+				//Begin- Dinesh - 04/28/2026-SIMS-944-Development for Geistlich - New LOB support 
+				select supp_code into :ls_bionova from Item_Master where sku =:lsSku and project_id=:lsProject using sqlca;
+				if upper(ls_bionova) = 'BIONNOVA' then
+					ldsSODetail.SetItem(llNewDetailRow,'Supp_Code',upper(ls_bionova)) /*Supplier Code*/	
+				else
+				//End- Dinesh - 04/28/2026-SIMS-944-Development for Geistlich - New LOB support 	
+					ldsSODetail.SetItem(llNewDetailRow,'Supp_Code',lsSupplier) /*Supplier Code*/
+				end if // Dinesh - 04/28/2026-SIMS-944-Development for Geistlich - New LOB support 
 				ldsSODetail.SetItem(llNewDetailRow,'Line_Item_No',llLineItemNo) /*Line_Item_No*/	
 				ldsSODetail.SetItem(llNewDetailRow,'Quantity', String(ldQuantity)) /*Quantity*/				
 	
@@ -4183,7 +4190,7 @@ for llFileRowPos = 1 to llFilerowCount
 		ldsItem.SetItem(1,'SKU',lsSKU)
 		ldsItem.SetItem(1,'project_id', lsProject)	
 		// Begin - Dinesh - 10/01/2025 - SIMS-806-Development for IFB - SIMS Bosch - New EDI interface setup for 888 
-		ldsItem.SetItem(1,'create_time', dateTime(today(),now()))	
+	//	ldsItem.SetItem(1,'create_time', dateTime(today(),now()))	//This has been cancelled........Dinesh - 10/01/2025 - SIMS-806-Development for IFB - SIMS Bosch - New EDI interface setup for 888 
 		// End - Dinesh - 10/01/2025 - SIMS-806-Development for IFB - SIMS Bosch - New EDI interface setup for 888 
 
 //TAM 2013/11/01  Added default for Component Indicator

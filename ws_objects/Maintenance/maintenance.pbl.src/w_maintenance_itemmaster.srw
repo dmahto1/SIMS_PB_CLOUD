@@ -2100,9 +2100,9 @@ return 0
 end event
 
 type tabpage_main from w_std_master_detail`tabpage_main within tab_main
-integer y = 108
+integer y = 116
 integer width = 4206
-integer height = 2628
+integer height = 2620
 string text = " Item Info"
 dw_sku_supplier dw_sku_supplier
 cb_item_master_owner cb_item_master_owner
@@ -2129,9 +2129,9 @@ destroy(this.dw_main)
 end on
 
 type tabpage_search from w_std_master_detail`tabpage_search within tab_main
-integer y = 108
+integer y = 116
 integer width = 4206
-integer height = 2628
+integer height = 2620
 cb_item_master_search cb_item_master_search
 cb_item_master_clear cb_item_master_clear
 dw_query dw_query
@@ -2788,6 +2788,14 @@ idw_main.object.allow_receipt.visible = 0
 END IF
 // End Dinesh- 11/23/2020 - S51444- PHILIPS-DA
 
+// Begin - 04/29/2026 - Nisha Nair - SIMS-962-SIMS – Adding MHE into SIMS.
+IF upper(gs_Project) = 'PANDORA'THEN
+	idw_main.object.mhe_1.visible = 1
+else
+	idw_main.object.mhe_1.visible = 0
+END IF
+// Ends - 04/29/2026 - Nisha Nair - SIMS-962-SIMS – Adding MHE into SIMS.
+
 // Begin Dinesh - SIMS-74 - 09/26/2022- Geistlich Serialization - Updates
 If upper(gs_project) ='GEISTLICH' then 
 
@@ -2989,9 +2997,9 @@ type tabpage_price from userobject within tab_main
 event create ( )
 event destroy ( )
 integer x = 18
-integer y = 108
+integer y = 116
 integer width = 4206
-integer height = 2628
+integer height = 2620
 long backcolor = 79741120
 string text = "Prices/Cust Alt SKUs"
 long tabtextcolor = 33554432
@@ -3303,9 +3311,9 @@ end event
 
 type tabpage_reorder from userobject within tab_main
 integer x = 18
-integer y = 108
+integer y = 116
 integer width = 4206
-integer height = 2628
+integer height = 2620
 long backcolor = 79741120
 string text = "Replen/Reorder/Putaway"
 long tabtextcolor = 33554432
@@ -3999,9 +4007,9 @@ end event
 
 type tabpage_component from userobject within tab_main
 integer x = 18
-integer y = 108
+integer y = 116
 integer width = 4206
-integer height = 2628
+integer height = 2620
 long backcolor = 79741120
 string text = "Component"
 long tabtextcolor = 33554432
@@ -4316,9 +4324,9 @@ end event
 
 type tabpage_packaging from userobject within tab_main
 integer x = 18
-integer y = 108
+integer y = 116
 integer width = 4206
-integer height = 2628
+integer height = 2620
 long backcolor = 79741120
 string text = "Packaging"
 long tabtextcolor = 33554432
@@ -4633,9 +4641,9 @@ end event
 
 type tabpage_sku_substitutes from userobject within tab_main
 integer x = 18
-integer y = 108
+integer y = 116
 integer width = 4206
-integer height = 2628
+integer height = 2620
 long backcolor = 79741120
 string text = "SKU Substitutes"
 long tabtextcolor = 33554432
@@ -4906,9 +4914,9 @@ event create ( )
 event destroy ( )
 boolean visible = false
 integer x = 18
-integer y = 108
+integer y = 116
 integer width = 4206
-integer height = 2628
+integer height = 2620
 long backcolor = 79741120
 string text = "COO"
 long tabtextcolor = 33554432

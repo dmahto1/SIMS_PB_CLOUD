@@ -506,7 +506,7 @@ string dataobject = "d_adjust_search"
 borderstyle borderstyle = stylelowered!
 end type
 
-event itemchanged;string ls_supp_code,ls_sku
+event itemchanged;string ls_supp_code,ls_sku,ls_mhe
 string ls_null
 Setnull(ls_null)
 Long ll_rtn
@@ -532,6 +532,16 @@ case 'sku'
 				this.object.supp_code[row] = ls_null
 				f_setfocus(dw_search,row,'supp_code')	
    	END IF
+		 // Begin- Dinesh - 04/27/2026- SIMS-962- Google - Development for Google – SIMS – Adding MHE into SIMS. 
+				select mhe into :ls_mhe from dbo.Item_Master with(nolock) 
+				where Project_Id =:gs_project and sku=:ls_sku and supp_code =:ls_supp_code 
+				using sqlca;
+				
+				If upper(ls_mhe) ="Y" Then
+					MessageBox("Stock Adjustment","Alert   : Special Handling required - Use caution." )
+				End If
+        // End- Dinesh - 04/27/2026- SIMS-962- Google - Development for Google – SIMS – Adding MHE into SIMS. 
+		
  Else			
 		MessageBox(is_title, "Invalid SKU, please re-enter!",StopSign!)
 		Post f_setfocus(dw_search,row,'sku')
@@ -561,6 +571,7 @@ event destructor;Destroy i_nwarehouse
 end event
 
 event clicked;string 	ls_column
+string ls_sku,ls_suppcode,ls_mhe
 
 long		ll_row
 

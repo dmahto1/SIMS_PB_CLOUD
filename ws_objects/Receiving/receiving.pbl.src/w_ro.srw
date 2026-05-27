@@ -226,7 +226,7 @@ integer ii_ret
 
 String	isScanColumn
  
-Boolean ib_import, ibConfirmRequested, ibManualScan, ibWORequested, ibMultipleSKU, ibSkuScanned
+Boolean ib_import, ibConfirmRequested, ibManualScan, ibWORequested, ibMultipleSKU, ibSkuScanned,ib_readonly
 long	ilCurrPutawayRow,ilComprow, ilCompNumber,il_userspid,il_find_matchW,il_find_matchR
 //string is_Serialized_Ind,is_po_indicator,is_lot_indicator
 
@@ -449,6 +449,7 @@ public function string f_is_kitting_location_occupied (string aswhcode, string a
 public function string getloctype (string aswhcode, string aslocation)
 public subroutine f_crossdock ()
 public subroutine wf_receive_order_readonly (boolean ab_read)
+public function integer wf_special_handling_gpn ()
 end prototypes
 
 event ue_confirm();boolean	lb_gotserial, lb_error_dup_sn, lbCreateBackorder, lb_Error, lbReconfirm
@@ -4180,6 +4181,7 @@ END IF
 f_method_trace_special( gs_project,this.ClassName() + ' -ue_generate_putaway_server','End ue_generate_putaway_server: ',ls_order,' ',' ',is_suppinvoiceno ) //08-Feb-2013  :Madhu added
 IF UPPER(gs_project) ='PANDORA' then
    ib_puaway_gen = true
+	wf_special_handling_gpn() //Dinesh- 04/27/2026-SIMS-962-Development for Google – SIMS – Adding MHE into SIMS. 
 end if 
 end event
 
@@ -5895,6 +5897,12 @@ Case "P"
 			tab_main.tabpage_putaway.cb_final_put_away.Enabled= FALSE//SIMS-55 Added by Dhirendra 
 			idw_main.settaborder('arrival_date',0)//SIMS-55 Added by Dhirendra
 		END IF
+		
+		//Begin- 04/16/2026-Dinesh- SIMS-953-Development for Google - SIMS - Receiving Order - From project Validation for Google Orders 
+		IF gs_project = "PANDORA" THEN
+				wf_receive_order_readonly(ib_readonly)
+		END IF
+		//End- 04/16/2026-Dinesh- SIMS-953-Development for Google - SIMS - Receiving Order - From project Validation for Google Orders 
 		
 	CASE "F"
 		 //  Added by Dhirendra -SIMS-55,  19/10/2022 -Stat
@@ -11239,7 +11247,7 @@ select count(*) into : User_field15 from Receive_Master where project_id=:gs_pro
 	end if
 end subroutine
 
-public subroutine wf_receive_order_readonly (boolean ab_read);
+public subroutine wf_receive_order_readonly (boolean ab_read);// Begin - Dinesh -  06/15/2023- SIMS-198- Google - SIMS - Read Only Access
 if ab_read=True then
 	idw_other.object.datawindow.readonly = 'yes'
 	idw_main.object.datawindow.readonly = 'yes'
@@ -11274,7 +11282,73 @@ if ab_read=True then
 	tab_main.Tabpage_putaway.cb_print_cn.enabled= False
 
 end if
+// End - Dinesh -  06/15/2023- SIMS-198- Google - SIMS - Read Only Access
+// Begin - Dinesh -  04/15/2025- SIMS-953-Development for Google - SIMS - Receiving Order - From project Validation for Google Orders 
+if ab_read= False then
+	idw_other.object.datawindow.readonly = 'No'
+	idw_main.object.datawindow.readonly = 'No'
+	idw_detail.object.datawindow.readonly = 'No'
+	idw_putaway.object.datawindow.readonly = 'No'
+ 	tab_main.tabpage_putaway.dw_putaway_mobile.object.datawindow.readonly='No'
+	tab_main.tabpage_main.cb_shipment.enabled=True
+	tab_main.tabpage_main.cb_confirm.enabled=True
+	tab_main.tabpage_main.cb_void.enabled=True
+	tab_main.tabpage_main.cb_backorder.enabled=True
+	tab_main.tabpage_main.cb_address.enabled=True
+	tab_main.tabpage_orderdetail.sle_verify.enabled=True
+	tab_main.tabpage_putaway.cb_generate.enabled = True
+	tab_main.tabpage_orderdetail.cb_insert.enabled = True
+	tab_main.tabpage_orderdetail.cb_delete.enabled = True	
+	tab_main.tabpage_OrderDetail.cb_IQC.Enabled = True
+	tab_main.tabpage_putaway.cb_deleterow.enabled = True	
+	tab_main.tabpage_putaway.cb_insertrow.enabled = True		
+	tab_main.tabpage_putaway.cb_copyrow.enabled = True	
+	tab_main.tabpage_putaway.cb_putaway_pallets.enabled = True  
+	tab_main.tabpage_putaway.cb_print.enabled = True
+	tab_main.tabpage_putaway.cb_putaway_pallets.enabled = True 
+	tab_main.tabpage_putaway.cb_final_put_away.enabled = True 
+	tab_main.tabpage_main.cb_confirm.enabled = True
+	tab_main.tabpage_main.cb_void.enabled = True
+	//tab_main.tabpage_other_info.enabled = False
+	//tab_main.tabpage_rma_serial.Enabled = False
+	tab_main.tabpage_rma_serial.cb_copy_row.enabled = True
+	tab_main.tabpage_rma_serial.cb_delete_row.enabled = True
+	tab_main.Tabpage_putaway.cbx_autofill.enabled = True
+	tab_main.Tabpage_putaway.cb_putaway_locs.enabled= True
+	tab_main.Tabpage_putaway.cb_print_cn.enabled= True
+
+end if
+// End - Dinesh -  04/15/2025- SIMS-953-Development for Google - SIMS - Receiving Order - From project Validation for Google Orders 
 end subroutine
+
+public function integer wf_special_handling_gpn (); //Begin- Dinesh - 04/27/2026- SIMS-962- Google - Development for Google – SIMS – Adding MHE into SIMS. 
+long ll_putaway_rowcount
+string ls_mhe,ls_sku,ls_suppcode
+ll_putaway_rowcount =idw_putaway.rowcount( ) //Get putaway row count
+		If ll_putaway_rowcount > 0 Then
+			
+			For ll_row =1 to ll_putaway_rowcount
+				ls_sku =idw_putaway.getItemString(ll_row,'sku')  //get SKU
+				ls_suppcode =idw_putaway.getItemString(ll_row,'supp_code') //get Supp Code
+				
+				//Look for an Item Master to get MHE value
+				select mhe into :ls_mhe from dbo.Item_Master with(nolock) 
+				where Project_Id =:gs_project and sku=:ls_sku and supp_code =:ls_suppcode 
+				using sqlca;
+				
+				If upper(ls_mhe) ="Y" Then
+					MessageBox("Receiving Order","Alert!!!   : Fully Populated Rack. Use Caution when performing offload. Special Handling required." )
+					exit
+				else
+				end if
+					
+			NEXT
+		End If 
+
+Return 0
+
+ //End- Dinesh - 04/27/2026- SIMS-962- Google - Development for Google – SIMS – Adding MHE into SIMS. 
+end function
 
 on w_ro.create
 int iCurrent
@@ -11581,42 +11655,42 @@ If idw_putaway.RowCount() > 0 then
 	End If
 End if
 
-	// Begin  - Dinesh - 07/25/2023- SIMS-198- Google - SIMS - Read Only Access
-	If upper(gs_project) = 'PANDORA' then
-				ls_invoice_no= idw_main.GetItemString(1,'supp_invoice_no')
-				lds_screen_lock = Create datastore
-				lds_screen_lock.Dataobject = 'd_screen_lock_order_r'
-				lds_screen_lock.settrans(sqlca)
-				lds_screen_lock.retrieve(gs_System_No,'R')
-				select count(*) into : il_find_matchW from Screen_Lock with(nolock) where Order_No= :gs_System_No and Edit_Mode='W' and screen_name='Receiving Order' using sqlca;
-				select user_id,UserSPID,Edit_Mode,Entry_Date into :ls_User_IdW,:ll_spid,:ls_Edit_modeW,:ld_entry_dateW from Screen_Lock with(nolock) where Order_No= :gs_System_No and Edit_Mode='W' and screen_name='Receiving Order' using sqlca;
-				select count(*) into : il_find_matchR from Screen_Lock with(nolock) where Order_No= :gs_System_No and Edit_Mode='R' and screen_name='Receiving Order' using sqlca;
-				select user_id,UserSPID,Edit_Mode,Entry_Date,order_no into :ls_User_Id,:ll_spidR,:ls_Edit_Mode,:ld_entry_dateR,:ls_Order_No from Screen_Lock with(nolock) where Order_No= :gs_System_No and Edit_Mode='R' and userspid = :gl_userspid and screen_name='Receiving Order' using sqlca;
-				select display_name into :ls_display_name from usertable with (Nolock) where userid=:ls_User_IdW;
-
-				if  (il_find_matchW > 0 and il_find_matchR > 0) and (ls_Order_No=gs_System_No and gs_userid <> ls_User_IdW  and ll_spidR = gl_userspid ) then
-						messagebox(is_title,'User Name: ' + ls_display_name + '/Session: ' + string(ll_spid) + ' is already accessing the Order Number ' + ls_invoice_no + '.~r~n~r~nThe screen is locked and can be accessible to read mode only.Please contact your Site Manager/Supervisor to unlock the screen or wait for sweeper to run for clearing the locked order.', Stopsign! )
-						lb_readonly=True
-						wf_receive_order_readonly(lb_readonly)
-						Return -1
-					
-				elseif (il_find_matchW > 0 and  il_find_matchR > 0) and (ls_Order_No=gs_System_No and gs_userid = ls_User_IdW and ls_Edit_mode='R' and  ll_spidR = gl_userspid) then
-						messagebox(is_title,'Hey!! You have already opened another session: ' +string(ll_spid)+ ' for the same Order Number ' + ls_invoice_no + '.~r~nPlease close all your current/previous session first and then re-open the order.', Stopsign! )
-						lb_readonly=True
-						wf_receive_order_readonly(lb_readonly)
-						Return -1
-				elseif  ib_access= True and (il_find_matchW = 0 and  il_find_matchR > 0) and (ls_Order_No=gs_System_No and gs_userid = ls_User_Id and ls_Edit_mode='R' and  ll_spidR = gl_userspid) then
-						messagebox(is_title,'Hey!! You have changed this order to READ ONLY ACCESS, session: ' +string(ll_spidR)+ '. Please close all your current session and re- open the order again to make any change for this order. ', Stopsign! )
-						lb_readonly= True
-						wf_receive_order_readonly(lb_readonly)
-						Return -1
-				else
-
-					//end if
-				End if
-		End if
-		// End - Dinesh-  07/25/2023- SIMS-198- Google - SIMS - Read Only Access
-
+//	// Begin  - Dinesh - 07/25/2023- SIMS-198- Google - SIMS - Read Only Access
+//	If upper(gs_project) = 'PANDORA' then
+//				ls_invoice_no= idw_main.GetItemString(1,'supp_invoice_no')
+//				lds_screen_lock = Create datastore
+//				lds_screen_lock.Dataobject = 'd_screen_lock_order_r'
+//				lds_screen_lock.settrans(sqlca)
+//				lds_screen_lock.retrieve(gs_System_No,'R')
+//				select count(*) into : il_find_matchW from Screen_Lock with(nolock) where Order_No= :gs_System_No and Edit_Mode='W' and screen_name='Receiving Order' using sqlca;
+//				select user_id,UserSPID,Edit_Mode,Entry_Date into :ls_User_IdW,:ll_spid,:ls_Edit_modeW,:ld_entry_dateW from Screen_Lock with(nolock) where Order_No= :gs_System_No and Edit_Mode='W' and screen_name='Receiving Order' using sqlca;
+//				select count(*) into : il_find_matchR from Screen_Lock with(nolock) where Order_No= :gs_System_No and Edit_Mode='R' and screen_name='Receiving Order' using sqlca;
+//				select user_id,UserSPID,Edit_Mode,Entry_Date,order_no into :ls_User_Id,:ll_spidR,:ls_Edit_Mode,:ld_entry_dateR,:ls_Order_No from Screen_Lock with(nolock) where Order_No= :gs_System_No and Edit_Mode='R' and userspid = :gl_userspid and screen_name='Receiving Order' using sqlca;
+//				select display_name into :ls_display_name from usertable with (Nolock) where userid=:ls_User_IdW;
+//
+//				if  (il_find_matchW > 0 and il_find_matchR > 0) and (ls_Order_No=gs_System_No and gs_userid <> ls_User_IdW  and ll_spidR = gl_userspid ) then
+//						messagebox(is_title,'User Name: ' + ls_display_name + '/Session: ' + string(ll_spid) + ' is already accessing the Order Number ' + ls_invoice_no + '.~r~n~r~nThe screen is locked and can be accessible to read mode only.Please contact your Site Manager/Supervisor to unlock the screen or wait for sweeper to run for clearing the locked order.', Stopsign! )
+//						lb_readonly=True
+//						wf_receive_order_readonly(lb_readonly)
+//						Return -1
+//					
+//				elseif (il_find_matchW > 0 and  il_find_matchR > 0) and (ls_Order_No=gs_System_No and gs_userid = ls_User_IdW and ls_Edit_mode='R' and  ll_spidR = gl_userspid) then
+//						messagebox(is_title,'Hey!! You have already opened another session: ' +string(ll_spid)+ ' for the same Order Number ' + ls_invoice_no + '.~r~nPlease close all your current/previous session first and then re-open the order.', Stopsign! )
+//						lb_readonly=True
+//						wf_receive_order_readonly(lb_readonly)
+//						Return -1
+//				elseif  ib_access= True and (il_find_matchW = 0 and  il_find_matchR > 0) and (ls_Order_No=gs_System_No and gs_userid = ls_User_Id and ls_Edit_mode='R' and  ll_spidR = gl_userspid) then
+//						messagebox(is_title,'Hey!! You have changed this order to READ ONLY ACCESS, session: ' +string(ll_spidR)+ '. Please close all your current session and re- open the order again to make any change for this order. ', Stopsign! )
+//						lb_readonly= True
+//						wf_receive_order_readonly(lb_readonly)
+//						Return -1
+//				else
+//
+//					//end if
+//				End if
+//		End if
+//		// End - Dinesh-  07/25/2023- SIMS-198- Google - SIMS - Read Only Access
+//
 
 //MEA - 4/13 - OTM
 IF g.is_OTM_Enable_Ind = 'Y' AND g.isOTMSendInboundOrder = 'Y' Then
@@ -11879,10 +11953,11 @@ select Inbound_ord_Ind into :is_Inbound_ord_Ind from Warehouse where wh_code=:ls
 END IF
 //2019/03 - TAM S30669 Are putaway attributes match phyical stock - END
 
+
 //Begin - Dinesh - 08/09/2023- SIMS-198- Google read only 
-if gs_project='PANDORA' and lb_readonly = True then
-		wf_receive_order_readonly(lb_readonly)
-end if
+//if gs_project='PANDORA' and lb_readonly = True then
+//		wf_receive_order_readonly(lb_readonly)
+//end if
 //End - Dinesh - 08/09/2023- SIMS-198- Google read only 
 // Updating the Datawindow
 
@@ -13744,6 +13819,10 @@ boolean lb_readonly=False,lb_selfuser=False
  String  ls_projectcode
  Long   i, ll_EDIBatch, llfindrow1, llcount1
  int      rowcount1
+ ib_void = False //Dinesh- 04/13/2026-Development for Google - SIMS - Receiving Order - From project Validation for Google Orders 
+ ib_readonly = False //Dinesh- 04/15/2026-Development for Google - SIMS - Receiving Order - From project Validation for Google Orders 
+ boolean lb_user_field2=True  //Dinesh- 04/14/2026-Development for Google - SIMS - Receiving Order - From project Validation for Google Orders 
+ Boolean lb_po_no=True //Dinesh- 04/14/2026-Development for Google - SIMS - Receiving Order - From project Validation for Google Orders 
 //Nxjain Trim the Bol value and udpate the where clause with like function. -20160211
 string ls_from_projectcode,lsFind2 //Added by Nisha - 12/29/2025- SIMS-895- Voiding manual IB orders with invalid Project Code
 long llFindRow2  //Added by Nisha - 12/29/2025- SIMS-895- Voiding manual IB orders with invalid Project Code
@@ -14340,31 +14419,37 @@ IF idw_main.RowCount() > 0 Then
 						 ls_from_projectcode= idw_detail.GetItemString(i,'user_field2')
 						 lsFind2 = "project_code = '" +ls_from_projectcode + "'"
 						 llFindRow2 = ldsProjectCode.Find(lsFind2, 1, llcount1)
-					
 						 if isnull(llFindRow2) then llFindRow2 = 0 
-						 
-						 If  llFindRow2 >0  then 
+						 If  llFindRow2 > 0  then 
+							ib_readonly=False // Dinesh- 04/13/2026-SIMS-953-Development for Google - SIMS - Receiving Order - From project Validation for Google Orders
 						 Elseif llFindRow2<=0 Then
 							if idw_main.GetItemString(1, "ord_status") <> "V" then 
 								If left (trim(is_suppinvoiceno),4) <> "GWPS" then 
 						//commented and added by Nisha - 12/29/2025- SIMS-895- Voiding manual IB orders with invalid Project Code - ends
-								   messagebox("Project Code Not Match","This order has a From Project "+ls_from_projectcode+" has an invalid Project Code. Processing of this order is not allowed.")
-						//Added by Nisha - 12/29/2025- SIMS-895- Voiding manual IB orders with invalid Project Code - starts	
-								else 
+								 //  messagebox("Project Code Not Match","This order has a From Project "+ls_from_projectcode+" has an invalid Project Code. However, You can Process this order.")
+								 //Begin- Dinesh- 04/13/2026-SIMS-953-Development for Google - SIMS - Receiving Order - From project Validation for Google Orders
+  								   ib_readonly=False
+								  // ib_void = True
+								  // cb_void.TriggerEvent(Clicked!)
+								   exit
+								   //End- Dinesh- 04/13/2026-SIMS-953-Development for Google - SIMS - Receiving Order - From project Validation for Google Orders
+						      //Added by Nisha - 12/29/2025- SIMS-895- Voiding manual IB orders with invalid Project Code - starts	
+								elseIf left (trim(is_suppinvoiceno),4) = "GWPS" then  
 									  messagebox("Project Code Not Match","This order has a From Project "+ ls_from_projectcode+" has an invalid Project Code. Processing of this order is not allowed,hence it will be voided.")
+									  ib_readonly=True  // Dinesh- 04/13/2026-SIMS-953-Development for Google - SIMS - Receiving Order - From project Validation for Google Orders
 									  ib_void = True
 									  cb_void.TriggerEvent(Clicked!)
-									  exit //dts
+									  exit //dts //Dinesh- 04/13/2026-SIMS-953-Development for Google - SIMS - Receiving Order - From project Validation for Google Orders
 								end if
-						//Added by Nisha - 12/29/2025- SIMS-895- Voiding manual IB orders with invalid Project Code - end
-								 lb_readonly=True
-								  wf_receive_order_readonly(lb_readonly) // Dinesh - 08/22/2023- SIMS-243 - Match the project code in order detail tab to project code table */
+						    //Added by Nisha - 12/29/2025- SIMS-895- Voiding manual IB orders with invalid Project Code - end
+								// lb_readonly=True //Dinesh- 04/13/2026-SIMS-953-Development for Google - SIMS - Receiving Order - From project Validation for Google Orders
+								//  wf_receive_order_readonly(lb_readonly) // Dinesh - 08/22/2023- SIMS-243 - Match the project code in order detail tab to project code table */
 								// Return -1   //Commented by Nisha - 12/29/2025- SIMS-895- Voiding manual IB orders with invalid Project Code
 							end if //added by Nisha - 12/29/2025- SIMS-895- Voiding manual IB orders with invalid Project Code
 						end if 
 				next
 				 
-			 if llFindRow2 >0 then //only need to check this if all From Projects are valid...
+			 if llFindRow2 >= 0 then //only need to check this if all From Projects are valid...
 				 for i = 1 to rowcount1
 						ls_projectcode= ldsponocode.GetItemString(i,'po_no')
 						lsFind = "project_code = '" +ls_projectcode + "'"
@@ -14376,32 +14461,42 @@ IF idw_main.RowCount() > 0 Then
 //						 llFindRow2 = ldsProjectCode.Find(lsFind2, 1, llcount1)
 						
 						 if isnull(llFindRow1) then llFindRow1 = 0 
-//dts						 if isnull(llFindRow2) then llFindRow2 = 0 
-						 
-						 If  llFindRow1 > 0 then //and llFindRow2 >0  
-						 Elseif llFindRow1 <= 0 Then //or llFindRow2<=0 
-						/* If  llFindRow1 > 0 then 
-						 Elseif llFindRow1 <= 0  Then */
+						 If  llFindRow1 > 0 then 
+						  ib_readonly=False //Dinesh- 04/13/2026-SIMS-953-Development for Google - SIMS - Receiving Order - From project Validation for Google Orders
+						 Elseif llFindRow1 <= 0 Then
 							if idw_main.GetItemString(1, "ord_status") <> "V" then 
 								If left (trim(is_suppinvoiceno),4) <> "GWPS" then 
-						//commented and added by Nisha - 12/29/2025- SIMS-895- Voiding manual IB orders with invalid Project Code - ends
-								   messagebox("Project Code Not Match","This order of PO No "+ls_projectcode+" has an invalid Project Code. Processing of this order is not allowed.")
-						//Added by Nisha - 12/29/2025- SIMS-895- Voiding manual IB orders with invalid Project Code - starts	
-								else 
-								  messagebox("Project Code Not Match","This order of PO No "+ls_projectcode+" has an invalid Project Code. Processing of this order is not allowed,hence it will be voided.")
+							//commented and added by Nisha - 12/29/2025- SIMS-895- Voiding manual IB orders with invalid Project Code - ends
+								  // messagebox("Project Code Not Match","This order of PONO "+ls_projectcode+" has an invalid Project Code. However, you can Process this order.")
+							//Added by Nisha - 12/29/2025- SIMS-895- Voiding manual IB orders with invalid Project Code - starts	
+						            //Begin- Dinesh- 04/13/2026-SIMS-953-Development for Google - SIMS - Receiving Order - From project Validation for Google Orders
+  								   ib_readonly=False
+								    exit
+									//End- Dinesh- 04/13/2026-SIMS-953-Development for Google - SIMS - Receiving Order - From project Validation for Google Orders
+								elseIf left (trim(is_suppinvoiceno),4) = "GWPS" then 
+								  messagebox("Project Code Not Match","This order of PONO "+ls_projectcode+" has an invalid Project Code. Processing of this order is not allowed,hence it will be voided.")
+								  ib_readonly=True  // Dinesh- 04/13/2026-SIMS-953-Development for Google - SIMS - Receiving Order - From project Validation for Google Orders
 								  ib_void = True
 								  cb_void.TriggerEvent(Clicked!)
-								  exit //dts
+								 exit //dts 
 								end if
+								
 						//Added by Nisha - 12/29/2025- SIMS-895- Voiding manual IB orders with invalid Project Code - end
-								 lb_readonly=True
-								  wf_receive_order_readonly(lb_readonly) // Dinesh - 08/22/2023- SIMS-243 - Match the project code in order detail tab to project code table */
+								//  lb_readonly=True //Dinesh- 04/13/2026-SIMS-953-Development for Google - SIMS - Receiving Order - From project Validation for Google Orders 
+								//  wf_receive_order_readonly(lb_readonly) // Dinesh - 08/22/2023- SIMS-243 - Match the project code in order detail tab to project code table */
 								// Return -1   //Commented by Nisha - 12/29/2025- SIMS-895- Voiding manual IB orders with invalid Project Code
 							end if //added by Nisha - 12/29/2025- SIMS-895- Voiding manual IB orders with invalid Project Code
 						end if 
 				 Next	
 			end if //llFindRow2>0
+			//Dinesh- 04/17/2026-SIMS-953-Development for Google - SIMS - Receiving Order - From project Validation for Google Orders 
+			if  idw_main.GetItemString(1, "ord_status") = "V" then
+				ib_void= True
+				wf_receive_order_readonly(ib_void)		
+			end if
+			 //Dinesh- 04/17/2026-SIMS-953-Development for Google - SIMS - Receiving Order - From project Validation for Google Orders 
 		   End if 	 
+			
    //* End.........Akash Baghel - 08/07/2023...- SIMS 243- Match the project code in order detail tab to project code table */
 
 	

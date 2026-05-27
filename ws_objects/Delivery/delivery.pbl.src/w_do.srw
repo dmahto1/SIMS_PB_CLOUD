@@ -960,6 +960,7 @@ protected function integer uf_print_a4_label ()
 public subroutine f_crossdock ()
 public subroutine wf_set_carton_type ()
 public subroutine wf_delivery_order_readonly (boolean ab_read)
+public function integer wf_special_handling_gpn ()
 end prototypes
 
 event ue_pack_print();// This event prints the Packing List which is currently visible on the screen 
@@ -3914,6 +3915,11 @@ IF (Upper(gs_project) = "PHILIPSCLS" OR Upper(gs_project) = "PHILIPS-DA" OR Uppe
 	idw_main.SetItem(1, "user_field4", lsGSIN)
 End IF
 
+//Begin-Dinesh- 04/27/2026-SIMS-962-Development for Google – SIMS – Adding MHE into SIMS. 
+if gs_Project = 'PANDORA' then	
+	wf_special_handling_gpn()
+end if
+//End-Dinesh- 04/27/2026-SIMS-962-Development for Google – SIMS – Adding MHE into SIMS. 
 
 
 SetPointer(Arrow!)
@@ -7258,6 +7264,7 @@ wf_post_pick_list_generate(0)
 
 //GailM 6/19/2018 S19742 F7864 I898 Google - Edge Packaging - SIMS Changes - GPN level mapping replaced with Commodity code level
 If UPPER(gs_project) = 'PANDORA' Then
+	wf_special_handling_gpn() //Dinesh- 04/28/2026-SIMS-962-Development for Google – SIMS – Adding MHE into SIMS. 
 	liRet = wf_set_special_packaging_comments()
 	If liRet <> 0 Then
 		messagebox("Setting Special Packaging Comments","Could not set Special Packaging Comments")
@@ -22862,7 +22869,7 @@ long k,ll_line_item_pack,ll_line_item_pick,j
 
 end subroutine
 
-public subroutine wf_delivery_order_readonly (boolean ab_read);
+public subroutine wf_delivery_order_readonly (boolean ab_read);// Begin - Dinesh -  06/15/2023- SIMS-198- Google - SIMS - Read Only Access
 if ab_read=True then
 	idw_other.object.datawindow.readonly = 'yes'
 	idw_main.object.datawindow.readonly = 'yes'
@@ -22918,10 +22925,39 @@ if ab_read=True then
 	tab_main.tabpage_main.cb_do_void.enabled = False
 	tab_main.tabpage_main.cb_do_notes.enabled = False
 	tab_main.tabpage_main.cb_do_readytoship.enabled = False
-	
 
 end if
+// End - Dinesh -  06/15/2023- SIMS-198- Google - SIMS - Read Only Access
 end subroutine
+
+public function integer wf_special_handling_gpn (); //Begin- Dinesh - 04/27/2026- SIMS-962- Google - Development for Google – SIMS – Adding MHE into SIMS. 
+long ll_picklist_rowcount,ll_row
+string ls_mhe,ls_sku,ls_suppcode
+ll_picklist_rowcount =idw_pick.rowcount( ) //Get putaway row count
+		If ll_picklist_rowcount > 0 Then
+			
+			For ll_row =1 to ll_picklist_rowcount
+				ls_sku =idw_pick.getItemString(ll_row,'sku')  //get SKU
+				ls_suppcode =idw_pick.getItemString(ll_row,'supp_code') //get Supp Code
+				
+				//Look for an Item Master to get MHE value
+				select mhe into :ls_mhe from dbo.Item_Master with(nolock) 
+				where Project_Id =:gs_project and sku=:ls_sku and supp_code =:ls_suppcode 
+				using sqlca;
+				
+				If upper(ls_mhe) ="Y" Then
+					MessageBox("Delivery Order","Alert!!! : Special Handling required - Use caution." )
+					exit
+				else
+				end if
+					
+			NEXT
+		End If 
+
+Return 0
+
+ //End- Dinesh - 04/27/2026- SIMS-962- Google - Development for Google – SIMS – Adding MHE into SIMS. 
+end function
 
 on w_do.create
 int iCurrent

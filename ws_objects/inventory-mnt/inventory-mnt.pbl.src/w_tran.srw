@@ -193,6 +193,7 @@ public function integer wf_check_toloc_cc (string assku, string assuppcode, stri
 public function integer wf_sku_tracked_by_validation ()
 public function integer wf_check_full_pallet_container ()
 public subroutine wf_transfer_read_only (boolean ab_read)
+public function integer wf_special_handling_gpn ()
 end prototypes
 
 event ue_deleterow();// ue_deleterow()
@@ -1617,6 +1618,7 @@ lds_adjustment_insert = f_datastorefactory( 'd_adjustment_sweeper' )
 
 // LTK 20160104  Pandora #1002
 if gs_project = 'PANDORA' then
+	wf_special_handling_gpn() //Dinesh-04/27/2026-SIMS-962-Development for Google – SIMS – Adding MHE into SIMS. 
 	lb_is_pandora_single_project_location_rule_on = ( f_retrieve_parm("PANDORA", "FLAG", "SOC_SERIAL_GPN_TRACK_ON") = 'Y' )
 end if
 
@@ -4127,6 +4129,35 @@ end if
 
 // End -  Dinesh - 11/06/2023- SIMS-328- Google read only changes  Part 2
 end subroutine
+
+public function integer wf_special_handling_gpn (); //Begin- Dinesh - 04/27/2026- SIMS-962- Google - Development for Google – SIMS – Adding MHE into SIMS. 
+long ll_detail_rowcount,ll_row
+string ls_mhe,ls_sku,ls_suppcode
+ll_detail_rowcount =idw_detail.rowcount( ) //Get putaway row count
+		If ll_detail_rowcount > 0 Then
+			
+			For ll_row =1 to ll_detail_rowcount
+				ls_sku =idw_detail.getItemString(ll_row,'sku')  //get SKU
+				ls_suppcode =idw_detail.getItemString(ll_row,'supp_code') //get Supp Code
+				
+				//Look for an Item Master to get MHE value
+				select mhe into :ls_mhe from dbo.Item_Master with(nolock) 
+				where Project_Id =:gs_project and sku=:ls_sku and supp_code =:ls_suppcode 
+				using sqlca;
+				
+				If upper(ls_mhe) ="Y" Then
+					MessageBox("Stock Transfer","Alert!!!   : Special Handling required - Use caution." )
+					exit
+				else
+				end if
+					
+			NEXT
+		End If 
+
+Return 0
+
+ //End- Dinesh - 04/27/2026- SIMS-962- Google - Development for Google – SIMS – Adding MHE into SIMS. 
+end function
 
 event open;call super::open;DatawindowChild	ldwc, ldwc2
 String				lsFilter
