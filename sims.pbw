@@ -5,5 +5,5 @@ Save Format v3.0(19990112)
  0 "app\\sims3.pbt";
  1 "sweeper\\sims_fp\\sims3fp.pbt";
 @end;
-DefaultTarget "sweeper\\sims_fp\\sims3fp.pbt";
-DefaultRemoteTarget "sweeper\\sims_fp\\sims3fp.pbt";
+DefaultTarget "app\\sims3.pbt";
+DefaultRemoteTarget "app\\sims3.pbt";

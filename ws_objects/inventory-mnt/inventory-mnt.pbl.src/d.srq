@@ -1,0 +1,2 @@
+﻿$PBExportHeader$d.srq
+PBSELECT( VERSION(400) TABLE(NAME="dbo.Content" )  TABLE(NAME="dbo.Project_Code" ) COLUMN(NAME="dbo.Content.Project_Id") COLUMN(NAME="dbo.Content.Owner_Id") COLUMN(NAME="dbo.Content.PO_No") COLUMN(NAME="dbo.Project_Code.Project_Code") COLUMN(NAME="dbo.Content.SKU")WHERE(    EXP1 ="dbo.Project_Code.Project_Code"   OP ="="    EXP2 =":project_code" ) ) ARG(NAME = "project_code" TYPE = string) 

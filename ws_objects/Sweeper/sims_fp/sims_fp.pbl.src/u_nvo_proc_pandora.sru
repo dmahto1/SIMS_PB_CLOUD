@@ -15045,7 +15045,7 @@ FileWrite(giLogFileNo,lsLogOut)
 			//If lbLPN Then
 			//	idsPODetail.SetItem(llNewDetailRow, 'container_id', '-')		//Pallet Rollup.  Container No tracked forLPN (Set to dash)
 			//Else
-				If left(idsOMCReceipt.getitemstring(ll_Row_Pos, 'SUSR2'), 1) <> 'X' or isnull(idsOMCReceipt.getitemstring(ll_Row_Pos, 'SUSR2'))  Then /* 08/30/17 - PCONKL - added null check*/
+			//	If left(idsOMCReceipt.getitemstring(ll_Row_Pos, 'SUSR2'), 1) <> 'X' or isnull(idsOMCReceipt.getitemstring(ll_Row_Pos, 'SUSR2'))  Then /* 08/30/17 - PCONKL - added null check*///commented by Nisha SIMS 943 :Google-Change Container ID mapping in Receiving Order download in SIMS
 					
 					//20-MAY-2019 :Madhu S33850 Container Tracked Items. - START
 					//29-MAY-2019 :Madhu S34063 Exclude Container Tracking Ind Condition
@@ -15084,7 +15084,7 @@ FileWrite(giLogFileNo,lsLogOut)
 						idsPODetail.SetItem(llNewDetailRow, 'user_field5', idsOMCReceiptDetail.getitemstring(ll_Row_Pos_RD, 'SUSR5')) //Added by Nisha SIMS 943 :Google-Change Container ID mapping in Receiving Order download in SIMS 
 					END IF
 					
-				End If
+			//	End If//commented by Nisha SIMS 943 :Google-Change Container ID mapping in Receiving Order download in SIMS
 			//End If
 			
 			if lbCrossDock = True and lsCrossDock_Loc > '' then

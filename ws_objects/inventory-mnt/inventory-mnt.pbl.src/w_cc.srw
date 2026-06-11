@@ -6711,7 +6711,28 @@ if  upper(gs_project) ='NYCSP'  AND _cb.checked = true then
 	idw_si.Filter()
 end if
 
-
+////Begin - Dinesh- 06/10/2026
+//DataWindowChild ldwc_project_code
+//if  upper(gs_project) ='PANDORA'  then
+//	idw_result1.GetChild("project_code", ldwc_project_code)
+//	ldwc_project_code.SetTransObject(sqlca)
+//	 ldwc_project_code.InsertRow(0)
+//	 ldwc_project_code.Retrieve() 
+//	 
+//	 idw_result2.GetChild("project_code", ldwc_project_code)
+//	 ldwc_project_code.SetTransObject(sqlca)
+//	 ldwc_project_code.InsertRow(0)
+//	 ldwc_project_code.Retrieve() 
+//	
+//	 idw_result3.GetChild("project_code", ldwc_project_code)
+//	 ldwc_project_code.SetTransObject(sqlca)
+//	 ldwc_project_code.InsertRow(0)
+//	 ldwc_project_code.Retrieve() 
+//	
+//	
+//end if
+////End - Dinesh- 06/10/2026
+//
 idw_si.setRedraw( true )
 _dw.Setredraw(True)
 wf_check_status()
@@ -8473,15 +8494,14 @@ ldwc.ShareData(ldwc2)
 //Begin....Akash Baghel - 07/17/2023 - SIMS 243- added dddw for po_no drop down column all cycle counts (project code)
 
 if upper(gs_project) = 'PANDORA' then	
-	idw_result1.Modify("po_no.Visible='1'")
-	idw_result1.Modify("po_no.Edit.Style='dddw'")
+idw_result1.Modify("po_no.Visible='1'")
+idw_result1.Modify("po_no.Edit.Style='dddw'")
 	
 	idw_result1.Modify("po_no.dddw.Case='Any'")
 	idw_result1.Modify("po_no.dddw.Name='dddw_project_code'")
 	idw_result1.Modify("po_no.dddw.DataColumn='project_code'")
 	idw_result1.Modify("po_no.dddw.DisplayColumn='project_code'")
 	idw_result1.Modify("po_no.dddw.Limit=30")
-	
 	idw_result1.Modify("po_no.dddw.PercentWidth=100")
 	idw_result1.Modify("po_no.dddw.UseAsBorder= Yes")
 	idw_result1.Modify("po_no.dddw.VScrollBar=Yes")
@@ -8661,7 +8681,7 @@ Else
 idw_result1.GetChild ( "po_no", ldw_child1 )
 ldw_child1.SetTransObject ( SQLCA )
 ldw_child1.Retrieve ()
-//End Akash
+////End Akash
 
 datawindowchild ldw_child
 

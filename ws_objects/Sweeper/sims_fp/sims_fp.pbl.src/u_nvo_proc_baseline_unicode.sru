@@ -1667,12 +1667,12 @@ else
 				// 02/13 - PCONKL - Added SHip Ref
 				lsTemp = Trim(ldsImport.GetItemString(llFileRowPos, "col63"))
 				If NOT(IsNull(lsTemp) OR trim(lsTemp) = '') Then
+					 ldsSOheader.SetItem(liNewRow,'ship_ref', lsTemp)
 				//Begin- Dinesh- 03/23/2026-SIMS-944-Development for Geistlich - New LOB support 
 					IF upper(asproject) ='GEISTLICH' then
 						 ldsSOheader.SetItem(liNewRow,'Line_Of_Business', UPPER(lsTemp))
 					END IF
 				//End- Dinesh- 03/23/2026-SIMS-944-Development for Geistlich - New LOB support 
-				    ldsSOheader.SetItem(liNewRow,'ship_ref', lsTemp)
 				End If			
 				
 				//2015/05/01 - TAM - Added Department Code
@@ -2095,23 +2095,22 @@ else
 	//			ldsSODetail.SetItem(llNewDetailRow,'action_cd',lsChangeID) /*Supplier Order*/	
 	
 				ldsSODetail.SetItem(llNewDetailRow,'sku',lsSku) /*Sku*/
+				ldsSODetail.SetItem(llNewDetailRow,'Supp_Code',lsSupplier) /*Supplier Code*/
 				//Begin- Dinesh - 04/28/2026-SIMS-944-Development for Geistlich - New LOB support 
-				select supp_code into :ls_bionova from Item_Master where sku =:lsSku and project_id=:lsProject using sqlca;
-				if upper(ls_bionova) = 'BIONNOVA' then
-					ldsSODetail.SetItem(llNewDetailRow,'Supp_Code',upper(ls_bionova)) /*Supplier Code*/	
-				else
+				if lsProject ='GEISTLICH' then		
+					select min(supp_code) into :ls_bionova from Item_Master where sku =:lsSku and project_id=:lsProject using sqlca;
+					if upper(ls_bionova) <> 'GEISTLICH' then
+						ldsSODetail.SetItem(llNewDetailRow,'Supp_Code',upper(ls_bionova)) /*Supplier Code*/	
+					end if
+				End if
 				//End- Dinesh - 04/28/2026-SIMS-944-Development for Geistlich - New LOB support 	
-					ldsSODetail.SetItem(llNewDetailRow,'Supp_Code',lsSupplier) /*Supplier Code*/
-				end if // Dinesh - 04/28/2026-SIMS-944-Development for Geistlich - New LOB support 
 				ldsSODetail.SetItem(llNewDetailRow,'Line_Item_No',llLineItemNo) /*Line_Item_No*/	
 				ldsSODetail.SetItem(llNewDetailRow,'Quantity', String(ldQuantity)) /*Quantity*/				
 	
 				IF Upper(asproject) = 'PHYSIO-MAA' OR Upper(asproject) = 'PHYSIO-XD' THEN
 					ldsSODetail.SetItem(llNewDetailRow,'User_Line_Item_No', string(llLineItemNo))
 					ldsSODetail.SetItem(llNewDetailRow,'Line_Item_No', llLineSeq)		
-				END IF			
-				
-				
+				END IF				
 	
 				//Customer  Line Item Number	C(20)	No	N/A	Customer Line Item Number
 	
