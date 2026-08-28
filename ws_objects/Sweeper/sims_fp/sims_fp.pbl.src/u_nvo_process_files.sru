@@ -5665,11 +5665,11 @@ For llTranPos = 1 to llTranCount
 	Where trans_id = :llTransID
 	using sqlca;
 	
-	If lsStatus <> 'N' Then Continue
+	//If lsStatus <> 'N' Then Continue
 	
 	//If lsStatus <> 'N' Then Continue // Dinesh - 08/29/2022
 	
-	//If lsStatus <> 'D' Then Continue // Dinesh - 07/04/2025
+	If lsStatus <> 'D' Then Continue // Dinesh - 07/04/2025
 
 	//SEPT 2019 - MikeA : S38259 Feature F18585: Change Sweeper to Limit 945s from Site to 10 per Cycle  (Bosch only)
 
@@ -6118,10 +6118,14 @@ uf_write_Log(lsOutput) /*display msg to screen*/
 	yield()
 	
 // Begin -Dinesh - 12/08/2025- SIMS-894- To Archive Sweeper_Cycle_log table
+datetime ldtToday
+ldtToday = DateTime(Today(), Now()) // Dinesh - 12/08/2025
   if  ib_connection= True then
 	  connect using sqlca;
 	  Insert Into Sweeper_Cycle_log (Sweeper_Name,Sweeper_Start_time, Next_Sweep_time,Sweeper_Stop_time, Status) 
 	  Values(:gsEnvironment,:gdtToday,NULL, NULL,'R');
+//	  Insert Into Sweeper_Cycle_log (Sweeper_Name,Sweeper_Start_time, Next_Sweep_time,Sweeper_Stop_time, Status,record_created_date) 
+//	  Values(:gsEnvironment,:gdtToday,NULL, NULL,'R',:ldtToday); //Dinesh - 06/17/2026
 	  commit using sqlca;
 	  ib_connection = False
   end if
@@ -6254,8 +6258,10 @@ end if
 			// Begin -Dinesh - 12/08/2025- SIMS-894- to Archive Sweeper_Cycle_log table
 			ldtToday = DateTime(Today(), Now()) // Dinesh - 12/08/2025
 			Insert Into Sweeper_Cycle_log (Sweeper_Name,Sweeper_Start_time, Next_Sweep_time,Sweeper_Stop_time, Status) 
- 			Values(:gsEnvironment,:gdtToday,NULL, :ldtToday,'S') using sqlca;
+			 Values(:gsEnvironment,:gdtToday,NULL, :ldtToday,'S') using sqlca;
 			commit using sqlca;
+//			Insert Into Sweeper_Cycle_log (Sweeper_Name,Sweeper_Start_time, Next_Sweep_time,Sweeper_Stop_time, Status,record_created_date) 
+// 			Values(:gsEnvironment,:gdtToday,NULL, :ldtToday,'S',:ldtToday) using sqlca; //Dinesh - 06/17/2026
 			//End -Dinesh - 12/08/2025- SIMS-894- to Archive Sweeper_Cycle_log table
 //			if ls_sweeper_status= 'R' then
 //				Update Sweeper_Running_Status set Alert_sent='' where sweeper_name= :lsSweeperName using sqlca ; // added- alert_sent field -Dinesh - 07/04/2024- SIMS-502- CORE Sweeper System Alert Modification

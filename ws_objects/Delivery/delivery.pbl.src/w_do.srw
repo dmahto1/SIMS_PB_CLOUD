@@ -3005,8 +3005,10 @@ If ibGenerateFromSerial Then /* Generate from Serial Tab*/
 				IF gs_project ='PANDORA' and  lbFootPrint  then
 					lsContainerId = idw_serial.getItemString( i, 'container_id' )
 					lsFind = "Upper(carton_no) = '" + upper(lsCarton) + "' and upper(sku) = '" + upper(lsSKU) + "' and Upper(supp_code) = '" + Upper(lsSupplier) + "' and line_item_no = " + String(llLineITemNo) + " and Upper( pack_container_id ) = '" + Upper( lsContainerId ) + "' "
-				elseif gs_project ='PANDORA' and  lbFootPrint =FALSE  then
-					lsFind = "Upper(pack_container_id) = '" + upper(lsCarton) + "' and upper(sku) = '" + upper(lsSKU) + "' and Upper(supp_code) = '" + Upper(lsSupplier) + "' and line_item_no = " + String(llLineITemNo)
+				elseif gs_project ='PANDORA' and  lbFootPrint =FALSE  then 
+					lsContainerId = idw_serial.getItemString( i, 'container_id' ) // Dinesh - 07/29/2026- SIMS-1000- Google-SIMS-Bug in Packing process for Serial tracked GPNs with Containerized Inventory
+					//lsFind = "Upper(pack_container_id) = '" + upper(lsCarton) + "' and upper(sku) = '" + upper(lsSKU) + "' and Upper(supp_code) = '" + Upper(lsSupplier) + "' and line_item_no = " + String(llLineITemNo)
+					lsFind = "Upper(pack_container_id) = '" + upper(lsContainerId) + "' and upper(sku) = '" + upper(lsSKU) + "' and Upper(supp_code) = '" + Upper(lsSupplier) + "' and line_item_no = " + String(llLineITemNo) // Dinesh - 07/29/2026- SIMS-1000- Google-SIMS-Bug in Packing process for Serial tracked GPNs with Containerized Inventory
 				else 
 					lsContainerId = idw_serial.getItemString( i, 'container_id' )
 					lsFind = "Upper(carton_no) = '" + upper(lsCarton) + "' and upper(sku) = '" + upper(lsSKU) + "' and Upper(supp_code) = '" + Upper(lsSupplier) + "' and line_item_no = " + String(llLineITemNo) + " and Upper( pack_container_id ) = '" + Upper( lsContainerId ) + "' "
@@ -3014,7 +3016,6 @@ If ibGenerateFromSerial Then /* Generate from Serial Tab*/
 			Else
 				//dts - S59788 - 08/21/2021 - now setting Serial Carton_No to do_no Sequence type Carton_No
 				//        - and using Pack_Container_ID in FIND (to create new row if Carton_No is the same (could probably just use Pack_Container_ID as a Container shouldn't be split over multiple Cartons, but....)
-				//lsContainerId = idw_serial.getItemString(i, 'carton_no' )
 				//lsFind = "Upper(carton_no) = '" + upper(lsCarton) + "' and upper(sku) = '" + upper(lsSKU) + "' and Upper(supp_code) = '" + Upper(lsSupplier) + "' and line_item_no = " + String(llLineITemNo)
 				lsContainerId = idw_serial.getItemString( i, 'container_id' )
 				lsFind = "Upper( pack_container_id ) = '" + Upper( lsContainerId ) + "' and Upper(carton_no) = '" + upper(lsCarton) + "' and upper(sku) = '" + upper(lsSKU) + "' and Upper(supp_code) = '" + Upper(lsSupplier) + "' and line_item_no = " + String(llLineITemNo) 
@@ -10131,6 +10132,9 @@ boolean lbvalidate
 datastore ldsdimensions
 long ll_text_length  //Dhirendra
 String ls_prefix
+boolean lbFootprint //Dinesh - 07/28/2026
+lbFootprint = False //Dinesh - 07/28/2026
+string lsContainerId 
 // 10/08/2010 - must default crossdock_ind since datawindow considers it required, even though it's not.
 if isnull(idw_main.GetItemString(1, "crossdock_ind")) or trim(idw_main.GetItemString(1, "crossdock_ind")) ='' then
 	idw_main.SetItem(1, 'crossdock_ind', 'N')
@@ -10415,15 +10419,31 @@ For i = 1 to ll_cnt
 						//Do nothing
 			Else
 				//Dhirendra -S59788 PANDORA-overpack caton type packing screen functionality -Start	
-				IF gs_project ='PANDORA' then 
+				IF gs_project ='PANDORA' then
+//					// Begin - Dinesh - 07/28/2026
+//						string lsSupplier,lsSKU
+//						lsSupplier = tab_main.tabpage_pick.dw_pick.GetITemString(1,"supp_code")
+//						lsSKU = idw_Serial.GetITemString(1,"SKU")		
+//						If f_is_sku_foot_print( lsSku,lsSUpplier) then
+//							lbFootprint = True
+//						End if
+//					// End - Dinesh - 07/28/2026
 					if tab_main.tabpage_serial.dw_serial.GetITemString(i,'container_tracking_ind') ='Y' THEN
 					// lsFind = "Upper(carton_no) = '" + Upper(tab_main.tabpage_serial.dw_serial.GetITemString(i,'carton_no')) + "'"
 						lsFind = "Upper(pack_container_id) = '" +tab_main.tabpage_serial.dw_serial.GetITemString(i,'container_id')+ "'" 
 					else 
 						ll_text_length =(len(tab_main.tabpage_serial.dw_serial.GetITemString(i,'carton_no')) -1)
 						ls_prefix	 = left(tab_main.tabpage_serial.dw_serial.GetITemString(i,'carton_no'),1)
-						IF ls_prefix = 'T'  Then
-							  lsFind = "Upper(pack_container_id) = '" +Upper(tab_main.tabpage_serial.dw_serial.GetITemString(i,'carton_no'))+ "'" 
+						IF ls_prefix = 'T' Then
+							//Begin - Dinesh- 08/10/2026-SIMS-1000-Google-SIMS-Bug in Packing process for Serial tracked GPNs with Containerized Inventory
+							lsContainerId= Upper(tab_main.tabpage_serial.dw_serial.GetITemString(i,'container_id'))
+						   IF  len(lsContainerId) >3 then
+								lsFind = "Upper(pack_container_id) = '" +Upper(tab_main.tabpage_serial.dw_serial.GetITemString(i,'container_id'))+ "'"
+						   ELSE 
+								lsFind = "Upper(pack_container_id) = '" +Upper(tab_main.tabpage_serial.dw_serial.GetITemString(i,'carton_no'))+ "'" 
+						   END IF
+						   //End  - Dinesh- 08/10/2026-SIMS-1000-Google-SIMS-Bug in Packing process for Serial tracked GPNs with Containerized Inventory	
+							 // lsFind = "Upper(pack_container_id) = '" +Upper(tab_main.tabpage_serial.dw_serial.GetITemString(i,'carton_no'))+ "'"// Commented agianst bug SIMS-1000- Dinesh- 08/10/2026-SIMS-1000-Google-SIMS-Bug in Packing process for Serial tracked GPNs with Containerized Inventory							   
 						else 
 							lsFind = "Upper(carton_no) = '" + Upper(tab_main.tabpage_serial.dw_serial.GetITemString(i,'carton_no')) + "'"
 						END IF
@@ -38210,7 +38230,6 @@ If Upper(gs_project) = 'PANDORA' and f_retrieve_parm("PANDORA","FLAG","CONTAINER
 End If
 SetMicroHelp("RetrieveEnd - Finished wf_check_footprint_containers")
 //f_method_trace_special( gs_project, this.ClassName() + ' - RetrieveEnd', 'RetrieveEnd - Finished wf_check_footprint_containers  ',gs_system_no, ' ',' ',gs_system_no) //2/7/2020  :Gail added
-
 
 This.SetRedraw(True)
 

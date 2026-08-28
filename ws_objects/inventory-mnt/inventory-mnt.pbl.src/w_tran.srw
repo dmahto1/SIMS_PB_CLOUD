@@ -2025,7 +2025,8 @@ if idw_content.Update(false,false)  = 1 then
 	//if idw_content.Update(True,True)  = 1 then
 	
 	//GailM 08/02/2017 SIMSPEVS-717 NYCSP Defect-Not Updating Component Location with Parent SKU
-	if gs_Project = 'NYCSP' and gs_Project = 'GEISTLICH' then  //Added by Dhirendra:gs_Project = 'GEISTLICH'/ S70297- Work Order Refactoring - Stock Transfer: Move Components with KIT
+	//if gs_Project = 'NYCSP' and gs_Project = 'GEISTLICH' then  //Added by Dhirendra:gs_Project = 'GEISTLICH'/ S70297- Work Order Refactoring - Stock Transfer: Move Components with KIT
+	if gs_Project = 'NYCSP' OR gs_Project = 'GEISTLICH' then //Dinesh - 08/10/2026- SIMS-999-NYCSP - Stock Transfer of KITs didn't move the associated Children
 		For ll_row = 1 to idw_content.rowcount()
 			If idw_content.GetItemNumber(ll_row,'component_no') > 0 Then
 				sql_syntax = "UPDATE content SET l_code = '" + idw_content.GetItemString(ll_row,'l_code') + &

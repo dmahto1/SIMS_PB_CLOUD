@@ -213,7 +213,9 @@ Else
 		// Begin -Dinesh - 12/08/2025- SIMS-894- to Archive Sweeper_Cycle_log table
 		ldtToday = DateTime(Today(), Now()) // Dinesh - 12/08/2025
 		Insert Into Sweeper_Cycle_log (Sweeper_Name,Sweeper_Start_time, Next_Sweep_time,Sweeper_Stop_time, Status) 
- 		Values(:gsEnvironment,:gdtToday,:ldtToday,NULL,'R') using sqlca;
+		 Values(:gsEnvironment,:gdtToday,:ldtToday,NULL,'R') using sqlca;
+//         Insert Into Sweeper_Cycle_log (Sweeper_Name,Sweeper_Start_time, Next_Sweep_time,Sweeper_Stop_time, Status,record_created_date) 
+// 		Values(:gsEnvironment,:gdtToday,:ldtToday,NULL,'R',:ldtToday) using sqlca; // Dinesh -06/17/2026
 		commit using sqlca;
 		// End -Dinesh - 12/08/2025- SIMS-894- to Archive Sweeper_Cycle_log table
 		
