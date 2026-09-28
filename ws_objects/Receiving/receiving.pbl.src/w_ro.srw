@@ -5898,11 +5898,13 @@ Case "P"
 			idw_main.settaborder('arrival_date',0)//SIMS-55 Added by Dhirendra
 		END IF
 		
-		//Begin- 04/16/2026-Dinesh- SIMS-953-Development for Google - SIMS - Receiving Order - From project Validation for Google Orders 
-		IF gs_project = "PANDORA" THEN
-				wf_receive_order_readonly(ib_readonly)
-		END IF
-		//End- 04/16/2026-Dinesh- SIMS-953-Development for Google - SIMS - Receiving Order - From project Validation for Google Orders 
+//		//Begin- 04/16/2026-Dinesh- SIMS-953-Development for Google - SIMS - Receiving Order - From project Validation for Google Orders 
+//Begin- Dinesh - 08/31/2026- SIMS-1006-Google-SIMS-Bug in Receiving Order screen -Below line is commented out to make the ord status enabled
+//		IF gs_project = "PANDORA" THEN
+//				wf_receive_order_readonly(ib_readonly)
+//		END IF
+//End- Dinesh - 08/31/2026- SIMS-1006-Google-SIMS-Bug in Receiving Order screen -Above line is commented out to make the ord status enabled
+//		//End- 04/16/2026-Dinesh- SIMS-953-Development for Google - SIMS - Receiving Order - From project Validation for Google Orders 
 		
 	CASE "F"
 		 //  Added by Dhirendra -SIMS-55,  19/10/2022 -Stat
@@ -13980,7 +13982,8 @@ if gs_project='PANDORA' then
 	
 			lds_screen_lockW = Create datastore
 			lds_screen_lockW.Dataobject = 'd_screen_lock_order_w'
-			lds_screen_lockW.settrans(sqlca)
+			//lds_screen_lockW.settrans(sqlca) //Dinesh - 09/22/2026-SIMS-1005-Google-SIMS-Bug in Screen Lock for Users
+			lds_screen_lockW.settransobject(sqlca) //Dinesh - 09/22/2026-SIMS-1005-Google-SIMS-Bug in Screen Lock for Users
 			lds_screen_lockW.retrieve(gs_System_No,'W')
 			
 			//gl_userspid
@@ -13991,7 +13994,8 @@ if gs_project='PANDORA' then
 			
 			lds_screen_lockR = Create datastore
 			lds_screen_lockR.Dataobject = 'd_screen_lock_order_r'
-			lds_screen_lockR.settrans(sqlca)
+			//lds_screen_lockR.settrans(sqlca)//Dinesh - 09/22/2026-SIMS-1005-Google-SIMS-Bug in Screen Lock for Users
+			lds_screen_lockR.settransobject(sqlca) //Dinesh - 09/22/2026-SIMS-1005-Google-SIMS-Bug in Screen Lock for Users
 			lds_screen_lockR.retrieve(gs_System_No,'R')
 		
 			for j= 1 to lds_screen_lockR.rowcount()
@@ -14035,6 +14039,7 @@ if gs_project='PANDORA' then
 						li_mes=messagebox(is_title,'Hey!! You have already opened another session: ' +string(ll_userspid)+ ' for~r~nthe same Order Number ' + is_order_new + '.~r~n~r~nDo you want to change the previous session to Read Mode only and open the current session in Write Mode ?', Question!,YesNo!,1 )//nisha2 commented.
 						if li_mes = 1 then 
 							Update screen_lock set Edit_Mode ='R'	where User_Id=:gs_userid and screen_name='Receiving Order' and UserSPID=:ll_spid using SQLCA;
+							commit; //Dinesh - 09/22/2026-SIMS-1005-Google-SIMS-Bug in Screen Lock for Users
 							f_method_trace_special( gs_project, this.ClassName() , 'Locking order to R by ' +gs_userid+' for session :' + String(ll_spid),is_rono, '','',is_suppinvoiceno) 	//nisha2-update added
 
 							delete from screen_lock where User_Id=:gs_userid and screen_name='Receiving Order' and UserSPID=:gl_userspid using sqlca; 
@@ -14046,6 +14051,10 @@ if gs_project='PANDORA' then
 						//End - 24/09/2025 - Nisha Nair - SIMS-853-SIMS- Google - SIMS – Session Unlock issue
 							lb_readonly=True
 							lb_selfuser= False
+							//Begin -Dinesh - 09/22/2026-SIMS-1005-Google-SIMS-Bug in Screen Lock for Users
+							insert into Screen_Lock (User_Id,Order_No,Screen_Name,Entry_Date,Out_Date,Edit_Mode,UserSPID) values(:gs_userid,:gs_System_No,:is_title,getdate(),NULL,'R',:gl_userspid) using sqlca;
+							commit;
+							//End-Dinesh - 09/22/2026-SIMS-1005-Google-SIMS-Bug in Screen Lock for Users
 						End if//Begin - 24/09/2025 - Nisha Nair - SIMS-853-SIMS- Google - SIMS – Session Unlock issue
 						
 				elseif gs_System_No=ls_Order_NoW and gs_userid = ls_User_IdW and  ll_spid = gl_userspid and gs_System_No <> '' then
@@ -14228,7 +14237,15 @@ if gs_project='PANDORA' then
 					
 				
 				else
-					lb_readonly=false
+					//lb_readonly=false //Dinesh- 09/15/2026-SIMS-1005-Google-SIMS-Bug in Screen Lock for Users
+					//Begin - Dinesh- 09/22/2026-SIMS-1005-Google-SIMS-Bug in Screen Lock for Users
+					lb_readonly= True //Dinesh- 09/15/2026-SIMS-1005-Google-SIMS-Bug in Screen Lock for Users
+					messagebox(is_title,'User Name: ' + is_display_name + '/Session: ' + string(ll_userspid) +  ' is already accessing the Order Number ' + is_order_new + '.~r~nThe screen is locked and can be accessible to read mode only.Please contact your Site Manager/Supervisor to unlock the screen or wait for sweeper run to clear the lock automatically.', Stopsign! )
+					insert into Screen_Lock (User_Id,Order_No,Screen_Name,Entry_Date,Out_Date,Edit_Mode,UserSPID) values(:gs_userid,:gs_System_No,:is_title,getdate(),NULL,'R',:gl_userspid) using sqlca;
+					commit; 
+					f_method_trace_special( gs_project, this.ClassName() , 'No records were inserted previosly in the screen lock table - but now its locked as read mode and inserted as Read' +gs_userid+' for session :' + String(ll_spid),is_rono, '','',is_suppinvoiceno) //Dinesh- 09/16/2026-SIMS-1005-Google-SIMS-Bug in Screen Lock for Users
+					//End  - Dinesh- 09/22/2026-SIMS-1005-Google-SIMS-Bug in Screen Lock for Users
+					//insert into Screen_Lock (User_Id,Order_No,Screen_Name,Entry_Date,Out_Date,Edit_Mode,UserSPID) values(:gs_userid,:gs_System_No,:is_title,getdate(),NULL,'R',:gl_userspid) using sqlca;
 					//insert into Screen_Lock (User_Id,Order_No,Screen_Name,Entry_Date,Out_Date,Edit_Mode,UserSPID) values(:gs_userid,:gs_System_No,:is_title,getdate(),NULL,'R',:gl_userspid) using sqlca;
 				end if	
 			else
@@ -14316,13 +14333,23 @@ IF idw_main.RowCount() > 0 Then
 	Else
 		tab_main.tabpage_notes.Enabled = False
 	End If
-
-	wf_checkstatus()
-	//Begin -08/09/2023- SIMS-198- Google- Read only for the multiple users
-	if gs_project='PANDORA' then
+	//Begin -Dinesh- 08/31/2026- SIMS-1006-Google-SIMS-Bug in Receiving Order screen
+	if gs_project='PANDORA' and lb_readonly= True then
 			wf_receive_order_readonly(lb_readonly)
+		else
+			wf_checkstatus()
 	end if
+	//End -Dinesh- 08/31/2026- SIMS-1006-Google-SIMS-Bug in Receiving Order screen
 	//End -08/09/2023- SIMS-198- Google- Read only for the multiple users
+
+	//Begin -Dinesh- 08/31/2026- SIMS-1006-Google-SIMS-Bug in Receiving Order screen - Below is commented out for the issue reported against SIMS-1006-Google-SIMS-Bug in Receiving Order screen
+	//wf_checkstatus() //Dinesh- SIMS-1006-Google-SIMS-Bug in Receiving Order screen
+//	//Begin -08/09/2023- SIMS-198- Google- Read only for the multiple users
+//	if gs_project='PANDORA' then
+//			wf_receive_order_readonly(lb_readonly)
+//	end if
+//End -Dinesh- 08/31/2026- SIMS-1006-Google-SIMS-Bug in Receiving Order screen - Above is commented out for the issue reported against SIMS-1006-Google-SIMS-Bug in Receiving Order screen
+//	//End -08/09/2023- SIMS-198- Google- Read only for the multiple users
 	If idw_main.GetItemString(1, "ord_status") <> "C" and &
 		idw_main.GetItemString(1, "ord_status") <> "V" Then
 		iw_window.TriggerEvent("ue_refresh")
@@ -14490,11 +14517,13 @@ IF idw_main.RowCount() > 0 Then
 				 Next	
 			end if //llFindRow2>0
 			//Dinesh- 04/17/2026-SIMS-953-Development for Google - SIMS - Receiving Order - From project Validation for Google Orders 
-			if  idw_main.GetItemString(1, "ord_status") = "V" then
-				ib_void= True
-				wf_receive_order_readonly(ib_void)		
-			end if
-			 //Dinesh- 04/17/2026-SIMS-953-Development for Google - SIMS - Receiving Order - From project Validation for Google Orders 
+			//Begin- Dinesh - 08/31/2026- SIMS-1006-Google-SIMS-Bug in Receiving Order screen -Below line is commented out to make the ord status enabled
+//			if  idw_main.GetItemString(1, "ord_status") = "V" then
+//				ib_void= True
+//				wf_receive_order_readonly(ib_void)		
+//			end if
+			//End- Dinesh - 08/31/2026- SIMS-1006-Google-SIMS-Bug in Receiving Order screen
+			// Dinesh- 04/17/2026-SIMS-953-Development for Google - SIMS - Receiving Order - From project Validation for Google Orders 
 		   End if 	 
 			
    //* End.........Akash Baghel - 08/07/2023...- SIMS 243- Match the project code in order detail tab to project code table */

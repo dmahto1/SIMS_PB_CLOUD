@@ -679,7 +679,7 @@ For llRowPos = 2 to llRowCount
 		//Supplier
 //		ldsPoHeader.SetITem(llNewRow,'supp_code',Trim(Mid(lu_ds.GetItemString(llRowPos,'rec_data'),61,35)))  
 
-//		lsSKU = Trim(Mid(lu_ds.GetItemString(llRowPos,'rec_data'),18,15))  
+		//lsSKU = Trim(Mid(lu_ds.GetItemString(llRowPos,'rec_data'),18,15))  
 
 		lsTemp = Trim(lu_ds.GetItemString(llRowPos, "col3"))	
 		lsSKU =lsTemp

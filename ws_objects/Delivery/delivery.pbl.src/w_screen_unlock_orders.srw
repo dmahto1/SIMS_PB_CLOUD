@@ -54,11 +54,12 @@ end type
 global w_screen_unlock_orders w_screen_unlock_orders
 
 type variables
-string is_userid
+
+ //Dinesh - 09/22/2026-SIMS-1005-Google-SIMS-Bug in Screen Lock for Usersstring is_userid
 long il_row
+string is_userid
 
 end variables
-
 on w_screen_unlock_orders.create
 int iCurrent
 call super::create
@@ -113,6 +114,7 @@ event ue_postopen;call super::ue_postopen;// Dinesh - 07/11/2023- SIMS-198- Goog
 
 //Retrieve available and currently selected
 // Dinesh - 07/11/2023- SIMS-198- Google read only
+//dw_avail.settrans(sqlca) // Dinesh - 09/21/2026
 dw_avail.Retrieve()
 dw_selected.Retrieve()
 dw_selected.SelectRow(0, FALSE)
@@ -553,7 +555,8 @@ long ll_ret
 		messagebox('Order Number','Sorry !!,No order is locked for the User ID/Order Number you are searching for. ')
 	connect using sqlca;
 	dw_avail.dataobject='d_screen_locked_user_list'
-	dw_avail.settrans(sqlca)
+	//dw_avail.settrans(sqlca)//Dinesh - 09/22/2026-SIMS-1005-Google-SIMS-Bug in Screen Lock for Users
+	dw_avail.settransobject(sqlca) //Dinesh - 09/22/2026-SIMS-1005-Google-SIMS-Bug in Screen Lock for Users
 	dw_avail.Retrieve()
 	end if
 	
@@ -602,7 +605,8 @@ end type
 event clicked;// Dinesh - 07/13/2023- SIMS-198- Google read only
 connect using sqlca;
 dw_avail.dataobject='d_screen_locked_user_list'
-dw_avail.settrans(sqlca)
+//dw_avail.settrans(sqlca) //Dinesh - 09/22/2026-SIMS-1005-Google-SIMS-Bug in Screen Lock for Users
+dw_avail.settransobject(sqlca) //Dinesh - 09/22/2026-SIMS-1005-Google-SIMS-Bug in Screen Lock for Users
 dw_avail.Retrieve()
 end event
 

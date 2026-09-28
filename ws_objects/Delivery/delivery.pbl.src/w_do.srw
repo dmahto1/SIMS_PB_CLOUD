@@ -29425,9 +29425,9 @@ if gs_project='PANDORA' then
 
 			lds_screen_lockW = Create datastore
 			lds_screen_lockW.Dataobject = 'd_screen_lock_order_w'
-			lds_screen_lockW.settrans(sqlca)
-			lds_screen_lockW.retrieve(gs_System_No,'W')
-			
+			//lds_screen_lockW.settrans(sqlca)//Dinesh- 09/22/2026-SIMS-1005-Google-SIMS-Bug in Screen Lock for Users
+			lds_screen_lockW.settransobject(sqlca) //Dinesh- 09/22/2026-SIMS-1005-Google-SIMS-Bug in Screen Lock for Users
+			lds_screen_lockW.retrieve(gs_System_No,'W') 
 			//gl_userspid
 			
 			//select top 1 Login_Time into :ldt_user_login_Date  from User_Login_History where UserId=:gs_userid order by Login_Time desc;
@@ -29435,9 +29435,9 @@ if gs_project='PANDORA' then
 			select count(*) into : il_find_matchW from Screen_Lock with(nolock) where Order_No= :gs_System_No and Edit_Mode='W' and screen_name='Delivery Order' using sqlca;
 			lds_screen_lockR = Create datastore
 			lds_screen_lockR.Dataobject = 'd_screen_lock_order_r'
-			lds_screen_lockR.settrans(sqlca)
-			lds_screen_lockR.retrieve(gs_System_No,'R')
-		
+			//lds_screen_lockR.settrans(sqlca) //Dinesh- 09/22/2026-SIMS-1005-Google-SIMS-Bug in Screen Lock for Users
+			lds_screen_lockR.settransobject(sqlca)//Dinesh- 09/22/2026-SIMS-1005-Google-SIMS-Bug in Screen Lock for Users
+			lds_screen_lockR.retrieve(gs_System_No,'R') 
 			for j= 1 to lds_screen_lockR.rowcount()
 					ls_Edit_ModeR = lds_screen_lockR.getitemstring(j,'edit_Mode')
 				 	ls_User_IdR = lds_screen_lockR.getitemstring(j,'user_Id')
@@ -29464,11 +29464,13 @@ if gs_project='PANDORA' then
 					 ll_userspid =lds_screen_lockW.getitemnumber(k,'userspid')
 				next
 				
-					select Display_Name into :is_display_name from UserTable with(nolock) where UserId=:ls_User_IdW;
+			select Display_Name into :is_display_name from UserTable with(nolock) where UserId=:ls_User_IdW;
 				
 			//if  ib_search= True then
 				if  gs_System_No = ls_Order_NoW and gs_userid <> ls_User_IdW and gs_System_No <> ''  then
 						messagebox(is_title,'User Name: ' + is_display_name + '/Session: ' + string(ll_userspid) +  ' is already accessing the Order Number ' + ls_order + '.~r~nThe screen is locked and can be accessible to read mode only.Please contact your Site Manager/Supervisor to unlock the screen or wait for sweeper run to clear the lock automatically.', Stopsign! )
+						insert into Screen_Lock (User_Id,Order_No,Screen_Name,Entry_Date,Out_Date,Edit_Mode,UserSPID) values(:gs_userid,:gs_System_No,:is_title,getdate(),NULL,'R',:gl_userspid) using sqlca; // Dinesh - 09/11/2026-SIMS-1005-Google-SIMS-Bug in Screen Lock for Users
+						commit; //Dinesh- 09/09/2026-SIMS-1005-Google-SIMS-Bug in Screen Lock for Users
 						lb_readonly=True
 						lb_selfuser= False
 				
@@ -29477,7 +29479,8 @@ if gs_project='PANDORA' then
 						// Begin - 24/09/2025 - Nisha Nair - SIMS-853-SIMS- Google - SIMS – Session Unlock issue
 						li_mes=messagebox(is_title,'Hey!! You have already opened another session: ' +string(ll_userspid)+ ' for~r~nthe same Order Number ' + ls_order + '.~r~n~r~nDo you want to change the previous session to Read Mode only and open the current session in Write Mode ?', Question!,YesNo!,1 )//nisha2 commented.
 						if li_mes = 1 then 
-							Update screen_lock set Edit_Mode ='R'	where User_Id=:gs_userid and screen_name='Delivery Order' and UserSPID=:ll_spid using SQLCA;
+							Update screen_lock set Edit_Mode ='R'	where User_Id=:gs_userid and screen_name='Delivery Order' and UserSPID=:ll_spid using SQLCA;//Dinesh- 09/09/2026-SIMS-1005-Google-SIMS-Bug in Screen Lock for Users
+							commit;//Dinesh- 09/09/2026-SIMS-1005-Google-SIMS-Bug in Screen Lock for Users
 							f_method_trace_special( gs_project, this.ClassName() , 'Locking order to R by ' +gs_userid+' for session :' + String(ll_spid),is_dono, '','',isinvoice_no) 	//nisha2-update added
 							
 							delete from screen_lock where User_Id=:gs_userid and screen_name='Delivery Order' and UserSPID=:gl_userspid using sqlca; 
@@ -29486,6 +29489,10 @@ if gs_project='PANDORA' then
 							lb_selfuser= True
 							lb_readonly=false						
 						else 
+							//Begin - Dinesh- 09/15/2026-SIMS-1005-Google-SIMS-Bug in Screen Lock for Users
+							insert into Screen_Lock (User_Id,Order_No,Screen_Name,Entry_Date,Out_Date,Edit_Mode,UserSPID) values(:gs_userid,:gs_System_No,:is_title,getdate(),NULL,'R',:gl_userspid) using sqlca;
+							commit;
+							//End - Dinesh- 09/15/2026-SIMS-1005-Google-SIMS-Bug in Screen Lock for Users
 							// Commented Begin - 24/09/2025 - Nisha Nair - SIMS-853-SIMS- Google - SIMS – Session Unlock issue
 							lb_readonly=True
 							lb_selfuser= False
@@ -29646,7 +29653,7 @@ if gs_project='PANDORA' then
 					lb_readonly=True
 					
 				elseif (il_find_matchW > 0 and il_find_matchR > 0) and (gs_userid <> ls_User_IdW and gs_System_No = ls_Order_NoW and  ll_spid <> gl_userspid) then
-						lds_screen_lockW.retrieve(gs_System_No,'W')
+						lds_screen_lockW.retrieve(gs_System_No,'W') 
 					 for k= 1 to lds_screen_lockW.rowcount()
 						 ls_Edit_ModeW = lds_screen_lockW.getitemstring(k,'edit_Mode')
 						 ls_User_IdW = lds_screen_lockW.getitemstring(k,'user_Id')
@@ -29663,12 +29670,17 @@ if gs_project='PANDORA' then
 					commit;	
 					lb_readonly=false
 					
-				
 				else
-					lb_readonly=false
+					//lb_readonly=false //Dinesh- 09/15/2026-SIMS-1005-Google-SIMS-Bug in Screen Lock for Users
+					lb_readonly= True //Dinesh- 09/15/2026-SIMS-1005-Google-SIMS-Bug in Screen Lock for Users
+					messagebox(is_title,'User Name: ' + is_display_name + '/Session: ' + string(ll_userspid) +  ' is already accessing the Order Number ' + ls_order + '.~r~nThe screen is locked and can be accessible to read mode only.Please contact your Site Manager/Supervisor to unlock the screen or wait for sweeper run to clear the lock automatically.', Stopsign! )//Dinesh- 09/15/2026-SIMS-1005-Google-SIMS-Bug in Screen Lock for Users
+					insert into Screen_Lock (User_Id,Order_No,Screen_Name,Entry_Date,Out_Date,Edit_Mode,UserSPID) values(:gs_userid,:gs_System_No,:is_title,getdate(),NULL,'R',:gl_userspid) using sqlca; //Dinesh- 09/15/2026-SIMS-1005-Google-SIMS-Bug in Screen Lock for Users
+					commit; //Dinesh- 09/15/2026-SIMS-1005-Google-SIMS-Bug in Screen Lock for Users
+					f_method_trace_special( gs_project, this.ClassName() , 'No records were inserted previosly in the screen lock table - but now its locked as read mode and inserted as Read' +gs_userid+' for session :' + String(ll_spid),is_dono, '','',isinvoice_no) //Dinesh- 09/16/2026-SIMS-1005-Google-SIMS-Bug in Screen Lock for Users
 					//insert into Screen_Lock (User_Id,Order_No,Screen_Name,Entry_Date,Out_Date,Edit_Mode,UserSPID) values(:gs_userid,:gs_System_No,:is_title,getdate(),NULL,'R',:gl_userspid) using sqlca;
 				end if	
 			else
+				f_method_trace_special( gs_project, this.ClassName() , 'Exceptions accessing multiple users same order - open in read mode ' +gs_userid+' for session :' + String(ll_spid),is_dono, '','',isinvoice_no) //Dinesh- 09/15/2026-SIMS-1005-Google-SIMS-Bug in Screen Lock for Users
 				
 			end if
 			
