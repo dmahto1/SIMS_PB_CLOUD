@@ -7184,6 +7184,7 @@ If UPPER(gs_project) = 'PANDORA' and ibDejaVu then
 				tab_main.tabpage_serial.cb_undo.enabled = true
 				tab_main.tabpage_serial.cb_ob_serial_insert.enabled = true
 				tab_main.tabpage_serial.cb_ob_serial_delete.enabled = true
+				tab_main.tabpage_serial.cb_new_carton.enabled = true //Dinesh - 10/19/2026-SIMS-1016-Google-SIMS-1000-Bug on the New Carton Button in Serial Tab
 			else
 				ibDejaVu = false
 			end if
@@ -9065,6 +9066,7 @@ Choose Case lsStatus
 		tab_main.tabpage_serial.cb_ob_serial_insert.Enabled = False
 		tab_main.tabpage_serial.cb_ob_serial_Delete.Enabled = False
 		tab_main.tabpage_serial.cb_undo.Enabled = False
+		tab_main.tabpage_serial.cb_new_carton.Enabled = False // Dinesh -10/19/2026-SIMS-1016-Google-SIMS-1000-Bug on the New Carton Button in Serial Tab	
 		wf_assignetom(0) //Disable the Engish to Metrics Radio Buttons 
 		
 		IF Upper(gs_project) = "EUT" OR Upper(gs_project) = "RUN-WORLD"  OR Upper(gs_project) = "GIGA" THEN
@@ -9203,6 +9205,7 @@ importing*/
 		icb_pack_insert.Enabled = True
 		icb_pack_delete.Enabled = True
 		icb_pack_copy.Enabled = True
+		//tab_main.tabpage_serial.cb_new_carton.Enabled = True //Dinesh - 10/16/2026
 		// GailM S20849 Do not allow pack list generation if container needs split
 		if ibSplitContainerRequired = True Then
 			tab_main.tabpage_pack.cb_pack_generate.Enabled = False
@@ -9286,6 +9289,7 @@ importing*/
 		tab_main.tabpage_serial.cb_ob_serial_insert.Enabled = True
 		tab_main.tabpage_serial.cb_ob_serial_Delete.Enabled = True
 		tab_main.tabpage_serial.cb_undo.Enabled = True
+		tab_main.tabpage_serial.cb_new_carton.enabled = true // Dinesh -10/19/2026-SIMS-1016-Google-SIMS-1000-Bug on the New Carton Button in Serial Tab	
 		tab_main.tabpage_serial.dw_serial.Object.DataWindow.ReadOnly= False
 		
 		IF Upper(gs_project) = "EUT" OR Upper(gs_project) = "RUN-WORLD" OR Upper(gs_project) = "GIGA" THEN
@@ -9520,7 +9524,7 @@ CASE "C" , "D", "R","Z" /* 03/25/10 dts - HOLD status moved below to act like VO
 		tab_main.tabpage_serial.cb_ob_serial_insert.Enabled = False
 		tab_main.tabpage_serial.cb_ob_serial_Delete.Enabled = False
 		tab_main.tabpage_serial.cb_undo.Enabled = False
-		
+		tab_main.tabpage_serial.cb_new_carton.Enabled = False//Begin- Dinesh -10/19/2026-SIMS-1016-Google-SIMS-1000-Bug on the New Carton Button in Serial Tab	
 		tab_main.tabpage_serial.dw_serial.Object.DataWindow.ReadOnly= True
 		
 //		//04/02 - Pconkl - Enable POD if order is confirmed and delivery_date Entered
@@ -29503,6 +29507,7 @@ if gs_project='PANDORA' then
 						lb_selfuser= True	
 			
 				end if
+				
 			//end if
 			if lb_selfuser= False  then
 			
@@ -29680,6 +29685,7 @@ if gs_project='PANDORA' then
 					//insert into Screen_Lock (User_Id,Order_No,Screen_Name,Entry_Date,Out_Date,Edit_Mode,UserSPID) values(:gs_userid,:gs_System_No,:is_title,getdate(),NULL,'R',:gl_userspid) using sqlca;
 				end if	
 			else
+				
 				f_method_trace_special( gs_project, this.ClassName() , 'Exceptions accessing multiple users same order - open in read mode ' +gs_userid+' for session :' + String(ll_spid),is_dono, '','',isinvoice_no) //Dinesh- 09/15/2026-SIMS-1005-Google-SIMS-Bug in Screen Lock for Users
 				
 			end if
@@ -29771,14 +29777,24 @@ If idw_main.RowCount() > 0 Then
 	End If
 	
 	f_method_trace_special( gs_project, this.ClassName() + ' - Modified', 'Modified - Start wf_check_status1  ',gs_system_no, ' ',' ',gs_system_no) //2/7/2020  :Gail added
-	wf_check_status()
-	f_method_trace_special( gs_project, this.ClassName() + ' - Modified', 'Modified - End wf_check_status1  ',gs_system_no, ' ',' ',gs_system_no) //2/7/2020  :Gail added
+	//wf_check_status() // Dinesh -10/19/2026-SIMS-1016-Google-SIMS-1000-Bug on the New Carton Button in Serial Tab
 	
-	//Begin -08/22/2023- SIMS-198- Google- Read only for the multiple users
-	if gs_project='PANDORA' then
-			wf_delivery_order_readonly(lb_readonly)
+	//Begin - Dinesh -10/19/2026-SIMS-1016-Google-SIMS-1000-Bug on the New Carton Button in Serial Tab
+	if gs_project='PANDORA' and  lb_readonly= True then
+		wf_delivery_order_readonly(lb_readonly)
+	else
+			wf_check_status()
 	end if
+	//End - Dinesh -10/19/2026-SIMS-1016-Google-SIMS-1000-Bug on the New Carton Button in Serial Tab
+	f_method_trace_special( gs_project, this.ClassName() + ' - Modified', 'Modified - End wf_check_status1  ',gs_system_no, ' ',' ',gs_system_no) //2/7/2020  :Gail added
+
+//Begin- Dinesh -10/19/2026-SIMS-1016-Google-SIMS-1000-Bug on the New Carton Button in Serial Tab	
+	//Begin -08/22/2023- SIMS-198- Google- Read only for the multiple users
+//	if gs_project='PANDORA' and  lb_readonly= True then
+//		wf_delivery_order_readonly(lb_readonly)
+//	end if
 	//End -08/22/2023- SIMS-198- Google- Read only for the multiple users
+//End- Dinesh -10/19/2026-SIMS-1016-Google-SIMS-1000-Bug on the New Carton Button in Serial Tab
 	
 	tab_main.tabpage_Serial.dw_serial.Reset() /* 1/01 Pconkl - Retrieve any outbound serial info - only when tab selected*/
 	tab_main.tabpage_serial.sle_barcodes.Text = "" // pvh - 10/28/05

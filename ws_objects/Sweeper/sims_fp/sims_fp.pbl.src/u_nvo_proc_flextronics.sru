@@ -654,7 +654,9 @@ For llRowPos = 2 to llRowCount
 
 	End If
 	
-
+	lsTemp = Trim(lu_ds.GetItemString(llRowPos, "col3"))	//Added by Nisha for SIMS-1008 - Flextronics - Corrected the SKU values to avoid the entry of same SKU values.
+	lsSKU =lsTemp//Added by Nisha for SIMS-1008 - Flextronics - INC5360398 -Corrected the SKU values to avoid the entry of same SKU values.
+	
 
 	// See if we already have a header, if not, create one
 	If ldsPOHeader.Find("Order_no = '" + lsOrder + "'",1,ldsPoHeader.RowCount()) <= 0 Then
@@ -679,10 +681,10 @@ For llRowPos = 2 to llRowCount
 		//Supplier
 //		ldsPoHeader.SetITem(llNewRow,'supp_code',Trim(Mid(lu_ds.GetItemString(llRowPos,'rec_data'),61,35)))  
 
-		//lsSKU = Trim(Mid(lu_ds.GetItemString(llRowPos,'rec_data'),18,15))  
+//		lsSKU = Trim(Mid(lu_ds.GetItemString(llRowPos,'rec_data'),18,15))  
 
-		lsTemp = Trim(lu_ds.GetItemString(llRowPos, "col3"))	
-		lsSKU =lsTemp
+	//	lsTemp = Trim(lu_ds.GetItemString(llRowPos, "col3"))	//commented by Nisha for SIMS-1008 - Flextronics - INC5360398 - Corrected the SKU values to avoid the entry of same SKU values.
+	//	lsSKU =lsTemp //commented by Nisha for SIMS-1008 - Flextronics - INC5360398 - Corrected the SKU values to avoid the entry of same SKU values.
 	
 
 	//lsSupplierName
