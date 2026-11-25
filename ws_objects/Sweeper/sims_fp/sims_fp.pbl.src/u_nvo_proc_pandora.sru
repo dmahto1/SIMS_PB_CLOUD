@@ -20046,7 +20046,19 @@ For llfileRowPos = 1 to llFileRowCOunt
 	ldsCustomer.SetItem(1,'User_Field5',lsTemp)
 			
 	lsData = Right(lsData,(len(lsData) - (Len(lsTemp) + 1))) //Strip off until the next delimeter
-
+	
+	//Begin-Dinesh- 11/24/2026- SIMS-1022-Development for Google – SIMS – Automation of SIMS   Customer Code – Adding new Field. 
+	// UF2-SIMS WH
+	If Pos(lsData,'|') > 0 Then
+		lsTemp = Left(lsData,(pos(lsData,'|') - 1))
+	Else 
+		lsTemp = lsData
+	End If
+	
+	ldsCustomer.SetItem(1,'User_Field2',lsTemp)
+			
+	lsData = Right(lsData,(len(lsData) - (Len(lsTemp) + 1))) //Strip off until the next delimeter
+	//End-Dinesh- 11/24/2026- SIMS-1022-Development for Google – SIMS – Automation of SIMS   Customer Code – Adding new Field. 
 	
 	//Update any record defaults
 	ldsCustomer.SetItem(1,'Last_user','SIMSFP')

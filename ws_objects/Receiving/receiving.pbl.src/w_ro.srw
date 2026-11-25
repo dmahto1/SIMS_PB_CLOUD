@@ -223,6 +223,7 @@ boolean ib_adj = True // Dinesh - 06/17/2025- SIMS-739- PH - Google – SIMS-Fix
 boolean ib_insert_mm = True // Dinesh - 04/07/2026-SIMS-954-Google - SIMS - Bug from SIMS-739 - GR transactions not inserted for orders
 boolean ib_insert_gr = True // Dinesh - 04/07/2026-SIMS-954-Google - SIMS - Bug from SIMS-739 - GR transactions not inserted for orders
 integer ii_ret 
+long il_detail_del //Dinesh -11/23/2026
 
 String	isScanColumn
  
@@ -245,6 +246,7 @@ boolean ibDejaVu	// 08/15/2014 Pandora Issue #883 - DejaVu IB orders w/container
 boolean ibDejaVu_Asked, ibDejaVu_Override //work around for DejaVu orders. the ...Override is in the lookup table to turn this on or off.  The ...Asked is for individual order
 boolean ibMIM   //GailM 07/03/2017 - SIMSPEVS-654 - PAN SIMS allow container/serial capture in 2D Barcode - BOX ID
 boolean ib_inbound //03/01/2021 - Dinesh - S54346 - Google - SIMS -  Footprints Inbound Warning Enhancement
+boolean ib_delete_orderdetail //Dinesh - 11/06/2026
 
 u_nvo_carton_serial_scanning iuo_carton_serial_scanning
 u_nvo_check_digit_validations iuo_check_digit_validations
@@ -261,6 +263,7 @@ datastore	idsRLScan
 datastore	idsMarlAdjustment
 datastore 	idsDOPicking
 datastore     idsputawaytracelog,ids_trace_loc_changel//SIMS-55 Dhirendra
+datastore idsorderdetailmethodtrace //Dinesh - 11/06/2026
 string 		isRLSkuList[]
 string		isQualityHoldFlag[]
   string		isRLSkuMARL[]
@@ -348,7 +351,6 @@ Boolean ib_puaway_gen =FALSE// SIMS-55 -Dhirendra for trace log for putaway gene
 Boolean ib_AutoFill_Shift_Select = false
 Long 	   il_AutoFill_Start_Row = 0
 end variables
-
 forward prototypes
 public function integer wf_set_comp_filter (string as_action)
 public function string wf_generate_pulse_imi ()
@@ -5008,6 +5010,7 @@ For i = 1 to ll_cnt /*each Putaway*/
 			
 		End If /*Confirm Requested*/
 		
+		
 	Else /*Line Item/Sku not found*/
 		
 		If idw_Putaway.GetItemString(i,"component_ind") <> '*' and idw_Putaway.GetItemString(i,"component_ind") <> 'B' Then /* 09/00 PCONKL - An asterick means it's a component child, 'B' means it's both - will not be in order detail*/
@@ -5015,6 +5018,7 @@ For i = 1 to ll_cnt /*each Putaway*/
 			tab_main.SelectTab(4) 
 			f_setfocus(idw_putaway, i, "sku")
 			Return -1
+			
 		End If /*not component*/
 		
 	End If
@@ -5146,6 +5150,8 @@ Next /*Putaway rec */
 SetPointer(Arrow!)
 idw_Putaway.SetRedraw(True)
 w_main.SetMicroHelp('Ready...')
+
+//f_method_trace_special( gs_project, this.ClassName() , 'Record Deleted by ' +gs_userid+' for System No : ' + is_rono,is_rono, '','',is_suppinvoiceno) //Dinesh-11/05/2026
 
 return 0
 end function
@@ -12131,6 +12137,29 @@ If idw_main.RowCount() > 0 Then
 		if li_ret = 1 then 	li_ret = idsmarladjustment.update()
 	end if
 End If
+//Begin - Dinesh - 11/06/2026
+long m,ll_lineitem_no
+IF li_ret  = 1 and ib_delete_orderdetail = TRUE THEN
+	//IF idsorderdetailmethodtrace.rowcount() > 0 then 
+		IF il_detail_del > 0 then
+		for m = 1 to il_detail_del
+		//for m = 1 to idsorderdetailmethodtrace.rowcount()//
+			ll_lineitem_no=idsorderdetailmethodtrace.getitemnumber(m,'line_no',Delete!,true)
+			//ll_lineitem_no =  idsorderdetailmethodtrace.getitemnumber(m,'line_no')
+			
+		 	//f_method_trace_special( gs_project, this.ClassName() , 'Record Deleted by ' +gs_userid+' for System No : ' + is_rono,is_rono, '','',is_suppinvoiceno) //Dinesh-11/06/2026			
+			f_method_trace_special( gs_project, this.ClassName() , 'Deleted for line no : ' +String(ll_lineitem_no), is_rono, '','',is_suppinvoiceno) //Dinesh-11/06/2026	
+			//f_method_trace_special( gs_project, this.ClassName() , 'Locking order to R by ' +gs_userid+' for session :' + String(ll_spid),is_rono, '','',is_suppinvoiceno) 	//nisha2-update added
+			// f_method_trace( ll_method_trace_id, this.ClassName(), 'Deleted for line item '+string(ll_lineitem_no)+ ' for System No : '+ (idw_Main.GetITemString(1,'RO_NO')) )
+			//f_method_trace( ll_method_trace_id, this.ClassName(), 'Record Deleted for line item -' +String(ll_lineitem_no) +' for System No : '+ lsRONO )
+
+			//f_method_trace( ll_method_trace_id, this.ClassName(), 'Record deleted for System No : '+ lsRONO )
+		next
+			ib_delete_orderdetail= FALSE
+		end if 
+	end if  
+//End - Dinesh - 11/06/2026
+
 //SIMS-55 Added by Dhirendra-Start
  IF li_ret  = 1 and ib_puaway_gen = TRUE then
 	f_method_trace( ll_method_trace_id, this.ClassName(), 'Generate Putaway Row of System No : '+ lsRONO)
@@ -12559,6 +12588,7 @@ end if
 	idsputawaytracelog = f_datastoreFactory( "d_gen_del_putaway_trace" )// SIMS-55 Added by Dhirendra
 //end if
 
+idsorderdetailmethodtrace = f_datastoreFactory( "d_order_detail_method_trace")// Dinesh- 11/06/2026
 // Storing into variables
 idw_main = tab_main.tabpage_main.dw_main
 idw_list_sku = tab_main.tabpage_orderdetail.dw_list_sku 
@@ -12958,6 +12988,7 @@ If isValid(w_proc_Asn_order) Then Close(w_proc_Asn_order)
 
 if isValid( idsItemMaster ) then destroy ( idsItemMaster )
 if isValid( idsRLScan ) then destroy ( idsRLScan )
+if isValid( idsorderdetailmethodtrace ) then destroy ( idsorderdetailmethodtrace ) //Dinesh- 11/23/2026
 
 f_method_trace_special( gs_project, this.ClassName() , 'Close Inbound order ' ,is_rono, '','',is_suppinvoiceno) //07-Oct-2015 :Madhu Added Method Trace call
 
@@ -16479,10 +16510,24 @@ string text = "&Delete Row"
 end type
 
 event clicked;ib_changed = True
+long ll_insert_row,ll_line_item_no //Dinesh - 11/06/2026
 
 If idw_detail.GetRow() > 0 then
+	ll_line_item_no= idw_detail.getitemnumber(1,'line_item_no')  //Dinesh - 11/06/2026
 	idw_detail.DeleteRow(0)
+	//Begin- Dinesh- 11/06/2026
+	IF UPPER(gs_project)='PANDORA' then
+		ib_delete_orderdetail = TRUE
+		IF idsorderdetailmethodtrace.rowcount() =0 then
+	    		ll_insert_row=	idsorderdetailmethodtrace.insertrow(0)
+		END IF 
+		idsorderdetailmethodtrace.setitem(ll_insert_row,'line_no',ll_line_item_no)
+		idsorderdetailmethodtrace.setitem(ll_insert_row,'order_no',is_suppinvoiceno)
+	END IF  
+	 //f_method_trace_special( gs_project, this.ClassName() , 'Record Deleted by ' +gs_userid+' for System No : ' + is_rono,is_rono, '','',is_suppinvoiceno) //Dinesh-11/05/2026
 End If
+
+il_detail_del=idsorderdetailmethodtrace.rowcount()
 end event
 
 event constructor;
