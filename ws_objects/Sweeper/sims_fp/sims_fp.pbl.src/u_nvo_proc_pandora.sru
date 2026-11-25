@@ -20058,6 +20058,7 @@ For llfileRowPos = 1 to llFileRowCOunt
 	ldsCustomer.SetItem(1,'User_Field2',lsTemp)
 			
 	lsData = Right(lsData,(len(lsData) - (Len(lsTemp) + 1))) //Strip off until the next delimeter
+	
 	//End-Dinesh- 11/24/2026- SIMS-1022-Development for Google – SIMS – Automation of SIMS   Customer Code – Adding new Field. 
 	
 	//Update any record defaults
